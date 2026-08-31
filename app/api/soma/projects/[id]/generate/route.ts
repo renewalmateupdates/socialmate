@@ -343,20 +343,31 @@ Rules:
 - Sound human, not AI-generated
 - Respect the character limit for ${platform}`
 
-      try {
-        const result = await model.generateContent(prompt)
-        const posts  = parseGeminiJson(result.response.text()).posts ?? []
-        if (!posts.length) {
-          const msg = `Empty response for chunk of ${chunkDays} slots`
-          console.error(`[SOMA Generate] ${platform}: ${msg}`)
-          return { job, posts: [] as any[], error: msg }
+      // Retry each chunk. There was no retry here at all, so a chunk that hit a
+      // rate limit, came back empty, or returned fewer posts than slots was
+      // simply lost -- which is how a run that reported success wrote 26 of the
+      // ~75 posts the schedule asks for. Firing every chunk at once makes a 429
+      // more likely rather than less, so the backoff matters.
+      let lastError = 'Unknown Gemini error'
+      let best: any[] = []
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt))
+        try {
+          const result = await model.generateContent(prompt)
+          const posts  = parseGeminiJson(result.response.text()).posts ?? []
+          if (posts.length >= chunkDays) return { job, posts, error: null as string | null }
+          // Short is not the same as failed. Hold the best partial and try again
+          // for a complete one rather than discarding what we got.
+          if (posts.length > best.length) best = posts
+          lastError = `Returned ${posts.length} of ${chunkDays} requested posts`
+          console.warn(`[SOMA Generate] ${platform} attempt ${attempt + 1}: ${lastError}`)
+        } catch (aiErr: any) {
+          lastError = aiErr?.message ?? 'Unknown Gemini error'
+          console.error(`[SOMA Generate] ${platform} attempt ${attempt + 1} error:`, lastError)
         }
-        return { job, posts, error: null as string | null }
-      } catch (aiErr: any) {
-        const msg = aiErr?.message ?? 'Unknown Gemini error'
-        console.error(`[SOMA Generate] ${platform} chunk error:`, msg)
-        return { job, posts: [] as any[], error: msg }
       }
+      console.error(`[SOMA Generate] ${platform}: gave up after 3 attempts -- ${lastError}`)
+      return { job, posts: best, error: lastError }
     }))
 
     // Inserts stay sequential: they share usedImageUrls for Unsplash dedup and
@@ -366,9 +377,13 @@ Rules:
       if (chunkError) platformErrors[platform] = chunkError
       if (!chunkPosts.length) continue
 
-      for (let i = 0; i < chunkPosts.length; i++) {
+      // Clamp to the slot count. `chunk[i] ?? chunk[chunk.length - 1]` silently
+      // stacked every surplus post onto the final slot, which is how Telegram
+      // ended up with two posts at the same minute on five separate days.
+      const usable = Math.min(chunkPosts.length, chunk.length)
+      for (let i = 0; i < usable; i++) {
         const post = chunkPosts[i]
-        const slot = chunk[i] ?? chunk[chunk.length - 1]
+        const slot = chunk[i]
 
         let mediaUrls: string[] | undefined
         if (project.include_media) {
