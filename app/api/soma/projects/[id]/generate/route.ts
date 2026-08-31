@@ -1,4 +1,11 @@
 export const dynamic = 'force-dynamic'
+// This route had no maxDuration at all, so it inherited Vercel's 10s default
+// while doing one Gemini call per 14-post chunk, sequentially. A 3-platform,
+// 7-day project at 5/day is ~75 slots = 7 calls, which never finished. The
+// browser reported the killed function as "Network error. Please try again".
+// 60 is the Hobby ceiling; the chunk calls below are now parallel per platform
+// so the whole run fits inside it comfortably.
+export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
@@ -291,7 +298,11 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
         chunks.push(allSlots.slice(i, i + CHUNK_SIZE))
       }
 
-      for (const chunk of chunks) {
+      // Fire every chunk for this platform at once rather than one after another.
+      // Each call is independent -- the slots are precomputed and each prompt
+      // carries its own -- so the only thing serialising them was the loop.
+      // Turns 3 sequential calls into roughly the duration of the slowest one.
+      const chunkResults = await Promise.all(chunks.map(async (chunk) => {
         const chunkDays  = chunk.length
         const prompt = `${identityContext}
 
@@ -324,23 +335,28 @@ Rules:
 - Sound human, not AI-generated
 - Respect the character limit for ${platform}`
 
-        let chunkPosts: any[]
         try {
           const result  = await model.generateContent(prompt)
           const parsed  = parseGeminiJson(result.response.text())
-          chunkPosts    = parsed.posts ?? []
-          if (!chunkPosts.length) {
+          const posts   = parsed.posts ?? []
+          if (!posts.length) {
             const msg = `Empty response for chunk of ${chunkDays} slots`
             console.error(`[SOMA Generate] ${platform}: ${msg}`)
-            platformErrors[platform] = msg
-            continue
+            return { chunk, posts: [] as any[], error: msg }
           }
+          return { chunk, posts, error: null as string | null }
         } catch (aiErr: any) {
           const msg = aiErr?.message ?? 'Unknown Gemini error'
           console.error(`[SOMA Generate] ${platform} chunk error:`, msg)
-          platformErrors[platform] = msg
-          continue
+          return { chunk, posts: [] as any[], error: msg }
         }
+      }))
+
+      // Insert sequentially. These share usedImageUrls for photo dedup and the
+      // ordering matters for scheduling, so only the Gemini calls were parallel.
+      for (const { chunk, posts: chunkPosts, error: chunkError } of chunkResults) {
+        if (chunkError) platformErrors[platform] = chunkError
+        if (!chunkPosts.length) continue
 
         // Map each returned post back to its slot for accurate scheduling
         for (let i = 0; i < chunkPosts.length; i++) {
