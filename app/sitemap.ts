@@ -1,4 +1,17 @@
 import { MetadataRoute } from 'next'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+
+// Blog posts live in two places: the hardcoded POSTS map in
+// app/blog/[slug]/page.tsx and the `blog_posts` table. generateStaticParams
+// already merges both, which is why every DB post renders — but this file only
+// ever listed BLOG_SLUGS below, so the sitemap has been a hand-maintained copy
+// of one of the two sources.
+//
+// Measured 2026-09-01: 674 rows in `blog_posts`, 540 blog URLs in the sitemap,
+// 227 posts live and returning 200 with no sitemap entry at all. That is a
+// third of the blog invisible to crawlers, and chatgpt.com is currently the
+// single largest identified referrer to this site. The list is now derived
+// rather than maintained.
 
 const BLOG_SLUGS = [
   // Original 14
@@ -575,7 +588,7 @@ const BLOG_SLUGS = [
   'socialmate-quote-calculator-estimate-posts',
 ]
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://socialmate.studio'
   const now  = new Date()
 
@@ -753,12 +766,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/tiktok-scheduler`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
-  const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
+  // Same merge generateStaticParams does, so the sitemap and the set of pages
+  // that actually build can no longer drift apart. A failure here degrades to
+  // the hardcoded list rather than emitting an empty sitemap.
+  let dbSlugs: string[] = []
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from('blog_posts')
+      .select('slug')
+      .limit(2000)
+    if (error) console.warn('[sitemap] blog_posts lookup failed:', error.message)
+    else if (data) dbSlugs = data.map((row: { slug: string }) => row.slug)
+  } catch (err) {
+    console.warn('[sitemap] blog_posts lookup threw:', err)
+  }
+
+  // BLOG_SLUGS itself contained seven duplicates, so dedupe rather than trust it.
+  const allSlugs = Array.from(new Set([...BLOG_SLUGS, ...dbSlugs]))
+
+  const blogPosts: MetadataRoute.Sitemap = allSlugs.map(slug => ({
     url: `${base}/blog/${slug}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }))
 
-  return [...core, ...comparisons, ...blogPosts]
+  // Final guard: a duplicate <loc> is wasted crawl budget, and core/comparisons
+  // are hand-maintained lists that can pick one up the same way BLOG_SLUGS did.
+  const seen = new Set<string>()
+  return [...core, ...comparisons, ...blogPosts].filter(entry => {
+    if (seen.has(entry.url)) return false
+    seen.add(entry.url)
+    return true
+  })
 }
