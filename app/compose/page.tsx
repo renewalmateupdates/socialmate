@@ -24,9 +24,14 @@ const PLATFORMS = [
   { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000, live: false },
 ]
 
+// TikTok is deliberately NOT in here. Its Production API has been approved
+// since 2026-05-17 and it is the single most-connected platform among external
+// accounts (7 of 16), but it takes video, so it publishes through
+// /tiktok/studio rather than this page. Labelling it "Soon" told seven people
+// the thing they had just connected did not work yet. It is rendered below as
+// a link to the Studio instead.
 const COMING_SOON_PLATFORMS = [
   { id: 'instagram', name: 'Instagram', icon: '📸' },
-  { id: 'tiktok',    name: 'TikTok',    icon: '🎵' },
   { id: 'facebook',  name: 'Facebook',  icon: '📘' },
   { id: 'threads',   name: 'Threads',   icon: '🧵' },
   { id: 'snapchat',  name: 'Snapchat',  icon: '👻' },
@@ -178,7 +183,14 @@ function ComposeInner() {
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'editor' | 'viewer' | 'client' | null>(null)
   const [showPostingDisclaimer, setShowPostingDisclaimer] = useState(false)
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
+  // Starts empty and is filled from the user's real connections once they load.
+  // This used to default to ['discord'] for everybody. Measured 2026-09-01: all
+  // sixteen external accounts that had connected a platform still had
+  // `default_platforms = []`, so every one of them opened Compose with Discord
+  // ticked. Ten had never connected Discord at all, and were shown a warning
+  // about a platform they never chose while the one they did connect sat
+  // unticked. None of the sixteen ever created a post.
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
 
   // Post tags state
   const [postTags, setPostTags] = useState<string[]>([])
@@ -445,17 +457,30 @@ function ComposeInner() {
       }
       setConnectedPlatforms(platformsSet)
 
-      // Load default platforms from user_settings (only when not editing a draft)
-      const draftId = searchParams.get('draft') || searchParams.get('id')
-      if (!draftId) {
-        const { data: uSettings } = await supabase
+      // Decide what to tick, in order of intent:
+      //   1. an explicit saved default, kept only where it is still connected
+      //   2. otherwise everything they have actually connected
+      //   3. otherwise nothing, and the empty state takes over
+      // Drafts and templates carry their own selection, so skip both here
+      // rather than racing the effect that applies them.
+      const draftId     = searchParams.get('draft') || searchParams.get('id')
+      const hasTemplate = !!(searchParams.get('template') || searchParams.get('starterTemplate'))
+      if (!draftId && !hasTemplate) {
+        // .maybeSingle(), not .single(): a user with no user_settings row is a
+        // zero-row lookup, which .single() reports as PGRST116 and which the
+        // discarded-error pattern would then swallow.
+        const { data: uSettings, error: settingsErr } = await supabase
           .from('user_settings')
           .select('default_platforms')
           .eq('user_id', data.user.id)
-          .single()
-        if (uSettings?.default_platforms && Array.isArray(uSettings.default_platforms) && uSettings.default_platforms.length > 0) {
-          setSelectedPlatforms(uSettings.default_platforms)
-        }
+          .maybeSingle()
+        if (settingsErr) console.warn('[compose] default_platforms lookup failed', settingsErr)
+
+        const live     = new Set(PLATFORMS.filter(p => p.live).map(p => p.id))
+        const saved    = Array.isArray(uSettings?.default_platforms) ? uSettings.default_platforms : []
+        const usable   = saved.filter((p: string) => live.has(p) && platformsSet.has(p))
+        const fallback = Array.from(platformsSet).filter(p => live.has(p))
+        setSelectedPlatforms(usable.length > 0 ? usable : fallback)
       }
 
       // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
@@ -1610,6 +1635,23 @@ function ComposeInner() {
               {/* PLATFORM SELECTOR */}
               <div id="compose-platforms" className="bg-surface border border-theme rounded-2xl p-4">
                 <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">{t('app_compose.platforms')}</p>
+                {/* Nothing connected. Say so before they write a post that cannot
+                    go anywhere, rather than after it fails. Five of the six
+                    external accounts that ever created a post had nothing
+                    connected when they wrote it. */}
+                {!loading && connectedPlatforms.size === 0 && (
+                  <div className="mb-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Connect an account first</p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                      You have no accounts connected yet, so this post has nowhere to publish.
+                      You can still save it as a draft.
+                    </p>
+                    <Link href="/accounts"
+                      className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 min-h-[44px] rounded-xl bg-amber-500 hover:bg-amber-400 text-white text-xs font-bold transition-colors">
+                      Connect an account →
+                    </Link>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2">
                   {livePlatforms.map(p => {
                     if (p.id === 'twitter' && plan === 'free') {
@@ -1630,6 +1672,10 @@ function ComposeInner() {
                             : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
                         }`}>
                         <span>{p.icon}</span>{p.name}
+                        {connectedPlatforms.has(p.id) && (
+                          <span title={`${p.name} is connected`}
+                            className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5 flex-shrink-0" />
+                        )}
                       </button>
                     )
                   })}
@@ -1665,6 +1711,14 @@ function ComposeInner() {
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2">
+                  <Link href="/tiktok/studio" title="TikTok takes video — post it from TikTok Studio"
+                    className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-pink-200 dark:border-pink-900 text-pink-500 dark:text-pink-400 hover:border-pink-400 transition-all">
+                    <span>🎵</span><span>TikTok</span>
+                    {connectedPlatforms.has('tiktok') && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                    )}
+                    <span className="text-[10px] font-extrabold ml-0.5">Studio →</span>
+                  </Link>
                   {soonPlatforms.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">

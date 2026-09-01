@@ -56,6 +56,10 @@ const ALL_PLATFORMS         = Object.keys(PLATFORM_META)
 const LIVE_PLATFORMS        = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'live')
 const COMING_SOON_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'coming_soon')
 const PLANNED_PLATFORMS     = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
+// Connecting these two is only half the job — they also need a channel or chat
+// to post into, stored in `post_destinations`. Kept in sync with the list of
+// the same name in app/compose/page.tsx.
+const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 function PlatformCard({
   platform, connectable, accountsPerPlatform, accountsByPlatform, connectingPlatform, onConnect,
@@ -141,6 +145,17 @@ function AccountsInner() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  // The platform they just finished connecting, if they arrived from a callback.
+  // Held in state rather than shown as a toast, because the toast cleared itself
+  // after three seconds and left the page with no next step at all. Sixteen
+  // external accounts connected a platform; none of them ever created a post.
+  const [justConnected, setJustConnected] = useState<string | null>(null)
+  // Discord and Telegram need a second step after the account connects: a
+  // channel to post into. Measured 2026-09-01: six external accounts had
+  // connected Discord and `post_destinations` held three rows in total, so
+  // none of them could have posted anywhere. This page never linked to
+  // destinations at all, so there was no way to find out.
+  const [destinationPlatforms, setDestinationPlatforms] = useState<Set<string>>(new Set())
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
   const [disconnecting, setDisconnecting] = useState<string | null>(null)
@@ -186,7 +201,9 @@ function AccountsInner() {
     // `<platform>_<reason>`, so both outcomes can be recorded in one place
     // instead of editing eight server routes.
     if (success?.endsWith('_connected')) {
-      track('connect_succeeded', { platform: success.replace(/_connected$/, '') })
+      const platform = success.replace(/_connected$/, '')
+      track('connect_succeeded', { platform })
+      setJustConnected(platform)
     } else if (error) {
       const [platform, ...rest] = error.split('_')
       track('connect_failed', { platform, reason: rest.join('_') || error })
@@ -286,6 +303,17 @@ function AccountsInner() {
       const { data } = await q
       setAccounts(data || [])
       setLoading(false)
+
+      let dq = supabase
+        .from('post_destinations')
+        .select('platform')
+        .eq('user_id', user.id)
+      dq = (activeWorkspace && !activeWorkspace.is_personal
+        ? dq.eq('workspace_id', activeWorkspace.id)
+        : dq.is('workspace_id', null)) as typeof dq
+      const { data: destRows, error: destErr } = await dq
+      if (destErr) console.warn('[accounts] destinations lookup failed', destErr)
+      setDestinationPlatforms(new Set((destRows || []).map((d: { platform: string }) => d.platform)))
 
       // Fetch Twitter quota if Twitter is connected
       const twitterConnected = (data || []).some((a: Account) => a.platform === 'twitter')
@@ -390,6 +418,53 @@ function AccountsInner() {
               {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}
             </div>
           </div>
+
+          {/* The step after connecting. This is the cliff: every external account
+              that connected a platform stopped here, because the only
+              acknowledgement was a toast that removed itself after three
+              seconds. TikTok goes to its Studio because it takes video; every
+              other live platform composes normally. */}
+          {justConnected && (
+            <div className="mb-6 rounded-2xl px-5 py-4 border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 flex flex-col sm:flex-row sm:items-center gap-4">
+              {(() => {
+                const needsChannel =
+                  DESTINATION_PLATFORMS.includes(justConnected) &&
+                  !destinationPlatforms.has(justConnected)
+                const next =
+                  justConnected === 'tiktok' ? { href: '/tiktok/studio', cta: 'Open TikTok Studio →',
+                    sub: 'TikTok takes video — upload your first one in TikTok Studio.' }
+                  : needsChannel ? { href: '/accounts/destinations', cta: 'Choose a channel →',
+                    sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
+                  : { href: '/compose', cta: 'Write your first post →',
+                    sub: 'Write your first post and send it out. It takes about a minute.' }
+                return (
+                  <>
+                    <div className="flex-1">
+                      <p className="text-sm font-extrabold text-emerald-800 dark:text-emerald-300">
+                        {PLATFORM_META[justConnected]?.label || justConnected} is connected.
+                      </p>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-1">{next.sub}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Link
+                        href={next.href}
+                        className="inline-flex items-center px-4 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors"
+                      >
+                        {next.cta}
+                      </Link>
+                      <button
+                        onClick={() => setJustConnected(null)}
+                        aria-label="Dismiss"
+                        className="px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                      >
+                        Later
+                      </button>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          )}
 
           <div className={`mb-6 rounded-2xl px-5 py-4 border flex flex-col sm:flex-row sm:items-center gap-3 ${
             plan === 'free'   ? 'bg-theme border-theme-md'   :
@@ -498,6 +573,26 @@ function AccountsInner() {
                           </button>
                         )}
                       </div>
+
+                      {/* A connected Discord or Telegram with no destination cannot
+                          publish anything, and nothing on this page used to say so.
+                          Surfaced on the card itself, not just at connect time, so
+                          it is still findable on a later visit. */}
+                      {DESTINATION_PLATFORMS.includes(account.platform)
+                        && !destinationPlatforms.has(account.platform)
+                        && !isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800/50">
+                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
+                            No channel picked yet — posts to {meta.label} have nowhere to go.
+                          </p>
+                          <Link
+                            href="/accounts/destinations"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
+                          >
+                            Choose a channel →
+                          </Link>
+                        </div>
+                      )}
 
                       {account.platform === 'discord' && !isConfirming && (
                         <div className="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-900/30">
