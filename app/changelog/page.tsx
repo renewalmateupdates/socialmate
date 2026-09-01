@@ -21,6 +21,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'September 1, 2026',
+    version: 'Connect-to-First-Post Fixes, Sitemap Rebuild, Crawler Accuracy',
+    changes: [
+      { type: 'Fixed',    text: 'Compose no longer pre-selects Discord for everyone. It now ticks the platforms you have actually connected, so you are not shown a warning about a platform you never chose while the one you did connect sits unticked.' },
+      { type: 'Fixed',    text: 'TikTok is no longer labelled "Coming Soon" in Compose. It has been live since May — it just takes video, so the chip now links straight to TikTok Studio.' },
+      { type: 'Fixed',    text: 'Discord and Telegram need a channel before they can publish anything, and nothing said so. Your account card now tells you when no channel is picked, with a direct link to choose one.' },
+      { type: 'New',      text: 'Connecting an account now shows a persistent next step instead of a toast that disappears after three seconds — TikTok to the Studio, Discord and Telegram to channel setup, everything else straight to Compose.' },
+      { type: 'New',      text: 'Compose tells you up front when you have no accounts connected, rather than letting you write a post with nowhere to publish.' },
+      { type: 'Fixed',    text: 'Sitemap now derives blog URLs from the database instead of a hand-kept list. 227 live blog posts had no sitemap entry at all, and seven URLs were duplicated. The sitemap went from 540 blog URLs to 767.' },
+      { type: 'Fixed',    text: 'ai.txt and the AI plugin manifest still quoted the old $20 Agency price from before the August repricing, and both listed Enki as a bundled feature. Corrected to $29 and Enki is now described accurately as a separate product.' },
+    ],
+  },
+  {
     date: 'June 5, 2026',
     version: 'Loading Skeletons Sweep + Build Fix',
     changes: [
