@@ -430,8 +430,16 @@ function AccountsInner() {
                 const needsChannel =
                   DESTINATION_PLATFORMS.includes(justConnected) &&
                   !destinationPlatforms.has(justConnected)
+                // X is connectable on every plan but only *postable* on Pro+,
+                // because X bills us per tweet. Compose renders it as an upgrade
+                // link rather than a selectable platform for free users, so a
+                // free account whose only connection is X cannot publish at all.
+                // Two external accounts were sitting in exactly that state.
+                const xNeedsPro = justConnected === 'twitter' && plan === 'free'
                 const next =
-                  justConnected === 'tiktok' ? { href: '/tiktok/studio', cta: 'Open TikTok Studio →',
+                  xNeedsPro ? { href: '/pricing', cta: 'See Pro →',
+                    sub: 'X charges per tweet, so posting to X needs Pro or an X Booster pack. Connecting a free platform like Bluesky, Mastodon or Discord gets you posting right now at no cost.' }
+                  : justConnected === 'tiktok' ? { href: '/tiktok/studio', cta: 'Open TikTok Studio →',
                     sub: 'TikTok takes video — upload your first one in TikTok Studio.' }
                   : needsChannel ? { href: '/accounts/destinations', cta: 'Choose a channel →',
                     sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
@@ -601,6 +609,20 @@ function AccountsInner() {
                             className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all"
                           >
                             🎮 Manage Server →
+                          </Link>
+                        </div>
+                      )}
+
+                      {account.platform === 'twitter' && plan === 'free' && !isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800/50">
+                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
+                            X posting needs Pro — X bills per tweet, so it is not on the free plan.
+                          </p>
+                          <Link
+                            href="/pricing"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
+                          >
+                            See Pro →
                           </Link>
                         </div>
                       )}
