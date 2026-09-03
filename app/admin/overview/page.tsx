@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { redirect } from 'next/navigation'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { internalIdsFrom } from '@/lib/internal-accounts'
 import Link from 'next/link'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -48,21 +49,29 @@ export default async function AdminOverviewPage() {
   const minus30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  // Exclude admin's own account from all business metrics so stats reflect real paying users
+  // Exclude every account of ours, not just the one signed in.
+  //
+  // This page filtered on `adminUserId` alone, which left the other three
+  // internal accounts in every number on it — including the seven posts
+  // gilgameshenterprisellc@gmail.com published in March. That is what kept
+  // "1 user has ever published" reading as true here long after /admin/funnel
+  // was corrected in #588, and it is why the signup count read 108 when 104
+  // real people had signed up.
+  //
+  // `.neq` can only exclude one value, so the filter below is a `not.in` list.
   const adminUserId = user.id
+  const { data: allProfiles } = await admin.from('profiles').select('id, email')
+  const internalIds = internalIdsFrom(allProfiles ?? [])
+  internalIds.add(adminUserId)
+  const notInternal = `(${Array.from(internalIds).join(',')})`
 
   // ── 1. Growth snapshot ────────────────────────────────────────────────
-  let totalUsers = 0
+  // Counted from profiles rather than the auth API, which has no way to
+  // exclude anyone and was the direct source of the inflated total.
+  let totalUsers = (allProfiles ?? []).filter(r => !internalIds.has(r.id)).length
   let newUsers7d = 0
   let proCount = 0
   let agencyCount = 0
-
-  try {
-    // Total users via admin auth API — Supabase returns total in the pagination object
-    const { data: authList } = await admin.auth.admin.listUsers({ perPage: 1 })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    totalUsers = (authList as any)?.total ?? 0
-  } catch { /* graceful fallback */ }
 
   try {
     // New users last 7d — count from workspaces created (personal workspaces proxy for new users)
@@ -70,7 +79,7 @@ export default async function AdminOverviewPage() {
       .from('workspaces')
       .select('id', { count: 'exact', head: true })
       .eq('is_personal', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
       .gte('created_at', minus7d)
     newUsers7d = count ?? 0
   } catch { /* graceful fallback */ }
@@ -81,7 +90,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .in('plan', ['pro', 'pro_annual'])
       .eq('is_personal', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
     proCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -91,7 +100,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .in('plan', ['agency', 'agency_annual'])
       .eq('is_personal', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
     agencyCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -105,7 +114,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .neq('plan', 'free')
       .eq('is_personal', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
     activePaidCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -114,7 +123,7 @@ export default async function AdminOverviewPage() {
       .from('workspaces')
       .select('id', { count: 'exact', head: true })
       .eq('soma_autopilot_enabled', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
     autopilotCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -206,7 +215,7 @@ export default async function AdminOverviewPage() {
       .select('id, owner_id')
       .in('plan', ['pro', 'pro_annual', 'agency', 'agency_annual'])
       .eq('is_personal', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
       .lte('created_at', minus30d)
 
     if (paidWorkspaces && paidWorkspaces.length > 0) {
@@ -248,7 +257,7 @@ export default async function AdminOverviewPage() {
     const { data: accounts } = await admin
       .from('connected_accounts')
       .select('platform, user_id')
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
     if (accounts) {
       const pm = new Map<string, number>()
       for (const acc of accounts) {
@@ -272,7 +281,7 @@ export default async function AdminOverviewPage() {
     const { data: sourceRows } = await admin
       .from('user_settings')
       .select('signup_source, signup_medium, signup_campaign, signup_referrer')
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
 
     if (sourceRows) {
       totalTracked = sourceRows.length
@@ -341,7 +350,7 @@ export default async function AdminOverviewPage() {
       .from('workspaces')
       .select('owner_id, plan, created_at')
       .eq('is_personal', true)
-      .neq('owner_id', adminUserId)
+      .not('owner_id', 'in', notInternal)
       .order('created_at', { ascending: false })
       .limit(10)
 
@@ -380,7 +389,7 @@ export default async function AdminOverviewPage() {
     const { data } = await admin
       .from('connected_accounts')
       .select('user_id')
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
     if (data) funnelConnected = new Set(data.map(r => r.user_id)).size
   } catch { /* graceful fallback */ }
 
@@ -388,7 +397,7 @@ export default async function AdminOverviewPage() {
     const { data } = await admin
       .from('posts')
       .select('user_id')
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
     if (data) funnelPosted = new Set(data.map(r => r.user_id)).size
   } catch { /* graceful fallback */ }
 
@@ -397,7 +406,7 @@ export default async function AdminOverviewPage() {
       .from('posts')
       .select('user_id')
       .eq('status', 'published')
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
     if (data) funnelPublished = new Set(data.map(r => r.user_id)).size
   } catch { /* graceful fallback */ }
 
@@ -407,7 +416,7 @@ export default async function AdminOverviewPage() {
       .select('user_id')
       .eq('status', 'published')
       .gte('published_at', minus7d)
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
     if (data) funnelRetained = new Set(data.map(r => r.user_id)).size
   } catch { /* graceful fallback */ }
 
@@ -419,7 +428,7 @@ export default async function AdminOverviewPage() {
     const { data: pwSettings } = await admin
       .from('user_settings')
       .select('user_id, login_count, last_active')
-      .neq('user_id', adminUserId)
+      .not('user_id', 'in', notInternal)
       .gt('login_count', 0)
       .order('login_count', { ascending: false })
       .limit(10)
