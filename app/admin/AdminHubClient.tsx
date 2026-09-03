@@ -8,6 +8,7 @@ import {
 interface HubStats {
   total_users: number
   posts_today: number
+  posts_today_internal: number
   active_affiliates: number
   stax_listings: number
 }
@@ -54,8 +55,14 @@ export default function AdminHubClient() {
   // anything money-shaped, jade is live activity. Nothing gets a colour just to
   // look varied.
   const STAT_CARDS = [
-    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',        sub: 'registered accounts' },
-    { label: 'Posts Today',       value: stats?.posts_today       ?? '—', tone: 'text-jade',         sub: 'published today'     },
+    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',        sub: 'real accounts, ours excluded' },
+    // Our own SOMA output is shown beside this, never inside it. Every post
+    // published in the week to 3 September was ours; folded into one number it
+    // read as product usage.
+    { label: 'Posts Today',       value: stats?.posts_today       ?? '—', tone: 'text-jade',
+      sub: stats && stats.posts_today_internal > 0
+        ? `by users · ${stats.posts_today_internal} ours`
+        : 'published by users' },
     { label: 'Active Affiliates', value: stats?.active_affiliates ?? '—', tone: 'text-amber',        sub: 'earning commissions' },
     { label: 'Stax Listings',     value: stats?.stax_listings     ?? '—', tone: 'text-ink-high',     sub: 'live in directory'   },
   ]
