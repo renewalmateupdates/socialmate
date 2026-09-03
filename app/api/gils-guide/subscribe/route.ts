@@ -36,9 +36,13 @@ function generateGuideEmail(name: string | null): string {
       <p style="margin:0 0 20px;color:#9ca3af;font-size:15px;line-height:1.6;">
         Everything they don't teach you about starting a business, building a brand, and becoming the person who pulls it off.
       </p>
-      <a href="https://socialmate.studio/gils-guide/download"
+      <!-- /gils-guide/download has never existed. It 404s in production, and it
+           was the only call to action in this email, so every subscriber who
+           ever clicked through hit a dead page. /guides is the real hub: all
+           fourteen volumes, each with its own PDF download. -->
+      <a href="https://socialmate.studio/guides"
         style="display:inline-block;background:#F59E0B;color:#000;font-weight:800;font-size:15px;text-decoration:none;padding:14px 28px;border-radius:12px;">
-        Download the Guide →
+        Read the Guides →
       </a>
     </div>
 
