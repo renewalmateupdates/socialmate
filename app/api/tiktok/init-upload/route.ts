@@ -82,9 +82,25 @@ export async function POST(request: NextRequest) {
   const hashtagStr = (hashtags as string[]).map((t: string) => `#${t.replace(/^#/, '')}`).join(' ')
   const fullCaption = [post_caption, hashtagStr].filter(Boolean).join('\n\n').slice(0, 2200)
 
-  // Unaudited (pre-production-approval) apps can only post as SELF_ONLY.
-  // Once the TikTok app review passes, remove this override.
-  const effectivePrivacy = 'SELF_ONLY'
+  // TikTok's accepted privacy values. Anything unrecognised falls back to
+  // SELF_ONLY: an unknown value is rejected by TikTok with an opaque error, and
+  // if this is going to be wrong it must be wrong in the private direction.
+  //
+  // This used to be a hard `= 'SELF_ONLY'` override, correct while the app was
+  // unaudited, with a comment saying to remove it once review passed. Review
+  // passed on 17 May 2026 and the override stayed. Every video posted through
+  // SocialMate since then went out private no matter which option the creator
+  // chose, while confirm-upload recorded their actual choice in our database —
+  // so the record said Public and TikTok had been told otherwise.
+  const TIKTOK_PRIVACY = [
+    'PUBLIC_TO_EVERYONE',
+    'MUTUAL_FOLLOW_FRIENDS',
+    'FOLLOWER_OF_CREATOR',
+    'SELF_ONLY',
+  ]
+  const effectivePrivacy = TIKTOK_PRIVACY.includes(privacy_level)
+    ? privacy_level
+    : 'SELF_ONLY'
 
   const postInfo: Record<string, unknown> = {
     title:                    fullCaption,
