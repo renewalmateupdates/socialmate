@@ -15,14 +15,14 @@ export async function GET(request: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!
 
   if (error || !code) {
-    return NextResponse.redirect(`${appUrl}/discord?error=bot_denied`)
+    return NextResponse.redirect(`${appUrl}/accounts?error=discord_bot_denied`)
   }
 
   const cookieStore = await cookies()
   const storedState = cookieStore.get('discord_bot_state')?.value
 
   if (!storedState || storedState !== state) {
-    return NextResponse.redirect(`${appUrl}/discord?error=invalid_state`)
+    return NextResponse.redirect(`${appUrl}/accounts?error=discord_invalid_state`)
   }
 
   // Exchange code for tokens
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   })
 
   if (!tokenRes.ok) {
-    return NextResponse.redirect(`${appUrl}/discord?error=token_failed`)
+    return NextResponse.redirect(`${appUrl}/accounts?error=discord_token_failed`)
   }
 
   const tokenData = await tokenRes.json()
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
   })
 
   if (!userRes.ok) {
-    return NextResponse.redirect(`${appUrl}/discord?error=user_fetch_failed`)
+    return NextResponse.redirect(`${appUrl}/accounts?error=discord_user_fetch_failed`)
   }
 
   const discordUser = await userRes.json()
@@ -105,14 +105,14 @@ export async function GET(request: NextRequest) {
   if (registryRecord) {
     if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
       cookieStore.delete('discord_bot_state')
-      return NextResponse.redirect(`${appUrl}/discord?error=discord_already_connected`)
+      return NextResponse.redirect(`${appUrl}/accounts?error=discord_already_connected`)
     }
     if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
       const coolingUntil = new Date(registryRecord.cooling_until)
       if (coolingUntil > new Date()) {
         cookieStore.delete('discord_bot_state')
         const until = coolingUntil.toISOString()
-        return NextResponse.redirect(`${appUrl}/discord?error=discord_in_cooldown&until=${encodeURIComponent(until)}`)
+        return NextResponse.redirect(`${appUrl}/accounts?error=discord_in_cooldown&until=${encodeURIComponent(until)}`)
       }
     }
   }
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
 
     if (dbError) {
       console.error('Discord bot DB error:', dbError)
-      return NextResponse.redirect(`${appUrl}/discord?error=db_error`)
+      return NextResponse.redirect(`${appUrl}/accounts?error=discord_db_error`)
     }
   }
 
@@ -185,5 +185,5 @@ export async function GET(request: NextRequest) {
     )
 
   cookieStore.delete('discord_bot_state')
-  return NextResponse.redirect(`${appUrl}/discord?success=bot_connected`)
+  return NextResponse.redirect(`${appUrl}/accounts?success=discord_connected`)
 }

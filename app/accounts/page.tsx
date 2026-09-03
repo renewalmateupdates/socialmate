@@ -157,6 +157,16 @@ function AccountsInner() {
   // none of them could have posted anywhere. This page never linked to
   // destinations at all, so there was no way to find out.
   const [destinationPlatforms, setDestinationPlatforms] = useState<Set<string>>(new Set())
+
+  // The Discord channel picker. Choosing where posts go used to mean leaving
+  // for /accounts/destinations and hand-building a webhook inside Discord —
+  // Settings, Integrations, Webhooks, New Webhook, copy, come back, paste. Of
+  // the seven external accounts that connected Discord, none ever finished it.
+  // With the bot in the server we can just list the channels and let them pick.
+  const [dcChannels, setDcChannels] = useState<{ id: string; name: string }[] | null>(null)
+  const [dcChannelsError, setDcChannelsError] = useState<string | null>(null)
+  const [dcPicked, setDcPicked] = useState('')
+  const [dcSaving, setDcSaving] = useState(false)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
   const [disconnecting, setDisconnecting] = useState<string | null>(null)
@@ -281,6 +291,54 @@ function AccountsInner() {
   // fire counts, which exist to answer "how often do they come back", were
   // roughly double. A ref rather than an empty dep array, because the router
   // guard below still needs the real deps.
+  // Loaded lazily, and only when it can actually be acted on: a connected
+  // Discord with no channel chosen yet.
+  const needsDiscordChannel =
+    accounts.some(a => a.platform === 'discord') && !destinationPlatforms.has('discord')
+
+  useEffect(() => {
+    if (!needsDiscordChannel || dcChannels || dcChannelsError) return
+    fetch('/api/accounts/discord/channels')
+      .then(async r => {
+        const j = await r.json().catch(() => ({}))
+        if (!r.ok) throw new Error(j.message || j.error || 'Could not load your channels.')
+        return j
+      })
+      .then((j: { channels: { id: string; name: string }[] }) => {
+        setDcChannels(j.channels ?? [])
+        if ((j.channels ?? []).length === 1) setDcPicked(j.channels[0].id)
+      })
+      .catch((e: Error) => setDcChannelsError(e.message))
+  }, [needsDiscordChannel, dcChannels, dcChannelsError])
+
+  const saveDiscordChannel = async (channelId: string) => {
+    const chan = dcChannels?.find(c => c.id === channelId)
+    if (!chan) return
+    setDcSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setDcSaving(false); router.push('/login'); return }
+
+    const { error } = await supabase.from('post_destinations').insert({
+      user_id: user.id,
+      platform: 'discord',
+      label: '#' + chan.name,
+      // A channel id, not a webhook URL. The publisher tells them apart by
+      // shape and keeps posting through existing webhooks unchanged.
+      destination_id: chan.id,
+      webhook_url: null,
+      workspace_id: activeWorkspace && !activeWorkspace.is_personal ? activeWorkspace.id : null,
+    })
+    setDcSaving(false)
+
+    if (error) {
+      console.warn('[accounts] saving discord channel failed', error)
+      showToast('Could not save that channel — please try again', 'error')
+      return
+    }
+    setDestinationPlatforms(prev => new Set(prev).add('discord'))
+    showToast('Posting to #' + chan.name, 'success')
+  }
+
   const viewTracked = useRef(false)
   useEffect(() => {
     if (viewTracked.current) return
@@ -449,8 +507,13 @@ function AccountsInner() {
                     sub: 'X charges per tweet, so posting to X needs Pro or an X Booster pack. Connecting a free platform like Bluesky, Mastodon or Discord gets you posting right now at no cost.' }
                   : justConnected === 'tiktok' ? { href: '/tiktok/studio', cta: 'Open TikTok Studio →',
                     sub: 'TikTok takes video — upload your first one in TikTok Studio.' }
-                  : needsChannel ? { href: '/accounts/destinations', cta: 'Choose a channel →',
-                    sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
+                  : needsChannel ? {
+                      // Discord picks its channel inline on the card below now.
+                      // Telegram still needs a username typed in, so it keeps
+                      // the trip to the destinations page.
+                      href: justConnected === 'discord' ? '#needs-channel-discord' : '/accounts/destinations',
+                      cta: justConnected === 'discord' ? 'Pick your channel ↓' : 'Choose a channel →',
+                      sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
                   : { href: '/compose', cta: 'Write your first post →',
                     sub: 'Write your first post and send it out. It takes about a minute.' }
                 return (
@@ -597,16 +660,65 @@ function AccountsInner() {
                       {DESTINATION_PLATFORMS.includes(account.platform)
                         && !destinationPlatforms.has(account.platform)
                         && !isConfirming && (
-                        <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800/50">
+                        <div id={'needs-channel-' + account.platform} className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800/50">
                           <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
                             No channel picked yet — posts to {meta.label} have nowhere to go.
                           </p>
-                          <Link
-                            href="/accounts/destinations"
-                            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
-                          >
-                            Choose a channel →
-                          </Link>
+                          {account.platform === 'discord' ? (
+                            dcChannelsError ? (
+                              <>
+                                <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">{dcChannelsError}</p>
+                                <Link
+                                  href="/accounts/destinations"
+                                  className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
+                                >
+                                  Add a webhook instead &rarr;
+                                </Link>
+                              </>
+                            ) : dcChannels === null ? (
+                              <p className="text-xs text-amber-700 dark:text-amber-400">Loading your channels&hellip;</p>
+                            ) : dcChannels.length === 0 ? (
+                              <>
+                                <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
+                                  No channels we can post to in that server.
+                                </p>
+                                <Link
+                                  href="/accounts/destinations"
+                                  className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
+                                >
+                                  Add a webhook instead &rarr;
+                                </Link>
+                              </>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                <select
+                                  value={dcPicked}
+                                  onChange={e => setDcPicked(e.target.value)}
+                                  aria-label="Discord channel to post into"
+                                  className="flex-1 min-h-[44px] text-xs font-semibold px-3 py-2 rounded-xl bg-surface border border-amber-300 dark:border-amber-800 text-theme"
+                                >
+                                  <option value="">Pick a channel&hellip;</option>
+                                  {dcChannels.map(c => (
+                                    <option key={c.id} value={c.id}>#{c.name}</option>
+                                  ))}
+                                </select>
+                                <button
+                                  onClick={() => saveDiscordChannel(dcPicked)}
+                                  disabled={!dcPicked || dcSaving}
+                                  className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-4 py-2 min-h-[44px] bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white rounded-xl transition-colors"
+                                >
+                                  {dcSaving ? 'Saving…' : 'Post here'}
+                                </button>
+                              </div>
+                            )
+                          ) : (
+                            <Link
+                              href="/accounts/destinations"
+                              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
+                            >
+                              Choose a channel &rarr;
+                            </Link>
+                          )}
                         </div>
                       )}
 
@@ -778,8 +890,9 @@ function AccountsInner() {
           <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <p className="text-lg font-bold mb-2">💬 Connect Discord</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-              Make sure you're logged into the Discord account you want to connect before continuing.
-              To add a different account, log into that account in your browser first.
+              You&apos;ll pick the server to add SocialMate to, then choose a channel here.
+              Make sure you&apos;re logged into the right Discord account first, and that you can
+              add apps to that server.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowDiscordModal(false)}
@@ -794,7 +907,7 @@ function AccountsInner() {
                   document.cookie = `pending_workspace_id=; path=/; max-age=0`
                 }
                 setShowDiscordModal(false)
-                window.open('/api/accounts/discord/connect', '_blank')
+                window.open('/api/accounts/discord/bot-connect', '_blank')
               }}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all">
                 Continue to Discord →
