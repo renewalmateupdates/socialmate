@@ -5,6 +5,7 @@ import { normalizePlan } from '@/lib/plan'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { track } from '@/lib/analytics'
+import { markActivated } from '@/lib/activation'
 import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
@@ -219,6 +220,10 @@ function OnboardingInner() {
         const data = await res.json()
         if ((data.platforms as string[]).includes(selectedPlatform)) {
           stopped = true
+          // They have connected. Whatever they do from here — finish step 4,
+          // close the tab, wander off to /accounts — they are not getting
+          // bounced back into onboarding for it.
+          void markActivated(user?.id)
           setConnectionDetected(true)
           setCheckingConnection(false)
           if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
@@ -457,6 +462,7 @@ function OnboardingInner() {
   // so skip waiting for the next poll tick.
   const onInlineConnected = (platform: string) => {
     track('connect_succeeded', { platform })
+    void markActivated(user?.id)
     setInlineModal(null)
     setConnectionDetected(true)
     setTimeout(() => setStep(quickMode ? 5 : 4), 1200)

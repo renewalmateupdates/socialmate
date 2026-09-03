@@ -2,6 +2,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { markActivated } from '@/lib/activation'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
@@ -203,6 +204,11 @@ function AccountsInner() {
     if (success?.endsWith('_connected')) {
       const platform = success.replace(/_connected$/, '')
       track('connect_succeeded', { platform })
+      // This is where every OAuth connect actually ends up — in a new tab, on
+      // this page. If the account is not marked activated here it never is,
+      // because the onboarding tab that would have done it is behind this one
+      // and nobody goes back to it.
+      void markActivated()
       setJustConnected(platform)
     } else if (error) {
       const [platform, ...rest] = error.split('_')
@@ -378,6 +384,7 @@ function AccountsInner() {
 
   const handleBlueskySuccess = async () => {
     track('connect_succeeded', { platform: 'bluesky' })
+    void markActivated()
     setShowBlueskyModal(false)
     showToast('Bluesky connected successfully!', 'success')
     await refreshAccounts()
@@ -385,6 +392,7 @@ function AccountsInner() {
 
   const handleTelegramSuccess = async () => {
     track('connect_succeeded', { platform: 'telegram' })
+    void markActivated()
     setShowTelegramModal(false)
     showToast('Telegram bot connected successfully!', 'success')
     await refreshAccounts()
