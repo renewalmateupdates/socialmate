@@ -66,8 +66,20 @@ export default async function AdminOverviewPage() {
   const notInternal = `(${Array.from(internalIds).join(',')})`
 
   // ── 1. Growth snapshot ────────────────────────────────────────────────
-  // Counted from profiles rather than the auth API, which has no way to
-  // exclude anyone and was the direct source of the inflated total.
+  // Two different numbers, because this page asks two different questions and
+  // was using one variable for both.
+  //
+  //   totalAccounts — how many accounts exist. Ours included, because they do
+  //                   exist, and because this is the figure the public counter
+  //                   and the admin hub both show. Those three disagreeing was
+  //                   the actual defect.
+  //   totalUsers    — the denominator for every activation ratio below. Ours
+  //                   excluded, because a numerator like funnelPublished counts
+  //                   only real people, and mixing the two is exactly what kept
+  //                   "1 user has ever published" alive for five months.
+  //
+  // Counted from profiles rather than the auth API, which has no way to filter.
+  const totalAccounts = (allProfiles ?? []).length
   let totalUsers = (allProfiles ?? []).filter(r => !internalIds.has(r.id)).length
   let newUsers7d = 0
   let proCount = 0
@@ -663,7 +675,7 @@ export default async function AdminOverviewPage() {
           <h1>SocialMate</h1>
           <div className="hud-stamp">
             {new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
-            <br />{fmt(totalUsers)} accounts tracked
+            <br />{fmt(totalAccounts)} accounts tracked
           </div>
         </div>
         <div className="hud-rule" />
@@ -731,7 +743,7 @@ export default async function AdminOverviewPage() {
         <h2 className="hud-sec">Growth</h2>
         <div className="hud-grid">
           <Link href="/admin/users" className="hud-card hud-tile">
-            <div className="hud-n">{fmt(totalUsers)}</div>
+            <div className="hud-n">{fmt(totalAccounts)}</div>
             <div className="hud-l">Total users</div>
             <div className="hud-s">registered accounts</div>
             <span className={`hud-chip ${newUsers7d > 0 ? 'pos' : 'idle'}`}>{newUsers7d > 0 ? 'Growing' : 'Flat'}</span>
@@ -739,7 +751,7 @@ export default async function AdminOverviewPage() {
           <div className="hud-card hud-tile">
             <div className={`hud-n ${newUsers7d === 0 ? 'dim' : ''}`}>{fmt(newUsers7d)}</div>
             <div className="hud-l">New last 7d</div>
-            <div className="hud-s">{totalUsers > 0 ? `+${((newUsers7d / totalUsers) * 100).toFixed(1)}% on base` : 'no base yet'}</div>
+            <div className="hud-s">{totalAccounts > 0 ? `+${((newUsers7d / totalAccounts) * 100).toFixed(1)}% on base` : 'no base yet'}</div>
             <span className={`hud-chip ${newUsers7d > 0 ? 'pos' : 'idle'}`}>{newUsers7d > 0 ? 'Steady intake' : 'No signups'}</span>
           </div>
           <Link href="/admin/users?plan=pro" className="hud-card hud-tile">
