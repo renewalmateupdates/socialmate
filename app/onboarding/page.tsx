@@ -453,7 +453,7 @@ function OnboardingInner() {
     if (platformData.connect === 'modal') { setInlineModal(platformData.id); return }
 
     const href = platformData.connect === 'invite'
-      ? '/api/accounts/discord/connect'
+      ? '/api/accounts/discord/bot-connect'
       : OAUTH_ROUTES[platformData.id]
     if (href) window.open(href, '_blank', 'noopener,noreferrer')
   }
