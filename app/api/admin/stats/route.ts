@@ -40,8 +40,10 @@ export async function GET() {
     affiliatesRes,
     listingsRes,
   ] = await Promise.allSettled([
-    db.from('user_settings').select('user_id', { count: 'exact', head: true })
-      .not('user_id', 'in', notInternal),
+    // Every account, ours included. This is a raw account count, and it has to
+    // match the number the public counter shows. Activation ratios are the
+    // opposite case and still exclude us — see /admin/overview.
+    db.from('user_settings').select('user_id', { count: 'exact', head: true }),
     db.from('posts').select('id', { count: 'exact', head: true })
       .gte('published_at', since)
       .eq('status', 'published')

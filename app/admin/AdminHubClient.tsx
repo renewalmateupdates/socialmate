@@ -55,7 +55,7 @@ export default function AdminHubClient() {
   // anything money-shaped, jade is live activity. Nothing gets a colour just to
   // look varied.
   const STAT_CARDS = [
-    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',        sub: 'real accounts, ours excluded' },
+    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',        sub: 'all accounts, ours included' },
     // Our own SOMA output is shown beside this, never inside it. Every post
     // published in the week to 3 September was ours; folded into one number it
     // read as product usage.
