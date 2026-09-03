@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
     disable_comment = false,
     disable_stitch  = false,
     sound_id,
+    video_cover_timestamp_ms = 0,
   } = body
 
   if (!video_size) return NextResponse.json({ error: 'video_size required' }, { status: 400 })
@@ -92,7 +93,11 @@ export async function POST(request: NextRequest) {
     disable_duet,
     disable_comment,
     disable_stitch,
-    video_cover_timestamp_ms: 0,
+    // Was hardcoded to 0, so every video's thumbnail was its literal first
+    // frame — very often black, since that is where most clips fade in from.
+    // The studio now sends the frame the creator picked, measured from the
+    // start of the trimmed clip that actually gets uploaded.
+    video_cover_timestamp_ms: Math.max(0, Math.round(Number(video_cover_timestamp_ms) || 0)),
   }
   if (sound_id && sound_id !== 'original') postInfo.music_id = sound_id
 
