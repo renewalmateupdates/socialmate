@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
     disable_stitch  = false,
     sound_id,
     video_cover_timestamp_ms = 0,
+    // 'direct' publishes straight to the profile. 'inbox' drops the video into
+    // the creator's TikTok drafts so they finish it in the TikTok app — which
+    // is the only place TikTok's sound library can legally be applied.
+    destination = 'direct',
   } = body
 
   if (!video_size) return NextResponse.json({ error: 'video_size required' }, { status: 400 })
@@ -78,14 +82,24 @@ export async function POST(request: NextRequest) {
 
   // FILE_UPLOAD: client will PUT the blob directly to TikTok's upload URL
   // No domain verification needed — avoids PULL_FROM_URL domain issues entirely
-  const initRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+  // Two different TikTok endpoints. Direct Post publishes; inbox upload hands
+  // the file to the creator's drafts. Both need video.upload, which we hold.
+  const toInbox = destination === 'inbox'
+  const initUrl = toInbox
+    ? 'https://open.tiktokapis.com/v2/post/publish/inbox/video/init/'
+    : 'https://open.tiktokapis.com/v2/post/publish/video/init/'
+
+  const initRes = await fetch(initUrl, {
     method:  'POST',
     headers: {
       Authorization:  `Bearer ${auth.token}`,
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: JSON.stringify({
-      post_info:   postInfo,
+      // The inbox endpoint takes no post_info at all. Caption, privacy and
+      // sound are chosen by the creator inside the TikTok app, so sending them
+      // here would be ignored at best and rejected at worst.
+      ...(toInbox ? {} : { post_info: postInfo }),
       source_info: {
         source:             'FILE_UPLOAD',
         video_size:         video_size,
@@ -107,5 +121,5 @@ export async function POST(request: NextRequest) {
   const { publish_id, upload_url } = initData?.data ?? {}
   if (!upload_url) return NextResponse.json({ error: 'No upload URL from TikTok' }, { status: 502 })
 
-  return NextResponse.json({ upload_url, publish_id, open_id: auth.openId, full_caption: fullCaption })
+  return NextResponse.json({ upload_url, publish_id, open_id: auth.openId, full_caption: fullCaption, destination: toInbox ? 'inbox' : 'direct' })
 }

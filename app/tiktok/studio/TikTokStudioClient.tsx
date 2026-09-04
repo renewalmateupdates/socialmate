@@ -87,8 +87,8 @@ interface PostSettingsPanelProps {
   setDisableStitch: (v: boolean) => void
   disableComment:  boolean
   setDisableComment: (v: boolean) => void
-  scheduleMode:    'now' | 'schedule'
-  setScheduleMode: (v: 'now' | 'schedule') => void
+  scheduleMode:    'now' | 'schedule' | 'drafts'
+  setScheduleMode: (v: 'now' | 'schedule' | 'drafts') => void
   scheduledAt:     string
   setScheduledAt:  (v: string) => void
   postError:       string | null
@@ -258,6 +258,25 @@ function PostSettingsPanel({
               </button>
             ))}
           </div>
+
+          {/* The only route to TikTok's sound library. TikTok never exposes
+              sound audio to a third party, so a track can only be added inside
+              their app — which means getting the video there as a draft. */}
+          <button
+            onClick={() => setScheduleMode('drafts')}
+            className={`w-full py-2.5 px-3 rounded-xl text-left border transition-all mb-2 ${
+              scheduleMode === 'drafts'
+                ? 'bg-[#fe2c55]/10 border-[#fe2c55]/50'
+                : 'bg-panel border-edge hover:border-edge-lit'
+            }`}
+          >
+            <span className={`text-xs font-bold ${scheduleMode === 'drafts' ? 'text-[#fe2c55]' : 'text-ink-high'}`}>
+              🎵 Send to TikTok drafts
+            </span>
+            <span className="block text-[11px] text-ink-muted mt-0.5 leading-snug">
+              Finish in the TikTok app, where you can add any sound from their library.
+            </span>
+          </button>
           {scheduleMode === 'schedule' && (
             <input
               type="datetime-local"
@@ -289,6 +308,8 @@ function PostSettingsPanel({
             ? <><span className="animate-pulse">🚀</span> Publishing…</>
             : scheduleMode === 'schedule'
             ? '📅 Schedule Video'
+            : scheduleMode === 'drafts'
+            ? '🎵 Send to TikTok drafts'
             : '🚀 Post to TikTok'}
         </button>
         <p className="text-xs text-ink-faint text-center">
@@ -352,7 +373,7 @@ export default function TikTokStudioClient() {
   const [disableDuet, setDisableDuet]           = useState(false)
   const [disableComment, setDisableComment]     = useState(false)
   const [disableStitch, setDisableStitch]       = useState(false)
-  const [scheduleMode, setScheduleMode]         = useState<'now' | 'schedule'>('now')
+  const [scheduleMode, setScheduleMode]         = useState<'now' | 'schedule' | 'drafts'>('now')
   const [scheduledAt, setScheduledAt]           = useState('')
 
   // Sound state
@@ -373,7 +394,7 @@ export default function TikTokStudioClient() {
   const [postSuccess, setPostSuccess] = useState(false)
   // TikTok processes asynchronously, so "uploaded" is not "published". Until
   // this settles we are still waiting on their answer, not on ourselves.
-  const [publishState, setPublishState] = useState<'idle' | 'checking' | 'live' | 'rejected' | 'unknown'>('idle')
+  const [publishState, setPublishState] = useState<'idle' | 'checking' | 'live' | 'drafted' | 'rejected' | 'unknown'>('idle')
   const [publishReason, setPublishReason] = useState<string | null>(null)
 
   // Refs
@@ -813,6 +834,7 @@ export default function TikTokStudioClient() {
           // the original file the creator dropped in.
           video_cover_timestamp_ms:
             coverTime === null ? 0 : Math.max(0, Math.round((coverTime - trimStart) * 1000)),
+          destination: scheduleMode === 'drafts' ? 'inbox' : 'direct',
         }),
       })
       const initData = await initRes.json()
@@ -889,6 +911,7 @@ export default function TikTokStudioClient() {
             })
             const d = await r.json()
             if (d.status === 'published') { setPublishState('live'); return }
+            if (d.status === 'in_drafts')  { setPublishState('drafted'); return }
             if (d.status === 'failed') {
               setPublishReason(d.reason ?? null)
               setPublishState('rejected')
@@ -991,11 +1014,14 @@ export default function TikTokStudioClient() {
               const tone =
                 publishState === 'rejected'
                   ? 'bg-alert/10 border-alert/25 text-alert'
+                : publishState === 'drafted'
+                  ? 'bg-violet/10 border-violet/25 text-violet'
                 : publishState === 'checking' || publishState === 'unknown'
                   ? 'bg-amber/10 border-amber/25 text-amber'
                   : 'bg-jade/10 border-jade/25 text-jade'
               const icon =
                 publishState === 'rejected' ? '✕'
+                : publishState === 'drafted' ? '♪'
                 : publishState === 'checking' ? '⋯'
                 : publishState === 'unknown' ? '?'
                 : '✓'
@@ -1003,6 +1029,7 @@ export default function TikTokStudioClient() {
                 scheduled                      ? 'Video scheduled'
                 : publishState === 'checking'  ? 'Sent to TikTok'
                 : publishState === 'live'      ? 'Published to TikTok'
+                : publishState === 'drafted'   ? 'Waiting in your TikTok drafts'
                 : publishState === 'rejected'  ? 'TikTok rejected the video'
                 : publishState === 'unknown'   ? 'Still processing at TikTok'
                 : 'Uploaded to TikTok'
@@ -1013,6 +1040,8 @@ export default function TikTokStudioClient() {
                   ? 'The upload finished. Waiting for TikTok to finish processing it — this is usually quick.'
                 : publishState === 'live'
                   ? 'TikTok confirmed the video is published.'
+                : publishState === 'drafted'
+                  ? 'Open TikTok, go to your drafts, and finish it there — that is where you can add a sound from their library, then post.'
                 : publishState === 'rejected'
                   ? (publishReason
                       ? `TikTok gave this reason: ${publishReason}`
