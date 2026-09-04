@@ -3,48 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-
-async function getValidAccessToken(userId: string): Promise<{ token: string; openId: string } | null> {
-  const { data: account } = await getSupabaseAdmin()
-    .from('connected_accounts')
-    .select('id, access_token, refresh_token, expires_at, platform_user_id')
-    .eq('user_id', userId)
-    .eq('platform', 'tiktok')
-    .maybeSingle()
-
-  if (!account) return null
-
-  let token = account.access_token
-
-  if (account.expires_at) {
-    const expiresAt = new Date(account.expires_at)
-    if (expiresAt.getTime() - Date.now() < 5 * 60 * 1000 && account.refresh_token) {
-      const clientKey    = process.env.TIKTOK_CLIENT_KEY!
-      const clientSecret = process.env.TIKTOK_CLIENT_SECRET!
-      const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_key: clientKey, client_secret: clientSecret,
-          grant_type: 'refresh_token', refresh_token: account.refresh_token,
-        }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        const expires_at = data.expires_in
-          ? new Date(Date.now() + data.expires_in * 1000).toISOString()
-          : null
-        await getSupabaseAdmin()
-          .from('connected_accounts')
-          .update({ access_token: data.access_token, refresh_token: data.refresh_token, expires_at })
-          .eq('id', account.id)
-        token = data.access_token
-      }
-    }
-  }
-
-  return { token, openId: account.platform_user_id }
-}
+import { getValidAccessToken } from '@/lib/tiktok-auth'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
