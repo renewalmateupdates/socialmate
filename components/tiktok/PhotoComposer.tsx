@@ -21,7 +21,7 @@ const FPS = 30
 const MAX_SLIDES = 20
 const MIN_TOTAL_S = 3
 
-export type Fit = 'fill' | 'fit'
+export type Fit = 'fill' | 'fit' | 'pan'
 export interface Slide { id: string; url: string; name: string; seconds: number; fit: Fit }
 
 interface Props {
@@ -50,9 +50,14 @@ function pickMp4Mime(): string | null {
  * width, so a landing page becomes a slice of a headline.
  *
  * 'fit' scales the whole image to be visible and fills the space behind it with
- * a blown-up, blurred copy of itself. That is the standard treatment for
- * landscape footage in a vertical feed, and it reads as deliberate rather than
- * as a bad crop.
+ * a blown-up, blurred copy of itself. Right down to about 1.9:1.
+ *
+ * 'pan' exists because past that, fit stops working. A 2:1 image letterboxed
+ * into 9:16 occupies 28% of the frame — measured, not guessed — and any text in
+ * it becomes unreadable while the other 72% is blurred mush. So a very wide
+ * image instead fills the frame at readable scale and drifts sideways across
+ * its own width, which shows the whole thing over time rather than all of it
+ * at once and none of it legibly.
  */
 function drawSlide(
   ctx: CanvasRenderingContext2D, img: HTMLImageElement, mode: Fit, scale: number, panX: number
@@ -69,7 +74,9 @@ function drawSlide(
     ctx.drawImage(img, x, y, w, h)
   }
 
-  if (mode === 'fill') { cover(scale, panX); return }
+  // Pan and fill share the same draw; they differ only in how far the caller
+  // sweeps panX.
+  if (mode === 'fill' || mode === 'pan') { cover(scale, panX); return }
 
   // Backdrop: the same image, oversized and blurred, so the bars are never
   // dead black. Drawn first, then cleared of the filter for the sharp pass.
@@ -135,8 +142,12 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
       next.forEach(slide => {
         const probe = new Image()
         probe.onload = () => {
-          if (probe.width / probe.height > 1.2) {
-            setSlides(cur => cur.map(x => (x.id === slide.id ? { ...x, fit: 'fit' } : x)))
+          const r = probe.width / probe.height
+          // Past ~1.9:1 letterboxing leaves too little frame to read, so those
+          // pan instead. Between 1.2 and 1.9 fit still holds up.
+          const chosen: Fit = r > 1.9 ? 'pan' : r > 1.2 ? 'fit' : 'fill'
+          if (chosen !== 'fill') {
+            setSlides(cur => cur.map(x => (x.id === slide.id ? { ...x, fit: chosen } : x)))
           }
         }
         probe.src = slide.url
@@ -240,8 +251,12 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
 
           // Slow push in with a touch of drift, so a still does not sit dead.
           const p = dur > 0 ? local / dur : 0
-          const scale = kenBurns ? 1.02 + 0.09 * p : 1.02
-          const pan   = kenBurns ? (i % 2 === 0 ? -1 : 1) * (p - 0.5) * 0.4 : 0
+          const isPan = slides[i].fit === 'pan'
+          // A pan sweeps most of the image's width; Ken Burns only nudges.
+          const scale = isPan ? 1.0 : kenBurns ? 1.02 + 0.09 * p : 1.02
+          const pan   = isPan
+            ? (i % 2 === 0 ? 1 : -1) * (p - 0.5) * 1.7
+            : kenBurns ? (i % 2 === 0 ? -1 : 1) * (p - 0.5) * 0.4 : 0
           ctx.globalAlpha = 1
           drawSlide(ctx, imgs[i], slides[i].fit, scale, pan)
 
@@ -316,14 +331,17 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
                   />
                   <span className="font-mono text-[10px] tabular-nums text-ink-faint w-8 text-right">{s.seconds}s</span>
                   <button
-                    onClick={() => setSlides(cur => cur.map((x, k) =>
-                      (k === i ? { ...x, fit: x.fit === 'fill' ? 'fit' : 'fill' } : x)))}
+                    onClick={() => setSlides(cur => cur.map((x, k) => (k === i
+                      ? { ...x, fit: x.fit === 'fill' ? 'fit' : x.fit === 'fit' ? 'pan' : 'fill' }
+                      : x)))}
                     title={s.fit === 'fill'
-                      ? 'Filling the frame and cropping the edges. Click to show the whole image instead.'
-                      : 'Showing the whole image on a blurred backdrop. Click to fill the frame instead.'}
+                      ? 'Filling the frame, cropping the edges. Click to show the whole image.'
+                      : s.fit === 'fit'
+                        ? 'Whole image on a blurred backdrop. Click to pan across it instead.'
+                        : 'Filling the frame and drifting across the width. Click to crop instead.'}
                     className="shrink-0 font-mono text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded-md border border-edge text-ink-muted hover:text-ink-high hover:border-edge-lit transition-colors"
                   >
-                    {s.fit === 'fill' ? 'Fill' : 'Fit'}
+                    {s.fit === 'fill' ? 'Fill' : s.fit === 'fit' ? 'Fit' : 'Pan'}
                   </button>
                 </div>
               </div>
