@@ -21,7 +21,8 @@ const FPS = 30
 const MAX_SLIDES = 20
 const MIN_TOTAL_S = 3
 
-export interface Slide { id: string; url: string; name: string; seconds: number }
+export type Fit = 'fill' | 'fit'
+export interface Slide { id: string; url: string; name: string; seconds: number; fit: Fit }
 
 interface Props {
   onComposed: (file: File) => void
@@ -41,18 +42,47 @@ function pickMp4Mime(): string | null {
   return null
 }
 
-/** Cover-fit, so a landscape photo fills a 9:16 frame instead of letterboxing. */
-function drawCover(
-  ctx: CanvasRenderingContext2D, img: HTMLImageElement, scale: number, panX: number
+/**
+ * Two ways to put a photo in a 9:16 frame, because one is not enough.
+ *
+ * 'fill' covers the frame and crops the overflow. Right for a phone photo,
+ * wrong for anything wide: a 16:9 screenshot keeps only the middle third of its
+ * width, so a landing page becomes a slice of a headline.
+ *
+ * 'fit' scales the whole image to be visible and fills the space behind it with
+ * a blown-up, blurred copy of itself. That is the standard treatment for
+ * landscape footage in a vertical feed, and it reads as deliberate rather than
+ * as a bad crop.
+ */
+function drawSlide(
+  ctx: CanvasRenderingContext2D, img: HTMLImageElement, mode: Fit, scale: number, panX: number
 ) {
   const ir = img.width / img.height
   const cr = CANVAS_W / CANVAS_H
+
+  const cover = (s: number, pan: number) => {
+    let w: number, h: number
+    if (ir > cr) { h = CANVAS_H * s; w = h * ir }
+    else         { w = CANVAS_W * s; h = w / ir }
+    const x = (CANVAS_W - w) / 2 + pan * (w - CANVAS_W) * 0.5
+    const y = (CANVAS_H - h) / 2
+    ctx.drawImage(img, x, y, w, h)
+  }
+
+  if (mode === 'fill') { cover(scale, panX); return }
+
+  // Backdrop: the same image, oversized and blurred, so the bars are never
+  // dead black. Drawn first, then cleared of the filter for the sharp pass.
+  ctx.save()
+  ctx.filter = 'blur(28px) brightness(0.55) saturate(1.2)'
+  cover(scale * 1.25, panX * 0.35)
+  ctx.restore()
+
+  // Foreground: whole image visible, centred, with the same slow push applied.
   let w: number, h: number
-  if (ir > cr) { h = CANVAS_H * scale; w = h * ir }
-  else         { w = CANVAS_W * scale; h = w / ir }
-  const x = (CANVAS_W - w) / 2 + panX * (w - CANVAS_W) * 0.5
-  const y = (CANVAS_H - h) / 2
-  ctx.drawImage(img, x, y, w, h)
+  if (ir > cr) { w = CANVAS_W * scale; h = w / ir }
+  else         { h = CANVAS_H * scale; w = h * ir }
+  ctx.drawImage(img, (CANVAS_W - w) / 2, (CANVAS_H - h) / 2, w, h)
 }
 
 export default function PhotoComposer({ onComposed, onCancel }: Props) {
@@ -89,12 +119,29 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
     setSlides(prev => {
       const room = MAX_SLIDES - prev.length
       if (room <= 0) { setError(`${MAX_SLIDES} photos is the limit.`); return prev }
-      const next = picked.slice(0, room).map((f, i) => ({
+      const next: Slide[] = picked.slice(0, room).map((f, i) => ({
         id: `${Date.now()}-${i}-${f.name}`,
         url: URL.createObjectURL(f),
         name: f.name,
         seconds: 2.5,
+        // Provisional. Corrected below once the real dimensions are known.
+        fit: 'fill' as Fit,
       }))
+
+      // A wide image cropped to 9:16 loses two thirds of its width, which is
+      // wrong for anything with layout in it — a screenshot, a chart, a
+      // landscape shot. Anything meaningfully wider than tall defaults to fit,
+      // and the creator can still override it per photo.
+      next.forEach(slide => {
+        const probe = new Image()
+        probe.onload = () => {
+          if (probe.width / probe.height > 1.2) {
+            setSlides(cur => cur.map(x => (x.id === slide.id ? { ...x, fit: 'fit' } : x)))
+          }
+        }
+        probe.src = slide.url
+      })
+
       return prev.concat(next)
     })
   }, [])
@@ -196,13 +243,13 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
           const scale = kenBurns ? 1.02 + 0.09 * p : 1.02
           const pan   = kenBurns ? (i % 2 === 0 ? -1 : 1) * (p - 0.5) * 0.4 : 0
           ctx.globalAlpha = 1
-          drawCover(ctx, imgs[i], scale, pan)
+          drawSlide(ctx, imgs[i], slides[i].fit, scale, pan)
 
           // Crossfade into the next still over the tail of this one.
           if (FADE > 0 && i < slides.length - 1 && local > dur - FADE) {
             const a = (local - (dur - FADE)) / FADE
             ctx.globalAlpha = Math.min(Math.max(a, 0), 1)
-            drawCover(ctx, imgs[i + 1], 1.02, 0)
+            drawSlide(ctx, imgs[i + 1], slides[i + 1].fit, 1.02, 0)
             ctx.globalAlpha = 1
           }
 
@@ -268,6 +315,16 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
                     className="flex-1 accent-[#fe2c55]" aria-label={`Seconds for photo ${i + 1}`}
                   />
                   <span className="font-mono text-[10px] tabular-nums text-ink-faint w-8 text-right">{s.seconds}s</span>
+                  <button
+                    onClick={() => setSlides(cur => cur.map((x, k) =>
+                      (k === i ? { ...x, fit: x.fit === 'fill' ? 'fit' : 'fill' } : x)))}
+                    title={s.fit === 'fill'
+                      ? 'Filling the frame and cropping the edges. Click to show the whole image instead.'
+                      : 'Showing the whole image on a blurred backdrop. Click to fill the frame instead.'}
+                    className="shrink-0 font-mono text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded-md border border-edge text-ink-muted hover:text-ink-high hover:border-edge-lit transition-colors"
+                  >
+                    {s.fit === 'fill' ? 'Fill' : 'Fit'}
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col gap-1 shrink-0">
