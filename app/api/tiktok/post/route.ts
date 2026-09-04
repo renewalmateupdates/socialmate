@@ -148,12 +148,12 @@ export async function POST(request: NextRequest) {
 
   // Publish now — call TikTok API via PULL_FROM_URL
   const auth = await getValidAccessToken(user.id)
-  if (!auth) {
+  if (!auth.ok) {
     await getSupabaseAdmin()
       .from('tiktok_posts')
-      .update({ status: 'failed', error_message: 'TikTok account not connected' })
+      .update({ status: 'failed', error_message: auth.message })
       .eq('id', tikPost.id)
-    return NextResponse.json({ error: 'TikTok account not connected' }, { status: 400 })
+    return NextResponse.json({ error: auth.message }, { status: 400 })
   }
 
   const postBody: Record<string, unknown> = {
