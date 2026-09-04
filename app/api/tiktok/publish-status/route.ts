@@ -25,6 +25,9 @@ import { getValidAccessToken } from '@/lib/tiktok-auth'
 // TikTok's documented terminal and in-flight states.
 const TERMINAL_OK   = 'PUBLISH_COMPLETE'
 const TERMINAL_FAIL = 'FAILED'
+// For an inbox upload this is the finish line, not a staging step: the video is
+// sitting in the creator's TikTok drafts waiting for them to open the app.
+const TERMINAL_INBOX = 'SEND_TO_USER_INBOX'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
   if (!row) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
 
   // Already settled — no reason to ask TikTok again.
-  if (row.status === 'published' || row.status === 'failed') {
+  if (row.status === 'published' || row.status === 'failed' || row.status === 'in_drafts') {
     return NextResponse.json({ status: row.status, settled: true })
   }
 
@@ -122,7 +125,15 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  // Still processing (PROCESSING_UPLOAD, PROCESSING_DOWNLOAD, SEND_TO_USER_INBOX).
+  if (tikTokStatus === TERMINAL_INBOX) {
+    await getSupabaseAdmin()
+      .from('tiktok_posts')
+      .update({ status: 'in_drafts', error_message: null })
+      .eq('id', row.id)
+    return NextResponse.json({ status: 'in_drafts', settled: true })
+  }
+
+  // Still processing (PROCESSING_UPLOAD, PROCESSING_DOWNLOAD).
   return NextResponse.json({
     status: 'publishing',
     settled: false,
