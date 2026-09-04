@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   if (!video_size) return NextResponse.json({ error: 'video_size required' }, { status: 400 })
 
   const auth = await getValidAccessToken(user.id)
-  if (!auth) return NextResponse.json({ error: 'TikTok account not connected' }, { status: 400 })
+  if (!auth.ok) return NextResponse.json({ error: auth.message }, { status: 400 })
 
   const hashtagStr = (hashtags as string[]).map((t: string) => `#${t.replace(/^#/, '')}`).join(' ')
   const fullCaption = [post_caption, hashtagStr].filter(Boolean).join('\n\n').slice(0, 2200)

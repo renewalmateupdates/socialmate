@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
   }
 
   const auth = await getValidAccessToken(user.id)
-  if (!auth) return NextResponse.json({ error: 'TikTok account not connected' }, { status: 400 })
+  if (!auth.ok) return NextResponse.json({ error: auth.message }, { status: 400 })
 
   const res = await fetch('https://open.tiktokapis.com/v2/post/publish/status/fetch/', {
     method: 'POST',
