@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import FilmstripTimeline from '@/components/tiktok/FilmstripTimeline'
+import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -115,10 +117,10 @@ function PostSettingsPanel({
 
         {/* Caption */}
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">
+          <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">
             Post Caption
           </label>
-          <p className="text-xs text-gray-600 mb-2">
+          <p className="text-xs text-ink-faint mb-2">
             This is the description shown on your TikTok post — separate from any video overlay text.
           </p>
           <textarea
@@ -126,10 +128,10 @@ function PostSettingsPanel({
             onChange={e => setPostCaption(e.target.value.slice(0, 2200))}
             placeholder="Describe your video…"
             rows={5}
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 resize-none focus:border-[#fe2c55] outline-none transition-colors"
+            className="w-full bg-panel border border-edge rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-ink-faint resize-none focus:border-[#fe2c55] outline-none transition-colors"
           />
           <div className="flex items-center justify-between mt-1">
-            <p className="text-xs text-gray-600">{charCount} / 2200</p>
+            <p className="text-xs text-ink-faint">{charCount} / 2200</p>
             {charCount > 1800 && (
               <p className="text-xs text-amber-500">{2200 - charCount} chars left</p>
             )}
@@ -139,7 +141,7 @@ function PostSettingsPanel({
         {/* Hashtags */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Hashtags</label>
+            <label className="text-xs font-bold text-ink-muted uppercase tracking-wider">Hashtags</label>
             <button
               onClick={suggestHashtags}
               disabled={!postCaption || aiHashtagLoading}
@@ -163,7 +165,7 @@ function PostSettingsPanel({
                 }
               }}
               placeholder="#fyp · press Enter to add"
-              className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:border-[#fe2c55] outline-none transition-colors"
+              className="flex-1 bg-panel border border-edge rounded-xl px-3 py-2 text-xs text-white placeholder:text-ink-faint focus:border-[#fe2c55] outline-none transition-colors"
             />
           </div>
           {hashtags.length > 0 && (
@@ -171,12 +173,12 @@ function PostSettingsPanel({
               {hashtags.map(tag => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 px-2 py-1 bg-gray-800 border border-gray-700 rounded-xl text-xs text-gray-200"
+                  className="flex items-center gap-1 px-2 py-1 bg-raised border border-edge rounded-xl text-xs text-ink-high"
                 >
                   #{tag}
                   <button
                     onClick={() => setHashtags(prev => prev.filter(t => t !== tag))}
-                    className="text-gray-500 hover:text-red-400 leading-none transition-colors"
+                    className="text-ink-muted hover:text-red-400 leading-none transition-colors"
                   >
                     ×
                   </button>
@@ -197,7 +199,7 @@ function PostSettingsPanel({
 
         {/* Privacy */}
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Privacy</label>
+          <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">Privacy</label>
           <div className="grid grid-cols-3 gap-1.5">
             {PRIVACY_OPTIONS.map(opt => (
               <button
@@ -206,7 +208,7 @@ function PostSettingsPanel({
                 className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all ${
                   privacyLevel === opt.value
                     ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
-                    : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                    : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
                 }`}
               >
                 {opt.label}
@@ -217,7 +219,7 @@ function PostSettingsPanel({
 
         {/* Interaction toggles */}
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Interactions</label>
+          <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">Interactions</label>
           <div className="space-y-2">
             {[
               { key: 'duet',    label: 'Disable Duets',    val: disableDuet,    set: setDisableDuet },
@@ -225,10 +227,10 @@ function PostSettingsPanel({
               { key: 'comment', label: 'Disable Comments', val: disableComment, set: setDisableComment },
             ].map(({ key, label, val, set }) => (
               <label key={key} className="flex items-center justify-between cursor-pointer group">
-                <span className="text-xs text-gray-400 group-hover:text-gray-200 transition-colors">{label}</span>
+                <span className="text-xs text-ink-muted group-hover:text-ink-high transition-colors">{label}</span>
                 <button
                   onClick={() => set(!val)}
-                  className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${val ? 'bg-[#fe2c55]' : 'bg-gray-700 hover:bg-gray-600'}`}
+                  className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${val ? 'bg-[#fe2c55]' : 'bg-raised hover:bg-raised'}`}
                 >
                   <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${val ? 'translate-x-4' : 'translate-x-0.5'}`} />
                 </button>
@@ -239,7 +241,7 @@ function PostSettingsPanel({
 
         {/* Schedule */}
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">When to Post</label>
+          <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">When to Post</label>
           <div className="flex gap-2 mb-2">
             {(['now', 'schedule'] as const).map(m => (
               <button
@@ -248,7 +250,7 @@ function PostSettingsPanel({
                 className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
                   scheduleMode === m
                     ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
-                    : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                    : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
                 }`}
               >
                 {m === 'now' ? '⚡ Post Now' : '📅 Schedule'}
@@ -261,14 +263,14 @@ function PostSettingsPanel({
               value={scheduledAt}
               onChange={e => setScheduledAt(e.target.value)}
               min={new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16)}
-              className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors"
+              className="w-full bg-panel border border-edge rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors"
             />
           )}
         </div>
       </div>
 
       {/* CTA */}
-      <div className="pt-4 mt-4 border-t border-gray-800 space-y-2">
+      <div className="pt-4 mt-4 border-t border-edge space-y-2">
         {postError && (
           <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 rounded-xl">
             <span className="text-red-400 text-xs mt-0.5">⚠️</span>
@@ -288,7 +290,7 @@ function PostSettingsPanel({
             ? '📅 Schedule Video'
             : '🚀 Post to TikTok'}
         </button>
-        <p className="text-xs text-gray-600 text-center">
+        <p className="text-xs text-ink-faint text-center">
           {uploading
             ? 'Uploading your video directly to TikTok…'
             : 'Your original video will be uploaded via TikTok\'s Content Posting API.'}
@@ -318,6 +320,11 @@ export default function TikTokStudioClient() {
   const [trimStart, setTrimStart]         = useState(0)
   const [trimEnd, setTrimEnd]             = useState(0)
   const [volume, setVolume]               = useState(100)
+  // Frames come back from the timeline once, and the cover picker reuses them
+  // rather than decoding the video a second time.
+  const [frames, setFrames]               = useState<{ time: number; url: string }[]>([])
+  const [coverTime, setCoverTime]         = useState<number | null>(null)
+  const [showSafeArea, setShowSafeArea]   = useState(false)
 
   // Edit state
   const [activeFilter, setActiveFilter]         = useState('None')
@@ -438,6 +445,52 @@ export default function TikTokStudioClient() {
       setIsPlaying(true)
     }
   }, [isPlaying, trimStart, trimEnd])
+
+  const seekTo = useCallback((t: number) => {
+    const v = videoRef.current
+    if (!v) return
+    v.currentTime = t
+    setCurrentTime(t)
+  }, [])
+
+  // ── Keyboard ────────────────────────────────────────────────────────────────
+  // The shortcuts every editor shares. Someone who has used one before will try
+  // space and the arrow keys within the first ten seconds, and having them do
+  // nothing is what makes a tool feel like a form instead of an instrument.
+  useEffect(() => {
+    if (!videoUrl) return
+    const onKey = (e: KeyboardEvent) => {
+      // Never steal a key from someone typing a caption.
+      const el = e.target as HTMLElement | null
+      const tag = el?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
+      const v = videoRef.current
+      if (!v) return
+      const step = e.shiftKey ? 1 : 1 / 30
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault(); togglePlay(); break
+        case 'ArrowLeft':
+          e.preventDefault(); seekTo(Math.max(trimStart, v.currentTime - step)); break
+        case 'ArrowRight':
+          e.preventDefault(); seekTo(Math.min(trimEnd, v.currentTime + step)); break
+        case 'Home':
+          e.preventDefault(); seekTo(trimStart); break
+        case 'End':
+          e.preventDefault(); seekTo(trimEnd); break
+        case 'i': case 'I':
+          e.preventDefault(); setTrimStart(Math.min(v.currentTime, trimEnd - MIN_DURATION_S)); break
+        case 'o': case 'O':
+          e.preventDefault(); setTrimEnd(Math.max(v.currentTime, trimStart + MIN_DURATION_S)); break
+        default: break
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [videoUrl, togglePlay, seekTo, trimStart, trimEnd])
 
   // ── Canvas frame renderer ───────────────────────────────────────────────────
 
@@ -591,6 +644,10 @@ export default function TikTokStudioClient() {
           disable_comment: disableComment,
           disable_stitch:  disableStitch,
           sound_id:        selectedSound?.id || null,
+          // Relative to the trimmed clip, which is what gets uploaded — not to
+          // the original file the creator dropped in.
+          video_cover_timestamp_ms:
+            coverTime === null ? 0 : Math.max(0, Math.round((coverTime - trimStart) * 1000)),
         }),
       })
       const initData = await initRes.json()
@@ -684,10 +741,10 @@ export default function TikTokStudioClient() {
 
   if (creatorLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+      <div className="min-h-screen flex items-center justify-center bg-void">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-[#fe2c55] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-400">Checking TikTok connection…</p>
+          <p className="text-sm text-ink-muted">Checking TikTok connection…</p>
         </div>
       </div>
     )
@@ -695,7 +752,7 @@ export default function TikTokStudioClient() {
 
   if (!creator?.connected) {
     return (
-      <div className="min-h-dvh bg-gray-950 flex">
+      <div className="min-h-dvh bg-void flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
@@ -703,7 +760,7 @@ export default function TikTokStudioClient() {
               🎵
             </div>
             <h1 className="text-2xl font-extrabold text-white mb-2">TikTok Studio</h1>
-            <p className="text-gray-400 mb-8 text-sm leading-relaxed">
+            <p className="text-ink-muted mb-8 text-sm leading-relaxed">
               Connect your TikTok account to edit, trim, and publish videos directly from SocialMate.
             </p>
             <a
@@ -712,7 +769,7 @@ export default function TikTokStudioClient() {
             >
               Connect TikTok →
             </a>
-            <p className="text-xs text-gray-600 mt-4">
+            <p className="text-xs text-ink-faint mt-4">
               Uses TikTok Login Kit + Content Posting API. Your credentials are never stored in plain text.
             </p>
           </div>
@@ -723,7 +780,7 @@ export default function TikTokStudioClient() {
 
   if (postSuccess) {
     return (
-      <div className="min-h-dvh bg-gray-950 flex">
+      <div className="min-h-dvh bg-void flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
@@ -733,7 +790,7 @@ export default function TikTokStudioClient() {
             <h2 className="text-2xl font-extrabold text-white mb-2">
               {scheduleMode === 'schedule' ? 'Video Scheduled!' : 'Video Posted to TikTok!'}
             </h2>
-            <p className="text-gray-400 mb-8 text-sm leading-relaxed">
+            <p className="text-ink-muted mb-8 text-sm leading-relaxed">
               {scheduleMode === 'schedule'
                 ? `Your video will go live on ${new Date(scheduledAt).toLocaleString()}.`
                 : 'Your video is live on TikTok. It may take a minute to appear.'}
@@ -752,7 +809,7 @@ export default function TikTokStudioClient() {
               >
                 Create Another
               </button>
-              <Link href="/dashboard" className="bg-gray-800 text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-gray-700 transition-all">
+              <Link href="/dashboard" className="bg-raised text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-raised transition-all">
                 Dashboard
               </Link>
             </div>
@@ -774,14 +831,14 @@ export default function TikTokStudioClient() {
   // ── Main studio layout ──────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-dvh bg-gray-950 flex">
+    <div className="min-h-dvh bg-void flex">
       <Sidebar />
       {UploadProgressBanner}
 
       <div className="md:ml-56 flex-1 flex flex-col">
 
         {/* ── Header ── */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-6 py-3 bg-gray-950/95 backdrop-blur border-b border-gray-800/80">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-6 py-3 bg-void/95 backdrop-blur border-b border-edge/80">
           <div className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0"
@@ -795,12 +852,12 @@ export default function TikTokStudioClient() {
           <div className="flex items-center gap-2 md:gap-3">
             {creator.avatar_url && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full ring-2 ring-gray-700" />
+              <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full ring-2 ring-edge" />
             )}
-            <span className="text-xs text-gray-400 hidden sm:block">{creator.account_name}</span>
+            <span className="text-xs text-ink-muted hidden sm:block">{creator.account_name}</span>
             <button
               onClick={() => fetch('/api/tiktok/disconnect', { method: 'POST' }).then(() => setCreator({ connected: false }))}
-              className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+              className="text-xs text-ink-faint hover:text-ink-muted transition-colors"
             >
               Disconnect
             </button>
@@ -810,7 +867,7 @@ export default function TikTokStudioClient() {
         <div className="flex flex-1 overflow-hidden">
 
           {/* ── LEFT: Video editor ── */}
-          <div className="flex flex-col flex-1 min-w-0 border-r border-gray-800/80">
+          <div className="flex flex-col flex-1 min-w-0 border-r border-edge/80">
 
             {/* Canvas / upload zone */}
             <div className="flex-1 flex items-center justify-center bg-black/50 p-4 md:p-6">
@@ -824,7 +881,7 @@ export default function TikTokStudioClient() {
                     w-56 md:w-64 aspect-[9/16] flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all
                     ${dragOver
                       ? 'border-[#fe2c55] bg-[#fe2c55]/10 scale-[1.02]'
-                      : 'border-gray-700 hover:border-gray-500 hover:bg-gray-900/30 bg-gray-900/20'}
+                      : 'border-edge hover:border-edge-lit hover:bg-panel/30 bg-panel/20'}
                   `}
                 >
                   <div className="text-4xl">{dragOver ? '📥' : '📱'}</div>
@@ -832,8 +889,8 @@ export default function TikTokStudioClient() {
                     <p className="text-sm font-bold text-white">
                       {dragOver ? 'Drop it here!' : 'Drop your video here'}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">MP4 or MOV · Max 500 MB</p>
-                    <p className="text-xs text-gray-600 mt-0.5">3 sec – 10 min · 9:16 vertical</p>
+                    <p className="text-xs text-ink-muted mt-1">MP4 or MOV · Max 500 MB</p>
+                    <p className="text-xs text-ink-faint mt-0.5">3 sec – 10 min · 9:16 vertical</p>
                   </div>
                   <button className="text-xs bg-[#fe2c55] text-white font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#fe2c55]/20">
                     Browse files
@@ -853,7 +910,7 @@ export default function TikTokStudioClient() {
                 <div className="relative" style={{ height: '65vh' }}>
                   {/* 9:16 phone frame */}
                   <div
-                    className="relative overflow-hidden rounded-[28px] border border-gray-600/60 shadow-2xl shadow-black/60 ring-1 ring-white/5"
+                    className="relative overflow-hidden rounded-[28px] border border-edge-lit/60 shadow-2xl shadow-black/60 ring-1 ring-white/5"
                     style={{
                       width:  'calc(65vh * 9 / 16)',
                       height: '65vh',
@@ -906,6 +963,8 @@ export default function TikTokStudioClient() {
                         </span>
                       </div>
                     )}
+                    <SafeAreaOverlay show={showSafeArea} />
+
                     {/* Active filter badge */}
                     {activeFilter !== 'None' && (
                       <div className="absolute top-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-full text-xs text-white font-semibold">
@@ -915,12 +974,25 @@ export default function TikTokStudioClient() {
                   </div>
 
                   {/* Change video button */}
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute top-2 right-2 text-xs bg-gray-900/90 text-gray-300 px-3 py-1.5 rounded-xl hover:bg-gray-800 border border-gray-700 transition-all backdrop-blur-sm"
-                  >
-                    Change
-                  </button>
+                  <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                    <button
+                      onClick={() => setShowSafeArea(v => !v)}
+                      title="Show where TikTok's own buttons and caption cover your video"
+                      className={`font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-xl border backdrop-blur-sm transition-colors ${
+                        showSafeArea
+                          ? 'bg-[#fe2c55]/20 border-[#fe2c55]/50 text-[#fe2c55]'
+                          : 'bg-void/80 border-edge text-ink-muted hover:text-ink-high'
+                      }`}
+                    >
+                      Guides
+                    </button>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="font-mono text-[10px] uppercase tracking-[0.14em] bg-void/80 text-ink-muted px-2.5 py-1.5 rounded-xl hover:text-ink-high border border-edge transition-colors backdrop-blur-sm"
+                    >
+                      Change
+                    </button>
+                  </div>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -932,63 +1004,102 @@ export default function TikTokStudioClient() {
               )}
             </div>
 
-            {/* Timeline + trim controls */}
+            {/* Timeline */}
             {videoUrl && (
-              <div className="px-4 md:px-6 py-4 border-t border-gray-800/80 space-y-3 bg-gray-950/50">
-                <div className="flex items-center justify-between text-xs text-gray-400">
-                  <span className="font-mono">{formatTime(currentTime)}</span>
-                  <span className="text-gray-600 text-[10px]">
-                    {formatTime(trimStart)} → {formatTime(trimEnd)} · {formatTime(trimEnd - trimStart)}
-                  </span>
-                  <span className="font-mono">{formatTime(videoDuration)}</span>
-                </div>
-                {/* Progress/trim bar */}
-                <div className="relative h-2.5 bg-gray-800 rounded-full">
-                  <div
-                    className="absolute h-full bg-[#fe2c55]/25 rounded-full"
-                    style={{
-                      left:  `${(trimStart / videoDuration) * 100}%`,
-                      width: `${((trimEnd - trimStart) / videoDuration) * 100}%`,
-                    }}
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-1 h-4 bg-white rounded-full shadow-sm"
-                    style={{ left: `${(currentTime / videoDuration) * 100}%` }}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[10px] text-gray-500 block mb-1 uppercase tracking-wider">Trim Start</label>
-                    <input
-                      type="range" min={0} max={trimEnd - MIN_DURATION_S} step={0.1}
-                      value={trimStart}
-                      onChange={e => {
-                        const v = parseFloat(e.target.value)
-                        setTrimStart(v)
-                        if (videoRef.current) videoRef.current.currentTime = v
-                      }}
-                      className="w-full accent-[#fe2c55]"
-                    />
+              <div className="px-4 md:px-6 py-4 border-t border-edge space-y-3 bg-panel/60">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-mono text-xs tabular-nums text-ink-high">{formatTime(currentTime)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setTrimStart(Math.min(currentTime, trimEnd - MIN_DURATION_S))}
+                      title="Set clip start to the playhead (I)"
+                      className="font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-lg border border-edge text-ink-muted hover:text-ink-high hover:border-edge-lit transition-colors"
+                    >
+                      Set in
+                    </button>
+                    <button
+                      onClick={() => setTrimEnd(Math.max(currentTime, trimStart + MIN_DURATION_S))}
+                      title="Set clip end to the playhead (O)"
+                      className="font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-lg border border-edge text-ink-muted hover:text-ink-high hover:border-edge-lit transition-colors"
+                    >
+                      Set out
+                    </button>
                   </div>
-                  <div>
-                    <label className="text-[10px] text-gray-500 block mb-1 uppercase tracking-wider">Trim End</label>
-                    <input
-                      type="range" min={trimStart + MIN_DURATION_S} max={videoDuration} step={0.1}
-                      value={trimEnd}
-                      onChange={e => setTrimEnd(parseFloat(e.target.value))}
-                      className="w-full accent-[#fe2c55]"
-                    />
-                  </div>
+                  <span className="font-mono text-xs tabular-nums text-ink-faint">{formatTime(videoDuration)}</span>
                 </div>
+
+                <FilmstripTimeline
+                  videoUrl={videoUrl}
+                  duration={videoDuration}
+                  currentTime={currentTime}
+                  trimStart={trimStart}
+                  trimEnd={trimEnd}
+                  minDuration={MIN_DURATION_S}
+                  onSeek={seekTo}
+                  onTrimChange={(a, b) => { setTrimStart(a); setTrimEnd(b) }}
+                  onFramesReady={setFrames}
+                />
+
+                <p className="font-mono text-[10px] tracking-[0.1em] text-ink-faint text-center">
+                  space play &middot; &larr; &rarr; step &middot; shift+&larr;&rarr; second &middot; I / O trim to playhead
+                </p>
+
+                {/* Cover frame. TikTok takes a timestamp for the thumbnail and
+                    we were always sending 0, so every video was represented in
+                    the feed by its literal first frame — usually black. */}
+                {frames.length > 0 && (
+                  <div className="pt-3 border-t border-edge">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+                        Cover frame
+                      </span>
+                      {coverTime !== null && (
+                        <button
+                          onClick={() => setCoverTime(null)}
+                          className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted hover:text-ink-high transition-colors"
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-1.5 overflow-x-auto pb-1">
+                      {(() => {
+                        const inClip = frames.filter(f => f.time >= trimStart && f.time <= trimEnd)
+                        const choices = inClip.length > 0 ? inClip : frames
+                        return choices.map(f => {
+                          const active = coverTime !== null && Math.abs(coverTime - f.time) < 0.01
+                          return (
+                            <button
+                              key={f.time}
+                              onClick={() => { setCoverTime(f.time); seekTo(f.time) }}
+                              title={`Use the frame at ${formatTime(f.time)}`}
+                              className={`shrink-0 rounded-md overflow-hidden border-2 transition-all ${
+                                active ? 'border-amber scale-105' : 'border-transparent hover:border-edge-lit opacity-70 hover:opacity-100'
+                              }`}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={f.url} alt="" className="h-14 w-8 object-cover" draggable={false} />
+                            </button>
+                          )
+                        })
+                      })()}
+                    </div>
+                    <p className="mt-1.5 font-mono text-[10px] tracking-[0.1em] text-ink-faint">
+                      {coverTime === null
+                        ? 'Using the first frame. Pick one that is not black.'
+                        : `Cover set to ${formatTime(coverTime)}`}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Tool tabs */}
             {videoUrl && (
-              <div className="border-t border-gray-800/80">
+              <div className="border-t border-edge/80">
 
                 {/* Tab bar — pill style */}
-                <div className="flex gap-1 p-2 bg-gray-900/60">
+                <div className="flex gap-1 p-2 bg-panel/60">
                   {(['filters', 'captions', 'audio', 'post'] as const).map(tab => {
                     const icons: Record<string, string> = {
                       filters:  '🎨',
@@ -1010,7 +1121,7 @@ export default function TikTokStudioClient() {
                         className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold transition-all ${
                           isActive
                             ? 'bg-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
-                            : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/50'
+                            : 'text-ink-muted hover:text-ink-body hover:bg-raised/50'
                         }`}
                       >
                         <span>{icons[tab]}</span>
@@ -1035,7 +1146,7 @@ export default function TikTokStudioClient() {
                             className={`relative flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl text-xs font-semibold border transition-all ${
                               isActive
                                 ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/25'
-                                : 'bg-gray-900 border-gray-700/50 text-gray-400 hover:border-gray-500 hover:text-gray-200 hover:bg-gray-800'
+                                : 'bg-panel border-edge/50 text-ink-muted hover:border-edge-lit hover:text-ink-high hover:bg-raised'
                             }`}
                           >
                             {f === 'None' && <span className="text-base">⊘</span>}
@@ -1068,23 +1179,23 @@ export default function TikTokStudioClient() {
                   {toolTab === 'captions' && (
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">
+                        <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-1.5">
                           Overlay Text
-                          <span className="ml-1.5 text-[10px] font-normal text-gray-600 normal-case">(burned into video visually)</span>
+                          <span className="ml-1.5 text-[10px] font-normal text-ink-faint normal-case">(burned into video visually)</span>
                         </label>
                         <textarea
                           value={captionOverlay}
                           onChange={e => setCaptionOverlay(e.target.value)}
                           placeholder="Text shown on your video…"
                           rows={2}
-                          className="w-full bg-gray-900 border border-gray-700/60 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 resize-none focus:border-[#fe2c55] outline-none transition-colors"
+                          className="w-full bg-panel border border-edge/60 rounded-xl px-3 py-2 text-sm text-white placeholder:text-ink-faint resize-none focus:border-[#fe2c55] outline-none transition-colors"
                         />
-                        <p className="text-[10px] text-gray-600 mt-1">
+                        <p className="text-[10px] text-ink-faint mt-1">
                           This appears as a visual overlay on your video preview. The post description is set in the Post tab.
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2 items-center">
-                        <span className="text-xs text-gray-500">Position:</span>
+                        <span className="text-xs text-ink-muted">Position:</span>
                         {(['top', 'center', 'bottom'] as const).map(pos => (
                           <button
                             key={pos}
@@ -1092,33 +1203,33 @@ export default function TikTokStudioClient() {
                             className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all capitalize ${
                               captionPosition === pos
                                 ? 'bg-[#fe2c55] border-[#fe2c55] text-white'
-                                : 'bg-gray-800 border-gray-700/50 text-gray-300 hover:border-gray-500'
+                                : 'bg-raised border-edge/50 text-ink-body hover:border-edge-lit'
                             }`}
                           >
                             {pos}
                           </button>
                         ))}
-                        <span className="text-xs text-gray-500 ml-1">Color:</span>
+                        <span className="text-xs text-ink-muted ml-1">Color:</span>
                         {CAPTION_COLORS.map(c => (
                           <button
                             key={c}
                             onClick={() => setCaptionColor(c)}
                             className={`w-7 h-7 rounded-full border-2 transition-all ${
-                              captionColor === c ? 'border-white scale-110 shadow-sm' : 'border-gray-600 hover:border-gray-400'
+                              captionColor === c ? 'border-white scale-110 shadow-sm' : 'border-edge-lit hover:border-edge-lit'
                             }`}
                             style={{ background: c }}
                           />
                         ))}
                       </div>
                       <div className="flex items-center gap-3">
-                        <label className="text-xs text-gray-400 shrink-0">Size: {captionFontSize}px</label>
+                        <label className="text-xs text-ink-muted shrink-0">Size: {captionFontSize}px</label>
                         <input
                           type="range" min={20} max={56} step={2}
                           value={captionFontSize}
                           onChange={e => setCaptionFontSize(parseInt(e.target.value))}
                           className="flex-1 accent-[#fe2c55]"
                         />
-                        <label className="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer shrink-0">
+                        <label className="flex items-center gap-1.5 text-xs text-ink-muted cursor-pointer shrink-0">
                           <input
                             type="checkbox"
                             checked={captionBg}
@@ -1150,7 +1261,7 @@ export default function TikTokStudioClient() {
 
                       {/* Volume control */}
                       <div>
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">
+                        <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">
                           Video Audio Volume
                         </label>
                         <div className="flex items-center gap-3">
@@ -1162,36 +1273,36 @@ export default function TikTokStudioClient() {
                             className="flex-1 accent-[#fe2c55]"
                           />
                           <span className="text-sm">🔊</span>
-                          <span className="text-xs text-gray-400 w-8 text-right font-mono">{volume}%</span>
+                          <span className="text-xs text-ink-muted w-8 text-right font-mono">{volume}%</span>
                         </div>
-                        <p className="text-[10px] text-gray-600 mt-1">
+                        <p className="text-[10px] text-ink-faint mt-1">
                           Preview only — TikTok uses the audio embedded in your uploaded video file.
                         </p>
                       </div>
 
                       {/* Tip */}
-                      <div className="flex gap-2 p-2.5 bg-gray-900/60 border border-gray-700/40 rounded-xl">
+                      <div className="flex gap-2 p-2.5 bg-panel/60 border border-edge/40 rounded-xl">
                         <span className="text-xs shrink-0">💡</span>
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                          <span className="font-semibold text-gray-300">Pro tip:</span> Record your video to a song playing in the background for built-in audio sync, then use TikTok&apos;s &quot;Add Sound&quot; feature after publishing to officially credit the track.
+                        <p className="text-xs text-ink-muted leading-relaxed">
+                          <span className="font-semibold text-ink-body">Pro tip:</span> Record your video to a song playing in the background for built-in audio sync, then use TikTok&apos;s &quot;Add Sound&quot; feature after publishing to officially credit the track.
                         </p>
                       </div>
 
                       {/* Sound search (kept for future use / shows "Original audio" fallback) */}
                       <div>
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Sound Library</label>
+                        <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">Sound Library</label>
                         <div className="flex gap-2">
                           <input
                             value={soundQuery}
                             onChange={e => setSoundQuery(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && searchSounds(soundQuery)}
                             placeholder="Search sounds…"
-                            className="flex-1 bg-gray-900 border border-gray-700/60 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-[#fe2c55] outline-none transition-colors"
+                            className="flex-1 bg-panel border border-edge/60 rounded-xl px-3 py-2 text-sm text-white placeholder:text-ink-faint focus:border-[#fe2c55] outline-none transition-colors"
                           />
                           <button
                             onClick={() => searchSounds(soundQuery)}
                             disabled={soundLoading}
-                            className="px-3 py-2 bg-gray-800 border border-gray-700/60 rounded-xl text-xs text-gray-300 hover:bg-gray-700 disabled:opacity-50 transition-all"
+                            className="px-3 py-2 bg-raised border border-edge/60 rounded-xl text-xs text-ink-body hover:bg-raised disabled:opacity-50 transition-all"
                           >
                             {soundLoading ? <span className="animate-spin inline-block">⏳</span> : '🔍'}
                           </button>
@@ -1208,16 +1319,16 @@ export default function TikTokStudioClient() {
                                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs transition-all ${
                                   selectedSound?.id === s.id
                                     ? 'bg-[#fe2c55]/20 border border-[#fe2c55]/40 text-white'
-                                    : 'bg-gray-900 border border-gray-800/60 text-gray-300 hover:border-gray-600'
+                                    : 'bg-panel border border-edge/60 text-ink-body hover:border-edge-lit'
                                 }`}
                               >
                                 <span className="text-base">{s.is_original ? '🎙️' : '🎵'}</span>
                                 <div className="flex-1 min-w-0">
                                   <p className="font-semibold truncate">{s.name}</p>
-                                  {s.artist && <p className="text-gray-500 truncate">{s.artist}</p>}
+                                  {s.artist && <p className="text-ink-muted truncate">{s.artist}</p>}
                                 </div>
                                 {s.duration > 0 && (
-                                  <span className="text-gray-500 shrink-0 font-mono">{formatTime(s.duration)}</span>
+                                  <span className="text-ink-muted shrink-0 font-mono">{formatTime(s.duration)}</span>
                                 )}
                               </button>
                             ))}
@@ -1238,7 +1349,7 @@ export default function TikTokStudioClient() {
           </div>
 
           {/* ── RIGHT: Post settings panel (desktop only) ── */}
-          <div className="w-80 xl:w-96 flex-col bg-gray-950 overflow-y-auto hidden lg:flex border-l border-gray-800/40">
+          <div className="w-80 xl:w-96 flex-col bg-void overflow-y-auto hidden lg:flex border-l border-edge/40">
             <div className="flex-1 p-5">
               <PostSettingsPanel {...postPanelProps} />
             </div>
