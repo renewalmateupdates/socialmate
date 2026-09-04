@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import FilmstripTimeline from '@/components/tiktok/FilmstripTimeline'
 import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
+import PhotoComposer from '@/components/tiktok/PhotoComposer'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -325,6 +326,9 @@ export default function TikTokStudioClient() {
   const [frames, setFrames]               = useState<{ time: number; url: string }[]>([])
   const [coverTime, setCoverTime]         = useState<number | null>(null)
   const [showSafeArea, setShowSafeArea]   = useState(false)
+  // "Browse files" assumed the creator already had a finished video, which is
+  // the one thing a studio should not assume.
+  const [composerOpen, setComposerOpen]   = useState(false)
 
   // Edit state
   const [activeFilter, setActiveFilter]         = useState('None')
@@ -1103,6 +1107,15 @@ export default function TikTokStudioClient() {
             {/* Canvas / upload zone */}
             <div className="flex-1 flex items-center justify-center bg-black/50 p-4 md:p-6">
               {!videoUrl ? (
+                composerOpen ? (
+                <PhotoComposer
+                  onCancel={() => setComposerOpen(false)}
+                  // A composed video is handed to the same handler an uploaded
+                  // one goes through, so it gets the same validation and the
+                  // whole editor works on it without knowing where it came from.
+                  onComposed={file => { setComposerOpen(false); handleFile(file) }}
+                />
+                ) : (
                 <div
                   onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                   onDragLeave={() => setDragOver(false)}
@@ -1149,9 +1162,17 @@ export default function TikTokStudioClient() {
                       </p>
                     </div>
 
-                    <button className="bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
-                      Browse files
-                    </button>
+                    <div className="flex flex-col items-center gap-3">
+                      <button className="bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
+                        Browse files
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); setComposerOpen(true) }}
+                        className="text-xs font-semibold text-ink-muted hover:text-ink-high underline underline-offset-4 decoration-edge-lit transition-colors"
+                      >
+                        or build one from photos
+                      </button>
+                    </div>
 
                     {/* What this does, said before they commit a 500 MB upload. */}
                     <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 max-w-md">
@@ -1179,6 +1200,7 @@ export default function TikTokStudioClient() {
                     onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
                   />
                 </div>
+                )
               ) : (
                 <div className="relative" style={{ height: '65vh' }}>
                   {/* 9:16 phone frame */}
