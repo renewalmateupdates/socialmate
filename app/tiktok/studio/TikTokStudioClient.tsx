@@ -397,6 +397,32 @@ export default function TikTokStudioClient() {
   const [publishState, setPublishState] = useState<'idle' | 'checking' | 'live' | 'drafted' | 'rejected' | 'unknown'>('idle')
   const [publishReason, setPublishReason] = useState<string | null>(null)
 
+  // A composed video lives only in this tab. It is a File in memory with an
+  // object URL — never uploaded, never written to storage — so a reload or a
+  // close destroys it with no way to get it back. Fifteen minutes of building a
+  // photo video was lost exactly this way.
+  //
+  // This catches reload and close. It cannot catch an in-app Link, which is why
+  // the Save a copy control below exists as the real answer.
+  useEffect(() => {
+    if (!videoFile || postSuccess) return
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [videoFile, postSuccess])
+
+  // Hand the creator the actual file. Once it is on disk it survives anything,
+  // and Browse files takes it straight back.
+  const saveCopy = useCallback(() => {
+    if (!videoFile) return
+    const url = URL.createObjectURL(videoFile)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = videoFile.name || `socialmate-tiktok-${Date.now()}.mp4`
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  }, [videoFile])
+
   // Refs
   const videoRef    = useRef<HTMLVideoElement>(null)
   const canvasRef   = useRef<HTMLCanvasElement>(null)
@@ -1112,6 +1138,15 @@ export default function TikTokStudioClient() {
             </div>
             <span className="font-extrabold text-white tracking-tight text-sm md:text-base">TikTok Studio</span>
             <span className="text-xs bg-green-500/15 text-green-400 font-bold px-2 py-0.5 rounded-full border border-green-500/20">LIVE</span>
+            {videoFile && !postSuccess && (
+              <button
+                onClick={saveCopy}
+                title="This video only exists in this tab. Save it so navigating away cannot lose it."
+                className="ml-1 font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1 rounded-lg border border-edge text-ink-muted hover:text-ink-high hover:border-edge-lit transition-colors"
+              >
+                Save a copy
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2 md:gap-3">
             {creator.avatar_url && (
