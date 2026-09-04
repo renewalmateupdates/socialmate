@@ -362,6 +362,10 @@ export default function TikTokStudioClient() {
   const [posting, setPosting]       = useState(false)
   const [postError, setPostError]   = useState<string | null>(null)
   const [postSuccess, setPostSuccess] = useState(false)
+  // TikTok processes asynchronously, so "uploaded" is not "published". Until
+  // this settles we are still waiting on their answer, not on ourselves.
+  const [publishState, setPublishState] = useState<'idle' | 'checking' | 'live' | 'rejected' | 'unknown'>('idle')
+  const [publishReason, setPublishReason] = useState<string | null>(null)
 
   // Refs
   const videoRef    = useRef<HTMLVideoElement>(null)
@@ -702,6 +706,38 @@ export default function TikTokStudioClient() {
       if (!confirmRes.ok) throw new Error(confirmData.error || 'Failed to save post record')
 
       setPostSuccess(true)
+
+      // Uploading the bytes is not publishing. TikTok returns 200 for the
+      // transfer and then decides separately whether the video is acceptable —
+      // length, format, copyrighted audio, and so on. Nothing used to ask, so
+      // the studio claimed success for videos TikTok silently rejected.
+      //
+      // Scheduled posts are not polled: nothing has been sent to TikTok yet.
+      if (scheduleMode !== 'schedule' && publish_id) {
+        setPublishState('checking')
+        const started = Date.now()
+        const poll = async (): Promise<void> => {
+          // Two minutes is well past normal processing. Beyond that, saying we
+          // do not know yet is honest; claiming success is not.
+          if (Date.now() - started > 120_000) { setPublishState('unknown'); return }
+          try {
+            const r = await fetch('/api/tiktok/publish-status', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ publish_id }),
+            })
+            const d = await r.json()
+            if (d.status === 'published') { setPublishState('live'); return }
+            if (d.status === 'failed') {
+              setPublishReason(d.reason ?? null)
+              setPublishState('rejected')
+              return
+            }
+          } catch { /* a dropped check is not a failed post; try again */ }
+          setTimeout(() => { void poll() }, 4000)
+        }
+        void poll()
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
       setPostError(msg)
@@ -784,17 +820,54 @@ export default function TikTokStudioClient() {
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
-            <div className="w-20 h-20 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-4xl mx-auto mb-6">
-              🎉
-            </div>
-            <h2 className="text-2xl font-extrabold text-white mb-2">
-              {scheduleMode === 'schedule' ? 'Video Scheduled!' : 'Video Posted to TikTok!'}
-            </h2>
-            <p className="text-ink-muted mb-8 text-sm leading-relaxed">
-              {scheduleMode === 'schedule'
-                ? `Your video will go live on ${new Date(scheduledAt).toLocaleString()}.`
-                : 'Your video is live on TikTok. It may take a minute to appear.'}
-            </p>
+            {/* What TikTok actually said, rather than what we hoped. The old
+                screen declared the video live the moment the bytes finished
+                transferring, which is several steps before TikTok decides
+                whether it will accept it at all. */}
+            {(() => {
+              const scheduled = scheduleMode === 'schedule'
+              const tone =
+                publishState === 'rejected'
+                  ? 'bg-alert/10 border-alert/25 text-alert'
+                : publishState === 'checking' || publishState === 'unknown'
+                  ? 'bg-amber/10 border-amber/25 text-amber'
+                  : 'bg-jade/10 border-jade/25 text-jade'
+              const icon =
+                publishState === 'rejected' ? '✕'
+                : publishState === 'checking' ? '⋯'
+                : publishState === 'unknown' ? '?'
+                : '✓'
+              const heading =
+                scheduled                      ? 'Video scheduled'
+                : publishState === 'checking'  ? 'Sent to TikTok'
+                : publishState === 'live'      ? 'Published to TikTok'
+                : publishState === 'rejected'  ? 'TikTok rejected the video'
+                : publishState === 'unknown'   ? 'Still processing at TikTok'
+                : 'Uploaded to TikTok'
+              const body =
+                scheduled
+                  ? `Your video will go live on ${new Date(scheduledAt).toLocaleString()}.`
+                : publishState === 'checking'
+                  ? 'The upload finished. Waiting for TikTok to finish processing it — this is usually quick.'
+                : publishState === 'live'
+                  ? 'TikTok confirmed the video is published.'
+                : publishState === 'rejected'
+                  ? (publishReason
+                      ? `TikTok gave this reason: ${publishReason}`
+                      : 'TikTok rejected it without giving a reason. Common causes are length, an unsupported format, or copyrighted audio.')
+                : publishState === 'unknown'
+                  ? 'TikTok has not finished processing yet. It will usually still appear. Check your TikTok notifications, or the post in your queue.'
+                  : 'The upload finished.'
+              return (
+                <>
+                  <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 border ${tone}`}>
+                    {icon}
+                  </div>
+                  <h2 className="text-2xl font-extrabold text-ink-high mb-2">{heading}</h2>
+                  <p className="text-ink-muted mb-8 text-sm leading-relaxed">{body}</p>
+                </>
+              )
+            })()}
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => {
