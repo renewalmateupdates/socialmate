@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import FilmstripTimeline from '@/components/tiktok/FilmstripTimeline'
@@ -328,6 +328,11 @@ export default function TikTokStudioClient() {
 
   // Edit state
   const [activeFilter, setActiveFilter]         = useState('None')
+  // Eight presets is a filter menu, not colour control. These compose on top of
+  // whichever preset is selected, so a look can be dialled in rather than picked.
+  const [adjust, setAdjust] = useState({ brightness: 100, contrast: 100, saturation: 100, warmth: 0 })
+  const adjustDefault = adjust.brightness === 100 && adjust.contrast === 100
+                     && adjust.saturation === 100 && adjust.warmth === 0
   const [captionOverlay, setCaptionOverlay]     = useState('')
   const [captionPosition, setCaptionPosition]   = useState<'top' | 'center' | 'bottom'>('bottom')
   const [captionColor, setCaptionColor]         = useState('#ffffff')
@@ -496,6 +501,22 @@ export default function TikTokStudioClient() {
     return () => window.removeEventListener('keydown', onKey)
   }, [videoUrl, togglePlay, seekTo, trimStart, trimEnd])
 
+  // One filter string for the preview canvas and the exported frames, so what
+  // is recorded is exactly what was on screen.
+  const composedFilter = useMemo(() => {
+    const parts: string[] = []
+    const preset = FILTERS[activeFilter]
+    if (preset) parts.push(preset)
+    if (adjust.brightness !== 100) parts.push(`brightness(${adjust.brightness / 100})`)
+    if (adjust.contrast !== 100)   parts.push(`contrast(${adjust.contrast / 100})`)
+    if (adjust.saturation !== 100) parts.push(`saturate(${adjust.saturation / 100})`)
+    // Warmth is sepia plus a hue nudge, which reads as warm or cool without
+    // needing a real colour-temperature pass.
+    if (adjust.warmth > 0) parts.push(`sepia(${(adjust.warmth / 100) * 0.5})`)
+    if (adjust.warmth < 0) parts.push(`hue-rotate(${adjust.warmth * 0.35}deg) saturate(1.05)`)
+    return parts.join(' ')
+  }, [activeFilter, adjust])
+
   // ── Canvas frame renderer ───────────────────────────────────────────────────
 
   const drawFrame = useCallback(() => {
@@ -503,8 +524,7 @@ export default function TikTokStudioClient() {
     const ctx = canvasRef.current?.getContext('2d')
     if (!v || !ctx || v.readyState < 2) return
 
-    const filter = FILTERS[activeFilter] || ''
-    ctx.filter = filter || 'none'
+    ctx.filter = composedFilter || 'none'
     ctx.drawImage(v, 0, 0, CANVAS_W, CANVAS_H)
     ctx.filter = 'none'
 
@@ -531,7 +551,7 @@ export default function TikTokStudioClient() {
         ctx.fillText(line, CANVAS_W / 2, y)
       })
     }
-  }, [activeFilter, captionOverlay, captionFontSize, captionPosition, captionColor, captionBg])
+  }, [composedFilter, captionOverlay, captionFontSize, captionPosition, captionColor, captionBg])
 
   useEffect(() => {
     if (!isPlaying || !videoRef.current) return
@@ -539,6 +559,119 @@ export default function TikTokStudioClient() {
     animRef.current = requestAnimationFrame(loop)
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
   }, [isPlaying, drawFrame])
+
+  // ── Export ──────────────────────────────────────────────────────────────────
+
+  // createMediaElementSource can only ever be called once per element; calling
+  // it a second time throws and takes the whole export with it. Cached so a
+  // second post attempt in the same session still works.
+  const audioGraphRef = useRef<{ ctx: AudioContext; gain: GainNode; dest: MediaStreamAudioDestinationNode } | null>(null)
+
+  /** Has the creator actually changed anything? */
+  const hasEdits =
+    trimStart > 0.05 ||
+    (videoDuration > 0 && trimEnd < videoDuration - 0.05) ||
+    activeFilter !== 'None' ||
+    !adjustDefault ||
+    captionOverlay.trim().length > 0 ||
+    volume !== 100
+
+  // TikTok accepts MP4 and MOV. MediaRecorder's universal format is WebM, which
+  // TikTok rejects, so re-encoding is only possible where the browser can record
+  // H.264. Chrome and Edge can; Firefox currently cannot.
+  const pickMp4Mime = (): string | null => {
+    if (typeof MediaRecorder === 'undefined') return null
+    const candidates = [
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'video/mp4;codecs=avc1,mp4a.40.2',
+      'video/mp4;codecs=avc1',
+      'video/mp4',
+    ]
+    for (const m of candidates) {
+      if (MediaRecorder.isTypeSupported(m)) return m
+    }
+    return null
+  }
+
+  /**
+   * Render the edit to a real file.
+   *
+   * Everything in this studio used to be preview only: `const uploadBlob =
+   * videoFile` sent the untouched original to TikTok, so the trim, the filter,
+   * the caption overlay and the volume changed what the creator saw here and
+   * nothing about what their followers saw. This plays the kept region back
+   * through the same drawFrame the preview uses, records the canvas, and mixes
+   * the audio at the chosen volume.
+   */
+  const exportEditedVideo = useCallback(async (mimeType: string): Promise<Blob> => {
+    const v = videoRef.current
+    const canvas = canvasRef.current
+    if (!v || !canvas) throw new Error('Nothing to export')
+
+    const stream = canvas.captureStream(30)
+
+    // Audio, at the chosen volume. A silent TikTok is not worth shipping, but a
+    // failure to route audio should not lose the whole post either.
+    try {
+      if (!audioGraphRef.current) {
+        const ctx = new AudioContext()
+        const src = ctx.createMediaElementSource(v)
+        const gain = ctx.createGain()
+        const dest = ctx.createMediaStreamDestination()
+        src.connect(gain)
+        gain.connect(dest)
+        gain.connect(ctx.destination)
+        audioGraphRef.current = { ctx, gain, dest }
+      }
+      const g = audioGraphRef.current
+      g.gain.gain.value = volume / 100
+      if (g.ctx.state === 'suspended') await g.ctx.resume()
+      g.dest.stream.getAudioTracks().forEach(t => stream.addTrack(t))
+    } catch (e) {
+      console.warn('[tiktok] audio capture failed, exporting video only', e)
+    }
+
+    const chunks: Blob[] = []
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 })
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
+
+    const finished = new Promise<Blob>((resolve, reject) => {
+      recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/mp4' }))
+      recorder.onerror = () => reject(new Error('Recording failed partway through'))
+    })
+
+    // Seek to the in point and wait for the frame to actually be there.
+    v.currentTime = trimStart
+    await new Promise<void>(resolve => {
+      const onSeeked = () => { v.removeEventListener('seeked', onSeeked); resolve() }
+      v.addEventListener('seeked', onSeeked)
+      setTimeout(resolve, 3000)
+    })
+
+    let raf = 0
+    const stopAll = () => {
+      cancelAnimationFrame(raf)
+      v.pause()
+      if (recorder.state !== 'inactive') recorder.stop()
+    }
+
+    recorder.start(100)
+    await v.play()
+
+    const loop = () => {
+      drawFrame()
+      if (v.currentTime >= trimEnd || v.ended) { stopAll(); return }
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+
+    // Hard ceiling, so a stalled element cannot leave the recorder running and
+    // the button spinning forever.
+    const guard = setTimeout(stopAll, (trimEnd - trimStart + 10) * 1000)
+    const blob = await finished
+    clearTimeout(guard)
+    return blob
+  }, [trimStart, trimEnd, volume, drawFrame])
 
   // ── File handling ───────────────────────────────────────────────────────────
 
@@ -632,8 +765,32 @@ export default function TikTokStudioClient() {
     setUploading(true)
 
     try {
-      const uploadBlob = videoFile
-      const mimeType   = videoFile.type === 'video/quicktime' ? 'video/mp4' : videoFile.type
+      // Send what they actually made. This was `const uploadBlob = videoFile`,
+      // so the original was uploaded untouched and every edit in this studio
+      // was decorative — the trim, the filter, the caption and the volume all
+      // changed the preview and nothing else.
+      //
+      // An untouched video is still uploaded byte for byte when nothing was
+      // edited: that is faster, lossless, and re-encoding it would only lose
+      // quality for no reason.
+      let uploadBlob: Blob = videoFile
+      let mimeType = videoFile.type === 'video/quicktime' ? 'video/mp4' : videoFile.type
+
+      if (hasEdits) {
+        const mp4 = pickMp4Mime()
+        if (!mp4) {
+          throw new Error(
+            'This browser cannot re-encode video to MP4, which TikTok requires, so your trim and filter cannot be applied here. Chrome or Edge can do it. You can also clear the trim, filter and caption to post the original as it is.'
+          )
+        }
+        setExporting(true)
+        uploadBlob = await exportEditedVideo(mp4)
+        setExporting(false)
+        if (!uploadBlob || uploadBlob.size < 1024) {
+          throw new Error('The edited video came out empty. Try again, or post the original without edits.')
+        }
+        mimeType = 'video/mp4'
+      }
 
       // Step 1: Initialize FILE_UPLOAD with TikTok
       const initRes = await fetch('/api/tiktok/init-upload', {
@@ -748,6 +905,7 @@ export default function TikTokStudioClient() {
     }
   }, [
     videoFile, videoUrl, trimStart, trimEnd, drawFrame,
+    hasEdits, exportEditedVideo, coverTime, volume,
     postCaption, hashtags, captionOverlay, captionPosition, captionColor,
     activeFilter, selectedSound, privacyLevel, disableDuet, disableComment,
     disableStitch, scheduleMode, scheduledAt,
@@ -950,27 +1108,69 @@ export default function TikTokStudioClient() {
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`
-                    w-56 md:w-64 aspect-[9/16] flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all
-                    ${dragOver
-                      ? 'border-[#fe2c55] bg-[#fe2c55]/10 scale-[1.02]'
-                      : 'border-edge hover:border-edge-lit hover:bg-panel/30 bg-panel/20'}
-                  `}
+                  className="relative w-full h-full min-h-[60vh] flex items-center justify-center cursor-pointer group"
                 >
-                  <div className="text-4xl">{dragOver ? '📥' : '📱'}</div>
-                  <div className="text-center px-4">
-                    <p className="text-sm font-bold text-white">
-                      {dragOver ? 'Drop it here!' : 'Drop your video here'}
-                    </p>
-                    <p className="text-xs text-ink-muted mt-1">MP4 or MOV · Max 500 MB</p>
-                    <p className="text-xs text-ink-faint mt-0.5">3 sec – 10 min · 9:16 vertical</p>
+                  {/* Ambient field. The stage used to be an unbroken black
+                      rectangle with a small dashed box floating in it, which is
+                      what made a working tool read as an unfinished one. */}
+                  <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div className={`absolute left-1/2 top-1/2 h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px] transition-opacity duration-500 ${dragOver ? 'opacity-40' : 'opacity-20'}`}
+                         style={{ background: 'radial-gradient(circle, #fe2c55 0%, transparent 62%)' }} />
+                    <div className="absolute left-[38%] top-[58%] h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[110px] opacity-15"
+                         style={{ background: 'radial-gradient(circle, #25f4ee 0%, transparent 65%)' }} />
                   </div>
-                  <button className="text-xs bg-[#fe2c55] text-white font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#fe2c55]/20">
-                    Browse files
-                  </button>
-                  {fileError && (
-                    <p className="text-xs text-red-400 text-center px-4 mt-1">{fileError}</p>
-                  )}
+
+                  <div className="relative flex flex-col items-center gap-7 px-6">
+                    {/* The shape of the thing they are making. */}
+                    <div className={`relative aspect-[9/16] w-40 rounded-[26px] border transition-all duration-300 ${
+                      dragOver
+                        ? 'border-[#fe2c55] scale-[1.04] shadow-[0_0_60px_-12px_rgba(254,44,85,0.65)]'
+                        : 'border-edge-lit/70 group-hover:border-[#fe2c55]/60 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.9)]'
+                    }`}>
+                      <div className="absolute inset-[7px] rounded-[20px] bg-gradient-to-b from-panel to-void" />
+                      <div className="absolute left-1/2 top-2.5 h-1 w-10 -translate-x-1/2 rounded-full bg-edge-lit/80" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${dragOver ? 'text-[#fe2c55]' : 'text-ink-faint'}`}>
+                          9:16
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-center">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#fe2c55] mb-2">
+                        TikTok Studio
+                      </p>
+                      <h2 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-ink-high leading-tight">
+                        {dragOver ? 'Let go' : 'Drop a video to start'}
+                      </h2>
+                      <p className="mt-2 text-sm text-ink-muted max-w-sm">
+                        Trim it on a real timeline, pick the frame people see first, and publish
+                        straight to TikTok without leaving the tab.
+                      </p>
+                    </div>
+
+                    <button className="bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
+                      Browse files
+                    </button>
+
+                    {/* What this does, said before they commit a 500 MB upload. */}
+                    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 max-w-md">
+                      {['Frame-accurate trim', 'Cover frame picker', 'Safe-area guides', 'Direct publish'].map(f => (
+                        <span key={f} className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
+                          <span className="h-1 w-1 rounded-full bg-jade" />{f}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="font-mono text-[10px] tracking-[0.12em] text-ink-faint">
+                      MP4 or MOV &middot; max 500 MB &middot; 3 sec to 10 min
+                    </p>
+
+                    {fileError && (
+                      <p className="text-xs text-alert text-center max-w-sm">{fileError}</p>
+                    )}
+                  </div>
+
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -1004,7 +1204,7 @@ export default function TikTokStudioClient() {
                       width={CANVAS_W}
                       height={CANVAS_H}
                       className="w-full h-full"
-                      style={{ filter: FILTERS[activeFilter] || 'none' }}
+                      style={{ filter: composedFilter || 'none' }}
                     />
                     {/* Play overlay */}
                     <button
@@ -1209,6 +1409,7 @@ export default function TikTokStudioClient() {
 
                   {/* Filters tab */}
                   {toolTab === 'filters' && (
+                    <div className="space-y-4">
                     <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
                       {Object.keys(FILTERS).map(f => {
                         const isActive = activeFilter === f
@@ -1245,6 +1446,49 @@ export default function TikTokStudioClient() {
                           </button>
                         )
                       })}
+                    </div>
+
+                    {/* Real colour control. The presets stay, but a look can now
+                        be dialled in on top of one instead of being whatever the
+                        preset decided. Every value here is baked into the export,
+                        not just the preview. */}
+                    <div className="rounded-xl border border-edge/60 bg-panel/50 p-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">Adjust</span>
+                        {!adjustDefault && (
+                          <button
+                            onClick={() => setAdjust({ brightness: 100, contrast: 100, saturation: 100, warmth: 0 })}
+                            className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted hover:text-ink-high transition-colors"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-2.5">
+                        {([
+                          ['brightness', 'Brightness', 50, 150],
+                          ['contrast',   'Contrast',   50, 150],
+                          ['saturation', 'Saturation',  0, 200],
+                          ['warmth',     'Warmth',    -60,  60],
+                        ] as const).map(([key, label, min, max]) => (
+                          <div key={key} className="flex items-center gap-3">
+                            <label htmlFor={`adj-${key}`} className="w-20 shrink-0 text-[11px] text-ink-muted">{label}</label>
+                            <input
+                              id={`adj-${key}`}
+                              type="range"
+                              min={min}
+                              max={max}
+                              value={adjust[key]}
+                              onChange={e => setAdjust(a => ({ ...a, [key]: Number(e.target.value) }))}
+                              className="flex-1 accent-[#fe2c55]"
+                            />
+                            <span className="w-9 shrink-0 text-right font-mono text-[10px] tabular-nums text-ink-faint">
+                              {adjust[key]}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     </div>
                   )}
 
@@ -1423,9 +1667,36 @@ export default function TikTokStudioClient() {
 
           {/* ── RIGHT: Post settings panel (desktop only) ── */}
           <div className="w-80 xl:w-96 flex-col bg-void overflow-y-auto hidden lg:flex border-l border-edge/40">
-            <div className="flex-1 p-5">
-              <PostSettingsPanel {...postPanelProps} />
-            </div>
+            {/* Before a video exists this panel was a live-looking form for a
+                post that cannot be made yet, sitting above a large empty
+                column. Held back until there is something to describe. */}
+            {videoUrl ? (
+              <div className="flex-1 p-5">
+                <PostSettingsPanel {...postPanelProps} />
+              </div>
+            ) : (
+              <div className="flex-1 p-5 flex flex-col justify-center items-center text-center gap-5">
+                <div className="w-full max-w-[15rem] space-y-2.5" aria-hidden="true">
+                  {[100, 72, 88].map((w, i) => (
+                    <div key={i} className="h-2 rounded-full bg-panel" style={{ width: `${w}%` }} />
+                  ))}
+                  <div className="h-16 rounded-xl border border-edge bg-panel/60" />
+                  <div className="flex gap-2 pt-1">
+                    <div className="h-7 flex-1 rounded-lg border border-edge bg-panel/60" />
+                    <div className="h-7 flex-1 rounded-lg border border-edge bg-panel/60" />
+                    <div className="h-7 flex-1 rounded-lg border border-edge bg-panel/60" />
+                  </div>
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+                    Caption, hashtags, privacy
+                  </p>
+                  <p className="mt-1.5 text-xs text-ink-muted max-w-[15rem]">
+                    Everything about the post opens up once a video is loaded.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
