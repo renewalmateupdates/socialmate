@@ -94,7 +94,13 @@ export async function POST(request: NextRequest) {
 
   const captionToStore = full_caption || post_caption
 
-  await getSupabaseAdmin()
+  // The error here was discarded, and the route returned success regardless.
+  // video_storage_path and video_url are both NOT NULL, and FILE_UPLOAD has
+  // neither — TikTok holds the bytes, we never do — so every insert since the
+  // switch away from PULL_FROM_URL on 5 May was rejected and every caller was
+  // told it worked. tiktok_posts stopped gaining rows that day and nobody
+  // found out, because the upload itself genuinely succeeds.
+  const { error: insertError } = await getSupabaseAdmin()
     .from('tiktok_posts')
     .insert({
       user_id:                user.id,
@@ -121,11 +127,25 @@ export async function POST(request: NextRequest) {
       tiktok_account_open_id: open_id || null,
     })
 
-  await getSupabaseAdmin()
+  // Deliberately not a 500. The video is already at TikTok by this point, so
+  // reporting failure would be a lie in the other direction. But the row is
+  // what publish-status polls, so without it the post is untrackable and the
+  // studio can never say whether TikTok accepted it. Say so.
+  if (insertError) {
+    console.error('[tiktok/confirm-upload] could not record the post:', insertError.message)
+  }
+
+  const { error: quotaError } = await getSupabaseAdmin()
     .from('workspaces')
     .update({ tiktok_videos_this_month: videosThisMonth + 1 })
     .eq('owner_id', user.id)
     .eq('is_personal', true)
+  if (quotaError) console.warn('[tiktok/confirm-upload] quota increment failed:', quotaError.message)
 
-  return NextResponse.json({ success: true, publish_id })
+  return NextResponse.json({
+    success: true,
+    publish_id,
+    recorded: !insertError,
+    ...(insertError ? { warning: 'The video reached TikTok but we could not record it, so its status cannot be tracked here.' } : {}),
+  })
 }

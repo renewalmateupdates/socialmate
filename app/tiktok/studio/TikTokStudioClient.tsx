@@ -937,6 +937,11 @@ export default function TikTokStudioClient() {
             })
             const d = await r.json()
             if (d.status === 'published') { setPublishState('live'); return }
+            // Landing in the creator's drafts is the finish line for an inbox
+            // upload, not a staging step. Without this the poll ran its full
+            // two minutes and then reported "still processing" about a video
+            // that was already sitting in TikTok waiting to be posted.
+            if (d.status === 'in_drafts') { setPublishState('drafted'); return }
             if (d.status === 'in_drafts')  { setPublishState('drafted'); return }
             if (d.status === 'failed') {
               setPublishReason(d.reason ?? null)
@@ -1067,7 +1072,7 @@ export default function TikTokStudioClient() {
                 : publishState === 'live'
                   ? 'TikTok confirmed the video is published.'
                 : publishState === 'drafted'
-                  ? 'Open TikTok, go to your drafts, and finish it there — that is where you can add a sound from their library, then post.'
+                  ? 'Open the TikTok app on your phone. The video is in your drafts, where you can add a sound from their library, then post.'
                 : publishState === 'rejected'
                   ? (publishReason
                       ? `TikTok gave this reason: ${publishReason}`
