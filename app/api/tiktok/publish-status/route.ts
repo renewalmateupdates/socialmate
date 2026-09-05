@@ -93,8 +93,13 @@ export async function POST(request: NextRequest) {
   const publiclyAvailable: string[] | undefined = payload?.data?.publicaly_available_post_id
     ?? payload?.data?.publicly_available_post_id
 
+  // Each write is checked. tiktok_posts.status carries a CHECK constraint, and
+  // an unlisted value is rejected with 23514 — which, discarded, produced a
+  // route that told the client the post had settled while the row stayed on
+  // 'publishing' forever. That is the same shape as the bug this endpoint was
+  // written to fix, reintroduced one layer up.
   if (tikTokStatus === TERMINAL_OK) {
-    await getSupabaseAdmin()
+    const { error: e } = await getSupabaseAdmin()
       .from('tiktok_posts')
       .update({
         status: 'published',
@@ -107,30 +112,36 @@ export async function POST(request: NextRequest) {
           : undefined,
       })
       .eq('id', row.id)
-    return NextResponse.json({ status: 'published', settled: true })
+    if (e) console.error('[tiktok/publish-status] could not record published:', e.message)
+    return NextResponse.json({ status: 'published', settled: true, recorded: !e })
   }
 
   if (tikTokStatus === TERMINAL_FAIL) {
-    await getSupabaseAdmin()
+    const { error: e } = await getSupabaseAdmin()
       .from('tiktok_posts')
       .update({
         status: 'failed',
         error_message: failReason || 'TikTok rejected the video without giving a reason.',
       })
       .eq('id', row.id)
+    if (e) console.error('[tiktok/publish-status] could not record failure:', e.message)
     return NextResponse.json({
       status: 'failed',
       settled: true,
       reason: failReason || null,
+      recorded: !e,
     })
   }
 
   if (tikTokStatus === TERMINAL_INBOX) {
-    await getSupabaseAdmin()
+    const { error: e } = await getSupabaseAdmin()
       .from('tiktok_posts')
       .update({ status: 'in_drafts', error_message: null })
       .eq('id', row.id)
-    return NextResponse.json({ status: 'in_drafts', settled: true })
+    if (e) console.error('[tiktok/publish-status] could not record in_drafts:', e.message)
+    // Reported to the creator either way: the video really is in their drafts,
+    // whether or not our own bookkeeping accepted the value.
+    return NextResponse.json({ status: 'in_drafts', settled: true, recorded: !e })
   }
 
   // Still processing (PROCESSING_UPLOAD, PROCESSING_DOWNLOAD).
