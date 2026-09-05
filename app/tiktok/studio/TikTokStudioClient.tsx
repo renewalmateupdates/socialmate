@@ -274,7 +274,8 @@ function PostSettingsPanel({
               🎵 Send to TikTok drafts
             </span>
             <span className="block text-[11px] text-ink-muted mt-0.5 leading-snug">
-              Finish in the TikTok app, where you can add any sound from their library.
+              Adds any sound from TikTok's library &mdash; but drafts open only in the
+              TikTok phone app. On desktop, use Post Now instead.
             </span>
           </button>
           {scheduleMode === 'schedule' && (
