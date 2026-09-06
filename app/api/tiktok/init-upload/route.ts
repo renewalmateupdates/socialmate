@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
     disable_stitch  = false,
     sound_id,
     video_cover_timestamp_ms = 0,
+    // Commercial content disclosure. TikTok labels the post from these, and
+    // requires the app to collect them before a direct post.
+    brand_content_toggle = false,
+    brand_organic_toggle = false,
     // 'direct' publishes straight to the profile. 'inbox' drops the video into
     // the creator's TikTok drafts so they finish it in the TikTok app — which
     // is the only place TikTok's sound library can legally be applied.
@@ -79,6 +83,19 @@ export async function POST(request: NextRequest) {
     video_cover_timestamp_ms: Math.max(0, Math.round(Number(video_cover_timestamp_ms) || 0)),
   }
   if (sound_id && sound_id !== 'original') postInfo.music_id = sound_id
+
+  // Only sent when disclosed. TikTok rejects branded content that is visible
+  // only to the creator, so that combination is refused here with a reason
+  // rather than passed on to come back as an opaque API error.
+  if (brand_content_toggle || brand_organic_toggle) {
+    if (brand_content_toggle && effectivePrivacy === 'SELF_ONLY') {
+      return NextResponse.json({
+        error: 'Branded content cannot be visible to only you. Choose a different audience.',
+      }, { status: 400 })
+    }
+    postInfo.brand_content_toggle = !!brand_content_toggle
+    postInfo.brand_organic_toggle = !!brand_organic_toggle
+  }
 
   // FILE_UPLOAD: client will PUT the blob directly to TikTok's upload URL
   // No domain verification needed — avoids PULL_FROM_URL domain issues entirely
