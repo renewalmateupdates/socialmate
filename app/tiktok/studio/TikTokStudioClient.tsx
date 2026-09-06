@@ -27,12 +27,15 @@ const FILTERS: Record<string, string> = {
 }
 
 const CAPTION_COLORS   = ['#ffffff', '#000000', '#facc15', '#ef4444', '#22d3ee']
-const PRIVACY_OPTIONS  = [
-  { value: 'PUBLIC_TO_EVERYONE',      label: '🌍 Public' },
-  { value: 'MUTUAL_FOLLOW_FRIENDS',   label: '👥 Friends' },
-  { value: 'SELF_ONLY',               label: '🔒 Private' },
-]
-
+// Labels only. Which of these a creator may actually use comes from TikTok's
+// creator_info response, never from this list — the audit checks that the app
+// offers exactly what the account allows and nothing more.
+const PRIVACY_LABELS: Record<string, string> = {
+  PUBLIC_TO_EVERYONE:    'Everyone',
+  MUTUAL_FOLLOW_FRIENDS: 'Friends',
+  FOLLOWER_OF_CREATOR:   'Followers',
+  SELF_ONLY:             'Only me',
+}
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatTime(s: number) {
@@ -58,11 +61,23 @@ type Sound = {
   is_original?: boolean
 }
 
+export interface CreatorLimits {
+  privacyOptions: string[]
+  commentDisabled: boolean
+  duetDisabled: boolean
+  stitchDisabled: boolean
+  maxDurationSec: number
+  infoOk: boolean
+}
+
 type CreatorInfo = {
   connected:    boolean
   account_name?: string
   avatar_url?:  string
   open_id?:     string
+  username?:    string | null
+  creator_info?: Record<string, unknown>
+  info_ok?:     boolean
 }
 
 // ── Post settings panel (shared between right panel and mobile Post tab) ──────
@@ -81,6 +96,13 @@ interface PostSettingsPanelProps {
   setSelectedSound: (s: Sound | null) => void
   privacyLevel:    string
   setPrivacyLevel: (v: string) => void
+  limits:          CreatorLimits
+  commercial:      boolean
+  setCommercial:   (v: boolean) => void
+  yourBrand:       boolean
+  setYourBrand:    (v: boolean) => void
+  brandedContent:  boolean
+  setBrandedContent: (v: boolean) => void
   disableDuet:     boolean
   setDisableDuet:  (v: boolean) => void
   disableStitch:   boolean
@@ -105,6 +127,7 @@ function PostSettingsPanel({
   aiHashtagLoading, suggestHashtags,
   selectedSound, setSelectedSound,
   privacyLevel, setPrivacyLevel,
+  limits, commercial, setCommercial, yourBrand, setYourBrand, brandedContent, setBrandedContent,
   disableDuet, setDisableDuet,
   disableStitch, setDisableStitch,
   disableComment, setDisableComment,
@@ -112,6 +135,13 @@ function PostSettingsPanel({
   scheduledAt, setScheduledAt,
   postError, videoUrl, isWorking, uploading, posting, handlePost,
 }: PostSettingsPanelProps) {
+  // Same gate as the parent, derived from props so the panel never enables a
+  // button the parent would reject.
+  const canPost =
+    !!privacyLevel &&
+    !(commercial && !yourBrand && !brandedContent) &&
+    !(brandedContent && privacyLevel === 'SELF_ONLY')
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 space-y-5 overflow-y-auto">
@@ -198,46 +228,149 @@ function PostSettingsPanel({
           </div>
         )}
 
-        {/* Privacy */}
+        {/* Privacy - from TikTok, never pre-selected.
+
+            The audit requires the creator to actively choose who can see the
+            post. This used to default to PUBLIC_TO_EVERYONE, which both fails
+            that check and quietly decides something the creator did not. */}
         <div>
-          <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">Privacy</label>
-          <div className="grid grid-cols-3 gap-1.5">
-            {PRIVACY_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setPrivacyLevel(opt.value)}
-                className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                  privacyLevel === opt.value
-                    ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
-                    : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">
+            Who can see this <span className="text-[#fe2c55]">*</span>
+          </label>
+          {limits.privacyOptions.length === 0 ? (
+            <p className="text-xs text-amber">
+              {limits.infoOk
+                ? 'TikTok reports no available privacy settings for this account.'
+                : 'Could not reach TikTok for this account settings. Reconnect TikTok and try again.'}
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-1.5">
+              {limits.privacyOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setPrivacyLevel(opt)}
+                  className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    privacyLevel === opt
+                      ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
+                      : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
+                  }`}
+                >
+                  {PRIVACY_LABELS[opt] ?? opt}
+                </button>
+              ))}
+            </div>
+          )}
+          {!privacyLevel && limits.privacyOptions.length > 0 && (
+            <p className="mt-2 text-[11px] text-ink-faint">Pick one to enable posting.</p>
+          )}
+          {/* Branded content cannot be private. TikTok rejects the combination,
+              so it is blocked here with the reason rather than at the API. */}
+          {brandedContent && privacyLevel === 'SELF_ONLY' && (
+            <p className="mt-2 text-[11px] text-alert">
+              Branded content cannot be visible to only you. Choose another audience.
+            </p>
+          )}
         </div>
 
-        {/* Interaction toggles */}
+        {/* Interactions - disabled where the account disables them.
+
+            These were free toggles. A creator whose account has comments off
+            saw a comment switch that did nothing, and the audit checks exactly
+            this. */}
         <div>
           <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">Interactions</label>
           <div className="space-y-2">
             {[
-              { key: 'duet',    label: 'Disable Duets',    val: disableDuet,    set: setDisableDuet },
-              { key: 'stitch',  label: 'Disable Stitch',   val: disableStitch,  set: setDisableStitch },
-              { key: 'comment', label: 'Disable Comments', val: disableComment, set: setDisableComment },
-            ].map(({ key, label, val, set }) => (
-              <label key={key} className="flex items-center justify-between cursor-pointer group">
-                <span className="text-xs text-ink-muted group-hover:text-ink-high transition-colors">{label}</span>
+              { key: 'duet',    label: 'Disable Duets',    val: disableDuet,    set: setDisableDuet,    off: limits.duetDisabled },
+              { key: 'stitch',  label: 'Disable Stitch',   val: disableStitch,  set: setDisableStitch,  off: limits.stitchDisabled },
+              { key: 'comment', label: 'Disable Comments', val: disableComment, set: setDisableComment, off: limits.commentDisabled },
+            ].map(({ key, label, val, set, off }) => (
+              <div key={key} className="flex items-center justify-between">
+                <span className={`text-xs ${off ? 'text-ink-faint' : 'text-ink-muted'}`}>
+                  {label}
+                  {off && <span className="ml-1.5 text-[10px] text-ink-faint">off for your account</span>}
+                </span>
                 <button
-                  onClick={() => set(!val)}
-                  className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${val ? 'bg-[#fe2c55]' : 'bg-raised hover:bg-raised'}`}
+                  onClick={() => !off && set(!val)}
+                  disabled={off}
+                  aria-label={label}
+                  className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${
+                    off ? 'bg-raised opacity-40 cursor-not-allowed' : val ? 'bg-[#fe2c55]' : 'bg-raised'
+                  }`}
                 >
-                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${val ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                    off || val ? 'translate-x-4' : 'translate-x-0.5'
+                  }`} />
                 </button>
-              </label>
+              </div>
             ))}
           </div>
+        </div>
+
+        {/* Commercial content disclosure.
+
+            Required by TikTok content sharing guidelines and absent entirely
+            before. The declaration text below is not decoration - it is the
+            disclosure TikTok requires be shown to the creator before posting,
+            and it changes with what they select. */}
+        <div>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-ink-muted uppercase tracking-wider">Disclose content</label>
+            <button
+              onClick={() => {
+                const next = !commercial
+                setCommercial(next)
+                if (!next) { setYourBrand(false); setBrandedContent(false) }
+              }}
+              aria-label="Disclose commercial content"
+              className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${commercial ? 'bg-[#fe2c55]' : 'bg-raised'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${commercial ? 'translate-x-4' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+          <p className="mt-1 text-[11px] text-ink-faint">
+            Turn this on if this video promotes yourself, a brand, or a product or service.
+          </p>
+
+          {commercial && (
+            <div className="mt-3 space-y-2">
+              {[
+                { on: yourBrand,      set: setYourBrand,      label: 'Your brand',
+                  sub: 'You are promoting yourself or your own business.' },
+                { on: brandedContent, set: setBrandedContent, label: 'Branded content',
+                  sub: 'You are posting on behalf of a brand, as a paid partnership.' },
+              ].map(o => (
+                <button
+                  key={o.label}
+                  onClick={() => o.set(!o.on)}
+                  className={`w-full text-left rounded-xl border px-3 py-2.5 transition-colors ${
+                    o.on ? 'border-[#fe2c55]/50 bg-[#fe2c55]/10' : 'border-edge bg-panel'
+                  }`}
+                >
+                  <span className="text-xs font-bold text-ink-high">{o.label}</span>
+                  <span className="block text-[11px] text-ink-muted mt-0.5">{o.sub}</span>
+                </button>
+              ))}
+
+              {!yourBrand && !brandedContent && (
+                <p className="text-[11px] text-alert">Pick at least one, or turn disclosure off.</p>
+              )}
+
+              {(yourBrand || brandedContent) && (
+                <p className="text-[11px] leading-relaxed text-ink-muted">
+                  {brandedContent
+                    ? 'Your video will be labelled Paid partnership. '
+                    : 'Your video will be labelled Promotional content. '}
+                  By posting, you agree to TikTok&apos;s{' '}
+                  <a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noopener noreferrer"
+                     className="text-[#fe2c55] underline underline-offset-2">Branded Content Policy</a>
+                  {' '}and{' '}
+                  <a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noopener noreferrer"
+                     className="text-[#fe2c55] underline underline-offset-2">Music Usage Confirmation</a>.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Schedule */}
@@ -300,7 +433,7 @@ function PostSettingsPanel({
         )}
         <button
           onClick={handlePost}
-          disabled={!videoUrl || isWorking || (scheduleMode === 'schedule' && !scheduledAt)}
+          disabled={!videoUrl || isWorking || !canPost || (scheduleMode === 'schedule' && !scheduledAt)}
           className="w-full bg-[#fe2c55] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20"
         >
           {uploading
@@ -328,6 +461,20 @@ function PostSettingsPanel({
 export default function TikTokStudioClient() {
   // Connection state
   const [creator, setCreator]         = useState<CreatorInfo | null>(null)
+
+  // What this account actually permits, straight from TikTok. Falls back to the
+  // most restrictive reading rather than an optimistic one, so a failed lookup
+  // never quietly offers an option the account does not have.
+  const ci = (creator?.creator_info ?? {}) as Record<string, unknown>
+  const limits: CreatorLimits = {
+    privacyOptions:  Array.isArray(ci.privacy_level_options) ? ci.privacy_level_options as string[] : [],
+    commentDisabled: ci.comment_disabled !== false,
+    duetDisabled:    ci.duet_disabled    !== false,
+    stitchDisabled:  ci.stitch_disabled  !== false,
+    maxDurationSec:  typeof ci.max_video_post_duration_sec === 'number' ? ci.max_video_post_duration_sec : MAX_DURATION_S,
+    infoOk:          creator?.info_ok === true,
+  }
+
   const [creatorLoading, setCreatorLoading] = useState(true)
 
   // File state
@@ -370,7 +517,13 @@ export default function TikTokStudioClient() {
   const [postCaption, setPostCaption]           = useState('')
   const [hashtags, setHashtags]                 = useState<string[]>([])
   const [hashtagInput, setHashtagInput]         = useState('')
-  const [privacyLevel, setPrivacyLevel]         = useState('PUBLIC_TO_EVERYONE')
+  // Deliberately empty. TikTok's audit requires the creator to choose an
+  // audience rather than inherit one, and a default of PUBLIC_TO_EVERYONE also
+  // decided something on their behalf that they may not have wanted.
+  const [privacyLevel, setPrivacyLevel]         = useState('')
+  const [commercial, setCommercial]             = useState(false)
+  const [yourBrand, setYourBrand]               = useState(false)
+  const [brandedContent, setBrandedContent]     = useState(false)
   const [disableDuet, setDisableDuet]           = useState(false)
   const [disableComment, setDisableComment]     = useState(false)
   const [disableStitch, setDisableStitch]       = useState(false)
@@ -747,7 +900,8 @@ export default function TikTokStudioClient() {
         URL.revokeObjectURL(url)
         return
       }
-      if (tempVideo.duration > MAX_DURATION_S) {
+      // TikTok caps duration per account, and it is not always 10 minutes.
+      if (tempVideo.duration > limits.maxDurationSec) {
         setFileError(`Video too long. Maximum 10 minutes (yours: ${formatTime(tempVideo.duration)}).`)
         URL.revokeObjectURL(url)
         return
@@ -853,6 +1007,10 @@ export default function TikTokStudioClient() {
           post_caption:    postCaption,
           hashtags,
           privacy_level:   privacyLevel,
+          // TikTok labels the post from these two. Sending them is what makes
+          // the disclosure shown in the UI actually mean something.
+          brand_content_toggle: brandedContent,
+          brand_organic_toggle: yourBrand,
           disable_duet:    disableDuet,
           disable_comment: disableComment,
           disable_stitch:  disableStitch,
@@ -972,6 +1130,12 @@ export default function TikTokStudioClient() {
 
   // ── Derived ─────────────────────────────────────────────────────────────────
 
+  // Disclosure is incomplete if switched on with neither box ticked, and TikTok
+  // rejects branded content that only the creator can see.
+  const disclosureIncomplete = commercial && !yourBrand && !brandedContent
+  const brandedAndPrivate    = brandedContent && privacyLevel === 'SELF_ONLY'
+  const canPost = !!privacyLevel && !disclosureIncomplete && !brandedAndPrivate
+
   const isWorking  = uploading || posting
   const charCount  = postCaption.length + (hashtags.length ? hashtags.map(t => `#${t}`).join(' ').length + 2 : 0)
 
@@ -982,6 +1146,7 @@ export default function TikTokStudioClient() {
     aiHashtagLoading, suggestHashtags,
     selectedSound, setSelectedSound,
     privacyLevel, setPrivacyLevel,
+    limits, commercial, setCommercial, yourBrand, setYourBrand, brandedContent, setBrandedContent,
     disableDuet, setDisableDuet,
     disableStitch, setDisableStitch,
     disableComment, setDisableComment,
