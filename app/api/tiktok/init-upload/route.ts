@@ -115,6 +115,28 @@ export async function POST(request: NextRequest) {
     const errCode = initData?.error?.code    || 'unknown'
     const errMsg  = initData?.error?.message || `TikTok init error ${initRes.status}`
     console.error('[tiktok/init-upload]', errCode, errMsg, JSON.stringify(initData))
+
+    // TikTok has two separate gates and they are easy to confuse. Production
+    // access lets an app call the Content Posting API at all; the content
+    // sharing audit is what allows a *public* direct post. Until the audit
+    // passes, an unaudited client may only direct-post to a private account.
+    //
+    // The raw code reads like the integration is broken. It is not — the video,
+    // the token and the upload are all fine, and sending to drafts is
+    // unaffected because the creator completes that post themselves in the app.
+    if (errCode === 'unaudited_client_can_only_post_to_private_accounts') {
+      return NextResponse.json({
+        error:
+          'TikTok will not let SocialMate post publicly yet. Our app is pending ' +
+          "TikTok's content sharing audit, and until it passes, direct posts can " +
+          'only go to a private TikTok account. Two ways through: set your TikTok ' +
+          'account back to private and post again, or use Send to TikTok drafts ' +
+          'and finish it in the TikTok app, which is not affected by this.',
+        code: errCode,
+        remedy: 'drafts_or_private',
+      }, { status: 502 })
+    }
+
     return NextResponse.json({ error: `[${errCode}] ${errMsg}`, code: errCode }, { status: 502 })
   }
 
