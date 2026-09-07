@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { MerchProductCard } from './MerchProductCard'
 import { MerchWaitlistForm } from './MerchWaitlistForm'
+import { MerchSuccessBanner } from './MerchSuccessBanner'
 
 const amber   = '#F59E0B'
 const dark    = '#0a0a0a'
@@ -30,10 +31,12 @@ async function getProducts() {
   }
 }
 
-export default async function MerchPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
-  const params = await searchParams
+// Printify products change rarely; serve the page from the ISR cache rather than
+// blocking every visit on the upstream API call.
+export const revalidate = 3600
+
+export default async function MerchPage() {
   const products = await getProducts()
-  const orderSuccess = params.success === 'true'
 
   return (
     <div style={{ minHeight: '100vh', background: dark, fontFamily: 'inherit', display: 'flex', flexDirection: 'column' }}>
@@ -64,16 +67,7 @@ export default async function MerchPage({ searchParams }: { searchParams: Promis
       </header>
 
       {/* Order success banner */}
-      {orderSuccess && (
-        <div style={{
-          background: 'rgba(16,185,129,0.1)', borderBottom: '1px solid rgba(16,185,129,0.3)',
-          padding: '16px 24px', textAlign: 'center',
-        }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#10B981' }}>
-            🎉 Order confirmed! Your merch is being printed and will ship soon. Check your email for tracking.
-          </span>
-        </div>
-      )}
+      <MerchSuccessBanner />
 
       {/* Hero */}
       <section style={{ padding: '72px 24px 64px', textAlign: 'center', maxWidth: 760, margin: '0 auto', width: '100%' }}>
