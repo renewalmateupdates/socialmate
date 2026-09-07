@@ -103,7 +103,7 @@ function formatPostDate(iso: string): string {
 }
 
 // Same category first, then newest. Deterministic, so a given post always links
-// to the same three neighbours — and, unlike the old rail, a different three per
+// to the same three neighbors — and, unlike the old rail, a different three per
 // post, which is 674 pages of real internal linking instead of 3.
 async function getRelatedPosts(currentSlug: string, category: string): Promise<RelatedPost[]> {
   type Candidate = Omit<RelatedPost, 'readTime'> & {
@@ -157,7 +157,7 @@ async function getRelatedPosts(currentSlug: string, category: string): Promise<R
   const others     = candidates.filter(p => normalizeCategory(p.category) !== target).sort(byNewest)
 
   // Taking the top three would point every post in a category at the same three
-  // neighbours. Starting at a slug-derived offset and wrapping instead spreads
+  // neighbors. Starting at a slug-derived offset and wrapping instead spreads
   // the links across the whole category, so the posts form a ring rather than
   // funnelling into three hubs — the difference between 3 internally linked
   // pages and 674. Seeded by slug, so a given post's rail never shuffles.
