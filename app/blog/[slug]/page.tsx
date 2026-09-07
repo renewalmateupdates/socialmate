@@ -39,31 +39,171 @@ function dbPostToPost(db: DbPost) {
 async function getDbPost(slug: string): Promise<ReturnType<typeof dbPostToPost> | null> {
   try {
     const admin = getSupabaseAdmin()
-    const { data } = await admin
+    const { data, error } = await admin
       .from('blog_posts')
       .select('slug, title, excerpt, content, category, author, published_at')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
+    if (error) console.warn(`[blog] post lookup failed for "${slug}":`, error.message)
     if (!data) return null
     return dbPostToPost(data as DbPost)
-  } catch {
+  } catch (e) {
+    console.warn(`[blog] post lookup threw for "${slug}":`, e)
     return null
   }
 }
 
-async function getAllDbPosts(): Promise<Array<[string, ReturnType<typeof dbPostToPost>]>> {
+// ── Related posts ─────────────────────────────────────────────────────────────
+// The "More from the blog" rail used to call a getAllDbPosts() helper that
+// selected `content` for 50 posts — 191 KB and ~490ms — and then discarded all
+// of it. The rail was built from a list with the 62 hardcoded posts first, so
+// its three slots were always full before a single DB row was reached. Every
+// render paid half a second of TTFB, and the build paid it 674 times, to print
+// the same three links on all 674 pages.
+//
+// `content` is only ever read to derive a read time. The table has a
+// `reading_time_minutes` column, but it is NOT usable: nothing reads it, and it
+// disagrees with the text on all 674 rows — it says 5 min for 548 of them while
+// the median post is 297 words, about a 1 min read. Using it would have inflated
+// every read time on the site ~3x. So: rank from a light query, then read
+// `content` for the three posts actually shown. 191 KB -> ~30 KB, same numbers.
+type RelatedRow = {
+  slug: string
+  title: string
+  category: string | null
+  published_at: string
+}
+
+type RelatedPost = {
+  slug: string
+  title: string
+  date: string
+  readTime: string
+}
+
+// Categories were typed by hand across 674 rows and drifted: Guides/guides/guide,
+// studio-stax/Studio Stax, enki/Enki, comparison/comparisons. Match on a
+// normalized form or same-category grouping silently misses most of its pool.
+function normalizeCategory(c: string): string {
+  return c.toLowerCase().replace(/[\s_-]+/g, '').replace(/s$/, '')
+}
+
+// Stable, dependency-free string hash. Only used to pick a rotation offset, so
+// it needs to be deterministic across builds, not cryptographic.
+function hashSlug(s: string): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) >>> 0
+  return h
+}
+
+function formatPostDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+  })
+}
+
+// Same category first, then newest. Deterministic, so a given post always links
+// to the same three neighbours — and, unlike the old rail, a different three per
+// post, which is 674 pages of real internal linking instead of 3.
+async function getRelatedPosts(currentSlug: string, category: string): Promise<RelatedPost[]> {
+  type Candidate = Omit<RelatedPost, 'readTime'> & {
+    readTime: string | null
+    category: string
+    ts: number
+  }
+  const pool: Candidate[] = []
+
+  for (const [slug, p] of Object.entries(POSTS)) {
+    pool.push({
+      slug,
+      title:    p.title,
+      date:     p.date,
+      readTime: p.readTime,
+      category: p.category,
+      ts:       Date.parse(p.date) || 0,
+    })
+  }
+
   try {
     const admin = getSupabaseAdmin()
-    const { data } = await admin
+    const { data, error } = await admin
       .from('blog_posts')
-      .select('slug, title, excerpt, content, category, author, published_at')
+      .select('slug, title, category, published_at')
       .order('published_at', { ascending: false })
-      .limit(50)
-    if (!data) return []
-    return (data as DbPost[]).map(d => [d.slug, dbPostToPost(d)])
-  } catch {
-    return []
+      .limit(100)
+    if (error) {
+      console.warn('[blog] related posts query failed:', error.message)
+    } else {
+      for (const row of (data ?? []) as RelatedRow[]) {
+        if (POSTS[row.slug]) continue // hardcoded copy wins
+        pool.push({
+          slug:     row.slug,
+          title:    row.title,
+          date:     formatPostDate(row.published_at),
+          readTime: null, // filled in below, for the three that get shown
+          category: row.category || 'Studio Stax',
+          ts:       Date.parse(row.published_at) || 0,
+        })
+      }
+    }
+  } catch (e) {
+    console.warn('[blog] related posts query threw:', e)
   }
+
+  const target    = normalizeCategory(category)
+  const candidates = pool.filter(p => p.slug !== currentSlug)
+  const byNewest   = (a: { ts: number }, b: { ts: number }) => b.ts - a.ts
+  const sameCat    = candidates.filter(p => normalizeCategory(p.category) === target).sort(byNewest)
+  const others     = candidates.filter(p => normalizeCategory(p.category) !== target).sort(byNewest)
+
+  // Taking the top three would point every post in a category at the same three
+  // neighbours. Starting at a slug-derived offset and wrapping instead spreads
+  // the links across the whole category, so the posts form a ring rather than
+  // funnelling into three hubs — the difference between 3 internally linked
+  // pages and 674. Seeded by slug, so a given post's rail never shuffles.
+  const seed = hashSlug(currentSlug)
+  const picked: typeof candidates = []
+  for (const list of [sameCat, others]) {
+    if (list.length === 0) continue
+    const start = seed % list.length
+    for (let i = 0; i < list.length && picked.length < 3; i++) {
+      picked.push(list[(start + i) % list.length])
+    }
+  }
+
+  const top = picked.slice(0, 3)
+
+  // Hardcoded posts already carry a read time; only DB ones need resolving, and
+  // only the ones that survived the ranking — at most three rows of content.
+  const needsReadTime = top.filter(p => p.readTime === null).map(p => p.slug)
+  const readTimes = new Map<string, string>()
+  if (needsReadTime.length > 0) {
+    try {
+      const admin = getSupabaseAdmin()
+      const { data, error } = await admin
+        .from('blog_posts')
+        .select('slug, content')
+        .in('slug', needsReadTime)
+      if (error) {
+        console.warn('[blog] related read-time query failed:', error.message)
+      } else {
+        for (const row of (data ?? []) as Array<{ slug: string; content: string | null }>) {
+          const words = (row.content || '').trim().split(/\s+/).length
+          readTimes.set(row.slug, `${Math.max(1, Math.round(words / 200))} min read`)
+        }
+      }
+    } catch (e) {
+      console.warn('[blog] related read-time query threw:', e)
+    }
+  }
+
+  return top.map(({ slug, title, date, readTime }) => ({
+    slug,
+    title,
+    date,
+    // A missing read time is not worth failing the rail over — drop the label.
+    readTime: readTime ?? readTimes.get(slug) ?? '',
+  }))
 }
 
 const POSTS: Record<string, {
@@ -4535,14 +4675,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     )
   }
 
-  const dbPosts    = await getAllDbPosts()
-  const allPosts   = [
-    ...Object.entries(POSTS),
-    ...dbPosts.filter(([s]) => !POSTS[s]), // deduplicate: skip if slug exists in POSTS
-  ]
-  const otherPosts = allPosts
-    .filter(([s]) => s !== slug)
-    .slice(0, 3)
+  const otherPosts = await getRelatedPosts(slug, post.category)
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -4668,12 +4801,14 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <div>
             <h2 className="text-lg font-extrabold tracking-tight mb-6 text-gray-100">More from the blog</h2>
             <div className="space-y-3">
-              {otherPosts.map(([slug, p]) => (
-                <Link key={slug} href={`/blog/${slug}`}
+              {otherPosts.map((p) => (
+                <Link key={p.slug} href={`/blog/${p.slug}`}
                   className="flex items-center gap-4 p-4 border border-gray-800 rounded-2xl hover:border-gray-600 transition-all group">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate text-gray-100 group-hover:text-gray-300 transition-colors">{p.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{p.date} · {p.readTime}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {[p.date, p.readTime].filter(Boolean).join(' · ')}
+                    </p>
                   </div>
                   <span className="text-gray-600 group-hover:text-white transition-colors">→</span>
                 </Link>
