@@ -529,16 +529,22 @@ async function handleFirstPostCredits(userId: string) {
       .eq('status', 'published')
 
     if (count === 1) {
-      const { data: userSettings } = await getSupabaseAdmin()
+      // earned_credits is one of the three real pools (monthly/earned/paid) that
+      // deduct_ai_credits and the sidebar balance actually read. ai_credits_remaining
+      // is a legacy fallback the balance only consults when monthly_credits_remaining
+      // is NULL — never true for a modern account (see PR #595, same bug on the
+      // onboarding bonus). Writing this bonus there made it invisible and unspendable.
+      const { data: userSettings, error: settingsErr } = await getSupabaseAdmin()
         .from('user_settings')
-        .select('ai_credits_remaining')
+        .select('earned_credits')
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
+      if (settingsErr) console.warn('[first-post-credit] settings lookup failed:', settingsErr.message)
 
       if (userSettings) {
         await getSupabaseAdmin()
           .from('user_settings')
-          .update({ ai_credits_remaining: (userSettings.ai_credits_remaining ?? 0) + 10 })
+          .update({ earned_credits: (userSettings.earned_credits ?? 0) + 10 })
           .eq('user_id', userId)
 
         // referred_by is a profiles column, not a user_settings one. It used
@@ -552,16 +558,17 @@ async function handleFirstPostCredits(userId: string) {
           .maybeSingle()
 
         if (refProfile?.referred_by) {
-          const { data: referrerSettings } = await getSupabaseAdmin()
+          const { data: referrerSettings, error: referrerErr } = await getSupabaseAdmin()
             .from('user_settings')
-            .select('ai_credits_remaining')
+            .select('earned_credits')
             .eq('user_id', refProfile.referred_by)
-            .single()
+            .maybeSingle()
+          if (referrerErr) console.warn('[first-post-credit] referrer settings lookup failed:', referrerErr.message)
 
           if (referrerSettings) {
             await getSupabaseAdmin()
               .from('user_settings')
-              .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + 10 })
+              .update({ earned_credits: (referrerSettings.earned_credits ?? 0) + 10 })
               .eq('user_id', refProfile.referred_by)
           }
         }
