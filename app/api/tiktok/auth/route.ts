@@ -23,6 +23,15 @@ export async function GET() {
     response_type: 'code',
     redirect_uri:  `${appUrl}/api/tiktok/callback`,
     state,
+    // Without this, TikTok skips the authorization page entirely for a
+    // browser session that's already logged into TikTok and has previously
+    // approved this app -- it silently re-auths and redirects straight back.
+    // That's the right default for a returning user reconnecting, but it also
+    // means a disconnect-then-reconnect never actually shows the consent
+    // screen, which both looks broken to a user who expects to pick an
+    // account and undermines a demo video meant to show TikTok's own consent
+    // screen for the content sharing audit.
+    disable_auto_auth: '1',
   })
 
   return NextResponse.redirect(
