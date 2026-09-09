@@ -608,7 +608,7 @@ export const fetchPostAnalytics = inngest.createFunction(
   { id: 'fetch-post-analytics', retries: 2 },
   { event: 'post/published' },
   async ({ event, step }) => {
-    const { postId, platformPostIds } = event.data as {
+    const { postId, userId, platformPostIds } = event.data as {
       postId: string
       userId: string
       platformPostIds: Record<string, string>
@@ -640,11 +640,21 @@ export const fetchPostAnalytics = inngest.createFunction(
       const mastodonId = platformPostIds?.mastodon
       if (mastodonId) {
         try {
+          // userId was typed on event.data but never destructured above, so this
+          // query had no user_id filter at all -- it read connected_accounts for
+          // ANY user on platform='mastodon' globally, not the post owner's. With
+          // 0-1 real Mastodon-connected users total that returned the only row
+          // that could match; the moment a second user connects Mastodon this
+          // either starts fetching engagement with the wrong account's token or
+          // throws on "multiple rows" for every post published, by anyone.
           const { data: account } = await getSupabaseAdmin()
             .from('connected_accounts')
             .select('platform_user_id, access_token')
+            .eq('user_id', userId)
             .eq('platform', 'mastodon')
-            .single()
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
           if (account) {
             const instance = account.platform_user_id?.split('@')[1]
             if (instance) {

@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
     .select('access_token, refresh_token, platform_user_id')
     .eq('user_id', user.id)
     .eq('platform', 'bluesky')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!account) return NextResponse.json({ messages: [] })
 

@@ -4,17 +4,42 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 // LinkedIn UGC posts max length
 const MAX_LINKEDIN_LENGTH = 3000
 
-export async function publishToLinkedIn(userId: string, content: string): Promise<string> {
+export async function publishToLinkedIn(
+  userId:     string,
+  content:    string,
+  workspaceId?: string | null,
+  accountId?:   string
+): Promise<string> {
   if (content.length > MAX_LINKEDIN_LENGTH) {
     throw new Error(`Post exceeds LinkedIn's ${MAX_LINKEDIN_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
   }
 
-  const { data: account, error: accountError } = await getSupabaseAdmin()
+  // connected_accounts rows for LinkedIn are never workspace-scoped today (the
+  // OAuth callback doesn't set workspace_id), but Pro/Agency plans explicitly
+  // sell up to 5-10 connected LinkedIn accounts per platform. This used to be
+  // .single() with no filter at all, which throws "multiple rows" the moment a
+  // user connects a second account -- every LinkedIn post then failed with a
+  // misleading "No LinkedIn account connected." Mirrors the Bluesky/Mastodon/
+  // Twitter pattern: honor an explicit account pick, else fall back to the most
+  // recently connected one instead of erroring.
+  let query = getSupabaseAdmin()
     .from('connected_accounts')
     .select('access_token, platform_user_id')
     .eq('user_id', userId)
     .eq('platform', 'linkedin')
-    .single()
+
+  if (accountId) {
+    query = query.eq('id', accountId)
+  } else if (workspaceId) {
+    query = query.eq('workspace_id', workspaceId)
+  } else {
+    query = query.is('workspace_id', null)
+  }
+
+  const { data: account, error: accountError } = await query
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (accountError || !account) {
     throw new Error('No LinkedIn account connected. Go to Accounts to connect your LinkedIn account.')

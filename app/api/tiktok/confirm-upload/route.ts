@@ -3,13 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
 
-const PLAN_TIKTOK_QUOTA: Record<string, number> = {
-  free:          20,
-  pro:           60,
-  pro_annual:    60,
-  agency:        200,
-  agency_annual: 200,
+const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
+  free:   20,
+  pro:    60,
+  agency: 200,
 }
 
 export async function POST(request: NextRequest) {
@@ -53,14 +52,10 @@ export async function POST(request: NextRequest) {
 
   if (!publish_id) return NextResponse.json({ error: 'publish_id required' }, { status: 400 })
 
-  // Check quota
-  const { data: settings } = await getSupabaseAdmin()
-    .from('user_settings')
-    .select('plan')
-    .eq('user_id', user.id)
-    .single()
-
-  const plan  = settings?.plan || 'free'
+  // Check quota — resolved through resolveWorkspacePlan, not a bare user_settings
+  // read, so a workspace-specific plan override isn't silently ignored the way
+  // workspaces.plan was for the first paying customer (see lib/plan.ts).
+  const plan  = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, workspace_id || null)
   const quota = PLAN_TIKTOK_QUOTA[plan] ?? 5
 
   const { data: ws } = await getSupabaseAdmin()

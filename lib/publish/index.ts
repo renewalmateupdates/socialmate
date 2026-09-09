@@ -53,7 +53,7 @@ export async function publishToAll(
           postId = await publishToBluesky(userId, content, workspaceId, selectedAccountIds['bluesky'], media)
           break
         case 'telegram':
-          postId = await publishToTelegram(userId, content, destId, media)
+          postId = await publishToTelegram(userId, content, destId, media, selectedAccountIds['telegram'])
           break
         case 'mastodon':
           postId = await publishToMastodon(userId, content, workspaceId, selectedAccountIds['mastodon'], media)
@@ -62,7 +62,7 @@ export async function publishToAll(
           postId = await publishToYouTube(userId, content)
           break
         case 'linkedin':
-          postId = await publishToLinkedIn(userId, content)
+          postId = await publishToLinkedIn(userId, content, workspaceId, selectedAccountIds['linkedin'])
           break
         case 'pinterest':
           postId = await publishToPinterest(userId, content, destId)

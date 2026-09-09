@@ -8,20 +8,33 @@ export async function publishToTelegram(
   userId:        string,
   content:       string,
   destinationId?: string,
-  mediaUrls?:    string[]
+  mediaUrls?:    string[],
+  accountId?:    string
 ): Promise<string> {
   // Enforce 4096 character limit
   if (content.length > MAX_TELEGRAM_LENGTH) {
     throw new Error(`Post exceeds Telegram's ${MAX_TELEGRAM_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
   }
 
-  // Get the bot token from connected_accounts
-  const { data: account, error: accountError } = await getSupabaseAdmin()
+  // Get the bot token from connected_accounts. This was .single() with no cap
+  // and no account filter -- fine for one bot, but Pro/Agency plans sell up to
+  // 5-10 connected accounts per platform, and a second connected Telegram bot
+  // made .single() throw "multiple rows", failing every Telegram post with a
+  // misleading "No Telegram account connected." An explicit accountId (same as
+  // Bluesky/Mastodon/Twitter/LinkedIn) picks the right bot; otherwise fall back
+  // to the most recently connected one instead of erroring.
+  let acctQuery = getSupabaseAdmin()
     .from('connected_accounts')
     .select('access_token')
     .eq('user_id', userId)
     .eq('platform', 'telegram')
-    .single()
+
+  if (accountId) acctQuery = acctQuery.eq('id', accountId)
+
+  const { data: account, error: accountError } = await acctQuery
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (accountError || !account?.access_token) {
     throw new Error('No Telegram account connected. Go to Accounts to connect your Telegram bot.')
@@ -33,25 +46,27 @@ export async function publishToTelegram(
   let chatId: string | null = null
 
   if (destinationId) {
-    const { data: dest } = await getSupabaseAdmin()
+    const { data: dest, error: destErr } = await getSupabaseAdmin()
       .from('post_destinations')
       .select('destination_id')
       .eq('id', destinationId)
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
+    if (destErr) console.warn('[Telegram] destination lookup failed:', destErr.message)
     chatId = dest?.destination_id || null
   }
 
   // Fall back to first saved Telegram destination
   if (!chatId) {
-    const { data: dest } = await getSupabaseAdmin()
+    const { data: dest, error: fallbackErr } = await getSupabaseAdmin()
       .from('post_destinations')
       .select('destination_id')
       .eq('user_id', userId)
       .eq('platform', 'telegram')
       .order('created_at', { ascending: true })
       .limit(1)
-      .single()
+      .maybeSingle()
+    if (fallbackErr) console.warn('[Telegram] fallback destination lookup failed:', fallbackErr.message)
     chatId = dest?.destination_id || null
   }
 
