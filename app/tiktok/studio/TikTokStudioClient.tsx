@@ -359,14 +359,8 @@ function PostSettingsPanel({
               {(yourBrand || brandedContent) && (
                 <p className="text-[11px] leading-relaxed text-ink-muted">
                   {brandedContent
-                    ? 'Your video will be labelled Paid partnership. '
-                    : 'Your video will be labelled Promotional content. '}
-                  By posting, you agree to TikTok&apos;s{' '}
-                  <a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noopener noreferrer"
-                     className="text-[#fe2c55] underline underline-offset-2">Branded Content Policy</a>
-                  {' '}and{' '}
-                  <a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noopener noreferrer"
-                     className="text-[#fe2c55] underline underline-offset-2">Music Usage Confirmation</a>.
+                    ? 'Your video will be labelled Paid partnership.'
+                    : 'Your video will be labelled Promotional content.'}
                 </p>
               )}
             </div>
@@ -430,6 +424,26 @@ function PostSettingsPanel({
             <span className="text-red-400 text-xs mt-0.5">⚠️</span>
             <p className="text-xs text-red-400">{postError}</p>
           </div>
+        )}
+        {/* TikTok requires a consent declaration before the publish button on
+            every direct post, not only when commercial content is disclosed --
+            it was previously nested inside the disclosure section and only
+            rendered when that was on, so the default (non-commercial) post
+            showed no declaration at all. Drafts don't use post_info at all
+            (TikTok's own inbox endpoint ignores it), so this doesn't apply. */}
+        {scheduleMode !== 'drafts' && (
+          <p className="text-[11px] leading-relaxed text-ink-muted text-center">
+            By posting, you agree to TikTok&apos;s{' '}
+            {brandedContent && (
+              <>
+                <a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noopener noreferrer"
+                   className="text-[#fe2c55] underline underline-offset-2">Branded Content Policy</a>
+                {' '}and{' '}
+              </>
+            )}
+            <a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noopener noreferrer"
+               className="text-[#fe2c55] underline underline-offset-2">Music Usage Confirmation</a>.
+          </p>
         )}
         <button
           onClick={handlePost}
