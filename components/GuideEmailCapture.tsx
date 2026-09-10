@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { BookOpen, Mailbox } from 'lucide-react'
 
 export default function GuideEmailCapture() {
   const [email, setEmail] = useState('')
@@ -27,13 +28,13 @@ export default function GuideEmailCapture() {
     <div className="my-16 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8 text-center">
       {done ? (
         <>
-          <div className="text-4xl mb-3">📬</div>
+          <Mailbox className="w-9 h-9 mx-auto mb-3 text-amber-400" strokeWidth={1.5} />
           <p className="text-lg font-extrabold text-white mb-2">You're in!</p>
           <p className="text-sm text-gray-400">Check your inbox — I sent you the full guide. New volumes land there first.</p>
         </>
       ) : (
         <>
-          <div className="text-3xl mb-3">📖</div>
+          <BookOpen className="w-7 h-7 mx-auto mb-3 text-amber-400" strokeWidth={1.5} />
           <p className="text-base font-extrabold text-white mb-2">Get new guides when they drop</p>
           <p className="text-sm text-gray-400 mb-6 max-w-sm mx-auto leading-relaxed">
             No courses. No upsells. Just the real stuff — straight to your inbox, free forever.

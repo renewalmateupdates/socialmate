@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useTheme, ACCENT_THEMES } from '@/contexts/ThemeContext'
+import { Moon, Sun } from 'lucide-react'
 
 const THEME_VIS_KEY = 'sidebar_theme_visible'
 
@@ -45,8 +46,8 @@ export default function ThemeToggle() {
         <>
           {/* Dark mode toggle */}
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>
-              {isDark ? '🌙 Dark mode' : '☀️ Light mode'}
+            <span className="text-xs font-semibold inline-flex items-center gap-1.5" style={{ color: 'var(--sidebar-muted)' }}>
+              {isDark ? <Moon size={13} strokeWidth={2} /> : <Sun size={13} strokeWidth={2} />} {isDark ? 'Dark mode' : 'Light mode'}
             </span>
 
             <button

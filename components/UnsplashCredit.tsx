@@ -1,4 +1,5 @@
 'use client'
+import { Camera } from 'lucide-react'
 
 /**
  * Parses a media_urls array and renders:
@@ -52,7 +53,7 @@ export default function UnsplashCredit({ mediaUrls, size = 'sm' }: Props) {
       {/* Attribution — required by Unsplash API guidelines */}
       {attribution && (
         <p className="mt-1 text-[10px] text-gray-400 dark:text-gray-500">
-          📷{' '}
+          <Camera size={10} strokeWidth={2} className="inline -mt-0.5 mr-0.5" />{' '}
           <a
             href={`${attribution.url}?utm_source=socialmate&utm_medium=referral`}
             target="_blank"

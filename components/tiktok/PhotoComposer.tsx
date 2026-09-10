@@ -1,5 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { X as CloseIcon } from 'lucide-react'
 
 /**
  * Build a video out of stills, inside the studio.
@@ -352,7 +353,7 @@ export default function PhotoComposer({ onComposed, onCancel }: Props) {
                   className="px-2 py-0.5 rounded-md border border-edge text-ink-muted disabled:opacity-30 hover:text-ink-high text-[10px]">↓</button>
               </div>
               <button onClick={() => remove(i)} aria-label="Remove"
-                className="shrink-0 px-2 py-1 rounded-md text-ink-faint hover:text-alert transition-colors text-xs">✕</button>
+                className="shrink-0 px-2 py-1 rounded-md text-ink-faint hover:text-alert transition-colors"><CloseIcon size={12} strokeWidth={2} /></button>
             </div>
           ))}
           <button

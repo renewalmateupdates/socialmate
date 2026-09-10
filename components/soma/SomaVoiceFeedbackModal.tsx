@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Check, Dna, Mic, X as CloseIcon } from 'lucide-react'
 
 // Rotating question pool — SOMA picks 3 each time to keep it fresh
 const QUESTION_POOL = [
@@ -162,7 +163,7 @@ export default function SomaVoiceFeedbackModal({ projectId, generationCount, onC
   if (done) return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
-        <div className="text-4xl mb-4">🧬</div>
+        <Dna className="w-9 h-9 mx-auto mb-4 text-purple-400" strokeWidth={1.5} />
         <h3 className="text-white font-semibold text-lg mb-2">Voice DNA updated</h3>
         <p className="text-gray-400 text-sm mb-6">SOMA learned something new about you. Every response makes the next batch sharper.</p>
         <button onClick={onClose} className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors">
@@ -177,11 +178,11 @@ export default function SomaVoiceFeedbackModal({ projectId, generationCount, onC
       <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <div className="text-2xl mb-1">🎙️</div>
+            <Mic className="w-6 h-6 mb-1 text-purple-400" strokeWidth={1.5} />
             <h3 className="text-white font-bold text-lg">3 quick questions</h3>
             <p className="text-gray-400 text-sm">Help SOMA learn your voice. Takes 30 seconds.</p>
           </div>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-400 text-xl ml-4">✕</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-400 ml-4"><CloseIcon size={18} strokeWidth={2} /></button>
         </div>
 
         <div className="flex flex-col gap-6">
@@ -203,7 +204,7 @@ export default function SomaVoiceFeedbackModal({ projectId, generationCount, onC
                           : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-200'
                       }`}
                     >
-                      {responses[q.key] === opt && '✓ '}{opt}
+                      {responses[q.key] === opt && <Check size={13} strokeWidth={2.5} className="inline mr-1 -mt-0.5" />}{opt}
                     </button>
                   ))}
                 </div>

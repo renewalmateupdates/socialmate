@@ -1,12 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { Bug, HeartHandshake, Lightbulb, MessageCircle, X as CloseIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 type FeedbackType = 'bug' | 'feature' | 'general'
 
-const TYPES: { id: FeedbackType; label: string; emoji: string }[] = [
-  { id: 'bug',     label: 'Bug',     emoji: '🐛' },
-  { id: 'feature', label: 'Idea',    emoji: '💡' },
-  { id: 'general', label: 'General', emoji: '💬' },
+const TYPES: { id: FeedbackType; label: string; icon: LucideIcon }[] = [
+  { id: 'bug',     label: 'Bug',     icon: Bug },
+  { id: 'feature', label: 'Idea',    icon: Lightbulb },
+  { id: 'general', label: 'General', icon: MessageCircle },
 ]
 
 export default function FeedbackWidget() {
@@ -82,7 +84,7 @@ export default function FeedbackWidget() {
           >
             {done ? (
               <div className="text-center py-6">
-                <div className="text-4xl mb-3">🙏</div>
+                <HeartHandshake className="w-9 h-9 mx-auto mb-3 text-amber-500" strokeWidth={1.5} />
                 <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Thanks! We read every message ✓</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Goes straight to the founder.</p>
               </div>
@@ -92,8 +94,8 @@ export default function FeedbackWidget() {
                   <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Send Feedback</p>
                   <button
                     onClick={handleClose}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all text-xl leading-none w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    ×
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <CloseIcon size={16} strokeWidth={2} />
                   </button>
                 </div>
 
@@ -106,7 +108,7 @@ export default function FeedbackWidget() {
                           ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
                           : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-400'
                       }`}>
-                      {t.emoji} {t.label}
+                      <t.icon size={13} strokeWidth={2} className="inline -mt-0.5 mr-1" /> {t.label}
                     </button>
                   ))}
                 </div>
@@ -154,9 +156,9 @@ export default function FeedbackWidget() {
       {/* Floating trigger button — bottom right */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors flex items-center justify-center text-lg"
+        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors flex items-center justify-center"
         title="Send feedback">
-        {open ? '×' : '💬'}
+        {open ? <CloseIcon size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}
       </button>
     </>
   )

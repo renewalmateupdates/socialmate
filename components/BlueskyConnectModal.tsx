@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { X as CloseIcon } from 'lucide-react'
 
 interface BlueskyConnectModalProps {
   onSuccess: (handle: string, displayName: string) => void
@@ -63,9 +64,9 @@ export default function BlueskyConnectModal({ onSuccess, onClose, workspaceId }:
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-white transition-colors text-xl leading-none"
+            className="text-gray-500 hover:text-white transition-colors"
           >
-            ✕
+            <CloseIcon size={20} strokeWidth={2} />
           </button>
         </div>
 

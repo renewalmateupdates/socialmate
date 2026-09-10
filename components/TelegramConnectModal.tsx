@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { X as CloseIcon } from 'lucide-react'
+import PlatformIcon from '@/components/landing/PlatformIcon'
 
 interface TelegramConnectModalProps {
   onSuccess: (username: string) => void
@@ -52,8 +54,8 @@ export default function TelegramConnectModal({ onSuccess, onClose, workspaceId }
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center text-xl">
-              ✈️
+            <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center">
+              <PlatformIcon name="telegram" size={20} />
             </div>
             <div>
               <h2 className="text-white font-semibold text-base">Connect Telegram</h2>
@@ -62,9 +64,9 @@ export default function TelegramConnectModal({ onSuccess, onClose, workspaceId }
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-white transition-colors text-xl leading-none"
+            className="text-gray-500 hover:text-white transition-colors"
           >
-            ✕
+            <CloseIcon size={20} strokeWidth={2} />
           </button>
         </div>
 
