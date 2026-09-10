@@ -7,7 +7,7 @@ import Sidebar from '@/components/Sidebar'
 import SomaCreditPacks from '@/components/SomaCreditPacks'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
-import { CircleDot, ClipboardList, Dna, Moon, Rocket, Sun, Sunrise, Zap } from 'lucide-react'
+import { CheckCircle2, CircleDot, ClipboardList, Dna, FolderOpen, Moon, Rocket, Sun, Sunrise, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -731,7 +731,7 @@ export default function SomaDashboardPage() {
             </div>
           ) : drafts.length === 0 ? (
             <div className="text-center py-10">
-              <span className="text-3xl mb-3 block">✅</span>
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-3" strokeWidth={1.5} />
               <p className="text-sm font-semibold text-gray-300">{t('app_soma_dashboard.queue_clear')}</p>
               <p className="text-xs text-gray-500 mt-1">{t('app_soma_dashboard.queue_clear_sub')}</p>
               <Link
@@ -883,7 +883,7 @@ export default function SomaDashboardPage() {
             href="/soma/weekly"
             className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/30 hover:bg-gray-900/80 transition-all p-4 group"
           >
-            <span className="text-xl">📋</span>
+            <ClipboardList size={20} strokeWidth={1.75} />
             <div>
               <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{t('app_soma_dashboard.quick_ingestion')}</p>
               <p className="text-[11px] text-gray-500 mt-0.5">{t('app_soma_dashboard.quick_ingestion_sub')}</p>
@@ -895,7 +895,7 @@ export default function SomaDashboardPage() {
             href="/drafts"
             className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/30 hover:bg-gray-900/80 transition-all p-4 group"
           >
-            <span className="text-xl">📂</span>
+            <FolderOpen size={20} strokeWidth={1.75} />
             <div>
               <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{t('app_soma_dashboard.quick_drafts')}</p>
               <p className="text-[11px] text-gray-500 mt-0.5">{t('app_soma_dashboard.quick_drafts_sub')}</p>
