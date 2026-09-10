@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { Check, X as CloseIcon } from 'lucide-react'
 
 const TOTAL_STEPS = 5
 const LS_STEP_KEY = 'soma_onboarding_step'
@@ -336,7 +337,7 @@ export default function SomaOnboardingPage() {
                         : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500'
                       }`}
                   >
-                    {selected && <span className="mr-2 text-amber-400">✓</span>}
+                    {selected && <Check size={14} strokeWidth={2.5} className="inline mr-2 text-amber-400" />}
                     {opt.label}
                   </button>
                 )
@@ -460,7 +461,7 @@ export default function SomaOnboardingPage() {
                         : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500'
                       }`}
                   >
-                    {checked && <span className="mr-2 text-red-400">✗</span>}
+                    {checked && <CloseIcon size={14} strokeWidth={2.5} className="inline mr-2 text-red-400" />}
                     {opt.label}
                   </button>
                 )
