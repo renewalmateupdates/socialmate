@@ -6,17 +6,24 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import type { InboxItem } from '@/app/api/inbox/route'
 import { useI18n } from '@/contexts/I18nContext'
+import { Inbox, Lock, Mail } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Mail size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const LS_KEY = 'sm_inbox_read_ids'
 
 type Platform = 'all' | 'bluesky' | 'mastodon' | 'telegram' | 'discord'
 
-const PLATFORM_META: Record<string, { icon: string; label: string; color: string }> = {
-  bluesky:  { icon: '🦋', label: 'Bluesky',  color: 'bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400'             },
-  mastodon: { icon: '🐘', label: 'Mastodon', color: 'bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-  telegram: { icon: '✈️', label: 'Telegram', color: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'         },
-  discord:  { icon: '💬', label: 'Discord',  color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+const PLATFORM_META: Record<string, { label: string; color: string }> = {
+  bluesky:  { label: 'Bluesky',  color: 'bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400'             },
+  mastodon: { label: 'Mastodon', color: 'bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+  telegram: { label: 'Telegram', color: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'         },
+  discord:  { label: 'Discord',  color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
 }
 
 const TYPE_META: Record<string, { label: string; color: string }> = {
@@ -191,7 +198,7 @@ export default function InboxPage() {
           <div className="flex items-start justify-between mb-5">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">📬</span>
+                <Inbox className="w-6 h-6" strokeWidth={1.75} />
                 <h1 className="text-2xl font-extrabold tracking-tight">{t('app_notifications.title')}</h1>
                 {unreadTotal > 0 && (
                   <span className="text-xs font-bold bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded-full">
@@ -249,8 +256,8 @@ export default function InboxPage() {
                           ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                           : 'text-gray-400 dark:text-gray-600 cursor-default opacity-60'
                     }`}>
-                    <span className="text-base leading-none">
-                      {tab === 'all' ? '📬' : meta?.icon}
+                    <span className="text-base leading-none flex items-center">
+                      {tab === 'all' ? <Inbox size={16} strokeWidth={1.75} /> : <PlatformGlyph id={tab} size={16} />}
                     </span>
                     <span className="flex-1 truncate">
                       {tab === 'all' ? 'All' : meta?.label}
@@ -270,7 +277,7 @@ export default function InboxPage() {
 
               {/* X/Twitter coming soon */}
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-400 dark:text-gray-600 opacity-60 cursor-default select-none mt-1">
-                <span className="text-base leading-none">🔒</span>
+                <span className="text-base leading-none flex items-center"><Lock size={16} strokeWidth={1.75} /></span>
                 <span className="flex-1 truncate">X / Twitter</span>
               </div>
               <p className="text-xs text-gray-400 dark:text-gray-500 px-3 pb-1 leading-snug">
@@ -297,7 +304,7 @@ export default function InboxPage() {
                           ? 'bg-surface border border-theme text-gray-600 dark:text-gray-400'
                           : 'bg-surface border border-theme text-gray-400 opacity-50'
                     }`}>
-                    {tab === 'all' ? '📬' : meta?.icon}
+                    {tab === 'all' ? <Inbox size={13} strokeWidth={1.75} /> : <PlatformGlyph id={tab} size={13} />}
                     {tab === 'all' ? 'All' : meta?.label}
                     {count > 0 && isConnected && (
                       <span className="bg-red-500 text-white text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
@@ -453,12 +460,12 @@ function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string)
               onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
           ) : (
-            <span className="text-xl">{platformMeta?.icon || '📱'}</span>
+            <PlatformGlyph id={item.platform} size={20} />
           )}
           {/* Small platform badge on avatar */}
           {item.from_avatar && (
             <span className="absolute -bottom-0.5 -right-0.5 text-xs leading-none bg-white dark:bg-gray-900 rounded-full p-0.5">
-              {platformMeta?.icon}
+              <PlatformGlyph id={item.platform} size={11} />
             </span>
           )}
         </div>
@@ -492,8 +499,8 @@ function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string)
 
           {/* Row 3: platform label + reply button */}
           <div className="flex items-center gap-1 mt-1.5">
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${platformMeta?.color ?? ''}`}>
-              {platformMeta?.icon} {platformMeta?.label}
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${platformMeta?.color ?? ''}`}>
+              <PlatformGlyph id={item.platform} size={11} /> {platformMeta?.label}
             </span>
             {item.post_url && (
               <span className="text-xs text-gray-400 dark:text-gray-500">↗</span>
@@ -577,7 +584,7 @@ function EmptyState({
     const meta = PLATFORM_META[platform]
     return (
       <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-        <div className="text-4xl mb-3">{meta?.icon}</div>
+        <div className="mb-3 flex justify-center"><PlatformGlyph id={platform} size={36} /></div>
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
           {meta?.label} not connected
         </p>
@@ -595,7 +602,7 @@ function EmptyState({
   if (connectedPlatforms.length === 0) {
     return (
       <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-        <div className="text-4xl mb-3">📭</div>
+        <Inbox className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
           {t('app_accounts.no_accounts')}
         </p>
@@ -612,7 +619,7 @@ function EmptyState({
 
   return (
     <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-      <div className="text-3xl mb-2">📭</div>
+      <Inbox className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
       <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
         {t('app_notifications.no_notifications_sub')}
       </p>
