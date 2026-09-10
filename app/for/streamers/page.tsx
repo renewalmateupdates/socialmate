@@ -3,40 +3,49 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, CalendarDays, Clapperboard, Clock, Gamepad2, Music2, PenLine, PlayCircle, Recycle, Rocket, Search } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'Bluesky',   icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',  icon: '🐘', note: 'Live' },
-  { name: 'Discord',   icon: '💬', note: 'Live' },
-  { name: 'Telegram',  icon: '✈️', note: 'Live' },
-  { name: 'TikTok',    icon: '🎵', note: 'Live' },
-  { name: 'LinkedIn',  icon: '💼', note: 'Live' },
+  { name: 'Bluesky',   icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',  icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',   icon: 'discord', note: 'Live' },
+  { name: 'Telegram',  icon: 'telegram', note: 'Live' },
+  { name: 'TikTok',    icon: 'tiktok', note: 'Live' },
+  { name: 'LinkedIn',  icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Kick',      icon: '🟢' },
-  { name: 'YouTube',   icon: '▶️' },
-  { name: 'Instagram', icon: '📸' },
-  { name: 'Threads',   icon: '🧵' },
-  { name: 'Facebook',  icon: '📘' },
+  { name: 'Kick',      icon: 'kick' },
+  { name: 'YouTube',   icon: 'youtube' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Threads',   icon: 'threads' },
+  { name: 'Facebook',  icon: 'facebook' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Open Twitch Dashboard. Find the clip. Copy the link.',
     after:  'Browse all your Twitch clips inside SocialMate.',
-    icon:   '🎬',
+    icon:   Clapperboard,
   },
   {
     before: 'Open Buffer / Hootsuite. Paste the link. Type a caption.',
     after:  'Pick a clip, write once, schedule everywhere.',
-    icon:   '✍️',
+    icon:   PenLine,
   },
   {
     before: 'Repeat for every platform. 6 tabs open, 45 minutes gone.',
     after:  'Hit schedule. Done in 30 seconds.',
-    icon:   '⏱️',
+    icon:   Clock,
   },
 ]
 
@@ -44,56 +53,56 @@ const FEATURES = [
   {
     title: 'Twitch Clip Browser',
     desc:  'Connect your Twitch account and browse every clip right inside SocialMate. No more switching tabs or hunting for URLs.',
-    icon:  '🎮',
+    icon:  Gamepad2,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'YouTube Video Scheduler',
     desc:  'Paste your YouTube channel URL — no API key, no OAuth — and browse your uploads ready to schedule.',
-    icon:  '▶️',
+    icon:  PlayCircle,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'Search Any Twitch Channel',
     desc:  'Not your clips? No problem. Search any public Twitch channel and grab clips from creators you collab with.',
-    icon:  '🔍',
+    icon:  Search,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'One-Click Multi-Platform Scheduling',
     desc:  'Pick a clip, write your caption, choose your platforms, hit schedule. Posts go out to Bluesky, X, Mastodon, Discord, and Telegram in one shot.',
-    icon:  '🚀',
+    icon:  Rocket,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'TikTok & Kick Scheduling',
     desc:  'Directly schedule your best clips to TikTok and Kick from the same dashboard. API access is being finalized.',
-    icon:  '🎵',
+    icon:  Music2,
     live:  false,
     badge: 'Coming soon',
   },
   {
     title: 'Clip Calendar & Bulk Scheduling',
     desc:  'Plan your entire week of clips in advance. Bulk-upload multiple clips and assign them to different days automatically.',
-    icon:  '📅',
+    icon:  CalendarDays,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'AI Caption Writer',
     desc:  'No idea what to write? Let the AI write a punchy caption for your clip — hooks, emojis, hashtags included.',
-    icon:  '🤖',
+    icon:  Bot,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'Evergreen Clip Recycling',
     desc:  'Your best clips don\'t die after one post. Set them to automatically recycle every few weeks and keep your content working forever.',
-    icon:  '♻️',
+    icon:  Recycle,
     live:  true,
     badge: 'Live now',
   },
@@ -211,7 +220,7 @@ export default function StreamersPage() {
                 </div>
                 <div className="bg-amber/10 border border-amber/40 rounded-2xl p-5">
                   <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -237,7 +246,7 @@ export default function StreamersPage() {
                   : 'bg-panel border-edge opacity-70'
                 }`}>
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${f.live
                     ? 'bg-jade/10 text-jade'
                     : 'bg-raised text-ink-body'
@@ -285,7 +294,7 @@ export default function StreamersPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_streamers.platforms_live_badge')}</span>
               </div>
@@ -300,7 +309,7 @@ export default function StreamersPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_streamers.pipeline_badge')}</span>
               </div>

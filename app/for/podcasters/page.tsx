@@ -3,44 +3,53 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, Briefcase, Megaphone, MessageCircle, Mic, Package, PenLine, Radio, Recycle, Rocket, Zap } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'Bluesky',     icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',    icon: '🐘', note: 'Live' },
-  { name: 'Discord',     icon: '💬', note: 'Live' },
-  { name: 'Telegram',    icon: '✈️', note: 'Live' },
-  { name: 'TikTok',      icon: '🎵', note: 'Live' },
-  { name: 'LinkedIn',    icon: '💼', note: 'Live' },
+  { name: 'Bluesky',     icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',    icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',     icon: 'discord', note: 'Live' },
+  { name: 'Telegram',    icon: 'telegram', note: 'Live' },
+  { name: 'TikTok',      icon: 'tiktok', note: 'Live' },
+  { name: 'LinkedIn',    icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'YouTube',   icon: '▶️' },
-  { name: 'Instagram', icon: '📸' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'Threads',   icon: '🧵' },
+  { name: 'YouTube',   icon: 'youtube' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Threads',   icon: 'threads' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'New episode drops. Now post about it on Twitter. Then LinkedIn. Then Bluesky. Then Discord. Then Telegram.',
     after:  'Write one episode announcement. Post to all 7 platforms in 30 seconds.',
-    icon:   '📣',
+    icon:   Megaphone,
   },
   {
     before: 'Guest comes on your show. You scramble to announce it across 5 apps with no time left.',
     after:  'Pre-schedule all guest announcement posts before the episode even airs.',
-    icon:   '🎙️',
+    icon:   Mic,
   },
   {
     before: 'Your audiogram is ready but you have no idea what caption to write for each platform.',
     after:  'AI writes platform-native captions for your audiogram in one click.',
-    icon:   '✍️',
+    icon:   PenLine,
   },
   {
     before: 'Your listener community is scattered across Reddit, Discord, and DMs.',
     after:  'Build your community in Discord — schedule announcements and updates directly to your server.',
-    icon:   '💬',
+    icon:   MessageCircle,
   },
 ]
 
@@ -48,49 +57,49 @@ const FEATURES = [
   {
     title: 'Episode Launch Scheduler',
     desc:  'Schedule episode drop announcements to all 7 platforms at once. Set it before you publish and it fires automatically when your episode goes live.',
-    icon:  '🚀',
+    icon:  Rocket,
     badge: 'Free',
   },
   {
     title: 'AI Caption Generator',
     desc:  'Stuck on what to write? Paste your episode title and description — AI writes punchy, platform-native captions. Hook variants, calls to action, the whole thing.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'Discord Listener Community',
     desc:  'Schedule episode announcements, Q&As, and listener updates directly to your Discord server. Build real community without switching apps.',
-    icon:  '💬',
+    icon:  MessageCircle,
     badge: 'Free',
   },
   {
     title: 'SOMA — Episode Promo on Autopilot',
     desc:  'Upload your show notes. SOMA generates a full week of episode promo content: teasers, quotes, guest callouts, listener questions — platform-native for each channel.',
-    icon:  '⚡',
+    icon:  Zap,
     badge: 'Pro',
   },
   {
     title: 'Content Repurposer',
     desc:  'Turn one episode into 6 types of content automatically: Twitter thread, LinkedIn post, email newsletter intro, short hook, caption, and more. 1 click.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Pro',
   },
   {
     title: 'Evergreen Episode Recycling',
     desc:  'Your back catalog has gold in it. Set top episodes to auto-recycle every few weeks. Old episodes become new listeners.',
-    icon:  '📻',
+    icon:  Radio,
     badge: 'Free',
   },
   {
     title: 'LinkedIn Scheduling',
     desc:  'LinkedIn is the platform podcasters are sleeping on. Schedule thought leadership posts, guest announcements, and episode clips directly to your professional network.',
-    icon:  '💼',
+    icon:  Briefcase,
     badge: 'Free',
   },
   {
     title: 'Bulk Episode Scheduling',
     desc:  'Launching a new season? Batch schedule all your episode promos for the entire run in one sitting. Set it and forget it for months.',
-    icon:  '📦',
+    icon:  Package,
     badge: 'Free',
   },
 ]
@@ -196,7 +205,7 @@ export default function PodcastersPage() {
                 </div>
                 <div className="bg-amber/10 border border-amber rounded-2xl p-5">
                   <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_podcasters.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -218,7 +227,7 @@ export default function PodcastersPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -267,7 +276,7 @@ export default function PodcastersPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_podcasters.platforms_live_badge')}</span>
               </div>
@@ -279,7 +288,7 @@ export default function PodcastersPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_podcasters.platforms_coming_badge')}</span>
               </div>

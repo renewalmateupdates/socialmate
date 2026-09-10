@@ -3,39 +3,48 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, CalendarDays, MessageCircle, Music2, PenLine, Recycle, RefreshCw } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'TikTok',      icon: '🎵', note: 'Live' },
-  { name: 'Bluesky',    icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live' },
-  { name: 'Discord',    icon: '💬', note: 'Live' },
-  { name: 'Telegram',   icon: '✈️', note: 'Live' },
-  { name: 'LinkedIn',   icon: '💼', note: 'Live' },
+  { name: 'TikTok',      icon: 'tiktok', note: 'Live' },
+  { name: 'Bluesky',    icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',    icon: 'discord', note: 'Live' },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live' },
+  { name: 'LinkedIn',   icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'YouTube',   icon: '▶️' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'Pinterest', icon: '📌' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'YouTube',   icon: 'youtube' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Pinterest', icon: 'pinterest' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Back-to-back clients from 6am to 7pm. Open phone to post. Blank. Brain dead.',
     after:  'Batch your whole week on Sunday. SocialMate posts while you train clients.',
-    icon: '📅',
+    icon: CalendarDays,
   },
   {
     before: 'Post the same transformation photo caption on TikTok, then retype it for X, then Bluesky.',
     after:  'Write once. Schedule to every platform at once. Same content, zero repetition.',
-    icon: '🔄',
+    icon: RefreshCw,
   },
   {
     before: '"What should I even post today?" Stare at the app for 15 minutes. Give up.',
     after:  'SOMA AI writes your captions, hooks, and content ideas based on your niche.',
-    icon: '🤖',
+    icon: Bot,
   },
 ]
 
@@ -43,37 +52,37 @@ const FEATURES = [
   {
     title: 'Batch Schedule a Week in 30 Minutes',
     desc:  'Sunday session: write or generate 7 posts, set your times, hit schedule. The whole week is done. No more daily scramble between sessions.',
-    icon:  '🗓️',
+    icon:  CalendarDays,
     badge: 'Free',
   },
   {
     title: 'SOMA AI Writes Your Content',
     desc:  'Tell SOMA your niche — fat loss coaching, powerlifting, yoga, whatever — and it generates a week of on-brand posts. Captions, hooks, CTAs, all of it.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'TikTok Scheduling',
     desc:  'Schedule your workout demos, client transformations, and tip videos directly to TikTok. TikTok is the #1 discovery platform for fitness — be there consistently.',
-    icon:  '🎵',
+    icon:  Music2,
     badge: 'Free',
   },
   {
     title: 'Discord Community for Client Check-ins',
     desc:  'Post your weekly check-in reminders, accountability updates, and motivational content directly to your Discord server — all scheduled from one place.',
-    icon:  '💬',
+    icon:  MessageCircle,
     badge: 'Free',
   },
   {
     title: 'AI Caption & Hook Generator',
     desc:  'Never write "Transformation Tuesday" again. 15+ AI tools generate punchy hooks, engaging captions, and hashtag sets built for fitness audiences.',
-    icon:  '✍️',
+    icon:  PenLine,
     badge: 'Free',
   },
   {
     title: 'Evergreen Recycling',
     desc:  'Your best tip posts and transformations never die. Set them to auto-recycle and keep your top content working for new followers every few weeks.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Pro',
   },
 ]
@@ -203,7 +212,7 @@ export default function FitnessCoachesPage() {
                 </div>
                 <div className="bg-jade/10 border border-jade/40 rounded-2xl p-5">
                   <p className="text-xs text-jade font-bold uppercase tracking-wide mb-2">{t('for_fitness.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -225,7 +234,7 @@ export default function FitnessCoachesPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -252,7 +261,7 @@ export default function FitnessCoachesPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_fitness.platforms_live_badge')}</span>
               </div>
@@ -263,7 +272,7 @@ export default function FitnessCoachesPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_fitness.platforms_coming_badge')}</span>
               </div>

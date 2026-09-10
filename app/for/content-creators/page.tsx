@@ -3,45 +3,54 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Banknote, Bot, CalendarDays, Clock, Flame, Gift, Mic, PenLine, Recycle, Rocket, Satellite, Zap } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'Bluesky',     icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',    icon: '🐘', note: 'Live' },
-  { name: 'Discord',     icon: '💬', note: 'Live' },
-  { name: 'Telegram',    icon: '✈️', note: 'Live' },
-  { name: 'TikTok',      icon: '🎵', note: 'Live' },
-  { name: 'LinkedIn',    icon: '💼', note: 'Live' },
+  { name: 'Bluesky',     icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',    icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',     icon: 'discord', note: 'Live' },
+  { name: 'Telegram',    icon: 'telegram', note: 'Live' },
+  { name: 'TikTok',      icon: 'tiktok', note: 'Live' },
+  { name: 'LinkedIn',    icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'YouTube',   icon: '▶️' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'Threads',   icon: '🧵' },
-  { name: 'Pinterest', icon: '📌' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'YouTube',   icon: 'youtube' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Threads',   icon: 'threads' },
+  { name: 'Pinterest', icon: 'pinterest' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Open TikTok. Post. Open X. Post. Open LinkedIn. Post. Open Bluesky. Post. 45 minutes gone.',
     after:  'Write once. Post to all 7 platforms in 30 seconds. One compose window.',
-    icon:   '⏱️',
+    icon:   Clock,
   },
   {
     before: 'Try to post daily. Miss three days. Engagement tanks. Feel guilty. Repeat.',
     after:  'Batch a week of content in one sitting. Post consistently without burning out.',
-    icon:   '📅',
+    icon:   CalendarDays,
   },
   {
     before: 'Stare at the caption box. No ideas. No energy. Skip posting entirely.',
     after:  'AI writes your captions, hooks, threads, and content ideas. You just edit and approve.',
-    icon:   '✍️',
+    icon:   PenLine,
   },
   {
     before: 'Hootsuite wants $99/month. Buffer wants $18. You have 5 platforms and a $0 budget.',
     after:  'Get the same scheduling power for $8/month — or completely free.',
-    icon:   '💸',
+    icon:   Banknote,
   },
 ]
 
@@ -49,55 +58,55 @@ const FEATURES = [
   {
     title: '7 Platforms, One Dashboard',
     desc:  'Bluesky, X, TikTok, LinkedIn, Discord, Telegram, Mastodon — all connected. Write once, publish everywhere. No switching apps.',
-    icon:  '📡',
+    icon:  Satellite,
     badge: 'Free',
   },
   {
     title: 'SOMA — AI Content OS',
     desc:  'Tell SOMA your niche and voice. It generates a full week of platform-native posts automatically — TikTok hooks, LinkedIn thoughts, X threads. Done.',
-    icon:  '⚡',
+    icon:  Zap,
     badge: 'Pro',
   },
   {
     title: 'AI Caption & Hook Writer',
     desc:  '20+ AI tools: caption generator, viral hook writer, thread builder, content repurposer, hashtag suggestions, post scorer. All powered by Google Gemini.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'Content Calendar',
     desc:  'Visual calendar view of everything scheduled. Drag, drop, reschedule. See your whole month at a glance. Never wonder "did I post today?" again.',
-    icon:  '📅',
+    icon:  CalendarDays,
     badge: 'Free',
   },
   {
     title: 'Content Repurposer',
     desc:  'Turn one piece of content into 6 formats: Twitter thread, LinkedIn post, email, short hook, caption, audiogram text. 1 click.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Pro',
   },
   {
     title: 'Posting Streak Tracker',
     desc:  'GitHub-style 365-day heatmap. See your consistency, longest streak, and total posts. Streak notifications keep you motivated when you\'re close to a milestone.',
-    icon:  '🔥',
+    icon:  Flame,
     badge: 'Free',
   },
   {
     title: 'Free Plan That Actually Works',
     desc:  '50 AI credits, all 7 platforms, full scheduling calendar, link in bio, drafts, evergreen recycling. Not a demo. A real tool you can run your whole presence on.',
-    icon:  '🎁',
+    icon:  Gift,
     badge: 'Free',
   },
   {
     title: 'Brand Voice AI',
     desc:  'Train the AI on your tone, vocabulary, and style. Every generated post sounds like you — not a template. Your audience will never know it was AI-assisted.',
-    icon:  '🎙️',
+    icon:  Mic,
     badge: 'Pro',
   },
   {
     title: 'Smart Queue & Auto-Schedule',
     desc:  'Have drafts piling up? Smart Queue automatically fills your schedule at optimal times on each platform. 1 click and your queue is full.',
-    icon:  '🚀',
+    icon:  Rocket,
     badge: 'Pro',
   },
 ]
@@ -180,7 +189,7 @@ export default function ContentCreatorsPage() {
                 </div>
                 <div className="bg-amber/10 border border-amber rounded-2xl p-5">
                   <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_content.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -202,7 +211,7 @@ export default function ContentCreatorsPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -230,7 +239,7 @@ export default function ContentCreatorsPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_live_badge')}</span>
               </div>
@@ -247,7 +256,7 @@ export default function ContentCreatorsPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_coming_badge')}</span>
               </div>

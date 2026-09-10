@@ -3,38 +3,47 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Banknote, Bot, CalendarDays, Gift, Heart, Link2, MessageCircle, Users } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'Discord',    icon: '💬', note: 'Live' },
-  { name: 'Telegram',   icon: '✈️', note: 'Live' },
-  { name: 'Bluesky',   icon: '🦋', note: 'Live' },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live' },
-  { name: 'LinkedIn',   icon: '💼', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'TikTok',     icon: '🎵', note: 'Live' },
+  { name: 'Discord',    icon: 'discord', note: 'Live' },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live' },
+  { name: 'Bluesky',   icon: 'bluesky', note: 'Live' },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live' },
+  { name: 'LinkedIn',   icon: 'linkedin', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'YouTube',   icon: '▶️' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'YouTube',   icon: 'youtube' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Hootsuite wants $99/month. Buffer wants $18. You have $0 in your marketing budget.',
     after:  'SocialMate free plan: 50 AI credits, 7 platforms, post calendar. No credit card. No trial. Free forever.',
-    icon: '💸',
+    icon: Banknote,
   },
   {
     before: 'Volunteer social media manager posts for 2 weeks, goes quiet for a month. Engagement tanks.',
     after:  'Schedule a month of content in one session. Stays consistent whether volunteers are available or not.',
-    icon: '📅',
+    icon: CalendarDays,
   },
   {
     before: 'Your community is on Discord and Telegram. Most tools don\'t even support them.',
     after:  'SocialMate is one of very few schedulers that posts directly to Discord servers and Telegram channels.',
-    icon: '💬',
+    icon: MessageCircle,
   },
 ]
 
@@ -42,37 +51,37 @@ const FEATURES = [
   {
     title: 'Free Plan — No Credit Card Required',
     desc:  '50 AI credits, 7 live platforms, post calendar, drafts, link in bio, and 2 team seats. No payment information required. Free forever — not a trial.',
-    icon:  '🎁',
+    icon:  Gift,
     badge: 'Free',
   },
   {
     title: 'Discord & Telegram Scheduling',
     desc:  'Post to your Discord server and Telegram channel directly from SocialMate. Announcement updates, volunteer call-outs, fundraiser countdowns — all scheduled in advance.',
-    icon:  '💬',
+    icon:  MessageCircle,
     badge: 'Free',
   },
   {
     title: 'SOMA AI Writes Cause-Based Content',
     desc:  'Tell SOMA your mission and audience — it generates donation ask posts, volunteer recruitment content, awareness campaign posts, and impact stories that align with your cause.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'SM-Give: 2% of Revenue Goes to Charity',
     desc:  "Every paying SocialMate subscription donates 2% to charity through SM-Give. When you use SocialMate Pro, you're not just saving money on tools — you're part of a platform that gives back.",
-    icon:  '❤️',
+    icon:  Heart,
     badge: 'Free',
   },
   {
     title: 'Link in Bio for Donation Pages',
     desc:  'Free link-in-bio page on all plans. Link your donation page, volunteer signup, petition, event registration, and impact report in one place. No Linktree subscription needed.',
-    icon:  '🔗',
+    icon:  Link2,
     badge: 'Free',
   },
   {
     title: 'Multi-Volunteer Team Access',
     desc:  'Add multiple volunteers and staff to one account. Free plan: 2 seats. Pro: 5 seats. Agency: 15 seats with client workspaces and approval workflows for content review.',
-    icon:  '👥',
+    icon:  Users,
     badge: 'Free',
   },
 ]
@@ -189,7 +198,7 @@ export default function NonprofitsPage() {
       {/* ─── SM-GIVE CALLOUT ─── */}
       <section className="bg-alert/10 border-y border-alert/40 text-ink-high py-8 px-6">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-          <span className="text-4xl flex-shrink-0">❤️</span>
+          <Heart className="w-8 h-8 flex-shrink-0 text-alert" strokeWidth={1.5} />
           <div>
             <p className="text-sm font-extrabold text-alert mb-1">SocialMate gives back — SM-Give</p>
             <p className="text-sm text-ink-body leading-relaxed">
@@ -217,7 +226,7 @@ export default function NonprofitsPage() {
                 </div>
                 <div className="bg-alert/10 border border-alert/40 rounded-2xl p-5">
                   <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_nonprofits.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -239,7 +248,7 @@ export default function NonprofitsPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -266,7 +275,7 @@ export default function NonprofitsPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_nonprofits.platforms_live_badge')}</span>
               </div>
@@ -277,7 +286,7 @@ export default function NonprofitsPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_nonprofits.platforms_coming_badge')}</span>
               </div>
@@ -323,7 +332,7 @@ export default function NonprofitsPage() {
             ))}
           </div>
           <div className="bg-alert/10 border border-alert/40 rounded-2xl p-4 max-w-md mx-auto">
-            <p className="text-sm font-bold text-alert mb-1">🎁 Nonprofit discount</p>
+            <p className="text-sm font-bold text-alert mb-1 flex items-center gap-1.5"><Gift className="w-4 h-4" strokeWidth={2} /> Nonprofit discount</p>
             <p className="text-xs text-ink-body">Use code <span className="font-mono font-bold text-ink-high">NONPROFIT50</span> at checkout for 50% off Pro — that&apos;s $2.50/month. Honor system. No verification required.</p>
             <Link href="/discount" className="text-xs text-alert hover:text-alert underline mt-2 block">
               See all discounts →

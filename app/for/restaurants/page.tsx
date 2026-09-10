@@ -3,38 +3,47 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, CalendarDays, Link2, Music2, Satellite, UtensilsCrossed } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'TikTok',     icon: '🎵', note: 'Live' },
-  { name: 'Discord',    icon: '💬', note: 'Live' },
-  { name: 'Telegram',   icon: '✈️', note: 'Live' },
-  { name: 'Bluesky',   icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live' },
-  { name: 'LinkedIn',   icon: '💼', note: 'Live' },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live' },
+  { name: 'Discord',    icon: 'discord', note: 'Live' },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live' },
+  { name: 'Bluesky',   icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live' },
+  { name: 'LinkedIn',   icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'Pinterest', icon: '📌' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Pinterest', icon: 'pinterest' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Saturday lunch rush. 40 covers on the floor. Still haven\'t posted the weekend special.',
     after:  'Weekend specials are scheduled Monday morning. They go live automatically while you work the line.',
-    icon: '🍽️',
+    icon: UtensilsCrossed,
   },
   {
     before: 'Post daily for 2 weeks, then go silent for a month. Lost followers, dead engagement.',
     after:  'Batch a month of menu posts and content in one afternoon. Consistent every day, automatically.',
-    icon: '📅',
+    icon: CalendarDays,
   },
   {
     before: 'TikTok is where customers find new restaurants. You know you need to be there. You don\'t have time.',
     after:  'Schedule your kitchen clips, plating videos, and specials directly to TikTok from one dashboard.',
-    icon: '🎵',
+    icon: Music2,
   },
 ]
 
@@ -42,37 +51,37 @@ const FEATURES = [
   {
     title: 'Schedule Daily Menu & Special Posts',
     desc:  'Write this week\'s specials once. Schedule them to go live at peak times — before the lunch rush, Friday night dinner hour. Content on autopilot while you run the kitchen.',
-    icon:  '🍕',
+    icon:  UtensilsCrossed,
     badge: 'Free',
   },
   {
     title: 'AI Generates Food Captions',
     desc:  'Describe the dish, pick your tone — casual, upscale, playful — and the AI writes a caption with hashtags ready to post. No more staring at a blank caption box at 11pm.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'TikTok Scheduling',
     desc:  'TikTok is the #1 discovery platform for restaurants right now. Schedule your kitchen videos, plating clips, and specials to post at the right time without picking up your phone.',
-    icon:  '🎵',
+    icon:  Music2,
     badge: 'Free',
   },
   {
     title: 'Cross-Post to 7 Platforms at Once',
     desc:  'Write one post. Hit schedule. It goes to TikTok, Discord, Telegram, Bluesky, X, Mastodon, and LinkedIn simultaneously. No copy-paste, no switching apps.',
-    icon:  '📡',
+    icon:  Satellite,
     badge: 'Free',
   },
   {
     title: 'Link in Bio for Your Menu',
     desc:  'Free link-in-bio page on all plans. Link your menu, reservation page, delivery app, and weekly specials PDF in one place. No Linktree subscription needed.',
-    icon:  '🔗',
+    icon:  Link2,
     badge: 'Free',
   },
   {
     title: 'SOMA AI Plans Your Content Calendar',
     desc:  'Tell SOMA your restaurant concept and audience — SOMA generates a week of content ideas: specials announcements, behind-the-scenes content, customer appreciation posts.',
-    icon:  '📅',
+    icon:  CalendarDays,
     badge: 'Pro',
   },
 ]
@@ -202,7 +211,7 @@ export default function RestaurantsPage() {
                 </div>
                 <div className="bg-amber/10 border border-amber rounded-2xl p-5">
                   <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_restaurants.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -224,7 +233,7 @@ export default function RestaurantsPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -251,7 +260,7 @@ export default function RestaurantsPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_restaurants.platforms_live_badge')}</span>
               </div>
@@ -266,7 +275,7 @@ export default function RestaurantsPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_restaurants.platforms_coming_badge')}</span>
               </div>

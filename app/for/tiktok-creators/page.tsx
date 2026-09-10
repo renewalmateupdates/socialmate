@@ -3,6 +3,15 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { AlarmClock, Banknote, Bot, CalendarDays, Clapperboard, Music2, PenLine, Rocket, Smartphone } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -44,37 +53,37 @@ const faqSchema = {
 }
 
 const LIVE_PLATFORMS = [
-  { name: 'TikTok',     icon: '🎵', note: 'Live', highlight: true },
-  { name: 'Bluesky',   icon: '🦋', note: 'Live', highlight: false },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live', highlight: false },
-  { name: 'Mastodon',  icon: '🐘', note: 'Live', highlight: false },
-  { name: 'Discord',   icon: '💬', note: 'Live', highlight: false },
-  { name: 'Telegram',  icon: '✈️', note: 'Live', highlight: false },
-  { name: 'LinkedIn',  icon: '💼', note: 'Live', highlight: false },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live', highlight: true },
+  { name: 'Bluesky',   icon: 'bluesky', note: 'Live', highlight: false },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live', highlight: false },
+  { name: 'Mastodon',  icon: 'mastodon', note: 'Live', highlight: false },
+  { name: 'Discord',   icon: 'discord', note: 'Live', highlight: false },
+  { name: 'Telegram',  icon: 'telegram', note: 'Live', highlight: false },
+  { name: 'LinkedIn',  icon: 'linkedin', note: 'Live', highlight: false },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'YouTube',    icon: '▶️' },
-  { name: 'Instagram',  icon: '📸' },
-  { name: 'Facebook',   icon: '📘' },
-  { name: 'Threads',    icon: '🧵' },
+  { name: 'YouTube',    icon: 'youtube' },
+  { name: 'Instagram',  icon: 'instagram' },
+  { name: 'Facebook',   icon: 'facebook' },
+  { name: 'Threads',    icon: 'threads' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Set an alarm at 7 PM. Open TikTok. Hope you don\'t forget. Post manually every single day.',
     after:  'Schedule weeks of TikTok videos in one session. They go live automatically.',
-    icon:   '⏰',
+    icon:   AlarmClock,
   },
   {
     before: 'Manage TikTok in one app, Bluesky in another, Discord in a third. Five tabs, all chaos.',
     after:  'One dashboard. All 7 platforms. Schedule once, post everywhere.',
-    icon:   '📱',
+    icon:   Smartphone,
   },
   {
     before: 'Pay $18+/month to a tool that charges extra or locks TikTok behind a paid plan.',
     after:  'TikTok scheduling is free on SocialMate. No per-post charges. No upgrade required.',
-    icon:   '💸',
+    icon:   Banknote,
   },
 ]
 
@@ -82,42 +91,42 @@ const FEATURES = [
   {
     title: 'TikTok Direct Scheduling',
     desc:  'Schedule TikTok videos using the official Production-approved Content Posting API. Pick your video, write a caption, set a time — SocialMate posts it automatically.',
-    icon:  '🎵',
+    icon:  Music2,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'TikTok Studio',
     desc:  'Browse and manage your TikTok content in one place. Connect your account at /accounts and access TikTok Studio at /tiktok/studio for a full content management experience.',
-    icon:  '🎬',
+    icon:  Clapperboard,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'TikTok Script Generator',
     desc:  'AI-powered TikTok script generator that writes hooks, body, and CTA optimized for TikTok format. Uses 5 AI credits per script. Available to all plans.',
-    icon:  '🤖',
+    icon:  Bot,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'Cross-Platform Posting',
     desc:  'Schedule the same video or content to all 7 platforms at once. One compose session reaches TikTok, Bluesky, X, Mastodon, Discord, Telegram, and LinkedIn simultaneously.',
-    icon:  '🚀',
+    icon:  Rocket,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'AI Caption Writer',
     desc:  'Write TikTok captions with hashtags, hooks, and emojis in one click. The AI knows TikTok character limits and what captions actually perform.',
-    icon:  '✍️',
+    icon:  PenLine,
     live:  true,
     badge: 'Live now',
   },
   {
     title: 'Scheduling Calendar',
     desc:  'Full drag-and-drop calendar view of every scheduled TikTok post. See gaps, move posts around, and bulk-schedule an entire week of content in one session.',
-    icon:  '📅',
+    icon:  CalendarDays,
     live:  true,
     badge: 'Live now',
   },
@@ -212,7 +221,7 @@ export default function TikTokCreatorsPage() {
                 </div>
                 <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/30 rounded-2xl p-5">
                   <p className="text-xs text-[#f59e0b] font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -237,7 +246,7 @@ export default function TikTokCreatorsPage() {
                 className="rounded-2xl p-5 border bg-panel border-edge"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-jade/10 text-jade">
                     {f.badge}
                   </span>
@@ -293,7 +302,7 @@ export default function TikTokCreatorsPage() {
                     : 'bg-panel border-edge'
                 }`}
               >
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                   p.highlight ? 'bg-[#f59e0b]/20 text-[#f59e0b]' : 'bg-jade/10 text-jade'
@@ -311,7 +320,7 @@ export default function TikTokCreatorsPage() {
                 key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60"
               >
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_tiktok.platforms_coming_badge')}</span>
               </div>

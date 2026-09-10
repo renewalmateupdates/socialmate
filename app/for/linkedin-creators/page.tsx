@@ -3,6 +3,14 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { AlarmClock, Banknote, Brain, Briefcase, CalendarDays, ClipboardList, Globe, Magnet, PenLine, Recycle, Rocket } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -44,35 +52,35 @@ const faqSchema = {
 }
 
 const LIVE_PLATFORMS = [
-  { name: 'LinkedIn',    icon: '💼', note: 'Live — free', highlight: true  },
-  { name: 'Bluesky',    icon: '🦋', note: 'Live',         highlight: false },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live',        highlight: false },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live',         highlight: false },
-  { name: 'Discord',    icon: '💬', note: 'Live',         highlight: false },
-  { name: 'Telegram',   icon: '✈️', note: 'Live',         highlight: false },
-  { name: 'TikTok',     icon: '🎵', note: 'Live',         highlight: false },
+  { name: 'LinkedIn',    icon: 'linkedin', note: 'Live — free', highlight: true  },
+  { name: 'Bluesky',    icon: 'bluesky', note: 'Live',         highlight: false },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live',        highlight: false },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live',         highlight: false },
+  { name: 'Discord',    icon: 'discord', note: 'Live',         highlight: false },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live',         highlight: false },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live',         highlight: false },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Open LinkedIn at 8am, stare at a blank box, give up and post nothing.',
     after:  'Write your week of LinkedIn posts on Sunday. They go out automatically.',
-    icon: '📅',
+    icon: CalendarDays,
   },
   {
     before: 'Pay $25–$99/month for a tool just to schedule LinkedIn posts.',
     after:  'Free on SocialMate. LinkedIn scheduling included on the free plan.',
-    icon: '💸',
+    icon: Banknote,
   },
   {
     before: 'LinkedIn, Bluesky, and X all need separate posting sessions.',
     after:  'Write once. Schedule to all 7 platforms simultaneously.',
-    icon: '🚀',
+    icon: Rocket,
   },
   {
     before: 'Stare at the cursor trying to write a LinkedIn hook that doesn\'t suck.',
     after:  'Click "Generate hook." Get 5 options in 3 seconds. Pick the best one.',
-    icon: '✍️',
+    icon: PenLine,
   },
 ]
 
@@ -80,56 +88,56 @@ const FEATURES = [
   {
     title: 'LinkedIn Post Scheduling',
     desc:  'Write your post, pick a date and time, hit schedule. SocialMate publishes directly to your LinkedIn profile using the official API at exactly the right moment.',
-    icon:  '💼',
+    icon:  Briefcase,
     badge: 'Free',
     live:  true,
   },
   {
     title: 'Best Time to Post on LinkedIn',
     desc:  'Data-driven recommendations for your best LinkedIn posting windows. Tue–Thu 8–10am and 12–1pm consistently outperforms other slots. One-click "Use best time" in the scheduler.',
-    icon:  '⏰',
+    icon:  AlarmClock,
     badge: 'Free',
     live:  true,
   },
   {
     title: 'AI LinkedIn Hook Generator',
     desc:  'The first line determines whether anyone reads your post. Generate 5 scroll-stopping opening lines based on your content — pick the one that fits your voice.',
-    icon:  '🎣',
+    icon:  Magnet,
     badge: '5 credits',
     live:  true,
   },
   {
     title: 'AI Caption & Rewriter',
     desc:  'Paste rough notes and get a polished LinkedIn-optimized post in seconds. The rewriter adjusts tone to professional-but-human — the LinkedIn sweet spot that actually gets engagement.',
-    icon:  '✍️',
+    icon:  PenLine,
     badge: '5 credits',
     live:  true,
   },
   {
     title: 'Cross-Platform Posting',
     desc:  'LinkedIn is just one of 7 live platforms. Write once and simultaneously schedule to LinkedIn, Bluesky, X/Twitter, Mastodon, Discord, and Telegram from a single compose window.',
-    icon:  '🌐',
+    icon:  Globe,
     badge: 'Free',
     live:  true,
   },
   {
     title: 'Content Repurposer',
     desc:  'Turn a blog post, tweet, or TikTok caption into a LinkedIn-formatted long-form post in one click. 6 repurpose formats. Each generates content in the native style of the target platform.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: '5 credits',
     live:  true,
   },
   {
     title: 'LinkedIn Post Queue',
     desc:  'Build a backlog of LinkedIn content that publishes on your schedule. Draft ideas throughout the week and let the queue handle the actual publishing at optimal times.',
-    icon:  '📋',
+    icon:  ClipboardList,
     badge: 'Free',
     live:  true,
   },
   {
     title: 'SOMA AI Content System',
     desc:  'Feed SOMA your weekly update doc and it generates a full week of LinkedIn posts that sound like you — not generic AI output. Includes Voice DNA builder trained on your writing style.',
-    icon:  '🧠',
+    icon:  Brain,
     badge: 'Pro',
     live:  true,
   },
@@ -256,7 +264,7 @@ export default function LinkedInCreatorsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="bg-panel border border-edge-lit rounded-2xl p-6">
-                <div className="text-2xl mb-4">{p.icon}</div>
+                <p.icon className="w-6 h-6 mb-4 text-ink-muted" strokeWidth={1.75} />
                 <div className="space-y-3">
                   <div className="bg-alert/10 border border-alert/40 rounded-xl p-3">
                     <p className="text-xs font-bold text-alert uppercase tracking-widest mb-1">{t('for_linkedin.pain_before_label')}</p>
@@ -284,7 +292,7 @@ export default function LinkedInCreatorsPage() {
             {FEATURES.map((f) => (
               <div key={f.title} className="bg-panel border border-edge-lit rounded-2xl p-5 hover:border-edge-lit transition-all">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -317,7 +325,7 @@ export default function LinkedInCreatorsPage() {
                     : 'bg-panel border-edge-lit text-ink-body'
                 }`}
               >
-                <span>{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span>{p.name}</span>
                 <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                   p.highlight ? 'bg-raised text-ink-muted' : 'bg-jade/10 text-jade'

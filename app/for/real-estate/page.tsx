@@ -3,38 +3,47 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, Briefcase, Building2, Home, PenLine, Satellite, Users } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'LinkedIn',   icon: '💼', note: 'Live' },
-  { name: 'Bluesky',   icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live' },
-  { name: 'Discord',    icon: '💬', note: 'Live' },
-  { name: 'Telegram',   icon: '✈️', note: 'Live' },
-  { name: 'TikTok',     icon: '🎵', note: 'Live' },
+  { name: 'LinkedIn',   icon: 'linkedin', note: 'Live' },
+  { name: 'Bluesky',   icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',    icon: 'discord', note: 'Live' },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live' },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'Pinterest', icon: '📌' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Pinterest', icon: 'pinterest' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Listing goes live. You post it once. It disappears from feeds in 20 minutes. Buyer never sees it.',
     after:  'Schedule a full campaign: announcement, open house reminder, price drop, sold post — all pre-planned.',
-    icon: '🏡',
+    icon: Home,
   },
   {
     before: 'LinkedIn is where serious buyers and referral partners live. You know you need to post more. You never do.',
     after:  'LinkedIn scheduling is live. Write once, schedule weeks in advance. Stay top-of-mind without daily effort.',
-    icon: '💼',
+    icon: Briefcase,
   },
   {
     before: 'Writing "Just Listed!" for the 50th time. Same caption, same energy, same low engagement.',
     after:  'AI generates fresh listing captions, market insight posts, and client win stories based on your niche.',
-    icon: '✍️',
+    icon: PenLine,
   },
 ]
 
@@ -42,37 +51,37 @@ const FEATURES = [
   {
     title: 'LinkedIn Scheduling — Live Now',
     desc:  'LinkedIn is the highest-value platform for real estate professionals. Connect your LinkedIn personal profile and schedule posts weeks in advance. Consistent presence without daily effort.',
-    icon:  '💼',
+    icon:  Briefcase,
     badge: 'Free',
   },
   {
     title: 'Schedule Listing Campaigns in Advance',
     desc:  'For every listing, build a campaign: announcement post, open house reminder, price update, sold announcement. Schedule them all at once. They fire automatically on your timeline.',
-    icon:  '🏡',
+    icon:  Home,
     badge: 'Free',
   },
   {
     title: 'SOMA AI Generates Real Estate Content',
     desc:  'Tell SOMA your market, niche (luxury, first-time buyers, investment), and tone — it writes listing captions, market update posts, and thought leadership content that sounds like you.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'Cross-Post to 7 Platforms at Once',
     desc:  'One listing. Seven platforms. Hit schedule and your post goes to LinkedIn, Bluesky, X, Mastodon, Discord, Telegram, and TikTok simultaneously. Zero copy-paste.',
-    icon:  '📡',
+    icon:  Satellite,
     badge: 'Free',
   },
   {
     title: 'Team Seats for Your Transaction Coordinator',
     desc:  'Add your TC, marketing assistant, or partner. Free plan includes 2 seats. Pro includes 5. No extra charge per seat — everyone schedules from the same account.',
-    icon:  '👥',
+    icon:  Users,
     badge: 'Free',
   },
   {
     title: 'Agency Plan for Teams & Brokerages',
     desc:  'Run social media for your entire team or brokerage. 5 client workspaces, 15 seats, client approval workflows — manage every agent\'s content from one Agency account.',
-    icon:  '🏢',
+    icon:  Building2,
     badge: 'Agency',
   },
 ]
@@ -202,7 +211,7 @@ export default function RealEstatePage() {
                 </div>
                 <div className="bg-raised border border-edge-lit rounded-2xl p-5">
                   <p className="text-xs text-ink-muted font-bold uppercase tracking-wide mb-2">{t('for_real_estate.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -224,7 +233,7 @@ export default function RealEstatePage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -253,7 +262,7 @@ export default function RealEstatePage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_real_estate.platforms_live_badge')}</span>
               </div>
@@ -264,7 +273,7 @@ export default function RealEstatePage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_real_estate.platforms_coming_badge')}</span>
               </div>
