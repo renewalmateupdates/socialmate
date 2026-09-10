@@ -8,6 +8,14 @@ import { ArrowUpDown, FileEdit, Heart, Inbox, MessageCircle, Recycle, Repeat2, R
 
 type BlueskyStats = { likes: number; reposts: number; replies: number; fetched_at: string } | null
 type MastodonStats = { favourites_count: number; reblogs_count: number; replies_count: number; fetched_at: string } | null
+// Auto-populated by the fetchPostAnalytics Inngest function 1h/24h after publish —
+// a second, separate engagement snapshot from the manually-triggered bluesky_stats/
+// mastodon_stats sync. Both are read here so a post shows real numbers whether or
+// not the user ever clicked "Sync" on /analytics.
+type AutoAnalytics = {
+  bluesky?:  { likes: number; replies: number; reposts: number }
+  mastodon?: { likes: number; replies: number; reposts: number }
+} | null
 
 type Post = {
   id: string
@@ -17,22 +25,26 @@ type Post = {
   evergreen: boolean
   bluesky_stats: BlueskyStats
   mastodon_stats: MastodonStats
+  analytics: AutoAnalytics
 }
 
 function engagementOf(post: Post): { likes: number; reposts: number; replies: number; hasData: boolean } {
   let likes = 0, reposts = 0, replies = 0, hasData = false
-  if (post.bluesky_stats) {
-    hasData = true
-    likes += post.bluesky_stats.likes ?? 0
-    reposts += post.bluesky_stats.reposts ?? 0
-    replies += post.bluesky_stats.replies ?? 0
-  }
-  if (post.mastodon_stats) {
-    hasData = true
-    likes += post.mastodon_stats.favourites_count ?? 0
-    reposts += post.mastodon_stats.reblogs_count ?? 0
-    replies += post.mastodon_stats.replies_count ?? 0
-  }
+
+  const bsky = post.bluesky_stats
+    ? { likes: post.bluesky_stats.likes ?? 0, reposts: post.bluesky_stats.reposts ?? 0, replies: post.bluesky_stats.replies ?? 0 }
+    : post.analytics?.bluesky
+      ? { likes: post.analytics.bluesky.likes ?? 0, reposts: post.analytics.bluesky.reposts ?? 0, replies: post.analytics.bluesky.replies ?? 0 }
+      : null
+  if (bsky) { hasData = true; likes += bsky.likes; reposts += bsky.reposts; replies += bsky.replies }
+
+  const masto = post.mastodon_stats
+    ? { likes: post.mastodon_stats.favourites_count ?? 0, reposts: post.mastodon_stats.reblogs_count ?? 0, replies: post.mastodon_stats.replies_count ?? 0 }
+    : post.analytics?.mastodon
+      ? { likes: post.analytics.mastodon.likes ?? 0, reposts: post.analytics.mastodon.reposts ?? 0, replies: post.analytics.mastodon.replies ?? 0 }
+      : null
+  if (masto) { hasData = true; likes += masto.likes; reposts += masto.reposts; replies += masto.replies }
+
   return { likes, reposts, replies, hasData }
 }
 
@@ -67,7 +79,7 @@ export default function EvergreenPage() {
 
       const { data } = await supabase
         .from('posts')
-        .select('id, content, platforms, published_at, evergreen, bluesky_stats, mastodon_stats')
+        .select('id, content, platforms, published_at, evergreen, bluesky_stats, mastodon_stats, analytics')
         .eq('user_id', user.id)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
