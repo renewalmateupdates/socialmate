@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
-import { Award, Crown, FileEdit, Flame, Gem, Globe, Link2, Medal, PenLine, Rocket, Star, Target, Trophy, Zap } from 'lucide-react'
+import { Award, Check, Crown, FileEdit, Flame, Gem, Globe, Link2, Medal, PenLine, Rocket, Star, Target, Trophy, Zap } from 'lucide-react'
 
 const ACHIEVEMENTS = [
   { key: 'first_post',   icon: Rocket, label: 'First Post',       desc: 'Publish your first post',              reward: 0,   category: 'Posts'    },
@@ -165,7 +165,7 @@ export default function AchievementsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className={`text-sm font-bold ${isEarned ? '' : 'text-gray-500 dark:text-gray-400'}`}>{ach.label}</p>
-                            {isEarned && <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold">✓ {t('achievements.earned_badge')}</span>}
+                            {isEarned && <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-0.5"><Check size={9} strokeWidth={3} /> {t('achievements.earned_badge')}</span>}
                             {ach.reward > 0 && <span className="text-[10px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">+{ach.reward} cr</span>}
                           </div>
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{ach.desc}</p>

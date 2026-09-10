@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { supabase } from '@/lib/supabase'
-import { Crown, Gem, Gift, Rocket, Star, DollarSign } from 'lucide-react'
+import { Check, Crown, Gem, Gift, Rocket, Star, DollarSign } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
@@ -289,7 +289,7 @@ export default function ReferralPage() {
                     <p className="text-sm font-bold">
                       {tier.paying} paying referrals
                       {unlocked && (
-                        <span className="ml-2 text-xs font-bold text-green-600 dark:text-green-400">✓ Unlocked</span>
+                        <span className="ml-2 text-xs font-bold text-green-600 dark:text-green-400 inline-flex items-center gap-0.5"><Check size={11} strokeWidth={2.5} /> Unlocked</span>
                       )}
                     </p>
                   </div>

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, X as CloseIcon } from 'lucide-react'
+import { Check, Lock, X as CloseIcon } from 'lucide-react'
 
 interface AffiliateRow {
   id: string
@@ -218,7 +218,7 @@ export default function AdminAffiliatesPage() {
                       {selected.status === 'pending_review' ? 'Pending Review' : selected.status}
                     </span>
                     {selected.meets_minimum && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">✓ Meets minimum</span>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 inline-flex items-center gap-0.5"><Check size={11} strokeWidth={2.5} /> Meets minimum</span>
                     )}
                   </div>
                 </div>
