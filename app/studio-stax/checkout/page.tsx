@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
+import { Clock, Link2 } from 'lucide-react'
 
 interface CheckoutData {
   listing:        { id: string; name: string; tagline: string; applicant_name: string }
@@ -63,7 +64,9 @@ function CheckoutInner() {
 
   if (!token || !data?.valid) return (
     <div className="max-w-lg mx-auto px-6 py-20 text-center">
-      <div className="text-4xl mb-4">{data?.expired ? '⏰' : '🔗'}</div>
+      {data?.expired
+        ? <Clock className="w-9 h-9 mx-auto mb-4 text-gray-400" strokeWidth={1.5} />
+        : <Link2 className="w-9 h-9 mx-auto mb-4 text-gray-400" strokeWidth={1.5} />}
       <h1 className="text-xl font-extrabold mb-3 text-gray-900 dark:text-gray-100">
         {data?.expired ? 'This link has expired' : 'Invalid checkout link'}
       </h1>

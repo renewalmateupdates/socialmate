@@ -5,6 +5,12 @@ import Sidebar from '@/components/Sidebar'
 import FilmstripTimeline from '@/components/tiktok/FilmstripTimeline'
 import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
 import PhotoComposer from '@/components/tiktok/PhotoComposer'
+import {
+  AlertTriangle, CalendarDays, Check, CheckCircle2, HelpCircle, Lightbulb, Loader2,
+  Mic, Music, Pause, Play, Rocket, Search, Smartphone, Sparkles, Volume2, VolumeX,
+  MessageCircle, Palette, XCircle, Zap,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -178,7 +184,7 @@ function PostSettingsPanel({
               disabled={!postCaption || aiHashtagLoading}
               className="text-xs text-[#fe2c55] disabled:opacity-40 hover:underline font-semibold transition-opacity"
             >
-              {aiHashtagLoading ? '…thinking' : '✦ AI Suggest (5 cr)'}
+              {aiHashtagLoading ? '…thinking' : <span className="inline-flex items-center gap-1"><Sparkles size={12} strokeWidth={2} /> AI Suggest (5 cr)</span>}
             </button>
           </div>
           <div className="flex gap-2 mb-2">
@@ -222,7 +228,7 @@ function PostSettingsPanel({
         {/* Selected sound badge */}
         {selectedSound && (
           <div className="flex items-center gap-2 px-3 py-2 bg-[#fe2c55]/10 border border-[#fe2c55]/30 rounded-xl text-xs text-[#fe2c55]">
-            <span>🎵</span>
+            <Music size={14} strokeWidth={2} />
             <span className="flex-1 font-semibold truncate">{selectedSound.name}</span>
             <button onClick={() => setSelectedSound(null)} className="opacity-60 hover:opacity-100 transition-opacity">×</button>
           </div>
@@ -381,7 +387,7 @@ function PostSettingsPanel({
                     : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
                 }`}
               >
-                {m === 'now' ? '⚡ Post Now' : '📅 Schedule'}
+                {m === 'now' ? <span className="inline-flex items-center gap-1.5 justify-center"><Zap size={13} strokeWidth={2} /> Post Now</span> : <span className="inline-flex items-center gap-1.5 justify-center"><CalendarDays size={13} strokeWidth={2} /> Schedule</span>}
               </button>
             ))}
           </div>
@@ -397,8 +403,8 @@ function PostSettingsPanel({
                 : 'bg-panel border-edge hover:border-edge-lit'
             }`}
           >
-            <span className={`text-xs font-bold ${scheduleMode === 'drafts' ? 'text-[#fe2c55]' : 'text-ink-high'}`}>
-              🎵 Send to TikTok drafts
+            <span className={`text-xs font-bold inline-flex items-center gap-1.5 ${scheduleMode === 'drafts' ? 'text-[#fe2c55]' : 'text-ink-high'}`}>
+              <Music size={13} strokeWidth={2} /> Send to TikTok drafts
             </span>
             <span className="block text-[11px] text-ink-muted mt-0.5 leading-snug">
               Adds any sound from TikTok's library &mdash; but drafts open only in the
@@ -421,7 +427,7 @@ function PostSettingsPanel({
       <div className="pt-4 mt-4 border-t border-edge space-y-2">
         {postError && (
           <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 rounded-xl">
-            <span className="text-red-400 text-xs mt-0.5">⚠️</span>
+            <AlertTriangle className="text-red-400 mt-0.5" size={13} strokeWidth={2} />
             <p className="text-xs text-red-400">{postError}</p>
           </div>
         )}
@@ -451,14 +457,14 @@ function PostSettingsPanel({
           className="w-full bg-[#fe2c55] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20"
         >
           {uploading
-            ? <><span className="animate-spin">⏳</span> Uploading to TikTok…</>
+            ? <><Loader2 size={15} strokeWidth={2} className="animate-spin" /> Uploading to TikTok…</>
             : posting
-            ? <><span className="animate-pulse">🚀</span> Publishing…</>
+            ? <><Rocket size={15} strokeWidth={2} className="animate-pulse" /> Publishing…</>
             : scheduleMode === 'schedule'
-            ? '📅 Schedule Video'
+            ? <><CalendarDays size={15} strokeWidth={2} /> Schedule Video</>
             : scheduleMode === 'drafts'
-            ? '🎵 Send to TikTok drafts'
-            : '🚀 Post to TikTok'}
+            ? <><Music size={15} strokeWidth={2} /> Send to TikTok drafts</>
+            : <><Rocket size={15} strokeWidth={2} /> Post to TikTok</>}
         </button>
         <p className="text-xs text-ink-faint text-center">
           {uploading
@@ -1188,8 +1194,8 @@ export default function TikTokStudioClient() {
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
-            <div className="w-20 h-20 rounded-2xl bg-[#fe2c55]/10 border border-[#fe2c55]/20 flex items-center justify-center text-4xl mx-auto mb-6">
-              🎵
+            <div className="w-20 h-20 rounded-2xl bg-[#fe2c55]/10 border border-[#fe2c55]/20 flex items-center justify-center mx-auto mb-6">
+              <Music className="w-9 h-9 text-[#fe2c55]" strokeWidth={1.5} />
             </div>
             <h1 className="text-2xl font-extrabold text-white mb-2">TikTok Studio</h1>
             <p className="text-ink-muted mb-8 text-sm leading-relaxed">
@@ -1230,12 +1236,12 @@ export default function TikTokStudioClient() {
                 : publishState === 'checking' || publishState === 'unknown'
                   ? 'bg-amber/10 border-amber/25 text-amber'
                   : 'bg-jade/10 border-jade/25 text-jade'
-              const icon =
-                publishState === 'rejected' ? '✕'
-                : publishState === 'drafted' ? '♪'
-                : publishState === 'checking' ? '⋯'
-                : publishState === 'unknown' ? '?'
-                : '✓'
+              const Icon: LucideIcon =
+                publishState === 'rejected' ? XCircle
+                : publishState === 'drafted' ? Music
+                : publishState === 'checking' ? Loader2
+                : publishState === 'unknown' ? HelpCircle
+                : CheckCircle2
               const heading =
                 scheduled                      ? 'Video scheduled'
                 : publishState === 'checking'  ? 'Sent to TikTok'
@@ -1262,8 +1268,8 @@ export default function TikTokStudioClient() {
                   : 'The upload finished.'
               return (
                 <>
-                  <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 border ${tone}`}>
-                    {icon}
+                  <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border ${tone}`}>
+                    <Icon className={`w-9 h-9 ${publishState === 'checking' ? 'animate-spin' : ''}`} strokeWidth={1.5} />
                   </div>
                   <h2 className="text-2xl font-extrabold text-ink-high mb-2">{heading}</h2>
                   <p className="text-ink-muted mb-8 text-sm leading-relaxed">{body}</p>
@@ -1483,7 +1489,7 @@ export default function TikTokStudioClient() {
                       className="absolute inset-0 flex items-center justify-center group"
                     >
                       <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm border border-white/10">
-                        <span className="text-2xl">{isPlaying ? '⏸' : '▶️'}</span>
+                        {isPlaying ? <Pause className="w-6 h-6 text-white" fill="currentColor" strokeWidth={0} /> : <Play className="w-6 h-6 text-white" fill="currentColor" strokeWidth={0} />}
                       </div>
                     </button>
                     {/* Caption preview overlay */}
@@ -1645,12 +1651,13 @@ export default function TikTokStudioClient() {
                 {/* Tab bar — pill style */}
                 <div className="flex gap-1 p-2 bg-panel/60">
                   {(['filters', 'captions', 'audio', 'post'] as const).map(tab => {
-                    const icons: Record<string, string> = {
-                      filters:  '🎨',
-                      captions: '💬',
-                      audio:    '🔊',
-                      post:     '📱',
+                    const icons: Record<string, LucideIcon> = {
+                      filters:  Palette,
+                      captions: MessageCircle,
+                      audio:    Volume2,
+                      post:     Smartphone,
                     }
+                    const TabIcon = icons[tab]
                     const labels: Record<string, string> = {
                       filters:  'Filters',
                       captions: 'Text',
@@ -1668,7 +1675,7 @@ export default function TikTokStudioClient() {
                             : 'text-ink-muted hover:text-ink-body hover:bg-raised/50'
                         }`}
                       >
-                        <span>{icons[tab]}</span>
+                        <TabIcon size={14} strokeWidth={2} />
                         <span className="hidden sm:inline">{labels[tab]}</span>
                       </button>
                     )
@@ -1712,7 +1719,7 @@ export default function TikTokStudioClient() {
                             )}
                             <span className="leading-tight text-center">{f}</span>
                             {isActive && (
-                              <span className="absolute top-1 right-1 text-[8px] font-black">✓</span>
+                              <Check className="absolute top-1 right-1" size={9} strokeWidth={3} />
                             )}
                           </button>
                         )
@@ -1836,7 +1843,7 @@ export default function TikTokStudioClient() {
 
                       {/* Info banner */}
                       <div className="flex gap-3 p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl">
-                        <span className="text-amber-400 text-base shrink-0">🎵</span>
+                        <Music className="text-amber-400 shrink-0" size={16} strokeWidth={2} />
                         <div className="space-y-1">
                           <p className="text-xs font-bold text-amber-300">About TikTok Music</p>
                           <p className="text-xs text-amber-400/80 leading-relaxed">
@@ -1853,14 +1860,14 @@ export default function TikTokStudioClient() {
                           Video Audio Volume
                         </label>
                         <div className="flex items-center gap-3">
-                          <span className="text-sm">🔇</span>
+                          <VolumeX size={15} strokeWidth={2} />
                           <input
                             type="range" min={0} max={100}
                             value={volume}
                             onChange={e => setVolume(parseInt(e.target.value))}
                             className="flex-1 accent-[#fe2c55]"
                           />
-                          <span className="text-sm">🔊</span>
+                          <Volume2 size={15} strokeWidth={2} />
                           <span className="text-xs text-ink-muted w-8 text-right font-mono">{volume}%</span>
                         </div>
                         <p className="text-[10px] text-ink-faint mt-1">
@@ -1870,7 +1877,7 @@ export default function TikTokStudioClient() {
 
                       {/* Tip */}
                       <div className="flex gap-2 p-2.5 bg-panel/60 border border-edge/40 rounded-xl">
-                        <span className="text-xs shrink-0">💡</span>
+                        <Lightbulb size={13} strokeWidth={2} className="shrink-0" />
                         <p className="text-xs text-ink-muted leading-relaxed">
                           <span className="font-semibold text-ink-body">Pro tip:</span> Record your video to a song playing in the background for built-in audio sync, then use TikTok&apos;s &quot;Add Sound&quot; feature after publishing to officially credit the track.
                         </p>
@@ -1892,7 +1899,7 @@ export default function TikTokStudioClient() {
                             disabled={soundLoading}
                             className="px-3 py-2 bg-raised border border-edge/60 rounded-xl text-xs text-ink-body hover:bg-raised disabled:opacity-50 transition-all"
                           >
-                            {soundLoading ? <span className="animate-spin inline-block">⏳</span> : '🔍'}
+                            {soundLoading ? <Loader2 size={14} strokeWidth={2} className="animate-spin" /> : <Search size={14} strokeWidth={2} />}
                           </button>
                         </div>
                         {soundNote && (
@@ -1910,7 +1917,7 @@ export default function TikTokStudioClient() {
                                     : 'bg-panel border border-edge/60 text-ink-body hover:border-edge-lit'
                                 }`}
                               >
-                                <span className="text-base">{s.is_original ? '🎙️' : '🎵'}</span>
+                                {s.is_original ? <Mic size={16} strokeWidth={2} /> : <Music size={16} strokeWidth={2} />}
                                 <div className="flex-1 min-w-0">
                                   <p className="font-semibold truncate">{s.name}</p>
                                   {s.artist && <p className="text-ink-muted truncate">{s.artist}</p>}

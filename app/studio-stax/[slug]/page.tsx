@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
 import NsfwLogoReveal from './NsfwLogoReveal'
+import { Crown, Heart } from 'lucide-react'
 
 const CATEGORY_LABELS: Record<string, string> = {
   'social-media':     'Social Media Tools',
@@ -98,7 +99,7 @@ export default async function ListingDetailPage({ params }: Props) {
         {/* Admin Featured Banner */}
         {listing.admin_featured && (
           <div className="flex items-center gap-3 bg-yellow-400/10 border border-yellow-500/40 rounded-2xl px-5 py-3.5 mb-8">
-            <span className="text-base">⚔️</span>
+            <Crown size={15} strokeWidth={2} className="text-yellow-400" fill="currentColor" />
             <p className="text-sm font-extrabold text-yellow-400">
               Gilgamesh&apos;s Garrison — Featured
             </p>
@@ -167,7 +168,7 @@ export default async function ListingDetailPage({ params }: Props) {
           {/* SM-Give donation */}
           {donatedDollars && (
             <div className="flex items-center gap-2 bg-green-900/20 border border-green-700/30 rounded-xl px-4 py-3 mb-6">
-              <span className="text-base">💚</span>
+              <Heart size={15} strokeWidth={2} className="text-green-400" fill="currentColor" />
               <p className="text-sm font-bold text-green-400">
                 Has donated ${donatedDollars} to SM-Give
               </p>
