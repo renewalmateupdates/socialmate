@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES, localeFromPath } from '@/lib/i18n'
+import { Check, Handshake, X as CloseIcon } from 'lucide-react'
 
 // Locale-prefixed landing pages — switching language navigates to the locale URL
 const PUBLIC_LOCALE_PATHS = new Set(['/', '/es', '/de', '/fr', '/pt', '/ru', '/zh', '/ja', '/ko'])
@@ -178,7 +179,7 @@ export default function PublicNav() {
                     }`}>
                     <span>{lang.flag}</span>
                     <span>{lang.label}</span>
-                    {locale === lang.code && <span className="ml-auto text-amber text-xs">✓</span>}
+                    {locale === lang.code && <Check size={13} strokeWidth={2.5} className="ml-auto text-amber" />}
                   </button>
                 ))}
               </div>
@@ -282,9 +283,9 @@ export default function PublicNav() {
               <span className="font-display text-title text-ink-high">{t('nav.mobile_menu')}</span>
               <button
                 onClick={() => setOpen(false)}
-                className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-panel transition-colors text-ink-muted text-lg"
+                className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-panel transition-colors text-ink-muted"
                 aria-label="Close menu">
-                ✕
+                <CloseIcon size={20} strokeWidth={2} />
               </button>
             </div>
 
@@ -385,7 +386,7 @@ export default function PublicNav() {
                 </Link>
                 <Link href="/partners" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber hover:bg-panel transition-all">
-                  🤝 {t('nav.partners')}
+                  <Handshake size={16} strokeWidth={2} /> {t('nav.partners')}
                 </Link>
               </div>
 

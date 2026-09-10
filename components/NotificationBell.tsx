@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { AlertTriangle, Bell, CheckCircle2, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface Notification {
   id: string
@@ -21,11 +23,11 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function typeIcon(type: string): string {
-  if (type === 'post_published') return '✅'
-  if (type === 'post_failed')    return '❌'
-  if (type === 'clip_quota')     return '⚠️'
-  return '🔔'
+function typeIcon(type: string): LucideIcon {
+  if (type === 'post_published') return CheckCircle2
+  if (type === 'post_failed')    return XCircle
+  if (type === 'clip_quota')     return AlertTriangle
+  return Bell
 }
 
 export default function NotificationBell() {
@@ -164,7 +166,7 @@ export default function NotificationBell() {
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2">
-                <span className="text-3xl">🔔</span>
+                <Bell className="w-7 h-7" strokeWidth={1.5} style={{ color: 'var(--text-faint)' }} />
                 <p className="text-sm" style={{ color: 'var(--text-faint)' }}>No notifications yet</p>
               </div>
             ) : (
@@ -176,7 +178,10 @@ export default function NotificationBell() {
                     className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors hover:opacity-80 ${!n.read ? 'opacity-100' : 'opacity-60'}`}
                     style={{ borderBottom: '1px solid var(--border-subtle)' }}
                   >
-                    <span className="text-base shrink-0 mt-0.5">{typeIcon(n.type)}</span>
+                    {(() => {
+                      const Icon = typeIcon(n.type)
+                      return <Icon size={16} strokeWidth={1.75} className="shrink-0 mt-0.5" />
+                    })()}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs leading-snug" style={{ color: 'var(--text)', fontWeight: n.read ? 400 : 600 }}>
                         {n.message}

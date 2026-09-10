@@ -1,5 +1,6 @@
 'use client'
 import { useEffect } from 'react'
+import { FileDown } from 'lucide-react'
 
 interface Props {
   title: string
@@ -28,7 +29,7 @@ export default function GuidePDFDownload({ title }: Props) {
         onClick={handlePrint}
         className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl transition-all text-sm"
       >
-        📄 Download as PDF
+        <FileDown size={15} strokeWidth={2} /> Download as PDF
       </button>
     </div>
   )
