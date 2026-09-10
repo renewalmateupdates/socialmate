@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import PlatformIcon from '@/components/landing/PlatformIcon'
+import { Banknote, Bot, Building2, CalendarDays, Inbox, Mail, PenLine, Target, Telescope, Zap } from 'lucide-react'
 
 const STATS = [
   { value: '$0',     label: 'Setup Cost',      sub: 'no credit card' },
@@ -11,25 +13,25 @@ const STATS = [
 const STEPS = [
   {
     number: '01',
-    icon: '🎯',
+    icon: Target,
     title: 'Create a Campaign',
     desc: 'Name it, set your goal, describe your target persona. HERMES uses this context to write messages that sound like you — not a template.',
   },
   {
     number: '02',
-    icon: '🔭',
+    icon: Telescope,
     title: 'Auto-Discover Prospects',
     desc: 'HERMES scrapes Substack, GitHub, Dev.to, and Hashnode for leads matching your keyword. Extracts emails from public profiles. Zero paid APIs required.',
   },
   {
     number: '03',
-    icon: '✍️',
+    icon: PenLine,
     title: 'AI Writes Every Message',
     desc: 'Gemini 2.5 Flash generates a personalized intro for each prospect based on their work, company, and your campaign goal. Not a mail merge.',
   },
   {
     number: '04',
-    icon: '⚡',
+    icon: Zap,
     title: 'Sequence Runs Itself',
     desc: 'Intro → Follow-up 1 → Follow-up 2 → Break-up. HERMES tracks every prospect and fires the next step automatically on your schedule.',
   },
@@ -37,21 +39,21 @@ const STEPS = [
 
 const CHANNELS = [
   {
-    icon: '📧',
+    icon: 'email',
     name: 'Email',
     desc: 'Finds verified emails automatically. Resend delivers HTML-formatted outreach. Full 4-step sequence with automated follow-ups.',
     badge: 'Best for agencies',
     badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   },
   {
-    icon: '🦋',
+    icon: 'bluesky',
     name: 'Bluesky DM',
     desc: 'Resolves handles to DIDs via AT Protocol. Sends via chat.bsky.convo — a real direct message, not a mention or @tag.',
     badge: 'Best for creators',
     badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   },
   {
-    icon: '🐘',
+    icon: 'mastodon',
     name: 'Mastodon DM',
     desc: 'Direct message via visibility:direct on any Mastodon instance. Reaches open-source communities and indie devs directly.',
     badge: 'Best for devs',
@@ -60,18 +62,18 @@ const CHANNELS = [
 ]
 
 const WHAT_YOU_GET = [
-  { icon: '🤖', title: 'AI-written messages, every time', desc: 'Every intro, follow-up, and break-up is written by Gemini based on who the prospect actually is. Not a template with {{FirstName}} in it.' },
-  { icon: '🔭', title: 'Free lead discovery', desc: 'Most tools charge per lead found. HERMES discovers from Substack, GitHub, Dev.to, and Hashnode — zero cost, no credit limits.' },
-  { icon: '📬', title: 'Multi-channel reach', desc: 'Email, Bluesky DM, and Mastodon DM in one sequence. Reach prospects where they actually spend time — not just their inbox.' },
-  { icon: '📅', title: 'Automated follow-ups', desc: 'Set your day intervals and let HERMES handle the rest. The right message, the right step, for every prospect — automatically.' },
-  { icon: '✏️', title: 'Draft mode or autopilot', desc: 'Review every AI-generated message before it goes out, or flip to Auto and let the sequence run hands-free.' },
-  { icon: '💸', title: 'Flat pricing. No per-seat nonsense.', desc: 'The rest of the industry charges $49–$99 per person per month. HERMES is a flat add-on. Your whole team. One price.' },
+  { icon: Bot, title: 'AI-written messages, every time', desc: 'Every intro, follow-up, and break-up is written by Gemini based on who the prospect actually is. Not a template with {{FirstName}} in it.' },
+  { icon: Telescope, title: 'Free lead discovery', desc: 'Most tools charge per lead found. HERMES discovers from Substack, GitHub, Dev.to, and Hashnode — zero cost, no credit limits.' },
+  { icon: Inbox, title: 'Multi-channel reach', desc: 'Email, Bluesky DM, and Mastodon DM in one sequence. Reach prospects where they actually spend time — not just their inbox.' },
+  { icon: CalendarDays, title: 'Automated follow-ups', desc: 'Set your day intervals and let HERMES handle the rest. The right message, the right step, for every prospect — automatically.' },
+  { icon: PenLine, title: 'Draft mode or autopilot', desc: 'Review every AI-generated message before it goes out, or flip to Auto and let the sequence run hands-free.' },
+  { icon: Banknote, title: 'Flat pricing. No per-seat nonsense.', desc: 'The rest of the industry charges $49–$99 per person per month. HERMES is a flat add-on. Your whole team. One price.' },
 ]
 
 const TIERS = [
   {
     name: 'HERMES',
-    icon: '🏹',
+    icon: Target,
     price: '$12',
     priceSub: '/month add-on',
     badge: 'Starter',
@@ -92,7 +94,7 @@ const TIERS = [
   },
   {
     name: 'HERMES Pro',
-    icon: '⚡',
+    icon: Zap,
     price: '$25',
     priceSub: '/month add-on',
     badge: 'Most Popular',
@@ -113,7 +115,7 @@ const TIERS = [
   },
   {
     name: 'Enterprise',
-    icon: '🏢',
+    icon: Building2,
     price: 'Custom',
     priceSub: 'Contact us for pricing',
     badge: 'Enterprise',
@@ -243,7 +245,7 @@ export default function HermesLandingPage() {
                   <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-xs font-extrabold text-amber-400">
                     {step.number}
                   </div>
-                  <span className="text-xl">{step.icon}</span>
+                  <step.icon className="w-5 h-5 text-gray-300" strokeWidth={1.75} />
                 </div>
                 <h3 className="text-sm font-extrabold text-gray-100 mb-2">{step.title}</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">{step.desc}</p>
@@ -271,7 +273,7 @@ export default function HermesLandingPage() {
             {CHANNELS.map(ch => (
               <div key={ch.name} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-3xl">{ch.icon}</span>
+                  {ch.icon === 'email' ? <Mail className="w-7 h-7 text-gray-300" strokeWidth={1.5} /> : <PlatformIcon name={ch.icon} size={28} />}
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${ch.badgeColor}`}>{ch.badge}</span>
                 </div>
                 <h3 className="text-base font-extrabold text-white mb-2">{ch.name}</h3>
@@ -296,7 +298,7 @@ export default function HermesLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {WHAT_YOU_GET.map(item => (
               <div key={item.title} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                <div className="text-2xl mb-3">{item.icon}</div>
+                <item.icon className="w-6 h-6 mb-3 text-gray-300" strokeWidth={1.75} />
                 <h3 className="text-sm font-extrabold text-gray-100 mb-2">{item.title}</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
               </div>
@@ -321,7 +323,7 @@ export default function HermesLandingPage() {
               <div key={tier.name} className={`rounded-2xl p-6 flex flex-col ${tier.cardBg} ${tier.border}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{tier.icon}</span>
+                    {tier.icon && <tier.icon className="w-5 h-5 text-gray-300" strokeWidth={1.75} />}
                     <h3 className="text-base font-extrabold text-white">{tier.name}</h3>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tier.badgeStyle}`}>{tier.badge}</span>
@@ -368,7 +370,7 @@ export default function HermesLandingPage() {
 
         {/* ── CTA ── */}
         <section className="text-center bg-gradient-to-br from-amber-950/40 to-orange-950/40 border-2 border-amber-500/20 rounded-2xl p-14 mb-12">
-          <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-2xl mx-auto mb-6">⚡</div>
+          <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mx-auto mb-6"><Zap className="w-6 h-6" strokeWidth={1.75} /></div>
           <h2 className="text-3xl font-extrabold text-white mb-3">
             The industry charges $49–$99/seat for this.
           </h2>

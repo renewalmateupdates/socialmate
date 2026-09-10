@@ -3,6 +3,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe, Mail, Target, Users, Zap } from 'lucide-react'
+
+function ChannelGlyph({ id, size = 12, className = '' }: { id: string; size?: number; className?: string }) {
+  if (id === 'email') return <Mail size={size} className={className} strokeWidth={1.75} />
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 type Campaign = {
   id: string
@@ -20,12 +28,6 @@ const STATUS_COLORS: Record<string, string> = {
   active:    'bg-green-500/10 text-green-400 border-green-500/20',
   paused:    'bg-amber-500/10 text-amber-400 border-amber-500/20',
   completed: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-}
-
-const CHANNEL_ICONS: Record<string, string> = {
-  email:    '📧',
-  bluesky:  '🦋',
-  mastodon: '🐘',
 }
 
 const CHANNEL_LABELS: Record<string, string> = {
@@ -59,10 +61,10 @@ export default function HermesPage() {
   const activeCampaigns = campaigns.filter(c => c.status === 'active').length
 
   const stats = [
-    { icon: '⚡', label: 'Active Campaigns', value: activeCampaigns,  color: 'text-amber-400' },
-    { icon: '👤', label: 'Total Prospects',  value: totalProspects,   color: 'text-blue-400' },
-    { icon: '✉️',  label: 'Messages Created', value: totalMessages,    color: 'text-purple-400' },
-    { icon: '🏹', label: 'Channels Live',    value: 3,                color: 'text-green-400' },
+    { icon: Zap, label: 'Active Campaigns', value: activeCampaigns,  color: 'text-amber-400' },
+    { icon: Users, label: 'Total Prospects',  value: totalProspects,   color: 'text-blue-400' },
+    { icon: Mail,  label: 'Messages Created', value: totalMessages,    color: 'text-purple-400' },
+    { icon: Target, label: 'Channels Live',    value: 3,                color: 'text-green-400' },
   ]
 
   return (
@@ -80,10 +82,10 @@ export default function HermesPage() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-xl">⚡</div>
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center"><Zap className="w-5 h-5" strokeWidth={1.75} /></div>
               <div>
                 <h1 className="text-2xl font-extrabold tracking-tight">HERMES</h1>
-                <p className="text-xs text-gray-500 mt-0.5">Cold outreach — 📧 Email · 🦋 Bluesky · 🐘 Mastodon</p>
+                <p className="text-xs text-gray-500 mt-0.5 inline-flex items-center gap-1">Cold outreach — <Mail className="w-3 h-3" strokeWidth={1.75} /> Email · <PlatformIcon name="bluesky" size={12} /> Bluesky · <PlatformIcon name="mastodon" size={12} /> Mastodon</p>
               </div>
             </div>
           </div>
@@ -99,7 +101,7 @@ export default function HermesPage() {
           {stats.map(s => (
             <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">{s.icon}</span>
+                <s.icon className="w-4 h-4" strokeWidth={1.75} />
                 <span className={`text-2xl font-extrabold ${s.color}`}>
                   {loading ? '–' : s.value}
                 </span>
@@ -123,7 +125,7 @@ export default function HermesPage() {
           </div>
         ) : campaigns.length === 0 ? (
           <div className="bg-gray-900 border border-dashed border-gray-700 rounded-2xl p-14 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-2xl mx-auto mb-4">⚡</div>
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mx-auto mb-4"><Zap className="w-6 h-6" strokeWidth={1.75} /></div>
             <h2 className="text-base font-bold mb-1">No campaigns yet</h2>
             <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
               Create a campaign, add prospects, let HERMES write and send your outreach.
@@ -157,7 +159,7 @@ export default function HermesPage() {
                             ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
                             : 'bg-gray-500/10 text-gray-400 border-gray-700'
                         }`}>
-                          {c.mode === 'auto' ? '⚡ Auto-send' : '✏️ Draft'}
+                          {c.mode === 'auto' ? <span className="inline-flex items-center gap-1"><Zap className="w-3 h-3" strokeWidth={2} /> Auto-send</span> : 'Draft'}
                         </span>
                       </div>
 
@@ -168,12 +170,12 @@ export default function HermesPage() {
 
                       {/* Meta row */}
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">👤 {prospectCount} prospect{prospectCount !== 1 ? 's' : ''}</span>
-                        <span className="flex items-center gap-1">✉️ {messageCount} message{messageCount !== 1 ? 's' : ''}</span>
+                        <span className="flex items-center gap-1"><Users className="w-3 h-3" strokeWidth={1.75} /> {prospectCount} prospect{prospectCount !== 1 ? 's' : ''}</span>
+                        <span className="flex items-center gap-1"><Mail className="w-3 h-3" strokeWidth={1.75} /> {messageCount} message{messageCount !== 1 ? 's' : ''}</span>
                         <span className="flex items-center gap-1">
                           {(c.channels ?? []).map(ch => (
                             <span key={ch} title={CHANNEL_LABELS[ch] ?? ch} className="flex items-center gap-0.5">
-                              {CHANNEL_ICONS[ch] ?? ch}
+                              <ChannelGlyph id={ch} size={12} />
                             </span>
                           ))}
                         </span>
