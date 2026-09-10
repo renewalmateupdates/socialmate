@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { Bot } from 'lucide-react'
 
 const TIERS = [
   { value: 'citizen',   label: 'Citizen — Free',    color: '#10b981' },
@@ -62,7 +63,7 @@ export default function EnkiPage() {
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 460, textAlign: 'center' }}>
 
         {/* Icon */}
-        <div style={{ fontSize: 56, marginBottom: 20, lineHeight: 1 }}>🤖</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}><Bot size={48} strokeWidth={1.5} /></div>
 
         {/* Wordmark */}
         <h1 style={{
