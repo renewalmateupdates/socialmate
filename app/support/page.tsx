@@ -7,7 +7,7 @@ import PublicLayout from '@/components/PublicLayout'
 const FAQS = [
   {
     q: 'What platforms can I schedule to?',
-    a: 'SocialMate currently supports Bluesky, Discord, Telegram, Mastodon, and X/Twitter. More platforms are coming soon: LinkedIn, YouTube, Reddit, and Pinterest are on the roadmap.',
+    a: 'SocialMate currently supports Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn — 7 platforms live. More are coming soon: Instagram, Facebook, Threads, YouTube, Reddit, and Pinterest are on the roadmap.',
   },
   {
     q: 'How do credits work?',

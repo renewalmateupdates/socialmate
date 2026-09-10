@@ -118,7 +118,7 @@ export default function VsPallyyPage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">250 posts / month. Flat pricing. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ Free forever — no post cap</li>
+              <li>✅ Free forever — 250 posts/month</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Link in bio included free</li>
@@ -156,7 +156,7 @@ export default function VsPallyyPage() {
               {
                 n: '1',
                 title: '15 posts/month runs out in less than a week for daily posters',
-                desc: 'If you post once a day, Pallyy\'s free plan runs out in 15 days. If you post twice a day, it is gone in a week. The cap forces you to either significantly reduce your posting frequency or pay the monthly fee. SocialMate has no post cap on the free plan — post as much as your strategy calls for with no wall in sight.',
+                desc: 'If you post once a day, Pallyy\'s free plan runs out in 15 days. If you post twice a day, it is gone in a week. The cap forces you to either significantly reduce your posting frequency or pay the monthly fee. SocialMate\'s free plan allows 250 posts a month — enough room for daily posting without hitting a wall halfway through the month.',
               },
               {
                 n: '2',

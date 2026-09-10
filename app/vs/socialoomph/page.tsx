@@ -163,7 +163,7 @@ export default function VsSocialOomphPage() {
               },
               {
                 n: '2',
-                title: 'Zero AI tools vs 12 free AI tools',
+                title: 'Zero AI tools vs 15+ free AI tools',
                 desc: 'SocialOomph has no AI writing assistance at any price tier. SocialMate includes 15+ AI tools free: hook writing, caption rewriting, thread generation, content repurposing, hashtag suggestions, and the SOMA system that generates a full week of posts across all your platforms. The time savings alone justify switching.',
               },
               {

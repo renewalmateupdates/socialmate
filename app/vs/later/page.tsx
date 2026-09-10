@@ -157,7 +157,7 @@ export default function VsLaterPage() {
               {
                 n: '1',
                 title: "Later's free plan is barely a free plan",
-                desc: "One Instagram profile and 30 posts per month is not a usable free tier for anyone who posts regularly. SocialMate's free plan has no monthly post cap and covers all 16 supported platforms — not just Instagram.",
+                desc: "One Instagram profile and 30 posts per month is not a usable free tier for anyone who posts regularly. SocialMate's free plan allows 250 posts a month across all 7 supported platforms — not just Instagram.",
               },
               {
                 n: '2',

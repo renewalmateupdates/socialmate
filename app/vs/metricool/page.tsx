@@ -31,7 +31,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'Does Metricool have a real free plan?',
-    a: 'Metricool has a free tier but it caps at 50 scheduled posts per month and 1 brand. If you post daily across multiple platforms, you will hit that cap fast. SocialMate has no post limits on the free tier.',
+    a: 'Metricool has a free tier but it caps at 50 scheduled posts per month and 1 brand. If you post daily across multiple platforms, you will hit that cap fast. SocialMate\'s free tier allows 250 posts a month, five times the room.',
   },
   {
     q: 'Does SocialMate have analytics like Metricool?',
@@ -156,7 +156,7 @@ export default function VsMetricoolPage() {
               {
                 n: '1',
                 title: 'The 50-post cap hits fast',
-                desc: 'If you post once a day across just 2 platforms, you hit Metricool\'s free tier limit in 25 days. Then you\'re either paying $22/month or throttling your output. SocialMate has no post limits on any plan, including free.',
+                desc: 'If you post once a day across just 2 platforms, you hit Metricool\'s free tier limit in 25 days. Then you\'re either paying $22/month or throttling your output. SocialMate\'s free plan allows 250 posts a month, with 1,000 on Pro and 5,000 on Agency.',
               },
               {
                 n: '2',

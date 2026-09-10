@@ -31,7 +31,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Is Planable's free plan actually free?",
-    a: "Planable's free plan gives you 50 posts total — not per month, not per year. Lifetime. After 50 posts, you must upgrade to $11/month per workspace. For most users this means the free plan runs out in the first month of use. SocialMate is genuinely free with no post limits ever.",
+    a: "Planable's free plan gives you 50 posts total — not per month, not per year. Lifetime. After 50 posts, you must upgrade to $11/month per workspace. For most users this means the free plan runs out in the first month of use. SocialMate's free plan gives you 250 posts every single month, indefinitely.",
   },
   {
     q: 'Planable is known for team collaboration — does SocialMate have that?',
@@ -156,7 +156,7 @@ export default function VsPlanablePage() {
               {
                 n: '1',
                 title: "50 posts for life is not a free plan",
-                desc: "Planable's free plan gives you 50 total posts across your lifetime account. Post twice a day and you run out in 25 days. Most users hit the cap in their first month and are forced to upgrade. SocialMate's free tier has no post limits — ever.",
+                desc: "Planable's free plan gives you 50 total posts across your lifetime account. Post twice a day and you run out in 25 days. Most users hit the cap in their first month and are forced to upgrade. SocialMate's free tier gives you 250 posts every month, not once ever.",
               },
               {
                 n: '2',

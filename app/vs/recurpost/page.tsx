@@ -34,7 +34,7 @@ const FAQ = [
   },
   {
     q: "What is RecurPost's main feature?",
-    a: 'RecurPost specializes in content recycling — it lets you build libraries of evergreen posts that automatically repeat on a schedule. This is a genuinely useful feature. SocialMate includes evergreen recycling on the free plan, with no post cap.',
+    a: 'RecurPost specializes in content recycling — it lets you build libraries of evergreen posts that automatically repeat on a schedule. This is a genuinely useful feature. SocialMate includes evergreen recycling on the free plan, within the free plan\'s 250 posts/month.',
   },
   {
     q: 'Which platforms does SocialMate support that RecurPost does not?',

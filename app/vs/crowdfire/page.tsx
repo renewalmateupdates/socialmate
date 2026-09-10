@@ -118,7 +118,7 @@ export default function VsCrowdfirePage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">250 posts / month. 7 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ Free forever — no post cap</li>
+              <li>✅ Free forever — 250 posts/month</li>
               <li>✅ Analytics included free (30 days)</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
@@ -156,7 +156,7 @@ export default function VsCrowdfirePage() {
               {
                 n: '1',
                 title: '10 posts per month is not enough for anyone posting regularly',
-                desc: 'If you post once a day, Crowdfire\'s free plan runs out in 10 days. If you post three times a week, you hit the wall by day 25. The hard cap forces you to either pay or stop scheduling — that is not a free plan, it is a trial with a monthly reset. SocialMate\'s free plan has no post cap, so you can post as much as your strategy calls for.',
+                desc: 'If you post once a day, Crowdfire\'s free plan runs out in 10 days. If you post three times a week, you hit the wall by day 25. The hard cap forces you to either pay or stop scheduling — that is not a free plan, it is a trial with a monthly reset. SocialMate\'s free plan allows 250 posts a month, enough room for daily posting across every platform you connect.',
               },
               {
                 n: '2',

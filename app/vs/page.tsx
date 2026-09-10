@@ -217,7 +217,7 @@ const COMPARISONS = [
     name:        'Post Planner',
     emoji:       '📋',
     headline:    "Post Planner free plan: 10 posts/month — nearly useless",
-    angle:       "10 posts per month is not a real social media strategy. SocialMate has no post cap on the free plan — post as much as you want.",
+    angle:       "10 posts per month is not a real social media strategy. SocialMate's free plan allows 250 posts a month — an actual usable amount.",
     tag:         '10-post free plan cap',
     tagColor:    'bg-amber/10 text-amber',
   },

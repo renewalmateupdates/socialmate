@@ -88,7 +88,7 @@ export default function VsBufferPage() {
             SocialMate vs Buffer
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no caps, bulk scheduler, 15+ AI tools included.
+            Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: 250 posts/month, bulk scheduler, 15+ AI tools included.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -116,7 +116,7 @@ export default function VsBufferPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Everything in one. No add-ons. No caps.</p>
+            <p className="font-extrabold text-lg mb-2">Everything in one. No add-ons. 250 posts/month.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 250 posts / month, no per-channel cap</li>
               <li>✅ Bulk scheduling free</li>

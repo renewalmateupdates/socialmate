@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Post Planner starts at $9/month but its free plan caps at 10 posts/month — nearly useless. SocialMate is free forever with 250 posts a month, AI tools, and Discord/Bluesky included.',
   openGraph: {
     title:       'SocialMate vs Post Planner (2026)',
-    description: "Post Planner's free plan limits you to 10 posts/month — barely enough to stay active. SocialMate is free forever with no post caps.",
+    description: "Post Planner's free plan limits you to 10 posts/month — barely enough to stay active. SocialMate is free forever with 250 posts a month.",
     url:         'https://socialmate.studio/vs/postplanner',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/postplanner' },
