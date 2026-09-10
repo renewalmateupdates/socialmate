@@ -2,6 +2,10 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Briefcase, Heart, Laptop, Mic2, Palette, Rocket, Star } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+const CREATOR_AVATARS: LucideIcon[] = [Laptop, Palette, Mic2, Briefcase, Rocket]
 
 // Add real testimonials here as they come in. Each entry:
 // { name, handle, platform, quote, avatar (emoji or initials) }
@@ -23,8 +27,6 @@ const TESTIMONIALS: {
   //   role: 'Creator & Coach',
   // },
 ]
-
-const STAR = '★'
 
 export default function WallOfLove() {
   const { t } = useI18n()
@@ -62,23 +64,27 @@ export default function WallOfLove() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
-                <div className="text-amber-400 text-sm tracking-wider">{STAR.repeat(5)}</div>
+                <div className="flex items-center gap-0.5 text-amber-400">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <Star key={s} size={14} strokeWidth={2} fill="currentColor" />
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         ) : (
           /* Empty state — shows until real testimonials are added */
           <div className="text-center py-16 mb-10">
-            <div className="text-6xl mb-6">🧡</div>
+            <Heart className="w-14 h-14 mx-auto mb-6 text-orange-400" strokeWidth={1.5} fill="currentColor" />
             <p className="text-lg font-extrabold tracking-tight mb-3">{t('wall_of_love.empty_title')}</p>
             <p className="text-gray-400 dark:text-gray-500 text-sm max-w-md mx-auto leading-relaxed mb-8">
               {t('wall_of_love.empty_desc')}
             </p>
             <div className="flex items-center justify-center gap-2 mb-6">
               <div className="flex -space-x-1.5">
-                {['🧑‍💻', '👩‍🎨', '🧑‍🎤', '👨‍💼', '👩‍🚀'].map((e, i) => (
-                  <div key={i} className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 border-2 border-white dark:border-gray-900 flex items-center justify-center text-base">
-                    {e}
+                {CREATOR_AVATARS.map((AvatarIcon, i) => (
+                  <div key={i} className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 border-2 border-white dark:border-gray-900 flex items-center justify-center">
+                    <AvatarIcon size={15} strokeWidth={1.75} className="text-gray-500 dark:text-gray-400" />
                   </div>
                 ))}
               </div>

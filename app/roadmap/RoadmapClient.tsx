@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { HeartHandshake } from 'lucide-react'
 
 type RoadmapItem = {
   title:    string
@@ -177,7 +178,7 @@ const STATUS_CONFIG = {
   'in-progress': { label: 'In Progress', color: 'bg-amber-100 text-amber-700',    dot: 'bg-amber-500'   },
   'coming-soon': { label: 'Coming Soon', color: 'bg-yellow-100 text-yellow-700', dot: 'bg-yellow-500' },
   'planned':     { label: 'Planned',     color: 'bg-gray-100 text-gray-500',    dot: 'bg-gray-400'   },
-  'shipped':     { label: 'Shipped ✅',  color: 'bg-green-100 text-green-700',  dot: 'bg-green-500'  },
+  'shipped':     { label: 'Shipped',     color: 'bg-green-100 text-green-700',  dot: 'bg-green-500'  },
 }
 
 const ORDER: RoadmapItem['status'][] = ['in-progress', 'coming-soon', 'planned', 'shipped']
@@ -287,7 +288,7 @@ export default function RoadmapClient() {
         </p>
         {feedbackSent ? (
           <div className="text-center py-6">
-            <div className="text-3xl mb-3">🙏</div>
+            <HeartHandshake className="w-7 h-7 mx-auto mb-3 text-amber-500" strokeWidth={1.5} />
             <p className="text-sm font-extrabold mb-1">Got it — thank you!</p>
             <p className="text-xs text-gray-500">We read every request.</p>
           </div>
