@@ -3,15 +3,22 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe, CircleDot, Rocket, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const ALL_PLATFORMS = [
-  { id: 'bluesky',   label: 'Bluesky',    icon: '🦋' },
-  { id: 'twitter',   label: 'Twitter / X', icon: '𝕏' },
-  { id: 'mastodon',  label: 'Mastodon',   icon: '🐘' },
-  { id: 'discord',   label: 'Discord',    icon: '💬' },
-  { id: 'telegram',  label: 'Telegram',   icon: '✈️' },
-  { id: 'linkedin',  label: 'LinkedIn',   icon: '💼' },
-  { id: 'instagram', label: 'Instagram',  icon: '📸' },
+  { id: 'bluesky',   label: 'Bluesky' },
+  { id: 'twitter',   label: 'Twitter / X' },
+  { id: 'mastodon',  label: 'Mastodon' },
+  { id: 'discord',   label: 'Discord' },
+  { id: 'telegram',  label: 'Telegram' },
+  { id: 'linkedin',  label: 'LinkedIn' },
+  { id: 'instagram', label: 'Instagram' },
 ]
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -80,7 +87,7 @@ function PlatformScheduleRow({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-base">{icon}</span>
+          <PlatformGlyph id={icon} size={16} />
           <span className="text-sm font-bold text-white">{label}</span>
         </div>
         {/* Posts per day */}
@@ -341,7 +348,7 @@ export default function NewSomaProjectPage() {
                           : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
                       }`}
                     >
-                      <span>{p.icon}</span>{p.label}
+                      <PlatformGlyph id={p.id} size={14} />{p.label}
                     </button>
                   ))}
                 </div>
@@ -367,7 +374,11 @@ export default function NewSomaProjectPage() {
                         : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
                     }`}
                   >
-                    {m === 'safe' ? '🟢 Safe' : m === 'autopilot' ? '⚡ Autopilot' : '🚀 Full Send'}
+                    {m === 'safe'
+                      ? <span className="inline-flex items-center gap-1"><CircleDot className="w-3 h-3" strokeWidth={2} /> Safe</span>
+                      : m === 'autopilot'
+                      ? <span className="inline-flex items-center gap-1"><Zap className="w-3 h-3" strokeWidth={2} /> Autopilot</span>
+                      : <span className="inline-flex items-center gap-1"><Rocket className="w-3 h-3" strokeWidth={2} /> Full Send</span>}
                   </button>
                 ))}
               </div>
@@ -395,7 +406,7 @@ export default function NewSomaProjectPage() {
                       key={pid}
                       platform={pid}
                       label={meta?.label ?? pid}
-                      icon={meta?.icon ?? '📱'}
+                      icon={meta?.id ?? pid}
                       schedule={schedule[pid] ?? { posts_per_day: 1, days: [1,2,3,4,5] }}
                       maxPosts={maxPostsPerDay}
                       onChange={s => updatePlatformSchedule(pid, s)}

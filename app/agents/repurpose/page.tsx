@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { Recycle } from 'lucide-react'
 
 type Settings = {
   enabled: boolean
@@ -68,7 +69,7 @@ export default function RepurposeAgentPage() {
   if (!isPro) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
-        <span className="text-5xl">♻️</span>
+        <Recycle className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">Repurpose Agent</h1>
         <p className="text-secondary text-sm max-w-md">Automatically repurpose your best posts into new formats every week. Available on Pro and Agency plans.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
@@ -82,7 +83,7 @@ export default function RepurposeAgentPage() {
       <div className="mb-8">
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">♻️</span>
+          <Recycle className="w-7 h-7" strokeWidth={1.5} />
           <h1 className="text-2xl font-black text-primary">Repurpose Agent</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>

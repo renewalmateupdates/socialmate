@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Toast from '@/components/Toast'
 import { useI18n } from '@/contexts/I18nContext'
+import { DollarSign } from 'lucide-react'
 
 type Settings = {
   stripe_account_id:         string | null
@@ -190,7 +191,7 @@ function MonetizeHubInner() {
   if (!isPro) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
-        <span className="text-5xl">💸</span>
+        <DollarSign className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">{t('app_creator_hub.pro_gate_title')}</h1>
         <p className="text-secondary text-sm max-w-md">{t('app_creator_hub.pro_gate_desc')}</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">{t('app_creator_hub.upgrade_pro')}</Link>
@@ -204,7 +205,7 @@ function MonetizeHubInner() {
       <div className="mb-8">
         <Link href="/monetize" className="text-xs text-secondary hover:text-primary mb-4 inline-block">{t('app_creator_hub.back_short')}</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">💸</span>
+          <DollarSign className="w-7 h-7" strokeWidth={1.75} />
           <h1 className="text-2xl font-black text-primary">{t('app_creator_hub.title')}</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>

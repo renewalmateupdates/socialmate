@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Ban, Clock, DollarSign, Lock, Store } from 'lucide-react'
 
 interface PostStats { published: number; failed: number; partial: number; scheduled: number }
 interface PlatformStat { published: number; failed: number }
@@ -131,7 +132,7 @@ function AdminUsersInner() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <p className="text-xs text-gray-400 mt-1 mb-4">Admin access required</p>
         <button onClick={() => router.push('/dashboard')}
@@ -292,12 +293,14 @@ function AdminUsersInner() {
                               u.affiliate_status === 'suspended' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
                                                                    'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                             }`}>
-                              {u.affiliate_status === 'active' ? '💰 Partner' : u.affiliate_status === 'pending' ? '⏳ Partner' : '⛔ Partner'}
+                              <span className="inline-flex items-center gap-1">
+                                {u.affiliate_status === 'active' ? <DollarSign className="w-3 h-3" strokeWidth={2} /> : u.affiliate_status === 'pending' ? <Clock className="w-3 h-3" strokeWidth={2} /> : <Ban className="w-3 h-3" strokeWidth={2} />} Partner
+                              </span>
                             </span>
                           )}
                           {u.is_stax && (
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 whitespace-nowrap">
-                              🏪 Stax
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 whitespace-nowrap inline-flex items-center gap-1">
+                              <Store className="w-3 h-3" strokeWidth={2} /> Stax
                             </span>
                           )}
                           {!u.affiliate_status && !u.is_stax && (
@@ -396,12 +399,12 @@ function AdminUsersInner() {
                         selected.affiliate_status === 'suspended' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
                                                                     'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                       }`}>
-                        💰 Partner ({selected.affiliate_status})
+                        <DollarSign className="inline w-3 h-3 align-text-bottom" strokeWidth={2} /> Partner ({selected.affiliate_status})
                       </span>
                     )}
                     {selected.is_stax && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                        🏪 Studio Stax
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 inline-flex items-center gap-1">
+                        <Store className="w-3 h-3" strokeWidth={2} /> Studio Stax
                       </span>
                     )}
                     {!selected.affiliate_status && !selected.is_stax && <span className="text-gray-400">none</span>}

@@ -3,6 +3,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -146,7 +147,7 @@ function EnkiCopilotAcceptInner() {
                   'No ability to trade or approve',
                 ].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-gray-300">
-                    <span className="text-amber-400">▸</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-amber-400" strokeWidth={2} />
                     {item}
                   </li>
                 ))}

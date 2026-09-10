@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { CheckCircle2, Flag, Lock, XCircle } from 'lucide-react'
 
 interface FeatureFlag {
   flag: string
@@ -88,7 +89,7 @@ export default function FeatureFlagsPage() {
     return (
       <div className="min-h-dvh bg-theme flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-3">🔒</div>
+          <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
           <p className="text-xs text-gray-400 mt-1 mb-4">Admin access required</p>
           <button onClick={() => router.push('/dashboard')}
@@ -138,7 +139,7 @@ export default function FeatureFlagsPage() {
         {/* Flags list */}
         {flags.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-            <div className="text-4xl mb-3">🚩</div>
+            <Flag className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
             <p className="text-sm font-bold mb-1">Couldn't load feature flags</p>
             <p className="text-xs text-gray-400">The switches are defined in code, so an empty list means the request failed. Try reloading.</p>
           </div>
@@ -203,10 +204,10 @@ export default function FeatureFlagsPage() {
       </div>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2 ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <XCircle className="w-4 h-4" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>

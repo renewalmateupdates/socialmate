@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { ChevronRight, Eye, Flame, Lock, Scale, Shield, Zap } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,7 +43,7 @@ interface CoinbaseInfo {
 
 const RISK_PRESETS: {
   id: RiskPreset
-  emoji: string
+  emoji: typeof Shield
   label: string
   description: string
   confidence: string
@@ -56,7 +57,7 @@ const RISK_PRESETS: {
 }[] = [
   {
     id: 'conservative',
-    emoji: '🛡️',
+    emoji: Shield,
     label: 'Conservative',
     description: 'Capital preservation first. Tight limits, high conviction only.',
     confidence: '8 / 10',
@@ -70,7 +71,7 @@ const RISK_PRESETS: {
   },
   {
     id: 'balanced',
-    emoji: '⚖️',
+    emoji: Scale,
     label: 'Balanced',
     description: 'Steady growth with disciplined risk management. Recommended for most.',
     confidence: '6 / 10',
@@ -84,7 +85,7 @@ const RISK_PRESETS: {
   },
   {
     id: 'aggressive',
-    emoji: '🔥',
+    emoji: Flame,
     label: 'Aggressive',
     description: 'Maximum upside. Larger positions, wider stops, lower confidence bar.',
     confidence: '4 / 10',
@@ -516,7 +517,7 @@ export default function EnkiSettingsPage() {
           <ul className="space-y-2">
             {TIER_FEATURES[tier].map(f => (
               <li key={f} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span className="text-amber-400 mt-0.5">▸</span>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400 mt-0.5" strokeWidth={2} />
                 {f}
               </li>
             ))}
@@ -538,7 +539,7 @@ export default function EnkiSettingsPage() {
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Risk Profile</h2>
           {truthMode && (
             <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-3 mb-4">
-              <span className="text-violet-500">🔒</span>
+              <Lock className="w-4 h-4 text-violet-500" strokeWidth={1.75} />
               <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
                 Truth Mode is running — parameters locked to preserve data integrity
               </p>
@@ -565,7 +566,7 @@ export default function EnkiSettingsPage() {
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg leading-none">{preset.emoji}</span>
+                    <preset.emoji className="w-4 h-4" strokeWidth={1.75} />
                     <span className={`text-sm font-bold ${isSelected ? preset.textAccent : 'text-gray-900 dark:text-gray-100'}`}>
                       {preset.label}
                     </span>
@@ -612,7 +613,7 @@ export default function EnkiSettingsPage() {
           </div>
           {truthMode && (
             <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-3 mb-4">
-              <span className="text-violet-500">🔒</span>
+              <Lock className="w-4 h-4 text-violet-500" strokeWidth={1.75} />
               <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
                 Truth Mode is running — parameters locked to preserve data integrity
               </p>
@@ -627,7 +628,7 @@ export default function EnkiSettingsPage() {
               <span className="text-gray-600 dark:text-gray-400">Size: <strong className="text-gray-900 dark:text-gray-100">{positionSizePct}%</strong></span>
               {positionSizePct === 100 && (
                 <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
-                  ⚡ Full Send — uses entire portfolio per trade
+                  <Zap className="inline w-3 h-3 align-text-bottom" strokeWidth={2} /> Full Send — uses entire portfolio per trade
                 </span>
               )}
             </div>
@@ -1077,8 +1078,8 @@ export default function EnkiSettingsPage() {
                 Invite one trusted person to view your Enki dashboard in read-only mode. They can see your live trades, performance, and signals — but cannot trade or approve anything.
               </p>
             </div>
-            <span className="shrink-0 ml-4 text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full">
-              👁 Read-only
+            <span className="shrink-0 ml-4 text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+              <Eye className="w-3 h-3" strokeWidth={2} /> Read-only
             </span>
           </div>
 

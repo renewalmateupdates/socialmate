@@ -2,16 +2,24 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { FlaskConical, Globe, Mail, Zap } from 'lucide-react'
+
+function ChannelGlyph({ id, size = 18, className = '' }: { id: string; size?: number; className?: string }) {
+  if (id === 'email') return <Mail size={size} className={className} strokeWidth={1.75} />
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const CHANNELS = [
-  { id: 'email',    label: 'Email',    icon: '📧', desc: 'Via Hunter.io + Resend. Best for agencies & freelancers.' },
-  { id: 'bluesky',  label: 'Bluesky',  icon: '🦋', desc: 'DM via AT Protocol. Great for creators & builders.' },
-  { id: 'mastodon', label: 'Mastodon', icon: '🐘', desc: 'Direct mention as DM. Open-source communities.' },
+  { id: 'email',    label: 'Email',    desc: 'Via Hunter.io + Resend. Best for agencies & freelancers.' },
+  { id: 'bluesky',  label: 'Bluesky',  desc: 'DM via AT Protocol. Great for creators & builders.' },
+  { id: 'mastodon', label: 'Mastodon', desc: 'Direct mention as DM. Open-source communities.' },
 ]
 
 const COMING_CHANNELS = [
-  { label: 'LinkedIn', icon: '💼', reason: 'Partner API required' },
-  { label: 'X / Twitter', icon: '✖️', reason: '$100/mo API access' },
+  { id: 'linkedin', label: 'LinkedIn', reason: 'Partner API required' },
+  { id: 'twitter', label: 'X / Twitter', reason: '$100/mo API access' },
 ]
 
 export default function NewCampaignPage() {
@@ -120,7 +128,7 @@ export default function NewCampaignPage() {
                       ? 'bg-amber-400/10 border-amber-400/30 text-white'
                       : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
                   }`}>
-                  <span className="text-xl">{ch.icon}</span>
+                  <ChannelGlyph id={ch.id} size={20} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold">{ch.label}</p>
                     <p className="text-xs text-gray-500">{ch.desc}</p>
@@ -138,7 +146,7 @@ export default function NewCampaignPage() {
                 <div
                   key={ch.label}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-800 bg-gray-900/50 opacity-50 cursor-not-allowed">
-                  <span className="text-xl grayscale">{ch.icon}</span>
+                  <ChannelGlyph id={ch.id} size={20} className="grayscale" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-500">{ch.label}</p>
                     <p className="text-xs text-gray-600">{ch.reason}</p>
@@ -154,8 +162,8 @@ export default function NewCampaignPage() {
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Mode</label>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { id: 'draft', icon: '✏️', label: 'Draft Mode', desc: 'AI writes messages for your review. You send manually.' },
-                { id: 'auto',  icon: '⚡', label: 'Auto-Send',  desc: 'AI writes and sends follow-ups automatically on schedule.' },
+                { id: 'draft', icon: FlaskConical, label: 'Draft Mode', desc: 'AI writes messages for your review. You send manually.' },
+                { id: 'auto',  icon: Zap, label: 'Auto-Send',  desc: 'AI writes and sends follow-ups automatically on schedule.' },
               ] as const).map(m => (
                 <button
                   key={m.id}
@@ -168,7 +176,7 @@ export default function NewCampaignPage() {
                         : 'bg-gray-800 border-gray-500'
                       : 'bg-gray-900 border-gray-700 hover:border-gray-500'
                   }`}>
-                  <p className="text-sm font-bold mb-1">{m.icon} {m.label}</p>
+                  <p className="text-sm font-bold mb-1 flex items-center gap-1.5"><m.icon className="w-3.5 h-3.5" strokeWidth={1.75} /> {m.label}</p>
                   <p className="text-xs text-gray-500">{m.desc}</p>
                 </button>
               ))}

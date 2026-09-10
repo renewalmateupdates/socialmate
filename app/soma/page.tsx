@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Building2, Download, FolderKanban, Mic, PenLine, RefreshCw, Rocket, Target, Zap } from 'lucide-react'
 
 const STATS = [
   { value: '6+',   label: 'Live Platforms' },
@@ -31,7 +32,7 @@ const STEPS = [
 const MODES = [
   {
     name: 'Autopilot',
-    icon: '⚡',
+    icon: Zap,
     price: '$10',
     priceSub: '/month add-on',
     badge: 'Most Popular',
@@ -55,7 +56,7 @@ const MODES = [
   },
   {
     name: 'Full Send',
-    icon: '🚀',
+    icon: Rocket,
     price: '$20',
     priceSub: '/month add-on',
     badge: 'Full Autonomous',
@@ -79,7 +80,7 @@ const MODES = [
   },
   {
     name: 'Enterprise',
-    icon: '🏢',
+    icon: Building2,
     price: 'Custom',
     priceSub: 'Contact us for pricing',
     badge: 'Enterprise',
@@ -251,7 +252,7 @@ export default function SomaLandingPage() {
               <div key={mode.name} className={`rounded-2xl p-6 flex flex-col ${mode.cardBg} ${mode.border}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{mode.icon}</span>
+                    <mode.icon className="w-5 h-5" strokeWidth={1.75} />
                     <h3 className={`text-sm font-extrabold ${mode.headerText}`}>{mode.name}</h3>
                   </div>
                   {mode.badge && (
@@ -316,12 +317,12 @@ export default function SomaLandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { icon: '📁', title: 'Named Projects', desc: 'Create a project per client or brand. Each has its own master doc history, voice profile, and platform selections.' },
-              { icon: '🔄', title: 'Automatic Diffing', desc: 'SOMA auto-compares each new doc against the previous version. Drop in an update and the diff becomes the content.' },
-              { icon: '🎯', title: 'Per-Project Settings', desc: 'Different clients post on different platforms at different frequencies. SOMA respects each project\'s settings independently.' },
+              { icon: FolderKanban, title: 'Named Projects', desc: 'Create a project per client or brand. Each has its own master doc history, voice profile, and platform selections.' },
+              { icon: RefreshCw, title: 'Automatic Diffing', desc: 'SOMA auto-compares each new doc against the previous version. Drop in an update and the diff becomes the content.' },
+              { icon: Target, title: 'Per-Project Settings', desc: 'Different clients post on different platforms at different frequencies. SOMA respects each project\'s settings independently.' },
             ].map(f => (
               <div key={f.title} className="bg-panel border border-edge rounded-2xl p-6">
-                <p className="text-2xl mb-3">{f.icon}</p>
+                <f.icon className="w-6 h-6 mb-3 text-ink-muted" strokeWidth={1.75} />
                 <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{f.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
               </div>
@@ -342,7 +343,7 @@ export default function SomaLandingPage() {
               <div key={`pricing-${mode.name}`} className={`rounded-2xl p-6 flex flex-col ${mode.cardBg} ${mode.border}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{mode.icon}</span>
+                    <mode.icon className="w-5 h-5" strokeWidth={1.75} />
                     <h3 className={`text-base font-extrabold ${mode.headerText}`}>{mode.name}</h3>
                   </div>
                   {mode.badge && (
@@ -386,13 +387,13 @@ export default function SomaLandingPage() {
           <div className="bg-panel border border-edge rounded-2xl overflow-hidden">
             <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
               {[
-                { action: 'Ingest master doc', credits: 25, desc: 'AI reads your doc, extracts themes, diffs against last week', icon: '📥' },
-                { action: 'Generate full week', credits: 75, desc: 'Platform-native posts for all connected platforms, 7–14 days', icon: '⚡' },
-                { action: 'Update voice profile', credits: 15, desc: 'Refresh SOMA\'s understanding of your tone and style', icon: '🎙️' },
-                { action: 'Generate single post', credits: 5, desc: 'One-off post generation outside the weekly cycle', icon: '✍️' },
+                { action: 'Ingest master doc', credits: 25, desc: 'AI reads your doc, extracts themes, diffs against last week', icon: Download },
+                { action: 'Generate full week', credits: 75, desc: 'Platform-native posts for all connected platforms, 7–14 days', icon: Zap },
+                { action: 'Update voice profile', credits: 15, desc: 'Refresh SOMA\'s understanding of your tone and style', icon: Mic },
+                { action: 'Generate single post', credits: 5, desc: 'One-off post generation outside the weekly cycle', icon: PenLine },
               ].map(item => (
                 <div key={item.action} className="p-6 flex items-start gap-4">
-                  <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                  <item.icon className="w-6 h-6 flex-shrink-0 text-ink-muted" strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <p className="text-sm font-extrabold text-gray-900 dark:text-white">{item.action}</p>

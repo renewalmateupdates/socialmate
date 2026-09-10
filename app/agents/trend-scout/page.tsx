@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Telescope, TrendingUp } from 'lucide-react'
 
 type Trend = {
   topic:          string
@@ -63,7 +64,7 @@ export default function TrendScoutPage() {
   if (!isPro) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
-        <span className="text-5xl">📈</span>
+        <TrendingUp className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">Trend Scout</h1>
         <p className="text-secondary text-sm max-w-md">Daily AI-powered trend analysis from your tracked competitors — content angles delivered every morning. Available on Pro and Agency plans.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
@@ -79,7 +80,7 @@ export default function TrendScoutPage() {
       <div className="mb-8">
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">📈</span>
+          <TrendingUp className="w-7 h-7" strokeWidth={1.5} />
           <h1 className="text-2xl font-black text-primary">Trend Scout</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>
@@ -144,7 +145,7 @@ export default function TrendScoutPage() {
                       <p className="font-black text-primary">{trend.topic}</p>
                       <p className="text-xs text-amber-500 mt-0.5">{trend.why_now}</p>
                     </div>
-                    <span className="text-xl shrink-0">📈</span>
+                    <TrendingUp className="w-5 h-5 shrink-0" strokeWidth={1.75} />
                   </div>
                   <p className="text-sm text-secondary mb-3">{trend.angle}</p>
                   <div className="bg-background border border-theme rounded-xl p-3 mb-3">
@@ -164,7 +165,7 @@ export default function TrendScoutPage() {
 
           {/* No competitors warning */}
           <div className="bg-surface border border-theme rounded-2xl p-4 flex items-center gap-3">
-            <span className="text-xl">🔭</span>
+            <Telescope className="w-5 h-5" strokeWidth={1.75} />
             <div>
               <p className="text-sm font-semibold text-primary">Needs competitor data</p>
               <p className="text-xs text-secondary">Trend Scout reads your competitor posts. <Link href="/competitors" className="text-amber-500 hover:underline">Add competitors →</Link></p>

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Lock, X as CloseIcon } from 'lucide-react'
 
 interface AffiliateRow {
   id: string
@@ -113,7 +114,7 @@ export default function AdminAffiliatesPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-400 hover:text-black dark:hover:text-white mt-4 transition-colors">← Dashboard</button>
       </div>
@@ -282,7 +283,7 @@ export default function AdminAffiliatesPage() {
                     </button>
                     <button onClick={() => handleAction('reject')} disabled={actionLoading}
                       className="flex-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 text-sm font-semibold py-2.5 rounded-xl hover:bg-red-100 transition-all disabled:opacity-60">
-                      {actionLoading ? 'Processing…' : '✕ Reject'}
+                      {actionLoading ? 'Processing…' : <span className="inline-flex items-center gap-1"><CloseIcon className="w-3.5 h-3.5" strokeWidth={2} /> Reject</span>}
                     </button>
                   </div>
                 </div>

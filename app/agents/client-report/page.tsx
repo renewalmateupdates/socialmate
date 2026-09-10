@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { BarChart3 } from 'lucide-react'
 
 type Settings = {
   enabled: boolean
@@ -63,7 +64,7 @@ export default function ClientReportPage() {
   if (!isAgency) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
-        <span className="text-5xl">📊</span>
+        <BarChart3 className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">Client Report Agent</h1>
         <p className="text-secondary text-sm max-w-md">Auto-generated weekly client reports are an Agency plan feature.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Agency →</Link>
@@ -77,7 +78,7 @@ export default function ClientReportPage() {
       <div className="mb-8">
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">📊</span>
+          <BarChart3 className="w-7 h-7" strokeWidth={1.5} />
           <h1 className="text-2xl font-black text-primary">Client Report Agent</h1>
           <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">Agency</span>
         </div>

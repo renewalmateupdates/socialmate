@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { Flame } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Enki Leaderboard — Top Architects by Treasury Growth',
@@ -173,8 +174,8 @@ export default async function EnkiLeaderboardPage() {
                       </td>
                       <td className="px-4 py-3.5 text-right tabular-nums">
                         {entry.conquest_streak > 0 ? (
-                          <span className="text-amber-500 font-bold">
-                            🔥 {entry.conquest_streak}
+                          <span className="text-amber-500 font-bold inline-flex items-center gap-1">
+                            <Flame className="w-3.5 h-3.5" strokeWidth={2} /> {entry.conquest_streak}
                           </span>
                         ) : (
                           <span className="text-gray-300 dark:text-gray-600">—</span>

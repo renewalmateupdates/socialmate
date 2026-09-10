@@ -3,6 +3,14 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Toast from '@/components/Toast'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { ArrowUp, Code2, FileText, Globe, Mail, Newspaper, Search, Telescope, Terminal, X as CloseIcon, Zap } from 'lucide-react'
+
+function ChannelGlyph({ id, size = 12, className = '' }: { id: string; size?: number; className?: string }) {
+  if (id === 'email') return <Mail size={size} className={className} strokeWidth={1.75} />
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 type Campaign = {
   id: string
@@ -50,7 +58,6 @@ const STATUS_COLORS: Record<string, string> = {
   opted_out: 'bg-red-500/10 text-red-400 border-red-500/20',
 }
 
-const CHANNEL_ICONS: Record<string, string> = { email: '📧', bluesky: '🦋', mastodon: '🐘' }
 const STEP_LABELS = ['Intro', 'Follow-up 1', 'Follow-up 2', 'Break-up']
 
 export default function CampaignDetailPage() {
@@ -294,7 +301,7 @@ export default function CampaignDetailPage() {
               <div className="flex items-center gap-2.5 flex-wrap mb-2">
                 <h1 className="text-xl font-extrabold">{campaign.name}</h1>
                 <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${campaign.mode === 'auto' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-gray-500/10 text-gray-400 border-gray-700'}`}>
-                  {campaign.mode === 'auto' ? '⚡ Auto-send' : '✏️ Draft mode'}
+                  {campaign.mode === 'auto' ? <span className="inline-flex items-center gap-1"><Zap className="w-3 h-3" strokeWidth={2} /> Auto-send</span> : 'Draft mode'}
                 </span>
               </div>
               {campaign.goal && <p className="text-sm text-gray-400 mb-1">{campaign.goal}</p>}
@@ -304,7 +311,7 @@ export default function CampaignDetailPage() {
               <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
                 <span>{prospects.length} prospects</span>
                 <span>{sentMessages.length} sent · {draftMessages.length} drafted</span>
-                <span>{(campaign.channels ?? []).map(ch => CHANNEL_ICONS[ch] ?? ch).join(' ')}</span>
+                <span className="inline-flex items-center gap-1.5">{(campaign.channels ?? []).map(ch => <ChannelGlyph key={ch} id={ch} size={12} />)}</span>
                 <span>Sequence: {campaign.sequence_days?.join(' → ')}d</span>
               </div>
             </div>
@@ -316,7 +323,7 @@ export default function CampaignDetailPage() {
         <div className="bg-gray-900 border border-purple-500/20 rounded-2xl p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-base">🔭</span>
+              <Telescope className="w-4 h-4" strokeWidth={1.75} />
               <span className="font-bold text-sm">Auto-Discover Prospects</span>
               <span className="text-xs text-purple-400 font-bold">HERMES Engine — free</span>
             </div>
@@ -333,20 +340,20 @@ export default function CampaignDetailPage() {
           {/* Source toggles */}
           <div className="flex gap-2 mb-3 flex-wrap">
             {[
-              { id: 'substack', label: 'Substack', icon: '📰' },
-              { id: 'github',   label: 'GitHub',   icon: '🐙' },
-              { id: 'devto',    label: 'Dev.to',   icon: '👩‍💻' },
-              { id: 'hashnode', label: 'Hashnode',  icon: '📝' },
+              { id: 'substack', label: 'Substack', icon: Newspaper },
+              { id: 'github',   label: 'GitHub',   icon: Terminal },
+              { id: 'devto',    label: 'Dev.to',   icon: Code2 },
+              { id: 'hashnode', label: 'Hashnode',  icon: FileText },
             ].map(src => (
               <button
                 key={src.id}
                 onClick={() => toggleSource(src.id)}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all inline-flex items-center gap-1.5 ${
                   discoverSources.includes(src.id)
                     ? 'bg-purple-500/15 border-purple-500/40 text-purple-300'
                     : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'
                 }`}>
-                {src.icon} {src.label}
+                <src.icon className="w-3.5 h-3.5" strokeWidth={1.75} /> {src.label}
               </button>
             ))}
           </div>
@@ -364,15 +371,15 @@ export default function CampaignDetailPage() {
               className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 disabled:opacity-40 text-white text-sm font-extrabold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
               {discovering
                 ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Finding...</>
-                : '🔭 Find & Import'}
+                : <span className="inline-flex items-center gap-1.5"><Telescope className="w-4 h-4" strokeWidth={1.75} /> Find &amp; Import</span>}
             </button>
           </div>
           {discoverResult && (
             <div className="flex items-center gap-4 text-xs flex-wrap">
               <span className="text-gray-400">Scraped <span className="text-white font-bold">{discoverResult.discovered}</span></span>
-              <span className="text-blue-400 font-bold">📧 {discoverResult.withEmail} with email</span>
-              <span className="text-green-400 font-bold">↑ {discoverResult.imported} imported</span>
-              <span className="text-amber-400 font-bold">⚡ {discoverResult.sent} sent</span>
+              <span className="text-blue-400 font-bold inline-flex items-center gap-1"><Mail className="w-3 h-3" strokeWidth={2} /> {discoverResult.withEmail} with email</span>
+              <span className="text-green-400 font-bold inline-flex items-center gap-1"><ArrowUp className="w-3 h-3" strokeWidth={2} /> {discoverResult.imported} imported</span>
+              <span className="text-amber-400 font-bold inline-flex items-center gap-1"><Zap className="w-3 h-3" strokeWidth={2} /> {discoverResult.sent} sent</span>
               {discoverResult.skipped > 0 && <span className="text-gray-500">{discoverResult.skipped} dupes skipped</span>}
               {discoverResult.sources && (
                 <span className="text-gray-600 text-xs">
@@ -382,7 +389,7 @@ export default function CampaignDetailPage() {
             </div>
           )}
           {autoDiscoverEnabled && (
-            <p className="text-xs text-purple-400 mt-2">⚡ Running every Monday — scrapes {discoverSources.join(', ')} for new leads, extracts emails, generates intros, sends automatically.</p>
+            <p className="text-xs text-purple-400 mt-2 inline-flex items-center gap-1"><Zap className="w-3 h-3" strokeWidth={2} /> Running every Monday — scrapes {discoverSources.join(', ')} for new leads, extracts emails, generates intros, sends automatically.</p>
           )}
         </div>
 
@@ -399,7 +406,7 @@ export default function CampaignDetailPage() {
                     ? 'bg-amber-400/10 border-amber-400/30 text-amber-400'
                     : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600'
                 }`}>
-                {CHANNEL_ICONS[ch]} {ch}
+                <ChannelGlyph id={ch} size={12} /> {ch}
               </button>
             ))}
           </div>
@@ -439,13 +446,13 @@ export default function CampaignDetailPage() {
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                 </div>
                 <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-3 space-y-2">
-                  <p className="text-xs font-bold text-gray-400">🔍 Find email automatically</p>
+                  <p className="text-xs font-bold text-gray-400 inline-flex items-center gap-1.5"><Search className="w-3.5 h-3.5" strokeWidth={1.75} /> Find email automatically</p>
                   <div className="flex gap-2">
                     <input value={pDomain} onChange={e => setPDomain(e.target.value)} placeholder="Company domain (e.g. stripe.com)"
                       className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                     <button type="button" onClick={findEmail} disabled={findingEmail || !pName.trim() || !pDomain.trim()}
                       className="px-3 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-black text-xs font-extrabold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5">
-                      {findingEmail ? <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Finding...</> : '🔍 Find'}
+                      {findingEmail ? <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Finding...</> : <><Search className="w-3 h-3" strokeWidth={2} /> Find</>}
                     </button>
                   </div>
                   <div className="flex gap-2 items-center">
@@ -497,9 +504,9 @@ export default function CampaignDetailPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
-                      {p.email && <span>📧 {p.email}</span>}
-                      {p.bluesky_handle && <span>🦋 {p.bluesky_handle}</span>}
-                      {p.mastodon_handle && <span>🐘 {p.mastodon_handle}</span>}
+                      {p.email && <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3" strokeWidth={1.75} /> {p.email}</span>}
+                      {p.bluesky_handle && <span className="inline-flex items-center gap-1"><PlatformIcon name="bluesky" size={12} /> {p.bluesky_handle}</span>}
+                      {p.mastodon_handle && <span className="inline-flex items-center gap-1"><PlatformIcon name="mastodon" size={12} /> {p.mastodon_handle}</span>}
                       {p.sequence_step > 0 && (
                         <span className="text-blue-400">Step {p.sequence_step} — {STEP_LABELS[p.sequence_step] ?? `Step ${p.sequence_step}`}</span>
                       )}
@@ -513,9 +520,9 @@ export default function CampaignDetailPage() {
                       className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
                       {generating === p.id
                         ? <><div className="w-3 h-3 border-2 border-gray-500 border-t-white rounded-full animate-spin" /> Writing...</>
-                        : `✍️ Generate ${STEP_LABELS[p.sequence_step] ?? 'message'}`}
+                        : `Generate ${STEP_LABELS[p.sequence_step] ?? 'message'}`}
                     </button>
-                    <button onClick={() => deleteProspect(p.id)} className="text-xs text-red-500/40 hover:text-red-400 transition-colors px-1">✕</button>
+                    <button onClick={() => deleteProspect(p.id)} className="text-xs text-red-500/40 hover:text-red-400 transition-colors px-1"><CloseIcon className="w-3 h-3" strokeWidth={2} /></button>
                   </div>
                 </div>
               </div>
@@ -536,7 +543,7 @@ export default function CampaignDetailPage() {
               <div key={m.id} className={`bg-gray-900 border rounded-2xl p-5 ${m.status === 'sent' ? 'border-green-500/20' : m.status === 'failed' ? 'border-red-500/20' : 'border-gray-800'}`}>
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm">{CHANNEL_ICONS[m.channel]}</span>
+                    <ChannelGlyph id={m.channel} size={14} />
                     <span className="text-sm font-bold">{m.hermes_prospects?.name ?? '—'}</span>
                     <span className="text-xs text-gray-500">{STEP_LABELS[m.step] ?? `Step ${m.step}`}</span>
                     <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${
@@ -559,9 +566,9 @@ export default function CampaignDetailPage() {
                         className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-black text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5">
                         {sending === m.id
                           ? <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Sending...</>
-                          : '⚡ Send'}
+                          : <><Zap className="w-3 h-3" strokeWidth={2} /> Send</>}
                       </button>
-                      <button onClick={() => deleteMessage(m.id)} className="text-xs text-red-500/40 hover:text-red-400 transition-colors px-1">✕</button>
+                      <button onClick={() => deleteMessage(m.id)} className="text-xs text-red-500/40 hover:text-red-400 transition-colors px-1"><CloseIcon className="w-3 h-3" strokeWidth={2} /></button>
                     </div>
                   )}
                   {m.status === 'sent' && m.sent_at && (

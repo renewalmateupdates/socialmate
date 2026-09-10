@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { CalendarDays } from 'lucide-react'
 
 interface Template {
   id: string
@@ -171,7 +172,7 @@ export default function ScheduleTemplatesPage() {
           </div>
         ) : templates.length === 0 ? (
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-10 text-center">
-            <p className="text-3xl mb-3">📅</p>
+            <CalendarDays className="w-8 h-8 mx-auto mb-3 text-gray-500" strokeWidth={1.5} />
             <p className="text-sm font-semibold text-gray-300 mb-1">No templates yet</p>
             <p className="text-xs text-gray-500">Create a template to save your favourite posting times for reuse.</p>
           </div>

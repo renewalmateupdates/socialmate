@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { Inbox, Mail } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Mail size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type NotifType = 'mention' | 'reply' | 'like' | 'repost' | 'follow'
@@ -20,11 +27,6 @@ type Notification = {
 }
 
 type FilterTab = 'all' | 'mentions' | 'likes' | 'follows'
-
-const PLATFORM_ICONS: Record<string, string> = {
-  bluesky:  '🦋',
-  mastodon: '🐘',
-}
 
 const TYPE_LABELS: Record<NotifType, { label: string; color: string }> = {
   mention: { label: 'mention',  color: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
@@ -195,7 +197,7 @@ export default function SocialInbox() {
           <div className="flex items-start justify-between mb-6">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">📬</span>
+                <Inbox className="w-6 h-6" strokeWidth={1.75} />
                 <h1 className="text-2xl font-extrabold tracking-tight">Social Inbox</h1>
                 {unreadCount > 0 && (
                   <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">
@@ -231,12 +233,12 @@ export default function SocialInbox() {
           {/* ── NO ACCOUNTS ─────────────────────────────────────────────── */}
           {hasNoAccounts ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">📭</div>
+              <Inbox className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 No platforms connected yet
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-5 max-w-sm mx-auto leading-relaxed">
-                Connect your Bluesky 🦋 or Mastodon 🐘 accounts to see your mentions, likes, and follows here.
+                Connect your Bluesky <PlatformGlyph id="bluesky" size={12} className="inline align-text-bottom" /> or Mastodon <PlatformGlyph id="mastodon" size={12} className="inline align-text-bottom" /> accounts to see your mentions, likes, and follows here.
               </p>
               <Link href="/accounts"
                 className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
@@ -266,13 +268,13 @@ export default function SocialInbox() {
                 {/* Platform badges */}
                 <div className="flex items-center gap-1.5 ml-auto">
                   {connectedPlatforms.includes('bluesky') && (
-                    <span className="text-xs font-semibold bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400 px-2.5 py-1 rounded-xl">
-                      🦋 Bluesky
+                    <span className="text-xs font-semibold bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">
+                      <PlatformGlyph id="bluesky" size={12} /> Bluesky
                     </span>
                   )}
                   {connectedPlatforms.includes('mastodon') && (
-                    <span className="text-xs font-semibold bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 px-2.5 py-1 rounded-xl">
-                      🐘 Mastodon
+                    <span className="text-xs font-semibold bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">
+                      <PlatformGlyph id="mastodon" size={12} /> Mastodon
                     </span>
                   )}
                 </div>
@@ -285,7 +287,7 @@ export default function SocialInbox() {
                 </div>
               ) : filtered.length === 0 ? (
                 <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-                  <div className="text-3xl mb-2">📭</div>
+                  <Inbox className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                   <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                     {notifications.length === 0 ? 'No notifications yet' : 'Nothing matches this filter'}
                   </p>
@@ -308,8 +310,8 @@ export default function SocialInbox() {
                         }`}>
                         <div className="flex items-start gap-3">
                           {/* Platform icon */}
-                          <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
-                            {PLATFORM_ICONS[notif.platform] || '📱'}
+                          <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <PlatformGlyph id={notif.platform} size={18} />
                           </div>
 
                           <div className="flex-1 min-w-0">

@@ -2,16 +2,17 @@
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useI18n } from '@/contexts/I18nContext'
+import { Brain, CalendarDays, Download, Flame, Sparkles, Zap } from 'lucide-react'
 
 export default function SomaUpgradePage() {
   const { t } = useI18n()
 
   const FEATURES = [
-    { icon: '🧠', label: t('app_soma_upgrade.feature_voice') },
-    { icon: '📥', label: t('app_soma_upgrade.feature_ingest') },
-    { icon: '✨', label: t('app_soma_upgrade.feature_generate') },
-    { icon: '📅', label: t('app_soma_upgrade.feature_schedule') },
-    { icon: '🔥', label: t('app_soma_upgrade.feature_autopilot') },
+    { icon: Brain, label: t('app_soma_upgrade.feature_voice') },
+    { icon: Download, label: t('app_soma_upgrade.feature_ingest') },
+    { icon: Sparkles, label: t('app_soma_upgrade.feature_generate') },
+    { icon: CalendarDays, label: t('app_soma_upgrade.feature_schedule') },
+    { icon: Flame, label: t('app_soma_upgrade.feature_autopilot') },
   ]
 
   return (
@@ -30,7 +31,7 @@ export default function SomaUpgradePage() {
               {/* Icon + heading */}
               <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 mb-4">
-                  <span className="text-3xl">⚡</span>
+                  <Zap className="w-7 h-7" strokeWidth={1.5} />
                 </div>
                 <h1 className="text-2xl font-extrabold text-white mb-2">
                   {t('app_soma_upgrade.title')}
@@ -44,7 +45,7 @@ export default function SomaUpgradePage() {
               <ul className="space-y-3 mb-8">
                 {FEATURES.map((f) => (
                   <li key={f.label} className="flex items-start gap-3">
-                    <span className="text-lg flex-shrink-0 mt-0.5">{f.icon}</span>
+                    <f.icon className="w-4 h-4 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
                     <span className="text-sm text-gray-300">{f.label}</span>
                   </li>
                 ))}

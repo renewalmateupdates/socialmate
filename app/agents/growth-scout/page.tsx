@@ -2,6 +2,13 @@
 import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe, Search, Telescope, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 type ScoutData = {
   competitors: { id: string; username: string; platform: string; last_checked_at: string | null }[]
@@ -12,16 +19,6 @@ type ScoutData = {
   cadence: { label: string; count: number }[]
   insights: string[]
   period_days: number
-}
-
-const PLATFORM_ICONS: Record<string, string> = {
-  twitter:   '🐦',
-  bluesky:   '🦋',
-  mastodon:  '🐘',
-  instagram: '📸',
-  linkedin:  '💼',
-  discord:   '💬',
-  telegram:  '✈️',
 }
 
 export default function GrowthScoutPage() {
@@ -44,7 +41,7 @@ export default function GrowthScoutPage() {
   if (!isPro) {
     return (
       <div className="min-h-screen bg-background p-6 md:p-10 max-w-3xl mx-auto flex flex-col items-center justify-center text-center gap-4">
-        <span className="text-5xl">🔭</span>
+        <Telescope className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">Growth Scout</h1>
         <p className="text-secondary text-sm max-w-md">
           Growth Scout is available on Pro and Agency plans. Upgrade to start tracking competitors and growing smarter.
@@ -64,7 +61,7 @@ export default function GrowthScoutPage() {
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">🔭</span>
+            <Telescope className="w-7 h-7" strokeWidth={1.5} />
             <h1 className="text-2xl font-black text-primary">Growth Scout</h1>
           </div>
           <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-full">Free — Pro+</span>
@@ -153,7 +150,7 @@ export default function GrowthScoutPage() {
                     const pct   = total > 0 ? Math.round((count / total) * 100) : 0
                     return (
                       <div key={platform} className="flex items-center gap-3">
-                        <span className="text-lg w-7">{PLATFORM_ICONS[platform] ?? '📱'}</span>
+                        <span className="w-7"><PlatformGlyph id={platform} size={16} /></span>
                         <span className="text-sm text-primary capitalize w-20">{platform}</span>
                         <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-2">
                           <div className="bg-amber-400 h-2 rounded-full" style={{ width: `${pct}%` }} />
@@ -176,7 +173,7 @@ export default function GrowthScoutPage() {
                   .map((c, i) => (
                     <div key={i} className="flex items-center justify-between p-3 bg-background border border-theme rounded-xl">
                       <div className="flex items-center gap-3">
-                        <span className="text-lg">{PLATFORM_ICONS[c.platform] ?? '📱'}</span>
+                        <PlatformGlyph id={c.platform} size={16} />
                         <div>
                           <p className="text-sm font-bold text-primary">@{c.username}</p>
                           <p className="text-xs text-secondary capitalize">{c.platform}</p>
@@ -203,11 +200,11 @@ export default function GrowthScoutPage() {
                   <div key={i} className="p-4 bg-background border border-theme rounded-xl">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span>{PLATFORM_ICONS[post.platform] ?? '📱'}</span>
+                        <PlatformGlyph id={post.platform} size={14} />
                         <span className="text-xs font-bold text-primary">@{post.username}</span>
                       </div>
                       {post.engagement > 0 && (
-                        <span className="text-xs text-amber-500 font-semibold">⚡ {post.engagement} engagement</span>
+                        <span className="text-xs text-amber-500 font-semibold inline-flex items-center gap-1"><Zap className="w-3 h-3" strokeWidth={2} /> {post.engagement} engagement</span>
                       )}
                     </div>
                     <p className="text-sm text-secondary leading-relaxed">{post.content}{post.content.length >= 200 ? '…' : ''}</p>
@@ -220,7 +217,7 @@ export default function GrowthScoutPage() {
           {/* No competitors CTA */}
           {data.competitors.length === 0 && (
             <div className="bg-surface border border-theme rounded-2xl p-8 text-center">
-              <p className="text-4xl mb-3">🔍</p>
+              <Search className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
               <p className="font-bold text-primary mb-1">No competitors tracked yet</p>
               <p className="text-sm text-secondary mb-4">Add competitors to start seeing intel on what's working in your space.</p>
               <Link href="/competitor-tracking" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-5 py-2.5 rounded-xl text-sm transition-all inline-block">

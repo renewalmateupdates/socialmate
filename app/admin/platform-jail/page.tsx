@@ -1,6 +1,13 @@
 'use client'
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { Globe, Lock, LockOpen } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 interface JailedAccount {
   id: string
@@ -10,20 +17,6 @@ interface JailedAccount {
   disconnected_at: string | null
   cooling_until: string | null
   created_at: string
-}
-
-const PLATFORM_EMOJI: Record<string, string> = {
-  twitter:   '🐦',
-  x:         '🐦',
-  bluesky:   '🦋',
-  mastodon:  '🐘',
-  discord:   '🎮',
-  telegram:  '✈️',
-  tiktok:    '🎵',
-  linkedin:  '💼',
-  youtube:   '▶️',
-  instagram: '📸',
-  pinterest: '📌',
 }
 
 const ALL_PLATFORMS = ['twitter', 'bluesky', 'mastodon', 'discord', 'telegram', 'tiktok']
@@ -107,7 +100,7 @@ export default function AdminPlatformJailPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <p className="text-xs text-gray-400 mt-1 mb-4">Admin access required</p>
         <button onClick={() => router.push('/dashboard')}
@@ -157,7 +150,7 @@ export default function AdminPlatformJailPage() {
                     ? 'bg-black dark:bg-white text-white dark:text-black'
                     : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
                 }`}>
-                <span>{PLATFORM_EMOJI[p] ?? '📡'}</span>
+                <PlatformGlyph id={p} size={12} />
                 <span className="capitalize">{p}</span>
                 <span className="opacity-60">({accounts.filter(a => a.platform === p).length})</span>
               </button>
@@ -171,7 +164,7 @@ export default function AdminPlatformJailPage() {
           <div className="text-center py-20 text-red-500 text-sm">{error}</div>
         ) : filteredAccounts.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-            <div className="text-4xl mb-3">🔓</div>
+            <LockOpen className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
             <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
               {accounts.length === 0 ? 'No accounts in cooling period' : `No ${platformFilter} accounts in cooling period`}
             </p>
@@ -213,7 +206,7 @@ export default function AdminPlatformJailPage() {
                           className={`transition-colors ${i < filteredAccounts.length - 1 ? 'border-b border-theme' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/40`}>
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-2">
-                              <span className="text-base">{PLATFORM_EMOJI[account.platform.toLowerCase()] ?? '📡'}</span>
+                              <PlatformGlyph id={account.platform.toLowerCase()} size={16} />
                               <span className="font-semibold text-gray-900 dark:text-gray-100 capitalize">{account.platform}</span>
                             </div>
                           </td>
@@ -262,7 +255,7 @@ export default function AdminPlatformJailPage() {
                   <div key={account.id} className="bg-surface border border-theme rounded-2xl p-4">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{PLATFORM_EMOJI[account.platform.toLowerCase()] ?? '📡'}</span>
+                        <PlatformGlyph id={account.platform.toLowerCase()} size={20} />
                         <span className="font-semibold text-gray-900 dark:text-gray-100 capitalize">{account.platform}</span>
                       </div>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${

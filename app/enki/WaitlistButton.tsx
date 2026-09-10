@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Bot, X as CloseIcon } from 'lucide-react'
 
 interface Props {
   children: React.ReactNode
@@ -82,7 +83,7 @@ export default function WaitlistButton({ children, className, defaultTier = 'cit
 
             {success ? (
               <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                <div style={{ fontSize: 56, marginBottom: 16 }}>🤖</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><Bot size={48} strokeWidth={1.5} /></div>
                 <h3 style={{ margin: '0 0 10px', fontSize: 22, fontWeight: 900, color: '#f1f1f1', letterSpacing: '-0.02em' }}>
                   You're on the list.
                 </h3>
@@ -112,11 +113,11 @@ export default function WaitlistButton({ children, className, defaultTier = 'cit
                   }}
                   aria-label="Close"
                 >
-                  ✕
+                  <CloseIcon size={18} />
                 </button>
 
                 <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>🤖</div>
+                  <div style={{ display: 'flex', marginBottom: 10 }}><Bot size={32} strokeWidth={1.5} /></div>
                   <h3 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 900, color: '#f1f1f1', letterSpacing: '-0.02em' }}>
                     Join the Enki Waitlist
                   </h3>

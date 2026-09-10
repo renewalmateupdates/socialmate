@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { BarChart3, CheckCircle2, Eye, Hammer, Mailbox, PenLine, Rocket, Sparkles, X as CloseIcon } from 'lucide-react'
 
 interface Dispatch {
   id: string
@@ -144,7 +145,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
         {/* Success banner */}
         {sent && (
           <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5 mb-6 flex items-start gap-3">
-            <span className="text-2xl">✅</span>
+            <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" strokeWidth={1.75} />
             <div>
               <p className="font-bold text-emerald-800 dark:text-emerald-300">Edition #{sent.edition} sent to {sent.count} subscribers.</p>
               <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">IRIS Dispatch is out in the world. 🌈</p>
@@ -178,7 +179,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
                   </svg>
                   Generating...
                 </>
-              ) : '✨ Generate draft with AI'}
+              ) : <><Sparkles className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />Generate draft with AI</>}
             </button>
           </div>
 
@@ -200,7 +201,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
           </div>
 
           <div className="mb-4">
-            <label className={LABEL_CLASS}>🖊 Intro — personal, from you</label>
+            <label className={`${LABEL_CLASS} inline-flex items-center gap-1.5`}><PenLine className="w-3.5 h-3.5" strokeWidth={1.75} /> Intro — personal, from you</label>
             <textarea
               value={intro}
               onChange={e => setIntro(e.target.value)}
@@ -211,7 +212,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
           </div>
 
           <div className="mb-4">
-            <label className={LABEL_CLASS}>🔨 What shipped</label>
+            <label className={`${LABEL_CLASS} inline-flex items-center gap-1.5`}><Hammer className="w-3.5 h-3.5" strokeWidth={1.75} /> What shipped</label>
             <textarea
               value={whatShipped}
               onChange={e => setWhatShipped(e.target.value)}
@@ -222,7 +223,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
           </div>
 
           <div className="mb-4">
-            <label className={LABEL_CLASS}>📊 Real numbers</label>
+            <label className={`${LABEL_CLASS} inline-flex items-center gap-1.5`}><BarChart3 className="w-3.5 h-3.5" strokeWidth={1.75} /> Real numbers</label>
             <textarea
               value={realNumbers}
               onChange={e => setRealNumbers(e.target.value)}
@@ -233,7 +234,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
           </div>
 
           <div className="mb-4">
-            <label className={LABEL_CLASS}>🚀 What's next</label>
+            <label className={`${LABEL_CLASS} inline-flex items-center gap-1.5`}><Rocket className="w-3.5 h-3.5" strokeWidth={1.75} /> What's next</label>
             <textarea
               value={whatsNext}
               onChange={e => setWhatsNext(e.target.value)}
@@ -244,7 +245,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
           </div>
 
           <div className="mb-6">
-            <label className={LABEL_CLASS}>✍️ Closing</label>
+            <label className={`${LABEL_CLASS} inline-flex items-center gap-1.5`}><PenLine className="w-3.5 h-3.5" strokeWidth={1.75} /> Closing</label>
             <textarea
               value={closing}
               onChange={e => setClosing(e.target.value)}
@@ -258,12 +259,12 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
               onClick={handlePreview}
               disabled={previewing}
               className="flex-1 py-3 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400 text-sm font-bold rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all disabled:opacity-50">
-              {previewing ? 'Generating…' : '👁 Preview Email'}
+              {previewing ? 'Generating…' : <span className="inline-flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" strokeWidth={1.75} /> Preview Email</span>}
             </button>
             <button
               onClick={() => { if (!subject.trim() || !intro.trim()) { setError('Subject and intro are required'); return } setConfirm(true) }}
               className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-2xl transition-all disabled:opacity-50">
-              📬 Send to {recipientCount} subscribers
+              <Mailbox className="inline w-4 h-4 align-text-bottom mr-1.5" strokeWidth={1.75} />Send to {recipientCount} subscribers
             </button>
           </div>
         </div>
@@ -273,7 +274,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
           <div className={SECTION_CLASS}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-gray-900 dark:text-gray-100">Email Preview</h2>
-              <button onClick={() => setPreview(null)} className="text-xs text-gray-400 hover:text-black dark:hover:text-white">✕ Close</button>
+              <button onClick={() => setPreview(null)} className="text-xs text-gray-400 hover:text-black dark:hover:text-white inline-flex items-center gap-1"><CloseIcon className="w-3 h-3" strokeWidth={2} /> Close</button>
             </div>
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50">
               <iframe
@@ -313,7 +314,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
       {confirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <div className="text-4xl mb-4 text-center">📬</div>
+            <Mailbox className="w-10 h-10 mx-auto mb-4" strokeWidth={1.5} />
             <h2 className="text-xl font-black text-center mb-2">Send Edition #{nextEdition}?</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
               This will email <strong>{recipientCount} subscribers</strong> with subject:<br />
@@ -330,7 +331,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
                 onClick={handleSend}
                 disabled={sending}
                 className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-2xl transition-all disabled:opacity-50">
-                {sending ? 'Sending…' : 'Send it 🚀'}
+                {sending ? 'Sending…' : <span className="inline-flex items-center gap-1.5">Send it <Rocket className="w-3.5 h-3.5" strokeWidth={1.75} /></span>}
               </button>
             </div>
           </div>

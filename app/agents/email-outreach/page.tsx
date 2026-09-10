@@ -2,14 +2,15 @@
 import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { BarChart3, ChevronDown, ChevronUp, DollarSign, Handshake, Link2, Mail, Newspaper } from 'lucide-react'
 
 const GOALS = [
-  { id: 'brand_deal',    label: '💰 Brand Deal / Sponsorship' },
-  { id: 'collaboration', label: '🤝 Creative Collaboration'    },
-  { id: 'partnership',   label: '🔗 Business Partnership'      },
-  { id: 'client_pitch',  label: '📊 Client Pitch'             },
-  { id: 'press',         label: '📰 Press / Media Coverage'   },
-  { id: 'other',         label: '✉️ Other'                    },
+  { id: 'brand_deal',    label: 'Brand Deal / Sponsorship', icon: DollarSign },
+  { id: 'collaboration', label: 'Creative Collaboration',   icon: Handshake },
+  { id: 'partnership',   label: 'Business Partnership',     icon: Link2 },
+  { id: 'client_pitch',  label: 'Client Pitch',             icon: BarChart3 },
+  { id: 'press',         label: 'Press / Media Coverage',   icon: Newspaper },
+  { id: 'other',         label: 'Other',                    icon: Mail },
 ]
 
 const TONES = [
@@ -104,7 +105,7 @@ export default function EmailOutreachPage() {
       <div className="mb-8">
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">✉️</span>
+          <Mail className="w-7 h-7" strokeWidth={1.5} />
           <h1 className="text-2xl font-black text-primary">Email Outreach Agent</h1>
         </div>
         <p className="text-secondary text-sm">
@@ -138,13 +139,13 @@ export default function EmailOutreachPage() {
               <button
                 key={g.id}
                 onClick={() => setGoal(g.id)}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all inline-flex items-center gap-1.5 ${
                   goal === g.id
                     ? 'bg-amber-400 text-black border-amber-400'
                     : 'bg-background border-theme text-secondary hover:border-amber-400'
                 }`}
               >
-                {g.label}
+                <g.icon className="w-3.5 h-3.5" strokeWidth={2} /> {g.label}
               </button>
             ))}
           </div>
@@ -203,7 +204,7 @@ export default function EmailOutreachPage() {
           disabled={loading || remaining < 5}
           className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black py-3 rounded-xl transition-all text-sm"
         >
-          {loading ? 'Writing your email…' : '✉️ Generate Email — 5 credits'}
+          {loading ? 'Writing your email…' : <span className="inline-flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" strokeWidth={2} /> Generate Email — 5 credits</span>}
         </button>
 
         {remaining < 5 && (
@@ -272,7 +273,7 @@ export default function EmailOutreachPage() {
             className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wide text-secondary"
           >
             <span>Previous Emails ({drafts.length})</span>
-            <span>{showHistory ? '▲' : '▼'}</span>
+            <span>{showHistory ? <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}</span>
           </button>
           {showHistory && (
             <div className="mt-4 space-y-3">

@@ -3,6 +3,13 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { supabase } from '@/lib/supabase'
+import { Dna, Globe, MessageCircle, Repeat2, Star } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14 }: { id: string; size?: number }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} />
+}
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 
@@ -67,13 +74,6 @@ const FORMAT_LABELS: Record<string, string> = {
   statement: 'Statement / hook',
 }
 
-const PLATFORM_ICONS: Record<string, string> = {
-  bluesky:  '🦋',
-  mastodon: '🐘',
-  twitter:  '🐦',
-  discord:  '💬',
-  telegram: '✈️',
-}
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -267,7 +267,7 @@ export default function ContentDNAPage() {
                 cursor: syncingBsky ? 'default' : 'pointer',
               }}
             >
-              {syncingBsky ? 'Syncing…' : '🦋 Sync Bluesky'}
+              {syncingBsky ? 'Syncing…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><PlatformGlyph id="bluesky" size={13} /> Sync Bluesky</span>}
             </button>
 
             <button
@@ -284,7 +284,7 @@ export default function ContentDNAPage() {
                 cursor: syncingMast ? 'default' : 'pointer',
               }}
             >
-              {syncingMast ? 'Syncing…' : '🐘 Sync Mastodon'}
+              {syncingMast ? 'Syncing…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><PlatformGlyph id="mastodon" size={13} /> Sync Mastodon</span>}
             </button>
 
             {syncMsg && (
@@ -308,7 +308,7 @@ export default function ContentDNAPage() {
               padding: '48px 32px',
               textAlign: 'center',
             }}>
-              <p style={{ fontSize: 32, marginBottom: 12 }}>🧬</p>
+              <Dna className="mx-auto" size={32} strokeWidth={1.5} color={T.gold} style={{ marginBottom: 12 }} />
               <h2 style={{ color: T.text, fontSize: 20, fontWeight: 700, marginBottom: 10 }}>
                 Not enough data yet
               </h2>
@@ -435,8 +435,8 @@ export default function ContentDNAPage() {
                             padding: '16px 20px',
                             textAlign: 'center',
                           }}>
-                            <p style={{ fontSize: 24, margin: '0 0 6px' }}>
-                              {PLATFORM_ICONS[pb.platform] ?? '📡'}
+                            <p style={{ margin: '0 0 6px', display: 'flex', justifyContent: 'center' }}>
+                              <PlatformGlyph id={pb.platform} size={24} />
                             </p>
                             <p style={{ color: i === 0 ? T.gold : T.text, fontWeight: 700, fontSize: 15, textTransform: 'capitalize', margin: '0 0 2px' }}>
                               {pb.platform}
@@ -504,17 +504,17 @@ export default function ContentDNAPage() {
                                 <span style={{ color: T.textDim, fontSize: 12 }}>
                                   {formatDate(post.published_at)}
                                 </span>
-                                <span style={{ color: T.textDim, fontSize: 12 }}>
-                                  {post.platforms.map(p => PLATFORM_ICONS[p] ?? p).join(' ')}
+                                <span style={{ color: T.textDim, fontSize: 12, display: 'inline-flex', gap: 4 }}>
+                                  {post.platforms.map(p => <PlatformGlyph key={p} id={p} size={12} />)}
                                 </span>
                                 {post.bluesky_stats && (
-                                  <span style={{ color: T.textDim, fontSize: 11 }}>
-                                    🦋 {(post.bluesky_stats.likes ?? 0)}L · {(post.bluesky_stats.reposts ?? 0)}R · {(post.bluesky_stats.replies ?? 0)}💬
+                                  <span style={{ color: T.textDim, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                                    <PlatformGlyph id="bluesky" size={11} /> {(post.bluesky_stats.likes ?? 0)}L · {(post.bluesky_stats.reposts ?? 0)}R · {(post.bluesky_stats.replies ?? 0)}<MessageCircle size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} />
                                   </span>
                                 )}
                                 {post.mastodon_stats && (
-                                  <span style={{ color: T.textDim, fontSize: 11 }}>
-                                    🐘 {(post.mastodon_stats.favourites_count ?? 0)}⭐ · {(post.mastodon_stats.reblogs_count ?? 0)}🔁 · {(post.mastodon_stats.replies_count ?? 0)}💬
+                                  <span style={{ color: T.textDim, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                                    <PlatformGlyph id="mastodon" size={11} /> {(post.mastodon_stats.favourites_count ?? 0)}<Star size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} /> · {(post.mastodon_stats.reblogs_count ?? 0)}<Repeat2 size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} /> · {(post.mastodon_stats.replies_count ?? 0)}<MessageCircle size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} />
                                   </span>
                                 )}
                               </div>

@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import SomaVoiceFeedbackModal from '@/components/soma/SomaVoiceFeedbackModal'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { ChevronDown, ChevronUp, CircleDot, Dna, Globe, Mic, Pause, Play, Rocket, Target, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 12, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 interface PlatformSchedule { posts_per_day: number; days: number[] }
 
@@ -154,11 +161,6 @@ const LOADING_QUOTES = [
 const RUN_CAPS = { safe: 4, autopilot: 8, full_send: 12 }
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-
-const PLATFORM_ICONS: Record<string, string> = {
-  twitter: '𝕏', bluesky: '🦋', mastodon: '🐘', telegram: '✈️',
-  discord: '🎮', linkedin: '💼', instagram: '📸', tiktok: '🎵',
-}
 
 const HOW_IT_WORKS = [
   { step: '1', title: 'Write your master doc', body: 'Drop in everything that happened this week — features shipped, insights gained, wins, lessons, news. No format required.' },
@@ -548,7 +550,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
           <div className="relative mb-8">
             <div className="w-16 h-16 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl">⚡</span>
+              <Zap className="w-6 h-6" strokeWidth={1.75} />
             </div>
           </div>
 
@@ -584,25 +586,29 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             {/* Status badges */}
             <div className="flex flex-wrap items-center gap-2 mt-2">
               {project.paused && (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-600/50 text-amber-400">
-                  ⏸ PAUSED — weekly cron skipped
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-600/50 text-amber-400 inline-flex items-center gap-1">
+                  <Pause className="w-3 h-3" strokeWidth={2} /> PAUSED — weekly cron skipped
                 </span>
               )}
               {project.campaign_theme && (
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-900/40 border border-orange-600/50 text-orange-300">
-                  🎯 Campaign: {project.campaign_theme}
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-900/40 border border-orange-600/50 text-orange-300 inline-flex items-center gap-1">
+                  <Target className="w-3 h-3" strokeWidth={2} /> Campaign: {project.campaign_theme}
                 </span>
               )}
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className={`text-xs font-bold px-3 py-1 rounded-full border ${modeColors.bg} ${modeColors.text}`}>
-              {project.mode === 'safe' ? '🟢 Safe' : project.mode === 'autopilot' ? '⚡ Autopilot' : '🚀 Full Send'}
+            <span className={`text-xs font-bold px-3 py-1 rounded-full border inline-flex items-center gap-1 ${modeColors.bg} ${modeColors.text}`}>
+              {project.mode === 'safe'
+                ? <><CircleDot className="w-3 h-3" strokeWidth={2} /> Safe</>
+                : project.mode === 'autopilot'
+                ? <><Zap className="w-3 h-3" strokeWidth={2} /> Autopilot</>
+                : <><Rocket className="w-3 h-3" strokeWidth={2} /> Full Send</>}
             </span>
             {project.full_send_enabled && project.mode === 'full_send' && (
               <span className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-600/50 text-amber-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-                🚀 Full Send active — posts daily at 9am EDT
+                <Rocket className="w-3 h-3" strokeWidth={2} /> Full Send active — posts daily at 9am EDT
               </span>
             )}
             {/* Pause toggle */}
@@ -616,7 +622,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
               }`}
               title={project.paused ? 'Resume — autopilot cron will run again' : 'Pause — skip weekly cron without deleting'}
             >
-              {togglingPause ? '…' : project.paused ? '▶ Resume' : '⏸ Pause'}
+              {togglingPause ? '…' : project.paused
+                ? <span className="inline-flex items-center gap-1"><Play className="w-3 h-3" strokeWidth={2} /> Resume</span>
+                : <span className="inline-flex items-center gap-1"><Pause className="w-3 h-3" strokeWidth={2} /> Pause</span>}
             </button>
             <button
               onClick={() => setConfirmDelete(true)}
@@ -634,7 +642,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             className="flex items-center justify-between gap-4 rounded-xl border border-purple-700/50 bg-purple-950/20 px-5 py-4 hover:bg-purple-950/30 transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🧬</span>
+              <Dna className="w-6 h-6" strokeWidth={1.75} />
               <div>
                 <p className="text-white font-semibold text-sm">Build your Voice DNA</p>
                 <p className="text-purple-300 text-xs">Answer 10–40 questions and SOMA generates content that actually sounds like you.</p>
@@ -649,7 +657,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             className="flex items-center justify-between gap-4 rounded-xl border border-gray-700/50 bg-gray-900/50 px-5 py-3 hover:bg-gray-900 transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <span className="text-xl">🧬</span>
+              <Dna className="w-5 h-5" strokeWidth={1.75} />
               <div>
                 <p className="text-gray-300 text-sm font-medium">Voice DNA active — <span className="capitalize text-purple-400">{voiceProfile.tier.replace('_', ' ')}</span> tier</p>
                 <p className="text-gray-600 text-xs">Click to deepen your profile or switch tiers</p>
@@ -684,7 +692,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
               <div className="flex flex-wrap gap-1">
                 {project.platforms.map(p => (
                   <span key={p} className="text-xs font-semibold text-white flex items-center gap-1">
-                    <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+                    <PlatformGlyph id={p} size={12} />
                     <span className="capitalize">{p}</span>
                   </span>
                 )).reduce((acc: React.ReactNode[], el, i) => i === 0 ? [el] : [...acc, <span key={`sep-${i}`} className="text-gray-600">·</span>, el], [])}
@@ -706,7 +714,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                       className="accent-amber-500 w-3.5 h-3.5"
                     />
                     <span className="text-xs text-gray-300 group-hover:text-white capitalize flex items-center gap-1">
-                      <span>{PLATFORM_ICONS[p] ?? '📱'}</span>{p}
+                      <PlatformGlyph id={p} size={12} />{p}
                     </span>
                   </label>
                 ))}
@@ -941,7 +949,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                     <div key={pid}>
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs font-semibold text-gray-300 capitalize flex items-center gap-1.5">
-                          <span>{PLATFORM_ICONS[pid] ?? '📱'}</span>{pid}
+                          <PlatformGlyph id={pid} size={12} />{pid}
                         </span>
                         {editingSchedule ? (
                           <div className="flex items-center gap-1">
@@ -989,7 +997,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                 className="flex items-center justify-between w-full text-left"
               >
                 <div className="flex items-center gap-2">
-                  <span>🎯</span>
+                  <Target className="w-3.5 h-3.5" strokeWidth={2} />
                   <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Campaign Mode</span>
                   {project.campaign_theme && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-900/40 border border-orange-700/40 text-orange-300">
@@ -997,7 +1005,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                     </span>
                   )}
                 </div>
-                <span className="text-gray-600 text-xs">{campaignOpen ? '▲' : '▼'}</span>
+                <span className="text-gray-600 text-xs">{campaignOpen ? <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}</span>
               </button>
 
               {campaignOpen && (
@@ -1158,13 +1166,13 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                             <div className="space-y-1 mb-3">
                               {Object.entries(generateResult.platform_counts as Record<string,number>).map(([p, n]) => (
                                 <div key={p} className="flex justify-between text-xs">
-                                  <span className="text-gray-400 capitalize">{PLATFORM_ICONS[p] ?? '📱'} {p}</span>
+                                  <span className="text-gray-400 capitalize inline-flex items-center gap-1"><PlatformGlyph id={p} size={12} /> {p}</span>
                                   <span className="text-emerald-400 font-bold">{n} posts ✓</span>
                                 </div>
                               ))}
                               {generateResult.platform_errors && Object.entries(generateResult.platform_errors as Record<string,string>).map(([p, err]) => (
                                 <div key={p} className="flex justify-between text-xs">
-                                  <span className="text-gray-400 capitalize">{PLATFORM_ICONS[p] ?? '📱'} {p}</span>
+                                  <span className="text-gray-400 capitalize inline-flex items-center gap-1"><PlatformGlyph id={p} size={12} /> {p}</span>
                                   <span className="text-red-400 font-bold">failed — {err.slice(0, 40)}</span>
                                 </div>
                               ))}
@@ -1176,9 +1184,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                             </Link>
                             <button
                               onClick={() => setShowFeedbackModal(true)}
-                              className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                              className="text-xs text-violet-400 hover:text-violet-300 transition-colors inline-flex items-center gap-1"
                             >
-                              🎙️ Give feedback
+                              <Mic className="w-3 h-3" strokeWidth={2} /> Give feedback
                             </button>
                           </div>
                         </div>

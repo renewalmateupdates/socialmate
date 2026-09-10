@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { useI18n } from '@/contexts/I18nContext'
+import { Eye, Medal, Zap } from 'lucide-react'
 
 // Returns how many minutes until the next 15-min scan boundary
 function minutesToNextScan(): number {
@@ -584,7 +585,7 @@ export default function DashboardClient() {
       {isCopilotMode && copilotOwnerEmail && (
         <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-3">
           <div className="max-w-6xl mx-auto flex items-center gap-3">
-            <span className="text-amber-400 text-lg">👁</span>
+            <Eye className="w-4 h-4 text-amber-400" strokeWidth={1.75} />
             <p className="text-sm text-amber-300 font-semibold">
               {t('app_enki_dashboard.copilot_banner').replace('{email}', copilotOwnerEmail ?? '')}
             </p>
@@ -710,7 +711,7 @@ export default function DashboardClient() {
         {/* ── Upgrade success banner ── */}
         {justUpgraded && (
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-6 py-4 mb-6 flex items-center gap-4">
-            <span className="text-2xl">🎖️</span>
+            <Medal className="w-6 h-6 text-amber-500" strokeWidth={1.75} />
             <div>
               <p className="font-extrabold text-amber-800 dark:text-amber-300 text-sm">{t('app_enki_dashboard.welcome_empire')}</p>
               <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
@@ -779,7 +780,7 @@ export default function DashboardClient() {
         {profile?.guardian_mode === 'approval' && pendingTrades.length > 0 && (
           <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-3.5 mb-6 gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="text-amber-500 text-base leading-none">⚡</span>
+              <Zap className="w-4 h-4 text-amber-500" strokeWidth={1.75} />
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
                 {t('app_enki_dashboard.trades_waiting').replace('{count}', String(pendingTrades.length)).replace('{plural}', pendingTrades.length === 1 ? '' : 's')}
               </p>
@@ -919,7 +920,7 @@ export default function DashboardClient() {
         {profile?.guardian_mode === 'approval' && pendingTrades.length > 0 && (
           <div className="bg-white dark:bg-gray-900 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden mb-8">
             <div className="px-6 py-4 border-b border-amber-100 dark:border-amber-800/40 flex items-center gap-3">
-              <span className="text-amber-500">⚡</span>
+              <Zap className="w-4 h-4 text-amber-500" strokeWidth={1.75} />
               <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{t('app_enki_dashboard.pending_approvals')}</p>
               <span className="text-[11px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
                 {pendingTrades.length} {t('app_enki_dashboard.pending_label')}

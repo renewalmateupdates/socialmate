@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { AlertTriangle } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -147,7 +148,7 @@ function SanityWarnings({ stats, totalClosed }: { stats: StratStats[]; totalClos
     <div className="space-y-2">
       {warnings.map((w, i) => (
         <div key={i} className="flex items-start gap-2 bg-amber-950/40 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300">
-          <span className="shrink-0 mt-0.5">⚠️</span>
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />
           <span>{w}</span>
         </div>
       ))}
