@@ -4,6 +4,16 @@ import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { AlertTriangle, CheckCircle2, Clock, FolderOpen, X as CloseIcon, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+const STATUS_ICONS: Record<string, LucideIcon> = {
+  active:   CheckCircle2,
+  approved: Clock,
+  pending:  Clock,
+  expired:  XCircle,
+  rejected: CloseIcon,
+}
 
 const CATEGORIES: Record<string, string> = {
   'social-media':     'Social Media Tools',
@@ -147,7 +157,7 @@ export default function StudioStaxPortalPage() {
     return (
       <PublicLayout>
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <div className="text-6xl mb-6">🗂️</div>
+          <FolderOpen className="w-14 h-14 mx-auto mb-6 text-gray-400" strokeWidth={1.5} />
           <h1 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">
             No listing found
           </h1>
@@ -529,11 +539,10 @@ export default function StudioStaxPortalPage() {
             <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">Current Status</p>
               <div className={`inline-flex items-center gap-2 border rounded-xl px-4 py-2 text-sm font-bold mb-4 ${statusColors[listing.status] ?? statusColors.pending}`}>
-                {listing.status === 'active'   && '✅'}
-                {listing.status === 'approved' && '⏳'}
-                {listing.status === 'pending'  && '⏳'}
-                {listing.status === 'expired'  && '❌'}
-                {listing.status === 'rejected' && '✕'}
+                {(() => {
+                  const StatusIcon = STATUS_ICONS[listing.status] ?? Clock
+                  return <StatusIcon size={15} strokeWidth={2} />
+                })()}
                 {statusLabels[listing.status] ?? listing.status}
               </div>
 
@@ -548,8 +557,8 @@ export default function StudioStaxPortalPage() {
                   {listing.status === 'active' && (() => {
                     const daysLeft = Math.ceil((new Date(renewalDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                     return daysLeft <= 30 ? (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">
-                        ⚠️ {daysLeft} day{daysLeft !== 1 ? 's' : ''} until renewal — renew soon to keep your ranking.
+                      <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1 inline-flex items-center gap-1">
+                        <AlertTriangle size={12} strokeWidth={2} /> {daysLeft} day{daysLeft !== 1 ? 's' : ''} until renewal — renew soon to keep your ranking.
                       </p>
                     ) : (
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">

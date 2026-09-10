@@ -3,19 +3,24 @@ import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import {
+  Users, FolderOpen, DollarSign, Rocket, Shield, Tag, Zap, FileText,
+  PartyPopper,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export default function EnterprisePage() {
   const { t } = useI18n()
 
-  const FEATURES = [
-    { icon: '👥', title: t('enterprise.feat1_title'), description: t('enterprise.feat1_desc') },
-    { icon: '🗂️', title: t('enterprise.feat2_title'), description: t('enterprise.feat2_desc') },
-    { icon: '💰', title: t('enterprise.feat3_title'), description: t('enterprise.feat3_desc') },
-    { icon: '🚀', title: t('enterprise.feat4_title'), description: t('enterprise.feat4_desc') },
-    { icon: '🛡️', title: t('enterprise.feat5_title'), description: t('enterprise.feat5_desc') },
-    { icon: '🏷️', title: t('enterprise.feat6_title'), description: t('enterprise.feat6_desc') },
-    { icon: '⚡', title: t('enterprise.feat7_title'), description: t('enterprise.feat7_desc') },
-    { icon: '📄', title: t('enterprise.feat8_title'), description: t('enterprise.feat8_desc') },
+  const FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
+    { icon: Users,      title: t('enterprise.feat1_title'), description: t('enterprise.feat1_desc') },
+    { icon: FolderOpen, title: t('enterprise.feat2_title'), description: t('enterprise.feat2_desc') },
+    { icon: DollarSign, title: t('enterprise.feat3_title'), description: t('enterprise.feat3_desc') },
+    { icon: Rocket,     title: t('enterprise.feat4_title'), description: t('enterprise.feat4_desc') },
+    { icon: Shield,     title: t('enterprise.feat5_title'), description: t('enterprise.feat5_desc') },
+    { icon: Tag,        title: t('enterprise.feat6_title'), description: t('enterprise.feat6_desc') },
+    { icon: Zap,        title: t('enterprise.feat7_title'), description: t('enterprise.feat7_desc') },
+    { icon: FileText,   title: t('enterprise.feat8_title'), description: t('enterprise.feat8_desc') },
   ]
 
   const TEAM_SIZES = [
@@ -99,14 +104,14 @@ export default function EnterprisePage() {
           <p className="text-sm text-gray-500 mb-6">{t('enterprise.trusted_by')}</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             {[
-              { label: t('enterprise.proof1'), icon: '👥' },
-              { label: t('enterprise.proof2'), icon: '🛡️' },
-              { label: t('enterprise.proof3'), icon: '🏷️' },
-              { label: t('enterprise.proof4'), icon: '⚡' },
+              { label: t('enterprise.proof1'), icon: Users },
+              { label: t('enterprise.proof2'), icon: Shield },
+              { label: t('enterprise.proof3'), icon: Tag },
+              { label: t('enterprise.proof4'), icon: Zap },
             ].map(item => (
               <div key={item.label}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold text-gray-300">
-                <span>{item.icon}</span>
+                <item.icon size={15} strokeWidth={1.75} />
                 <span>{item.label}</span>
               </div>
             ))}
@@ -127,7 +132,7 @@ export default function EnterprisePage() {
               <div key={feature.title}
                 className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-amber-500/30 transition-all">
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl flex-shrink-0">{feature.icon}</span>
+                  <feature.icon className="w-6 h-6 flex-shrink-0 text-amber-400" strokeWidth={1.75} />
                   <div>
                     <h3 className="font-bold text-white mb-1">{feature.title}</h3>
                     <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
@@ -163,7 +168,7 @@ export default function EnterprisePage() {
 
           {submitted ? (
             <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-2xl p-8 text-center">
-              <p className="text-2xl mb-3">🎉</p>
+              <PartyPopper className="w-8 h-8 mx-auto mb-3 text-emerald-400" strokeWidth={1.75} />
               <h3 className="text-lg font-bold text-emerald-400 mb-2">{t('enterprise.success_title')}</h3>
               <p className="text-gray-400 text-sm">
                 {t('enterprise.success_desc_before')} <span className="font-semibold text-white">{email}</span> {t('enterprise.success_desc_after')}{' '}

@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
+import { AlertTriangle, Clock, Link2, RefreshCw, Siren } from 'lucide-react'
 
 interface RenewalData {
   valid:         boolean
@@ -60,7 +61,9 @@ function RenewInner() {
 
   if (!token || !data?.valid) return (
     <div className="max-w-lg mx-auto px-6 py-20 text-center">
-      <div className="text-4xl mb-4">{data?.expired ? '⏰' : '🔗'}</div>
+      {data?.expired
+        ? <Clock className="w-9 h-9 mx-auto mb-4 text-gray-400" strokeWidth={1.5} />
+        : <Link2 className="w-9 h-9 mx-auto mb-4 text-gray-400" strokeWidth={1.5} />}
       <h1 className="text-xl font-extrabold mb-3 text-gray-900 dark:text-gray-100">
         {data?.expired ? 'Renewal link expired' : 'Invalid renewal link'}
       </h1>
@@ -91,7 +94,9 @@ function RenewInner() {
             ? 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
             : 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
         }`}>
-          {isUrgent ? '🚨 Expiring soon' : '🔄 Annual renewal'}
+          {isUrgent
+            ? <><Siren size={13} strokeWidth={2} /> Expiring soon</>
+            : <><RefreshCw size={13} strokeWidth={2} /> Annual renewal</>}
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-1">
           Renew your listing
@@ -107,10 +112,13 @@ function RenewInner() {
           ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
           : 'bg-panel border-edge'
       }`}>
-        <p className={`text-sm font-semibold ${isUrgent ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
-          {isUrgent
-            ? `⚠️ Your listing expires in ${data.daysRemaining} day${data.daysRemaining !== 1 ? 's' : ''} — renew now to avoid losing your spot.`
-            : `Your listing expires on ${expiryDate} (${data.daysRemaining} days away).`}
+        <p className={`text-sm font-semibold inline-flex items-start gap-1.5 ${isUrgent ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
+          {isUrgent && <AlertTriangle size={14} strokeWidth={2} className="shrink-0 mt-0.5" />}
+          <span>
+            {isUrgent
+              ? `Your listing expires in ${data.daysRemaining} day${data.daysRemaining !== 1 ? 's' : ''} — renew now to avoid losing your spot.`
+              : `Your listing expires on ${expiryDate} (${data.daysRemaining} days away).`}
+          </span>
         </p>
       </div>
 
