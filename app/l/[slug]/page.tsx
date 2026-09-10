@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import { normalizePlan } from '@/lib/plan'
 import BioLinkButton from './BioLinkButton'
+import { Link2, User } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 
 function getSupabase() {
   return createClient(
@@ -32,15 +34,6 @@ const BTN_RADIUS: Record<string, string> = {
   rounded: '12px',
   pill: '9999px',
   square: '0px',
-}
-
-const SOCIAL_ICONS: Record<string, string> = {
-  instagram: '📸',
-  twitter: '🐦',
-  linkedin: '💼',
-  tiktok: '🎵',
-  youtube: '▶️',
-  pinterest: '📌',
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -132,8 +125,8 @@ export default async function BioPage({ params }: { params: Promise<{ slug: stri
           })
         : React.createElement(
             'div',
-            { style: { width: '80px', height: '80px', borderRadius: '50%', backgroundColor: `${theme.text}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '32px' } },
-            p.name?.[0]?.toUpperCase() || '👤'
+            { style: { width: '80px', height: '80px', borderRadius: '50%', backgroundColor: `${theme.text}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '32px', color: theme.text } },
+            p.name?.[0]?.toUpperCase() || React.createElement(User, { size: 32, strokeWidth: 1.75 })
           ),
       React.createElement('h1', { style: { color: theme.text, fontSize: '22px', fontWeight: '800', margin: '0 0 8px', textAlign: 'center' as const } }, p.name),
       p.bio
@@ -144,7 +137,11 @@ export default async function BioPage({ params }: { params: Promise<{ slug: stri
             'div',
             { style: { display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' as const, justifyContent: 'center' } },
             ...activeSocials.map(([platform, url]) =>
-              React.createElement('a', { key: platform, href: url, target: '_blank', rel: 'noopener noreferrer', style: { fontSize: '22px', textDecoration: 'none' } }, SOCIAL_ICONS[platform] || '🔗')
+              React.createElement('a', { key: platform, href: url, target: '_blank', rel: 'noopener noreferrer', style: { textDecoration: 'none', color: theme.text, display: 'inline-flex' } },
+                hasPlatformIcon(platform)
+                  ? React.createElement(PlatformIcon, { name: platform, size: 22 })
+                  : React.createElement(Link2, { size: 22, strokeWidth: 1.75 })
+              )
             )
           )
         : null,

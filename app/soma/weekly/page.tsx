@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
-import { Zap } from 'lucide-react'
+import { CheckCircle2, FolderOpen, Zap } from 'lucide-react'
 
 function getCurrentWeekLabel(): string {
   const now = new Date()
@@ -217,7 +217,7 @@ export default function SomaWeeklyPage() {
         {insights ? (
           <div className="rounded-xl border border-amber-500/30 bg-zinc-900/80 p-6 space-y-5">
             <div className="flex items-center gap-2">
-              <span className="text-green-400 text-lg">✅</span>
+              <CheckCircle2 className="text-green-400" size={18} strokeWidth={1.75} />
               <h2 className="font-semibold text-white">Week analyzed</h2>
             </div>
 
@@ -437,7 +437,7 @@ export default function SomaWeeklyPage() {
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <p className="text-4xl">📁</p>
+                        <FolderOpen className="w-9 h-9 mx-auto" strokeWidth={1.5} />
                         <p className="text-zinc-300 text-sm font-medium">Drop your file here</p>
                         <p className="text-zinc-600 text-xs">or click to browse — .txt or .md only</p>
                       </div>
