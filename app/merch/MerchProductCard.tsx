@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Heart } from 'lucide-react'
 
 interface Variant {
   id: number
@@ -103,7 +104,7 @@ export function MerchProductCard({ product }: { product: Product }) {
           background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
           borderRadius: 8, padding: '5px 10px', alignSelf: 'flex-start',
         }}>
-          <span style={{ fontSize: 11, color: '#10B981', fontWeight: 700 }}>❤️ 75% of profit → SM-Give</span>
+          <span style={{ fontSize: 11, color: '#10B981', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Heart size={11} strokeWidth={2} /> 75% of profit → SM-Give</span>
         </div>
 
         {/* Size picker */}

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 const amber    = '#F59E0B'
 const amberDim = '#D97706'
@@ -33,7 +34,7 @@ export function MerchWaitlistForm() {
         background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
         borderRadius: 12, padding: '14px 24px',
       }}>
-        <span style={{ fontSize: 18 }}>✅</span>
+        <CheckCircle2 size={18} strokeWidth={1.75} color="#10B981" />
         <span style={{ fontSize: 14, fontWeight: 700, color: '#10B981' }}>
           You&apos;re on the list! We&apos;ll keep you updated on new drops.
         </span>

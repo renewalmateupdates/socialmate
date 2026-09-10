@@ -3,6 +3,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import PartnersHeader from '@/components/partners/PartnersHeader'
+import {
+  AlertTriangle, BarChart3, Bell, Bot, CalendarDays, ClipboardList, Clock, CreditCard,
+  Crown, DollarSign, Flame, Gem, Gift, Hand, Handshake, Link2, Lightbulb, Lock,
+  Map as MapIcon, Medal, PartyPopper, Rocket, Star, Swords, TrendingUp, Trophy,
+  Users, CheckCircle2,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 
@@ -28,59 +35,59 @@ const CONFETTI = Array.from({ length: 64 }, (_, i) => ({
 
 // ── Milestones ───────────────────────────────────────────────────────────────
 
-const MILESTONES = [
-  { id: 'first_conversion', label: 'First Win',    icon: '🎉', desc: 'First paying referral',      check: (p: AffiliateProfile) => p.lifetime_earnings_cents > 0 },
-  { id: 'earn_10',          label: '$10 Earned',   icon: '💰', desc: 'Earned your first $10',       check: (p: AffiliateProfile) => p.lifetime_earnings_cents >= 1000 },
-  { id: 'earn_50',          label: '$50 Club',     icon: '🌟', desc: 'Hit $50 lifetime',            check: (p: AffiliateProfile) => p.lifetime_earnings_cents >= 5000 },
-  { id: 'earn_100',         label: '$100 Badge',   icon: '🚀', desc: 'Triple digits!',              check: (p: AffiliateProfile) => p.lifetime_earnings_cents >= 10000 },
-  { id: 'earn_500',         label: '$500 Club',    icon: '💎', desc: 'Half-grand earner',           check: (p: AffiliateProfile) => p.lifetime_earnings_cents >= 50000 },
-  { id: 'earn_1000',        label: '$1K Legend',   icon: '👑', desc: 'Four-figure earner',          check: (p: AffiliateProfile) => p.lifetime_earnings_cents >= 100000 },
-  { id: 'refs_5',           label: '5 Referrals',  icon: '🤝', desc: '5 active paying referrals',  check: (p: AffiliateProfile) => p.active_referral_count >= 5 },
-  { id: 'refs_25',          label: '25 Referrals', icon: '⭐', desc: '25 active referrals',         check: (p: AffiliateProfile) => p.active_referral_count >= 25 },
-  { id: 'refs_50',          label: '50 Referrals', icon: '🔥', desc: '50 referrals — on fire',     check: (p: AffiliateProfile) => p.active_referral_count >= 50 },
-  { id: 'refs_100',         label: 'Elite Tier',   icon: '🏆', desc: '100 refs = 40% commission',  check: (p: AffiliateProfile) => p.active_referral_count >= 100 },
+const MILESTONES: { id: string; label: string; icon: LucideIcon; desc: string; check: (p: AffiliateProfile) => boolean }[] = [
+  { id: 'first_conversion', label: 'First Win',    icon: PartyPopper, desc: 'First paying referral',      check: (p) => p.lifetime_earnings_cents > 0 },
+  { id: 'earn_10',          label: '$10 Earned',   icon: DollarSign,  desc: 'Earned your first $10',       check: (p) => p.lifetime_earnings_cents >= 1000 },
+  { id: 'earn_50',          label: '$50 Club',     icon: Star,        desc: 'Hit $50 lifetime',            check: (p) => p.lifetime_earnings_cents >= 5000 },
+  { id: 'earn_100',         label: '$100 Badge',   icon: Rocket,      desc: 'Triple digits!',              check: (p) => p.lifetime_earnings_cents >= 10000 },
+  { id: 'earn_500',         label: '$500 Club',    icon: Gem,         desc: 'Half-grand earner',           check: (p) => p.lifetime_earnings_cents >= 50000 },
+  { id: 'earn_1000',        label: '$1K Legend',   icon: Crown,       desc: 'Four-figure earner',          check: (p) => p.lifetime_earnings_cents >= 100000 },
+  { id: 'refs_5',           label: '5 Referrals',  icon: Handshake,   desc: '5 active paying referrals',  check: (p) => p.active_referral_count >= 5 },
+  { id: 'refs_25',          label: '25 Referrals', icon: Medal,       desc: '25 active referrals',         check: (p) => p.active_referral_count >= 25 },
+  { id: 'refs_50',          label: '50 Referrals', icon: Flame,       desc: '50 referrals — on fire',     check: (p) => p.active_referral_count >= 50 },
+  { id: 'refs_100',         label: 'Elite Tier',   icon: Trophy,      desc: '100 refs = 40% commission',  check: (p) => p.active_referral_count >= 100 },
 ]
 
 // ── Tour steps ───────────────────────────────────────────────────────────────
 
-const TOUR_STEPS = [
+const TOUR_STEPS: { icon: LucideIcon; title: string; body: string }[] = [
   {
-    emoji: '👋',
+    icon: Hand,
     title: 'Welcome to Partner HQ',
     body: "You're in the right place. Earn 30%–40% recurring commission on every referral across SocialMate, Enki, and every product we launch. Let's show you around.",
   },
   {
-    emoji: '📊',
+    icon: BarChart3,
     title: 'Track Your Earnings',
     body: 'Pending = in your 60-day hold period. Available = ready to cash out right now. All commissions calculate on the post-discount price your referrals actually paid.',
   },
   {
-    emoji: '🏅',
+    icon: Medal,
     title: 'Earn Milestone Badges',
     body: 'Hit milestones as you grow. Each one unlocks a badge — and confetti. Keep going until you hit the $1K Legend and the Elite Tier.',
   },
   {
-    emoji: '🔗',
+    icon: Link2,
     title: 'Your Referral Link',
     body: 'This is your main weapon. Drop it in your bio, content, socials, everywhere. Every person who signs up and subscribes through your link earns you recurring commission.',
   },
   {
-    emoji: '🎁',
+    icon: Gift,
     title: 'Your Promo Codes',
     body: 'Six codes, each with a different discount duration. Your audience saves money — you earn commission on every renewal. Win-win.',
   },
   {
-    emoji: '📈',
+    icon: TrendingUp,
     title: 'The 40% Elite Tier',
     body: 'Once you hit 100 active referrals, your commission jumps from 30% to 40% — permanently. That one milestone pays for itself for the life of your account.',
   },
   {
-    emoji: '🏅',
+    icon: Trophy,
     title: 'The Leaderboard',
     body: 'Opt in to see how you rank against other partners. Toggle anonymous mode if you want to compete without showing your name.',
   },
   {
-    emoji: '🚀',
+    icon: Rocket,
     title: "You're Ready. Let's Get It.",
     body: "That's the full tour. Your dashboard updates in real time. Share your link, rack up conversions, and watch the balance grow. The door is open — go build.",
   },
@@ -257,7 +264,7 @@ function TourOverlay({
           ))}
         </div>
 
-        <div style={{ fontSize: 38, marginBottom: 10 }}>{current.emoji}</div>
+        <div style={{ marginBottom: 10 }}><current.icon size={34} strokeWidth={1.5} color={gold} /></div>
         <h3 style={{ margin: '0 0 10px', fontSize: 20, fontWeight: 900, color: '#f1f1f1', letterSpacing: '-0.02em' }}>
           {current.title}
         </h3>
@@ -295,7 +302,7 @@ function TourOverlay({
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              {isLast ? "Let's Go! 🚀" : 'Next →'}
+              {isLast ? <>Let's Go! <Rocket size={14} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} /></> : 'Next →'}
             </button>
           </div>
         </div>
@@ -533,7 +540,7 @@ export default function PartnersDashboardPage() {
         {/* ── Suspended banner ── */}
         {profile.status === 'suspended' && (
           <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 18 }}>⚠️</span>
+            <AlertTriangle size={18} color="#f87171" strokeWidth={2} />
             <div>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#f87171' }}>Account Suspended</p>
               <p style={{ margin: '4px 0 0', fontSize: 13, color: muted }}>Your account has been suspended. Contact hello@socialmate.studio to resolve this.</p>
@@ -544,7 +551,7 @@ export default function PartnersDashboardPage() {
         {/* ── W-9 alert ── */}
         {profile.w9_required && !profile.w9_submitted && (
           <div style={{ background: 'rgba(245,158,11,0.08)', border: `1px solid rgba(245,158,11,0.3)`, borderRadius: 12, padding: '14px 20px', marginBottom: 28, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>📋</span>
+            <ClipboardList size={18} color={gold} strokeWidth={2} style={{ flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: gold }}>W-9 Required</p>
               <p style={{ margin: '4px 0 8px', fontSize: 13, color: muted }}>
@@ -561,7 +568,7 @@ export default function PartnersDashboardPage() {
           <div style={{ marginBottom: 28 }}>
             {unread.map(n => (
               <div key={n.id} style={{ background: 'rgba(124,58,237,0.08)', border: `1px solid rgba(124,58,237,0.2)`, borderRadius: 12, padding: '12px 16px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 14 }}>🔔</span>
+                <Bell size={14} strokeWidth={2} />
                 <span style={{ fontSize: 13, color: '#c4b5fd' }}>{n.subject}</span>
               </div>
             ))}
@@ -572,7 +579,7 @@ export default function PartnersDashboardPage() {
         <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
             <h1 style={{ fontSize: 26, fontWeight: 900, color: '#f1f1f1', margin: '0 0 8px', letterSpacing: '-0.03em' }}>
-              {profile.full_name ? `Welcome back, ${profile.full_name.split(' ')[0]} 👋` : 'Partner Dashboard'}
+              {profile.full_name ? <>Welcome back, {profile.full_name.split(' ')[0]} <Hand size={22} strokeWidth={1.75} style={{ display: 'inline', verticalAlign: 'middle' }} /></> : 'Partner Dashboard'}
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 13, color: muted }}>Commission rate:</span>
@@ -600,18 +607,18 @@ export default function PartnersDashboardPage() {
               cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
-            🗺️ Retake Tour
+            <MapIcon size={12} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 5 }} />Retake Tour
           </button>
         </div>
 
         {/* ── Stats cards ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 28 }}>
           {[
-            { label: 'Pending',          value: cents(pendingCents),                      sub: '60-day hold',             icon: '⏳', accent: gold },
-            { label: 'Available',        value: cents(profile.available_balance_cents),   sub: 'Ready to cash out',       icon: '✅', accent: green },
-            { label: 'Paid Out',         value: cents(profile.paid_out_cents),            sub: 'Total disbursed',         icon: '💳', accent: '#60a5fa' },
-            { label: `${new Date().getFullYear()} Earnings`, value: cents(profile.lifetime_earnings_cents), sub: 'W-9 required at $600', icon: '📅', accent: '#e879f9' },
-            { label: 'Active Referrals', value: String(profile.active_referral_count),   sub: `${commission_label}/renewal`, icon: '👥', accent: purple },
+            { label: 'Pending',          value: cents(pendingCents),                      sub: '60-day hold',             icon: Clock,        accent: gold },
+            { label: 'Available',        value: cents(profile.available_balance_cents),   sub: 'Ready to cash out',       icon: CheckCircle2, accent: green },
+            { label: 'Paid Out',         value: cents(profile.paid_out_cents),            sub: 'Total disbursed',         icon: CreditCard,   accent: '#60a5fa' },
+            { label: `${new Date().getFullYear()} Earnings`, value: cents(profile.lifetime_earnings_cents), sub: 'W-9 required at $600', icon: CalendarDays, accent: '#e879f9' },
+            { label: 'Active Referrals', value: String(profile.active_referral_count),   sub: `${commission_label}/renewal`, icon: Users, accent: purple },
           ].map(stat => (
             <div key={stat.label} className="stat-card" style={{
               background: surface, border: `1px solid ${border}`,
@@ -619,7 +626,7 @@ export default function PartnersDashboardPage() {
               position: 'relative', overflow: 'hidden',
             }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: stat.accent, opacity: 0.7, borderRadius: '16px 16px 0 0' }} />
-              <div style={{ fontSize: 22, marginBottom: 10 }}>{stat.icon}</div>
+              <div style={{ marginBottom: 10 }}><stat.icon size={22} strokeWidth={1.75} color={stat.accent} /></div>
               <div style={{ fontSize: 23, fontWeight: 900, color: '#f1f1f1', letterSpacing: '-0.03em', lineHeight: 1.1 }}>{stat.value}</div>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#9ca3af', marginTop: 4 }}>{stat.label}</div>
               <div style={{ fontSize: 11, color: '#374151', marginTop: 2 }}>{stat.sub}</div>
@@ -636,7 +643,7 @@ export default function PartnersDashboardPage() {
                 {MILESTONES.filter(m => m.check(profile)).length} / {MILESTONES.length} unlocked
               </p>
             </div>
-            <div style={{ fontSize: 22 }}>🏅</div>
+            <Medal size={22} strokeWidth={1.75} />
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {MILESTONES.map(m => {
@@ -651,7 +658,7 @@ export default function PartnersDashboardPage() {
                   opacity: unlocked ? 1 : 0.35,
                   minWidth: 108,
                 }}>
-                  <div style={{ fontSize: 22, marginBottom: 5 }}>{unlocked ? m.icon : '🔒'}</div>
+                  <div style={{ marginBottom: 5 }}>{unlocked ? <m.icon size={22} strokeWidth={1.75} color={gold} /> : <Lock size={22} strokeWidth={1.75} />}</div>
                   <div style={{ fontSize: 11, fontWeight: 800, color: unlocked ? '#f1f1f1' : muted, lineHeight: 1.3 }}>{m.label}</div>
                   <div style={{ fontSize: 10, color: '#374151', marginTop: 3 }}>{m.desc}</div>
                 </div>
@@ -700,14 +707,14 @@ export default function PartnersDashboardPage() {
           borderRadius: 16, padding: 20, marginBottom: 24,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-            <span style={{ fontSize: 14 }}>💡</span>
+            <Lightbulb size={14} strokeWidth={2} color={gold} />
             <span style={{ fontSize: 12, fontWeight: 800, color: gold, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Referral Link vs. Promo Codes — What's the difference?
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             <div style={{ background: '#0a0a0a', borderRadius: 12, padding: '14px 16px', border: `1px solid ${border}` }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#f1f1f1', marginBottom: 6 }}>🔗 Your Referral Link</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#f1f1f1', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}><Link2 size={13} strokeWidth={2} /> Your Referral Link</div>
               <p style={{ fontSize: 12, color: muted, lineHeight: 1.7, margin: 0 }}>
                 A tracking URL. When someone clicks it, signs up, and subscribes — you earn commission.
                 <br /><br />
@@ -715,7 +722,7 @@ export default function PartnersDashboardPage() {
               </p>
             </div>
             <div style={{ background: '#0a0a0a', borderRadius: 12, padding: '14px 16px', border: `1px solid ${border}` }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#f1f1f1', marginBottom: 6 }}>🎁 Your Promo Codes</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#f1f1f1', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}><Gift size={13} strokeWidth={2} /> Your Promo Codes</div>
               <p style={{ fontSize: 12, color: muted, lineHeight: 1.7, margin: 0 }}>
                 Discount codes your audience types at checkout. Each code offers a different discount duration — share whichever fits your audience best.
                 <br /><br />
@@ -734,7 +741,7 @@ export default function PartnersDashboardPage() {
           {/* Referral link */}
           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 16 }}>🔗</span>
+              <Link2 size={16} strokeWidth={2} />
               <h3 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Referral Link</h3>
             </div>
             <p style={{ margin: '0 0 14px', fontSize: 11, color: '#4b5563' }}>
@@ -754,7 +761,7 @@ export default function PartnersDashboardPage() {
                   fontSize: 13, fontWeight: 700,
                 }}
               >
-                {copied === 'link' ? '✓ Copied!' : '📋 Copy'}
+                {copied === 'link' ? '✓ Copied!' : <><ClipboardList size={13} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 5 }} />Copy</>}
               </button>
               <button
                 onClick={() => {
@@ -772,7 +779,7 @@ export default function PartnersDashboardPage() {
                   fontSize: 13, fontWeight: 700,
                 }}
               >
-                🚀 Share
+                <Rocket size={13} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 5 }} />Share
               </button>
             </div>
           </div>
@@ -780,7 +787,7 @@ export default function PartnersDashboardPage() {
           {/* SocialMate promo codes */}
           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 16 }}>🎁</span>
+              <Gift size={16} strokeWidth={2} />
               <h3 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>SocialMate Codes</h3>
             </div>
             <p style={{ margin: '0 0 14px', fontSize: 11, color: '#4b5563' }}>Share for discounts. You earn on every sub and renewal they make.</p>
@@ -836,7 +843,7 @@ export default function PartnersDashboardPage() {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 20 }}>🤖</span>
+                <Bot size={20} strokeWidth={1.75} />
                 <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#f1f1f1' }}>Enki Promo Codes</h3>
                 <span style={{
                   background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)',
@@ -852,9 +859,9 @@ export default function PartnersDashboardPage() {
               </p>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {[
-                  { tier: 'Citizen',   color: '#10b981', sub: 'Free · No promo needed',   icon: '🆓' },
-                  { tier: 'Commander', color: gold,      sub: '30%–40% commission',        icon: '⚔️' },
-                  { tier: 'Emperor',   color: purple,    sub: '30%–40% commission',        icon: '👑' },
+                  { tier: 'Citizen',   color: '#10b981', sub: 'Free · No promo needed',   icon: Gift },
+                  { tier: 'Commander', color: gold,      sub: '30%–40% commission',        icon: Swords },
+                  { tier: 'Emperor',   color: purple,    sub: '30%–40% commission',        icon: Crown },
                 ].map(t => (
                   <div key={t.tier} style={{
                     background: '#0a0a0a', border: `1px solid ${border}`,
@@ -862,7 +869,7 @@ export default function PartnersDashboardPage() {
                     display: 'flex', alignItems: 'center', gap: 8,
                     opacity: 0.65,
                   }}>
-                    <span style={{ fontSize: 14 }}>{t.icon}</span>
+                    <t.icon size={14} strokeWidth={1.75} color={t.color} />
                     <div>
                       <div style={{ fontSize: 11, fontWeight: 800, color: t.color }}>{t.tier}</div>
                       <div style={{ fontSize: 10, color: '#4b5563' }}>{t.sub}</div>
@@ -879,7 +886,7 @@ export default function PartnersDashboardPage() {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontSize: 16 }}>🏅</span>
+                <Trophy size={16} strokeWidth={2} />
                 <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#f1f1f1' }}>Partner Leaderboard</h3>
               </div>
               <p style={{ margin: 0, fontSize: 12, color: muted }}>Opt in to appear and see how you rank. Anonymous mode hides your name.</p>
@@ -910,7 +917,7 @@ export default function PartnersDashboardPage() {
 
           {!lbOptIn ? (
             <div style={{ textAlign: 'center', padding: '32px 0', background: '#0a0a0a', borderRadius: 12 }}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>🏆</div>
+              <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center' }}><Trophy size={32} strokeWidth={1.5} /></div>
               <p style={{ fontSize: 14, color: muted, margin: '0 0 4px' }}>You're not on the leaderboard yet.</p>
               <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>Toggle "Show on Leaderboard" above. You can stay anonymous.</p>
             </div>
@@ -931,8 +938,8 @@ export default function PartnersDashboardPage() {
                   border: `1px solid ${entry.is_me ? 'rgba(245,158,11,0.25)' : border}`,
                   borderRadius: 12, padding: '12px 16px',
                 }}>
-                  <div style={{ fontSize: 16, fontWeight: 900, minWidth: 28, textAlign: 'center' }}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : <span style={{ color: muted }}>#{entry.rank}</span>}
+                  <div style={{ fontSize: 16, fontWeight: 900, minWidth: 28, textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+                    {i === 0 ? <Medal size={18} strokeWidth={1.75} color="#facc15" /> : i === 1 ? <Medal size={18} strokeWidth={1.75} color="#cbd5e1" /> : i === 2 ? <Medal size={18} strokeWidth={1.75} color="#d97706" /> : <span style={{ color: muted }}>#{entry.rank}</span>}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: entry.is_me ? gold : '#f1f1f1' }}>
@@ -952,7 +959,7 @@ export default function PartnersDashboardPage() {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 16 }}>💳</span>
+                <CreditCard size={16} strokeWidth={2} />
                 <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#f1f1f1' }}>Request Payout</h3>
               </div>
               <p style={{ margin: '0 0 4px', fontSize: 13, color: muted, lineHeight: 1.6 }}>
@@ -965,7 +972,7 @@ export default function PartnersDashboardPage() {
                 </p>
               )}
               {payoutError   && <p style={{ margin: '8px 0 0', fontSize: 13, color: '#f87171' }}>{payoutError}</p>}
-              {payoutSuccess && <p style={{ margin: '8px 0 0', fontSize: 13, color: green }}>✓ Payout requested! Confirmation email on the way.</p>}
+              {payoutSuccess && <p style={{ margin: '8px 0 0', fontSize: 13, color: green, display: 'flex', alignItems: 'center', gap: 6 }}><CheckCircle2 size={14} strokeWidth={2} /> Payout requested! Confirmation email on the way.</p>}
             </div>
             <button
               onClick={requestPayout}
@@ -994,7 +1001,7 @@ export default function PartnersDashboardPage() {
             borderRadius: 16, padding: 24, marginBottom: 24,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 16 }}>📋</span>
+              <ClipboardList size={16} strokeWidth={2} />
               <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#f1f1f1' }}>W-9 Tax Form</h3>
               {profile.w9_submitted && (
                 <span style={{ background: 'rgba(34,197,94,0.12)', color: green, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>
@@ -1013,8 +1020,8 @@ export default function PartnersDashboardPage() {
                 <W9UploadForm affiliateId={profile.id} onSuccess={() => window.location.reload()} />
               </>
             ) : (
-              <p style={{ margin: 0, fontSize: 13, color: green }}>
-                ✓ W-9 on file since {profile.w9_withholding_started_at ? new Date(profile.w9_withholding_started_at).toLocaleDateString() : 'submission'}.
+              <p style={{ margin: 0, fontSize: 13, color: green, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={14} strokeWidth={2} /> W-9 on file since {profile.w9_withholding_started_at ? new Date(profile.w9_withholding_started_at).toLocaleDateString() : 'submission'}.
               </p>
             )}
           </div>
@@ -1035,7 +1042,9 @@ export default function PartnersDashboardPage() {
                   marginBottom: -1,
                 }}
               >
-                {tab === 'conversions' ? `💰 Conversions (${conversions.length})` : `💳 Payouts (${payouts.length})`}
+                {tab === 'conversions'
+                  ? <><DollarSign size={13} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />Conversions ({conversions.length})</>
+                  : <><CreditCard size={13} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />Payouts ({payouts.length})</>}
               </button>
             ))}
           </div>
@@ -1044,7 +1053,7 @@ export default function PartnersDashboardPage() {
             {activeTab === 'conversions' && (
               conversions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>🚀</div>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}><Rocket size={36} strokeWidth={1.5} /></div>
                   <p style={{ fontSize: 14, color: muted, margin: '0 0 4px' }}>No conversions yet.</p>
                   <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>Share your referral link to start earning!</p>
                 </div>
@@ -1081,7 +1090,7 @@ export default function PartnersDashboardPage() {
             {activeTab === 'payouts' && (
               payouts.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>💳</div>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}><CreditCard size={36} strokeWidth={1.5} /></div>
                   <p style={{ fontSize: 14, color: muted, margin: 0 }}>No payouts yet — keep building that balance!</p>
                 </div>
               ) : (

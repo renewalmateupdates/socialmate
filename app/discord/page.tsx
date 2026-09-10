@@ -5,6 +5,8 @@ import SuspenseFallback from '@/components/SuspenseFallback'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import { Ban, Bot, Hand, Megaphone, PenLine, UserCog } from 'lucide-react'
+import PlatformIcon from '@/components/landing/PlatformIcon'
 
 interface GuildData {
   connected: boolean
@@ -274,7 +276,7 @@ function DiscordHubInner() {
             ← Dashboard
           </Link>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🎮</span>
+            <PlatformIcon name="discord" size={26} />
             <div>
               <h1 className="text-xl font-bold leading-tight">Discord Hub</h1>
               <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
@@ -315,7 +317,7 @@ function DiscordHubInner() {
         {isNotConnected && !error && (
           <div className="rounded-2xl p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
             <div className="flex items-start gap-4">
-              <span className="text-3xl flex-shrink-0">🤖</span>
+              <Bot className="w-8 h-8 flex-shrink-0" strokeWidth={1.5} />
               <div>
                 <h2 className="font-bold text-base mb-1">Connect Discord Bot Permissions</h2>
                 <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>
@@ -330,7 +332,7 @@ function DiscordHubInner() {
                     className="inline-flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all hover:opacity-80"
                     style={{ background: '#5865F2', color: '#fff' }}
                   >
-                    🤖 Add SocialMate Bot to Server
+<Bot size={15} strokeWidth={2} /> Add SocialMate Bot to Server
                   </a>
                   <p className="text-xs self-center" style={{ color: 'var(--text-faint)' }}>
                     You can still schedule posts to Discord channels using the Compose page.
@@ -383,7 +385,7 @@ function DiscordHubInner() {
                 className="w-full flex items-center justify-between px-5 py-4 transition-all hover:opacity-80 text-left"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">👋</span>
+                  <Hand size={20} strokeWidth={1.75} />
                   <div>
                     <p className="font-bold text-sm">Welcome Messages</p>
                     <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
@@ -475,7 +477,7 @@ function DiscordHubInner() {
                 className="w-full flex items-center justify-between px-5 py-4 transition-all hover:opacity-80 text-left"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">🎭</span>
+                  <UserCog size={20} strokeWidth={1.75} />
                   <div>
                     <p className="font-bold text-sm">Role Automation</p>
                     <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
@@ -548,7 +550,7 @@ function DiscordHubInner() {
                 className="w-full flex items-center justify-between px-5 py-4 transition-all hover:opacity-80 text-left"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">🚫</span>
+                  <Ban size={20} strokeWidth={1.75} />
                   <div>
                     <p className="font-bold text-sm">Word Filter</p>
                     <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
@@ -636,7 +638,7 @@ function DiscordHubInner() {
 
             {/* Announcements CTA card */}
             <div className="rounded-2xl p-5 flex items-start gap-4" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
-              <span className="text-2xl flex-shrink-0">📣</span>
+              <Megaphone className="w-6 h-6 flex-shrink-0" strokeWidth={1.75} />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm mb-1">Announcements</p>
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
@@ -647,7 +649,7 @@ function DiscordHubInner() {
                   className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl transition-all hover:opacity-80"
                   style={{ background: '#5865F2', color: '#fff' }}
                 >
-                  ✏️ Compose a Discord post
+<PenLine size={13} strokeWidth={2} /> Compose a Discord post
                 </Link>
               </div>
             </div>

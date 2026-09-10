@@ -253,7 +253,7 @@ export default function AdminStudioStaxPage() {
       })
       const json = await res.json()
       if (json.success) {
-        showToast(currentlyFeatured ? 'Removed from featured' : '⭐ Marked as featured')
+        showToast(currentlyFeatured ? 'Removed from featured' : 'Marked as featured')
         setSelected(null)
         await load()
       } else {
@@ -345,7 +345,7 @@ export default function AdminStudioStaxPage() {
             <div className="text-3xl font-black text-amber-600 dark:text-amber-400 mb-1">
               {featuredCount} <span className="text-lg">/ 5</span>
             </div>
-            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">⭐ Editor's Picks</div>
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 inline-flex items-center gap-1.5"><Star size={13} strokeWidth={2} fill="currentColor" /> Editor's Picks</div>
             <div className="text-xs text-gray-400 mt-0.5">Always rank first</div>
           </div>
         </div>
@@ -638,7 +638,7 @@ export default function AdminStudioStaxPage() {
                       : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                   }`}>
                     <div>
-                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⭐ Editor&apos;s Pick</p>
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300 inline-flex items-center gap-1.5"><Star size={12} strokeWidth={2} fill="currentColor" /> Editor&apos;s Pick</p>
                       <p className="text-xs text-gray-400 mt-0.5">Pinned listings always rank first ({featuredCount}/5 slots used)</p>
                     </div>
                     <button
@@ -662,7 +662,7 @@ export default function AdminStudioStaxPage() {
                       : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                   }`}>
                     <div>
-                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⭐ Paid Featured Placement</p>
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300 inline-flex items-center gap-1.5"><Star size={12} strokeWidth={2} fill="currentColor" /> Paid Featured Placement</p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {selected.featured && selected.featured_until
                           ? `Active until ${new Date(selected.featured_until).toLocaleDateString()}`
@@ -677,7 +677,7 @@ export default function AdminStudioStaxPage() {
                           ? 'bg-yellow-500 text-white hover:opacity-80'
                           : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
                       }`}>
-                      {selected.featured ? 'Remove feature' : '⭐ Feature listing'}
+                      {selected.featured ? 'Remove feature' : <span className="inline-flex items-center gap-1"><Star size={12} strokeWidth={2} fill="currentColor" /> Feature listing</span>}
                     </button>
                   </div>
                 )}

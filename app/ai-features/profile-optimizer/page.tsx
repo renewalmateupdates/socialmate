@@ -6,17 +6,24 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { ClipboardList, PenLine, RefreshCw, Search, Sparkles } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (id === 'general' || !hasPlatformIcon(id)) return <PenLine size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 type Platform = 'twitter' | 'linkedin' | 'instagram' | 'tiktok' | 'bluesky' | 'general'
 type Goal = 'Get more followers' | 'Drive website traffic' | 'Get clients' | 'Build brand awareness' | 'Get collaborations'
 
-const PLATFORMS: { id: Platform; label: string; emoji: string }[] = [
-  { id: 'twitter',   label: 'X / Twitter', emoji: '𝕏'  },
-  { id: 'linkedin',  label: 'LinkedIn',    emoji: '💼' },
-  { id: 'instagram', label: 'Instagram',   emoji: '📸' },
-  { id: 'tiktok',    label: 'TikTok',      emoji: '🎵' },
-  { id: 'bluesky',   label: 'Bluesky',     emoji: '🦋' },
-  { id: 'general',   label: 'General',     emoji: '✍️' },
+const PLATFORMS: { id: Platform; label: string }[] = [
+  { id: 'twitter',   label: 'X / Twitter' },
+  { id: 'linkedin',  label: 'LinkedIn' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'tiktok',    label: 'TikTok' },
+  { id: 'bluesky',   label: 'Bluesky' },
+  { id: 'general',   label: 'General' },
 ]
 
 const GOALS: Goal[] = [
@@ -170,7 +177,7 @@ export default function ProfileOptimizerPage() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-                <span>🔍</span> Profile Optimizer
+<Search size={20} strokeWidth={1.75} /> Profile Optimizer
               </h1>
               <p className="text-sm text-gray-400 mt-1">Score your bio, get 3 fixes, and see an AI-rewritten version.</p>
             </div>
@@ -199,7 +206,7 @@ export default function ProfileOptimizerPage() {
                           : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'
                       }`}
                     >
-                      <span>{p.emoji}</span>
+                      <PlatformGlyph id={p.id} size={14} />
                       <span className="truncate">{p.label}</span>
                     </button>
                   ))}
@@ -255,7 +262,7 @@ export default function ProfileOptimizerPage() {
                     Analyzing your bio…
                   </>
                 ) : (
-                  <>🔍 Analyze & Optimize — 5 credits</>
+                  <><Search size={14} strokeWidth={2} /> Analyze & Optimize — 5 credits</>
                 )}
               </button>
 
@@ -311,14 +318,14 @@ export default function ProfileOptimizerPage() {
               <div className="bg-surface border border-theme rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">✨</span>
+                    <Sparkles size={18} strokeWidth={1.75} />
                     <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Rewritten Version</p>
                   </div>
                   <button
                     onClick={copyRewrite}
                     className="text-xs font-bold px-3 py-1.5 bg-black dark:bg-white text-white dark:text-black rounded-lg hover:opacity-80 transition-all"
                   >
-                    {copiedRewrite ? '✓ Copied!' : '📋 Copy'}
+                    {copiedRewrite ? '✓ Copied!' : <><ClipboardList size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Copy</>}
                   </button>
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -332,13 +339,13 @@ export default function ProfileOptimizerPage() {
                   disabled={generating}
                   className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold py-2.5 rounded-xl hover:border-amber-400 dark:hover:border-amber-500 transition-all disabled:opacity-40"
                 >
-                  🔄 Re-analyze
+<RefreshCw size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Re-analyze
                 </button>
                 <Link
                   href="/ai-features/bio-writer"
                   className="flex-1 text-center bg-black dark:bg-white text-white dark:text-black text-sm font-bold py-2.5 rounded-xl hover:opacity-80 transition-all"
                 >
-                  ✍️ Write new bio →
+<PenLine size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Write new bio →
                 </Link>
               </div>
             </div>

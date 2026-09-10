@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useI18n } from '@/contexts/I18nContext'
+import { Landmark, MessageCircle, Plug } from 'lucide-react'
 
 const PLATFORM_LABELS: Record<string, string> = {
   bluesky: 'Bluesky',
@@ -178,7 +179,7 @@ export default function AgoraPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">🏛️</span>
+            <Landmark className="w-7 h-7 text-amber-400" strokeWidth={1.75} />
             <h1 className="text-3xl font-extrabold tracking-tight">HESTIA</h1>
             <span className="text-xs font-bold bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full">Community</span>
           </div>
@@ -190,7 +191,7 @@ export default function AgoraPage() {
         {/* Gate: must have at least one connected account */}
         {!hasConnected ? (
           <div className="bg-gray-900 border border-amber-500/30 rounded-2xl p-8 text-center mb-8">
-            <p className="text-2xl mb-3">🔌</p>
+            <Plug className="w-7 h-7 mx-auto mb-3 text-amber-400" strokeWidth={1.75} />
             <p className="font-extrabold text-lg mb-2">{t('community.gate_title')}</p>
             <p className="text-gray-400 text-sm mb-5">{t('community.gate_desc')}</p>
             <a href="/accounts" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all text-sm">
@@ -255,7 +256,7 @@ export default function AgoraPage() {
         {/* Feed */}
         {filteredPosts.length === 0 ? (
           <div className="text-center py-16 text-gray-600">
-            <p className="text-4xl mb-3">🏛️</p>
+            <Landmark className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
             <p className="font-bold">{t('community.empty_title')} {category === 'All' ? 'HESTIA' : category}</p>
             <p className="text-sm mt-1">{t('community.empty_subtitle')}</p>
           </div>
@@ -312,7 +313,7 @@ export default function AgoraPage() {
                       onClick={() => toggleExpand(post.id)}
                       className="ml-auto text-xs text-gray-500 hover:text-gray-300 transition-all flex items-center gap-1"
                     >
-                      💬 {isExpanded ? t('community.hide_replies') : `${t('community.reply_btn')}${postReplies.length > 0 ? ` (${postReplies.length})` : ''}`}
+                      <MessageCircle size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />{isExpanded ? t('community.hide_replies') : `${t('community.reply_btn')}${postReplies.length > 0 ? ` (${postReplies.length})` : ''}`}
                     </button>
                   </div>
 

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { PartyPopper } from 'lucide-react'
 
 const AMOUNTS = [5, 10, 25, 50]
 
@@ -14,7 +15,7 @@ export default function GiveDonate() {
   if (donated) {
     return (
       <div className="text-center p-8 rounded-2xl" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-        <div className="text-4xl mb-3">🎉</div>
+        <PartyPopper className="w-9 h-9 mx-auto mb-3 text-green-400" strokeWidth={1.5} />
         <p className="font-extrabold text-lg text-green-400 mb-1">Thank you so much.</p>
         <p className="text-sm text-gray-400">Your donation goes directly to SM-Give — school supplies, baby essentials, and care packages for people who need it.</p>
       </div>

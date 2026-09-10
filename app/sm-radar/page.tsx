@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { CalendarDays, CheckCircle2, ClipboardList, Fish, Radar, Search, Telescope, Zap } from 'lucide-react'
 
 const CREDIT_COST = 20
 
@@ -71,7 +72,7 @@ export default function SMRadarPage() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">📡</span>
+                <Radar className="w-6 h-6" strokeWidth={1.75} />
                 <h1 className="text-2xl font-extrabold tracking-tight">SM-Radar</h1>
               </div>
               <p className="text-sm text-gray-400 dark:text-gray-500">
@@ -90,15 +91,15 @@ export default function SMRadarPage() {
             <h2 className="text-sm font-extrabold mb-4">What SM-Radar analyzes</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { icon: '🕳️', label: 'Content gaps',        desc: 'Topics being asked about but not answered well in your niche'    },
-                { icon: '🔭', label: 'Competitor weak spots', desc: 'What competitors are missing that you can own'                  },
-                { icon: '📋', label: 'Best post formats',    desc: 'Which content structures are working right now in your niche'   },
-                { icon: '🎣', label: 'Hook styles',          desc: 'Opening formats driving the most engagement this week'          },
-                { icon: '📅', label: 'Timing signals',       desc: 'When your niche audience is most active and engaged'            },
-                { icon: '⚡', label: 'This week\'s opportunity', desc: 'One concrete content angle you should post on right now'    },
+                { icon: Search,    label: 'Content gaps',        desc: 'Topics being asked about but not answered well in your niche'    },
+                { icon: Telescope, label: 'Competitor weak spots', desc: 'What competitors are missing that you can own'                  },
+                { icon: ClipboardList, label: 'Best post formats',    desc: 'Which content structures are working right now in your niche'   },
+                { icon: Fish,      label: 'Hook styles',          desc: 'Opening formats driving the most engagement this week'          },
+                { icon: CalendarDays, label: 'Timing signals',       desc: 'When your niche audience is most active and engaged'            },
+                { icon: Zap,       label: 'This week\'s opportunity', desc: 'One concrete content angle you should post on right now'    },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                  <span className="text-lg flex-shrink-0">{item.icon}</span>
+                  <item.icon className="w-5 h-5 flex-shrink-0" strokeWidth={1.75} />
                   <div>
                     <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{item.label}</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed mt-0.5">{item.desc}</p>
@@ -128,7 +129,7 @@ export default function SMRadarPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-extrabold mb-1">
-                  {result ? '✅ Report ready — insights below' : 'Generate your Radar report'}
+                  {result ? <><CheckCircle2 size={14} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Report ready — insights below</> : 'Generate your Radar report'}
                 </p>
                 <p className="text-xs text-gray-400">
                   {result
@@ -146,7 +147,7 @@ export default function SMRadarPage() {
                     Analyzing...
                   </>
                 ) : (
-                  `📡 Generate Report — ${CREDIT_COST} credits`
+                  <><Radar size={14} strokeWidth={2} /> Generate Report — {CREDIT_COST} credits</>
                 )}
               </button>
             </div>
@@ -219,7 +220,7 @@ export default function SMRadarPage() {
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[2px]">
                 <div className="text-center px-6">
-                  <div className="text-3xl mb-3">📡</div>
+                  <Radar className="w-8 h-8 mx-auto mb-3" strokeWidth={1.5} />
                   <p className="text-sm font-extrabold mb-1">Your growth report appears here</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Enter your niche above and generate a report to unlock personalized content strategy intelligence.</p>
                 </div>

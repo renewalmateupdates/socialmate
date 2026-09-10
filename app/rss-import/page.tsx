@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { Check, CheckCircle2, Rss, XCircle } from 'lucide-react'
 
 const LS_KEY = 'sm_rss_imported_links'
 
@@ -135,7 +136,7 @@ export default function RSSImport() {
 
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">📡</span>
+              <Rss className="w-6 h-6" strokeWidth={1.75} />
               <h1 className="text-2xl font-extrabold tracking-tight">RSS / Blog Import</h1>
             </div>
             <p className="text-sm text-gray-400 dark:text-gray-500">Pull posts from any RSS or Atom feed and turn them into scheduled social posts.</p>
@@ -161,7 +162,7 @@ export default function RSSImport() {
                 ) : 'Fetch Feed'}
               </button>
             </div>
-            {error && <p className="text-xs text-red-500 font-semibold mt-2">❌ {error}</p>}
+            {error && <p className="text-xs text-red-500 font-semibold mt-2 inline-flex items-center gap-1.5"><XCircle size={13} strokeWidth={2} /> {error}</p>}
           </div>
 
           {posts.length > 0 && (
@@ -195,8 +196,8 @@ export default function RSSImport() {
                         alreadyImported ? 'bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700'
                         : post.selected ? 'bg-black border-black' : 'border-gray-300'
                       }`}>
-                        {alreadyImported && <span className="text-gray-400 text-xs font-bold">✓</span>}
-                        {!alreadyImported && post.selected && <span className="text-white text-xs font-bold">✓</span>}
+                        {alreadyImported && <Check size={13} strokeWidth={2.5} className="text-gray-400" />}
+                        {!alreadyImported && post.selected && <Check size={13} strokeWidth={2.5} className="text-white" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -243,7 +244,7 @@ export default function RSSImport() {
 
           {posts.length === 0 && !fetching && !error && (
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-              <div className="text-4xl mb-3">📡</div>
+              <Rss className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Enter a feed URL above</p>
               <p className="text-xs text-gray-400 dark:text-gray-500">Works with any RSS or Atom feed — blog posts, podcasts, YouTube channels, newsletters.</p>
             </div>
@@ -254,7 +255,7 @@ export default function RSSImport() {
 
       {toast && (
         <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 bg-black text-white px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg">
-          ✅ {toast}
+<CheckCircle2 className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} /> {toast}
         </div>
       )}
     </div>

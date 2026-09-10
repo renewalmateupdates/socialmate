@@ -6,17 +6,24 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { PenLine, RefreshCw, Search, ClipboardList } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (id === 'general' || !hasPlatformIcon(id)) return <PenLine size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 type Platform = 'twitter' | 'linkedin' | 'instagram' | 'tiktok' | 'bluesky' | 'general'
 type Tone = 'Professional' | 'Casual' | 'Bold' | 'Playful' | 'Authentic'
 
-const PLATFORMS: { id: Platform; label: string; emoji: string; limit: number }[] = [
-  { id: 'twitter',   label: 'X / Twitter', emoji: '𝕏',  limit: 160  },
-  { id: 'linkedin',  label: 'LinkedIn',    emoji: '💼', limit: 2600 },
-  { id: 'instagram', label: 'Instagram',   emoji: '📸', limit: 150  },
-  { id: 'tiktok',    label: 'TikTok',      emoji: '🎵', limit: 80   },
-  { id: 'bluesky',   label: 'Bluesky',     emoji: '🦋', limit: 256  },
-  { id: 'general',   label: 'General',     emoji: '✍️', limit: 500  },
+const PLATFORMS: { id: Platform; label: string; limit: number }[] = [
+  { id: 'twitter',   label: 'X / Twitter', limit: 160  },
+  { id: 'linkedin',  label: 'LinkedIn',    limit: 2600 },
+  { id: 'instagram', label: 'Instagram',   limit: 150  },
+  { id: 'tiktok',    label: 'TikTok',      limit: 80   },
+  { id: 'bluesky',   label: 'Bluesky',     limit: 256  },
+  { id: 'general',   label: 'General',     limit: 500  },
 ]
 
 const TONES: Tone[] = ['Professional', 'Casual', 'Bold', 'Playful', 'Authentic']
@@ -120,7 +127,7 @@ export default function BioWriterPage() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-                <span>✍️</span> Bio Writer
+<PenLine size={20} strokeWidth={1.75} /> Bio Writer
               </h1>
               <p className="text-sm text-gray-400 mt-1">Generate a platform-optimized bio that makes people click Follow.</p>
             </div>
@@ -149,7 +156,7 @@ export default function BioWriterPage() {
                           : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'
                       }`}
                     >
-                      <span>{p.emoji}</span>
+                      <PlatformGlyph id={p.id} size={14} />
                       <span className="truncate">{p.label}</span>
                     </button>
                   ))}
@@ -237,7 +244,7 @@ export default function BioWriterPage() {
                     Writing your bio…
                   </>
                 ) : (
-                  <>✍️ Generate Bio — 5 credits</>
+                  <><PenLine size={14} strokeWidth={2} /> Generate Bio — 5 credits</>
                 )}
               </button>
 
@@ -260,14 +267,14 @@ export default function BioWriterPage() {
                   onClick={copyBio}
                   className="text-xs font-bold px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all"
                 >
-                  {copied ? '✓ Copied!' : '📋 Copy Bio'}
+                  {copied ? '✓ Copied!' : <><ClipboardList size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Copy Bio</>}
                 </button>
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{currentPlatform.emoji}</span>
+                    <PlatformGlyph id={currentPlatform.id} size={18} />
                     <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{currentPlatform.label} Bio</p>
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${limitColor} border-current`}>
@@ -285,13 +292,13 @@ export default function BioWriterPage() {
                   disabled={generating}
                   className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold py-2.5 rounded-xl hover:border-amber-400 dark:hover:border-amber-500 transition-all disabled:opacity-40"
                 >
-                  🔄 Regenerate
+<RefreshCw size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Regenerate
                 </button>
                 <Link
                   href="/ai-features/profile-optimizer"
                   className="flex-1 text-center bg-black dark:bg-white text-white dark:text-black text-sm font-bold py-2.5 rounded-xl hover:opacity-80 transition-all"
                 >
-                  🔍 Optimize it →
+<Search size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Optimize it →
                 </Link>
               </div>
             </div>

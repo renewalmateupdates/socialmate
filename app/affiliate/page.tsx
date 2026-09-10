@@ -4,6 +4,16 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import {
+  CheckCircle2, Clock, CreditCard, DollarSign, Link2, PenLine, Plus,
+  Receipt, Repeat2, Target, Users, Video, XCircle, Zap,
+} from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Link2 size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const appUrl = 'https://socialmate.studio'
 
@@ -58,7 +68,7 @@ function Sparkline({ data }: { data: number[] }) {
 }
 
 // ── CopyableTemplate ─────────────────────────────────────────────────────────
-function CopyableTemplate({ label, icon, text }: { label: string; icon: string; text: string }) {
+function CopyableTemplate({ label, platformId, text }: { label: string; platformId: string | null; text: string }) {
   const [copied, setCopied] = useState(false)
   function copy() {
     navigator.clipboard.writeText(text)
@@ -69,7 +79,7 @@ function CopyableTemplate({ label, icon, text }: { label: string; icon: string; 
     <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 dark:border-gray-700">
         <span className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <span>{icon}</span>
+          {platformId ? <PlatformGlyph id={platformId} size={13} /> : <Link2 size={13} strokeWidth={1.75} />}
           {label}
         </span>
         <button
@@ -190,17 +200,17 @@ export default function AffiliatePage() {
     ? [
         {
           label: 'Twitter / X',
-          icon: '𝕏',
+          platformId: 'twitter',
           text: `I've been using @socialmatehq to schedule posts across Bluesky, Discord, Mastodon, and Telegram — all for free. Try it: ${referralLink}`,
         },
         {
           label: 'Discord',
-          icon: '💬',
+          platformId: 'discord',
           text: `Hey, found this free social media scheduler that actually works for Bluesky/Discord/Mastodon — ${referralLink}`,
         },
         {
           label: 'General',
-          icon: '🔗',
+          platformId: null,
           text: `Free social media scheduler with AI tools — no credit card needed: ${referralLink}`,
         },
       ]
@@ -254,7 +264,7 @@ export default function AffiliatePage() {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg opacity-70" aria-hidden>🙋</span>
+                    <Users className="opacity-70" size={18} strokeWidth={1.75} aria-hidden />
                   </div>
                   <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none tabular-nums">
                     {stats.totalReferrals}
@@ -271,7 +281,7 @@ export default function AffiliatePage() {
             </div>
 
             <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
-              <span className="text-lg opacity-70" aria-hidden>⚡</span>
+              <Zap className="opacity-70" size={18} strokeWidth={1.75} aria-hidden />
               <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none tabular-nums">{stats.payingReferrals}</div>
               <div>
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Active / Paying</div>
@@ -280,7 +290,7 @@ export default function AffiliatePage() {
             </div>
 
             <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
-              <span className="text-lg opacity-70" aria-hidden>💰</span>
+              <DollarSign className="opacity-70" size={18} strokeWidth={1.75} aria-hidden />
               <div className="text-3xl font-extrabold text-green-600 dark:text-green-400 leading-none tabular-nums">
                 {stats.totalEarnings > 0
                   ? `$${stats.totalEarnings.toFixed(0)}`
@@ -301,7 +311,7 @@ export default function AffiliatePage() {
             </div>
 
             <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
-              <span className="text-lg opacity-70" aria-hidden>⏳</span>
+              <Clock className="opacity-70" size={18} strokeWidth={1.75} aria-hidden />
               <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 leading-none tabular-nums">
                 {stats.pendingPayout > 0 ? `$${stats.pendingPayout.toFixed(0)}` : '—'}
               </div>
@@ -371,7 +381,7 @@ export default function AffiliatePage() {
                 </h3>
                 <div className="space-y-3">
                   {shareTemplates.map(t => (
-                    <CopyableTemplate key={t.label} label={t.label} icon={t.icon} text={t.text} />
+                    <CopyableTemplate key={t.label} label={t.label} platformId={t.platformId} text={t.text} />
                   ))}
                 </div>
               </>
@@ -383,7 +393,7 @@ export default function AffiliatePage() {
             <h2 className="text-sm font-extrabold mb-4">Payout History</h2>
             {conversions.length === 0 ? (
               <div className="text-center py-10">
-                <div className="text-4xl mb-3">💸</div>
+                <Receipt className="w-9 h-9 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                 <p className="text-sm font-bold text-gray-600 dark:text-gray-300">No payouts yet</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs mx-auto">
                   Once your referrals upgrade to a paid plan, their conversions will appear here.
@@ -405,7 +415,7 @@ export default function AffiliatePage() {
                       const amount = c.payout_amount != null ? `$${c.payout_amount.toFixed(2)}` : c.total_earned != null ? `${c.total_earned} cr` : '—'
                       const rawStatus = c.payout_status ?? c.status ?? 'pending'
                       const status = rawStatus === 'eligible' ? 'pending' : rawStatus
-                      const statusLabel = status === 'paid' ? '✓ Paid' : status === 'pending' ? '⏳ Pending' : status
+                      const statusLabel: React.ReactNode = status === 'paid' ? '✓ Paid' : status === 'pending' ? <><Clock size={11} strokeWidth={2} className="inline align-text-bottom mr-1" />Pending</> : status
                       const statusStyle =
                         status === 'paid'
                           ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-800'
@@ -439,28 +449,28 @@ export default function AffiliatePage() {
             <div className="space-y-0">
               {[
                 {
-                  icon: '🎯',
+                  icon: Target,
                   title: 'Share in Bluesky, Mastodon & Discord communities',
                   desc: 'Drop your link in creator, marketing, or indie-maker communities where people talk about tools. Be genuine — explain why you use it.',
                 },
                 {
-                  icon: '✍️',
+                  icon: PenLine,
                   title: 'Write a comparison post',
                   desc: '"SocialMate vs Buffer" or "free Buffer alternatives" searches convert extremely well. A short blog post targeting those keywords pays off long-term.',
                 },
                 {
-                  icon: '📹',
+                  icon: Video,
                   title: 'Record a quick walkthrough of your workflow',
                   desc: 'A 60-second screen recording of how you schedule a week of posts is one of the highest-converting formats on YouTube Shorts, TikTok, or Reels.',
                 },
                 {
-                  icon: '🔗',
+                  icon: Link2,
                   title: 'Add your link to your bio / link-in-bio page',
                   desc: 'A passive placement in your profile bio or Linktree drives consistent sign-ups with zero ongoing effort.',
                 },
               ].map(tip => (
                 <div key={tip.title} className="flex items-start gap-3.5 py-3.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                  <span className="text-xl flex-shrink-0 mt-0.5">{tip.icon}</span>
+                  <tip.icon className="w-5 h-5 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
                   <div>
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{tip.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{tip.desc}</p>
@@ -524,7 +534,7 @@ export default function AffiliatePage() {
 
             {affiliateStatus === 'active' ? (
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                <span className="text-green-600 text-lg">✅</span>
+                <CheckCircle2 className="text-green-600" size={18} strokeWidth={1.75} />
                 <div>
                   <p className="text-sm font-bold text-green-700 dark:text-green-400">Affiliate status: Active</p>
                   <p className="text-xs text-green-600 dark:text-green-500">
@@ -534,7 +544,7 @@ export default function AffiliatePage() {
               </div>
             ) : affiliateStatus === 'pending_review' ? (
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                <span className="text-amber-600 text-lg">⏳</span>
+                <Clock className="text-amber-600" size={18} strokeWidth={1.75} />
                 <div>
                   <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Application under review</p>
                   <p className="text-xs text-amber-600 dark:text-amber-500">We&apos;ll notify you by email within 3–5 business days.</p>
@@ -610,14 +620,14 @@ export default function AffiliatePage() {
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Payout Details</h3>
               <div className="space-y-0 text-sm">
                 {[
-                  { icon: '💳', label: 'Payout method',      value: 'Stripe (direct deposit or debit)'                },
-                  { icon: '⏱',  label: 'Holding period',     value: '60 days — protects against cancellations & fraud' },
-                  { icon: '🔁', label: 'Recurring?',          value: 'Yes — earn on every renewal, not just first payment' },
-                  { icon: '➕', label: 'Add-on commissions',  value: 'White-label add-ons ($20–$40) also attributed to you' },
-                  { icon: '🔗', label: 'Tracking methods',    value: 'Referral link OR promo code — both fully attributed' },
+                  { icon: CreditCard, label: 'Payout method',      value: 'Stripe (direct deposit or debit)'                },
+                  { icon: Clock,      label: 'Holding period',     value: '60 days — protects against cancellations & fraud' },
+                  { icon: Repeat2,    label: 'Recurring?',          value: 'Yes — earn on every renewal, not just first payment' },
+                  { icon: Plus,       label: 'Add-on commissions',  value: 'White-label add-ons ($20–$40) also attributed to you' },
+                  { icon: Link2,      label: 'Tracking methods',    value: 'Referral link OR promo code — both fully attributed' },
                 ].map(item => (
                   <div key={item.label} className="flex items-start gap-3 py-2.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                    <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+                    <item.icon className="flex-shrink-0 mt-0.5" size={16} strokeWidth={1.75} />
                     <div className="flex-1 min-w-0">
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400 block">{item.label}</span>
                       <span className="text-sm text-gray-800 dark:text-gray-200">{item.value}</span>
@@ -632,7 +642,7 @@ export default function AffiliatePage() {
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Promotion Guidelines</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-bold text-green-600 dark:text-green-500 mb-2">✅ Do</p>
+                  <p className="text-xs font-bold text-green-600 dark:text-green-500 mb-2 inline-flex items-center gap-1.5"><CheckCircle2 size={13} strokeWidth={2} /> Do</p>
                   <ul className="space-y-1.5">
                     {[
                       'Disclose that you earn a commission (required by FTC/ASA)',
@@ -649,7 +659,7 @@ export default function AffiliatePage() {
                   </ul>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-red-500 dark:text-red-400 mb-2">❌ Don&apos;t</p>
+                  <p className="text-xs font-bold text-red-500 dark:text-red-400 mb-2 inline-flex items-center gap-1.5"><XCircle size={13} strokeWidth={2} /> Don&apos;t</p>
                   <ul className="space-y-1.5">
                     {[
                       "Don't make false or misleading claims about the product",

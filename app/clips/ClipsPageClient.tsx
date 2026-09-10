@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
+import { CalendarDays, CheckCircle2, Eye, Film, Gamepad2, Inbox, KeyRound, Loader2, PlayCircle, RefreshCw, XCircle } from 'lucide-react'
 
 type ActivePlatform = 'twitch' | 'youtube'
 
@@ -39,7 +40,7 @@ function Toast({ message, type }: { message: string; type: 'success' | 'error' }
           : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700'
       }`}
     >
-      <span>{type === 'success' ? '✅' : '❌'}</span>
+      <span>{type === 'success' ? <CheckCircle2 size={16} strokeWidth={2} /> : <XCircle size={16} strokeWidth={2} />}</span>
       <span>{message}</span>
     </div>
   )
@@ -272,12 +273,12 @@ export default function ClipsPage() {
         <button
           onClick={() => setActivePlatform('twitch')}
           className={'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ' + (activePlatform === 'twitch' ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-700')}>
-          🟣 Twitch
+<Gamepad2 size={16} strokeWidth={2} /> Twitch
         </button>
         <button
           onClick={() => setActivePlatform('youtube')}
           className={'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ' + (activePlatform === 'youtube' ? 'bg-red-600 text-white border-red-600 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-700')}>
-          ▶️ YouTube
+          <PlayCircle size={16} strokeWidth={2} /> YouTube
         </button>
       </div>
 
@@ -290,7 +291,7 @@ export default function ClipsPage() {
             </div>
           ) : !connection ? (
             <div className="rounded-2xl p-8 text-center max-w-md mx-auto" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
-              <div className="text-5xl mb-4">🟣</div>
+              <Gamepad2 className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} style={{ color: '#9146FF' }} />
               <h2 className="text-lg font-extrabold mb-2" style={{ color: 'var(--text)' }}>Connect Twitch</h2>
               <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Connect your Twitch account to browse and schedule your clips.</p>
               <a
@@ -319,7 +320,7 @@ export default function ClipsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={fetchClips} disabled={loadingClips} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)', color: 'var(--text)' }}>
-                    {loadingClips ? '⏳' : '🔄'} {loadingClips ? 'Fetching…' : 'Refresh'}
+                    {loadingClips ? <Loader2 size={14} strokeWidth={2} className="animate-spin" /> : <RefreshCw size={14} strokeWidth={2} />} {loadingClips ? 'Fetching…' : 'Refresh'}
                   </button>
                   <button onClick={handleDisconnect} disabled={disconnecting} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)', color: 'var(--text-muted)' }}>
                     {disconnecting ? 'Disconnecting…' : 'Disconnect'}
@@ -329,7 +330,7 @@ export default function ClipsPage() {
               {/* Expired token reconnect prompt */}
               {twitchTokenExpired && (
                 <div className="mb-6 rounded-2xl p-6 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
-                  <div className="text-3xl mb-3">🔑</div>
+                  <KeyRound className="w-8 h-8 mx-auto mb-3" strokeWidth={1.5} />
                   <p className="text-sm font-extrabold mb-1" style={{ color: 'var(--text)' }}>Twitch connection expired</p>
                   <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>
                     Your Twitch connection has expired — reconnect to view your clips.
@@ -350,7 +351,7 @@ export default function ClipsPage() {
                 </div>
               ) : !twitchTokenExpired && clips.length === 0 ? (
                 <div className="text-center py-20">
-                  <p className="text-4xl mb-3">🎬</p>
+                  <Film className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>No clips found for this channel.</p>
                   <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>Create some clips on Twitch, then hit Refresh.</p>
                 </div>
@@ -420,14 +421,14 @@ export default function ClipsPage() {
               className="px-5 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
               style={{ background: '#9146FF' }}
             >
-              {publicLoading ? '⏳' : 'Search'}
+              {publicLoading ? <Loader2 size={14} strokeWidth={2} className="animate-spin" /> : 'Search'}
             </button>
           </div>
 
           {/* Error */}
           {publicError && (
             <div className="mb-4 rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700">
-              <span>❌</span> {publicError}
+              <XCircle size={15} strokeWidth={2} /> {publicError}
             </div>
           )}
 
@@ -471,7 +472,7 @@ export default function ClipsPage() {
             </div>
           ) : !ytConnected ? (
             <div className="rounded-2xl p-8 max-w-md mx-auto" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
-              <div className="text-5xl mb-4 text-center">▶️</div>
+              <PlayCircle className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} style={{ color: '#FF0000' }} />
               <h2 className="text-lg font-extrabold mb-2 text-center" style={{ color: 'var(--text)' }}>Connect YouTube Channel</h2>
               <p className="text-sm mb-6 text-center" style={{ color: 'var(--text-muted)' }}>Paste your channel URL to import your latest videos — no API key needed.</p>
               <div className="space-y-3">
@@ -513,7 +514,7 @@ export default function ClipsPage() {
               </div>
               {ytVideos.length === 0 ? (
                 <div className="text-center py-20">
-                  <div className="text-4xl mb-3">📭</div>
+                  <Inbox className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
                   <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No public videos found on this channel.</p>
                 </div>
               ) : (
@@ -551,7 +552,7 @@ function ClipCard({ clip }: { clip: Clip }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-3xl">🎬</span>
+            <Film className="w-8 h-8" strokeWidth={1.5} />
           </div>
         )}
         {/* Play icon overlay */}
@@ -578,7 +579,7 @@ function ClipCard({ clip }: { clip: Clip }) {
           {clip.title}
         </p>
         <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
-          👁 {formatViews(clip.view_count)} views
+          <Eye size={12} strokeWidth={2} className="inline align-text-bottom mr-1" />{formatViews(clip.view_count)} views
         </p>
 
         <button
@@ -586,7 +587,7 @@ function ClipCard({ clip }: { clip: Clip }) {
           className="mt-auto w-full py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95"
           style={{ background: 'var(--accent, #7c3aed)' }}
         >
-          📅 Schedule
+<CalendarDays size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Schedule
         </button>
       </div>
     </div>
@@ -637,7 +638,7 @@ function YTVideoCard({ video }: { video: YTVideo }) {
           className="mt-auto w-full py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95"
           style={{ background: '#FF0000' }}
         >
-          📅 Schedule
+<CalendarDays size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Schedule
         </button>
       </div>
     </div>

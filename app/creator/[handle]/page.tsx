@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { BookOpen, DollarSign, Lock, Repeat2, User, UserX } from 'lucide-react'
 
 type CreatorProfile = {
   page_handle:              string
@@ -237,7 +238,7 @@ function CreatorPageInner() {
   if (notFound || !creator) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-6 text-center">
-        <span className="text-5xl">🤷</span>
+        <UserX className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-xl font-black text-primary">{t('app_creator_public.not_found_title')}</h1>
         <p className="text-secondary text-sm">{t('app_creator_public.not_found_desc')}</p>
         <Link href="/" className="text-xs text-amber-500 hover:underline">← socialmate.studio</Link>
@@ -255,7 +256,7 @@ function CreatorPageInner() {
           {creator.avatar_url ? (
             <img src={creator.avatar_url} alt={creator.page_title || handle} className="w-16 h-16 rounded-full object-cover" />
           ) : (
-            <span>👤</span>
+            <User size={26} strokeWidth={1.75} />
           )}
         </div>
         <h1 className="text-2xl font-black" style={{ color: creator.header_color === '#ffffff' ? '#111827' : '#fff' }}>{creator.page_title || handle}</h1>
@@ -301,7 +302,7 @@ function CreatorPageInner() {
         {creator.tip_enabled && (
           <div className="bg-surface border border-theme rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">💸</span>
+              <DollarSign className="w-6 h-6" strokeWidth={1.75} />
               <div>
                 <p className="font-black text-primary">{t('app_creator_public.tip_title')}</p>
                 <p className="text-xs text-secondary">{t('app_creator_public.tip_desc')}</p>
@@ -363,7 +364,7 @@ function CreatorPageInner() {
         {creator.subscription_enabled && !isFan && (
           <div className="bg-surface border border-theme rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🔁</span>
+              <Repeat2 className="w-6 h-6" strokeWidth={1.75} />
               <div>
                 <p className="font-black text-primary">{creator.subscription_name}</p>
                 <p className="text-xs text-secondary">${creator.subscription_price / 100}/month</p>
@@ -391,7 +392,7 @@ function CreatorPageInner() {
         {hasPaywalledPosts && (
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">🔒</span>
+              <Lock size={18} strokeWidth={1.75} />
               <p className="font-black text-primary">{t('app_creator_public.exclusive_posts')}</p>
               {isFan && <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">{t('app_creator_public.fan_access')}</span>}
             </div>
@@ -404,7 +405,7 @@ function CreatorPageInner() {
                   <div key={post.id} className={`rounded-2xl border p-4 ${isUnlocked ? 'bg-surface border-theme' : 'bg-surface border-theme'}`}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
-                        <span>{isUnlocked ? '📖' : '🔒'}</span>
+                        {isUnlocked ? <BookOpen size={15} strokeWidth={1.75} /> : <Lock size={15} strokeWidth={1.75} />}
                         <p className="font-bold text-primary text-sm">{post.title}</p>
                       </div>
                       {isUnlocked && (

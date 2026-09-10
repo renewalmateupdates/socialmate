@@ -5,6 +5,14 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { ArrowUp, CheckCircle2, Clock, Eye, Globe, Heart, MessageCircle, Repeat2, Telescope, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14 }: { id: string; size?: number }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} />
+}
 
 type Competitor = {
   id: string
@@ -28,26 +36,32 @@ type CompetitorPost = {
 }
 
 const PLATFORMS = [
-  { id: 'bluesky',  name: 'Bluesky',  icon: '🦋' },
-  { id: 'mastodon', name: 'Mastodon', icon: '🐘' },
-  { id: 'discord',  name: 'Discord',  icon: '💬' },
-  { id: 'telegram', name: 'Telegram', icon: '✈️' },
-  { id: 'reddit',   name: 'Reddit',   icon: '🤖' },
-  { id: 'youtube',  name: 'YouTube',  icon: '▶️' },
-  { id: 'linkedin', name: 'LinkedIn', icon: '💼' },
+  { id: 'bluesky',  name: 'Bluesky' },
+  { id: 'mastodon', name: 'Mastodon' },
+  { id: 'discord',  name: 'Discord' },
+  { id: 'telegram', name: 'Telegram' },
+  { id: 'reddit',   name: 'Reddit' },
+  { id: 'youtube',  name: 'YouTube' },
+  { id: 'linkedin', name: 'LinkedIn' },
 ]
 
 const MAX_COMPETITORS = 3
 
-function formatEngagement(engagement: Record<string, number>): string {
-  const parts: string[] = []
-  if (engagement.likes   != null) parts.push(`❤️ ${engagement.likes}`)
-  if (engagement.reposts != null) parts.push(`🔁 ${engagement.reposts}`)
-  if (engagement.replies != null) parts.push(`💬 ${engagement.replies}`)
-  if (engagement.views   != null) parts.push(`👁 ${engagement.views}`)
-  if (engagement.upvotes != null) parts.push(`⬆️ ${engagement.upvotes}`)
-  if (engagement.comments != null) parts.push(`💬 ${engagement.comments}`)
-  return parts.slice(0, 3).join('  ')
+function formatEngagement(engagement: Record<string, number>): React.ReactNode {
+  const parts: { Icon: LucideIcon; value: number }[] = []
+  if (engagement.likes   != null) parts.push({ Icon: Heart, value: engagement.likes })
+  if (engagement.reposts != null) parts.push({ Icon: Repeat2, value: engagement.reposts })
+  if (engagement.replies != null) parts.push({ Icon: MessageCircle, value: engagement.replies })
+  if (engagement.views   != null) parts.push({ Icon: Eye, value: engagement.views })
+  if (engagement.upvotes != null) parts.push({ Icon: ArrowUp, value: engagement.upvotes })
+  if (engagement.comments != null) parts.push({ Icon: MessageCircle, value: engagement.comments })
+  return (
+    <span className="inline-flex items-center gap-2">
+      {parts.slice(0, 3).map((p, i) => (
+        <span key={i} className="inline-flex items-center gap-1"><p.Icon size={11} strokeWidth={2} /> {p.value}</span>
+      ))}
+    </span>
+  )
 }
 
 function formatDate(iso: string | null): string {
@@ -168,7 +182,7 @@ export default function CompetitorTracking() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">🔭</span>
+                <Telescope className="w-6 h-6" strokeWidth={1.75} />
                 <h1 className="text-2xl font-extrabold tracking-tight">Competitor Tracking</h1>
               </div>
               <p className="text-sm text-gray-400 dark:text-gray-500">Track up to 3 competitor accounts across platforms — all tiers.</p>
@@ -212,7 +226,7 @@ export default function CompetitorTracking() {
                     <select value={platform} onChange={e => setPlatform(e.target.value)}
                       className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all">
                       {PLATFORMS.map(p => (
-                        <option key={p.id} value={p.id}>{p.icon} {p.name}</option>
+                        <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
                     </select>
                   </div>
@@ -230,7 +244,7 @@ export default function CompetitorTracking() {
                     rows={2}
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all resize-none" />
                 </div>
-                {error && <p className="text-xs text-red-500 font-semibold">❌ {error}</p>}
+                {error && <p className="text-xs text-red-500 font-semibold inline-flex items-center gap-1.5"><XCircle size={13} strokeWidth={2} /> {error}</p>}
                 <div className="flex gap-3">
                   <button onClick={() => { setShowForm(false); setError('') }}
                     className="px-5 py-2.5 border border-gray-200 text-xs font-bold rounded-xl hover:border-gray-400 transition-all">
@@ -247,7 +261,7 @@ export default function CompetitorTracking() {
 
           {competitors.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-              <div className="text-4xl mb-3">🔭</div>
+              <Telescope className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No competitors tracked yet</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Add up to 3 competitor accounts to keep tabs on what they're doing.</p>
               <button onClick={() => setShowForm(true)}
@@ -266,8 +280,8 @@ export default function CompetitorTracking() {
                     <div className="p-5">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                            {p?.icon || '📱'}
+                          <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <PlatformGlyph id={c.platform} size={20} />
                           </div>
                           <div>
                             <p className="text-sm font-extrabold">{c.name}</p>
@@ -340,8 +354,8 @@ export default function CompetitorTracking() {
                       </div>
                     ) : (
                       <div className="border-t border-gray-100 dark:border-gray-800 px-5 py-4 bg-gray-50 dark:bg-gray-900/20">
-                        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-                          🕐 Posts will appear here after the nightly fetch (runs daily at 7am UTC)
+                        <p className="text-xs text-gray-400 dark:text-gray-500 text-center inline-flex items-center gap-1.5 justify-center w-full">
+                          <Clock size={13} strokeWidth={2} /> Posts will appear here after the nightly fetch (runs daily at 7am UTC)
                         </p>
                       </div>
                     )}
@@ -362,8 +376,8 @@ export default function CompetitorTracking() {
       </main>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 bg-black text-white px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg">
-          ✅ {toast}
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 bg-black text-white px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> {toast}
         </div>
       )}
     </div>

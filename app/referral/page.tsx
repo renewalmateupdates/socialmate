@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { supabase } from '@/lib/supabase'
+import { Crown, Gem, Gift, Rocket, Star, DollarSign } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -12,12 +14,12 @@ const SIGNUP_REWARDS = [
   { trigger: 'They upgrade to Agency',                   reward: '+50 credits', both: false },
 ]
 
-const MILESTONES = [
-  { paying: 5,  reward: '+100 bonus credits', icon: '🎁' },
-  { paying: 10, reward: '+100 bonus credits', icon: '⭐' },
-  { paying: 15, reward: '+100 bonus credits', icon: '🚀' },
-  { paying: 20, reward: '+100 bonus credits', icon: '💎' },
-  { paying: 25, reward: '+100 bonus credits', icon: '👑' },
+const MILESTONES: { paying: number; reward: string; icon: LucideIcon }[] = [
+  { paying: 5,  reward: '+100 bonus credits', icon: Gift },
+  { paying: 10, reward: '+100 bonus credits', icon: Star },
+  { paying: 15, reward: '+100 bonus credits', icon: Rocket },
+  { paying: 20, reward: '+100 bonus credits', icon: Gem },
+  { paying: 25, reward: '+100 bonus credits', icon: Crown },
 ]
 
 const FAQ = [
@@ -120,7 +122,7 @@ export default function ReferralPage() {
         {/* ─── REFERRAL PROGRAM VS AFFILIATE CALLOUT ─── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
           <div className="bg-white dark:bg-gray-900 border-2 border-black dark:border-white rounded-2xl p-5">
-            <div className="text-2xl mb-2">🎁</div>
+            <Gift className="w-6 h-6 mb-2" strokeWidth={1.75} />
             <h3 className="text-sm font-extrabold mb-1">Referral Program</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
               For everyone. Share your link, earn AI credits. No application — starts the moment you create an account.
@@ -128,7 +130,7 @@ export default function ReferralPage() {
             <p className="mt-3 text-xs font-bold text-black dark:text-white">← You are here</p>
           </div>
           <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
-            <div className="text-2xl mb-2">💸</div>
+            <DollarSign className="w-6 h-6 mb-2" strokeWidth={1.75} />
             <h3 className="text-sm font-extrabold mb-1">Affiliate Program</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
               For creators and marketers. Earn 30–40% recurring cash commissions on every referral. Application-based.
@@ -282,7 +284,7 @@ export default function ReferralPage() {
               const unlocked = userId && stats.paying >= tier.paying
               return (
                 <div key={i} className={`flex items-center gap-4 py-3 border-b border-gray-50 dark:border-gray-800 last:border-0 ${unlocked ? '' : 'opacity-60'}`}>
-                  <span className="text-2xl flex-shrink-0">{tier.icon}</span>
+                  <tier.icon className="w-6 h-6 flex-shrink-0" strokeWidth={1.75} />
                   <div className="flex-1">
                     <p className="text-sm font-bold">
                       {tier.paying} paying referrals

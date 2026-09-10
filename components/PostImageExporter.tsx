@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useState } from 'react'
+import { Camera } from 'lucide-react'
 
 const PLATFORM_NAMES: Record<string, string> = {
   discord:   'Discord',
@@ -44,8 +45,8 @@ interface Props {
   content: string
   platform?: string
   handle?: string
-  /** Optional: custom label for the trigger button. Defaults to "📸 Save as image" */
-  buttonLabel?: string
+  /** Optional: custom label for the trigger button. Defaults to a camera icon + "Save as image" */
+  buttonLabel?: React.ReactNode
   /** Optional: extra classes for the trigger button */
   buttonClassName?: string
 }
@@ -204,7 +205,7 @@ export default function PostImageExporter({
   content,
   platform,
   handle,
-  buttonLabel = '📸 Save as image',
+  buttonLabel = <><Camera size={14} strokeWidth={2} /> Save as image</>,
   buttonClassName = '',
 }: Props) {
   const [exporting, setExporting] = useState(false)

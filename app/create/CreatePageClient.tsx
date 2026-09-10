@@ -3,13 +3,32 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import {
+  Camera, Circle, Download, FileVideo, Film, Gamepad2, Globe,
+  Image as ImageIcon, Layers, Music, Package, Palette, Pause, Play,
+  Scissors, SunMedium, Sparkles, Type, Volume2, VolumeX, X as CloseIcon, Zap,
+  MessageCircle,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function platformIconId(id: string) {
+  return id.startsWith('instagram') ? 'instagram' : id
+}
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  const key = platformIconId(id)
+  if (key === 'twitch') return <Gamepad2 size={size} className={className} strokeWidth={1.75} />
+  if (key === 'kick') return <Zap size={size} className={className} strokeWidth={1.75} />
+  if (!hasPlatformIcon(key)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={key} size={size} className={className} />
+}
 
 // ── Platform specs ────────────────────────────────────────────────────────────
 
 type PlatformSpec = {
   id: string
   name: string
-  icon: string
   ratio: string
   ratioLabel: string
   maxDuration: string
@@ -22,7 +41,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'tiktok',
     name: 'TikTok',
-    icon: '🎵',
     ratio: '9:16',
     ratioLabel: '9:16 (Vertical)',
     maxDuration: '60s (organic) / 10min (creator)',
@@ -33,7 +51,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'youtube',
     name: 'YouTube',
-    icon: '▶️',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
     maxDuration: 'Unlimited',
@@ -44,7 +61,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'instagram-reels',
     name: 'Instagram Reels',
-    icon: '📸',
     ratio: '9:16',
     ratioLabel: '9:16 (Vertical)',
     maxDuration: '90s',
@@ -55,7 +71,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'twitter',
     name: 'Twitter / X',
-    icon: '🐦',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
     maxDuration: '2m 20s',
@@ -66,7 +81,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'bluesky',
     name: 'Bluesky',
-    icon: '🦋',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
     maxDuration: '60s',
@@ -77,7 +91,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'twitch',
     name: 'Twitch Clip',
-    icon: '🎮',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
     maxDuration: '60s',
@@ -88,7 +101,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'kick',
     name: 'Kick',
-    icon: '🟢',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
     maxDuration: 'Unlimited',
@@ -99,7 +111,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'facebook',
     name: 'Facebook',
-    icon: '📘',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
     maxDuration: '240min',
@@ -110,7 +121,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'instagram-post',
     name: 'Instagram Post',
-    icon: '🖼️',
     ratio: '4:5',
     ratioLabel: '4:5 (Portrait)',
     maxDuration: '—',
@@ -121,7 +131,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
   {
     id: 'pinterest',
     name: 'Pinterest',
-    icon: '📌',
     ratio: '2:3',
     ratioLabel: '2:3 (Portrait)',
     maxDuration: '—',
@@ -191,18 +200,18 @@ function formatBytes(bytes: number): string {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function ComingSoonBtn({ icon, label }: { icon: string; label: string }) {
+function ComingSoonBtn({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
     <div className="relative group">
       <button
         className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/40 transition-all text-sm font-medium text-gray-400 hover:text-gray-200"
         disabled
       >
-        <span className="text-xl">{icon}</span>
+        <Icon size={18} strokeWidth={1.75} />
         <span className="text-xs whitespace-nowrap">{label}</span>
       </button>
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-xs text-amber-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-        Coming soon ✦
+        Coming soon
       </div>
     </div>
   )
@@ -672,7 +681,7 @@ export default function CreatePageClient() {
         <header className="sticky top-0 z-20 flex items-center justify-between px-5 py-3 border-b border-gray-800 bg-gray-950/95 backdrop-blur-md">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
-              <span className="text-amber-400 text-xl">✦</span>
+              <Sparkles className="text-amber-400 w-5 h-5" strokeWidth={1.75} />
               Creator Studio
             </h1>
             <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1">
@@ -682,7 +691,7 @@ export default function CreatePageClient() {
                   activeTab === 'video' ? 'bg-amber-500 text-gray-950' : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                📹 Video Editor
+                <Film size={14} strokeWidth={2} /> Video Editor
               </button>
               <button
                 onClick={() => switchTab('image')}
@@ -690,7 +699,7 @@ export default function CreatePageClient() {
                   activeTab === 'image' ? 'bg-amber-500 text-gray-950' : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                🖼️ Image Editor
+                <ImageIcon size={14} strokeWidth={2} /> Image Editor
               </button>
             </div>
           </div>
@@ -719,7 +728,7 @@ export default function CreatePageClient() {
                         : 'border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-gray-200'
                     }`}
                   >
-                    <span>{p.icon}</span>
+                    <PlatformGlyph id={p.id} size={14} />
                     <span>{p.name}</span>
                     <span className={`text-xs font-mono ${selectedPlatform === p.id ? 'text-amber-500/70' : 'text-gray-600'}`}>
                       {p.ratio}
@@ -752,7 +761,7 @@ export default function CreatePageClient() {
                           : 'border-gray-800 bg-gray-900 hover:border-gray-700 hover:bg-gray-900/80'
                       }`}
                     >
-                      <div className="text-4xl">🎬</div>
+                      <Film className="w-9 h-9 text-gray-500" strokeWidth={1.5} />
                       <div className="text-center">
                         <p className="text-base font-bold text-gray-200">Drop your video here</p>
                         <p className="text-sm text-gray-500 mt-1">or click to browse — MP4, MOV, WebM, AVI</p>
@@ -779,7 +788,7 @@ export default function CreatePageClient() {
                             onClick={() => { setVideoFile(null); if (videoUrl) { URL.revokeObjectURL(videoUrl); setVideoUrl(null) } }}
                             className="text-gray-600 hover:text-red-400 transition-colors text-xs"
                           >
-                            ✕ Remove
+                            <CloseIcon size={12} strokeWidth={2} className="inline align-text-bottom" /> Remove
                           </button>
                         </div>
                       </div>
@@ -831,7 +840,7 @@ export default function CreatePageClient() {
                           className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500 text-gray-950 text-base font-bold hover:opacity-90 transition-opacity flex-shrink-0"
                           title={isPlaying ? 'Pause' : 'Play'}
                         >
-                          {isPlaying ? '⏸' : '▶'}
+                          {isPlaying ? <Pause size={16} fill="currentColor" strokeWidth={0} /> : <Play size={16} fill="currentColor" strokeWidth={0} />}
                         </button>
                         <span className="text-xs font-mono text-gray-400 flex-shrink-0 w-20 text-center">
                           {formatTime(currentTime)} / {formatTime(videoDuration)}
@@ -911,10 +920,10 @@ export default function CreatePageClient() {
                                   : 'text-gray-500 hover:text-gray-300'
                               }`}
                             >
-                              {t === 'filters' && '🎨 '}
-                              {t === 'captions' && '💬 '}
-                              {t === 'audio' && '🔊 '}
-                              {t === 'export' && '📦 '}
+                              {t === 'filters' && <Palette size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />}
+                              {t === 'captions' && <MessageCircle size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />}
+                              {t === 'audio' && <Volume2 size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />}
+                              {t === 'export' && <Package size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />}
                               {t.charAt(0).toUpperCase() + t.slice(1)}
                             </button>
                           ))}
@@ -1052,11 +1061,11 @@ export default function CreatePageClient() {
                                     : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
                                 }`}
                               >
-                                {muted ? '🔇 Muted — click to unmute' : '🔊 Mute'}
+                                {muted ? <><VolumeX size={14} strokeWidth={2} className="inline align-text-bottom mr-1.5" /> Muted — click to unmute</> : <><Volume2 size={14} strokeWidth={2} className="inline align-text-bottom mr-1.5" /> Mute</>}
                               </button>
 
                               <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-800 bg-gray-800/50 opacity-60">
-                                <span className="text-base">🎵</span>
+                                <Music size={16} strokeWidth={1.75} />
                                 <div>
                                   <p className="text-xs font-semibold text-gray-400">Background music</p>
                                   <p className="text-xs text-gray-600">Coming soon — add royalty-free music to your clips</p>
@@ -1078,15 +1087,15 @@ export default function CreatePageClient() {
 
                               <div className="flex flex-col gap-2 text-xs text-gray-500">
                                 <div className="flex items-center gap-2">
-                                  <span className={activeFilter !== 'None' ? 'text-amber-400' : 'text-gray-600'}>✦</span>
+                                  <Circle size={8} fill="currentColor" strokeWidth={0} className={activeFilter !== 'None' ? 'text-amber-400' : 'text-gray-600'} />
                                   <span>Filter: <span className="font-mono text-gray-300">{activeFilter}</span></span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className={captionText ? 'text-amber-400' : 'text-gray-600'}>✦</span>
+                                  <Circle size={8} fill="currentColor" strokeWidth={0} className={captionText ? 'text-amber-400' : 'text-gray-600'} />
                                   <span>Caption: <span className="font-mono text-gray-300">{captionText || 'none'}</span></span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-amber-400">✦</span>
+                                  <Circle size={8} fill="currentColor" strokeWidth={0} className="text-amber-400" />
                                   <span>Trim: <span className="font-mono text-gray-300">{formatTime(trimStart)} → {formatTime(trimEnd)}</span></span>
                                 </div>
                               </div>
@@ -1108,7 +1117,7 @@ export default function CreatePageClient() {
                                     Exporting…
                                   </>
                                 ) : (
-                                  '📦 Export for ' + spec.name
+                                  <><Package size={14} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Export for {spec.name}</>
                                 )}
                               </button>
                               <p className="text-xs text-gray-600">
@@ -1133,20 +1142,20 @@ export default function CreatePageClient() {
                           className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                           title="Capture current frame as PNG thumbnail"
                         >
-                          📷 Capture Thumbnail
+                          <Camera size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Capture Thumbnail
                         </button>
                         <button
                           onClick={exportVideo}
                           disabled={exporting}
                           className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all disabled:opacity-60"
                         >
-                          {exporting ? 'Exporting…' : '⬇ Download Export'}
+                          {exporting ? 'Exporting…' : <><Download size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Download Export</>}
                         </button>
                         <button
                           onClick={exportGif}
                           disabled={!videoFile || exporting}
                           className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/40 transition-all text-sm font-medium text-gray-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed">
-                          <span className="text-lg">🎞️</span>
+                          <FileVideo size={18} strokeWidth={1.75} />
                           <span className="text-xs">Export GIF</span>
                           <span className="text-[10px] text-gray-500">max 5s</span>
                         </button>
@@ -1178,7 +1187,7 @@ export default function CreatePageClient() {
                             : 'border-gray-800 bg-gray-900 hover:border-gray-700 hover:bg-gray-900/80'
                         }`}
                       >
-                        <div className="text-4xl">🖼️</div>
+                        <ImageIcon className="w-9 h-9 text-gray-500" strokeWidth={1.5} />
                         <div className="text-center">
                           <p className="text-base font-bold text-gray-200">Drop your image here</p>
                           <p className="text-sm text-gray-500 mt-1">or click to browse — JPG, PNG, GIF, WebP</p>
@@ -1205,7 +1214,7 @@ export default function CreatePageClient() {
                               title="Coming soon"
                             >
                               <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center group-hover:from-amber-950/30 group-hover:to-gray-800 transition-all">
-                                <span className="text-2xl opacity-40">🖼️</span>
+                                <ImageIcon className="w-6 h-6 opacity-40" strokeWidth={1.5} />
                               </div>
                               <p className="text-xs font-semibold text-gray-300 text-center leading-tight">{t.name}</p>
                               <p className="text-xs font-mono text-gray-600">{t.dims}</p>
@@ -1227,7 +1236,7 @@ export default function CreatePageClient() {
                             onClick={() => { setImageFile(null); if (imageUrl) { URL.revokeObjectURL(imageUrl); setImageUrl(null) } }}
                             className="text-gray-600 hover:text-red-400 transition-colors text-xs"
                           >
-                            ✕ Remove
+                            <CloseIcon size={12} strokeWidth={2} className="inline align-text-bottom" /> Remove
                           </button>
                         </div>
                       </div>
@@ -1242,12 +1251,12 @@ export default function CreatePageClient() {
 
                   {/* Image toolbar */}
                   <div className="flex flex-wrap gap-2">
-                    <ComingSoonBtn icon="✂️" label="Crop" />
-                    <ComingSoonBtn icon="🎨" label="Filter" />
-                    <ComingSoonBtn icon="💡" label="Brightness/Contrast" />
-                    <ComingSoonBtn icon="✏️" label="Text Overlay" />
-                    <ComingSoonBtn icon="🌟" label="Stickers" />
-                    <ComingSoonBtn icon="🔲" label="Background" />
+                    <ComingSoonBtn icon={Scissors} label="Crop" />
+                    <ComingSoonBtn icon={Palette} label="Filter" />
+                    <ComingSoonBtn icon={SunMedium} label="Brightness/Contrast" />
+                    <ComingSoonBtn icon={Type} label="Text Overlay" />
+                    <ComingSoonBtn icon={Sparkles} label="Stickers" />
+                    <ComingSoonBtn icon={Layers} label="Background" />
                   </div>
 
                   <div className="flex items-center gap-3 pt-2 border-t border-gray-800">
@@ -1269,7 +1278,7 @@ export default function CreatePageClient() {
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Platform Specs</p>
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-3xl">{spec.icon}</span>
+                <PlatformGlyph id={spec.id} size={28} />
                 <div>
                   <p className="font-extrabold text-white text-base leading-tight">{spec.name}</p>
                   <p className="text-xs text-amber-400 font-mono">{spec.ratioLabel}</p>
@@ -1297,27 +1306,27 @@ export default function CreatePageClient() {
                       <span className="inline-block w-3 h-3 border-2 border-gray-950/30 border-t-gray-950 rounded-full animate-spin" />
                       Exporting…
                     </>
-                  ) : '📦 Export for ' + spec.name}
+                  ) : <><Package size={14} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Export for {spec.name}</>}
                 </button>
                 <button
                   onClick={captureThumbnail}
                   disabled={!videoRef.current || videoDuration === 0}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  📷 Capture Thumbnail
+                  <Camera size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Capture Thumbnail
                 </button>
                 <button
                   onClick={exportGif}
                   disabled={!videoFile || exporting}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  🎞️ Export GIF <span className="text-xs text-gray-500">(max 5s)</span>
+                  <FileVideo size={14} strokeWidth={2} /> Export GIF <span className="text-xs text-gray-500">(max 5s)</span>
                 </button>
                 <button
                   onClick={() => router.push('/compose')}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all"
                 >
-                  📅 Schedule this video →
+                  Schedule this video →
                 </button>
                 {exportError && (
                   <p className="text-xs text-red-400 mt-1">{exportError}</p>
@@ -1369,7 +1378,7 @@ export default function CreatePageClient() {
 
             {/* Pro tip */}
             <div className="mt-auto p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-              <p className="text-xs font-bold text-amber-400 mb-1">✦ Pro tip</p>
+              <p className="text-xs font-bold text-amber-400 mb-1 inline-flex items-center gap-1.5"><Sparkles size={12} strokeWidth={2} /> Pro tip</p>
               <p className="text-xs text-gray-400 leading-relaxed">
                 Select your platform first — the editor will auto-size your export to the exact recommended dimensions.
                 Use <strong className="text-gray-300">Capture Thumbnail</strong> to grab any frame as a PNG for your upload thumbnail.

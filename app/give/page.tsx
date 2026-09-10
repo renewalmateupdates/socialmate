@@ -5,6 +5,8 @@ import PublicFooter from '@/components/PublicFooter'
 import GiveLiveCounter from './GiveLiveCounter'
 import GiveDonate from './GiveDonate'
 import { useI18n } from '@/contexts/I18nContext'
+import { Backpack, Baby, Crown, Heart, Home, Lightbulb } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // Amber/warm design tokens
 const amber   = '#F59E0B'
@@ -18,9 +20,9 @@ const muted   = '#6b7280'
 export default function GivePage() {
   const { t } = useI18n()
 
-  const pillars = [
+  const pillars: { icon: LucideIcon; title: string; subtitle: string; description: string; color: string; colorDim: string; colorBorder: string; impact: string }[] = [
     {
-      emoji: '🎒',
+      icon: Backpack,
       title: t('give.pillar1_title'),
       subtitle: t('give.pillar1_subtitle'),
       description: t('give.pillar1_desc'),
@@ -30,7 +32,7 @@ export default function GivePage() {
       impact: t('give.pillar1_impact'),
     },
     {
-      emoji: '👶',
+      icon: Baby,
       title: t('give.pillar2_title'),
       subtitle: t('give.pillar2_subtitle'),
       description: t('give.pillar2_desc'),
@@ -40,7 +42,7 @@ export default function GivePage() {
       impact: t('give.pillar2_impact'),
     },
     {
-      emoji: '🏠',
+      icon: Home,
       title: t('give.pillar3_title'),
       subtitle: t('give.pillar3_subtitle'),
       description: t('give.pillar3_desc'),
@@ -86,7 +88,7 @@ export default function GivePage() {
           background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`,
           borderRadius: 20, padding: '6px 16px', marginBottom: 28,
         }}>
-          <span style={{ fontSize: 14 }}>❤️</span>
+          <Heart size={14} strokeWidth={2} color={amber} />
           <span style={{ color: amber, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t('give.badge')}</span>
         </div>
 
@@ -160,7 +162,7 @@ export default function GivePage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 28, flexShrink: 0,
                 }}>
-                  {pillar.emoji}
+                  <pillar.icon size={28} strokeWidth={1.75} color={pillar.color} />
                 </div>
 
                 {/* Content */}
@@ -254,7 +256,7 @@ export default function GivePage() {
             borderRadius: 14, padding: '18px 22px',
             display: 'flex', alignItems: 'flex-start', gap: 14,
           }}>
-            <span style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>💡</span>
+            <Lightbulb size={20} strokeWidth={1.75} color={amber} style={{ flexShrink: 0, marginTop: 2 }} />
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#f1f1f1', margin: '0 0 6px' }}>
                 {t('give.why_75_title')}
@@ -302,7 +304,7 @@ export default function GivePage() {
             background: 'rgba(245,158,11,0.03)', border: `1px solid ${border}`,
             borderRadius: 20, padding: '36px 28px', textAlign: 'center',
           }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>👑</div>
+            <Crown size={32} strokeWidth={1.5} color={amber} style={{ margin: '0 auto 12px' }} />
             <p style={{ fontSize: 11, fontWeight: 700, color: amber, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
               {t('give.support_badge')}
             </p>
