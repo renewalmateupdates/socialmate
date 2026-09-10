@@ -4,6 +4,30 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import {
+  Check, CheckCircle2, Download, Globe, Link2, Lock, Mail, Palette,
+  Repeat2, Smartphone, X as CloseIcon, XCircle, DollarSign, BarChart3, User,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+const NON_PLATFORM_LINK_ICONS: Record<string, LucideIcon> = {
+  custom: Link2,
+  tip: DollarSign,
+  subscribe: Repeat2,
+  paywall: Lock,
+  email: Mail,
+  website: Globe,
+}
+
+function LinkGlyph({ id, size = 14, className = '' }: { id?: string; size?: number; className?: string }) {
+  if (id && NON_PLATFORM_LINK_ICONS[id]) {
+    const Icon = NON_PLATFORM_LINK_ICONS[id]
+    return <Icon size={size} className={className} strokeWidth={1.75} />
+  }
+  if (id && hasPlatformIcon(id)) return <PlatformIcon name={id} size={size} className={className} />
+  return <Link2 size={size} className={className} strokeWidth={1.75} />
+}
 
 const THEMES = [
   { id: 'white',    label: 'Clean White', bg: 'bg-white',         text: 'text-gray-900',    btn: 'bg-gray-900 text-white'       },
@@ -29,34 +53,34 @@ const BTN_STYLES = [
 ]
 
 const SOCIAL_PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',   icon: '📸', placeholder: 'https://instagram.com/yourhandle'     },
-  { id: 'twitter',   label: 'X / Twitter', icon: '𝕏',  placeholder: 'https://x.com/yourhandle'            },
-  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', placeholder: 'https://bsky.app/profile/yourhandle'  },
-  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', placeholder: 'https://mastodon.social/@yourhandle'  },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', placeholder: 'https://linkedin.com/in/yourname'     },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', placeholder: 'https://tiktok.com/@yourhandle'       },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️', placeholder: 'https://youtube.com/@yourchannel'     },
-  { id: 'discord',   label: 'Discord',     icon: '💬', placeholder: 'https://discord.gg/yourserver'        },
-  { id: 'telegram',  label: 'Telegram',    icon: '✈️', placeholder: 'https://t.me/yourhandle'              },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌', placeholder: 'https://pinterest.com/yourhandle'     },
+  { id: 'instagram', label: 'Instagram',   placeholder: 'https://instagram.com/yourhandle'     },
+  { id: 'twitter',   label: 'X / Twitter', placeholder: 'https://x.com/yourhandle'            },
+  { id: 'bluesky',   label: 'Bluesky',     placeholder: 'https://bsky.app/profile/yourhandle'  },
+  { id: 'mastodon',  label: 'Mastodon',    placeholder: 'https://mastodon.social/@yourhandle'  },
+  { id: 'linkedin',  label: 'LinkedIn',    placeholder: 'https://linkedin.com/in/yourname'     },
+  { id: 'tiktok',    label: 'TikTok',      placeholder: 'https://tiktok.com/@yourhandle'       },
+  { id: 'youtube',   label: 'YouTube',     placeholder: 'https://youtube.com/@yourchannel'     },
+  { id: 'discord',   label: 'Discord',     placeholder: 'https://discord.gg/yourserver'        },
+  { id: 'telegram',  label: 'Telegram',    placeholder: 'https://t.me/yourhandle'              },
+  { id: 'pinterest', label: 'Pinterest',   placeholder: 'https://pinterest.com/yourhandle'     },
 ]
 
 const LINK_TYPES = [
-  { id: 'custom',    label: 'Custom Link',    icon: '🔗' },
-  { id: 'tip',       label: 'Tip Jar',        icon: '💸' },
-  { id: 'subscribe', label: 'Fan Subscribe',  icon: '🔁' },
-  { id: 'paywall',   label: 'Paywalled Post', icon: '🔒' },
-  { id: 'youtube',   label: 'YouTube',        icon: '▶️' },
-  { id: 'instagram', label: 'Instagram',      icon: '📸' },
-  { id: 'twitter',   label: 'X / Twitter',    icon: '𝕏'  },
-  { id: 'bluesky',   label: 'Bluesky',        icon: '🦋' },
-  { id: 'mastodon',  label: 'Mastodon',       icon: '🐘' },
-  { id: 'discord',   label: 'Discord',        icon: '💬' },
-  { id: 'telegram',  label: 'Telegram',       icon: '✈️' },
-  { id: 'tiktok',    label: 'TikTok',         icon: '🎵' },
-  { id: 'linkedin',  label: 'LinkedIn',       icon: '💼' },
-  { id: 'email',     label: 'Email',          icon: '📧' },
-  { id: 'website',   label: 'Website',        icon: '🌐' },
+  { id: 'custom',    label: 'Custom Link' },
+  { id: 'tip',       label: 'Tip Jar' },
+  { id: 'subscribe', label: 'Fan Subscribe' },
+  { id: 'paywall',   label: 'Paywalled Post' },
+  { id: 'youtube',   label: 'YouTube' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'twitter',   label: 'X / Twitter' },
+  { id: 'bluesky',   label: 'Bluesky' },
+  { id: 'mastodon',  label: 'Mastodon' },
+  { id: 'discord',   label: 'Discord' },
+  { id: 'telegram',  label: 'Telegram' },
+  { id: 'tiktok',    label: 'TikTok' },
+  { id: 'linkedin',  label: 'LinkedIn' },
+  { id: 'email',     label: 'Email' },
+  { id: 'website',   label: 'Website' },
 ]
 
 const PUBLIC_BASE = 'socialmate.studio/l'
@@ -72,11 +96,6 @@ interface BioLink {
 
 function makeId() {
   return Math.random().toString(36).slice(2, 9)
-}
-
-function getLinkIcon(type?: string) {
-  const found = LINK_TYPES.find(t => t.id === type)
-  return found ? found.icon : '🔗'
 }
 
 export default function LinkInBio() {
@@ -300,7 +319,7 @@ export default function LinkInBio() {
                       {avatarUrl
                         ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover"
                             onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                        : <span>{name?.[0]?.toUpperCase() || '👤'}</span>
+                        : <span>{name?.[0]?.toUpperCase() || <User size={20} strokeWidth={1.75} />}</span>
                       }
                     </div>
                     <h2 className={`text-[12px] font-extrabold text-center mb-1 leading-tight ${currentTheme.text}`}>
@@ -315,7 +334,7 @@ export default function LinkInBio() {
                     {Object.entries(socials).filter(([, v]) => v).length > 0 && (
                       <div className="flex items-center gap-2 mb-3.5 flex-wrap justify-center">
                         {SOCIAL_PLATFORMS.filter(p => socials[p.id]).map(p => (
-                          <span key={p.id} className="text-sm leading-none">{p.icon}</span>
+                          <span key={p.id} className="leading-none"><LinkGlyph id={p.id} size={14} /></span>
                         ))}
                       </div>
                     )}
@@ -329,7 +348,7 @@ export default function LinkInBio() {
                         activeLinks.map(link => (
                           <div key={link.id}
                             className={`w-full py-2.5 px-3 text-[10px] font-bold text-center flex items-center justify-center gap-1.5 shadow-sm ${currentTheme.btn} ${currentBtnStyle.class}`}>
-                            <span className="text-[11px] leading-none">{getLinkIcon(link.type)}</span>
+                            <span className="leading-none"><LinkGlyph id={link.type} size={11} /></span>
                             <span>{link.title}</span>
                           </div>
                         ))
@@ -367,7 +386,7 @@ export default function LinkInBio() {
             className={`w-full py-2.5 text-xs font-bold rounded-xl transition-all ${
               copied ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'
             }`}>
-            {copied ? '✓ Copied!' : '🔗 Copy My Link'}
+            {copied ? '✓ Copied!' : <><Link2 size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Copy My Link</>}
           </button>
         </div>
       )}
@@ -405,7 +424,7 @@ export default function LinkInBio() {
                       ? 'bg-green-500 text-white shadow-sm'
                       : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400 shadow-sm'
                   }`}>
-                  {copied ? '✓ Copied!' : '🔗 Copy Bio Link'}
+                  {copied ? '✓ Copied!' : <><Link2 size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Copy Bio Link</>}
                 </button>
               )}
               <button
@@ -457,7 +476,7 @@ export default function LinkInBio() {
                         }`} />
                       {checkingSlug && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500">...</span>}
                       {slugAvailable === true  && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-500 font-bold">✓</span>}
-                      {slugAvailable === false && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-red-500 font-bold">✕</span>}
+                      {slugAvailable === false && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500"><CloseIcon size={13} strokeWidth={2.5} /></span>}
                     </div>
                   </div>
                 </div>
@@ -484,20 +503,20 @@ export default function LinkInBio() {
               {/* TABS */}
               <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 overflow-x-auto">
                 {[
-                  { id: 'links',     label: '🔗 Links'     },
-                  { id: 'socials',   label: '📱 Socials'    },
-                  { id: 'design',    label: '🎨 Design'     },
-                  { id: 'domain',    label: canUseCustomDomain ? '🌐 Domain' : '🔒 Domain' },
-                  { id: 'analytics', label: '📊 Analytics'  },
+                  { id: 'links',     label: 'Links',     Icon: Link2 },
+                  { id: 'socials',   label: 'Socials',   Icon: Smartphone },
+                  { id: 'design',    label: 'Design',    Icon: Palette },
+                  { id: 'domain',    label: 'Domain',    Icon: canUseCustomDomain ? Globe : Lock },
+                  { id: 'analytics', label: 'Analytics', Icon: BarChart3 },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => {
                     setActiveTab(tab.id as any)
                     if (tab.id === 'analytics') loadAnalytics()
                   }}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap inline-flex items-center justify-center gap-1.5 ${
                       activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                     }`}>
-                    {tab.label}
+                    <tab.Icon size={13} strokeWidth={2} /> {tab.label}
                   </button>
                 ))}
               </div>
@@ -540,7 +559,7 @@ export default function LinkInBio() {
                           onChange={e => updateLink(link.id, 'type', e.target.value)}
                           className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-1.5 py-1 focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-200 flex-shrink-0">
                           {LINK_TYPES.map(lt => (
-                            <option key={lt.id} value={lt.id}>{lt.icon} {lt.label}</option>
+                            <option key={lt.id} value={lt.id}>{lt.label}</option>
                           ))}
                         </select>
                         <span className="text-xs text-gray-300 dark:text-gray-600 font-bold flex-1 text-right">#{i + 1}</span>
@@ -552,7 +571,7 @@ export default function LinkInBio() {
                         </button>
                         <button onClick={() => removeLink(link.id)}
                           className="text-xs text-gray-300 dark:text-gray-600 hover:text-red-400 transition-all ml-0.5 w-5 h-5 flex items-center justify-center">
-                          ✕
+                          <CloseIcon size={12} strokeWidth={2} />
                         </button>
                       </div>
                       {/* Inputs row */}
@@ -579,7 +598,7 @@ export default function LinkInBio() {
 
                   {/* Monetize quick-add */}
                   <div className="pt-1">
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">💸 Monetize</p>
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2 inline-flex items-center gap-1.5"><DollarSign size={12} strokeWidth={2} /> Monetize</p>
                     {creatorHandle ? (
                       <div className="space-y-2">
                         <div className="grid grid-cols-2 gap-2">
@@ -599,7 +618,7 @@ export default function LinkInBio() {
                         {/* Paywalled posts quick-add */}
                         {paywalledPosts.length > 0 && (
                           <div>
-                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1.5">🔒 Exclusive Posts</p>
+                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1.5 inline-flex items-center gap-1"><Lock size={10} strokeWidth={2} /> Exclusive Posts</p>
                             <div className="space-y-1.5">
                               {paywalledPosts.map(post => (
                                 <button
@@ -624,7 +643,7 @@ export default function LinkInBio() {
                             href="/monetize/hub"
                             className="block w-full py-2 border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-xl text-xs text-purple-400 dark:text-purple-500 text-center hover:border-purple-400 hover:text-purple-600 transition-all"
                           >
-                            🔒 Add exclusive posts in Creator Hub →
+<Lock size={11} strokeWidth={2} className="inline align-text-bottom mr-1" />Add exclusive posts in Creator Hub →
                           </a>
                         )}
                       </div>
@@ -647,9 +666,9 @@ export default function LinkInBio() {
                     <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Social Profiles</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">These appear as icons above your links.</p>
                   </div>
-                  {SOCIAL_PLATFORMS.map(p => (
+                  {SOCIAL_PLATFORMS.map((p) => (
                     <div key={p.id} className="flex items-center gap-3">
-                      <span className="text-xl w-7 flex-shrink-0 text-center leading-none">{p.icon}</span>
+                      <span className="w-7 flex-shrink-0 flex items-center justify-center leading-none"><LinkGlyph id={p.id} size={20} /></span>
                       <div className="flex-1 min-w-0">
                         <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 block mb-0.5">{p.label}</label>
                         <input
@@ -675,7 +694,7 @@ export default function LinkInBio() {
                           className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${theme === t.id ? 'border-black dark:border-white' : 'border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500'}`}>
                           <div className={`w-5 h-5 rounded-lg ${t.bg} border border-gray-200 dark:border-gray-600 flex-shrink-0`} />
                           <span className="text-xs font-semibold truncate">{t.label}</span>
-                          {theme === t.id && <span className="ml-auto text-xs font-bold flex-shrink-0">✓</span>}
+                          {theme === t.id && <Check size={14} strokeWidth={2.5} className="ml-auto flex-shrink-0" />}
                         </button>
                       ))}
                     </div>
@@ -752,7 +771,7 @@ export default function LinkInBio() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                            ⬇ Download QR Code
+<Download size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Download QR Code
                           </a>
                         </div>
                       </div>
@@ -839,7 +858,7 @@ export default function LinkInBio() {
                   {canUseCustomDomain ? (
                     <div className="bg-surface border border-theme rounded-2xl p-5 space-y-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg">🌐</span>
+                        <Globe size={18} strokeWidth={1.75} />
                         <h2 className="text-base font-extrabold">Custom Domain</h2>
                         {customDomainUnlocked && plan === 'free' && (
                           <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Earned via referrals</span>
@@ -882,7 +901,7 @@ export default function LinkInBio() {
                     <div className="space-y-4">
                       <div className="bg-black text-white rounded-2xl p-5 md:p-6">
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-2xl">🌐</span>
+                          <Globe className="w-6 h-6" strokeWidth={1.5} />
                           <h2 className="text-base font-extrabold">Custom Domain</h2>
                         </div>
                         <p className="text-xs text-gray-400 mb-4 leading-relaxed">
@@ -899,7 +918,7 @@ export default function LinkInBio() {
                           </div>
                           <p className="text-xs text-gray-400 mt-2">
                             {payingReferrals >= CUSTOM_DOMAIN_REFERRAL_THRESHOLD
-                              ? '✅ Unlocked! Refresh to access your custom domain settings.'
+                              ? <><CheckCircle2 size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Unlocked! Refresh to access your custom domain settings.</>
                               : `${CUSTOM_DOMAIN_REFERRAL_THRESHOLD - payingReferrals} more paying referral${CUSTOM_DOMAIN_REFERRAL_THRESHOLD - payingReferrals !== 1 ? 's' : ''} to unlock`}
                           </p>
                         </div>
@@ -952,7 +971,7 @@ export default function LinkInBio() {
         <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 size={16} strokeWidth={2} className="inline align-text-bottom mr-1" /> : <XCircle size={16} strokeWidth={2} className="inline align-text-bottom mr-1" />} {toast.message}
         </div>
       )}
     </div>
