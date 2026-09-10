@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getHermesAccess } from '@/lib/hermes-access'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -21,7 +23,8 @@ async function getUser() {
 export async function GET(req: NextRequest) {
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const access = await getHermesAccess(getSupabaseAdmin(), user.id, user.email)
+  if (!access.allowed) return NextResponse.json({ error: 'HERMES is not active on your account' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
   const firstName = searchParams.get('first_name')?.trim()
