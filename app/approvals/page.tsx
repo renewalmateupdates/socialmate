@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { CheckCircle2, Clock, Inbox, XCircle } from 'lucide-react'
 
 type PendingPost = {
   id: string
@@ -126,7 +127,7 @@ export default function ApprovalsPage() {
         <main className="md:ml-56 flex-1 p-4 md:p-8">
           <div className="max-w-3xl mx-auto">
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-              <div className="text-4xl mb-4">✅</div>
+              <CheckCircle2 className="w-10 h-10 mx-auto mb-4" strokeWidth={1.5} />
               <h1 className="text-xl font-extrabold mb-2">Content Approval Workflows</h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mb-6 max-w-sm mx-auto leading-relaxed">
                 Let team members submit posts for admin review before they go live. Available on Pro and Agency plans.
@@ -156,7 +157,7 @@ export default function ApprovalsPage() {
 
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">✅</span>
+              <CheckCircle2 className="w-6 h-6" strokeWidth={1.75} />
               <h1 className="text-2xl font-extrabold tracking-tight">Content Approvals</h1>
             </div>
             <p className="text-sm text-gray-400 dark:text-gray-500">Review posts submitted by team members before they go live.</p>
@@ -188,8 +189,8 @@ export default function ApprovalsPage() {
 
           {displayedPosts.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-              <div className="text-4xl mb-3">
-                {tab === 'pending' ? '📭' : tab === 'approved' ? '✅' : '❌'}
+              <div className="mb-3 flex justify-center">
+                {tab === 'pending' ? <Inbox className="w-10 h-10" strokeWidth={1.5} /> : tab === 'approved' ? <CheckCircle2 className="w-10 h-10" strokeWidth={1.5} /> : <XCircle className="w-10 h-10" strokeWidth={1.5} />}
               </div>
               <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 {tab === 'pending' ? 'No posts awaiting review' : tab === 'approved' ? 'No approved posts yet' : 'No rejected posts'}
@@ -212,7 +213,7 @@ export default function ApprovalsPage() {
                       'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-500'
                     }`}>
                       {post.approval_status === 'approved' ? '✓ Approved' :
-                       post.approval_status === 'rejected' ? '✗ Rejected' : '⏳ Pending'}
+                       post.approval_status === 'rejected' ? '✗ Rejected' : <><Clock size={11} strokeWidth={2} className="inline align-text-bottom mr-1" />Pending</>}
                     </span>
                   </div>
 
@@ -304,7 +305,7 @@ export default function ApprovalsPage() {
         <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-black text-white'
         }`}>
-          {toast.type === 'error' ? '❌' : '✅'} {toast.message}
+          {toast.type === 'error' ? <XCircle className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} /> : <CheckCircle2 className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>

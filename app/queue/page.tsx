@@ -18,7 +18,7 @@ import { CSS } from '@dnd-kit/utilities'
 import PostImageExporter from '@/components/PostImageExporter'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { AlertTriangle, CalendarClock, CalendarRange, CheckCircle2, Globe, Heart, Layers, Lock, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
+import { AlertTriangle, CalendarClock, CalendarRange, Camera, CheckCircle2, Globe, Heart, Layers, Lock, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -34,13 +34,6 @@ function tagColorQueue(tag: string): string {
   let hash = 0
   for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash)
   return COLORS[Math.abs(hash) % COLORS.length]
-}
-
-const PLATFORM_ICONS: Record<string, string> = {
-  instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
-  facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
-  mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
 
 const PLATFORM_NAMES: Record<string, string> = {
@@ -254,7 +247,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
             <PostImageExporter
               content={post.content ?? ''}
               platform={(post.platforms ?? [])[0]}
-              buttonLabel="📸"
+              buttonLabel={<Camera size={13} strokeWidth={2} />}
               buttonClassName="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-amber-400 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             />
             <button onClick={() => setConfirmCancel(post.id)}

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
+import { Eye, Heart, Sprout, Star, TrendingUp } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'social-media',      label: 'Social Media Tools'   },
@@ -44,7 +45,7 @@ export default async function ListingsPage() {
         {/* Header */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 mb-6">
-            ❤️ SM-Give Certified Directory
+<Heart size={13} strokeWidth={2} /> SM-Give Certified Directory
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-4">
             Tools Built <span className="text-amber-500">By the People</span>
@@ -70,17 +71,17 @@ export default async function ListingsPage() {
             </p>
           </div>
           <div className="flex gap-4 text-center shrink-0">
-            <div><p className="text-2xl font-extrabold text-amber-500">❤️</p><p className="text-xs text-gray-400 mt-1">Donate to<br/>SM-Give</p></div>
+            <div><Heart className="mx-auto text-amber-500" size={24} strokeWidth={1.75} /><p className="text-xs text-gray-400 mt-1">Donate to<br/>SM-Give</p></div>
             <div><p className="text-2xl font-extrabold text-gray-400">→</p></div>
-            <div><p className="text-2xl font-extrabold text-green-500">📈</p><p className="text-xs text-gray-400 mt-1">Rank<br/>higher</p></div>
+            <div><TrendingUp className="mx-auto text-green-500" size={24} strokeWidth={1.75} /><p className="text-xs text-gray-400 mt-1">Rank<br/>higher</p></div>
             <div><p className="text-2xl font-extrabold text-gray-400">→</p></div>
-            <div><p className="text-2xl font-extrabold text-blue-500">👀</p><p className="text-xs text-gray-400 mt-1">More<br/>exposure</p></div>
+            <div><Eye className="mx-auto text-blue-500" size={24} strokeWidth={1.75} /><p className="text-xs text-gray-400 mt-1">More<br/>exposure</p></div>
           </div>
         </div>
 
         {!hasAny ? (
           <div className="text-center py-24">
-            <div className="text-6xl mb-6">🌱</div>
+            <Sprout className="w-14 h-14 mx-auto mb-6" strokeWidth={1.5} />
             <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">First listings coming soon</h2>
             <p className="text-gray-400 dark:text-gray-500 mb-8 max-w-md mx-auto text-sm">Be among the first tools featured in our curated directory. Apply now and get founding member pricing.</p>
             <Link href="/listings/apply" className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
@@ -118,7 +119,7 @@ export default async function ListingsPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{listing.name}</p>
-                              {idx === 0 && <span className="shrink-0 text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full">⭐ Top Pick</span>}
+                              {idx === 0 && <span className="shrink-0 text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full inline-flex items-center gap-1"><Star size={9} strokeWidth={2} fill="currentColor" /> Top Pick</span>}
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{listing.tagline}</p>
                           </div>
@@ -126,8 +127,8 @@ export default async function ListingsPage() {
                         <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-3">{listing.description}</p>
                         {listing.smgive_donated_cents > 0 && (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-bold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-800">
-                              ❤️ Donated ${(listing.smgive_donated_cents / 100).toFixed(0)} to SM-Give
+                            <span className="text-[10px] font-bold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-800 inline-flex items-center gap-1">
+                              <Heart size={9} strokeWidth={2} /> Donated ${(listing.smgive_donated_cents / 100).toFixed(0)} to SM-Give
                             </span>
                           </div>
                         )}
