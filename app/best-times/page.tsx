@@ -4,6 +4,13 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { BarChart3, FlaskConical, Globe as GlobeIcon, Trophy } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14 }: { id: string; size?: number }) {
+  if (!hasPlatformIcon(id)) return <GlobeIcon size={size} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} />
+}
 
 const DAYS  = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const HOURS = Array.from({ length: 24 }, (_, i) => {
@@ -14,20 +21,20 @@ const HOURS = Array.from({ length: 24 }, (_, i) => {
 
 const PLATFORM_AVERAGES = [
   // Live now
-  { platform: 'Discord',   icon: '💬', status: 'live', best: 'Weekdays 4pm–9pm, weekends all day',       peak: 'Saturday 7pm'   },
-  { platform: 'Bluesky',   icon: '🦋', status: 'live', best: 'Mon–Fri, 8am–10am',                        peak: 'Tuesday 9am'    },
-  { platform: 'Telegram',  icon: '✈️', status: 'live', best: 'Mon–Fri, 8am–10am & 6pm–8pm',              peak: 'Wednesday 8am'  },
-  { platform: 'Mastodon',  icon: '🐘', status: 'live', best: 'Mon–Fri, 9am–11am (local timezone)',        peak: 'Tuesday 10am'   },
+  { platform: 'Discord',   id: 'discord',   status: 'live', best: 'Weekdays 4pm–9pm, weekends all day',       peak: 'Saturday 7pm'   },
+  { platform: 'Bluesky',   id: 'bluesky',   status: 'live', best: 'Mon–Fri, 8am–10am',                        peak: 'Tuesday 9am'    },
+  { platform: 'Telegram',  id: 'telegram',  status: 'live', best: 'Mon–Fri, 8am–10am & 6pm–8pm',              peak: 'Wednesday 8am'  },
+  { platform: 'Mastodon',  id: 'mastodon',  status: 'live', best: 'Mon–Fri, 9am–11am (local timezone)',        peak: 'Tuesday 10am'   },
   // Coming soon
-  { platform: 'LinkedIn',  icon: '💼', status: 'live', best: 'Tue–Thu, 8am–10am & 12pm–1pm',             peak: 'Tuesday 9am'    },
-  { platform: 'YouTube',   icon: '▶️', status: 'soon', best: 'Thu–Sat, 12pm–4pm',                        peak: 'Saturday 3pm'   },
-  { platform: 'Pinterest', icon: '📌', status: 'soon', best: 'Sat & Sun, 8pm–11pm',                      peak: 'Saturday 9pm'   },
-  { platform: 'Reddit',    icon: '🤖', status: 'soon', best: 'Mon–Fri, 6am–8am & 12pm–1pm (EST)',        peak: 'Monday 8am'     },
+  { platform: 'LinkedIn',  id: 'linkedin',  status: 'live', best: 'Tue–Thu, 8am–10am & 12pm–1pm',             peak: 'Tuesday 9am'    },
+  { platform: 'YouTube',   id: 'youtube',   status: 'soon', best: 'Thu–Sat, 12pm–4pm',                        peak: 'Saturday 3pm'   },
+  { platform: 'Pinterest', id: 'pinterest', status: 'soon', best: 'Sat & Sun, 8pm–11pm',                      peak: 'Saturday 9pm'   },
+  { platform: 'Reddit',    id: 'reddit',    status: 'soon', best: 'Mon–Fri, 6am–8am & 12pm–1pm (EST)',        peak: 'Monday 8am'     },
   // Planned
-  { platform: 'Instagram', icon: '📸', status: 'planned', best: 'Tue–Fri, 9am–11am & 2pm–5pm',          peak: 'Wednesday 11am' },
-  { platform: 'TikTok',    icon: '🎵', status: 'planned', best: 'Tue, Thu, Fri 7am–9am & 7pm–9pm',      peak: 'Friday 7pm'     },
-  { platform: 'X/Twitter', icon: '🐦', status: 'planned', best: 'Mon–Fri, 8am–10am & 12pm–1pm',         peak: 'Wednesday 9am'  },
-  { platform: 'Facebook',  icon: '📘', status: 'planned', best: 'Wed–Fri, 9am–1pm',                      peak: 'Wednesday 11am' },
+  { platform: 'Instagram', id: 'instagram', status: 'planned', best: 'Tue–Fri, 9am–11am & 2pm–5pm',          peak: 'Wednesday 11am' },
+  { platform: 'TikTok',    id: 'tiktok',    status: 'planned', best: 'Tue, Thu, Fri 7am–9am & 7pm–9pm',      peak: 'Friday 7pm'     },
+  { platform: 'X/Twitter', id: 'twitter',   status: 'planned', best: 'Mon–Fri, 8am–10am & 12pm–1pm',         peak: 'Wednesday 9am'  },
+  { platform: 'Facebook',  id: 'facebook',  status: 'planned', best: 'Wed–Fri, 9am–1pm',                      peak: 'Wednesday 11am' },
 ]
 
 const LIVE_PLATFORMS    = PLATFORM_AVERAGES.filter(p => p.status === 'live')
@@ -80,7 +87,7 @@ export default function BestTimes() {
 
   const PlatformCard = ({ p }: { p: typeof PLATFORM_AVERAGES[0] }) => (
     <div className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-      <span className="text-2xl flex-shrink-0">{p.icon}</span>
+      <span className="flex-shrink-0"><PlatformGlyph id={p.id} size={22} /></span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <p className="text-sm font-extrabold">{p.platform}</p>
@@ -93,7 +100,7 @@ export default function BestTimes() {
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{p.best}</p>
         <div className="flex items-center gap-1 mt-1.5">
-          <span className="text-xs font-bold text-black">🏆 Peak:</span>
+          <span className="text-xs font-bold text-black inline-flex items-center gap-1"><Trophy size={12} strokeWidth={2} /> Peak:</span>
           <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{p.peak}</span>
         </div>
       </div>
@@ -228,12 +235,12 @@ export default function BestTimes() {
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Pro tips</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { icon: '🧪', tip: 'Test different times for 2–4 weeks before drawing conclusions.' },
-                { icon: '🌍', tip: "Adjust for your audience's timezone — not yours." },
-                { icon: '📊', tip: 'Check your Analytics page to see which posts actually performed best.' },
+                { Icon: FlaskConical, tip: 'Test different times for 2–4 weeks before drawing conclusions.' },
+                { Icon: GlobeIcon, tip: "Adjust for your audience's timezone — not yours." },
+                { Icon: BarChart3, tip: 'Check your Analytics page to see which posts actually performed best.' },
               ].map(item => (
                 <div key={item.tip} className="flex items-start gap-2">
-                  <span className="flex-shrink-0">{item.icon}</span>
+                  <span className="flex-shrink-0"><item.Icon size={16} strokeWidth={1.75} /></span>
                   <p className="text-xs text-gray-400 leading-relaxed">{item.tip}</p>
                 </div>
               ))}
