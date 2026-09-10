@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { CheckCircle2, Flame } from 'lucide-react'
 
 const CREDIT_COST = 20
 
@@ -74,7 +75,7 @@ export default function SMPulsePage() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">🔥</span>
+                <Flame className="w-6 h-6" strokeWidth={1.75} />
                 <h1 className="text-2xl font-extrabold tracking-tight">SM-Pulse</h1>
               </div>
               <p className="text-sm text-gray-400 dark:text-gray-500">
@@ -132,7 +133,7 @@ export default function SMPulsePage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-extrabold mb-1">
-                  {result ? '✅ Scan complete — results below' : 'Ready to scan your niche'}
+                  {result ? <><CheckCircle2 size={14} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Scan complete — results below</> : 'Ready to scan your niche'}
                 </p>
                 <p className="text-xs text-gray-400">
                   {lastScanned ? `Last scanned: ${lastScanned}` : `Powered by real Reddit and YouTube data. Costs ${CREDIT_COST} credits.`}
@@ -148,7 +149,7 @@ export default function SMPulsePage() {
                     Scanning...
                   </>
                 ) : (
-                  `🔥 Run Scan — ${CREDIT_COST} credits`
+                  <><Flame size={14} strokeWidth={2} /> Run Scan — {CREDIT_COST} credits</>
                 )}
               </button>
             </div>
@@ -222,7 +223,7 @@ export default function SMPulsePage() {
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[2px]">
                 <div className="text-center px-6">
-                  <div className="text-3xl mb-3">🔥</div>
+                  <Flame className="w-8 h-8 mx-auto mb-3" strokeWidth={1.5} />
                   <p className="text-sm font-extrabold mb-1">Your trend report appears here</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Enter your niche above and run a scan to unlock real-time trend intelligence for your content.</p>
                 </div>
