@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Microscope } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -335,8 +335,8 @@ function TruthModeOffHero({ onStart, starting }: { onStart: () => void; starting
 
       {/* Hero CTA */}
       <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 sm:p-10 text-center space-y-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zinc-800 border border-zinc-700 text-3xl mx-auto">
-          🔬
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zinc-800 border border-zinc-700 mx-auto">
+          <Microscope size={28} strokeWidth={1.5} className="text-zinc-300" />
         </div>
 
         <div>
@@ -724,7 +724,7 @@ export default function TruthClient() {
       {/* Empty state — running but no trades yet */}
       {closed.length === 0 && open.length === 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center text-zinc-500">
-          <div className="text-4xl mb-3">🔬</div>
+          <Microscope className="w-9 h-9 mx-auto mb-3 text-zinc-500" strokeWidth={1.5} />
           <div className="text-sm font-semibold text-zinc-400 mb-1">{t('app_enki_truth.empty_waiting_title')}</div>
           <div className="text-xs">{t('app_enki_truth.empty_waiting_body')}</div>
         </div>

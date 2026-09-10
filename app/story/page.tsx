@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { supabase } from '@/lib/supabase'
+import { Heart } from 'lucide-react'
 
 const DONATION_AMOUNTS = [5, 10, 25, 50]
 
@@ -120,8 +121,8 @@ export default function Story() {
         <button
           onClick={handleDonate}
           disabled={(!selectedAmount && !customAmount) || loading}
-          className="bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-          {loading ? 'Redirecting...' : 'Support SocialMate ❤️'}
+          className="bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5">
+          {loading ? 'Redirecting...' : <>Support SocialMate <Heart size={14} strokeWidth={2} fill="currentColor" /></>}
         </button>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
           Payments processed securely via Stripe. This is a voluntary contribution — not a subscription.{' '}

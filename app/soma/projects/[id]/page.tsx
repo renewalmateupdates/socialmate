@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import SomaVoiceFeedbackModal from '@/components/soma/SomaVoiceFeedbackModal'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { ChevronDown, ChevronUp, CircleDot, Dna, Globe, Mic, Pause, Play, Rocket, Target, Zap } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, CircleDot, Dna, Film, Globe, Mic, Pause, Play, Rocket, Target, Zap } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 12, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -776,7 +776,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         {/* Video attachment */}
         <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-4">
           <div className="mb-3">
-            <p className="text-sm font-bold text-white">🎬 Video attachment</p>
+            <p className="text-sm font-bold text-white inline-flex items-center gap-1.5"><Film size={14} strokeWidth={2} /> Video attachment</p>
             <p className="text-xs text-gray-500 mt-0.5">
               Paste a TikTok or YouTube short URL. Posts will include this video link when generated.
             </p>
@@ -785,7 +785,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
           {project.include_video_url && videoUrlInput === project.include_video_url ? (
             /* Current saved URL display */
             <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 mb-3">
-              <span className="text-xs text-emerald-400 font-semibold flex-shrink-0">✓ Saved:</span>
+              <span className="text-xs text-emerald-400 font-semibold flex-shrink-0 inline-flex items-center gap-1"><Check size={12} strokeWidth={2.5} /> Saved:</span>
               <span className="text-xs text-gray-300 truncate flex-1">{project.include_video_url}</span>
               <button
                 type="button"

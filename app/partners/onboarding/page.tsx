@@ -3,6 +3,8 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import SuspenseFallback from '@/components/SuspenseFallback'
 import { supabase } from '@/lib/supabase'
+import { AlertTriangle, CheckCircle2, PartyPopper } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const gold   = '#F59E0B'
 const purple = '#7C3AED'
@@ -315,7 +317,7 @@ function OnboardingInner() {
         {step === 3 && (
           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 32 }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#f1f1f1', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-              {stripeSetupDone ? '🎉 You\'re all set!' : 'Set Up Payouts'}
+              {stripeSetupDone ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><PartyPopper size={18} strokeWidth={1.75} /> You&apos;re all set!</span> : 'Set Up Payouts'}
             </h2>
             <p style={{ fontSize: 13, color: muted, margin: '0 0 24px', lineHeight: 1.6 }}>
               {stripeSetupDone
@@ -326,13 +328,15 @@ function OnboardingInner() {
             {!stripeSetupDone && (
               <div style={{ background: '#0a0a0a', border: `1px solid ${border}`, borderRadius: 12, padding: 20, marginBottom: 24 }}>
                 <p style={{ fontSize: 12, color: muted, margin: '0 0 8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Payout Info</p>
-                {[
-                  '✅ Weekly payouts after 60-day hold',
-                  '✅ Minimum $25.00 balance required',
-                  '✅ Direct bank deposit via Stripe Connect',
-                  '⚠️  W-9 required at $599 lifetime earnings',
-                ].map((item, i) => (
-                  <p key={i} style={{ fontSize: 13, color: '#9ca3af', margin: '0 0 6px', lineHeight: 1.5 }}>{item}</p>
+                {([
+                  { icon: CheckCircle2, text: 'Weekly payouts after 60-day hold' },
+                  { icon: CheckCircle2, text: 'Minimum $25.00 balance required' },
+                  { icon: CheckCircle2, text: 'Direct bank deposit via Stripe Connect' },
+                  { icon: AlertTriangle, text: 'W-9 required at $599 lifetime earnings' },
+                ] as { icon: LucideIcon; text: string }[]).map((item, i) => (
+                  <p key={i} style={{ fontSize: 13, color: '#9ca3af', margin: '0 0 6px', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <item.icon size={14} strokeWidth={1.75} style={{ flexShrink: 0 }} /> {item.text}
+                  </p>
                 ))}
               </div>
             )}

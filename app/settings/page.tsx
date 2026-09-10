@@ -10,7 +10,7 @@ import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { CheckCircle2, Clock, Crown, Gem, Gift, Globe, Link2, Mic, Rocket, Star, Tag, Upload, X as CloseIcon, XCircle, Zap } from 'lucide-react'
+import { Check, CheckCircle2, Clock, Crown, Gem, Gift, Globe, Link2, Mic, Rocket, Star, Tag, Upload, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -2216,7 +2216,7 @@ function LanguageTab() {
           >
             <span className="text-xl">{loc.flag}</span>
             <span>{loc.label}</span>
-            {pending === loc.code && <span className="ml-auto text-amber-500">✓</span>}
+            {pending === loc.code && <Check size={15} strokeWidth={2.5} className="ml-auto text-amber-500" />}
           </button>
         ))}
       </div>

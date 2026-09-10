@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Coffee, Crown, Heart } from 'lucide-react'
 
 const GUIDES = [
   {
@@ -437,7 +438,7 @@ export default function GuidesHubPage() {
         <section className="border-t border-[#1f1f1f] px-6 py-16">
           <div className="mx-auto max-w-3xl">
             <div className="mb-8 text-center">
-              <div className="mb-3 text-4xl">☕</div>
+              <Coffee className="mb-3 mx-auto w-9 h-9 text-amber-400" strokeWidth={1.5} />
               <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">{t('guides_landing.support_badge')}</p>
               <h2 className="mb-4 text-2xl font-black text-white">
                 {t('guides_landing.support_title')}
@@ -449,7 +450,7 @@ export default function GuidesHubPage() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {/* Support Joshua */}
               <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-7 text-center">
-                <div className="mb-3 text-3xl">👑</div>
+                <Crown className="mb-3 mx-auto w-7 h-7 text-amber-400" strokeWidth={1.5} fill="currentColor" />
                 <h3 className="mb-2 text-lg font-extrabold text-white">{t('guides_landing.support_joshua_title')}</h3>
                 <p className="mb-6 text-sm leading-relaxed text-gray-400">
                   {t('guides_landing.support_joshua_desc')}
@@ -463,7 +464,7 @@ export default function GuidesHubPage() {
               </div>
               {/* Pay It Forward / donate */}
               <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-7 text-center">
-                <div className="mb-3 text-3xl">❤️</div>
+                <Heart className="mb-3 mx-auto w-7 h-7 text-amber-400" strokeWidth={1.5} fill="currentColor" />
                 <h3 className="mb-2 text-lg font-extrabold text-white">{t('guides_landing.pay_forward_title')}</h3>
                 <p className="mb-6 text-sm leading-relaxed text-gray-400">
                   {t('guides_landing.pay_forward_desc')}

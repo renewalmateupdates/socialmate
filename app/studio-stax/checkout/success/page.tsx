@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
+import { PartyPopper } from 'lucide-react'
 
 function SuccessInner() {
   const params      = useSearchParams()
@@ -10,7 +11,7 @@ function SuccessInner() {
 
   return (
     <div className="max-w-lg mx-auto px-6 py-20 text-center">
-      <div className="text-6xl mb-6">🎉</div>
+      <PartyPopper className="w-14 h-14 mx-auto mb-6 text-amber-500" strokeWidth={1.5} />
 
       <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-full px-4 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 mb-6">
         Payment confirmed

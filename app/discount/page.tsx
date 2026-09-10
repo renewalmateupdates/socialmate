@@ -4,14 +4,19 @@ import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
+import { GraduationCap, Handshake, Mail } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export default function DiscountPage() {
   const { t } = useI18n()
 
-  const DISCOUNTS = [
+  const DISCOUNTS: {
+    id: string; icon: LucideIcon; label: string; badge: string; desc: string
+    eligibility: string[]; code: string; color: string
+  }[] = [
     {
       id: 'nonprofit',
-      icon: '🤝',
+      icon: Handshake,
       label: t('discount.nonprofit_label'),
       badge: t('discount.nonprofit_badge'),
       desc: t('discount.nonprofit_desc'),
@@ -26,7 +31,7 @@ export default function DiscountPage() {
     },
     {
       id: 'student',
-      icon: '🎓',
+      icon: GraduationCap,
       label: t('discount.student_label'),
       badge: t('discount.student_badge'),
       desc: t('discount.student_desc'),
@@ -70,10 +75,10 @@ export default function DiscountPage() {
               d.color === 'emerald' ? 'border-emerald-500/30' : 'border-blue-500/30'
             }`}>
               <div className="flex items-start gap-4 mb-5">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 ${
-                  d.color === 'emerald' ? 'bg-emerald-900/40' : 'bg-blue-900/40'
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                  d.color === 'emerald' ? 'bg-emerald-900/40 text-emerald-400' : 'bg-blue-900/40 text-blue-400'
                 }`}>
-                  {d.icon}
+                  <d.icon size={22} strokeWidth={1.75} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 flex-wrap mb-1">
@@ -131,7 +136,7 @@ export default function DiscountPage() {
           <a
             href="mailto:hi@socialmate.studio"
             className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all">
-            📬 hi@socialmate.studio
+            <Mail size={16} strokeWidth={2} /> hi@socialmate.studio
           </a>
         </div>
 

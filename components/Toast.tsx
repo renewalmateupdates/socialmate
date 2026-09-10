@@ -1,4 +1,5 @@
 'use client'
+import { CheckCircle2, XCircle } from 'lucide-react'
 
 /**
  * Shared Toast component — safe-area aware, mobile-friendly.
@@ -27,17 +28,14 @@ export default function Toast({
     type === 'success' ? 'bg-gray-900'  :
                          'bg-gray-900'
 
-  const prefix =
-    type === 'success' ? '✅ ' :
-    type === 'error'   ? '❌ ' :
-                         ''
-
   return (
     <div
-      className={`fixed right-6 z-50 ${bg} text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl`}
+      className={`fixed right-6 z-50 ${bg} text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2`}
       style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
     >
-      {prefix}{message}
+      {type === 'success' && <CheckCircle2 size={16} strokeWidth={2} className="shrink-0" />}
+      {type === 'error' && <XCircle size={16} strokeWidth={2} className="shrink-0" />}
+      {message}
     </div>
   )
 }

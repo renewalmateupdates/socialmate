@@ -1,6 +1,16 @@
 ﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
+import {
+  ArrowUp, Beer, Bell, Bird, BarChart3, Bot, BookOpen, Brain, Briefcase,
+  Building2, CalendarClock, CalendarDays, Camera, CheckCircle2,
+  ClipboardList, Clock, Diamond, DollarSign, Eye, Feather, Film, Flame,
+  FolderOpen, Globe, Globe2, Hexagon, Image as ImageIcon, Keyboard,
+  Landmark, Link2, Mail, Mailbox, Megaphone, Package, Palette, PenLine,
+  Pin, Plane, Radio, RefreshCw, Repeat, Send, Share2, Shield, Smartphone,
+  Sprout, Swords, TrendingUp, Trophy, Wrench,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Everyone — 56+ Competitor Comparisons (2026)',
@@ -17,7 +27,7 @@ const COMPARISONS = [
   {
     slug:        'hootsuite',
     name:        'Hootsuite',
-    emoji:       '🦉',
+    icon:       Bird,
     headline:    'Hootsuite starts at $99/month',
     angle:       'No free plan. Prices have tripled since 2023. SocialMate gives you bulk scheduling and multi-platform posting for $0.',
     tag:         'Most expensive',
@@ -26,7 +36,7 @@ const COMPARISONS = [
   {
     slug:        'buffer',
     name:        'Buffer',
-    emoji:       '📦',
+    icon:       Package,
     headline:    'Buffer free plan: 3 channels, 10 posts total',
     angle:       "Buffer's free tier is so limited it's almost unusable for real posting. Bulk scheduling is locked behind paid plans.",
     tag:         'Severely limited free',
@@ -35,7 +45,7 @@ const COMPARISONS = [
   {
     slug:        'later',
     name:        'Later',
-    emoji:       '📷',
+    icon:       Camera,
     headline:    "Later's free plan is Instagram-only",
     angle:       'Later was built for Instagram and TikTok. If you post on Bluesky, Discord, Telegram, or Mastodon — Later is useless.',
     tag:         'Instagram-only focus',
@@ -44,7 +54,7 @@ const COMPARISONS = [
   {
     slug:        'sendible',
     name:        'Sendible',
-    emoji:       '📡',
+    icon:       Radio,
     headline:    'Sendible starts at $29/month — no free plan',
     angle:       'Built for agencies, priced for agencies. Solo creators and small teams pay for features they\'ll never use.',
     tag:         'Agency-priced',
@@ -53,7 +63,7 @@ const COMPARISONS = [
   {
     slug:        'metricool',
     name:        'Metricool',
-    emoji:       '📊',
+    icon:       BarChart3,
     headline:    'Metricool free plan caps at 50 posts/month',
     angle:       'Hit 50 posts and you stop. Per-brand pricing means costs multiply fast if you manage multiple clients or projects.',
     tag:         'Post-limit free plan',
@@ -62,7 +72,7 @@ const COMPARISONS = [
   {
     slug:        'publer',
     name:        'Publer',
-    emoji:       '📤',
+    icon:       Send,
     headline:    'Publer free plan: 3 accounts, 10 posts each',
     angle:       'Publer looks affordable until you add accounts. Features like AI assist and bulk upload are paywalled.',
     tag:         'Account-capped',
@@ -71,7 +81,7 @@ const COMPARISONS = [
   {
     slug:        'planable',
     name:        'Planable',
-    emoji:       '🗂️',
+    icon:       FolderOpen,
     headline:    'Planable free plan: 50 posts total — lifetime',
     angle:       "Not 50 posts per month. 50 posts ever. Once you hit the limit, you're done unless you pay $33/month.",
     tag:         'Lifetime post cap',
@@ -80,7 +90,7 @@ const COMPARISONS = [
   {
     slug:        'sprout-social',
     name:        'Sprout Social',
-    emoji:       '🌱',
+    icon:       Sprout,
     headline:    'Sprout Social starts at $249/month',
     angle:       'The most expensive tool in the space by far. 5 social profiles for $249/mo. Built for enterprise, priced for enterprise.',
     tag:         'Enterprise pricing',
@@ -89,7 +99,7 @@ const COMPARISONS = [
   {
     slug:        'socialpilot',
     name:        'SocialPilot',
-    emoji:       '🛩️',
+    icon:       Plane,
     headline:    'SocialPilot has no free plan at all',
     angle:       "$25.50/month minimum, billed annually. No way to try it before paying. Heavy Instagram/Facebook focus — Bluesky and Discord aren't supported.",
     tag:         'No free tier',
@@ -98,7 +108,7 @@ const COMPARISONS = [
   {
     slug:        'zoho-social',
     name:        'Zoho Social',
-    emoji:       '🔷',
+    icon:       Diamond,
     headline:    'Zoho Social is a Zoho ecosystem product',
     angle:       'Powerful if you already use Zoho CRM. Overkill — and confusing — if you just want to schedule posts.',
     tag:         'CRM-first tool',
@@ -107,7 +117,7 @@ const COMPARISONS = [
   {
     slug:        'loomly',
     name:        'Loomly',
-    emoji:       '📅',
+    icon:       CalendarDays,
     headline:    'Loomly starts at $32/month — no free plan',
     angle:       'Per-workspace pricing means your costs multiply fast. SocialMate gives you multi-brand management for free.',
     tag:         'Per-workspace pricing',
@@ -116,7 +126,7 @@ const COMPARISONS = [
   {
     slug:        'coschedule',
     name:        'CoSchedule',
-    emoji:       '🗓️',
+    icon:       CalendarClock,
     headline:    "CoSchedule free plan can't auto-publish",
     angle:       "Free tier requires you to manually click publish every time. If you want actual scheduling, you're paying from day one.",
     tag:         'No free auto-publish',
@@ -125,7 +135,7 @@ const COMPARISONS = [
   {
     slug:        'meetedgar',
     name:        'MeetEdgar',
-    emoji:       '🔄',
+    icon:       RefreshCw,
     headline:    'MeetEdgar charges $29/month for evergreen recycling',
     angle:       "MeetEdgar's main selling point — content recycling — is free on SocialMate. And we support Bluesky, Discord, and Mastodon too.",
     tag:         'Recycling not worth $29',
@@ -134,7 +144,7 @@ const COMPARISONS = [
   {
     slug:        'iconosquare',
     name:        'Iconosquare',
-    emoji:       '📸',
+    icon:       Camera,
     headline:    'Iconosquare starts at $49/month — analytics-first, not scheduling-first',
     angle:       "Iconosquare is an analytics tool that added scheduling, not the other way around. You're paying for data you probably don't need yet.",
     tag:         'Analytics-first, expensive',
@@ -143,7 +153,7 @@ const COMPARISONS = [
   {
     slug:        'tailwind-social',
     name:        'Tailwind',
-    emoji:       '📌',
+    icon:       Pin,
     headline:    "Tailwind's free plan is limited to 20 posts/month",
     angle:       "Tailwind was built for Pinterest and Instagram. If you're on Bluesky, Discord, Mastodon, or Telegram — Tailwind doesn't support them at all.",
     tag:         'Pinterest/Instagram only',
@@ -152,7 +162,7 @@ const COMPARISONS = [
   {
     slug:        'crowdfire',
     name:        'Crowdfire',
-    emoji:       '🔥',
+    icon:       Flame,
     headline:    "Crowdfire free plan: 3 accounts, 10 scheduled posts total",
     angle:       "Crowdfire's free tier is practically unusable for real scheduling. And most of the differentiating features — curated content, advanced analytics — require paid plans.",
     tag:         'Minimal free tier',
@@ -161,7 +171,7 @@ const COMPARISONS = [
   {
     slug:        'pallyy',
     name:        'Pallyy',
-    emoji:       '🎨',
+    icon:       Palette,
     headline:    "Pallyy free plan: 1 social group, 15 scheduled posts/month",
     angle:       "Pallyy's UI looks great but the free plan barely lets you get started. Heavy Instagram/TikTok focus means Bluesky, Discord, and Mastodon users get nothing.",
     tag:         'Visual-first, limited free',
@@ -170,7 +180,7 @@ const COMPARISONS = [
   {
     slug:        'agorapulse',
     name:        'Agorapulse',
-    emoji:       '📬',
+    icon:       Mailbox,
     headline:    'Agorapulse starts at $49/month — no free plan',
     angle:       'Built for agencies with heavy team workflows most solo creators never need. SocialMate gives you everything for free without the agency markup.',
     tag:         'Agency-focused, no free plan',
@@ -179,7 +189,7 @@ const COMPARISONS = [
   {
     slug:        'sprinklr',
     name:        'Sprinklr',
-    emoji:       '🏢',
+    icon:       Building2,
     headline:    'Sprinklr starts at $299+/month — enterprise only',
     angle:       'Built for Fortune 500 companies with dedicated social teams. Requires a demo just to get a price. SocialMate is free, self-serve, and ready in minutes.',
     tag:         'Enterprise-only',
@@ -188,7 +198,7 @@ const COMPARISONS = [
   {
     slug:        'socialbee',
     name:        'SocialBee',
-    emoji:       '🐝',
+    icon:       Hexagon,
     headline:    'SocialBee starts at $29/month — no free plan',
     angle:       "Content categories are useful but paywalled. AI tools locked to higher tiers. SocialMate gives you categories, recycling, and 15+ AI tools for $0.",
     tag:         'Paywalled features',
@@ -197,7 +207,7 @@ const COMPARISONS = [
   {
     slug:        'contentstudio',
     name:        'ContentStudio',
-    emoji:       '🖊️',
+    icon:       PenLine,
     headline:    'ContentStudio starts at $25/month — no free plan',
     angle:       'Complex UI with a steep learning curve and no free tier. SocialMate is ready in minutes with a clean interface and no monthly fee to get started.',
     tag:         'Complex UI, no free plan',
@@ -206,7 +216,7 @@ const COMPARISONS = [
   {
     slug:        'missinglettr',
     name:        'Missinglettr',
-    emoji:       '✉️',
+    icon:       Mail,
     headline:    'Missinglettr charges $19/month — no free plan',
     angle:       'Auto-campaign drip posts are clever but cost $19/month minimum. SocialMate gives you evergreen recycling and scheduling for free.',
     tag:         'Auto-campaigns, no free tier',
@@ -215,7 +225,7 @@ const COMPARISONS = [
   {
     slug:        'postplanner',
     name:        'Post Planner',
-    emoji:       '📋',
+    icon:       ClipboardList,
     headline:    "Post Planner free plan: 10 posts/month — nearly useless",
     angle:       "10 posts per month is not a real social media strategy. SocialMate's free plan allows 250 posts a month — an actual usable amount.",
     tag:         '10-post free plan cap',
@@ -224,7 +234,7 @@ const COMPARISONS = [
   {
     slug:        'recurpost',
     name:        'RecurPost',
-    emoji:       '🔁',
+    icon:       Repeat,
     headline:    'RecurPost free plan: 3 accounts, 100 posts lifetime',
     angle:       "Not 100 posts per month — 100 posts ever. Use them up and you're done unless you pay $25/month. SocialMate has no lifetime post cap.",
     tag:         'Lifetime post cap',
@@ -233,7 +243,7 @@ const COMPARISONS = [
   {
     slug:        'nuelink',
     name:        'Nuelink',
-    emoji:       '🔗',
+    icon:       Link2,
     headline:    'Nuelink starts at $15/month — no free plan at all',
     angle:       'Clean UI and bulk scheduling, but only a 7-day trial before you pay. SocialMate gives you the same core features plus 15+ AI tools for free.',
     tag:         'No free plan',
@@ -242,7 +252,7 @@ const COMPARISONS = [
   {
     slug:        'fedica',
     name:        'Fedica',
-    emoji:       '🐦',
+    icon:       Feather,
     headline:    'Fedica is a Twitter/X-only analytics tool — $15/month',
     angle:       "If you post on Bluesky, Discord, Instagram, or Mastodon — Fedica can't help. SocialMate supports 7 platforms with full scheduling and analytics free.",
     tag:         'Twitter/X only',
@@ -251,7 +261,7 @@ const COMPARISONS = [
   {
     slug:        'statusbrew',
     name:        'Statusbrew',
-    emoji:       '🍺',
+    icon:       Beer,
     headline:    'Statusbrew starts at $69/month — no free plan',
     angle:       'Enterprise-focused with a unified inbox and team workflows. $69/month for one user with no free plan. SocialMate is free forever for small teams.',
     tag:         'Enterprise pricing',
@@ -260,7 +270,7 @@ const COMPARISONS = [
   {
     slug:        'canva',
     name:        'Canva',
-    emoji:       '🎨',
+    icon:       Palette,
     headline:    "Canva is a design tool — scheduling is bolt-on at $15/month",
     angle:       "Canva Pro is $15/month for design features and basic scheduling. No Discord, Telegram, or Bluesky. No autonomous AI content. SocialMate Pro is $8/month and purpose-built for scheduling.",
     tag:         'Design tool, not scheduler',
@@ -269,7 +279,7 @@ const COMPARISONS = [
   {
     slug:        'plann',
     name:        'Plann',
-    emoji:       '🖼️',
+    icon:       ImageIcon,
     headline:    "Plann is Instagram-centric at $13/month",
     angle:       "Built around Instagram feed aesthetics. No Discord, Telegram, Bluesky, or TikTok. No autonomous AI content system. SocialMate covers 7 platforms for less.",
     tag:         'Instagram-only focus',
@@ -278,7 +288,7 @@ const COMPARISONS = [
   {
     slug:        'social-champ',
     name:        'Social Champ',
-    emoji:       '🏆',
+    icon:       Trophy,
     headline:    "Social Champ starts at $29/month — 6x more than SocialMate Pro",
     angle:       "Budget Buffer alternative but still $29/month. No Discord, Telegram, or Bluesky. SocialMate Pro is $8/month with more platforms, SOMA, and 20+ AI tools.",
     tag:         'Overpriced for what it offers',
@@ -287,7 +297,7 @@ const COMPARISONS = [
   {
     slug:        'ripl',
     name:        'Ripl',
-    emoji:       '🎬',
+    icon:       Film,
     headline:    "Ripl is a video creator — not a real scheduling platform ($15/month)",
     angle:       "Ripl makes animated videos. No bulk scheduling, no Discord/Telegram/Bluesky, no AI content system. SocialMate is purpose-built for scheduling and starts free.",
     tag:         'Video creator, not scheduler',
@@ -296,7 +306,7 @@ const COMPARISONS = [
   {
     slug:        'preview-app',
     name:        'Preview App',
-    emoji:       '👁️',
+    icon:       Eye,
     headline:    "Preview App: Instagram/Pinterest only, $8/month",
     angle:       "Instagram and Pinterest planning only. No TikTok, Discord, Telegram, Bluesky, or X. No AI content tools. SocialMate is free and covers 7 platforms.",
     tag:         'Instagram/Pinterest only',
@@ -305,7 +315,7 @@ const COMPARISONS = [
   {
     slug:        'gain-app',
     name:        'Gain',
-    emoji:       '✅',
+    icon:       CheckCircle2,
     headline:    "Gain charges $99/month for client approvals SocialMate includes free",
     angle:       "Gain is an approval workflow tool at $99/month. SocialMate has full client approval workflows built in on the free plan — plus 7 platforms and 20+ AI tools.",
     tag:         '$99/mo for what we give free',
@@ -314,7 +324,7 @@ const COMPARISONS = [
   {
     slug:        'kontentino',
     name:        'Kontentino',
-    emoji:       '🏢',
+    icon:       Building2,
     headline:    "Kontentino: $99/month enterprise tool — SocialMate Agency is $29",
     angle:       "Enterprise collaboration tool at $99/month with no Discord, Telegram, or Bluesky. SocialMate Agency is $29/month with 5x more platform coverage and 20+ AI tools.",
     tag:         '5x more expensive',
@@ -323,7 +333,7 @@ const COMPARISONS = [
   {
     slug:        'unum',
     name:        'Unum',
-    emoji:       '📱',
+    icon:       Smartphone,
     headline:    "Unum is Instagram visual planning — no Discord, Telegram, or Bluesky",
     angle:       "Instagram/TikTok/X visual planner at $8/month. No community platforms, no AI content system, no autonomous content. SocialMate is free and covers 7 platforms.",
     tag:         'Instagram-first, limited',
@@ -332,7 +342,7 @@ const COMPARISONS = [
   {
     slug:        'taplio',
     name:        'Taplio',
-    emoji:       '💼',
+    icon:       Briefcase,
     headline:    'Taplio charges $39/month for LinkedIn-only scheduling',
     angle:       "A single-platform tool at $39/month. SocialMate schedules LinkedIn plus 6 other platforms — Bluesky, X, TikTok, Discord, Telegram, and Mastodon — starting free.",
     tag:         'LinkedIn-only, $39/month',
@@ -341,7 +351,7 @@ const COMPARISONS = [
   {
     slug:        'shield-app',
     name:        'Shield App',
-    emoji:       '🛡️',
+    icon:       Shield,
     headline:    "Shield App tracks LinkedIn analytics — but can't schedule posts",
     angle:       "Analytics-only tool at $8+/month. You still need a separate scheduler. SocialMate does both — LinkedIn scheduling and analytics — free to start.",
     tag:         'Analytics only, no scheduling',
@@ -350,7 +360,7 @@ const COMPARISONS = [
   {
     slug:        'storychief',
     name:        'StoryChief',
-    emoji:       '📖',
+    icon:       BookOpen,
     headline:    'StoryChief charges $99/month — a content platform, not a social scheduler',
     angle:       'Built for content teams producing blog posts and campaigns. No Discord, Telegram, or Bluesky. No autonomous AI content. SocialMate is $8/month for 7 platforms and 15+ AI tools.',
     tag:         'Content platform, high price',
@@ -359,7 +369,7 @@ const COMPARISONS = [
   {
     slug:        'oneup',
     name:        'OneUp',
-    emoji:       '⬆️',
+    icon:       ArrowUp,
     headline:    "OneUp is $18/month with no AI tools and no Discord or Telegram",
     angle:       'Basic scheduling at $18/month with no free plan. No AI writing, no Discord, no Telegram, no Bluesky. SocialMate Pro has 15+ AI tools and 7 platforms for $8/month.',
     tag:         'No AI, limited platforms',
@@ -368,7 +378,7 @@ const COMPARISONS = [
   {
     slug:        'brand24',
     name:        'Brand24',
-    emoji:       '📡',
+    icon:       Radio,
     headline:    "Brand24 charges $79/month for monitoring — it can't schedule posts",
     angle:       "Social listening-only tool at $79/month. No post scheduling, no AI writing, no Discord/Telegram. SocialMate schedules, monitors, and creates content across 7 platforms — starting free.",
     tag:         'Monitoring only, no scheduling',
@@ -377,7 +387,7 @@ const COMPARISONS = [
   {
     slug:        'post-beyond',
     name:        'PostBeyond',
-    emoji:       '📢',
+    icon:       Megaphone,
     headline:    'PostBeyond is $1,000+/month employee advocacy — not a general scheduler',
     angle:       "Enterprise employee advocacy platform that requires a procurement process. SocialMate is self-serve, free to start, and built for individual creators and small teams — not corporate advocacy programs.",
     tag:         'Enterprise advocacy only',
@@ -386,7 +396,7 @@ const COMPARISONS = [
   {
     slug:        'combin',
     name:        'Combin',
-    emoji:       '📸',
+    icon:       Camera,
     headline:    "Combin is Instagram-only — no scheduling for any other platform",
     angle:       "Instagram growth tool at $15/month. Cannot schedule to Bluesky, Discord, Telegram, TikTok, LinkedIn, or X. SocialMate covers 7 platforms with 15+ AI tools — starting free.",
     tag:         'Instagram-only, single platform',
@@ -395,7 +405,7 @@ const COMPARISONS = [
   {
     slug:        'keystroke',
     name:        'Keystroke',
-    emoji:       '⌨️',
+    icon:       Keyboard,
     headline:    "Keystroke is a LinkedIn-only scheduler at $29/month",
     angle:       "LinkedIn-focused scheduling tool with basic AI. No Discord, Telegram, Bluesky, TikTok, or Mastodon. SocialMate covers LinkedIn plus 6 other platforms — starting free.",
     tag:         'LinkedIn-only, $29/month',
@@ -404,7 +414,7 @@ const COMPARISONS = [
   {
     slug:        'mention',
     name:        'Mention',
-    emoji:       '🔔',
+    icon:       Bell,
     headline:    "Mention charges $41/month for listening — it cannot publish posts",
     angle:       "$41/month for social listening with no scheduling, no AI writing, and no Discord/Telegram. SocialMate schedules, monitors, and creates content across 7 platforms — starting free.",
     tag:         'Monitoring only, no publishing',
@@ -413,7 +423,7 @@ const COMPARISONS = [
   {
     slug:        'emplifi',
     name:        'Emplifi',
-    emoji:       '🏢',
+    icon:       Building2,
     headline:    "Emplifi is $200+/month enterprise — no Discord, Telegram, or free plan",
     angle:       "Enterprise social platform formerly Socialbakers. $200+/month, no self-serve. No Discord or Telegram. SocialMate is free for creators with 7 platforms and 15+ AI tools built in.",
     tag:         'Enterprise only, $200+/month',
@@ -422,7 +432,7 @@ const COMPARISONS = [
   {
     slug:        'postoplan',
     name:        'Postoplan',
-    emoji:       '📋',
+    icon:       ClipboardList,
     headline:    "Postoplan is $19/month with no AI and a 1-account free plan",
     angle:       "Basic scheduler with a free plan limited to one account. No AI writing, no Discord, Telegram, or Bluesky. SocialMate Pro has 15+ AI tools and 7 platforms for $8/month.",
     tag:         'No AI, 1-account free limit',
@@ -431,7 +441,7 @@ const COMPARISONS = [
   {
     slug:        'social-report',
     name:        'Social Report',
-    emoji:       '📊',
+    icon:       BarChart3,
     headline:    "Social Report is $49/month — no AI tools and no Discord or Telegram",
     angle:       "Strong analytics but no AI writing and no Discord, Telegram, or Bluesky support. Starts at $49/month with a 30-day trial. SocialMate has 15+ AI tools and 7 platforms — starting free.",
     tag:         'Analytics-strong, AI-absent',
@@ -440,7 +450,7 @@ const COMPARISONS = [
   {
     slug:        'khoros',
     name:        'Khoros',
-    emoji:       '🏛️',
+    icon:       Landmark,
     headline:    "Khoros is $500+/month enterprise — requires a demo and a signed contract",
     angle:       "Enterprise community + social management platform at $500+/month. Demo required, no self-serve. No Discord, Telegram, or Bluesky. SocialMate starts free with 7 platforms and SOMA built in.",
     tag:         'Enterprise, $500+/month',
@@ -449,7 +459,7 @@ const COMPARISONS = [
   {
     slug:        'talkwalker',
     name:        'Talkwalker',
-    emoji:       '👁️',
+    icon:       Eye,
     headline:    "Talkwalker is $9,600+/year — enterprise listening with zero scheduling",
     angle:       "Billion-source social listening at enterprise prices. No post scheduling, no AI content tools, no Discord or Telegram support. SocialMate schedules, monitors, and creates — starting free.",
     tag:         'Listening only, $9,600+/year',
@@ -458,7 +468,7 @@ const COMPARISONS = [
   {
     slug:        'feedhive',
     name:        'FeedHive',
-    emoji:       '🐝',
+    icon:       Hexagon,
     headline:    "FeedHive starts at $19/month — no free plan, no Discord or Telegram",
     angle:       "AI-assisted scheduling with no Discord, Telegram, Bluesky, or TikTok support. No free plan either. SocialMate covers 7 platforms with 15+ AI tools and SOMA — starting free.",
     tag:         'Limited platforms, no free plan',
@@ -467,7 +477,7 @@ const COMPARISONS = [
   {
     slug:        'socialoomph',
     name:        'SocialOomph',
-    emoji:       '⏰',
+    icon:       Clock,
     headline:    "SocialOomph is $15/month — no TikTok, LinkedIn, or Discord support",
     angle:       "Old-school queue-based scheduler with no TikTok, LinkedIn, Bluesky, Discord, or Telegram. SocialMate Pro is $8/month and covers all 7 live platforms with 15+ AI tools and SOMA.",
     tag:         'Outdated platform coverage',
@@ -476,7 +486,7 @@ const COMPARISONS = [
   {
     slug:        'eclincher',
     name:        'eClincher',
-    emoji:       '🔧',
+    icon:       Wrench,
     headline:    "eClincher charges $65/month for features SocialMate includes free",
     angle:       "Agency-focused tool at $65–$425/month with no Discord, Telegram, Bluesky, or Mastodon. SocialMate is free to start with 7 platforms, 15+ AI tools, and SOMA built in.",
     tag:         'Agency-priced, missing platforms',
@@ -485,7 +495,7 @@ const COMPARISONS = [
   {
     slug:        'postpickr',
     name:        'PostPickr',
-    emoji:       '🌍',
+    icon:       Globe,
     headline:    "PostPickr charges €8/month with no TikTok, Discord, Telegram, or Bluesky",
     angle:       "European-focused scheduler at €8+/month with no free plan and no TikTok, Discord, Telegram, or Bluesky support. SocialMate covers 7 platforms — including all four — and starts completely free.",
     tag:         'Missing key platforms, no free plan',
@@ -493,15 +503,15 @@ const COMPARISONS = [
   },
 ]
 
-const SOCIALMATE_WINS = [
-  { icon: '✅', text: 'Genuinely free forever — no credit card, no trial' },
-  { icon: '📦', text: 'Bulk scheduler included on the free plan' },
-  { icon: '🌐', text: 'Discord + Telegram — platforms 99% of competitors skip entirely' },
-  { icon: '🦋', text: 'Bluesky, Mastodon, TikTok, LinkedIn — 7 live platforms total' },
-  { icon: '💰', text: 'Flat pricing — Pro $8/mo, Agency $29/mo. No per-brand fees' },
-  { icon: '🤖', text: '20+ AI tools built in — no add-ons, no extra cost' },
-  { icon: '🧠', text: 'SOMA: autonomous AI content system learns your brand voice' },
-  { icon: '📈', text: 'Enki: autonomous trading bot — unique to SocialMate' },
+const SOCIALMATE_WINS: { icon: LucideIcon; text: string }[] = [
+  { icon: CheckCircle2, text: 'Genuinely free forever — no credit card, no trial' },
+  { icon: Package,      text: 'Bulk scheduler included on the free plan' },
+  { icon: Globe2,       text: 'Discord + Telegram — platforms 99% of competitors skip entirely' },
+  { icon: Share2,       text: 'Bluesky, Mastodon, TikTok, LinkedIn — 7 live platforms total' },
+  { icon: DollarSign,   text: 'Flat pricing — Pro $8/mo, Agency $29/mo. No per-brand fees' },
+  { icon: Bot,          text: '20+ AI tools built in — no add-ons, no extra cost' },
+  { icon: Brain,        text: 'SOMA: autonomous AI content system learns your brand voice' },
+  { icon: TrendingUp,   text: 'Enki: autonomous trading bot — unique to SocialMate' },
 ]
 
 export default function VsIndex() {
@@ -531,7 +541,7 @@ export default function VsIndex() {
 
         {/* HERO */}
         <div className="text-center mb-14">
-          <div className="text-5xl mb-5">⚔️</div>
+          <Swords className="w-12 h-12 mx-auto mb-5 text-ink-high" strokeWidth={1.5} />
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-high mb-4">
             SocialMate vs Everyone —<br className="hidden sm:block" /> 56+ Competitor Comparisons
           </h1>
@@ -548,7 +558,7 @@ export default function VsIndex() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {SOCIALMATE_WINS.map(w => (
               <div key={w.text} className="flex items-start gap-3">
-                <span className="text-base flex-shrink-0 mt-0.5">{w.icon}</span>
+                <w.icon className="w-4 h-4 flex-shrink-0 mt-0.5 text-ink-high" strokeWidth={1.75} />
                 <p className="text-sm text-ink-body leading-relaxed">{w.text}</p>
               </div>
             ))}
@@ -574,7 +584,7 @@ export default function VsIndex() {
               className="group bg-panel border border-edge rounded-2xl p-5 hover:border-edge dark:hover:border-edge transition-all block">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{c.emoji}</span>
+                  <c.icon className="w-6 h-6 text-ink-body" strokeWidth={1.75} />
                   <p className="text-sm font-extrabold text-ink-high">
                     SocialMate vs {c.name}
                   </p>

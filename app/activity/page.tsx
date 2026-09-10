@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import { useI18n } from '@/contexts/I18nContext'
-import { CalendarDays, CheckCircle2, DoorOpen, FileEdit, FileText, MapPin, Send, Settings, Theater, Trash2, UserPlus, XCircle } from 'lucide-react'
+import { CalendarDays, CheckCircle2, ClipboardList, DoorOpen, FileEdit, FileText, MapPin, Send, Settings, Theater, Trash2, UserPlus, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 interface ActivityEvent {
@@ -89,7 +89,7 @@ export default function ActivityPage() {
             className="rounded-2xl border p-10 text-center"
             style={{ borderColor: 'var(--border-mid)', color: 'var(--text-faint)' }}
           >
-            <div className="text-3xl mb-3">📋</div>
+            <ClipboardList className="w-7 h-7 mx-auto mb-3" strokeWidth={1.5} />
             <p className="text-sm font-semibold">{t('app_activity.no_activity')}</p>
             <p className="text-xs mt-1">{t('app_activity.no_activity_sub')}</p>
           </div>

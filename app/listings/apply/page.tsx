@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
+import { CreditCard, PartyPopper } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'social-media',      label: 'Social Media Tools'   },
@@ -62,7 +63,7 @@ export default function ListingsApplyPage() {
     return (
       <PublicLayout>
         <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-          <div className="text-6xl mb-6">🎉</div>
+          <PartyPopper className="w-14 h-14 mx-auto mb-6 text-amber-500" strokeWidth={1.5} />
           <h1 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Application received!</h1>
           <p className="text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
             Joshua reviews every application personally. You&apos;ll hear back within 48 hours. If approved, you&apos;ll receive a payment link for your $149/year listing fee.
@@ -168,8 +169,8 @@ export default function ListingsApplyPage() {
 
           {/* Pricing note */}
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
-            <p className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
-              💳 <strong>$149/year</strong> — billed after approval. No charge today. Joshua reviews every application personally and responds within 48 hours. If approved, you&apos;ll receive a payment link via email.
+            <p className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-relaxed inline-flex items-start gap-1.5">
+              <CreditCard size={13} strokeWidth={2} className="shrink-0 mt-0.5" /> <span><strong>$149/year</strong> — billed after approval. No charge today. Joshua reviews every application personally and responds within 48 hours. If approved, you&apos;ll receive a payment link via email.</span>
             </p>
           </div>
 

@@ -189,8 +189,8 @@ function AutopilotModal({
                 <p className="text-sm font-extrabold text-violet-300">{t('app_soma_dashboard.mode_autopilot')}</p>
                 <p className="text-xs text-gray-400">{t('app_soma_dashboard.autopilot_active_label')}</p>
               </div>
-              <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-700/40 px-2 py-1 rounded-full">
-                ✓ Active
+              <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-700/40 px-2 py-1 rounded-full inline-flex items-center gap-1">
+                <CheckCircle2 size={12} strokeWidth={2} /> Active
               </span>
             </div>
           )}
@@ -871,7 +871,7 @@ export default function SomaDashboardPage() {
             <div>
               <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{t('app_soma_dashboard.quick_voice_dna')}</p>
               {voiceDnaTier !== 'none' ? (
-                <p className="text-[11px] text-purple-400 mt-0.5 capitalize">✓ {voiceDnaTier.replace('_', ' ')} tier saved</p>
+                <p className="text-[11px] text-purple-400 mt-0.5 capitalize inline-flex items-center gap-1"><CheckCircle2 size={10} strokeWidth={2} /> {voiceDnaTier.replace('_', ' ')} tier saved</p>
               ) : (
                 <p className="text-[11px] text-gray-500 mt-0.5">{t('app_soma_dashboard.quick_voice_dna_sub')}</p>
               )}

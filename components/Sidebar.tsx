@@ -25,7 +25,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Activity, AlertTriangle, BarChart3, Beaker, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Beaker, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
@@ -610,7 +610,7 @@ function SidebarContent({
                       >
                         <span>{loc.flag}</span>
                         <span>{loc.label}</span>
-                        {loc.code === locale && <span className="ml-auto">✓</span>}
+                        {loc.code === locale && <Check size={13} strokeWidth={2.5} className="ml-auto" />}
                       </button>
                     ))}
                   </div>
@@ -708,7 +708,7 @@ function SidebarContent({
                     }}>
                     <Home className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
                     <span className="truncate">My Workspace</span>
-                    {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto" style={{ color: 'var(--sidebar-fg)' }}>✓</span>}
+                    {activeWorkspace?.id === personalWorkspace.id && <Check size={13} strokeWidth={2.5} className="ml-auto" style={{ color: 'var(--sidebar-fg)' }} />}
                   </button>
                 )}
 
@@ -727,7 +727,7 @@ function SidebarContent({
                         }}>
                         <Building2 className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
                         <span className="truncate">{ws.client_name || ws.name}</span>
-                        {activeWorkspace?.id === ws.id && <span className="ml-auto" style={{ color: 'var(--sidebar-fg)' }}>✓</span>}
+                        {activeWorkspace?.id === ws.id && <Check size={13} strokeWidth={2.5} className="ml-auto" style={{ color: 'var(--sidebar-fg)' }} />}
                       </button>
                     ))}
                   </>

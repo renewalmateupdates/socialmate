@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { X as CloseIcon, Zap } from 'lucide-react'
 
 export interface UpgradeNudgeProps {
   title: string
@@ -63,10 +64,10 @@ export default function UpgradeNudge({
             {dismissKey && (
               <button
                 onClick={handleDismiss}
-                className="text-amber-500/50 hover:text-amber-400 transition-colors text-sm leading-none ml-1"
+                className="text-amber-500/50 hover:text-amber-400 transition-colors ml-1"
                 aria-label="Dismiss"
               >
-                ✕
+                <CloseIcon size={14} strokeWidth={2} />
               </button>
             )}
           </div>
@@ -78,7 +79,7 @@ export default function UpgradeNudge({
   // banner variant
   return (
     <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 px-4 py-3 flex items-start gap-3">
-      <span className="text-amber-400 text-base flex-shrink-0 mt-0.5">⚡</span>
+      <Zap size={16} strokeWidth={2} className="text-amber-400 flex-shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-amber-300 leading-tight">{title}</p>
         <p className="text-xs text-amber-300/70 mt-0.5 leading-relaxed">{description}</p>
@@ -93,10 +94,10 @@ export default function UpgradeNudge({
         {dismissKey && (
           <button
             onClick={handleDismiss}
-            className="text-amber-500/50 hover:text-amber-400 transition-colors text-sm leading-none w-6 h-6 flex items-center justify-center rounded"
+            className="text-amber-500/50 hover:text-amber-400 transition-colors w-6 h-6 flex items-center justify-center rounded"
             aria-label="Dismiss"
           >
-            ✕
+            <CloseIcon size={14} strokeWidth={2} />
           </button>
         )}
       </div>

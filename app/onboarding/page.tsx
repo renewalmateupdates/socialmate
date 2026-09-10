@@ -700,7 +700,7 @@ function OnboardingInner() {
                   Connect your {platformData?.label} account
                 </h2>
                 {connectionDetected ? (
-                  <p className="text-green-600 dark:text-green-400 font-bold text-sm">✓ Account connected — moving you along…</p>
+                  <p className="text-green-600 dark:text-green-400 font-bold text-sm inline-flex items-center gap-1"><Check size={14} strokeWidth={2.5} /> Account connected — moving you along…</p>
                 ) : (
                   <p className="text-gray-400 dark:text-gray-500 text-sm">Keep this tab open and come back when done.</p>
                 )}

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
-import { CheckCircle2, Dna } from 'lucide-react'
+import { Check, CheckCircle2, Dna } from 'lucide-react'
 
 // ─── Question bank ────────────────────────────────────────────────────────────
 
@@ -567,7 +567,7 @@ export default function SomaVoicePage() {
                         : 'border-gray-700 bg-gray-900 text-gray-300 hover:border-gray-500 hover:text-white'
                     }`}
                   >
-                    {selected && <span className="mr-2">✓</span>}
+                    {selected && <Check size={14} strokeWidth={2.5} className="mr-2 inline" />}
                     {opt}
                   </button>
                 )

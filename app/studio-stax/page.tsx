@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
 import ListingViewTracker from './ListingViewTracker'
+import { ArrowRight, Crown, Eye, Flame, Heart, Medal, Sprout, Star, TrendingUp } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'social-media',      label: 'Social Media Tools'   },
@@ -103,7 +104,7 @@ export default async function StudioStaxPage() {
         {/* Header */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 mb-6">
-            ❤️ SM-Give Certified Directory
+            <Heart size={13} strokeWidth={2} fill="currentColor" /> SM-Give Certified Directory
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-4">
             Studio <span className="text-amber-500">Stax</span>
@@ -114,12 +115,12 @@ export default async function StudioStaxPage() {
           {/* Founding spots counter */}
           {!foundingFull ? (
             <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-full px-5 py-2 mt-6 text-sm font-bold text-amber-700 dark:text-amber-400">
-              🔥 {spotsRemaining} of {FOUNDING_LIMIT} Founding Spots Remaining
+              <Flame size={15} strokeWidth={2} /> {spotsRemaining} of {FOUNDING_LIMIT} Founding Spots Remaining
               <span className="font-normal text-amber-600 dark:text-amber-500">— $100/yr (then $150/yr)</span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-edge rounded-full px-5 py-2 mt-6 text-sm font-semibold text-gray-600 dark:text-gray-400">
-              🏅 {spotsUsed} Founding Members
+              <Medal size={15} strokeWidth={2} /> {spotsUsed} Founding Members
             </div>
           )}
 
@@ -146,7 +147,7 @@ export default async function StudioStaxPage() {
             {/* Section header */}
             <div className="flex items-center gap-3 mb-6">
               <div className="flex items-center gap-2 bg-amber-600 dark:bg-amber-700 text-void px-4 py-1.5 rounded-full">
-                <span className="text-base">👑</span>
+                <Crown size={15} strokeWidth={2} fill="currentColor" />
                 <span className="text-xs font-extrabold uppercase tracking-widest">Gilgamesh&apos;s Garrison</span>
               </div>
               <span className="text-xs text-gray-400 dark:text-gray-500">Built by the founder. Always here.</span>
@@ -182,7 +183,7 @@ export default async function StudioStaxPage() {
                         <p className="font-extrabold text-base text-gray-900 dark:text-gray-100">{listing.name}</p>
                         {/* Founder's Pick badge */}
                         <span className="inline-flex items-center gap-1 text-[10px] font-extrabold bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-700 uppercase tracking-wider">
-                          👑 Founder&apos;s Pick
+                          <Crown size={10} strokeWidth={2} fill="currentColor" /> Founder&apos;s Pick
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{listing.tagline}</p>
@@ -225,7 +226,7 @@ export default async function StudioStaxPage() {
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex items-center gap-2 bg-yellow-500 dark:bg-yellow-600 text-black px-4 py-1.5 rounded-full">
-                <span className="text-base">⭐</span>
+                <Star size={15} strokeWidth={2} fill="currentColor" />
                 <span className="text-xs font-extrabold uppercase tracking-widest">Featured Listings</span>
               </div>
               <span className="text-xs text-gray-400 dark:text-gray-500">Paid spotlight placement</span>
@@ -239,7 +240,7 @@ export default async function StudioStaxPage() {
                   className="group relative flex flex-col bg-panel border-2 border-yellow-400 dark:border-yellow-500 ring-1 ring-yellow-200 dark:ring-yellow-700 rounded-2xl p-6 hover:shadow-xl hover:border-yellow-500 dark:hover:border-yellow-400 transition-all overflow-hidden"
                 >
                   {/* Featured badge */}
-                  <span className="absolute top-3 right-3 z-10 text-[10px] font-extrabold bg-yellow-400 text-black px-2 py-0.5 rounded-full select-none">⭐ Featured</span>
+                  <span className="absolute top-3 right-3 z-10 inline-flex items-center gap-0.5 text-[10px] font-extrabold bg-yellow-400 text-black px-2 py-0.5 rounded-full select-none"><Star size={9} strokeWidth={2} fill="currentColor" /> Featured</span>
 
                   {listing.is_nsfw && (
                     <span className="absolute top-3 left-3 z-10 text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full select-none">18+</span>
@@ -296,18 +297,18 @@ export default async function StudioStaxPage() {
             </p>
           </div>
           <div className="flex gap-4 text-center shrink-0">
-            <div><p className="text-2xl font-extrabold text-amber-500">❤️</p><p className="text-xs text-gray-400 mt-1">Donate to<br/>SM-Give</p></div>
-            <div><p className="text-2xl font-extrabold text-gray-400">→</p></div>
-            <div><p className="text-2xl font-extrabold text-green-500">📈</p><p className="text-xs text-gray-400 mt-1">Rank<br/>higher</p></div>
-            <div><p className="text-2xl font-extrabold text-gray-400">→</p></div>
-            <div><p className="text-2xl font-extrabold text-amber-500">👀</p><p className="text-xs text-gray-400 mt-1">More<br/>exposure</p></div>
+            <div><Heart className="w-6 h-6 mx-auto text-amber-500" strokeWidth={1.75} fill="currentColor" /><p className="text-xs text-gray-400 mt-1">Donate to<br/>SM-Give</p></div>
+            <div><ArrowRight className="w-6 h-6 mx-auto text-gray-400" strokeWidth={1.75} /></div>
+            <div><TrendingUp className="w-6 h-6 mx-auto text-green-500" strokeWidth={1.75} /><p className="text-xs text-gray-400 mt-1">Rank<br/>higher</p></div>
+            <div><ArrowRight className="w-6 h-6 mx-auto text-gray-400" strokeWidth={1.75} /></div>
+            <div><Eye className="w-6 h-6 mx-auto text-amber-500" strokeWidth={1.75} /><p className="text-xs text-gray-400 mt-1">More<br/>exposure</p></div>
           </div>
         </div>
 
         {/* Regular category listings */}
         {!hasRegular ? (
           <div className="text-center py-24">
-            <div className="text-6xl mb-6">🌱</div>
+            <Sprout className="w-14 h-14 mx-auto mb-6 text-gray-400" strokeWidth={1.5} />
             <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">First listings coming soon</h2>
             <p className="text-gray-400 dark:text-gray-500 mb-8 max-w-md mx-auto text-sm">Be among the first 100 tools in Studio Stax. Apply now and lock in the $100/year founder price before it goes to $150.</p>
             <Link href="/studio-stax/apply" className="inline-flex items-center gap-2 bg-amber text-void font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
@@ -353,7 +354,7 @@ export default async function StudioStaxPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{listing.name}</p>
-                              {idx === 0 && <span className="shrink-0 text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full">⭐ Top Pick</span>}
+                              {idx === 0 && <span className="shrink-0 inline-flex items-center gap-0.5 text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full"><Star size={9} strokeWidth={2} fill="currentColor" /> Top Pick</span>}
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{listing.tagline}</p>
                           </div>
@@ -369,8 +370,8 @@ export default async function StudioStaxPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-gray-400 font-medium">{getHostname(listing.url)}</span>
                           {listing.smgive_donated_cents > 0 && (
-                            <span className="text-[10px] font-bold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-800">
-                              ❤️ ${(listing.smgive_donated_cents / 100).toFixed(0)} to SM-Give
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-800">
+                              <Heart size={9} strokeWidth={2} fill="currentColor" /> ${(listing.smgive_donated_cents / 100).toFixed(0)} to SM-Give
                             </span>
                           )}
                         </div>

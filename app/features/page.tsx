@@ -455,7 +455,7 @@ export default function Features() {
                   }`}>
                     <PlatformIcon name={p.name} size={13} mono />
                     <span>{p.name}</span>
-                    {p.status === 'live' && <span className="font-bold">✓</span>}
+                    {p.status === 'live' && <CheckCircle2 size={13} strokeWidth={2} />}
                     {p.status === 'soon' && <span className="text-ink-muted font-bold">{t('features.platform_soon')}</span>}
                   </div>
                 ))}

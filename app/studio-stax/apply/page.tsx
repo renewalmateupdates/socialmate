@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
+import { CreditCard, Flame, Lock, PartyPopper } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'social-media',      label: 'Social Media Tools'   },
@@ -77,7 +78,7 @@ export default function StudioStaxApplyPage() {
     return (
       <PublicLayout>
         <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-          <div className="text-6xl mb-6">🎉</div>
+          <PartyPopper className="w-14 h-14 mx-auto mb-6 text-amber-500" strokeWidth={1.5} />
           <h1 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Application received!</h1>
           <p className="text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
             Joshua reviews every application personally. You&apos;ll hear back within 48 hours. If approved, you&apos;ll receive a payment link for your listing fee.
@@ -121,8 +122,8 @@ export default function StudioStaxApplyPage() {
               </div>
             ) : (
               <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-4">
-                <p className="text-base font-extrabold text-amber-700 dark:text-amber-400">
-                  🔥 {pricing.annual.slotsRemaining} of {pricing.annual.slotsTotal} Founding Spots Remaining
+                <p className="text-base font-extrabold text-amber-700 dark:text-amber-400 inline-flex items-center gap-1.5">
+                  <Flame size={16} strokeWidth={2} /> {pricing.annual.slotsRemaining} of {pricing.annual.slotsTotal} Founding Spots Remaining
                   <span className="ml-2 text-sm font-semibold text-amber-600 dark:text-amber-500">— $100/yr (then $150/yr)</span>
                 </p>
                 <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
@@ -277,8 +278,8 @@ export default function StudioStaxApplyPage() {
                     Standard rate — all {pricing.annual.slotsTotal.toLocaleString()} founding spots are filled.
                   </p>
                 ) : (
-                  <p className="text-[11px] text-gray-600 dark:text-gray-400">
-                    🔒 <strong>{pricing.annual.slotsRemaining.toLocaleString()} of {pricing.annual.slotsTotal.toLocaleString()}</strong> founding spots remaining.
+                  <p className="text-[11px] text-gray-600 dark:text-gray-400 inline-flex items-center gap-1">
+                    <Lock size={11} strokeWidth={2} /> <strong>{pricing.annual.slotsRemaining.toLocaleString()} of {pricing.annual.slotsTotal.toLocaleString()}</strong> founding spots remaining.
                     Goes to ${(pricing.annual.standardPrice / 100).toFixed(0)}/yr after. Early renewal: $80/yr.
                   </p>
                 )}
@@ -286,8 +287,8 @@ export default function StudioStaxApplyPage() {
             ) : (
               <p className="text-xs text-amber-700 dark:text-amber-300">Loading pricing...</p>
             )}
-            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-              💳 <strong>No charge today.</strong> Joshua reviews every application personally and responds within 48 hours. If approved, you&apos;ll receive a secure payment link via email.
+            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed inline-flex items-start gap-1.5">
+              <CreditCard size={13} strokeWidth={2} className="shrink-0 mt-0.5" /> <span><strong>No charge today.</strong> Joshua reviews every application personally and responds within 48 hours. If approved, you&apos;ll receive a secure payment link via email.</span>
             </p>
           </div>
 

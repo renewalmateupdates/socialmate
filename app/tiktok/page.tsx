@@ -1,21 +1,22 @@
 'use client'
 import Link from 'next/link'
-import { Sparkles } from 'lucide-react'
+import { Bot, CalendarDays, CheckCircle2, Globe, Images, Lightbulb, MessageCircle, Palette, Repeat, Scissors, Send, Sparkles } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 
 export default function TikTokStudioLandingPage() {
   const { t } = useI18n()
 
-  const FEATURES = [
-    { icon: '✂️', title: t('tiktok_landing.feat1_title'), description: t('tiktok_landing.feat1_desc') },
-    { icon: '🎨', title: t('tiktok_landing.feat2_title'), description: t('tiktok_landing.feat2_desc') },
-    { icon: '💬', title: t('tiktok_landing.feat3_title'), description: t('tiktok_landing.feat3_desc') },
-    { icon: '🖼️', title: t('tiktok_landing.feat4_title'), description: t('tiktok_landing.feat4_desc') },
-    { icon: '📤', title: t('tiktok_landing.feat5_title'), description: t('tiktok_landing.feat5_desc') },
-    { icon: '🤖', title: t('tiktok_landing.feat6_title'), description: t('tiktok_landing.feat6_desc') },
-    { icon: '📅', title: t('tiktok_landing.feat7_title'), description: t('tiktok_landing.feat7_desc') },
-    { icon: '🔁', title: t('tiktok_landing.feat8_title'), description: t('tiktok_landing.feat8_desc') },
+  const FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
+    { icon: Scissors, title: t('tiktok_landing.feat1_title'), description: t('tiktok_landing.feat1_desc') },
+    { icon: Palette, title: t('tiktok_landing.feat2_title'), description: t('tiktok_landing.feat2_desc') },
+    { icon: MessageCircle, title: t('tiktok_landing.feat3_title'), description: t('tiktok_landing.feat3_desc') },
+    { icon: Images, title: t('tiktok_landing.feat4_title'), description: t('tiktok_landing.feat4_desc') },
+    { icon: Send, title: t('tiktok_landing.feat5_title'), description: t('tiktok_landing.feat5_desc') },
+    { icon: Bot, title: t('tiktok_landing.feat6_title'), description: t('tiktok_landing.feat6_desc') },
+    { icon: CalendarDays, title: t('tiktok_landing.feat7_title'), description: t('tiktok_landing.feat7_desc') },
+    { icon: Repeat, title: t('tiktok_landing.feat8_title'), description: t('tiktok_landing.feat8_desc') },
   ]
 
   const QUOTA = [
@@ -35,7 +36,7 @@ export default function TikTokStudioLandingPage() {
 
         <div className="relative max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] text-xs font-semibold px-3 py-1 rounded-full mb-6">
-            ✅ {t('tiktok_landing.api_approved_badge')}
+            <CheckCircle2 size={13} strokeWidth={2} /> {t('tiktok_landing.api_approved_badge')}
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight">
@@ -78,7 +79,7 @@ export default function TikTokStudioLandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {FEATURES.map((f) => (
               <div key={f.title} className="bg-gray-800 rounded-xl p-5 border border-edge hover:border-[#f59e0b]/40 transition-colors">
-                <div className="text-2xl mb-3">{f.icon}</div>
+                <div className="mb-3"><f.icon className="w-6 h-6 text-[#f59e0b]" strokeWidth={1.75} /></div>
                 <h3 className="text-white font-semibold mb-2 text-sm">{f.title}</h3>
                 <p className="text-gray-400 text-xs leading-relaxed">{f.description}</p>
               </div>
@@ -90,7 +91,7 @@ export default function TikTokStudioLandingPage() {
       {/* Post everywhere CTA section */}
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="text-4xl mb-4">🌐</div>
+          <Globe className="w-9 h-9 mx-auto mb-4 text-[#f59e0b]" strokeWidth={1.5} />
           <h2 className="text-2xl font-bold text-white mb-4">
             {t('tiktok_landing.post_everywhere_title')}
           </h2>
@@ -127,8 +128,8 @@ export default function TikTokStudioLandingPage() {
             ))}
           </div>
 
-          <div className="bg-gray-800 rounded-xl p-5 border border-edge text-sm text-gray-400 text-center">
-            💡 {t('tiktok_landing.pricing_note')}
+          <div className="bg-gray-800 rounded-xl p-5 border border-edge text-sm text-gray-400 text-center inline-flex items-center gap-2">
+            <Lightbulb size={14} strokeWidth={2} /> {t('tiktok_landing.pricing_note')}
           </div>
         </div>
       </section>
