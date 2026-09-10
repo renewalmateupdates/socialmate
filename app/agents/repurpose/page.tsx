@@ -68,42 +68,42 @@ export default function RepurposeAgentPage() {
 
   if (!isPro) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
+      <div className="min-h-screen bg-theme flex flex-col items-center justify-center p-6 text-center gap-4">
         <Recycle className="w-12 h-12" strokeWidth={1.5} />
-        <h1 className="text-2xl font-black text-primary">Repurpose Agent</h1>
-        <p className="text-secondary text-sm max-w-md">Automatically repurpose your best posts into new formats every week. Available on Pro and Agency plans.</p>
+        <h1 className="text-2xl font-black text-theme">Repurpose Agent</h1>
+        <p className="text-muted text-sm max-w-md">Automatically repurpose your best posts into new formats every week. Available on Pro and Agency plans.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme">← Back to Agents</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-2xl mx-auto">
       <div className="mb-8">
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
           <Recycle className="w-7 h-7" strokeWidth={1.5} />
-          <h1 className="text-2xl font-black text-primary">Repurpose Agent</h1>
+          <h1 className="text-2xl font-black text-theme">Repurpose Agent</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-muted text-sm">
           Every Wednesday, your best recent post is automatically repurposed into the formats you choose — dropped into your drafts for review or scheduled directly.
         </p>
         {settings.last_ran_at && (
-          <p className="text-xs text-secondary mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleDateString()}</p>
+          <p className="text-xs text-muted mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleDateString()}</p>
         )}
       </div>
 
       {loading ? (
-        <div className="text-secondary text-sm py-10 text-center">Loading…</div>
+        <div className="text-muted text-sm py-10 text-center">Loading…</div>
       ) : (
         <div className="space-y-5">
           {/* Enable toggle */}
           <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <p className="font-bold text-primary">Enable Repurpose Agent</p>
-              <p className="text-xs text-secondary mt-0.5">Runs every Wednesday at 9am UTC — free, no credits charged</p>
+              <p className="font-bold text-theme">Enable Repurpose Agent</p>
+              <p className="text-xs text-muted mt-0.5">Runs every Wednesday at 9am UTC — free, no credits charged</p>
             </div>
             <button
               onClick={() => setSettings(s => ({ ...s, enabled: !s.enabled }))}
@@ -116,7 +116,7 @@ export default function RepurposeAgentPage() {
           {/* How it works */}
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-5">
             <p className="text-xs font-bold uppercase tracking-wide text-amber-600 mb-2">How it works</p>
-            <ul className="text-sm text-secondary space-y-1">
+            <ul className="text-sm text-muted space-y-1">
               <li>✓ Picks your best post from the past week</li>
               <li>✓ Generates a new version in each selected format</li>
               <li>✓ Drops them into your Drafts queue</li>
@@ -126,7 +126,7 @@ export default function RepurposeAgentPage() {
 
           {/* Format picker */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-3">
               Formats to generate <span className="font-normal normal-case text-amber-500">({settings.formats.length} selected)</span>
             </p>
             <div className="space-y-2">
@@ -139,12 +139,12 @@ export default function RepurposeAgentPage() {
                     className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between ${
                       active
                         ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                        : 'border-theme bg-background hover:border-amber-400/50'
+                        : 'border-theme bg-theme hover:border-amber-400/50'
                     }`}
                   >
                     <div>
-                      <p className="font-bold text-sm text-primary">{fmt.label}</p>
-                      <p className="text-xs text-secondary mt-0.5">{fmt.desc}</p>
+                      <p className="font-bold text-sm text-theme">{fmt.label}</p>
+                      <p className="text-xs text-muted mt-0.5">{fmt.desc}</p>
                     </div>
                     <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-black transition-all ${
                       active ? 'bg-amber-400 text-black' : 'border border-theme text-transparent'
@@ -157,7 +157,7 @@ export default function RepurposeAgentPage() {
 
           {/* Mode */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Output mode</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-3">Output mode</p>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { id: 'draft', label: 'Draft', desc: 'Dropped into Drafts for your review' },
@@ -169,11 +169,11 @@ export default function RepurposeAgentPage() {
                   className={`text-left p-4 rounded-xl border transition-all ${
                     settings.mode === m.id
                       ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                      : 'border-theme bg-background hover:border-amber-400/50'
+                      : 'border-theme bg-theme hover:border-amber-400/50'
                   }`}
                 >
-                  <p className="font-bold text-sm text-primary">{m.label}</p>
-                  <p className="text-xs text-secondary mt-1">{m.desc}</p>
+                  <p className="font-bold text-sm text-theme">{m.label}</p>
+                  <p className="text-xs text-muted mt-1">{m.desc}</p>
                 </button>
               ))}
             </div>

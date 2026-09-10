@@ -124,17 +124,17 @@ export default function AgentsPage() {
   const comingAgents  = AGENTS.filter(a => !a.live)
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <Bot className="w-8 h-8" strokeWidth={1.5} />
-          <h1 className="text-3xl font-black text-primary">{t('app_agents.title')}</h1>
+          <h1 className="text-3xl font-black text-theme">{t('app_agents.title')}</h1>
         </div>
-        <p className="text-secondary text-base max-w-xl">
+        <p className="text-muted text-base max-w-xl">
           {t('app_agents.subtitle')}
         </p>
-        <div className="mt-4 flex items-center gap-3 text-xs text-secondary">
+        <div className="mt-4 flex items-center gap-3 text-xs text-muted">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> {t('app_agents.legend_free')}</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> {t('app_agents.legend_credits')}</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300 inline-block" /> {t('app_agents.legend_coming_soon')}</span>
@@ -143,7 +143,7 @@ export default function AgentsPage() {
 
       {/* Live agents */}
       <div className="mb-10">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">{t('app_agents.section_live')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-muted mb-4">{t('app_agents.section_live')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {liveAgents.map(agent => (
             <button
@@ -166,9 +166,9 @@ export default function AgentsPage() {
                   </span>
                 </div>
               </div>
-              <h3 className="font-black text-primary text-lg group-hover:text-amber-500 transition-colors">{agent.name}</h3>
+              <h3 className="font-black text-theme text-lg group-hover:text-amber-500 transition-colors">{agent.name}</h3>
               <p className="text-xs font-semibold text-amber-500 mb-1">{agent.tagline}</p>
-              <p className="text-sm text-secondary">{agent.description}</p>
+              <p className="text-sm text-muted">{agent.description}</p>
               <div className="mt-4 text-xs font-bold text-amber-500 group-hover:translate-x-1 transition-transform inline-block">
                 {t('app_agents.launch_agent')}
               </div>
@@ -179,7 +179,7 @@ export default function AgentsPage() {
 
       {/* Coming soon */}
       <div>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">{t('app_agents.section_coming')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-muted mb-4">{t('app_agents.section_coming')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {comingAgents.map(agent => (
             <div
@@ -197,9 +197,9 @@ export default function AgentsPage() {
                   </span>
                 </div>
               </div>
-              <h3 className="font-black text-primary text-lg">{agent.name}</h3>
+              <h3 className="font-black text-theme text-lg">{agent.name}</h3>
               <p className="text-xs font-semibold text-gray-400 mb-1">{agent.tagline}</p>
-              <p className="text-sm text-secondary">{agent.description}</p>
+              <p className="text-sm text-muted">{agent.description}</p>
               <div className="mt-4 text-xs font-bold text-gray-400">
                 {t('app_agents.coming_soon')}
               </div>

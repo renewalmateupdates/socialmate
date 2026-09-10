@@ -101,42 +101,42 @@ export default function InboxAgentPage() {
 
   if (!isPro) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
+      <div className="min-h-screen bg-theme flex flex-col items-center justify-center p-6 text-center gap-4">
         <MessageCircle className="w-12 h-12" strokeWidth={1.5} />
-        <h1 className="text-2xl font-black text-primary">Inbox Agent</h1>
-        <p className="text-secondary text-sm max-w-md">Never leave a mention on read. AI-drafted replies to your Bluesky and Mastodon mentions — review and send with one click. Available on Pro and Agency.</p>
+        <h1 className="text-2xl font-black text-theme">Inbox Agent</h1>
+        <p className="text-muted text-sm max-w-md">Never leave a mention on read. AI-drafted replies to your Bluesky and Mastodon mentions — review and send with one click. Available on Pro and Agency.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme">← Back to Agents</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-2xl mx-auto">
       <div className="mb-8">
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
           <MessageCircle className="w-7 h-7" strokeWidth={1.5} />
-          <h1 className="text-2xl font-black text-primary">Inbox Agent</h1>
+          <h1 className="text-2xl font-black text-theme">Inbox Agent</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-muted text-sm">
           Every 2 hours, the agent checks your Bluesky and Mastodon mentions for new replies and drafts smart, on-brand responses. Review, edit, and send without leaving SocialMate.
         </p>
         {settings.last_ran_at && (
-          <p className="text-xs text-secondary mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleString()}</p>
+          <p className="text-xs text-muted mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleString()}</p>
         )}
       </div>
 
       {loading ? (
-        <div className="text-secondary text-sm py-10 text-center">Loading…</div>
+        <div className="text-muted text-sm py-10 text-center">Loading…</div>
       ) : (
         <div className="space-y-5">
           {/* Enable toggle */}
           <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <p className="font-bold text-primary">Enable Inbox Agent</p>
-              <p className="text-xs text-secondary mt-0.5">Checks mentions every 2 hours — free, no credits charged</p>
+              <p className="font-bold text-theme">Enable Inbox Agent</p>
+              <p className="text-xs text-muted mt-0.5">Checks mentions every 2 hours — free, no credits charged</p>
             </div>
             <button
               onClick={() => setSettings(s => ({ ...s, enabled: !s.enabled }))}
@@ -148,7 +148,7 @@ export default function InboxAgentPage() {
 
           {/* Tone hint */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <label className="block text-xs font-bold uppercase tracking-wide text-secondary mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wide text-muted mb-1">
               Reply tone <span className="font-normal normal-case">(optional)</span>
             </label>
             <input
@@ -156,7 +156,7 @@ export default function InboxAgentPage() {
               value={settings.tone_hint}
               onChange={e => setSettings(s => ({ ...s, tone_hint: e.target.value }))}
               placeholder="e.g. friendly, direct, a bit witty — never formal"
-              className="w-full bg-background border border-theme rounded-xl px-4 py-2.5 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+              className="w-full bg-theme border border-theme rounded-xl px-4 py-2.5 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function InboxAgentPage() {
           {/* Reply drafts */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold uppercase tracking-wide text-secondary">
+              <p className="text-xs font-bold uppercase tracking-wide text-muted">
                 Pending Replies {drafts.length > 0 && <span className="text-amber-500">({drafts.length})</span>}
               </p>
               {drafts.length > 0 && (
@@ -183,8 +183,8 @@ export default function InboxAgentPage() {
 
             {drafts.length === 0 ? (
               <div className="bg-surface border border-theme rounded-2xl p-6 text-center">
-                <p className="text-secondary text-sm">No pending reply drafts</p>
-                <p className="text-xs text-secondary mt-1">Enable the agent above — first drafts will appear within 2 hours.</p>
+                <p className="text-muted text-sm">No pending reply drafts</p>
+                <p className="text-xs text-muted mt-1">Enable the agent above — first drafts will appear within 2 hours.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -193,27 +193,27 @@ export default function InboxAgentPage() {
                     {/* Mention */}
                     <div className="mb-3 pb-3 border-b border-theme">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-secondary uppercase">{draft.platform}</span>
-                        <span className="text-xs text-secondary">·</span>
-                        <span className="text-xs font-semibold text-primary">{draft.mention_author}</span>
+                        <span className="text-xs font-bold text-muted uppercase">{draft.platform}</span>
+                        <span className="text-xs text-muted">·</span>
+                        <span className="text-xs font-semibold text-theme">{draft.mention_author}</span>
                         {draft.mention_url && (
                           <a href={draft.mention_url} target="_blank" rel="noopener noreferrer" className="text-xs text-amber-500 hover:underline ml-auto">View →</a>
                         )}
                       </div>
-                      <p className="text-sm text-secondary italic">"{draft.mention_text}"</p>
+                      <p className="text-sm text-muted italic">"{draft.mention_text}"</p>
                     </div>
 
                     {/* Suggested reply */}
-                    <p className="text-xs font-bold text-secondary mb-1">Suggested reply</p>
+                    <p className="text-xs font-bold text-muted mb-1">Suggested reply</p>
                     {editId === draft.id ? (
                       <textarea
                         value={editText}
                         onChange={e => setEditText(e.target.value)}
                         rows={3}
-                        className="w-full bg-background border border-amber-400 rounded-xl px-3 py-2 text-sm text-primary focus:outline-none resize-none mb-3"
+                        className="w-full bg-theme border border-amber-400 rounded-xl px-3 py-2 text-sm text-theme focus:outline-none resize-none mb-3"
                       />
                     ) : (
-                      <p className="text-sm text-primary mb-3">{draft.suggested_reply}</p>
+                      <p className="text-sm text-theme mb-3">{draft.suggested_reply}</p>
                     )}
 
                     <div className="flex gap-2">
@@ -228,7 +228,7 @@ export default function InboxAgentPage() {
                           </button>
                           <button
                             onClick={() => setEditId(null)}
-                            className="px-3 py-2 rounded-xl text-xs border border-theme text-secondary hover:text-primary"
+                            className="px-3 py-2 rounded-xl text-xs border border-theme text-muted hover:text-theme"
                           >
                             Cancel
                           </button>
@@ -244,13 +244,13 @@ export default function InboxAgentPage() {
                           </button>
                           <button
                             onClick={() => { setEditId(draft.id); setEditText(draft.suggested_reply) }}
-                            className="px-3 py-2 rounded-xl text-xs border border-theme text-secondary hover:text-primary"
+                            className="px-3 py-2 rounded-xl text-xs border border-theme text-muted hover:text-theme"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => dismiss(draft.id)}
-                            className="px-3 py-2 rounded-xl text-xs border border-theme text-secondary hover:text-red-400"
+                            className="px-3 py-2 rounded-xl text-xs border border-theme text-muted hover:text-red-400"
                           >
                             Dismiss
                           </button>

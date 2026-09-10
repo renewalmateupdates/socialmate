@@ -63,42 +63,42 @@ export default function ClientReportPage() {
 
   if (!isAgency) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
+      <div className="min-h-screen bg-theme flex flex-col items-center justify-center p-6 text-center gap-4">
         <BarChart3 className="w-12 h-12" strokeWidth={1.5} />
-        <h1 className="text-2xl font-black text-primary">Client Report Agent</h1>
-        <p className="text-secondary text-sm max-w-md">Auto-generated weekly client reports are an Agency plan feature.</p>
+        <h1 className="text-2xl font-black text-theme">Client Report Agent</h1>
+        <p className="text-muted text-sm max-w-md">Auto-generated weekly client reports are an Agency plan feature.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Agency →</Link>
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme">← Back to Agents</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-2xl mx-auto">
       <div className="mb-8">
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
           <BarChart3 className="w-7 h-7" strokeWidth={1.5} />
-          <h1 className="text-2xl font-black text-primary">Client Report Agent</h1>
+          <h1 className="text-2xl font-black text-theme">Client Report Agent</h1>
           <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">Agency</span>
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-muted text-sm">
           Every Monday morning, a performance summary for your workspace is automatically emailed — posts published, scheduled ahead, active platforms.
         </p>
         {settings.last_sent_at && (
-          <p className="text-xs text-secondary mt-1">Last sent: {new Date(settings.last_sent_at).toLocaleDateString()}</p>
+          <p className="text-xs text-muted mt-1">Last sent: {new Date(settings.last_sent_at).toLocaleDateString()}</p>
         )}
       </div>
 
       {loading ? (
-        <div className="text-secondary text-sm py-10 text-center">Loading…</div>
+        <div className="text-muted text-sm py-10 text-center">Loading…</div>
       ) : (
         <div className="space-y-5">
           {/* Enable toggle */}
           <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <p className="font-bold text-primary">Enable Client Report Agent</p>
-              <p className="text-xs text-secondary mt-0.5">Runs every Monday at 9am UTC — sent to you + any recipients below</p>
+              <p className="font-bold text-theme">Enable Client Report Agent</p>
+              <p className="text-xs text-muted mt-0.5">Runs every Monday at 9am UTC — sent to you + any recipients below</p>
             </div>
             <button
               onClick={() => setSettings(s => ({ ...s, enabled: !s.enabled }))}
@@ -111,7 +111,7 @@ export default function ClientReportPage() {
           {/* What's included */}
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-5">
             <p className="text-xs font-bold uppercase tracking-wide text-amber-600 mb-2">Report includes</p>
-            <ul className="text-sm text-secondary space-y-1">
+            <ul className="text-sm text-muted space-y-1">
               <li>✓ Posts published this week</li>
               <li>✓ Posts scheduled for next week</li>
               <li>✓ Active platforms</li>
@@ -121,10 +121,10 @@ export default function ClientReportPage() {
 
           {/* Recipient emails */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-1">
               Additional recipients <span className="font-normal normal-case">(optional)</span>
             </p>
-            <p className="text-xs text-secondary mb-3">Report always goes to you. Add client emails to CC them directly.</p>
+            <p className="text-xs text-muted mb-3">Report always goes to you. Add client emails to CC them directly.</p>
             <div className="flex gap-2 mb-3">
               <input
                 type="email"
@@ -132,20 +132,20 @@ export default function ClientReportPage() {
                 onChange={e => setEmailInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addEmail()}
                 placeholder="client@company.com"
-                className="flex-1 bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="flex-1 bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
               <button onClick={addEmail} className="bg-amber-400 hover:bg-amber-300 text-black font-black px-4 py-2 rounded-xl text-sm">Add</button>
             </div>
             {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
             <div className="space-y-1">
               {settings.recipient_emails.map(email => (
-                <div key={email} className="flex items-center justify-between bg-background border border-theme rounded-lg px-3 py-2">
-                  <span className="text-sm text-primary">{email}</span>
+                <div key={email} className="flex items-center justify-between bg-theme border border-theme rounded-lg px-3 py-2">
+                  <span className="text-sm text-theme">{email}</span>
                   <button onClick={() => removeEmail(email)} className="text-gray-400 hover:text-red-400 text-xs">Remove</button>
                 </div>
               ))}
               {settings.recipient_emails.length === 0 && (
-                <p className="text-xs text-secondary text-center py-2">Only you will receive the report</p>
+                <p className="text-xs text-muted text-center py-2">Only you will receive the report</p>
               )}
             </div>
           </div>
