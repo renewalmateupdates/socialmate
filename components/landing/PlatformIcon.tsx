@@ -63,7 +63,7 @@ const PATHS: Record<string, { d: string; color: string }> = {
 }
 
 export function hasPlatformIcon(name: string): boolean {
-  const key = name.toLowerCase().replace(/[^a-z]/g, '').replace('xtwitter', 'x')
+  const key = name.toLowerCase().replace(/[^a-z]/g, '').replace('xtwitter', 'x').replace(/^twitter$/, 'x')
   return key in PATHS
 }
 
@@ -78,7 +78,7 @@ export default function PlatformIcon({
   className?: string
   mono?: boolean
 }) {
-  const key = name.toLowerCase().replace(/[^a-z]/g, '').replace('xtwitter', 'x')
+  const key = name.toLowerCase().replace(/[^a-z]/g, '').replace('xtwitter', 'x').replace(/^twitter$/, 'x')
   const icon = PATHS[key]
   if (!icon) return null
   return (
