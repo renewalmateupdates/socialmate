@@ -10,7 +10,7 @@ import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { CheckCircle2, Crown, Gem, Gift, Globe, Link2, Mic, Rocket, Star, Tag, X as CloseIcon, Zap } from 'lucide-react'
+import { CheckCircle2, Clock, Crown, Gem, Gift, Globe, Link2, Mic, Rocket, Star, Tag, Upload, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -1158,7 +1158,7 @@ function SettingsInner() {
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">{tSettings('app_settings.security_tab.desc')}</p>
                 {mfaError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
-                    <p className="text-xs font-semibold text-red-500">❌ {mfaError}</p>
+                    <p className="text-xs font-semibold text-red-500 inline-flex items-center gap-1.5"><XCircle size={13} strokeWidth={2} /> {mfaError}</p>
                   </div>
                 )}
                 {mfaStep === 'idle' && !mfaEnabled && (
@@ -1367,7 +1367,7 @@ function SettingsInner() {
               {/* Pending review state */}
               {plan !== 'free' && !whiteLabelActive && whiteLabelStatus === 'pending' && (
                 <div className="bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800 rounded-2xl px-5 py-4 flex items-start gap-3">
-                  <span className="text-amber-500 text-lg shrink-0 mt-0.5">🕐</span>
+                  <Clock className="text-amber-500 shrink-0 mt-0.5" size={18} strokeWidth={1.75} />
                   <div>
                     <p className="text-sm font-bold text-amber-700 dark:text-amber-400">{tSettings('app_settings.white_label_tab.review_title')}</p>
                     <p className="text-xs text-amber-600 dark:text-amber-500 mt-1 leading-relaxed">
@@ -1485,7 +1485,7 @@ function SettingsInner() {
                         }`}>
                           {wlLogoUploading
                             ? <><div className="w-3 h-3 border-2 border-gray-400 border-t-gray-700 rounded-full animate-spin" /> Uploading...</>
-                            : '📁 Upload logo'}
+                            : <><Upload size={13} strokeWidth={2} /> Upload logo</>}
                           <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp,image/svg+xml"

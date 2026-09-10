@@ -3,14 +3,12 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { Flame, Globe, Trophy } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 
-const PLATFORM_ICONS: Record<string, string> = {
-  bluesky:  '🦋',
-  mastodon: '🐘',
-  twitter:  '𝕏',
-  discord:  '💬',
-  telegram: '✈️',
-  tiktok:   '🎵',
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
 }
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -175,8 +173,8 @@ export default function ZenithPage() {
               <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-2">{t('zenith.active_on')}</p>
               <div className="flex flex-wrap gap-2">
                 {stats.platforms.map(p => (
-                  <span key={p} className={`text-xs font-bold px-3 py-1.5 rounded-full border ${PLATFORM_COLORS[p] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
-                    {PLATFORM_ICONS[p] ?? '🌐'} {p.charAt(0).toUpperCase() + p.slice(1)}
+                  <span key={p} className={`text-xs font-bold px-3 py-1.5 rounded-full border inline-flex items-center gap-1.5 ${PLATFORM_COLORS[p] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                    <PlatformGlyph id={p} size={12} /> {p.charAt(0).toUpperCase() + p.slice(1)}
                   </span>
                 ))}
               </div>
@@ -222,12 +220,12 @@ export default function ZenithPage() {
         {/* Quick links */}
         <div className="grid grid-cols-2 gap-3">
           <Link href="/achievements" className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center hover:border-amber-500/30 transition-all">
-            <p className="text-2xl mb-1">🏆</p>
+            <Trophy className="w-6 h-6 mx-auto mb-1" strokeWidth={1.75} />
             <p className="text-xs font-bold">Achievements</p>
             <p className="text-xs text-gray-500 mt-0.5">{stats.achievements} {t('zenith.earned')}</p>
           </Link>
           <Link href="/challenge" className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center hover:border-amber-500/30 transition-all">
-            <p className="text-2xl mb-1">🔥</p>
+            <Flame className="w-6 h-6 mx-auto mb-1" strokeWidth={1.75} />
             <p className="text-xs font-bold">{t('zenith.challenge_title')}</p>
             <p className="text-xs text-gray-500 mt-0.5">{stats.streak} {t('zenith.day_streak')}</p>
           </Link>
