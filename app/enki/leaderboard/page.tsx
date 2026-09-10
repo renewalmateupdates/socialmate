@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Flame } from 'lucide-react'
+import { Flame, Medal } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Enki Leaderboard — Top Architects by Treasury Growth',
@@ -51,9 +51,9 @@ async function getLeaderboard(): Promise<LeaderboardEntry[]> {
 }
 
 function PlacementBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="text-lg">🥇</span>
-  if (rank === 2) return <span className="text-lg">🥈</span>
-  if (rank === 3) return <span className="text-lg">🥉</span>
+  if (rank === 1) return <Medal size={18} strokeWidth={1.75} className="text-yellow-500" fill="currentColor" />
+  if (rank === 2) return <Medal size={18} strokeWidth={1.75} className="text-gray-400" fill="currentColor" />
+  if (rank === 3) return <Medal size={18} strokeWidth={1.75} className="text-amber-700" fill="currentColor" />
   return <span className="text-sm font-bold text-gray-400 tabular-nums">#{rank}</span>
 }
 

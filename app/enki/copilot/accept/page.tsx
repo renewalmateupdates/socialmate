@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, CheckCircle2, Lock, XCircle } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -107,7 +107,7 @@ function EnkiCopilotAcceptInner() {
 
           {status === 'no-auth' && (
             <div className="text-center">
-              <div className="text-4xl mb-4">🔐</div>
+              <Lock className="w-9 h-9 mx-auto mb-4 text-amber-400" strokeWidth={1.5} />
               <h2 className="text-lg font-bold text-white mb-2">Sign in to accept</h2>
               <p className="text-gray-400 text-sm mb-6">You need a SocialMate account to accept this co-pilot invitation.</p>
               <div className="space-y-3">
@@ -177,7 +177,7 @@ function EnkiCopilotAcceptInner() {
 
           {status === 'success' && (
             <div className="text-center py-4">
-              <div className="text-5xl mb-4">✅</div>
+              <CheckCircle2 className="w-11 h-11 mx-auto mb-4 text-emerald-400" strokeWidth={1.5} />
               <h2 className="text-lg font-bold text-white mb-2">Co-Pilot access granted</h2>
               <p className="text-gray-400 text-sm mb-6">You now have read-only access to their Enki dashboard. Redirecting…</p>
               <Link
@@ -191,7 +191,7 @@ function EnkiCopilotAcceptInner() {
 
           {status === 'error' && (
             <div className="text-center py-4">
-              <div className="text-4xl mb-4">❌</div>
+              <XCircle className="w-9 h-9 mx-auto mb-4 text-red-400" strokeWidth={1.5} />
               <h2 className="text-lg font-bold text-white mb-2">Invitation error</h2>
               <p className="text-gray-400 text-sm mb-6">{errorMsg}</p>
               <Link

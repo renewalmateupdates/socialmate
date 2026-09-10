@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { useI18n } from '@/contexts/I18nContext'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -464,7 +465,7 @@ export default function EnkiDoctrinesPage() {
         {/* ── Active limit warning ── */}
         {atActiveLimit && (
           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-6 flex items-center gap-3">
-            <span className="text-amber-600 dark:text-amber-400 text-sm font-bold flex-shrink-0">⚠</span>
+            <AlertTriangle size={16} strokeWidth={2} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <p className="text-xs text-amber-700 dark:text-amber-400">
               {td('app_enki_doctrines.active_limit_warning')}
             </p>
@@ -822,9 +823,9 @@ export default function EnkiDoctrinesPage() {
             }`}
           >
             {t.type === 'success' ? (
-              <span className="mr-2 text-amber-400">◆</span>
+              <CheckCircle2 size={15} strokeWidth={2} className="mr-2 inline text-amber-400" />
             ) : (
-              <span className="mr-2">⚠</span>
+              <AlertTriangle size={15} strokeWidth={2} className="mr-2 inline" />
             )}
             {t.message}
           </div>

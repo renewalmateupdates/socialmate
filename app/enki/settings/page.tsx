@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
-import { ChevronRight, Eye, Flame, Lock, Scale, Shield, Zap } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Clock, Eye, Flame, Lock, Scale, Shield, Zap } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -1101,8 +1101,10 @@ export default function EnkiSettingsPage() {
                 }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-0.5">
-                        {copilot.status === 'active' ? '✅ Active co-pilot' : '⏳ Invitation pending'}
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-0.5 inline-flex items-center gap-1">
+                        {copilot.status === 'active'
+                          ? <><CheckCircle2 size={12} strokeWidth={2} /> Active co-pilot</>
+                          : <><Clock size={12} strokeWidth={2} /> Invitation pending</>}
                       </p>
                       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{copilot.copilot_email}</p>
                       {copilot.status === 'active' && copilot.accepted_at && (
