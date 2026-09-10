@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import type { InboxItem } from '@/app/api/inbox/route'
 import { useI18n } from '@/contexts/I18nContext'
-import { Inbox, Lock, Mail } from 'lucide-react'
+import { Check, Inbox, Lock, Mail } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
@@ -515,7 +515,7 @@ function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string)
             )}
             {sent && (
               <span className="ml-auto text-xs font-semibold text-green-600 dark:text-green-400 flex items-center gap-1">
-                ✓ Replied
+                <Check size={12} strokeWidth={2.5} /> Replied
               </span>
             )}
           </div>
