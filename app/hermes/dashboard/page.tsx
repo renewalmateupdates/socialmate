@@ -38,12 +38,12 @@ const CHANNEL_LABELS: Record<string, string> = {
 
 const HERMES_TIERS = [
   {
-    id: 'starter', priceId: 'price_HERMES_STARTER_PLACEHOLDER',
+    id: 'starter', priceId: 'price_1UEHaA7OMwDowUuUJ2OA4jic',
     name: 'HERMES Starter', price: '$12/mo',
     features: ['3 active campaigns', '75 prospects/month', 'Email + Bluesky', 'Draft mode'],
   },
   {
-    id: 'pro', priceId: 'price_HERMES_PRO_PLACEHOLDER',
+    id: 'pro', priceId: 'price_1UEHcB7OMwDowUuUFwqE1Hk6',
     name: 'HERMES Pro', price: '$25/mo',
     features: ['10 active campaigns', '400 prospects/month', 'Email + Bluesky + Mastodon', 'Draft + Auto-send'],
   },
