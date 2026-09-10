@@ -4,6 +4,13 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/contexts/I18nContext'
+import { Link2, Search } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Link2 size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 type LinkItem = {
   id: string
@@ -53,19 +60,6 @@ const BUTTON_COLORS: Record<string, string> = {
   gradient_dark:   'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20',
 }
 
-const SOCIAL_ICONS: Record<string, string> = {
-  instagram: '📸',
-  twitter:   '🐦',
-  linkedin:  '💼',
-  tiktok:    '🎵',
-  youtube:   '▶️',
-  facebook:  '📘',
-  pinterest: '📌',
-  threads:   '🧵',
-  bluesky:   '🦋',
-  snapchat:  '👻',
-}
-
 const APP_ROUTES = [
   'dashboard', 'compose', 'calendar', 'drafts', 'queue', 'analytics',
   'settings', 'accounts', 'team', 'referral', 'notifications', 'search',
@@ -110,7 +104,7 @@ export default function PublicBioPage() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-2xl mb-2">🔍</p>
+          <Search className="w-6 h-6 mx-auto mb-2" strokeWidth={1.75} />
           <p className="text-sm font-bold text-gray-700">{t('app_bio_public.not_found')}</p>
           <p className="text-xs text-gray-400 mt-1">{t('app_bio_public.not_found_sub')}</p>
         </div>
@@ -166,7 +160,7 @@ export default function PublicBioPage() {
                 <a key={platform} href={url} target="_blank" rel="noopener noreferrer"
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all hover:scale-110 ${bg === 'white' || bg === 'gray' ? 'bg-gray-100 hover:bg-gray-200' : 'bg-white/20 hover:bg-white/30'}`}
                   title={platform}>
-                  {SOCIAL_ICONS[platform] || '🔗'}
+                  <PlatformGlyph id={platform} size={18} />
                 </a>
               ))}
           </div>

@@ -5,6 +5,13 @@ import { useRouter, useParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { Building2, Check, CheckCircle2, ClipboardList, Circle, FileText, Globe, Smartphone, XCircle, Zap } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const INDUSTRIES = [
   'E-commerce', 'Restaurant / Food', 'Fitness / Wellness', 'Beauty / Fashion',
@@ -12,11 +19,10 @@ const INDUSTRIES = [
   'Nonprofit', 'Healthcare', 'Travel', 'Other',
 ]
 
-const PLATFORM_ICONS: Record<string, string> = {
-  discord: '💬', bluesky: '🦋', telegram: '✈️', mastodon: '🐘',
-  linkedin: '💼', youtube: '▶️', pinterest: '📌', reddit: '🤖',
-  instagram: '📸', tiktok: '🎵', twitter: '🐦', facebook: '📘', threads: '🧵',
-}
+const PLATFORM_IDS = [
+  'discord', 'bluesky', 'telegram', 'mastodon', 'linkedin', 'youtube',
+  'pinterest', 'reddit', 'instagram', 'tiktok', 'twitter', 'facebook', 'threads',
+]
 
 type WorkspaceDetail = {
   id: string
@@ -151,11 +157,11 @@ export default function WorkspaceEdit() {
 
   if (!ws) return null
 
-  const TABS: { key: Tab; label: string; icon: string }[] = [
-    { key: 'details',   label: 'Details',   icon: '📋' },
-    { key: 'platforms', label: 'Platforms',  icon: '📱' },
-    { key: 'notes',     label: 'Notes',      icon: '📝' },
-  ]
+  const TABS = [
+    { key: 'details',   label: 'Details',   icon: ClipboardList },
+    { key: 'platforms', label: 'Platforms',  icon: Smartphone },
+    { key: 'notes',     label: 'Notes',      icon: FileText },
+  ] as const
 
   return (
     <div className="min-h-dvh bg-theme flex">
@@ -199,14 +205,14 @@ export default function WorkspaceEdit() {
           {/* QUICK STATS */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { label: 'Plan',      value: PLAN_CONFIG[plan].label, icon: plan === 'agency' ? '🏢' : '⚡' },
-              { label: 'Platforms', value: `${selectedPlatforms.length} selected`,                icon: '📱' },
-              { label: 'Status',    value: isActive ? 'Active' : 'Inactive',                     icon: isActive ? '🟢' : '⚪' },
+              { label: 'Plan',      value: PLAN_CONFIG[plan].label, icon: plan === 'agency' ? Building2 : Zap },
+              { label: 'Platforms', value: `${selectedPlatforms.length} selected`,                icon: Smartphone },
+              { label: 'Status',    value: isActive ? 'Active' : 'Inactive',                     icon: Circle, filled: isActive },
             ].map(stat => (
               <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
-                  <span>{stat.icon}</span>
+                  <stat.icon size={14} strokeWidth={1.75} fill={'filled' in stat && stat.filled ? 'currentColor' : 'none'} className={'filled' in stat && stat.filled ? 'text-green-500' : ''} />
                 </div>
                 <div className="text-sm font-extrabold text-gray-800">{stat.value}</div>
               </div>
@@ -220,7 +226,7 @@ export default function WorkspaceEdit() {
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
                   tab === t.key ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
                 }`}>
-                <span>{t.icon}</span>
+                <t.icon size={13} strokeWidth={2} />
                 <span>{t.label}</span>
               </button>
             ))}
@@ -306,18 +312,18 @@ export default function WorkspaceEdit() {
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
-                {Object.entries(PLATFORM_ICONS).map(([pid, icon]) => {
+                {PLATFORM_IDS.map(pid => {
                   const selected = selectedPlatforms.includes(pid)
                   return (
                     <button key={pid} onClick={() => togglePlatform(pid)}
                       className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${
                         selected ? 'border-black bg-black/5' : 'border-gray-100 hover:border-gray-300'
                       }`}>
-                      <span className="text-base flex-shrink-0">{icon}</span>
+                      <PlatformGlyph id={pid} size={16} className="flex-shrink-0" />
                       <span className="text-xs font-semibold truncate">
                         {pid === 'twitter' ? 'X / Twitter' : pid.charAt(0).toUpperCase() + pid.slice(1)}
                       </span>
-                      {selected && <span className="ml-auto text-black font-bold text-xs flex-shrink-0">✓</span>}
+                      {selected && <Check size={13} strokeWidth={2.5} className="ml-auto text-black flex-shrink-0" />}
                     </button>
                   )
                 })}
@@ -399,7 +405,7 @@ export default function WorkspaceEdit() {
         <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} /> : <XCircle className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>

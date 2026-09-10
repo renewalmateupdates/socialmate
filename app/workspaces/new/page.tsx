@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { Ban, Building2, Check, Globe } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const INDUSTRIES = [
   'E-commerce', 'Restaurant / Food', 'Fitness / Wellness', 'Beauty / Fashion',
@@ -12,11 +19,10 @@ const INDUSTRIES = [
   'Nonprofit', 'Healthcare', 'Travel', 'Other',
 ]
 
-const PLATFORM_ICONS: Record<string, string> = {
-  discord: '💬', bluesky: '🦋', telegram: '✈️', mastodon: '🐘',
-  linkedin: '💼', youtube: '▶️', pinterest: '📌', reddit: '🤖',
-  instagram: '📸', tiktok: '🎵', twitter: '🐦', facebook: '📘', threads: '🧵',
-}
+const PLATFORM_IDS = [
+  'discord', 'bluesky', 'telegram', 'mastodon', 'linkedin', 'youtube',
+  'pinterest', 'reddit', 'instagram', 'tiktok', 'twitter', 'facebook', 'threads',
+]
 
 export default function NewWorkspace() {
   const [authChecked, setAuthChecked] = useState(false)
@@ -110,7 +116,7 @@ export default function NewWorkspace() {
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
-            <div className="text-5xl mb-4">🏢</div>
+            <Building2 className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
               Create separate workspaces for each client — their own accounts, posts, analytics, and team access.
@@ -150,7 +156,7 @@ export default function NewWorkspace() {
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
-            <div className="text-5xl mb-4">🚫</div>
+            <Ban className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
             <h1 className="text-xl font-extrabold tracking-tight mb-3">Workspace limit reached</h1>
             {plan === 'agency' ? (
               <>
@@ -284,18 +290,18 @@ export default function NewWorkspace() {
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">You can add or change these later from workspace settings.</p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
-                {Object.entries(PLATFORM_ICONS).map(([id, icon]) => {
+                {PLATFORM_IDS.map(id => {
                   const selected = selectedPlatforms.includes(id)
                   return (
                     <button key={id} onClick={() => togglePlatform(id)}
                       className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${
                         selected ? 'border-black bg-black/5' : 'border-theme hover:border-gray-300'
                       }`}>
-                      <span className="text-base flex-shrink-0">{icon}</span>
+                      <PlatformGlyph id={id} size={16} className="flex-shrink-0" />
                       <span className="text-xs font-semibold truncate">
                         {id === 'twitter' ? 'X / Twitter' : id.charAt(0).toUpperCase() + id.slice(1)}
                       </span>
-                      {selected && <span className="ml-auto text-black font-bold text-xs flex-shrink-0">✓</span>}
+                      {selected && <Check size={13} strokeWidth={2.5} className="ml-auto text-black flex-shrink-0" />}
                     </button>
                   )
                 })}
@@ -339,7 +345,7 @@ export default function NewWorkspace() {
                     <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
                       {selectedPlatforms.length > 0
                         ? selectedPlatforms.map(p => (
-                          <span key={p} className="text-lg">{PLATFORM_ICONS[p]}</span>
+                          <PlatformGlyph key={p} id={p} size={18} />
                         ))
                         : <span className="text-xs text-gray-400 dark:text-gray-500">None selected</span>
                       }
