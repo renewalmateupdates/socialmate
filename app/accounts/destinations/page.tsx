@@ -4,6 +4,13 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { CheckCircle2, MapPin, XCircle } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <MapPin size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -18,16 +25,14 @@ type Destination = {
   metadata?: Record<string, any>
 }
 
-const PLATFORM_META: Record<string, { icon: string; label: string; webhookBased: boolean; helpText: string; placeholder: string }> = {
+const PLATFORM_META: Record<string, { label: string; webhookBased: boolean; helpText: string; placeholder: string }> = {
   discord: {
-    icon: '💬',
     label: 'Discord',
     webhookBased: true,
     helpText: 'Go to your Discord server → Channel Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL',
     placeholder: 'https://discord.com/api/webhooks/...',
   },
   telegram: {
-    icon: '✈️',
     label: 'Telegram',
     webhookBased: false,
     helpText: 'Enter your Telegram group or channel username (e.g. @mygroupname) or numeric chat ID',
@@ -148,11 +153,11 @@ export default function Destinations() {
             <p className="text-xs font-bold text-blue-700 mb-2">How destinations work</p>
             <div className="space-y-1.5">
               {[
-                { icon: '💬', text: 'Discord — create a webhook in your channel settings and paste the URL here. SocialMate will post to that channel directly.' },
-                { icon: '✈️', text: 'Telegram — add @SocialMateBot to your group or channel, then enter the group username or chat ID here.' },
+                { id: 'discord', text: 'Discord — create a webhook in your channel settings and paste the URL here. SocialMate will post to that channel directly.' },
+                { id: 'telegram', text: 'Telegram — add @SocialMateBot to your group or channel, then enter the group username or chat ID here.' },
               ].map(item => (
-                <div key={item.icon} className="flex items-start gap-2 text-xs text-blue-600">
-                  <span className="flex-shrink-0">{item.icon}</span>
+                <div key={item.id} className="flex items-start gap-2 text-xs text-blue-600">
+                  <PlatformGlyph id={item.id} size={14} className="flex-shrink-0" />
                   <span>{item.text}</span>
                 </div>
               ))}
@@ -174,7 +179,7 @@ export default function Destinations() {
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
                           platform === p ? 'border-black bg-black text-white' : 'border-gray-200 text-gray-500 hover:border-gray-400'
                         }`}>
-                        <span>{PLATFORM_META[p].icon}</span>
+                        <PlatformGlyph id={p} size={14} />
                         <span>{PLATFORM_META[p].label}</span>
                       </button>
                     ))}
@@ -232,7 +237,7 @@ export default function Destinations() {
             </div>
           ) : destinations.length === 0 && !showForm ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">📍</div>
+              <MapPin className="w-10 h-10 mx-auto mb-3 text-gray-300" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">No destinations yet</p>
               <p className="text-xs text-gray-400 mb-5">
                 Add a Discord webhook or Telegram channel so SocialMate knows where to send your posts.
@@ -245,11 +250,11 @@ export default function Destinations() {
           ) : (
             <div className="space-y-6">
               {Object.entries(byPlatform).map(([plat, dests]) => {
-                const pm = PLATFORM_META[plat] || { icon: '📱', label: plat }
+                const pm = PLATFORM_META[plat] || { label: plat }
                 return (
                   <div key={plat}>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">{pm.icon}</span>
+                      <PlatformGlyph id={plat} size={18} />
                       <h2 className="text-sm font-bold">{pm.label}</h2>
                       <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
                         {dests.length}
@@ -310,7 +315,7 @@ export default function Destinations() {
         <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} /> : <XCircle className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>
