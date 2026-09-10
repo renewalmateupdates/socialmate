@@ -475,7 +475,7 @@ export default function LinkInBio() {
                           slugAvailable === false ? 'border-red-300' : slugAvailable === true ? 'border-green-300' : 'border-gray-200 dark:border-gray-600 focus:border-gray-400'
                         }`} />
                       {checkingSlug && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500">...</span>}
-                      {slugAvailable === true  && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-500 font-bold">✓</span>}
+                      {slugAvailable === true  && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500"><Check size={13} strokeWidth={2.5} /></span>}
                       {slugAvailable === false && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500"><CloseIcon size={13} strokeWidth={2.5} /></span>}
                     </div>
                   </div>
