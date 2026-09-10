@@ -30,11 +30,10 @@ const STRIPE_AGENCY_ANNUAL_PRICE_ID_LEGACY = 'price_1TFMI07OMwDowUuUoHfKJEpo'
 const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1TFMHt7OMwDowUuU56Fzw4fE'
 const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 
-// HERMES add-on — set once the real Prices exist in Stripe (Starter $12/mo,
-// Pro $25/mo per app/hermes/page.tsx). Until then these never match a real
-// price.id, so the checkout/webhook paths below are inert but ready.
-const STRIPE_HERMES_STARTER_PRICE_ID = 'price_HERMES_STARTER_PLACEHOLDER'
-const STRIPE_HERMES_PRO_PRICE_ID     = 'price_HERMES_PRO_PLACEHOLDER'
+// HERMES add-on — live Stripe Prices, created Sept 10, 2026 (Starter $12/mo,
+// Pro $25/mo per app/hermes/page.tsx).
+const STRIPE_HERMES_STARTER_PRICE_ID = 'price_1UEHaA7OMwDowUuUJ2OA4jic'
+const STRIPE_HERMES_PRO_PRICE_ID     = 'price_1UEHcB7OMwDowUuUFwqE1Hk6'
 
 const CREDIT_PACK_PRICES: Record<string, number> = {
   'price_1TFMI47OMwDowUuUhTrbe3oq': 100,
