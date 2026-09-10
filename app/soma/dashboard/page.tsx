@@ -189,8 +189,8 @@ function AutopilotModal({
                 <p className="text-sm font-extrabold text-violet-300">{t('app_soma_dashboard.mode_autopilot')}</p>
                 <p className="text-xs text-gray-400">{t('app_soma_dashboard.autopilot_active_label')}</p>
               </div>
-              <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-700/40 px-2 py-1 rounded-full">
-                ✓ Active
+              <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-700/40 px-2 py-1 rounded-full inline-flex items-center gap-1">
+                <CheckCircle2 size={12} strokeWidth={2} /> Active
               </span>
             </div>
           )}

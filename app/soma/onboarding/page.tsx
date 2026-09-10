@@ -387,7 +387,7 @@ export default function SomaOnboardingPage() {
                           : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500'
                         }`}
                     >
-                      {form.sentenceStyle === opt.id && <span className="mr-2 text-amber-400">✓</span>}
+                      {form.sentenceStyle === opt.id && <Check size={14} strokeWidth={2.5} className="mr-2 inline text-amber-400" />}
                       {opt.label}
                     </button>
                   ))}
@@ -407,7 +407,7 @@ export default function SomaOnboardingPage() {
                           : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500'
                         }`}
                     >
-                      {form.languageStyle === opt.id && <span className="mr-2 text-amber-400">✓</span>}
+                      {form.languageStyle === opt.id && <Check size={14} strokeWidth={2.5} className="mr-2 inline text-amber-400" />}
                       {opt.label}
                     </button>
                   ))}
