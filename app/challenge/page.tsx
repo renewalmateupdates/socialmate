@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { CheckCircle2, Flame, PartyPopper, PenLine } from 'lucide-react'
 
 const CHALLENGE_DAYS = 30
 const CHALLENGE_REWARD = 50
@@ -105,7 +106,7 @@ export default function ChallengePage() {
 
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="text-5xl mb-4">🔥</div>
+          <Flame className="w-12 h-12 mx-auto mb-4 text-amber-500" strokeWidth={1.5} />
           <h1 className="text-4xl font-extrabold tracking-tight mb-2">{t('challenge.title')}</h1>
           <p className="text-gray-400 text-base">
             {t('challenge.subtitle_before')} <span className="text-amber-400 font-bold">{CHALLENGE_REWARD} {t('challenge.bonus_credits')}</span> {t('challenge.subtitle_after')}
@@ -115,7 +116,7 @@ export default function ChallengePage() {
         {/* Completion banner */}
         {isComplete && (
           <div className={`rounded-2xl p-6 text-center mb-8 ${alreadyRewarded ? 'bg-emerald-900/30 border border-emerald-500/40' : 'bg-amber-500/20 border border-amber-500/40'}`}>
-            <p className="text-2xl mb-1">{alreadyRewarded ? '✅' : '🎉'}</p>
+            <p className="flex justify-center mb-1">{alreadyRewarded ? <CheckCircle2 className="w-7 h-7 text-emerald-400" strokeWidth={1.75} /> : <PartyPopper className="w-7 h-7 text-amber-400" strokeWidth={1.75} />}</p>
             <p className="font-extrabold text-lg">
               {alreadyRewarded ? `${t('challenge.complete_already')} ${CHALLENGE_REWARD} ${t('challenge.credits_awarded')}` : `${t('challenge.you_did_it')} ${CHALLENGE_REWARD} ${t('challenge.credits_incoming')}`}
             </p>
@@ -212,7 +213,7 @@ export default function ChallengePage() {
               href="/compose"
               className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-2xl transition-all text-base"
             >
-              ✏️ {t('challenge.cta_start')}
+<PenLine size={16} strokeWidth={2} /> {t('challenge.cta_start')}
             </Link>
           </div>
         )}
@@ -222,7 +223,7 @@ export default function ChallengePage() {
               href="/compose"
               className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-2xl transition-all text-base"
             >
-              ✏️ {t('challenge.cta_keep_going')}
+<PenLine size={16} strokeWidth={2} /> {t('challenge.cta_keep_going')}
             </Link>
           </div>
         )}
