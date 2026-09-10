@@ -1004,8 +1004,8 @@ export default function PartnersDashboardPage() {
               <ClipboardList size={16} strokeWidth={2} />
               <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#f1f1f1' }}>W-9 Tax Form</h3>
               {profile.w9_submitted && (
-                <span style={{ background: 'rgba(34,197,94,0.12)', color: green, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6 }}>
-                  Submitted ✓
+                <span style={{ background: 'rgba(34,197,94,0.12)', color: green, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  <CheckCircle2 size={11} strokeWidth={2.5} /> Submitted
                 </span>
               )}
             </div>
