@@ -5,19 +5,19 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { Check, CheckCircle2, Globe, Search, X as CloseIcon, XCircle } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14 }: { id: string; size?: number }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} />
+}
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Question', 'Poll', 'Thread', 'Other']
-
-const PLATFORM_ICONS: Record<string, string> = {
-  instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
-  facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
-  mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
-}
 
 const PLATFORM_LABELS: Record<string, string> = {
   bluesky: 'Bluesky', discord: 'Discord', telegram: 'Telegram', mastodon: 'Mastodon',
@@ -449,7 +449,7 @@ export default function Templates() {
                             ? 'bg-black text-white border-black'
                             : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                         }`}>
-                        <span>{PLATFORM_ICONS[id]}</span>
+                        <PlatformGlyph id={id} size={12} />
                         <span className="capitalize">{id}</span>
                       </button>
                     ))}
@@ -457,7 +457,7 @@ export default function Templates() {
                       <div key={id}
                         className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
                         title={`${id} — coming soon`}>
-                        <span>{PLATFORM_ICONS[id]}</span>
+                        <PlatformGlyph id={id} size={12} />
                         <span className="capitalize">{id}</span>
                         <span className="text-gray-200 dark:text-gray-600 ml-0.5 text-xs">Soon</span>
                       </div>
@@ -484,7 +484,7 @@ export default function Templates() {
             <div className="space-y-3 mb-5">
               {/* Search bar */}
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm pointer-events-none">🔍</span>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" strokeWidth={2} />
                 <input
                   type="text"
                   value={searchQuery}
@@ -495,7 +495,7 @@ export default function Templates() {
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
-                    ✕
+                    <CloseIcon size={14} strokeWidth={2} />
                   </button>
                 )}
               </div>
@@ -543,7 +543,7 @@ export default function Templates() {
                                 ? 'bg-green-500 text-white border-green-500'
                                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                             }`}>
-                            {copied === t.id ? '✓' : 'Copy'}
+                            {copied === t.id ? <Check size={13} strokeWidth={2.5} /> : 'Copy'}
                           </button>
                           <Link href={`/compose?content=${encodeURIComponent(t.content)}`}
                             className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
@@ -570,7 +570,7 @@ export default function Templates() {
                         {t.platforms.map((p: string) => (
                           <span key={p}
                             className="inline-flex items-center gap-1 text-[10px] font-semibold bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-md">
-                            <span className="text-sm leading-none">{PLATFORM_ICONS[p]}</span>
+                            <PlatformGlyph id={p} size={12} />
                             <span>{PLATFORM_LABELS[p] || p}</span>
                           </span>
                         ))}
@@ -625,7 +625,7 @@ export default function Templates() {
             {/* Starter search + filter */}
             <div className="space-y-3 mb-4">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm pointer-events-none">🔍</span>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" strokeWidth={2} />
                 <input
                   type="text"
                   value={starterSearch}
@@ -636,7 +636,7 @@ export default function Templates() {
                 {starterSearch && (
                   <button onClick={() => setStarterSearch('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
-                    ✕
+                    <CloseIcon size={14} strokeWidth={2} />
                   </button>
                 )}
               </div>
@@ -681,7 +681,7 @@ export default function Templates() {
                               ? 'bg-green-500 text-white border-green-500'
                               : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                           }`}>
-                          {copied === t.id ? '✓' : 'Copy'}
+                          {copied === t.id ? <Check size={13} strokeWidth={2.5} /> : 'Copy'}
                         </button>
                         <Link href={`/compose?content=${encodeURIComponent(t.content)}`}
                           className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
@@ -700,7 +700,7 @@ export default function Templates() {
                       {t.platforms.map(p => (
                         <span key={p}
                           className="inline-flex items-center gap-1 text-[10px] font-semibold bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-md">
-                          <span className="text-sm leading-none">{PLATFORM_ICONS[p]}</span>
+                          <PlatformGlyph id={p} size={12} />
                           <span>{PLATFORM_LABELS[p] || p}</span>
                         </span>
                       ))}
@@ -727,10 +727,10 @@ export default function Templates() {
       </div>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2 ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <XCircle className="w-4 h-4" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>

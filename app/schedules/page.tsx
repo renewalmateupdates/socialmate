@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
+import { ClipboardList, X } from 'lucide-react'
 
 type Slot = { day: string; time: string }
 
@@ -154,7 +155,7 @@ export default function SchedulesPage() {
                       {TIMES.map(t => <option key={t} value={t}>{fmtTime(t)}</option>)}
                     </select>
                     {slots.length > 1 && (
-                      <button onClick={() => removeSlot(i)} className="text-gray-400 hover:text-red-400 text-sm">✕</button>
+                      <button onClick={() => removeSlot(i)} className="text-gray-400 hover:text-red-400 text-sm"><X size={14} strokeWidth={2} /></button>
                     )}
                   </div>
                 ))}
@@ -186,7 +187,7 @@ export default function SchedulesPage() {
           <div className="text-secondary text-sm py-10 text-center">Loading templates…</div>
         ) : templates.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-            <p className="text-4xl mb-3">📋</p>
+            <ClipboardList className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
             <p className="font-bold text-primary mb-1">No templates yet</p>
             <p className="text-sm text-secondary mb-4">Save your posting schedule as a preset to reuse across projects.</p>
             <button
