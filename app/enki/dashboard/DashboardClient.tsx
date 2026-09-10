@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { useI18n } from '@/contexts/I18nContext'
-import { Eye, Medal, Zap } from 'lucide-react'
+import { Check, Eye, Medal, Zap } from 'lucide-react'
 
 // Returns how many minutes until the next 15-min scan boundary
 function minutesToNextScan(): number {
@@ -646,7 +646,7 @@ export default function DashboardClient() {
               {/* Step indicators */}
               <div className="flex items-center gap-2 mb-6">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-6 h-6 rounded-full bg-green-500 text-white text-[11px] font-extrabold flex items-center justify-center shrink-0">✓</span>
+                  <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0"><Check size={13} strokeWidth={3} /></span>
                   <span className="text-xs font-bold text-green-400">{t('app_enki_dashboard.doctrine_armed')}</span>
                 </div>
                 <span className="text-gray-600 text-xs">→</span>
