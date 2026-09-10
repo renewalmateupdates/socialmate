@@ -3,6 +3,7 @@ import Link from 'next/link'
 import BlogInlineCTA from '@/components/BlogInlineCTA'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import PublicFooter from '@/components/PublicFooter'
+import { CalendarDays, Clock, Heart, PenLine } from 'lucide-react'
 
 // Revalidate every 24h — blog posts rarely change; shorter TTL caused hourly ISR cache misses
 // that hit the origin server, causing 3s+ FCP for international visitors on each cache expiry.
@@ -4662,7 +4663,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           </div>
         </nav>
         <div className="max-w-2xl mx-auto px-6 py-32 text-center">
-          <div className="text-5xl mb-6">✍️</div>
+          <PenLine className="w-11 h-11 mx-auto mb-6 text-gray-400" strokeWidth={1.5} />
           <h1 className="text-3xl font-extrabold tracking-tight mb-4 dark:text-gray-100">This post is coming soon</h1>
           <p className="text-gray-400 dark:text-gray-500 leading-relaxed mb-8">
             We only publish real, genuinely useful content. This one is still being written. Check back soon.
@@ -4714,7 +4715,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <Link href="/blog"        className="font-bold text-white">Blog</Link>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/give"   className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:block">❤️ Give</Link>
+          <Link href="/give"   className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:inline-flex items-center gap-1"><Heart size={13} strokeWidth={2} fill="currentColor" /> Give</Link>
           <Link href="/login"  className="text-sm font-semibold text-gray-400 hover:text-white transition-colors hidden sm:block">Sign in</Link>
           <Link href="/signup" className="bg-amber-500 hover:bg-amber-400 text-gray-950 text-sm font-semibold px-4 py-2 rounded-xl transition-all">
             Get started free →
@@ -4735,8 +4736,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4 text-gray-100">{post.title}</h1>
           <p className="text-lg text-gray-400 leading-relaxed mb-6">{post.excerpt}</p>
           <div className="flex items-center gap-4 text-xs text-gray-500 border-t border-gray-800 pt-4">
-            <span>📅 {post.date}</span>
-            <span>⏱ {post.readTime}</span>
+            <span className="inline-flex items-center gap-1"><CalendarDays size={12} strokeWidth={2} /> {post.date}</span>
+            <span className="inline-flex items-center gap-1"><Clock size={12} strokeWidth={2} /> {post.readTime}</span>
           </div>
         </div>
 

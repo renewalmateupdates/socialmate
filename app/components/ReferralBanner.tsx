@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Gift } from 'lucide-react'
 
 export default function ReferralBanner({ refCode }: { refCode: string }) {
   const [dismissed, setDismissed] = useState(false)
@@ -17,7 +18,7 @@ export default function ReferralBanner({ refCode }: { refCode: string }) {
 
   return (
     <div className="w-full bg-black text-white text-sm py-2.5 px-4 flex items-center justify-center gap-3 relative">
-      <span>🎁</span>
+      <Gift size={16} strokeWidth={2} />
       <span className="font-medium">
         {isAffiliate
           ? 'You\'ve been referred by a SocialMate affiliate — create your free account and get started instantly.'

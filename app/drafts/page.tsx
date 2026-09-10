@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { AlertTriangle, CalendarDays, CheckCircle2, FolderOpen, Globe, Heart, MessageCircle, Repeat, X as CloseIcon, XCircle } from 'lucide-react'
+import { AlertTriangle, CalendarDays, CheckCircle2, FolderOpen, Globe, Heart, MessageCircle, PenLine, Repeat, X as CloseIcon, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
@@ -350,7 +350,7 @@ function DraftsInner() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">📝</div>
+              <PenLine className="w-9 h-9 mx-auto mb-3 text-gray-400" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">No {filter === 'all' ? '' : filter + ' '}posts yet</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">
                 {filter === 'scheduled' ? 'Schedule a post and it will appear here.' :
