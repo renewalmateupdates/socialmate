@@ -173,7 +173,7 @@ export default function VsPostoplanPage() {
               },
               {
                 n: '4',
-                title: '$19/month for less vs. $5/month for more',
+                title: '$19/month for less vs. $8/month for more',
                 desc: "Postoplan's paid plan starts at $19/month with limited AI and no community platform support. SocialMate Pro is $8/month and includes 500 AI credits, SOMA access, 5 team seats, and 8 autonomous agents. At every price point, SocialMate delivers more value.",
               },
             ].map((r) => (

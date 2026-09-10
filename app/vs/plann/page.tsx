@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate cheaper than Plann?",
-    a: "Yes. SocialMate is free to start and $8/month for Pro. Plann starts at $13/month. For $5/month, SocialMate gives you more platforms, more AI tools, an autonomous content system (SOMA), and features Plann does not have at any price.",
+    a: "Yes. SocialMate is free to start and $8/month for Pro. Plann starts at $13/month. For $8/month, SocialMate gives you more platforms, more AI tools, an autonomous content system (SOMA), and features Plann does not have at any price.",
   },
   {
     q: "Can SocialMate plan my Instagram feed visually like Plann?",

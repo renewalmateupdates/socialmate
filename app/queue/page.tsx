@@ -975,7 +975,7 @@ function QueueInner() {
                 <span className="text-xl mt-0.5">⚡</span>
                 <div>
                   <p className="text-sm font-extrabold text-white mb-0.5">Auto-scheduling is a Pro feature</p>
-                  <p className="text-xs text-[#9ca3af]">Let SocialMate fill your queue automatically — Pro fills 14 days, Agency fills 30 days at peak engagement times. Upgrade for $5/mo.</p>
+                  <p className="text-xs text-[#9ca3af]">Let SocialMate fill your queue automatically — Pro fills 14 days, Agency fills 30 days at peak engagement times. Upgrade for $8/mo.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-auto">

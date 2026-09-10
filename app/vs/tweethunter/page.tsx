@@ -174,7 +174,7 @@ export default function VsTweetHunterPage() {
               {
                 n: '4',
                 title: 'SOMA handles your X content strategy end-to-end',
-                desc: 'SocialMate\'s SOMA AI system generates a full week of cross-platform content including X posts and threads. Define your voice, topics, and cadence — SOMA writes and schedules everything. No other tool does this for $5/month across 7 platforms including X.',
+                desc: 'SocialMate\'s SOMA AI system generates a full week of cross-platform content including X posts and threads. Define your voice, topics, and cadence — SOMA writes and schedules everything. No other tool does this for $8/month across 7 platforms including X.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
@@ -203,7 +203,7 @@ export default function VsTweetHunterPage() {
 
         {/* BOTTOM CTA */}
         <div className="text-center py-12 bg-void text-ink-high rounded-3xl px-8">
-          <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">7 platforms for $5/month</p>
+          <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">7 platforms for $8/month</p>
           <h2 className="text-3xl font-extrabold mb-4">Schedule X posts — and 6 more platforms</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate posts to X/Twitter via the official API. Schedule threads, set post times, recycle evergreen content.
