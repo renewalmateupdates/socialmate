@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { BookOpen, Check, CheckCircle2, Clipboard, Crown, DollarSign, Link2, Sparkles, Store, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const APP_URL = 'https://socialmate.studio'
 
@@ -65,10 +67,10 @@ export default function AdminInvitesPage() {
     )
   }
 
-  const TABS: { id: Tab; label: string; emoji: string }[] = [
-    { id: 'affiliate', label: 'Affiliate Invites',   emoji: '💰' },
-    { id: 'stax',      label: 'Studio Stax Invites', emoji: '🏪' },
-    { id: 'vip',       label: 'VIP Promo Codes',     emoji: '👑' },
+  const TABS: { id: Tab; label: string; icon: LucideIcon }[] = [
+    { id: 'affiliate', label: 'Affiliate Invites',   icon: DollarSign },
+    { id: 'stax',      label: 'Studio Stax Invites', icon: Store },
+    { id: 'vip',       label: 'VIP Promo Codes',     icon: Crown },
   ]
 
   return (
@@ -96,7 +98,7 @@ export default function AdminInvitesPage() {
                   ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}>
-              <span>{t.emoji}</span> {t.label}
+              <t.icon size={14} strokeWidth={2} /> {t.label}
             </button>
           ))}
         </div>
@@ -162,14 +164,14 @@ function AffiliateInvitePanel() {
           </div>
         </div>
         {result && (
-          <p className={`mt-3 text-sm font-semibold ${result.ok ? 'text-green-600' : 'text-red-500'}`}>
-            {result.ok ? '✅' : '❌'} {result.msg}
+          <p className={`mt-3 text-sm font-semibold inline-flex items-center gap-1.5 ${result.ok ? 'text-green-600' : 'text-red-500'}`}>
+            {result.ok ? <CheckCircle2 size={15} strokeWidth={2} /> : <XCircle size={15} strokeWidth={2} />} {result.msg}
           </p>
         )}
       </div>
 
       <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5">
-        <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">📋 After the invite is accepted</p>
+        <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1 inline-flex items-center gap-1.5"><Clipboard size={13} strokeWidth={2} /> After the invite is accepted</p>
         <p className="text-xs text-amber-600 dark:text-amber-500 leading-relaxed">
           Go to <strong>Affiliates → Applications</strong> in the admin panel to approve the application.
           Once approved, their 6 promo codes are auto-generated in Stripe and Supabase.
@@ -259,8 +261,8 @@ function StaxInvitePanel() {
 
         {result && (
           <div className={`mt-4 p-4 rounded-xl ${result.ok ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/20 border border-red-200'}`}>
-            <p className={`text-sm font-bold mb-2 ${result.ok ? 'text-green-700 dark:text-green-400' : 'text-red-600'}`}>
-              {result.ok ? '✅' : '❌'} {result.msg}
+            <p className={`text-sm font-bold mb-2 inline-flex items-center gap-1.5 ${result.ok ? 'text-green-700 dark:text-green-400' : 'text-red-600'}`}>
+              {result.ok ? <CheckCircle2 size={15} strokeWidth={2} /> : <XCircle size={15} strokeWidth={2} />} {result.msg}
             </p>
             {result.link && (
               <div className="flex gap-2">
@@ -269,7 +271,7 @@ function StaxInvitePanel() {
                 </code>
                 <button onClick={copy}
                   className={`px-4 py-2 rounded-lg text-xs font-bold transition ${copied ? 'bg-green-500 text-white' : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'}`}>
-                  {copied ? '✓ Copied' : 'Copy'}
+                  {copied ? <span className="inline-flex items-center gap-1"><Check size={12} strokeWidth={2.5} /> Copied</span> : 'Copy'}
                 </button>
               </div>
             )}
@@ -331,7 +333,7 @@ function VIPCodesPanel() {
     })
     const json = await res.json()
     if (res.ok) {
-      setSuccess(`✅ ${json.code.code} created in Stripe!`)
+      setSuccess(`${json.code.code} created in Stripe!`)
       setCode(''); setLabel(''); setNote('')
       setDiscountPct('100'); setDuration('forever'); setMaxRed('1'); setUnlimitedRed(false)
       await loadCodes()
@@ -453,11 +455,11 @@ function VIPCodesPanel() {
           </div>
         </div>
 
-        {error   && <p className="text-sm text-red-500 font-semibold mb-3">❌ {error}</p>}
-        {success && <p className="text-sm text-green-600 dark:text-green-400 font-semibold mb-3">{success}</p>}
+        {error   && <p className="text-sm text-red-500 font-semibold mb-3 inline-flex items-center gap-1.5"><XCircle size={14} strokeWidth={2} /> {error}</p>}
+        {success && <p className="text-sm text-green-600 dark:text-green-400 font-semibold mb-3 inline-flex items-center gap-1.5"><CheckCircle2 size={14} strokeWidth={2} /> {success}</p>}
 
         <button onClick={create} disabled={creating || !code.trim() || !label.trim()} className={btnCls}>
-          {creating ? 'Creating in Stripe...' : '✨ Create VIP Code'}
+          {creating ? 'Creating in Stripe...' : <span className="inline-flex items-center gap-1.5 justify-center"><Sparkles size={14} strokeWidth={2} /> Create VIP Code</span>}
         </button>
       </div>
 
@@ -471,7 +473,7 @@ function VIPCodesPanel() {
           <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
         ) : codes.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="text-3xl mb-2">👑</div>
+            <Crown className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
             <p className="text-sm text-gray-400">No VIP codes yet. Create one above.</p>
           </div>
         ) : (
@@ -508,12 +510,16 @@ function VIPCodesPanel() {
                     <button
                       onClick={() => copy(c.code, `code-${c.id}`)}
                       className="px-3 py-1.5 rounded-lg text-xs font-bold border border-theme bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:border-black dark:hover:border-white transition">
-                      {copied === `code-${c.id}` ? '✓ Code' : '📋 Code'}
+                      <span className="inline-flex items-center gap-1">
+                        {copied === `code-${c.id}` ? <Check size={12} strokeWidth={2.5} /> : <Clipboard size={12} strokeWidth={2} />} Code
+                      </span>
                     </button>
                     <button
                       onClick={() => copy(checkoutLink, `link-${c.id}`)}
                       className="px-3 py-1.5 rounded-lg text-xs font-bold border border-theme bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:border-black dark:hover:border-white transition">
-                      {copied === `link-${c.id}` ? '✓ Link' : '🔗 Link'}
+                      <span className="inline-flex items-center gap-1">
+                        {copied === `link-${c.id}` ? <Check size={12} strokeWidth={2.5} /> : <Link2 size={12} strokeWidth={2} />} Link
+                      </span>
                     </button>
                     {c.active && (
                       <button
@@ -533,7 +539,7 @@ function VIPCodesPanel() {
 
       {/* How it works */}
       <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5 text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-        <p className="font-bold mb-1">📖 How VIP codes work</p>
+        <p className="font-bold mb-1 inline-flex items-center gap-1.5"><BookOpen size={13} strokeWidth={2} /> How VIP codes work</p>
         <ul className="space-y-1 list-disc list-inside text-blue-600 dark:text-blue-500">
           <li><strong>Code:</strong> Share it and they type it at any SocialMate checkout to apply the discount</li>
           <li><strong>Pre-filled link:</strong> Goes directly to pricing page with code pre-applied — one click to checkout</li>

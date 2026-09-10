@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Gift, Lock, ShieldAlert, Star, X as CloseIcon } from 'lucide-react'
 
 interface Listing {
   id: string
@@ -298,7 +299,7 @@ export default function AdminStudioStaxPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-400 hover:text-black dark:hover:text-white mt-4 transition-colors">← Dashboard</button>
       </div>
@@ -420,7 +421,10 @@ export default function AdminStudioStaxPage() {
                               ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700'
                               : 'border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-amber-300 hover:text-amber-600'
                           }`}>
-                          {listing.admin_featured ? '⭐ Featured' : '☆ Pin'}
+                          <span className="inline-flex items-center gap-1">
+                            <Star size={12} strokeWidth={2} fill={listing.admin_featured ? 'currentColor' : 'none'} />
+                            {listing.admin_featured ? 'Featured' : 'Pin'}
+                          </span>
                         </button>
                       </td>
                       <td className="px-5 py-3">
@@ -434,7 +438,10 @@ export default function AdminStudioStaxPage() {
                                 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-700'
                                 : 'border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-yellow-300 hover:text-yellow-600'
                             }`}>
-                            {listing.featured ? '⭐ Active' : '☆ Feature'}
+                            <span className="inline-flex items-center gap-1">
+                              <Star size={12} strokeWidth={2} fill={listing.featured ? 'currentColor' : 'none'} />
+                              {listing.featured ? 'Active' : 'Feature'}
+                            </span>
                           </button>
                         ) : (
                           <span className="text-xs text-gray-400">—</span>
@@ -564,7 +571,7 @@ export default function AdminStudioStaxPage() {
                   <div className={`rounded-xl border p-3 space-y-2 ${editIsNsfw ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'}`}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300">🔞 NSFW / Adult Content</p>
+                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300 inline-flex items-center gap-1"><ShieldAlert size={13} strokeWidth={2} /> NSFW / Adult Content</p>
                         <p className="text-xs text-gray-400 mt-0.5">Blurs logo and description on public listing cards</p>
                       </div>
                       <button
@@ -702,13 +709,13 @@ export default function AdminStudioStaxPage() {
                       onClick={() => handleFreeYear(selected.id, adminNotes)}
                       disabled={actionLoading}
                       className="w-full bg-emerald-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-60">
-                      {actionLoading ? 'Processing…' : '🎁 Approve Free (1yr)'}
+                      {actionLoading ? 'Processing…' : <span className="inline-flex items-center gap-1.5 justify-center"><Gift size={14} strokeWidth={2} /> Approve Free (1yr)</span>}
                     </button>
                     <button
                       onClick={() => handleStatusChange(selected.id, 'rejected', adminNotes)}
                       disabled={actionLoading}
                       className="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 text-sm font-semibold py-2.5 rounded-xl hover:bg-red-100 transition-all disabled:opacity-60">
-                      {actionLoading ? 'Processing…' : '✕ Reject'}
+                      {actionLoading ? 'Processing…' : <span className="inline-flex items-center gap-1.5 justify-center"><CloseIcon size={14} strokeWidth={2} /> Reject</span>}
                     </button>
                   </>
                 )}

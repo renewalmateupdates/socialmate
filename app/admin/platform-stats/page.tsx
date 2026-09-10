@@ -1,6 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Globe, Lock } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 interface PlatformStat {
   total: number
@@ -21,19 +28,6 @@ interface StatsData {
   top_users: TopUser[]
   total_published: number
   total_failed: number
-}
-
-const PLATFORM_EMOJI: Record<string, string> = {
-  discord:   '🎮',
-  bluesky:   '🦋',
-  mastodon:  '🐘',
-  telegram:  '✈️',
-  twitter:   '🐦',
-  x:         '🐦',
-  linkedin:  '💼',
-  youtube:   '▶️',
-  pinterest: '📌',
-  instagram: '📸',
 }
 
 const PLATFORM_COLOR: Record<string, string> = {
@@ -69,7 +63,7 @@ export default function AdminPlatformStatsPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-400 hover:text-black dark:hover:text-white mt-4 transition-colors">← Dashboard</button>
       </div>
@@ -130,12 +124,11 @@ export default function AdminPlatformStatsPage() {
                     const successRate = stat.total > 0 ? Math.round(((stat.total - stat.failed) / stat.total) * 100) : 100
                     const barWidth   = Math.round((stat.total / maxTotal) * 100)
                     const color      = PLATFORM_COLOR[platform.toLowerCase()] || 'bg-gray-400'
-                    const emoji      = PLATFORM_EMOJI[platform.toLowerCase()] || '📡'
                     return (
                       <div key={platform} className="bg-surface border border-theme rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3 gap-4">
                           <div className="flex items-center gap-3">
-                            <span className="text-xl">{emoji}</span>
+                            <PlatformGlyph id={platform.toLowerCase()} size={20} />
                             <div>
                               <div className="font-semibold text-gray-900 dark:text-gray-100 capitalize">{platform}</div>
                               <div className="text-xs text-gray-400 mt-0.5">

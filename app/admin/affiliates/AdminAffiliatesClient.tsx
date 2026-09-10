@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { AlertTriangle, CheckCircle2, Gift, XCircle } from 'lucide-react'
 
 interface AffiliateProfile {
   id: string
@@ -275,7 +276,7 @@ export default function AdminAffiliatesClient() {
                       { label: 'Earned',     value: cents(selected.total_earnings_cents) },
                       { label: 'Available',  value: cents(selected.available_balance_cents) },
                       { label: 'Paid Out',   value: cents(selected.paid_out_cents) },
-                      { label: 'W-9',        value: selected.w9_submitted ? 'Submitted' : selected.w9_required ? '⚠️ Required' : 'Not required' },
+                      { label: 'W-9',        value: selected.w9_submitted ? 'Submitted' : selected.w9_required ? <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400"><AlertTriangle size={13} strokeWidth={2} /> Required</span> : 'Not required' },
                     ].map(({ label, value }) => (
                       <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
                         <div className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-0.5">{label}</div>
@@ -314,7 +315,7 @@ export default function AdminAffiliatesClient() {
                   <button onClick={() => generatePromos(selected)}
                     disabled={actionLoading}
                     className="flex-1 bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400 text-sm font-bold py-2.5 rounded-xl hover:opacity-80 transition disabled:opacity-50">
-                    {actionLoading ? '...' : '🎁 Gen Promo Codes'}
+                    {actionLoading ? '...' : <span className="inline-flex items-center gap-1.5 justify-center"><Gift size={14} strokeWidth={2} /> Gen Promo Codes</span>}
                   </button>
                 </div>
 
@@ -357,8 +358,8 @@ export default function AdminAffiliatesClient() {
       </div>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${toast.ok ? 'bg-black text-white' : 'bg-red-500 text-white'}`}>
-          {toast.ok ? '✅' : '❌'} {toast.msg}
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2 ${toast.ok ? 'bg-black text-white' : 'bg-red-500 text-white'}`}>
+          {toast.ok ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <XCircle className="w-4 h-4" strokeWidth={2} />} {toast.msg}
         </div>
       )}
     </div>

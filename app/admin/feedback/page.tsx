@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Lock, MessageCircle } from 'lucide-react'
 
 interface FeedbackItem {
   id: string
@@ -118,7 +119,7 @@ export default function AdminFeedbackPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-400 hover:text-black dark:hover:text-white mt-4 transition-colors">← Dashboard</button>
       </div>
@@ -136,7 +137,7 @@ export default function AdminFeedbackPage() {
           </button>
         </div>
         <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-          <div className="text-4xl mb-4">💬</div>
+          <MessageCircle className="w-10 h-10 mx-auto mb-4 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
           <p className="text-base font-bold text-gray-700 dark:text-gray-300 mb-2">No feedback yet</p>
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-6 max-w-sm mx-auto">
             To start collecting feedback, add a feedback button to your app that calls the{' '}

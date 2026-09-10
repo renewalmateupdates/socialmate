@@ -1,6 +1,13 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { CheckCircle2, Globe, Lock } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 interface PostFailure {
   id: string
@@ -18,16 +25,6 @@ interface DiagnosticsResponse {
   count: number
   error_summary: Record<string, Record<string, number>>
   posts: PostFailure[]
-}
-
-const PLATFORM_EMOJI: Record<string, string> = {
-  bluesky:  '🦋',
-  twitter:  '𝕏',
-  tiktok:   '🎵',
-  discord:  '💬',
-  telegram: '✈️',
-  mastodon: '🐘',
-  linkedin: '💼',
 }
 
 const STATUS_STYLE: Record<string, string> = {
@@ -73,7 +70,7 @@ export default function FailureLogPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-400 hover:text-black dark:hover:text-white mt-4 transition-colors">← Dashboard</button>
       </div>
@@ -131,7 +128,7 @@ export default function FailureLogPage() {
           <div className="text-center py-20 text-gray-400 text-sm">Loading failures…</div>
         ) : !data || data.count === 0 ? (
           <div className="text-center py-24 bg-surface border border-theme rounded-2xl">
-            <div className="text-5xl mb-4">✅</div>
+            <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-emerald-500" strokeWidth={1.5} />
             <p className="text-base font-bold text-gray-700 dark:text-gray-300 mb-2">No failures in the last {days} day{days !== 1 ? 's' : ''}</p>
             <p className="text-sm text-gray-400">All posts published successfully.</p>
           </div>
@@ -145,7 +142,7 @@ export default function FailureLogPage() {
                   {Object.entries(data.error_summary).map(([platform, errors]) => (
                     <div key={platform}>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-base">{PLATFORM_EMOJI[platform] ?? '📡'}</span>
+                        <PlatformGlyph id={platform} size={16} />
                         <span className="text-sm font-bold text-gray-700 dark:text-gray-300 capitalize">{platform}</span>
                         <span className="text-xs text-gray-400">({Object.values(errors).reduce((s, n) => s + n, 0)} failures)</span>
                       </div>
@@ -177,7 +174,7 @@ export default function FailureLogPage() {
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all capitalize ${
                       platformFilter === p ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                     }`}>
-                    {PLATFORM_EMOJI[p] ?? '📡'} {p}
+                    <span className="inline-flex items-center gap-1"><PlatformGlyph id={p} size={12} /> {p}</span>
                   </button>
                 ))}
               </div>
@@ -199,8 +196,8 @@ export default function FailureLogPage() {
                           {post.status}
                         </span>
                         {Object.keys(post.errors).map(pl => (
-                          <span key={pl} className="text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-2 py-0.5 rounded-full font-semibold">
-                            {PLATFORM_EMOJI[pl] ?? '📡'} {pl} failed
+                          <span key={pl} className="text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
+                            <PlatformGlyph id={pl} size={11} /> {pl} failed
                           </span>
                         ))}
                         {post.succeeded !== 'none' && (
@@ -225,7 +222,7 @@ export default function FailureLogPage() {
                       {Object.entries(post.errors).map(([platform, msg]) => (
                         <div key={platform}>
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-sm">{PLATFORM_EMOJI[platform] ?? '📡'}</span>
+                            <PlatformGlyph id={platform} size={13} />
                             <span className="text-xs font-bold text-gray-600 dark:text-gray-400 capitalize">{platform}</span>
                           </div>
                           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2 text-xs text-red-700 dark:text-red-300 font-mono leading-relaxed break-all">

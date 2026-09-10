@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Toast from '@/components/Toast'
+import { CheckCircle2, Lock } from 'lucide-react'
 
 interface WLRequest {
   user_id: string
@@ -86,7 +87,7 @@ export default function AdminWhiteLabelPage() {
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl mb-3">🔒</div>
+        <Lock className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Access denied</p>
         <p className="text-xs text-gray-400 mt-1 mb-4">Admin access required</p>
         <button onClick={() => router.push('/dashboard')}
@@ -135,7 +136,7 @@ export default function AdminWhiteLabelPage() {
           <div className="text-center py-20 text-red-500 text-sm">{error}</div>
         ) : requests.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-            <div className="text-4xl mb-3">✅</div>
+            <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-emerald-500" strokeWidth={1.5} />
             <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">No {statusFilter} requests</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">All clear.</p>
           </div>

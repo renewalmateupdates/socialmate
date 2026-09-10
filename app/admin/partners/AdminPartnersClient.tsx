@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Bug, CheckCircle2, Lightbulb, Mail, Mailbox, MessageCircle, Trash2 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -450,11 +452,11 @@ export default function AdminPartnersClient() {
             disabled={launchEmailSending}
             style={{ padding: '8px 16px', background: '#ff6154', color: 'white', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: launchEmailSending ? 'not-allowed' : 'pointer', opacity: launchEmailSending ? 0.6 : 1 }}
           >
-            {launchEmailSending ? 'Sending...' : '📧 Send Launch Email to All Users'}
+            {launchEmailSending ? 'Sending...' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Mail size={14} strokeWidth={2} /> Send Launch Email to All Users</span>}
           </button>
           {launchEmailResult && (
-            <span style={{ fontSize: 12, color: '#4ade80' }}>
-              ✅ Sent to {launchEmailResult.sent} users ({launchEmailResult.failed} failed)
+            <span style={{ fontSize: 12, color: '#4ade80', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <CheckCircle2 size={13} strokeWidth={2} /> Sent to {launchEmailResult.sent} users ({launchEmailResult.failed} failed)
             </span>
           )}
         </div>
@@ -692,7 +694,7 @@ export default function AdminPartnersClient() {
             </div>
             {feedback.length === 0 ? (
               <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 40, textAlign: 'center' }}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>📭</div>
+                <Mailbox size={32} strokeWidth={1.5} style={{ margin: '0 auto 12px', color: muted }} />
                 <p style={{ fontSize: 14, color: muted, margin: 0 }}>No feedback yet. The pink bubble on every page sends messages here.</p>
               </div>
             ) : (
@@ -701,8 +703,8 @@ export default function AdminPartnersClient() {
                   const typeColor: Record<string, string> = {
                     bug: '#f87171', feature: '#60a5fa', general: '#a3a3a3',
                   }
-                  const typeEmoji: Record<string, string> = {
-                    bug: '🐛', feature: '💡', general: '💬',
+                  const typeEmoji: Record<string, LucideIcon> = {
+                    bug: Bug, feature: Lightbulb, general: MessageCircle,
                   }
                   return (
                     <div key={item.id} style={{
@@ -712,7 +714,7 @@ export default function AdminPartnersClient() {
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 14 }}>{typeEmoji[item.type] ?? '💬'}</span>
+                          {(() => { const TypeIcon = typeEmoji[item.type] ?? MessageCircle; return <TypeIcon size={14} strokeWidth={1.75} /> })()}
                           <span style={{
                             fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                             letterSpacing: '0.08em', color: typeColor[item.type] ?? muted,
@@ -737,7 +739,7 @@ export default function AdminPartnersClient() {
                               fontFamily: 'inherit',
                             }}
                           >
-                            {deletingFeedbackId === item.id ? '…' : '🗑'}
+                            {deletingFeedbackId === item.id ? '…' : <Trash2 size={12} strokeWidth={2} />}
                           </button>
                         </div>
                       </div>
@@ -795,9 +797,9 @@ export default function AdminPartnersClient() {
                           <button
                             onClick={() => sendPaymentLink(listing.id)}
                             disabled={listingActionLoading}
-                            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#22c55e', color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
+                            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#22c55e', color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1, display: 'inline-flex', alignItems: 'center', gap: 6 }}
                           >
-                            ✅ Approve & Send Payment Link
+                            <CheckCircle2 size={13} strokeWidth={2} /> Approve & Send Payment Link
                           </button>
                         )}
                         {/* Resend link if already approved but maybe they didn't pay */}
@@ -1023,7 +1025,7 @@ export default function AdminPartnersClient() {
                       cursor: 'pointer', fontFamily: 'inherit', opacity: 0.7,
                     }}
                   >
-                    🗑 Remove Entirely
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Trash2 size={12} strokeWidth={2} /> Remove Entirely</span>
                   </button>
                 ) : (
                   <div style={{ border: '1px solid rgba(239,68,68,0.4)', borderRadius: 8, padding: 12 }}>
