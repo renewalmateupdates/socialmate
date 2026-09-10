@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { Handshake } from 'lucide-react'
 
 const gold  = '#F59E0B'
 const dark  = '#0a0a0a'
@@ -10,7 +11,7 @@ export default function DeclinedPage() {
   return (
     <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ maxWidth: 440, textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🤝</div>
+        <Handshake size={42} strokeWidth={1.5} color={gold} style={{ marginBottom: 16 }} />
         <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
           No worries, it's all good!
         </h1>

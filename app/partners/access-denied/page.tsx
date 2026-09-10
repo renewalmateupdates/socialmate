@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { Calendar, Check, CheckCircle2, Clock, CreditCard, Handshake, PartyPopper } from 'lucide-react'
 
 const gold   = '#F59E0B'
 const purple = '#7C3AED'
@@ -152,7 +153,7 @@ export default function AccessDeniedPage() {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 440, textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 20 }}>🤝</div>
+          <Handshake size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Become a SocialMate Affiliate</h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 32 }}>
             Earn 30–40% recurring commission on every referral. Sign in to apply.
@@ -171,7 +172,7 @@ export default function AccessDeniedPage() {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 480, textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 20 }}>💳</div>
+          <CreditCard size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Paid plan required</h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
             SocialMate affiliates must be active paid subscribers. We want our affiliates to genuinely know and use the product — that's what makes for real, trustworthy recommendations.
@@ -180,7 +181,7 @@ export default function AccessDeniedPage() {
             <p style={{ fontSize: 12, fontWeight: 700, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>What affiliates earn</p>
             {['30% recurring on every referral subscription','40% at 100+ active referrals','10–15% on credit pack purchases via your promo code','Unique single-use promo codes that auto-regenerate'].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: i < 3 ? 10 : 0 }}>
-                <span style={{ color: gold, fontWeight: 700 }}>✓</span>
+                <Check size={15} strokeWidth={2.5} color={gold} style={{ flexShrink: 0, marginTop: 2 }} />
                 <span style={{ fontSize: 14, color: '#d1d5db', lineHeight: 1.5 }}>{item}</span>
               </div>
             ))}
@@ -203,7 +204,7 @@ export default function AccessDeniedPage() {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 440, textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 20 }}>⏳</div>
+          <Clock size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Application under review</h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
             We review applications manually and typically respond within 3 business days. You'll get an email either way.
@@ -221,7 +222,7 @@ export default function AccessDeniedPage() {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 440, textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 20 }}>📅</div>
+          <Calendar size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Come back soon</h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
             Your previous application wasn't approved. You can reapply on <strong style={{ color: gold }}>{reapplyDate}</strong>.
@@ -244,7 +245,7 @@ export default function AccessDeniedPage() {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>✓</div>
+          <CheckCircle2 size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 16 }} />
           <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f1f1', marginBottom: 12 }}>You're already an affiliate!</h1>
           <Link href="/partners/dashboard" style={{ color: gold, fontSize: 14, textDecoration: 'none', fontWeight: 700 }}>Go to your dashboard →</Link>
         </div>
@@ -257,7 +258,7 @@ export default function AccessDeniedPage() {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 440, textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}>🎉</div>
+          <PartyPopper size={42} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Application submitted!</h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
             We review every application manually and will get back to you within 3 business days. Keep an eye on your email.
