@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
 import Link from 'next/link'
-import { Check, CheckCircle2, FolderOpen, ImagePlus, Video, X as CloseIcon, XCircle } from 'lucide-react'
+import { Check, CheckCircle2, FolderOpen, ImagePlus, Loader2, Video, X as CloseIcon, XCircle } from 'lucide-react'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -169,7 +169,7 @@ export default function MediaLibrary() {
                 onChange={handleUpload} className="hidden" id="media-upload" />
               <label htmlFor="media-upload"
                 className={`inline-block bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                {uploading ? `⏳ ${t('app_media.uploading')}` : `+ ${t('app_media.upload')}`}
+                {uploading ? <span className="inline-flex items-center gap-1.5"><Loader2 size={13} strokeWidth={2} className="animate-spin" /> {t('app_media.uploading')}</span> : `+ ${t('app_media.upload')}`}
               </label>
             </div>
           </div>

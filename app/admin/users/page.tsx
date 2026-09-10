@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Ban, Clock, DollarSign, Lock, Store } from 'lucide-react'
+import { Ban, Clock, DollarSign, Lock, Store, Timer } from 'lucide-react'
 
 interface PostStats { published: number; failed: number; partial: number; scheduled: number }
 interface PlatformStat { published: number; failed: number }
@@ -319,8 +319,8 @@ function AdminUsersInner() {
                             </span>
                           )}
                           {(u.post_stats?.scheduled ?? 0) > 0 && (
-                            <span className="text-amber-500">
-                              · {u.post_stats.scheduled} ⏳
+                            <span className="text-amber-500 inline-flex items-center gap-0.5">
+                              · {u.post_stats.scheduled} <Timer size={11} strokeWidth={2} />
                             </span>
                           )}
                         </div>

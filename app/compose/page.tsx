@@ -12,7 +12,8 @@ import { useI18n } from '@/contexts/I18nContext'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import { track, trackOnce } from '@/lib/analytics'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { AlertTriangle, Ban, BarChart3, Building2, CheckCircle2, ClipboardList, Clock, Eye, FlaskConical, Film, Globe, Hash, Image as ImageIcon, Lightbulb, Lock, Mic, MessagesSquare, RefreshCw, Repeat, Scissors, Sparkles, X as CloseIcon, Zap } from 'lucide-react'
+import { AlertTriangle, BadgePercent, Ban, BarChart3, Bookmark, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ClipboardList, Clock, Eye, Fish, FlaskConical, Film, Flame, Globe, Hash, Heart, HeartHandshake, HelpCircle, Image as ImageIcon, Lightbulb, ListOrdered, Lock, Mic, MessageCircle, MessagesSquare, Newspaper, Paperclip, PartyPopper, PenLine, Recycle, RefreshCw, Repeat, Repeat2, Reply, Rocket, Scissors, Sparkles, Star, TrendingUp, X as CloseIcon, XCircle, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -20,15 +21,15 @@ function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: n
 }
 
 const PLATFORMS = [
-  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
-  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300,   live: true  },
-  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096,  live: true  },
-  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500,   live: true  },
-  { id: 'twitter',   name: 'X',         icon: '🐦', limit: 280,   live: true  },
-  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000,  live: true  },
-  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000,  live: false },
-  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500,   live: false },
-  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000, live: false },
+  { id: 'discord',   name: 'Discord',   limit: 2000,  live: true  },
+  { id: 'bluesky',   name: 'Bluesky',   limit: 300,   live: true  },
+  { id: 'telegram',  name: 'Telegram',  limit: 4096,  live: true  },
+  { id: 'mastodon',  name: 'Mastodon',  limit: 500,   live: true  },
+  { id: 'twitter',   name: 'X',         limit: 280,   live: true  },
+  { id: 'linkedin',  name: 'LinkedIn',  limit: 3000,  live: true  },
+  { id: 'youtube',   name: 'YouTube',   limit: 5000,  live: false },
+  { id: 'pinterest', name: 'Pinterest', limit: 500,   live: false },
+  { id: 'reddit',    name: 'Reddit',    limit: 40000, live: false },
 ]
 
 // TikTok is deliberately NOT in here. Its Production API has been approved
@@ -38,22 +39,22 @@ const PLATFORMS = [
 // the thing they had just connected did not work yet. It is rendered below as
 // a link to the Studio instead.
 const COMING_SOON_PLATFORMS = [
-  { id: 'instagram', name: 'Instagram', icon: '📸' },
-  { id: 'facebook',  name: 'Facebook',  icon: '📘' },
-  { id: 'threads',   name: 'Threads',   icon: '🧵' },
-  { id: 'snapchat',  name: 'Snapchat',  icon: '👻' },
-  { id: 'lemon8',    name: 'Lemon8',    icon: '🍋' },
-  { id: 'bereal',    name: 'BeReal',    icon: '📷' },
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'facebook',  name: 'Facebook' },
+  { id: 'threads',   name: 'Threads' },
+  { id: 'snapchat',  name: 'Snapchat' },
+  { id: 'lemon8',    name: 'Lemon8' },
+  { id: 'bereal',    name: 'BeReal' },
 ]
 
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
-const AI_TOOLS = [
-  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 5,  desc: 'Generate a caption from your topic'     },
-  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
-  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
-  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 10, desc: 'Reshape long content for this platform' },
+const AI_TOOLS: { id: string; label: string; icon: LucideIcon; credits: number; desc: string }[] = [
+  { id: 'caption',   label: 'Caption',   icon: PenLine,     credits: 5,  desc: 'Generate a caption from your topic'     },
+  { id: 'rewrite',   label: 'Rewrite',   icon: Repeat2,     credits: 5,  desc: 'Rewrite your post to be punchier'       },
+  { id: 'hook',      label: 'Hook',      icon: Fish,        credits: 5,  desc: 'Generate 3 viral opening hooks'         },
+  { id: 'thread',    label: 'Thread',    icon: ListOrdered, credits: 10, desc: 'Turn your idea into a full thread'      },
+  { id: 'repurpose', label: 'Repurpose', icon: Recycle,     credits: 10, desc: 'Reshape long content for this platform' },
 ]
 
 const SCORE_CREDIT_COST = 5
@@ -1860,25 +1861,25 @@ function ComposeInner() {
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">{t('app_compose.template')}</p>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      { id: 'starter-1',  label: '🚀 Product Launch'        },
-                      { id: 'starter-2',  label: '💡 Tips & Tricks'          },
-                      { id: 'starter-3',  label: '🤔 Engagement Hook'        },
-                      { id: 'starter-4',  label: '👀 Behind the Scenes'      },
-                      { id: 'starter-5',  label: '📰 Weekly Roundup'         },
-                      { id: 'starter-6',  label: '🎉 Milestone Announcement' },
-                      { id: 'starter-7',  label: '🔥 Hot Take'               },
-                      { id: 'starter-8',  label: '🧵 Storytime'              },
-                      { id: 'starter-9',  label: '🔖 Value Drop'             },
-                      { id: 'starter-10', label: '📊 Question / Poll'        },
-                      { id: 'starter-11', label: '📈 Behind the Numbers'     },
-                      { id: 'starter-12', label: '🗓️ Day in My Life'        },
-                      { id: 'starter-13', label: '💡 Lesson Learned'         },
-                      { id: 'starter-14', label: '🙏 Appreciation Post'      },
-                      { id: 'starter-15', label: '💰 Promotion / Offer'      },
+                      { id: 'starter-1',  label: 'Product Launch',         icon: Rocket },
+                      { id: 'starter-2',  label: 'Tips & Tricks',          icon: Lightbulb },
+                      { id: 'starter-3',  label: 'Engagement Hook',        icon: HelpCircle },
+                      { id: 'starter-4',  label: 'Behind the Scenes',      icon: Eye },
+                      { id: 'starter-5',  label: 'Weekly Roundup',         icon: Newspaper },
+                      { id: 'starter-6',  label: 'Milestone Announcement', icon: PartyPopper },
+                      { id: 'starter-7',  label: 'Hot Take',               icon: Flame },
+                      { id: 'starter-8',  label: 'Storytime',              icon: BookOpen },
+                      { id: 'starter-9',  label: 'Value Drop',             icon: Bookmark },
+                      { id: 'starter-10', label: 'Question / Poll',        icon: BarChart3 },
+                      { id: 'starter-11', label: 'Behind the Numbers',     icon: TrendingUp },
+                      { id: 'starter-12', label: 'Day in My Life',         icon: CalendarDays },
+                      { id: 'starter-13', label: 'Lesson Learned',         icon: Lightbulb },
+                      { id: 'starter-14', label: 'Appreciation Post',      icon: HeartHandshake },
+                      { id: 'starter-15', label: 'Promotion / Offer',      icon: BadgePercent },
                     ].map(t => (
                       <Link key={t.id} href={`?starterTemplate=${t.id}`}
-                        className="text-xs font-semibold px-3 py-2.5 min-h-[44px] inline-flex items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all">
-                        {t.label}
+                        className="text-xs font-semibold px-3 py-2.5 min-h-[44px] inline-flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all">
+                        <t.icon size={13} strokeWidth={2} /> {t.label}
                       </Link>
                     ))}
                   </div>
@@ -2154,7 +2155,7 @@ function ComposeInner() {
                           )}
                           {!item.uploading && item.url && (
                             <div className="absolute top-1 left-1">
-                              <span className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[9px] font-bold">✓</span>
+                              <span className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white"><Check size={10} strokeWidth={3} /></span>
                             </div>
                           )}
                           <button
@@ -2177,7 +2178,7 @@ function ComposeInner() {
                       onClick={() => fileInputRef.current?.click()}
                       disabled={mediaItems.length >= 4}
                       className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2.5 min-h-[44px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 dark:hover:border-gray-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                      <span>📎</span>
+                      <Paperclip size={13} strokeWidth={2} />
                       {mediaItems.length === 0 ? 'Attach image / video' : `${mediaItems.length}/4 attached`}
                     </button>
                     {mediaItems.length > 0 && (
@@ -2276,7 +2277,7 @@ function ComposeInner() {
                 {showPollPanel && pollPlatformsActive && (
                   <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">📊 Poll Options</p>
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide inline-flex items-center gap-1.5"><BarChart3 size={12} strokeWidth={2} /> Poll Options</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500">{pollCharLimit} char limit per option</p>
                     </div>
                     <div className="space-y-2 mb-3">
@@ -2519,7 +2520,7 @@ function ComposeInner() {
                         : (aiLoading || !!rateLimitedUntil) ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
                         : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-gray-400 text-gray-700'
                       }`}>
-                      <div className="text-lg mb-1">{tool.emoji}</div>
+                      <div className="mb-1 flex justify-center"><tool.icon size={18} strokeWidth={1.75} /></div>
                       <p className="text-xs font-bold">{tool.label}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tool.credits} cr</p>
                     </button>
@@ -2552,7 +2553,7 @@ function ComposeInner() {
                 {showRepurposePanel && (
                   <div className="mb-4 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">🔄 Repurpose Content</p>
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide inline-flex items-center gap-1.5"><RefreshCw size={12} strokeWidth={2} /> Repurpose Content</p>
                       <button
                         onClick={() => { setShowRepurposePanel(false); setRepurposeResult(''); setRepurposeError('') }}
                         className="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-base font-bold">
@@ -2960,7 +2961,7 @@ function ComposeInner() {
                               type="button"
                               onClick={() => setRecurrenceEndDate('')}
                               className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                              ✕
+                              <CloseIcon size={13} strokeWidth={2} />
                             </button>
                           )}
                         </div>
@@ -2994,8 +2995,8 @@ function ComposeInner() {
                           <p className="text-xs font-bold text-gray-900">{PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}</p>
                           {result.error && <p className="text-xs text-red-500 mt-0.5">{result.error}</p>}
                         </div>
-                        <span className={`text-xs font-bold flex-shrink-0 ${result.success ? 'text-green-600' : 'text-red-500'}`}>
-                          {result.success ? '✓ Published' : '✗ Failed'}
+                        <span className={`text-xs font-bold flex-shrink-0 inline-flex items-center gap-1 ${result.success ? 'text-green-600' : 'text-red-500'}`}>
+                          {result.success ? <><CheckCircle2 size={12} strokeWidth={2} /> Published</> : <><XCircle size={12} strokeWidth={2} /> Failed</>}
                         </span>
                       </div>
                     ))}
@@ -3170,23 +3171,23 @@ function ComposeInner() {
                   <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Quick Start</p>
                   <div className="space-y-2">
                     {[
-                      { emoji: '1️⃣', text: 'Connect a social account', href: '/accounts' },
-                      { emoji: '2️⃣', text: 'Write your post or use an AI tool', href: null },
-                      { emoji: '3️⃣', text: 'Post now or schedule it', href: null },
+                      { text: 'Connect a social account', href: '/accounts' },
+                      { text: 'Write your post or use an AI tool', href: null },
+                      { text: 'Post now or schedule it', href: null },
                     ].map((step, i) => (
                       step.href
                         ? <a key={i} href={step.href} className="flex items-center gap-2 text-xs text-gray-300 hover:text-white transition-colors">
-                            <span>{step.emoji}</span> <span className="underline underline-offset-2">{step.text}</span>
+                            <span className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold flex-shrink-0">{i + 1}</span> <span className="underline underline-offset-2">{step.text}</span>
                           </a>
                         : <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
-                            <span>{step.emoji}</span> <span>{step.text}</span>
+                            <span className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold flex-shrink-0">{i + 1}</span> <span>{step.text}</span>
                           </div>
                     ))}
                   </div>
                   <div className="mt-4 pt-3 border-t border-white/10">
                     <p className="text-xs text-gray-500 mb-2">Try a starter template:</p>
-                    <Link href="?starterTemplate=starter-1" className="block w-full text-center py-2 bg-white/10 hover:bg-white/20 text-xs font-bold rounded-lg transition-all">
-                      🚀 Product Launch Template
+                    <Link href="?starterTemplate=starter-1" className="w-full text-center py-2 bg-white/10 hover:bg-white/20 text-xs font-bold rounded-lg transition-all inline-flex items-center justify-center gap-1.5">
+                      <Rocket size={13} strokeWidth={2} /> Product Launch Template
                     </Link>
                   </div>
                 </div>
@@ -3270,7 +3271,7 @@ function ComposeInner() {
                 aria-label="Dismiss"
                 className="shrink-0 text-white/70 hover:text-white transition"
               >
-                ✕
+                <CloseIcon size={14} strokeWidth={2} />
               </button>
             </>
           )}
@@ -3333,14 +3334,14 @@ function ComposeInner() {
                                 {previewText || <span className="text-gray-300 dark:text-gray-600 italic">Nothing written yet...</span>}
                               </p>
                               <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
-                                <span className="flex items-center gap-1 text-xs text-gray-400">💬 <span>0</span></span>
-                                <span className="flex items-center gap-1 text-xs text-gray-400">🔁 <span>0</span></span>
-                                <span className="flex items-center gap-1 text-xs text-gray-400">❤️ <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-400"><MessageCircle size={13} strokeWidth={2} /> <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-400"><Repeat2 size={13} strokeWidth={2} /> <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-400"><Heart size={13} strokeWidth={2} /> <span>0</span></span>
                               </div>
                             </div>
                           </div>
                           <div className="mt-2 flex items-center gap-1.5">
-                            <span className="text-sky-400 text-base">🦋</span>
+                            <PlatformGlyph id="bluesky" size={14} className="text-sky-400" />
                             <span className="text-xs font-bold text-sky-400">Bluesky</span>
                             <span className={`ml-auto text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                               {previewText.length}/{platform.limit}
@@ -3358,7 +3359,7 @@ function ComposeInner() {
                         <div key={platformId} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                              <span className="text-white text-lg">🐘</span>
+                              <PlatformGlyph id="mastodon" size={18} className="text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
@@ -3384,14 +3385,14 @@ function ComposeInner() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-5 mt-2 pt-2 border-t border-gray-50 dark:border-gray-800">
-                                <span className="text-xs text-gray-400">↩ Reply</span>
-                                <span className="text-xs text-gray-400">🔁 Boost</span>
-                                <span className="text-xs text-gray-400">⭐ Fav</span>
+                                <span className="text-xs text-gray-400 flex items-center gap-1"><Reply size={12} strokeWidth={2} /> Reply</span>
+                                <span className="text-xs text-gray-400 flex items-center gap-1"><Repeat2 size={12} strokeWidth={2} /> Boost</span>
+                                <span className="text-xs text-gray-400 flex items-center gap-1"><Star size={12} strokeWidth={2} /> Fav</span>
                               </div>
                             </div>
                           </div>
                           <div className="mt-2 flex items-center gap-1.5">
-                            <span className="text-purple-500 text-base">🐘</span>
+                            <PlatformGlyph id="mastodon" size={14} className="text-purple-500" />
                             <span className="text-xs font-bold text-purple-500">Mastodon</span>
                           </div>
                         </div>
@@ -3420,15 +3421,15 @@ function ComposeInner() {
                                 {truncated && <span className="text-blue-400 ml-1">... (truncated at 280)</span>}
                               </p>
                               {truncated && (
-                                <p className="text-xs text-red-400 mt-1.5 font-semibold">
-                                  ⚠️ {previewText.length - 280} characters over X&apos;s 280 limit
+                                <p className="text-xs text-red-400 mt-1.5 font-semibold flex items-center gap-1.5">
+                                  <AlertTriangle size={12} strokeWidth={2} /> {previewText.length - 280} characters over X&apos;s 280 limit
                                 </p>
                               )}
                               <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-800">
-                                <span className="flex items-center gap-1 text-xs text-gray-500">💬 <span>0</span></span>
-                                <span className="flex items-center gap-1 text-xs text-gray-500">🔁 <span>0</span></span>
-                                <span className="flex items-center gap-1 text-xs text-gray-500">❤️ <span>0</span></span>
-                                <span className="flex items-center gap-1 text-xs text-gray-500">📊 <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500"><MessageCircle size={13} strokeWidth={2} /> <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500"><Repeat2 size={13} strokeWidth={2} /> <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500"><Heart size={13} strokeWidth={2} /> <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500"><BarChart3 size={13} strokeWidth={2} /> <span>0</span></span>
                               </div>
                             </div>
                           </div>
@@ -3462,7 +3463,7 @@ function ComposeInner() {
                             </div>
                           </div>
                           <div className="mt-2 flex items-center gap-1.5">
-                            <span className="text-indigo-400 text-base">💬</span>
+                            <PlatformGlyph id="discord" size={14} className="text-indigo-400" />
                             <span className="text-xs font-bold text-indigo-400">Discord</span>
                             <span className={`ml-auto text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-400' : 'text-gray-500'}`}>
                               {previewText.length}/{platform.limit.toLocaleString()}
@@ -3486,7 +3487,7 @@ function ComposeInner() {
                             </div>
                           </div>
                           <div className="mt-2 flex items-center gap-1.5">
-                            <span className="text-[#2AABEE] text-base">✈️</span>
+                            <PlatformGlyph id="telegram" size={14} className="text-[#2AABEE]" />
                             <span className="text-xs font-bold text-[#2AABEE]">Telegram</span>
                             <span className={`ml-auto text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                               {previewText.length}/{platform.limit.toLocaleString()}
@@ -3500,7 +3501,7 @@ function ComposeInner() {
                     return (
                       <div key={platformId} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xl">{platform.icon}</span>
+                          <PlatformGlyph id={platform.id} size={18} />
                           <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{platform.name}</span>
                           {threadCount > 1 && (
                             <span className="ml-auto text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">1/{threadCount}</span>
