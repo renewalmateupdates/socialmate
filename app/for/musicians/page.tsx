@@ -3,39 +3,48 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, CalendarDays, MessageCircle, Music2, Recycle, Rocket, Sparkles } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'Bluesky',    icon: '🦋', note: 'Live' },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live' },
-  { name: 'TikTok',     icon: '🎵', note: 'Live' },
-  { name: 'Discord',    icon: '💬', note: 'Live' },
-  { name: 'Telegram',   icon: '✈️', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'LinkedIn',   icon: '💼', note: 'Live' },
+  { name: 'Bluesky',    icon: 'bluesky', note: 'Live' },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live' },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live' },
+  { name: 'Discord',    icon: 'discord', note: 'Live' },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'LinkedIn',   icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'YouTube',   icon: '▶️' },
-  { name: 'Threads',   icon: '🧵' },
-  { name: 'Facebook',  icon: '📘' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'YouTube',   icon: 'youtube' },
+  { name: 'Threads',   icon: 'threads' },
+  { name: 'Facebook',  icon: 'facebook' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'New single drops Friday. Spend all week manually posting teasers to 5 different apps instead of making music.',
     after:  'Schedule your entire release campaign in one sitting. SocialMate posts across every platform on your timeline.',
-    icon: '🎶',
+    icon: Music2,
   },
   {
     before: 'Post one week, disappear for three. Fans unfollow. Algorithm tanks. Start over.',
     after:  'Batch a month of content in one session. Stay consistent on every platform without burning out.',
-    icon: '📅',
+    icon: CalendarDays,
   },
   {
     before: 'Bluesky fans are different from TikTok fans. Writing separate captions for each platform takes forever.',
     after:  'AI adapts your content for each platform\'s style. One idea, multiple formats, done in seconds.',
-    icon: '🤖',
+    icon: Bot,
   },
 ]
 
@@ -43,37 +52,37 @@ const FEATURES = [
   {
     title: 'Schedule Release Campaigns',
     desc:  'Plan your entire single or album release — teasers, drop day posts, follow-up pushes — scheduled across every platform in advance. Your release runs on autopilot.',
-    icon:  '🚀',
+    icon:  Rocket,
     badge: 'Free',
   },
   {
     title: 'Bluesky & Mastodon for Indie Audiences',
     desc:  'Independent music fans live on Bluesky and Mastodon. SocialMate is one of the few schedulers that supports both open social platforms where indie artists are actually growing.',
-    icon:  '🦋',
+    icon:  Sparkles,
     badge: 'Free',
   },
   {
     title: 'TikTok Scheduling',
     desc:  'Schedule your behind-the-scenes clips, snippets, and music videos directly to TikTok. TikTok music discovery is real — consistent posting is how artists blow up.',
-    icon:  '🎵',
+    icon:  Music2,
     badge: 'Free',
   },
   {
     title: 'Discord Fan Community Posting',
     desc:  'Post track announcements, exclusive updates, and listening party invites directly to your Discord server. Keep your core fanbase engaged without manually switching apps.',
-    icon:  '💬',
+    icon:  MessageCircle,
     badge: 'Free',
   },
   {
     title: 'SOMA AI Generates Your Captions',
     desc:  "Tell SOMA your sound, your story, and your audience — it generates platform-specific captions for TikTok hooks, Bluesky threads, and announcement posts that actually sound like you.",
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'Evergreen Content Recycling',
     desc:  'Your music catalog never stops growing. Set older tracks and evergreen content to auto-recycle so new fans always find your best work — not just your latest release.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Pro',
   },
 ]
@@ -203,7 +212,7 @@ export default function MusiciansPage() {
                 </div>
                 <div className="bg-amber/10 border border-amber/40 rounded-2xl p-5">
                   <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_musicians.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -225,7 +234,7 @@ export default function MusiciansPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -252,7 +261,7 @@ export default function MusiciansPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_musicians.platforms_live_badge')}</span>
               </div>
@@ -263,7 +272,7 @@ export default function MusiciansPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_musicians.platforms_coming_badge')}</span>
               </div>

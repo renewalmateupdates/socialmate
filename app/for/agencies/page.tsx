@@ -3,27 +3,27 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
-
+import { Banknote, BarChart3, Bot, Building2, Clapperboard, Globe, Package, Puzzle, Recycle, Satellite, Sparkles, Tag, Users } from 'lucide-react'
 const PAIN_POINTS = [
   {
     before: 'Pay $299+/month for Sprout Social. Hope the client doesn\'t notice you\'re reselling it.',
     after:  'Pay $29/month for SocialMate Agency. White label it. Your brand, your price.',
-    icon: '💸',
+    icon: Banknote,
   },
   {
     before: 'Juggle 6 different logins across 6 different tools for 6 different clients.',
     after:  'One dashboard. Switch between client workspaces in one click.',
-    icon: '🧩',
+    icon: Puzzle,
   },
   {
     before: 'Write every caption from scratch. Pay a copywriter per post.',
     after:  '15+ built-in AI tools. Generate captions, hooks, and threads in seconds.',
-    icon: '🤖',
+    icon: Bot,
   },
   {
     before: 'Manually report results to clients every month. 3 hours in spreadsheets.',
     after:  'Built-in analytics. Export-ready. Done.',
-    icon: '📊',
+    icon: BarChart3,
   },
 ]
 
@@ -31,55 +31,55 @@ const FEATURES = [
   {
     title: 'Client Workspaces',
     desc:  '5 isolated client workspaces on the Agency plan. Each client sees only their data — no cross-contamination, no accidental posts.',
-    icon:  '🏢',
+    icon:  Building2,
     badge: 'Agency',
   },
   {
     title: 'White Label — Your Brand',
     desc:  'Custom logo, colors, and brand name for $20/month add-on. Your clients never know what\'s powering it.',
-    icon:  '🏷️',
+    icon:  Tag,
     badge: 'Add-on',
   },
   {
     title: 'White Label — Custom Domain',
     desc:  'Go further: serve the platform from your own domain. app.youragency.com instead of socialmate.studio.',
-    icon:  '🌐',
+    icon:  Globe,
     badge: 'Add-on',
   },
   {
     title: '15 Team Seats',
     desc:  'Add your entire team without paying per-seat fees. Everyone gets full access to the workspace.',
-    icon:  '👥',
+    icon:  Users,
     badge: 'Agency',
   },
   {
     title: '2,000 AI Credits / Month',
     desc:  '15+ AI tools — caption writer, hook generator, thread builder, rewriter, and more. 2,000 credits go a long way across multiple clients.',
-    icon:  '✨',
+    icon:  Sparkles,
     badge: 'Agency',
   },
   {
     title: '7 Live Platforms',
     desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn today. YouTube, Pinterest, and Instagram are on the active roadmap.',
-    icon:  '📡',
+    icon:  Satellite,
     badge: 'Live now',
   },
   {
     title: 'Bulk Scheduling',
     desc:  'Upload a CSV or paste multiple posts at once. Assign platforms, days, and times in bulk. Perfect for high-volume agencies.',
-    icon:  '📦',
+    icon:  Package,
     badge: 'Live now',
   },
   {
     title: 'Clips Studio',
     desc:  'Manage Twitch and YouTube clip distribution for streamer clients. Browse, caption, and schedule clips to every platform in minutes.',
-    icon:  '🎬',
+    icon:  Clapperboard,
     badge: 'Live now',
   },
   {
     title: 'Evergreen Recycling',
     desc:  'Set top-performing posts to auto-recycle. Keep client content calendars full without manual effort.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Live now',
   },
 ]
@@ -209,7 +209,7 @@ export default function AgenciesPage() {
                 </div>
                 <div className="bg-amber/10 border border-amber rounded-2xl p-5">
                   <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -266,7 +266,7 @@ export default function AgenciesPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Agency'   ? 'bg-amber/10 text-amber' :
                     f.badge === 'Add-on'  ? 'bg-raised text-ink-body' :

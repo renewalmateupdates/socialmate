@@ -3,38 +3,39 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Banknote, BarChart3, Bot, Briefcase, CalendarDays, Clock, Dumbbell, FileEdit, Hammer, Home, Link2, Package, PenLine, Recycle, Satellite, Scissors, Shirt, Truck, Users, UtensilsCrossed } from 'lucide-react'
 
 const PERSONAS = [
-  { label: 'Restaurant owner',     icon: '🍕' },
-  { label: 'Hair salon',           icon: '💇' },
-  { label: 'Boutique shop',        icon: '👗' },
-  { label: 'Fitness studio',       icon: '🏋️' },
-  { label: 'Local contractor',     icon: '🔨' },
-  { label: 'Real estate agent',    icon: '🏡' },
-  { label: 'Freelancer / consultant', icon: '💼' },
-  { label: 'Food truck',           icon: '🚚' },
+  { label: 'Restaurant owner',     icon: UtensilsCrossed },
+  { label: 'Hair salon',           icon: Scissors },
+  { label: 'Boutique shop',        icon: Shirt },
+  { label: 'Fitness studio',       icon: Dumbbell },
+  { label: 'Local contractor',     icon: Hammer },
+  { label: 'Real estate agent',    icon: Home },
+  { label: 'Freelancer / consultant', icon: Briefcase },
+  { label: 'Food truck',           icon: Truck },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Open 4 apps. Post the same thing 4 times. 45 minutes gone.',
     after:  'Write once. Schedule to 7 platforms in 30 seconds.',
-    icon: '⏱️',
+    icon: Clock,
   },
   {
     before: 'Pay $99/month for Hootsuite and use 10% of the features.',
     after:  'Get the same result for $8/month. Or free.',
-    icon: '💸',
+    icon: Banknote,
   },
   {
     before: 'Stare at a blank caption box for 20 minutes.',
     after:  'Click "Generate caption." Done in 3 seconds.',
-    icon: '✍️',
+    icon: PenLine,
   },
   {
     before: 'Forget to post for 2 weeks. Watch your engagement tank.',
     after:  'Schedule a month of content in one sitting. Set it and forget it.',
-    icon: '📅',
+    icon: CalendarDays,
   },
 ]
 
@@ -42,55 +43,55 @@ const FEATURES = [
   {
     title: 'Schedule to 7 Platforms',
     desc:  'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn — all live today. Write once, post everywhere.',
-    icon:  '📡',
+    icon:  Satellite,
     badge: 'Free',
   },
   {
     title: 'AI Caption Writer',
     desc:  'Stuck on what to write? Generate a caption, hook, or call-to-action in one click. Reads your content, writes like you.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'Post Calendar',
     desc:  'See your entire content schedule at a glance. Drag, drop, reschedule. Never wonder "did I post today?" again.',
-    icon:  '📅',
+    icon:  CalendarDays,
     badge: 'Free',
   },
   {
     title: 'Link in Bio',
     desc:  'Free link-in-bio page included on all plans. One link, all your important pages. No Linktree subscription needed.',
-    icon:  '🔗',
+    icon:  Link2,
     badge: 'Free',
   },
   {
     title: 'Bulk Scheduling',
     desc:  'Batch your entire week of posts in one session. Upload a CSV or paste multiple captions at once and assign times automatically.',
-    icon:  '📦',
+    icon:  Package,
     badge: 'Free',
   },
   {
     title: 'Drafts & Queue',
     desc:  'Save ideas as drafts. Build a queue of evergreen posts that publish on a schedule. Never run out of content.',
-    icon:  '📝',
+    icon:  FileEdit,
     badge: 'Free',
   },
   {
     title: 'Best Times to Post',
     desc:  'Data-driven recommendations for when your audience is most active on each platform. Stop guessing.',
-    icon:  '📊',
+    icon:  BarChart3,
     badge: 'Pro',
   },
   {
     title: 'Team Seats',
     desc:  'Add a VA, a partner, or a part-time social media helper. Up to 5 seats on Pro — no extra charge per seat.',
-    icon:  '👥',
+    icon:  Users,
     badge: 'Pro',
   },
   {
     title: 'Evergreen Recycling',
     desc:  'Your best posts keep working. Set any post to auto-recycle on a schedule so your top content never gets buried.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Pro',
   },
 ]
@@ -185,7 +186,7 @@ export default function SmallBusinessPage() {
           {PERSONAS.map((p) => (
             <span key={p.label}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-panel border border-edge rounded-full text-xs text-ink-body font-medium">
-              {p.icon} {p.label}
+              <p.icon className="w-3.5 h-3.5" strokeWidth={1.75} /> {p.label}
             </span>
           ))}
         </div>
@@ -219,7 +220,7 @@ export default function SmallBusinessPage() {
                 </div>
                 <div className="bg-raised border border-edge-lit rounded-2xl p-5">
                   <p className="text-xs text-ink-muted font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -241,7 +242,7 @@ export default function SmallBusinessPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'

@@ -3,36 +3,45 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, Clapperboard, Gamepad2, Music2, Palette, PenLine, PlayCircle, Rocket, Upload } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'TikTok',     icon: '🎵', note: 'Live — free', highlight: true  },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live',        highlight: false },
-  { name: 'Bluesky',    icon: '🦋', note: 'Live',        highlight: false },
-  { name: 'Mastodon',   icon: '🐘', note: 'Live',        highlight: false },
-  { name: 'Discord',    icon: '💬', note: 'Live',        highlight: false },
-  { name: 'Telegram',   icon: '✈️', note: 'Live',        highlight: false },
-  { name: 'LinkedIn',   icon: '💼', note: 'Live',        highlight: false },
+  { name: 'TikTok',     icon: 'tiktok', note: 'Live — free', highlight: true  },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live',        highlight: false },
+  { name: 'Bluesky',    icon: 'bluesky', note: 'Live',        highlight: false },
+  { name: 'Mastodon',   icon: 'mastodon', note: 'Live',        highlight: false },
+  { name: 'Discord',    icon: 'discord', note: 'Live',        highlight: false },
+  { name: 'Telegram',   icon: 'telegram', note: 'Live',        highlight: false },
+  { name: 'LinkedIn',   icon: 'linkedin', note: 'Live',        highlight: false },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'YouTube posting', icon: '▶️' },
-  { name: 'Instagram',       icon: '📸' },
-  { name: 'LinkedIn',        icon: '💼' },
+  { name: 'YouTube posting', icon: 'youtube' },
+  { name: 'Instagram',       icon: 'instagram' },
+  { name: 'LinkedIn',        icon: 'linkedin' },
 ]
 
 const PAIN_POINTS = [
   {
-    icon: '🎬',
+    icon: Clapperboard,
     problem: 'Managing TikTok, Twitter, and Discord separately for every video upload — three tabs, three captions, three times the effort.',
     solution: 'One dashboard. Write once, publish to all 7 platforms in one click. TikTok + Discord + Bluesky + LinkedIn in 30 seconds flat.',
   },
   {
-    icon: '✍️',
+    icon: PenLine,
     problem: 'Recording great content but spending hours writing hooks, captions, and CTAs from scratch for every video.',
     solution: 'AI TikTok Script Generator writes your hook, body, and CTA. AI Caption Generator handles social posts. Done in seconds.',
   },
   {
-    icon: '📤',
+    icon: Upload,
     problem: 'Exporting clips in different formats and dimensions for TikTok vs Twitter vs Discord — a technical headache every time.',
     solution: 'Creator Studio handles GIF export and video editing with 8 CSS filters. One source, multiple outputs.',
   },
@@ -42,7 +51,7 @@ const FEATURES = [
   {
     title: 'TikTok Scheduling — Live & Free',
     desc:  'Production API approved May 2026. Schedule TikTok videos directly from your dashboard — for free on every plan. 20 videos/month on free, 60 on Pro, 200 on Agency.',
-    icon:  '🎵',
+    icon:  Music2,
     live:  true,
     badge: 'Live now',
     accent: 'text-[#f59e0b]',
@@ -51,7 +60,7 @@ const FEATURES = [
   {
     title: 'Clips Studio (Twitch + YouTube)',
     desc:  'Browse your Twitch clips via OAuth or paste a YouTube channel URL — no API key needed. Pick any clip and schedule it to all platforms in one click.',
-    icon:  '🎮',
+    icon:  Gamepad2,
     live:  true,
     badge: 'Live now',
     accent: 'text-amber',
@@ -60,7 +69,7 @@ const FEATURES = [
   {
     title: 'Creator Studio & GIF Export',
     desc:  'Trim videos, apply 8 CSS filters, add caption overlays, and export as GIF or MP4 via MediaRecorder + canvas. No additional software needed.',
-    icon:  '🎨',
+    icon:  Palette,
     live:  true,
     badge: 'Live now',
     accent: 'text-amber',
@@ -69,7 +78,7 @@ const FEATURES = [
   {
     title: 'TikTok Script Generator',
     desc:  'AI-powered hook → body → CTA script built for TikTok format. Enter your topic and get a complete short-form video script in seconds. Powered by Google Gemini.',
-    icon:  '🤖',
+    icon:  Bot,
     live:  true,
     badge: 'Live now',
     accent: 'text-[#f59e0b]',
@@ -78,7 +87,7 @@ const FEATURES = [
   {
     title: 'Cross-Platform Posting',
     desc:  'Post to all 7 live platforms simultaneously — TikTok, X/Twitter, Bluesky, Mastodon, Discord, Telegram, LinkedIn. Per-platform previews show exactly how each post will look.',
-    icon:  '🚀',
+    icon:  Rocket,
     live:  true,
     badge: 'Live now',
     accent: 'text-ink-muted',
@@ -87,7 +96,7 @@ const FEATURES = [
   {
     title: 'YouTube Posting',
     desc:  'Direct video uploads to YouTube from the SocialMate dashboard. Full title, description, and tag support. API application in progress.',
-    icon:  '▶️',
+    icon:  PlayCircle,
     live:  false,
     badge: 'Coming soon',
     accent: 'text-[#ff0000]',
@@ -204,7 +213,7 @@ export default function VideoCreatorsPage() {
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div className="bg-panel border border-edge rounded-2xl p-5">
                   <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_video.pain_before_label')}</p>
-                  <p className="text-sm text-ink-body leading-relaxed">{p.icon} {p.problem}</p>
+                  <p className="text-sm text-ink-body leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.problem}</p>
                 </div>
                 <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-2xl p-5">
                   <p className="text-xs text-[#f59e0b] font-bold uppercase tracking-wide mb-2">{t('for_video.pain_after_label')}</p>
@@ -237,7 +246,7 @@ export default function VideoCreatorsPage() {
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${f.badgeBg}`}>
                     {f.live ? t('for_video.badge_live') : t('for_video.badge_soon')}
                   </span>
@@ -269,7 +278,7 @@ export default function VideoCreatorsPage() {
                     : 'bg-panel border-edge'
                 }`}
               >
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className={`text-sm font-bold ${p.highlight ? 'text-[#f59e0b]' : ''}`}>{p.name}</span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full font-bold ${
@@ -291,7 +300,7 @@ export default function VideoCreatorsPage() {
                 key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60"
               >
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_video.pipeline_badge')}</span>
               </div>

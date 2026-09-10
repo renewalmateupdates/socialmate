@@ -3,48 +3,57 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Activity, BarChart3, Bot, Brain, Briefcase, CalendarDays, Clock, DollarSign, Megaphone, MessageCircle, Mic, PenLine, Recycle, Sprout, Target, TrendingUp, Zap } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const PERSONAS = [
-  { label: 'Life coach',           icon: '🌱' },
-  { label: 'Business coach',       icon: '💼' },
-  { label: 'Health coach',         icon: '🏃' },
-  { label: 'Career consultant',    icon: '📈' },
-  { label: 'Executive coach',      icon: '🎯' },
-  { label: 'Financial advisor',    icon: '💰' },
-  { label: 'Marketing consultant', icon: '📣' },
-  { label: 'Mindset coach',        icon: '🧠' },
+  { label: 'Life coach',           icon: Sprout },
+  { label: 'Business coach',       icon: Briefcase },
+  { label: 'Health coach',         icon: Activity },
+  { label: 'Career consultant',    icon: TrendingUp },
+  { label: 'Executive coach',      icon: Target },
+  { label: 'Financial advisor',    icon: DollarSign },
+  { label: 'Marketing consultant', icon: Megaphone },
+  { label: 'Mindset coach',        icon: Brain },
 ]
 
 const LIVE_PLATFORMS = [
-  { name: 'Bluesky',     icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',    icon: '🐘', note: 'Live' },
-  { name: 'Discord',     icon: '💬', note: 'Live' },
-  { name: 'Telegram',    icon: '✈️', note: 'Live' },
-  { name: 'TikTok',      icon: '🎵', note: 'Live' },
-  { name: 'LinkedIn',    icon: '💼', note: 'Live' },
+  { name: 'Bluesky',     icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',    icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',     icon: 'discord', note: 'Live' },
+  { name: 'Telegram',    icon: 'telegram', note: 'Live' },
+  { name: 'TikTok',      icon: 'tiktok', note: 'Live' },
+  { name: 'LinkedIn',    icon: 'linkedin', note: 'Live' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Client work fills every hour. No time left to post. No visibility, no new clients.',
     after:  'Schedule a full week of content on Sunday. Show up every day without lifting a finger.',
-    icon:   '⏱️',
+    icon:   Clock,
   },
   {
     before: 'Stare at a blank screen trying to write something that sounds "thought leader-y." 45 minutes gone.',
     after:  'AI writes thought leadership posts in your voice in 3 seconds. You just review and approve.',
-    icon:   '✍️',
+    icon:   PenLine,
   },
   {
     before: 'Feel weird promoting yourself. Posting feels inauthentic.',
     after:  'SOMA generates content from your actual ideas and methods — not generic fluff.',
-    icon:   '🎯',
+    icon:   Target,
   },
   {
     before: 'LinkedIn is where your clients are, but you never post consistently enough to matter.',
     after:  'Schedule LinkedIn posts in advance and build authority without being glued to your phone.',
-    icon:   '💼',
+    icon:   Briefcase,
   },
 ]
 
@@ -52,49 +61,49 @@ const FEATURES = [
   {
     title: 'LinkedIn Scheduling',
     desc:  'Your clients are on LinkedIn. Schedule thought leadership posts, client wins, and offers in advance. Show up consistently without the daily grind.',
-    icon:  '💼',
+    icon:  Briefcase,
     badge: 'Free',
   },
   {
     title: 'AI Thought Leadership Writer',
     desc:  'Type a topic or paste a voice note. AI generates a polished post that sounds like you — your framework, your voice, your clients. Not generic coaching-speak.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'SOMA — Coaching Content on Autopilot',
     desc:  'Upload your methodology, client FAQs, or coaching frameworks. SOMA generates a week of platform-native content automatically — LinkedIn posts, X threads, Discord insights, all in your voice.',
-    icon:  '⚡',
+    icon:  Zap,
     badge: 'Pro',
   },
   {
     title: 'Batch Your Week in 30 Minutes',
     desc:  'Schedule all 7 platforms in one sitting. Use templates, bulk-upload content ideas, or let Smart Queue fill optimal time slots automatically.',
-    icon:  '📅',
+    icon:  CalendarDays,
     badge: 'Free',
   },
   {
     title: 'Content Repurposer',
     desc:  'Turn one piece of content into 6 formats: LinkedIn post, X thread, email snippet, short hook, Telegram update, Discord message. 1 click, 5 minutes saved.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Pro',
   },
   {
     title: 'Brand Voice AI',
     desc:  'Train the AI on your tone, vocabulary, and style once. Every AI-generated post will sound like you — not a template. Pro feature.',
-    icon:  '🎙️',
+    icon:  Mic,
     badge: 'Pro',
   },
   {
     title: 'Client Community via Discord & Telegram',
     desc:  'Schedule community updates, accountability check-ins, and group challenges to your client Discord or Telegram group automatically.',
-    icon:  '💬',
+    icon:  MessageCircle,
     badge: 'Free',
   },
   {
     title: 'Analytics & Best Times',
     desc:  'See which content lands, when your audience is most active, and which platform drives the most engagement. Double down on what works.',
-    icon:  '📊',
+    icon:  BarChart3,
     badge: 'Pro',
   },
 ]
@@ -169,7 +178,7 @@ export default function CoachesPage() {
           {PERSONAS.map((p) => (
             <span key={p.label}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-panel border border-edge rounded-full text-xs text-ink-body font-medium">
-              {p.icon} {p.label}
+              <p.icon className="w-3.5 h-3.5" strokeWidth={1.75} /> {p.label}
             </span>
           ))}
         </div>
@@ -203,7 +212,7 @@ export default function CoachesPage() {
                 </div>
                 <div className="bg-jade/10 border border-jade/40 rounded-2xl p-5">
                   <p className="text-xs text-jade font-bold uppercase tracking-wide mb-2">{t('for_coaches.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -225,7 +234,7 @@ export default function CoachesPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -256,7 +265,7 @@ export default function CoachesPage() {
                     ? 'bg-raised border-edge-lit'
                     : 'bg-panel border-edge'
                 }`}>
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_coaches.platforms_live_badge')}</span>
               </div>

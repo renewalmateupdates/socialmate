@@ -3,44 +3,53 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Bot, Briefcase, CalendarDays, Frown, PenLine, Recycle, RefreshCw, Rocket, Satellite, Sparkles, Zap } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Globe } from 'lucide-react'
+
+
+function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { name: 'Bluesky',     icon: '🦋', note: 'Live' },
-  { name: 'X / Twitter', icon: '🐦', note: 'Live' },
-  { name: 'Mastodon',    icon: '🐘', note: 'Live' },
-  { name: 'Discord',     icon: '💬', note: 'Live' },
-  { name: 'Telegram',    icon: '✈️', note: 'Live' },
-  { name: 'TikTok',      icon: '🎵', note: 'Live' },
-  { name: 'LinkedIn',    icon: '💼', note: 'Live' },
+  { name: 'Bluesky',     icon: 'bluesky', note: 'Live' },
+  { name: 'X / Twitter', icon: 'twitter', note: 'Live' },
+  { name: 'Mastodon',    icon: 'mastodon', note: 'Live' },
+  { name: 'Discord',     icon: 'discord', note: 'Live' },
+  { name: 'Telegram',    icon: 'telegram', note: 'Live' },
+  { name: 'TikTok',      icon: 'tiktok', note: 'Live' },
+  { name: 'LinkedIn',    icon: 'linkedin', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: '📸' },
-  { name: 'YouTube',   icon: '▶️' },
-  { name: 'Facebook',  icon: '📘' },
-  { name: 'Pinterest', icon: '📌' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'YouTube',   icon: 'youtube' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Pinterest', icon: 'pinterest' },
 ]
 
 const PAIN_POINTS = [
   {
     before: 'Spend 4 hours writing a post. Spend another hour promoting it across 6 apps. Exhausted.',
     after:  'Write. Publish. SocialMate handles the promotion — all 7 platforms, scheduled automatically.',
-    icon:   '😮‍💨',
+    icon:   Frown,
   },
   {
     before: 'Old posts nobody sees. You can\'t afford to manually promote your back catalog.',
     after:  'Evergreen recycling automatically re-promotes your best posts every few weeks.',
-    icon:   '♻️',
+    icon:   Recycle,
   },
   {
     before: 'Stare at a blank caption box. You already wrote 2,000 words today. You\'re done.',
     after:  'AI reads your post and writes a platform-optimized caption in 3 seconds.',
-    icon:   '✍️',
+    icon:   PenLine,
   },
   {
     before: 'Post goes live. Twitter, LinkedIn, Bluesky, Discord — all manual. Takes 45 minutes.',
     after:  'Paste your RSS feed once. Every new post auto-schedules to all platforms.',
-    icon:   '🚀',
+    icon:   Rocket,
   },
 ]
 
@@ -48,49 +57,49 @@ const FEATURES = [
   {
     title: 'RSS Import — Blog to Social, Automatically',
     desc:  'Paste your blog RSS or Atom feed URL once. Every new post you publish automatically gets queued for social media promotion across all your connected platforms.',
-    icon:  '📡',
+    icon:  Satellite,
     badge: 'Free',
   },
   {
     title: 'AI Caption Generator',
     desc:  'Paste your post title and intro. AI generates punchy captions for each platform — Twitter hooks, LinkedIn opener, short blurb for Discord, hashtag-rich Mastodon post. Platform-native, not copy-pasted.',
-    icon:  '🤖',
+    icon:  Bot,
     badge: 'Free',
   },
   {
     title: 'SOMA — Blog Repurposing on Autopilot',
     desc:  'Upload your post or share your RSS. SOMA generates a full week of content from your blog: quotes, key points, questions, angles, teasers — platform-native for each channel. Run it once a week.',
-    icon:  '⚡',
+    icon:  Zap,
     badge: 'Pro',
   },
   {
     title: 'Evergreen Post Recycling',
     desc:  'Your best posts shouldn\'t die after launch day. Mark them evergreen and they auto-recycle on a schedule — monthly, quarterly, whenever you want. Back catalog = active traffic.',
-    icon:  '♻️',
+    icon:  Recycle,
     badge: 'Free',
   },
   {
     title: 'LinkedIn Scheduling',
     desc:  'LinkedIn drives the most blog traffic for B2B bloggers. Schedule your post promotion and thought leadership content to your professional network in advance.',
-    icon:  '💼',
+    icon:  Briefcase,
     badge: 'Free',
   },
   {
     title: 'Content Repurposer',
     desc:  'Turn one blog post into 6 content pieces: Twitter thread, LinkedIn long-form, email newsletter hook, short TikTok hook, Mastodon post, Discord update. 1 click.',
-    icon:  '🔄',
+    icon:  RefreshCw,
     badge: 'Pro',
   },
   {
     title: 'Post Calendar & Scheduling Queue',
     desc:  'See all your blog promo scheduled across all platforms. Drag and drop to reschedule. Smart Queue fills optimal time slots automatically on Pro.',
-    icon:  '📅',
+    icon:  CalendarDays,
     badge: 'Free',
   },
   {
     title: 'Bluesky — Organic Reach for Writers',
     desc:  'Bluesky has the best organic reach for writers and bloggers right now. Chronological feed, engaged audience, no algorithmic suppression. First place to promote your posts.',
-    icon:  '🦋',
+    icon:  Sparkles,
     badge: 'Free',
   },
 ]
@@ -187,7 +196,7 @@ export default function BloggersPage() {
                 </div>
                 <div className="bg-raised border border-edge-lit rounded-2xl p-5">
                   <p className="text-xs text-ink-muted font-bold uppercase tracking-wide mb-2">{t('for_bloggers.pain_after_label')}</p>
-                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed"><p.icon className="inline w-4 h-4 align-text-bottom mr-1" strokeWidth={1.75} />{p.after}</p>
                 </div>
               </div>
             ))}
@@ -219,11 +228,11 @@ export default function BloggersPage() {
                 <p className="text-ink-muted text-xs mb-2">RSS Feed:</p>
                 <p className="text-ink-high text-xs mb-4">yourblog.com/feed</p>
                 <p className="text-ink-muted text-xs mb-2">Platforms:</p>
-                <p className="text-xs">🦋 Bluesky ✓</p>
-                <p className="text-xs">🐦 X ✓</p>
-                <p className="text-xs">💼 LinkedIn ✓</p>
-                <p className="text-xs">💬 Discord ✓</p>
-                <p className="text-xs mb-4">✈️ Telegram ✓</p>
+                <p className="text-xs flex items-center gap-1.5"><PlatformGlyph id="bluesky" size={12} /> Bluesky ✓</p>
+                <p className="text-xs flex items-center gap-1.5"><PlatformGlyph id="twitter" size={12} /> X ✓</p>
+                <p className="text-xs flex items-center gap-1.5"><PlatformGlyph id="linkedin" size={12} /> LinkedIn ✓</p>
+                <p className="text-xs flex items-center gap-1.5"><PlatformGlyph id="discord" size={12} /> Discord ✓</p>
+                <p className="text-xs mb-4 flex items-center gap-1.5"><PlatformGlyph id="telegram" size={12} /> Telegram ✓</p>
                 <p className="text-jade text-xs font-bold">✓ Auto-scheduled</p>
               </div>
             </div>
@@ -245,7 +254,7 @@ export default function BloggersPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-void border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <f.icon className="w-6 h-6 text-ink-muted" strokeWidth={1.75} />
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
                       ? 'bg-jade/10 text-jade'
@@ -273,7 +282,7 @@ export default function BloggersPage() {
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_bloggers.platforms_live_badge')}</span>
               </div>
@@ -285,7 +294,7 @@ export default function BloggersPage() {
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
-                <span className="text-lg">{p.icon}</span>
+                <PlatformGlyph id={p.icon} size={18} />
                 <span className="text-sm font-bold text-ink-body">{p.name}</span>
                 <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_bloggers.platforms_coming_badge')}</span>
               </div>
