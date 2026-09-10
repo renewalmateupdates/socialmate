@@ -9,6 +9,17 @@ import { markActivated } from '@/lib/activation'
 import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
+import {
+  CalendarDays, Check, FileText, Globe, Hand, Lightbulb, Link2,
+  Mailbox, PartyPopper, PenLine, Rocket, Smartphone, TrendingUp, Users,
+  X as CloseIcon, XCircle, Zap,
+} from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id?: string; size?: number; className?: string }) {
+  if (!id || !hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 // How a platform is actually connected, which is the thing that decides whether
 // someone finishes onboarding:
@@ -26,22 +37,22 @@ import MastodonConnectModal from '@/components/MastodonConnectModal'
 type ConnectKind = 'oauth' | 'modal' | 'invite'
 
 const LIVE_PLATFORMS: {
-  id: string; label: string; icon: string; desc: string
+  id: string; label: string; desc: string
   connect: ConnectKind; needs: string | null; badge: string | null
 }[] = [
-  { id: 'tiktok',   label: 'TikTok',      icon: '🎵', desc: 'Schedule videos straight to your account',
-    connect: 'oauth',  needs: null,                          badge: '⚡ 2 clicks' },
-  { id: 'linkedin', label: 'LinkedIn',    icon: '💼', desc: 'Post to your personal profile',
-    connect: 'oauth',  needs: null,                          badge: '⚡ 2 clicks' },
-  { id: 'twitter',  label: 'X / Twitter', icon: '🐦', desc: '280 characters — 5 free posts a month, then $0.01 each',
-    connect: 'oauth',  needs: null,                          badge: '⚡ 2 clicks' },
-  { id: 'bluesky',  label: 'Bluesky',     icon: '🦋', desc: 'Decentralized social — great for builders & creators',
+  { id: 'tiktok',   label: 'TikTok',      desc: 'Schedule videos straight to your account',
+    connect: 'oauth',  needs: null,                          badge: '2 clicks' },
+  { id: 'linkedin', label: 'LinkedIn',    desc: 'Post to your personal profile',
+    connect: 'oauth',  needs: null,                          badge: '2 clicks' },
+  { id: 'twitter',  label: 'X / Twitter', desc: '280 characters — 5 free posts a month, then $0.01 each',
+    connect: 'oauth',  needs: null,                          badge: '2 clicks' },
+  { id: 'bluesky',  label: 'Bluesky',     desc: 'Decentralized social — great for builders & creators',
     connect: 'modal',  needs: 'an app password from bsky.app', badge: null },
-  { id: 'mastodon', label: 'Mastodon',    icon: '🐘', desc: 'Federated network — engaged, ad-free community',
+  { id: 'mastodon', label: 'Mastodon',    desc: 'Federated network — engaged, ad-free community',
     connect: 'modal',  needs: 'your instance address',         badge: null },
-  { id: 'telegram', label: 'Telegram',    icon: '✈️', desc: 'Broadcast to your Telegram channel or group',
+  { id: 'telegram', label: 'Telegram',    desc: 'Broadcast to your Telegram channel or group',
     connect: 'modal',  needs: 'a bot token from @BotFather',   badge: null },
-  { id: 'discord',  label: 'Discord',     icon: '💬', desc: 'Post announcements to your server channels',
+  { id: 'discord',  label: 'Discord',     desc: 'Post announcements to your server channels',
     connect: 'invite', needs: 'a server you administer',       badge: null },
 ]
 
@@ -533,13 +544,13 @@ function OnboardingInner() {
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               {referralCode && (
                 <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
-                  <span className="text-xl">🎉</span>
+                  <PartyPopper size={20} strokeWidth={1.75} className="text-emerald-600" />
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">You were invited by a friend — you'll both earn bonus credits when you upgrade.</p>
                 </div>
               )}
 
               <div className="text-center mb-7">
-                <div className="text-5xl mb-4">👋</div>
+                <Hand className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Set up in under 2 minutes.</p>
               </div>
@@ -562,9 +573,9 @@ function OnboardingInner() {
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">What's your main goal?</label>
                 <div className="grid grid-cols-1 gap-2">
                   {[
-                    { id: 'schedule',  icon: '📅', label: 'Schedule & publish content', desc: 'Plan posts across platforms in advance' },
-                    { id: 'grow',      icon: '📈', label: 'Grow my audience',           desc: 'Build reach with consistent posting + AI tools' },
-                    { id: 'clients',   icon: '👥', label: 'Manage client accounts',     desc: 'Handle multiple brands from one workspace' },
+                    { id: 'schedule',  icon: CalendarDays, label: 'Schedule & publish content', desc: 'Plan posts across platforms in advance' },
+                    { id: 'grow',      icon: TrendingUp,   label: 'Grow my audience',           desc: 'Build reach with consistent posting + AI tools' },
+                    { id: 'clients',   icon: Users,        label: 'Manage client accounts',     desc: 'Handle multiple brands from one workspace' },
                   ].map(g => (
                     <button
                       key={g.id}
@@ -575,12 +586,12 @@ function OnboardingInner() {
                           ? 'border-black dark:border-white bg-gray-50 dark:bg-gray-800'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}>
-                      <span className="text-xl flex-shrink-0">{g.icon}</span>
+                      <g.icon className="w-5 h-5 flex-shrink-0" strokeWidth={1.75} />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-gray-800 dark:text-gray-100 leading-tight">{g.label}</p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{g.desc}</p>
                       </div>
-                      {onboardingGoal === g.id && <span className="ml-auto text-black dark:text-white font-black flex-shrink-0">✓</span>}
+                      {onboardingGoal === g.id && <Check size={16} strokeWidth={2.5} className="ml-auto text-black dark:text-white flex-shrink-0" />}
                     </button>
                   ))}
                 </div>
@@ -588,7 +599,7 @@ function OnboardingInner() {
 
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-2xl p-4 mb-4">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">⚡</span>
+                  <Zap size={20} strokeWidth={1.75} className="text-blue-600" />
                   <div>
                     <p className="text-xs font-extrabold text-blue-800 dark:text-blue-300 mb-1">Complete setup → earn 50 bonus AI credits</p>
                     <p className="text-xs text-blue-600 dark:text-blue-400">Refer a friend after and you both earn 25 more.</p>
@@ -602,10 +613,10 @@ function OnboardingInner() {
                 onClick={() => setIrisOptIn(v => !v)}
                 className="w-full flex items-center gap-3 px-4 py-3 mb-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-left hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                 <div className={`w-4 h-4 flex-shrink-0 rounded border-2 flex items-center justify-center transition-all ${irisOptIn ? 'bg-amber-500 border-amber-500' : 'border-gray-300 dark:border-gray-600'}`}>
-                  {irisOptIn && <span className="text-white text-[9px] font-black">✓</span>}
+                  {irisOptIn && <Check size={10} strokeWidth={3} className="text-white" />}
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-bold text-gray-800 dark:text-gray-200">📬 IRIS Dispatch</span> — weekly build-in-public newsletter. No spam.
+                  <span className="font-bold text-gray-800 dark:text-gray-200 inline-flex items-center gap-1"><Mailbox size={12} strokeWidth={2} /> IRIS Dispatch</span> — weekly build-in-public newsletter. No spam.
                 </p>
               </button>
 
@@ -631,7 +642,7 @@ function OnboardingInner() {
           {step === 2 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-8">
-                <div className="text-5xl mb-4">📱</div>
+                <Smartphone className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platform do you mainly post on?</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Pick one to start — you can connect more later from Settings.</p>
               </div>
@@ -653,12 +664,12 @@ function OnboardingInner() {
                         key={p.id}
                         onClick={() => { setSelectedPlatform(p.id); setStep(3) }}
                         className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 text-left transition-all group">
-                        <span className="text-2xl flex-shrink-0">{p.icon}</span>
+                        <PlatformGlyph id={p.id} size={22} className="flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-bold">{p.label}</p>
                             {p.badge && (
-                              <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full leading-none flex-shrink-0">{p.badge}</span>
+                              <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full leading-none flex-shrink-0 inline-flex items-center gap-1"><Zap size={9} strokeWidth={2.5} />{p.badge}</span>
                             )}
                           </div>
                           <p className="text-xs text-gray-400 dark:text-gray-500">{p.desc}</p>
@@ -684,7 +695,7 @@ function OnboardingInner() {
           {step === 3 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-8">
-                <div className="text-5xl mb-4">{platformData?.icon || '🔗'}</div>
+                <div className="mb-4 flex justify-center">{selectedPlatform ? <PlatformGlyph id={selectedPlatform} size={44} /> : <Link2 size={44} strokeWidth={1.5} />}</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">
                   Connect your {platformData?.label} account
                 </h2>
@@ -726,7 +737,7 @@ function OnboardingInner() {
                   <button
                     onClick={startConnect}
                     className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                    {platformData?.icon} Connect {platformData?.label}
+                    <PlatformGlyph id={selectedPlatform} size={15} /> Connect {platformData?.label}
                   </button>
                   <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
                     {platformData?.connect === 'modal'
@@ -785,7 +796,7 @@ function OnboardingInner() {
           {step === 4 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
-                <div className="text-5xl mb-4">✏️</div>
+                <PenLine className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Schedule your first post</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
                   Tell us what you post about and we&apos;ll write one for you. Pick when it goes out.
@@ -910,7 +921,7 @@ function OnboardingInner() {
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 text-center">
               {searchParams.get('upgraded') === 'true' && (
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3 text-left">
-                  <span className="text-xl">🎉</span>
+                  <PartyPopper size={20} strokeWidth={1.75} className="text-green-600" />
                   <div>
                     <p className="text-sm font-extrabold text-green-700 dark:text-green-400">Payment confirmed — you're on Pro!</p>
                     <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">500 AI credits and all Pro features are now active.</p>
@@ -918,7 +929,7 @@ function OnboardingInner() {
                 </div>
               )}
 
-              <div className="text-6xl mb-4">🚀</div>
+              <Rocket className="w-14 h-14 mx-auto mb-4" strokeWidth={1.5} />
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
               </h2>
@@ -934,7 +945,7 @@ function OnboardingInner() {
 
               <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-5 mb-5 text-left">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">⚡</span>
+                  <Zap size={28} strokeWidth={1.75} className="text-green-600" />
                   <div>
                     <p className="text-sm font-extrabold text-green-700 dark:text-green-400">50 bonus AI credits added!</p>
                     <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">Refer a friend and you both earn 25 more credits on top.</p>
@@ -946,7 +957,7 @@ function OnboardingInner() {
               {!isUpgraded && (
                 <div className="border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-5 mb-5 text-left">
                   <div className="mb-3">
-                    <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300">⚡ Upgrade to Pro — $8/month</p>
+                    <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300 inline-flex items-center gap-1.5"><Zap size={14} strokeWidth={2} /> Upgrade to Pro — $8/month</p>
                     <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">500 AI credits · 5 connected accounts · Smart Queue · Brand Voice AI</p>
                   </div>
                   <div className="mb-3">
@@ -955,7 +966,7 @@ function OnboardingInner() {
                         <span className="text-green-700 dark:text-green-400 font-bold">
                           {couponApplied.code} — {couponApplied.discount_type === 'percent' ? `${couponApplied.discount_value}% off` : `$${couponApplied.discount_value} off`} applied ✓
                         </span>
-                        <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600">✕</button>
+                        <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600"><CloseIcon size={12} strokeWidth={2} /></button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
@@ -1009,7 +1020,11 @@ function OnboardingInner() {
               ) : (
                 <Link href={didSchedule ? '/calendar' : didDraft ? '/drafts' : '/compose'}
                   className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
-                  {didSchedule ? '📅 View Your Scheduled Post →' : didDraft ? '📄 Open Your Draft →' : '✏️ Write Your First Post →'}
+                  {didSchedule
+                    ? <><CalendarDays size={14} strokeWidth={2} /> View Your Scheduled Post →</>
+                    : didDraft
+                    ? <><FileText size={14} strokeWidth={2} /> Open Your Draft →</>
+                    : <><PenLine size={14} strokeWidth={2} /> Write Your First Post →</>}
                 </Link>
               )}
 
@@ -1035,7 +1050,7 @@ function OnboardingInner() {
           className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
             toast.type === 'info' ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'
           }`}>
-          {toast.type === 'info' ? '💡' : '❌'} {toast.message}
+          {toast.type === 'info' ? <Lightbulb size={16} strokeWidth={2} className="inline align-text-bottom mr-1" /> : <XCircle size={16} strokeWidth={2} className="inline align-text-bottom mr-1" />} {toast.message}
         </div>
       )}
 
