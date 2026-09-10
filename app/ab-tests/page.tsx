@@ -4,14 +4,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { FlaskConical, Globe } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 
-const PLATFORM_ICONS: Record<string, string> = {
-  bluesky:  '🦋',
-  discord:  '💬',
-  telegram: '✈️',
-  mastodon: '🐘',
-  twitter:  '🐦',
-  linkedin: '💼',
+function PlatformGlyph({ id, size = 14 }: { id: string; size?: number }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} />
 }
 
 type BlueskyStats = { likes: number; reposts: number; replies: number } | null
@@ -113,8 +111,8 @@ function VariantCard({
 
           <div className="flex flex-wrap gap-1">
             {post.platforms.map(p => (
-              <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
-                {PLATFORM_ICONS[p] ?? '📱'} {p}
+              <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                <PlatformGlyph id={p} size={11} /> {p}
               </span>
             ))}
           </div>
@@ -242,7 +240,7 @@ export default function ABTestsPage() {
 
             {isPro && !error && tests.length === 0 && (
               <div className="bg-surface border border-theme rounded-2xl p-8 text-center">
-                <p className="text-3xl mb-3">🧪</p>
+                <FlaskConical className="w-8 h-8 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                 <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">No A/B tests yet</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
                   Write two versions of a post in Compose, set a delay between them, and let SocialMate tell you which one wins.

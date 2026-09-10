@@ -5,24 +5,31 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { AlertTriangle, Building2, CalendarDays, CheckCircle2, Globe, Lightbulb, Loader2, Paperclip, Unlock, Video, X as CloseIcon, XCircle, Zap } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const LIVE_PLATFORMS = [
-  { id: 'discord',  label: 'Discord',  icon: '💬' },
-  { id: 'bluesky',  label: 'Bluesky',  icon: '🦋' },
-  { id: 'telegram', label: 'Telegram', icon: '✈️' },
-  { id: 'mastodon', label: 'Mastodon', icon: '🐘' },
-  { id: 'twitter',  label: 'X/Twitter', icon: '𝕏' },
+  { id: 'discord',  label: 'Discord' },
+  { id: 'bluesky',  label: 'Bluesky' },
+  { id: 'telegram', label: 'Telegram' },
+  { id: 'mastodon', label: 'Mastodon' },
+  { id: 'twitter',  label: 'X/Twitter' },
 ]
 
 const COMING_SOON_PLATFORMS = [
-  { id: 'linkedin',  label: 'LinkedIn',  icon: '💼' },
-  { id: 'youtube',   label: 'YouTube',   icon: '▶️' },
-  { id: 'pinterest', label: 'Pinterest', icon: '📌' },
-  { id: 'reddit',    label: 'Reddit',    icon: '🤖' },
-  { id: 'instagram', label: 'Instagram', icon: '📸' },
-  { id: 'tiktok',    label: 'TikTok',    icon: '🎵' },
-  { id: 'facebook',  label: 'Facebook',  icon: '📘' },
-  { id: 'threads',   label: 'Threads',   icon: '🧵' },
+  { id: 'linkedin',  label: 'LinkedIn' },
+  { id: 'youtube',   label: 'YouTube' },
+  { id: 'pinterest', label: 'Pinterest' },
+  { id: 'reddit',    label: 'Reddit' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'tiktok',    label: 'TikTok' },
+  { id: 'facebook',  label: 'Facebook' },
+  { id: 'threads',   label: 'Threads' },
 ]
 
 // Per-platform character limits
@@ -387,8 +394,8 @@ export default function BulkScheduler() {
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Link href="/calendar"
-                className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                📅 Calendar
+                className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all inline-flex items-center gap-1.5">
+                <CalendarDays size={13} strokeWidth={2} /> Calendar
               </Link>
             </div>
           </div>
@@ -399,10 +406,10 @@ export default function BulkScheduler() {
             plan === 'pro'    ? 'bg-blue-50 border-blue-100' :
             'bg-purple-50 border-purple-100'
           }`}>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-              {plan === 'free'   && '🔓 Free · Up to 10 posts per session · 2-week horizon'}
-              {plan === 'pro'    && '⚡ Pro · Up to 50 posts per session · 1-month horizon'}
-              {plan === 'agency' && '🏢 Agency · Up to 100 posts per session · 3-month horizon'}
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 inline-flex items-center gap-1.5">
+              {plan === 'free'   && <><Unlock size={13} strokeWidth={2} /> Free · Up to 10 posts per session · 2-week horizon</>}
+              {plan === 'pro'    && <><Zap size={13} strokeWidth={2} /> Pro · Up to 50 posts per session · 1-month horizon</>}
+              {plan === 'agency' && <><Building2 size={13} strokeWidth={2} /> Agency · Up to 100 posts per session · 3-month horizon</>}
               <span className="ml-2 font-bold text-gray-700 dark:text-gray-300">{posts.length}/{maxRows} rows</span>
             </p>
             {plan !== 'agency' && (
@@ -428,7 +435,7 @@ export default function BulkScheduler() {
                         ? 'bg-black text-white border-black'
                         : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                     }`}>
-                    <span>{p.icon}</span>
+                    <PlatformGlyph id={p.id} size={13} />
                     <span>{p.label}</span>
                   </button>
                 ))}
@@ -436,7 +443,7 @@ export default function BulkScheduler() {
                   <div key={p.id}
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
                     title={`${p.label} — coming soon`}>
-                    <span>{p.icon}</span>
+                    <PlatformGlyph id={p.id} size={13} />
                     <span className="hidden sm:inline">{p.label}</span>
                     <span className="text-xs text-gray-200 dark:text-gray-700 ml-0.5">Soon</span>
                   </div>
@@ -465,7 +472,7 @@ export default function BulkScheduler() {
                 <button onClick={autoFillDates}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all whitespace-nowrap"
                   title={`Fill all rows with upcoming ${DAY_LABELS[defaultDayOfWeek]}s`}>
-                  🗓 Auto-fill {DAY_LABELS[defaultDayOfWeek]}s
+                  <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} strokeWidth={2} /> Auto-fill {DAY_LABELS[defaultDayOfWeek]}s</span>
                 </button>
                 <button onClick={applyDefaultsToAll}
                   className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all whitespace-nowrap">
@@ -480,10 +487,10 @@ export default function BulkScheduler() {
             <div className={`rounded-2xl px-5 py-3 mb-4 flex flex-wrap items-center gap-4 text-xs font-semibold ${
               errorPosts > 0 ? 'bg-red-50 border border-red-100' : 'bg-green-50 border border-green-100'
             }`}>
-              {savedPosts > 0 && <span className="text-green-700">✅ {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>}
+              {savedPosts > 0 && <span className="text-green-700 inline-flex items-center gap-1.5"><CheckCircle2 size={14} strokeWidth={2} /> {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>}
               {errorPosts > 0 && (
-                <span className="text-red-600">
-                  ❌ {errorPosts} failed{quotaWall ? '' : ' — check content and try again'}
+                <span className="text-red-600 inline-flex items-center gap-1.5">
+                  <XCircle size={14} strokeWidth={2} /> {errorPosts} failed{quotaWall ? '' : ' — check content and try again'}
                 </span>
               )}
             </div>
@@ -524,8 +531,8 @@ export default function BulkScheduler() {
                   {/* ROW CONTROLS */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500 w-5 text-center flex-shrink-0">
-                        {post.status === 'saved' ? '✅' : post.status === 'error' ? '❌' : index + 1}
+                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500 w-5 flex items-center justify-center flex-shrink-0">
+                        {post.status === 'saved' ? <CheckCircle2 size={14} className="text-green-600" strokeWidth={2} /> : post.status === 'error' ? <XCircle size={14} className="text-red-500" strokeWidth={2} /> : index + 1}
                       </span>
                       <input type="date" value={post.date}
                         min={today} max={maxScheduleDate}
@@ -543,7 +550,7 @@ export default function BulkScheduler() {
                       <button onClick={() => removeRow(post.id)}
                         disabled={posts.length <= 1}
                         className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0 ml-auto sm:ml-0">
-                        ✕
+                        <CloseIcon size={14} strokeWidth={2} />
                       </button>
                     </div>
 
@@ -558,15 +565,15 @@ export default function BulkScheduler() {
                               : 'border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-gray-400'
                           }`}
                           title={p.label}>
-                          <span>{p.icon}</span>
+                          <PlatformGlyph id={p.id} size={13} />
                           <span className="hidden md:inline">{p.label}</span>
                         </button>
                       ))}
                       {COMING_SOON_PLATFORMS.slice(0, 3).map(p => (
                         <span key={p.id}
-                          className="text-base opacity-20 cursor-not-allowed"
+                          className="opacity-20 cursor-not-allowed"
                           title={`${p.label} — coming soon`}>
-                          {p.icon}
+                          <PlatformGlyph id={p.id} size={16} />
                         </span>
                       ))}
                     </div>
@@ -597,8 +604,8 @@ export default function BulkScheduler() {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={post.mediaUrl} alt="attached" className="h-12 w-12 object-cover rounded-lg border border-gray-200 dark:border-gray-600" />
                           ) : (
-                            <div className="h-12 w-12 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-center text-lg bg-gray-50 dark:bg-gray-800">
-                              🎬
+                            <div className="h-12 w-12 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+                              <Video className="w-5 h-5 text-gray-400" strokeWidth={1.5} />
                             </div>
                           )}
                           <span className="text-xs text-gray-400 truncate max-w-[120px]">
@@ -626,7 +633,9 @@ export default function BulkScheduler() {
                             onClick={() => fileInputRefs.current[post.id]?.click()}
                             disabled={post.mediaUploading}
                             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border border-dashed border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all disabled:opacity-50">
-                            {post.mediaUploading ? '⏳ Uploading…' : '📎 Attach media'}
+                            {post.mediaUploading
+                              ? <><Loader2 size={13} strokeWidth={2} className="animate-spin" /> Uploading…</>
+                              : <><Paperclip size={13} strokeWidth={2} /> Attach media</>}
                           </button>
                         </>
                       )}
@@ -635,7 +644,7 @@ export default function BulkScheduler() {
 
                   {/* CHAR COUNT + ERROR */}
                   {post.status === 'error' && post.error && (
-                    <p className="text-xs text-red-500 mt-1.5 font-semibold">⚠️ {post.error}</p>
+                    <p className="text-xs text-red-500 mt-1.5 font-semibold inline-flex items-center gap-1.5"><AlertTriangle size={12} strokeWidth={2} /> {post.error}</p>
                   )}
                   <div className="flex items-center justify-between mt-1.5">
                     <p className="text-xs text-gray-400 dark:text-gray-500">
@@ -687,16 +696,18 @@ export default function BulkScheduler() {
 
           {/* TIPS */}
           <div className="mt-8 bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">💡 Tips</p>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3 inline-flex items-center gap-1.5"><Lightbulb size={13} strokeWidth={2} /> Tips</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { icon: '🗓', tip: 'Pick a day of week (Mon–Sun) then click "Auto-fill" to schedule all posts on that recurring day.' },
-                { icon: '⚡', tip: 'Set defaults at the top then click "Apply to All" to update every row at once.' },
-                { icon: '[ ]', tip: 'Use [brackets] in content as fill-in-the-blank placeholders for easy editing.' },
-                { icon: '📎', tip: 'Attach an image or video per post — uploaded securely to your media library.' },
+                { Icon: CalendarDays, tip: 'Pick a day of week (Mon–Sun) then click "Auto-fill" to schedule all posts on that recurring day.' },
+                { Icon: Zap, tip: 'Set defaults at the top then click "Apply to All" to update every row at once.' },
+                { Icon: null, label: '[ ]', tip: 'Use [brackets] in content as fill-in-the-blank placeholders for easy editing.' },
+                { Icon: Paperclip, tip: 'Attach an image or video per post — uploaded securely to your media library.' },
               ].map(item => (
                 <div key={item.tip} className="flex items-start gap-2">
-                  <span className="text-sm flex-shrink-0 font-bold text-gray-500 dark:text-gray-400">{item.icon}</span>
+                  <span className="flex-shrink-0 font-bold text-gray-500 dark:text-gray-400 mt-0.5">
+                    {item.Icon ? <item.Icon size={14} strokeWidth={2} /> : item.label}
+                  </span>
                   <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{item.tip}</p>
                 </div>
               ))}
@@ -709,10 +720,10 @@ export default function BulkScheduler() {
       {toast && (
         <div
           style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
-          className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+          className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2 ${
             toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
           }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <XCircle className="w-4 h-4" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>
