@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
 import Link from 'next/link'
+import { Check, CheckCircle2, FolderOpen, ImagePlus, Video, X as CloseIcon, XCircle } from 'lucide-react'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -214,7 +215,7 @@ export default function MediaLibrary() {
           {/* DROP ZONE */}
           <label htmlFor="media-upload"
             className="block border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-2xl p-6 md:p-8 text-center mb-6 hover:border-gray-400 transition-all cursor-pointer group">
-            <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🖼️</div>
+            <ImagePlus className="w-8 h-8 mx-auto mb-2 text-gray-400 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
             <p className="text-sm font-bold text-gray-500 dark:text-gray-400">Drop files here or click to upload</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Images and videos · Max {MAX_FILE_SIZE_MB}MB per file</p>
           </label>
@@ -226,7 +227,7 @@ export default function MediaLibrary() {
                 {selectedFile.mime_type?.startsWith('image/') ? (
                   <img src={selectedFile.url} alt={selectedFile.filename} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl">🎥</div>
+                  <div className="w-full h-full flex items-center justify-center"><Video className="w-8 h-8 text-gray-400" strokeWidth={1.5} /></div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -263,7 +264,7 @@ export default function MediaLibrary() {
                   )}
                   <button onClick={() => { setSelectedFile(null); setConfirmDelete(null) }}
                     className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all ml-auto">
-                    ✕ {t('app_common.close')}
+                    <CloseIcon className="inline w-3 h-3 align-text-bottom mr-1" strokeWidth={2} />{t('app_common.close')}
                   </button>
                 </div>
               </div>
@@ -277,7 +278,7 @@ export default function MediaLibrary() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">📁</div>
+              <FolderOpen className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">
                 {filter === 'All' ? t('app_media.no_media') : `No ${filter.toLowerCase()} yet`}
               </p>
@@ -302,12 +303,12 @@ export default function MediaLibrary() {
                         <img src={file.url} alt={file.filename} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-4xl">🎥</span>
+                          <Video className="w-8 h-8 text-gray-400" strokeWidth={1.5} />
                         </div>
                       )}
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-5 h-5 bg-black rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">✓</span>
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
                         </div>
                       )}
                     </div>
@@ -324,10 +325,10 @@ export default function MediaLibrary() {
       </div>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2 ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <XCircle className="w-4 h-4" strokeWidth={2} />} {toast.message}
         </div>
       )}
     </div>

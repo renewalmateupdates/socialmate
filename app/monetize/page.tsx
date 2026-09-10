@@ -4,27 +4,29 @@ import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Check, DollarSign, Heart, Link2, Lock, Repeat, Users, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export default function MonetizeLandingPage() {
   const { t } = useI18n()
 
-  const FEATURES = [
+  const FEATURES: { icon: LucideIcon; number: string; title: string; desc: string; highlight: string }[] = [
     {
-      icon: '💸',
+      icon: DollarSign,
       number: '01',
       title: t('monetize_landing.feat1_title'),
       desc: t('monetize_landing.feat1_desc'),
       highlight: t('monetize_landing.feat1_highlight'),
     },
     {
-      icon: '🔁',
+      icon: Repeat,
       number: '02',
       title: t('monetize_landing.feat2_title'),
       desc: t('monetize_landing.feat2_desc'),
       highlight: t('monetize_landing.feat2_highlight'),
     },
     {
-      icon: '🔒',
+      icon: Lock,
       number: '03',
       title: t('monetize_landing.feat3_title'),
       desc: t('monetize_landing.feat3_desc'),
@@ -153,7 +155,7 @@ export default function MonetizeLandingPage() {
                   <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center">
                     <span className="text-xs font-extrabold text-white">{feature.number}</span>
                   </div>
-                  <span className="text-2xl">{feature.icon}</span>
+                  <feature.icon className="w-6 h-6" strokeWidth={1.75} />
                 </div>
                 <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-2">{feature.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed flex-1 mb-4">{feature.desc}</p>
@@ -215,12 +217,12 @@ export default function MonetizeLandingPage() {
 
             <div className="px-8 py-6 bg-gray-900/40 grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { icon: '🔗', title: t('monetize_landing.why1_title'), desc: t('monetize_landing.why1_desc') },
-                { icon: '👥', title: t('monetize_landing.why2_title'), desc: t('monetize_landing.why2_desc') },
-                { icon: '⚡', title: t('monetize_landing.why3_title'), desc: t('monetize_landing.why3_desc') },
+                { icon: Link2, title: t('monetize_landing.why1_title'), desc: t('monetize_landing.why1_desc') },
+                { icon: Users, title: t('monetize_landing.why2_title'), desc: t('monetize_landing.why2_desc') },
+                { icon: Zap, title: t('monetize_landing.why3_title'), desc: t('monetize_landing.why3_desc') },
               ].map(item => (
                 <div key={item.title} className="flex items-start gap-3">
-                  <span className="text-xl flex-shrink-0">{item.icon}</span>
+                  <item.icon className="w-5 h-5 flex-shrink-0" strokeWidth={1.75} />
                   <div>
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
@@ -234,8 +236,8 @@ export default function MonetizeLandingPage() {
         {/* ── WAITLIST ── */}
         <section id="waitlist" className="mb-20">
           <div className="bg-gradient-to-br from-amber-950/40 to-amber-950/30 border-2 border-amber-800/50 rounded-2xl p-10 text-center">
-            <div className="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center text-void text-2xl mx-auto mb-5">
-              💜
+            <div className="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center text-void mx-auto mb-5">
+              <Heart className="w-6 h-6" strokeWidth={1.75} fill="currentColor" />
             </div>
             <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-2">{t('monetize_landing.waitlist_badge')}</p>
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-50 mb-3">
@@ -247,7 +249,7 @@ export default function MonetizeLandingPage() {
 
             {status === 'success' ? (
               <div className="inline-flex items-center gap-2 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-6 py-3.5 rounded-xl text-sm">
-                <span className="text-lg">✓</span> {t('monetize_landing.waitlist_success')}
+                <Check className="w-5 h-5" strokeWidth={2.5} /> {t('monetize_landing.waitlist_success')}
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">

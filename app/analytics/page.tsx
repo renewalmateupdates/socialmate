@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useI18n } from '@/contexts/I18nContext'
+import { AlertTriangle, CheckCircle2, Flame, Globe, Heart, Lock, MessageCircle, Repeat2 } from 'lucide-react'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+
+function PlatformGlyph({ id, size = 14 }: { id: string; size?: number }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} />
+}
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
@@ -56,21 +63,6 @@ type DateRange = '7d' | '30d' | 'all'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const PLATFORM_ICONS: Record<string, string> = {
-  bluesky:  '🦋',
-  discord:  '💬',
-  telegram: '✈️',
-  mastodon: '🐘',
-  twitter:  '🐦',
-  instagram:'📸',
-  linkedin: '💼',
-  youtube:  '▶️',
-  reddit:   '🤖',
-  tiktok:   '🎵',
-  facebook: '📘',
-  threads:  '🧵',
-  pinterest:'📌',
-}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -107,7 +99,7 @@ function Skeleton({ w = '100%', h = 24 }: { w?: string | number; h?: number }) {
 
 function StatCard({ label, value, sub, subColor }: {
   label: string
-  value: string | number
+  value: React.ReactNode
   sub?: string
   subColor?: string
 }) {
@@ -477,7 +469,7 @@ export default function Analytics() {
                     opacity: syncState === 'syncing' ? 0.6 : 1,
                   }}
                 >
-                  {syncState === 'idle' ? '🦋 Sync Bluesky ↻'
+                  {syncState === 'idle' ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><PlatformGlyph id="bluesky" size={13} /> Sync Bluesky ↻</span>
                     : syncState === 'syncing' ? 'Syncing...'
                     : `✓ Synced ${syncCount} posts`}
                 </button>
@@ -519,7 +511,7 @@ export default function Analytics() {
                   />
                   <StatCard
                     label={t('app_analytics.overview')}
-                    value={`${stats?.current_streak ?? 0} 🔥`}
+                    value={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>{stats?.current_streak ?? 0} <Flame size={16} strokeWidth={2} color={T.gold} /></span>}
                     sub={`Longest: ${stats?.longest_streak ?? 0} days`}
                   />
                   <StatCard
@@ -555,7 +547,7 @@ export default function Analytics() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {syncState === 'idle' ? '🦋 Sync Bluesky engagement'
+                  {syncState === 'idle' ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><PlatformGlyph id="bluesky" size={12} /> Sync Bluesky engagement</span>
                     : syncState === 'syncing' ? 'Syncing...'
                     : `✓ Synced ${syncCount} posts`}
                 </button>
@@ -563,33 +555,33 @@ export default function Analytics() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
                   {
-                    icon: '🦋', name: 'Bluesky',
-                    badge: '✅ Available', badgeColor: '#16a34a', badgeBg: 'rgba(22,163,74,0.12)',
+                    id: 'bluesky', name: 'Bluesky',
+                    badge: 'Available', BadgeIcon: CheckCircle2, badgeColor: '#16a34a', badgeBg: 'rgba(22,163,74,0.12)',
                     desc: 'Likes, reposts, and replies — pulled live via AT Protocol public API.',
                   },
                   {
-                    icon: '🐘', name: 'Mastodon',
-                    badge: '✅ Available', badgeColor: '#16a34a', badgeBg: 'rgba(22,163,74,0.12)',
+                    id: 'mastodon', name: 'Mastodon',
+                    badge: 'Available', BadgeIcon: CheckCircle2, badgeColor: '#16a34a', badgeBg: 'rgba(22,163,74,0.12)',
                     desc: 'Favourites and reblogs available via Mastodon API. Integration in progress.',
                   },
                   {
-                    icon: '💬', name: 'Discord',
-                    badge: '⚠️ Limited', badgeColor: '#d97706', badgeBg: 'rgba(217,119,6,0.12)',
+                    id: 'discord', name: 'Discord',
+                    badge: 'Limited', BadgeIcon: AlertTriangle, badgeColor: '#d97706', badgeBg: 'rgba(217,119,6,0.12)',
                     desc: 'Message delivery confirmed. Discord does not expose engagement metrics via API.',
                   },
                   {
-                    icon: '✈️', name: 'Telegram',
-                    badge: '⚠️ Limited', badgeColor: '#d97706', badgeBg: 'rgba(217,119,6,0.12)',
+                    id: 'telegram', name: 'Telegram',
+                    badge: 'Limited', BadgeIcon: AlertTriangle, badgeColor: '#d97706', badgeBg: 'rgba(217,119,6,0.12)',
                     desc: 'Message delivery confirmed. View counts available for channels only — not groups or DMs.',
                   },
                   {
-                    icon: '🐦', name: 'X / Twitter',
-                    badge: '🔒 Blocked', badgeColor: '#6b7280', badgeBg: 'rgba(107,114,128,0.12)',
+                    id: 'twitter', name: 'X / Twitter',
+                    badge: 'Blocked', BadgeIcon: Lock, badgeColor: '#6b7280', badgeBg: 'rgba(107,114,128,0.12)',
                     desc: 'Impressions require Twitter API v2 Basic ($100+/mo). We\'ve built the integration — pending API tier upgrade.',
                   },
                   {
-                    icon: '💼', name: 'LinkedIn',
-                    badge: '🔒 Blocked', badgeColor: '#6b7280', badgeBg: 'rgba(107,114,128,0.12)',
+                    id: 'linkedin', name: 'LinkedIn',
+                    badge: 'Blocked', BadgeIcon: Lock, badgeColor: '#6b7280', badgeBg: 'rgba(107,114,128,0.12)',
                     desc: 'Impression data requires LinkedIn Partner Program approval. Coming when LinkedIn integration launches.',
                   },
                 ].map(row => (
@@ -598,15 +590,16 @@ export default function Analytics() {
                     background: T.surface2, border: `1px solid ${T.border}`,
                     borderRadius: 8, padding: '10px 14px',
                   }}>
-                    <span style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{row.icon}</span>
+                    <span style={{ flexShrink: 0, marginTop: 1 }}><PlatformGlyph id={row.id} size={20} /></span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 2 }}>
                         <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{row.name}</span>
                         <span style={{
                           fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12,
                           color: row.badgeColor, background: row.badgeBg, border: `1px solid ${row.badgeColor}33`,
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
                         }}>
-                          {row.badge}
+                          <row.BadgeIcon size={11} strokeWidth={2} /> {row.badge}
                         </span>
                       </div>
                       <p style={{ fontSize: 12, color: T.textDim, margin: 0, lineHeight: 1.5 }}>{row.desc}</p>
@@ -654,11 +647,10 @@ export default function Analytics() {
                     const total = stats.total_published || 1
                     const pct   = Math.round((count / total) * 100)
                     const barW  = Math.max((count / maxPlatform) * 100, 2)
-                    const icon  = PLATFORM_ICONS[platform] ?? '📡'
                     return (
                       <div key={platform} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span style={{ width: 100, fontSize: 13, color: T.text, display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, textTransform: 'capitalize' }}>
-                          <span>{icon}</span>
+                          <PlatformGlyph id={platform} size={14} />
                           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{platform}</span>
                         </span>
                         <div style={{ flex: 1, height: 8, background: T.surface2, borderRadius: 4, overflow: 'hidden' }}>
@@ -684,7 +676,7 @@ export default function Analytics() {
               <div style={{ ...sectionStyle, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <div>
-                    <p style={{ ...sectionHead, margin: 0 }}>🦋 Bluesky Engagement</p>
+                    <p style={{ ...sectionHead, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}><PlatformGlyph id="bluesky" size={15} /> Bluesky Engagement</p>
                     <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>Platform Engagement — pulled live from AT Protocol API</p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -708,15 +700,15 @@ export default function Analytics() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                   {[
-                    { emoji: '❤️', label: 'Likes', value: bskyLikes },
-                    { emoji: '🔁', label: 'Reposts', value: bskyRep },
-                    { emoji: '💬', label: 'Replies', value: bskyReplies },
-                  ].map(({ emoji, label, value }) => (
+                    { Icon: Heart, label: 'Likes', value: bskyLikes },
+                    { Icon: Repeat2, label: 'Reposts', value: bskyRep },
+                    { Icon: MessageCircle, label: 'Replies', value: bskyReplies },
+                  ].map(({ Icon, label, value }) => (
                     <div key={label} style={{
                       background: T.surface2, border: `1px solid ${T.border}`,
                       borderRadius: 10, padding: '14px 16px', textAlign: 'center',
                     }}>
-                      <div style={{ fontSize: 22 }}>{emoji}</div>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}><Icon size={22} strokeWidth={1.75} color={T.muted} /></div>
                       <div style={{ fontSize: 24, fontWeight: 800, color: T.text, lineHeight: 1.2 }}>{value}</div>
                       <div style={{ fontSize: 11, color: T.muted }}>{label}</div>
                     </div>
@@ -784,9 +776,9 @@ export default function Analytics() {
                     <span>Content</span>
                     <span>Platforms</span>
                     {bskyPosts.length > 0 && <>
-                      <span style={{ textAlign: 'right' }}>❤️</span>
-                      <span style={{ textAlign: 'right' }}>💬</span>
-                      <span style={{ textAlign: 'right' }}>🔁</span>
+                      <span style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}><Heart size={12} strokeWidth={1.75} /></span>
+                      <span style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}><MessageCircle size={12} strokeWidth={1.75} /></span>
+                      <span style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}><Repeat2 size={12} strokeWidth={1.75} /></span>
                     </>}
                     <span style={{ textAlign: 'right' }}>Date</span>
                   </div>
@@ -817,8 +809,8 @@ export default function Analytics() {
                         {/* Platforms */}
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {post.platforms.map(p => (
-                            <span key={p} title={p} style={{ fontSize: 14 }}>
-                              {PLATFORM_ICONS[p] ?? '📡'}
+                            <span key={p} title={p}>
+                              <PlatformGlyph id={p} size={14} />
                             </span>
                           ))}
                         </div>
