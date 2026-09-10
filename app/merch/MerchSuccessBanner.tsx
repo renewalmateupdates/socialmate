@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { PartyPopper } from 'lucide-react'
 
 // The success banner is the only thing on /merch that depended on the URL query.
 // Reading searchParams in the page opted the whole route into dynamic rendering,
@@ -17,8 +18,8 @@ function Banner() {
       background: 'rgba(16,185,129,0.1)', borderBottom: '1px solid rgba(16,185,129,0.3)',
       padding: '16px 24px', textAlign: 'center',
     }}>
-      <span style={{ fontSize: 14, fontWeight: 700, color: '#10B981' }}>
-        🎉 Order confirmed! Your merch is being printed and will ship soon. Check your email for tracking.
+      <span style={{ fontSize: 14, fontWeight: 700, color: '#10B981', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <PartyPopper size={15} strokeWidth={2} /> Order confirmed! Your merch is being printed and will ship soon. Check your email for tracking.
       </span>
     </div>
   )

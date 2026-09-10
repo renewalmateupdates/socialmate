@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { MerchProductCard } from './MerchProductCard'
 import { MerchWaitlistForm } from './MerchWaitlistForm'
 import { MerchSuccessBanner } from './MerchSuccessBanner'
+import { Check, Globe2, Heart, Printer, Rocket, Shirt } from 'lucide-react'
 
 const amber   = '#F59E0B'
 const dark    = '#0a0a0a'
@@ -76,7 +77,7 @@ export default async function MerchPage() {
           background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)',
           borderRadius: 20, padding: '6px 16px', marginBottom: 28,
         }}>
-          <span style={{ fontSize: 14 }}>👕</span>
+          <Shirt size={14} strokeWidth={2} color={amber} />
           <span style={{ color: amber, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Store Open · Creator Merch · Powered by Purpose
           </span>
@@ -96,15 +97,17 @@ export default async function MerchPage() {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
           {[
-            { value: '75%', label: 'of profit to SM-Give' },
-            { value: '🌍', label: 'Global fulfillment' },
-            { value: '🖨️', label: 'Print on demand' },
+            { value: '75%', icon: null, label: 'of profit to SM-Give' },
+            { value: null, icon: Globe2, label: 'Global fulfillment' },
+            { value: null, icon: Printer, label: 'Print on demand' },
           ].map(s => (
             <div key={s.label} style={{
               background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
               borderRadius: 12, padding: '12px 20px', textAlign: 'center',
             }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: amber, letterSpacing: '-0.02em' }}>{s.value}</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: amber, letterSpacing: '-0.02em', display: 'flex', justifyContent: 'center' }}>
+                {s.value ?? (s.icon && <s.icon size={22} strokeWidth={1.75} />)}
+              </div>
               <div style={{ fontSize: 12, color: '#d1d5db', fontWeight: 600, marginTop: 3 }}>{s.label}</div>
             </div>
           ))}
@@ -188,7 +191,7 @@ export default async function MerchPage() {
                 'Available to all SocialMate users',
               ].map(point => (
                 <div key={point} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <span style={{ color: amber, fontWeight: 800, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
+                  <Check size={14} strokeWidth={2.5} color={amber} style={{ flexShrink: 0, marginTop: 1 }} />
                   <span style={{ fontSize: 14, color: '#d1d5db', lineHeight: 1.55 }}>{point}</span>
                 </div>
               ))}
@@ -203,7 +206,7 @@ export default async function MerchPage() {
           background: surface, border: `1px solid ${border}`,
           borderRadius: 24, padding: '48px 40px', textAlign: 'center',
         }}>
-          <span style={{ fontSize: 36 }}>🚀</span>
+          <Rocket size={32} strokeWidth={1.5} color={amber} />
           <h2 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '16px 0 10px', letterSpacing: '-0.02em' }}>
             Get notified on new drops
           </h2>
@@ -217,8 +220,8 @@ export default async function MerchPage() {
       {/* Footer */}
       <footer style={{ borderTop: `1px solid ${border}`, padding: '28px 24px', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap', marginBottom: 12 }}>
-          <Link href="/give" style={{ fontSize: 13, color: '#10B981', textDecoration: 'none', fontWeight: 600 }}>
-            ❤️ SM-Give — How we give back
+          <Link href="/give" style={{ fontSize: 13, color: '#10B981', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Heart size={13} strokeWidth={2} /> SM-Give — How we give back
           </Link>
           <Link href="/signup" style={{ fontSize: 13, color: muted, textDecoration: 'none' }}>Get started free</Link>
           <Link href="/affiliates" style={{ fontSize: 13, color: muted, textDecoration: 'none' }}>Affiliate program</Link>
