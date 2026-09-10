@@ -56,6 +56,26 @@ interface DraftPost {
   metadata: Record<string, string> | null
 }
 
+interface SomaPerformance {
+  publishedCount: number
+  totalLikes: number
+  totalReposts: number
+  totalReplies: number
+  topPost: { content: string; engagement: number } | null
+}
+
+function postEngagement(p: { bluesky_stats?: any; mastodon_stats?: any; analytics?: any }): { likes: number; reposts: number; replies: number } {
+  const autoBsky  = p.analytics?.bluesky
+  const autoMasto = p.analytics?.mastodon
+  const bsky  = p.bluesky_stats ?? (autoBsky ? { likes: autoBsky.likes ?? 0, reposts: autoBsky.reposts ?? 0, replies: autoBsky.replies ?? 0 } : null)
+  const masto = p.mastodon_stats ?? (autoMasto ? { favourites_count: autoMasto.likes ?? 0, reblogs_count: autoMasto.reposts ?? 0, replies_count: autoMasto.replies ?? 0 } : null)
+  return {
+    likes:   (bsky?.likes ?? 0) + (masto?.favourites_count ?? 0),
+    reposts: (bsky?.reposts ?? 0) + (masto?.reblogs_count ?? 0),
+    replies: (bsky?.replies ?? 0) + (masto?.replies_count ?? 0),
+  }
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function timeSlotIcon(scheduledAt: string | null): LucideIcon {
@@ -261,6 +281,7 @@ export default function SomaDashboardPage() {
   const [ledgerLoading, setLedgerLoading]     = useState(false)
   const [projects, setProjects]               = useState<SomaProject[]>([])
   const [projectLimit, setProjectLimit]       = useState(1)
+  const [performance, setPerformance]         = useState<SomaPerformance | null>(null)
 
   // ── Data loading ────────────────────────────────────────────────────────────
 
@@ -327,6 +348,31 @@ export default function SomaDashboardPage() {
         (p: any) => p.metadata?.source === 'soma'
       )
       setDrafts(somaPosts)
+
+      // Performance — how SOMA's published posts have actually done. Reuses
+      // the same engagement merge as /analytics and /evergreen: manual
+      // bluesky_stats/mastodon_stats sync wins when present, otherwise the
+      // auto-populated analytics snapshot fills the gap.
+      const { data: publishedPosts } = await supabase
+        .from('posts')
+        .select('id, content, metadata, bluesky_stats, mastodon_stats, analytics')
+        .eq('user_id', user.id)
+        .eq('status', 'published')
+
+      const somaPublished = (publishedPosts ?? []).filter((p: any) => p.metadata?.source === 'soma')
+      if (somaPublished.length > 0) {
+        let totalLikes = 0, totalReposts = 0, totalReplies = 0
+        let topPost: { content: string; engagement: number } | null = null
+        for (const p of somaPublished) {
+          const e = postEngagement(p as any)
+          totalLikes += e.likes; totalReposts += e.reposts; totalReplies += e.replies
+          const total = e.likes + e.reposts + e.replies
+          if (total > 0 && (!topPost || total > topPost.engagement)) {
+            topPost = { content: (p as any).content ?? '', engagement: total }
+          }
+        }
+        setPerformance({ publishedCount: somaPublished.length, totalLikes, totalReposts, totalReplies, topPost })
+      }
 
     } catch (err) {
       console.error('SOMA dashboard load error:', err)
@@ -903,6 +949,32 @@ export default function SomaDashboardPage() {
             <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
           </Link>
         </div>
+
+        {/* Performance — how SOMA's own published posts have actually done */}
+        {performance && performance.publishedCount > 0 && (
+          <div className="mt-6 rounded-2xl border border-gray-800 bg-gray-900 p-5">
+            <p className="text-sm font-bold text-white mb-4">SOMA post performance</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              {[
+                { label: 'Posts published', value: performance.publishedCount },
+                { label: 'Likes',   value: performance.totalLikes },
+                { label: 'Reposts', value: performance.totalReposts },
+                { label: 'Replies', value: performance.totalReplies },
+              ].map(s => (
+                <div key={s.label} className="rounded-xl bg-black/30 p-3 text-center">
+                  <p className="text-lg font-extrabold text-amber-400">{s.value.toLocaleString()}</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+            {performance.topPost && (
+              <div className="rounded-xl bg-black/30 p-4">
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Top performer — {performance.topPost.engagement.toLocaleString()} total engagement</p>
+                <p className="text-xs text-gray-300 leading-relaxed line-clamp-2">{performance.topPost.content}</p>
+              </div>
+            )}
+          </div>
+        )}
 
       </main>
     </div>
