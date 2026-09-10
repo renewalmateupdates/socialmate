@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
-import { CheckCircle2, Flame, PartyPopper, PenLine } from 'lucide-react'
+import { CheckCircle2, Flame, PartyPopper, PenLine, Sparkles } from 'lucide-react'
 
 const CHALLENGE_DAYS = 30
 const CHALLENGE_REWARD = 50
@@ -199,7 +199,7 @@ export default function ChallengePage() {
               t('challenge.rule5'),
             ].map((rule, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="text-amber-500 mt-0.5 flex-shrink-0">✦</span>
+                <Sparkles size={13} strokeWidth={2} className="text-amber-500 mt-0.5 flex-shrink-0" />
                 {rule}
               </li>
             ))}

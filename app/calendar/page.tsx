@@ -21,7 +21,7 @@ import {
 } from '@dnd-kit/core'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { CalendarDays, ChevronDown, Globe, Sparkles, X as CloseIcon } from 'lucide-react'
+import { CalendarDays, ChevronDown, Clock, Globe, Sparkles, X as CloseIcon } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -734,8 +734,8 @@ export default function CalendarPage() {
                           </p>
                           <UnsplashCredit mediaUrls={post.media_urls} size="md" />
                           {(post.scheduled_at || post.created_at) && (
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
-                              🕐 {formatTime(post.scheduled_at || post.created_at)}
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 inline-flex items-center gap-1">
+                              <Clock size={11} strokeWidth={2} /> {formatTime(post.scheduled_at || post.created_at)}
                             </p>
                           )}
                           {(post.status === 'partial' || post.status === 'failed') && (

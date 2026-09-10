@@ -3,6 +3,7 @@ import { useState } from 'react'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import Link from 'next/link'
+import { Smartphone } from 'lucide-react'
 
 const TESTER_GOAL = 12
 
@@ -42,7 +43,7 @@ export default function BetaPage() {
         {/* Badge */}
         <div className="flex justify-center mb-6">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-400/10 border border-amber-400/30 rounded-full text-xs font-bold text-amber-400 uppercase tracking-widest">
-            🤖 Android Beta
+            <Smartphone size={13} strokeWidth={2} /> Android Beta
           </span>
         </div>
 

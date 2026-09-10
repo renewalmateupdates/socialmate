@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { Bot } from 'lucide-react'
+import { Bot, CheckCircle2 } from 'lucide-react'
 
 const TIERS = [
   { value: 'citizen',   label: 'Citizen — Free',    color: '#10b981' },
@@ -96,7 +96,7 @@ export default function EnkiPage() {
             padding: '40px 32px',
             boxShadow: '0 0 60px rgba(245,158,11,0.08)',
           }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+            <CheckCircle2 size={44} strokeWidth={1.5} color="#10b981" style={{ marginBottom: 16 }} />
             <h2 style={{ margin: '0 0 10px', fontSize: 22, fontWeight: 900, color: '#f1f1f1' }}>
               You&apos;re on the list.
             </h2>
