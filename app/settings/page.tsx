@@ -9,6 +9,13 @@ import { usePushNotifications } from '@/hooks/usePushNotifications'
 import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { CheckCircle2, Crown, Gem, Gift, Globe, Link2, Mic, Rocket, Star, Tag, X as CloseIcon, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const STRIPE_PRO_PRICE_ID    = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
 const STRIPE_AGENCY_PRICE_ID = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
@@ -18,11 +25,11 @@ const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Scheduling', 'Language
 
 // Every 5 paying referrals = +100 bonus credits (stacking, no cap)
 const REFERRAL_TIERS = [
-  { paying: 5,   reward: '+100 bonus credits',  icon: '🎁' },
-  { paying: 10,  reward: '+200 bonus credits',  icon: '⭐' },
-  { paying: 15,  reward: '+300 bonus credits',  icon: '🚀' },
-  { paying: 20,  reward: '+400 bonus credits',  icon: '💎' },
-  { paying: 25,  reward: '+500 bonus credits',  icon: '👑' },
+  { paying: 5,   reward: '+100 bonus credits',  icon: Gift },
+  { paying: 10,  reward: '+200 bonus credits',  icon: Star },
+  { paying: 15,  reward: '+300 bonus credits',  icon: Rocket },
+  { paying: 20,  reward: '+400 bonus credits',  icon: Gem },
+  { paying: 25,  reward: '+500 bonus credits',  icon: Crown },
 ]
 
 const CREDIT_PACKS = [
@@ -644,7 +651,7 @@ function SettingsInner() {
 
               {/* Built with SocialMate badge */}
               <div className="border-t border-theme pt-5 mt-2">
-                <p className="text-sm font-bold mb-1">🏷️ Built with SocialMate Badge</p>
+                <p className="text-sm font-bold mb-1 flex items-center gap-1.5"><Tag className="w-4 h-4" strokeWidth={1.75} /> Built with SocialMate Badge</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Drop this on your website, link-in-bio, or portfolio to show your creator stack.</p>
                 <div className="flex items-center gap-3 mb-3">
                   <img src="/badge.svg" alt="Built with SocialMate" className="h-8" />
@@ -701,7 +708,7 @@ function SettingsInner() {
                         <span className="text-green-700 dark:text-green-400 font-bold flex-1">
                           {couponApplied.code} — {couponApplied.discount_type === 'percent' ? `${couponApplied.discount_value}% off` : couponApplied.discount_type === 'fixed' ? `$${couponApplied.discount_value} off` : `+${couponApplied.discount_value} trial days`}
                         </span>
-                        <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600 font-bold">✕</button>
+                        <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600 font-bold"><CloseIcon className="w-3.5 h-3.5" strokeWidth={2} /></button>
                       </div>
                     ) : (
                       <div className="flex gap-2">
@@ -825,7 +832,7 @@ function SettingsInner() {
 
                 {/* Booster balance */}
                 <div className="flex items-center gap-2 mb-5 px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
-                  <span className="text-amber-600 dark:text-amber-400 text-sm">⚡</span>
+                  <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" strokeWidth={1.75} />
                   <span className="text-xs text-gray-700 dark:text-gray-300">
                     {tSettings('app_settings.plan_tab.x_booster_balance')}{' '}
                     <strong className="text-amber-700 dark:text-amber-400">
@@ -958,7 +965,7 @@ function SettingsInner() {
                         return (
                           <div key={i} className={`flex items-center justify-between py-3 border-b border-gray-50 last:border-0 ${unlocked ? 'opacity-50' : ''}`}>
                             <div className="flex items-center gap-3">
-                              <span className="text-xl">{unlocked ? '✅' : tier.icon}</span>
+                              {unlocked ? <CheckCircle2 className="w-5 h-5 text-green-600" strokeWidth={1.75} /> : <tier.icon className="w-5 h-5" strokeWidth={1.75} />}
                               <div>
                                 <p className="text-sm font-bold">
                                   {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
@@ -980,7 +987,7 @@ function SettingsInner() {
                     <h2 className="text-base font-extrabold mb-5">{tSettings('app_settings.referrals_tab.history')}</h2>
                     {referralHistory.length === 0 ? (
                       <div className="text-center py-8">
-                        <p className="text-3xl mb-3">🎁</p>
+                        <Gift className="w-8 h-8 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                         <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{tSettings('app_settings.referrals_tab.no_referrals')}</p>
                         <p className="text-xs text-gray-400 dark:text-gray-500">{tSettings('app_settings.referrals_tab.no_referrals_sub')}</p>
                       </div>
@@ -1345,7 +1352,7 @@ function SettingsInner() {
               {/* Free plan — fully locked */}
               {plan === 'free' && (
                 <div className="bg-surface border border-theme rounded-2xl p-8 text-center">
-                  <div className="text-3xl mb-3">🏷️</div>
+                  <Tag className="w-8 h-8 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                   <h2 className="text-base font-extrabold mb-2">{tSettings('app_settings.white_label_tab.locked_title')}</h2>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mb-5 max-w-sm mx-auto leading-relaxed">
                     {tSettings('app_settings.white_label_tab.locked_desc')}
@@ -1630,7 +1637,7 @@ function SettingsInner() {
             <div className="space-y-4">
               <div className="bg-surface border border-theme rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">🎙️</span>
+                  <Mic className="w-4 h-4" strokeWidth={1.75} />
                   <h2 className="text-base font-extrabold">{tSettings('app_settings.brand_voice_tab.title')}</h2>
                 </div>
                 <p className="text-xs text-[#9ca3af] mb-6 leading-relaxed">
@@ -1758,7 +1765,7 @@ function SettingsInner() {
                 <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-5">
                   <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wide mb-3">{tSettings('app_settings.brand_voice_tab.preview_label')}</p>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm">🎙️</span>
+                    <Mic className="w-3.5 h-3.5" strokeWidth={1.75} />
                     <span className="text-sm font-extrabold text-[#F59E0B]">{voiceName}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1879,13 +1886,13 @@ function SettingsInner() {
                   </p>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {[
-                      { id: 'bluesky',  name: 'Bluesky',  icon: '🦋' },
-                      { id: 'mastodon', name: 'Mastodon', icon: '🐘' },
-                      { id: 'discord',  name: 'Discord',  icon: '💬' },
-                      { id: 'telegram', name: 'Telegram', icon: '✈️' },
-                      { id: 'twitter',  name: 'X',        icon: '🐦' },
-                      { id: 'linkedin', name: 'LinkedIn', icon: '💼' },
-                      { id: 'tiktok',   name: 'TikTok',   icon: '🎵' },
+                      { id: 'bluesky',  name: 'Bluesky' },
+                      { id: 'mastodon', name: 'Mastodon' },
+                      { id: 'discord',  name: 'Discord' },
+                      { id: 'telegram', name: 'Telegram' },
+                      { id: 'twitter',  name: 'X' },
+                      { id: 'linkedin', name: 'LinkedIn' },
+                      { id: 'tiktok',   name: 'TikTok' },
                     ].map(platform => {
                       const selected = defaultPlatforms.includes(platform.id)
                       return (
@@ -1903,7 +1910,7 @@ function SettingsInner() {
                               ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
                               : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                           }`}>
-                          <span>{platform.icon}</span>
+                          <PlatformGlyph id={platform.id} size={14} />
                           <span>{platform.name}</span>
                         </button>
                       )
@@ -2127,7 +2134,7 @@ function IntegrationsTab() {
           </div>
         ) : webhooks.length === 0 ? (
           <div className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
-            <p className="text-2xl mb-2">🔗</p>
+            <Link2 className="w-6 h-6 mx-auto mb-2" strokeWidth={1.5} />
             <p className="font-semibold mb-1">No webhooks yet</p>
             <p>Connect to Zapier, Make, n8n, or any custom receiver above.</p>
           </div>
