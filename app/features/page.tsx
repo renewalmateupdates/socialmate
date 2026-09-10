@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
-import { BarChart3, Bot, Building2, CalendarClock, CalendarDays, CheckCircle2, Clock, FileDown, FileText, Flame, FolderOpen, Hash, History, ImagePlus, Inbox, Link2, MessagesSquare, Package, PenLine, Radar, Recycle, RefreshCw, Rss, Search, ShieldCheck, Tag, Tags, Telescope, TrendingUp, Users, Wrench, Zap } from 'lucide-react'
+import { BarChart3, Bot, Building2, CalendarClock, CalendarDays, CheckCircle2, Clock, FileDown, FileText, Flame, FolderOpen, Hash, History, ImagePlus, Inbox, Link2, MessagesSquare, Package, PenLine, Radar, Recycle, RefreshCw, Rss, Search, ShieldCheck, Smartphone, Tag, Tags, Telescope, TrendingUp, Users, Wrench, Zap } from 'lucide-react'
 import PlatformIcon from '@/components/landing/PlatformIcon'
 
 const FEATURE_CATEGORIES = [
@@ -426,7 +426,7 @@ export default function Features() {
         {/* PLATFORM NOTE */}
         <div className="bg-raised border border-edge rounded-2xl p-6 mb-10">
           <div className="flex items-start gap-4">
-            <span className="text-3xl">📱</span>
+            <Smartphone className="w-8 h-8 flex-shrink-0 text-ink-muted" strokeWidth={1.5} />
             <div>
               <h3 className="text-sm font-extrabold mb-1 text-ink-high">{t('features.platform_note_title')}</h3>
               <p className="text-xs text-ink-muted leading-relaxed mb-3">
