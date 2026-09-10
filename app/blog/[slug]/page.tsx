@@ -483,9 +483,9 @@ The per-seat model on team plans has similar issues. Adding a content creator to
 
 SocialMate was built on the premise that the per-channel, per-seat model is the wrong foundation for a scheduling tool aimed at individual creators and small teams.
 
-The free plan includes all 16 supported platforms — Instagram, X/Twitter, LinkedIn, TikTok, Facebook, Threads, Pinterest, YouTube, Snapchat, Bluesky, Reddit, Discord, Telegram, Mastodon, Lemon8, and BeReal. Connecting your Instagram account and your TikTok account doesn't cost more than connecting just Instagram. The platform count doesn't drive the pricing.
+The free plan includes all 7 live platforms — Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. Connecting a Bluesky account and a TikTok account doesn't cost more than connecting just one. The platform count doesn't drive the pricing.
 
-Team seats follow the same logic. The free plan includes 2 team members. The Pro plan ($8/month flat, not per channel) includes 5. Agency ($29/month) includes unlimited. You're not paying per person.
+Team seats follow the same logic. The free plan includes 2 team members. The Pro plan ($8/month flat, not per channel) includes 5. Agency ($29/month) includes 15. You're not paying per person.
 
 ## What This Actually Costs You Compared
 
