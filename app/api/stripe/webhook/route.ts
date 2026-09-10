@@ -30,6 +30,12 @@ const STRIPE_AGENCY_ANNUAL_PRICE_ID_LEGACY = 'price_1TFMI07OMwDowUuUoHfKJEpo'
 const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1TFMHt7OMwDowUuU56Fzw4fE'
 const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 
+// HERMES add-on — set once the real Prices exist in Stripe (Starter $12/mo,
+// Pro $25/mo per app/hermes/page.tsx). Until then these never match a real
+// price.id, so the checkout/webhook paths below are inert but ready.
+const STRIPE_HERMES_STARTER_PRICE_ID = 'price_HERMES_STARTER_PLACEHOLDER'
+const STRIPE_HERMES_PRO_PRICE_ID     = 'price_HERMES_PRO_PLACEHOLDER'
+
 const CREDIT_PACK_PRICES: Record<string, number> = {
   'price_1TFMI47OMwDowUuUhTrbe3oq': 100,
   'price_1TFMI77OMwDowUuU0wDZWcCL': 300,
@@ -126,19 +132,25 @@ function resolveSubscription(subscription: Stripe.Subscription): {
   whiteLabelActive: boolean
   whiteLabelTier: string | null
   isWhiteLabelOnly: boolean
+  hermesActive: boolean
+  hermesTier: string | null
 } {
   let plan: string | null = null
   let whiteLabelActive = false
   let whiteLabelTier: string | null = null
+  let hermesActive = false
+  let hermesTier: string | null = null
 
   for (const item of subscription.items.data) {
     const priceId = item.price.id
     if (PLAN_PRICES.has(priceId)) plan = PRICE_TO_PLAN[priceId]
     if (priceId === STRIPE_WHITE_LABEL_BASIC_PRICE_ID) { whiteLabelActive = true; whiteLabelTier = 'basic' }
     if (priceId === STRIPE_WHITE_LABEL_PRO_PRICE_ID)   { whiteLabelActive = true; whiteLabelTier = 'pro'   }
+    if (priceId === STRIPE_HERMES_STARTER_PRICE_ID)    { hermesActive = true; hermesTier = 'starter' }
+    if (priceId === STRIPE_HERMES_PRO_PRICE_ID)        { hermesActive = true; hermesTier = 'pro'     }
   }
 
-  return { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly: plan === null && whiteLabelActive }
+  return { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly: plan === null && whiteLabelActive, hermesActive, hermesTier }
 }
 
 function getSupabase() {
@@ -1018,7 +1030,23 @@ export async function POST(req: NextRequest) {
 
     const customerId   = session.customer as string
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
-    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly } = resolveSubscription(subscription)
+    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly, hermesActive, hermesTier } = resolveSubscription(subscription)
+
+    // HERMES activates immediately on payment — no approval flow like White
+    // Label. Runs whether or not this checkout also bundled a base-plan price,
+    // and is tracked by its own subscription id (not user_settings.stripe_subscription_id,
+    // which belongs to the base plan) so cancelling one never touches the other.
+    if (hermesActive && userId) {
+      try {
+        await supabase.from('user_settings').update({
+          hermes_active:          true,
+          hermes_tier:            hermesTier,
+          hermes_subscription_id: subscription.id,
+        }).eq('user_id', userId)
+      } catch (err) {
+        console.error('[HERMES] activation failed (non-fatal):', err)
+      }
+    }
 
     if (isWhiteLabelOnly || !plan) return NextResponse.json({ received: true })
 
@@ -1153,7 +1181,7 @@ const creditsToSet = alreadyOnPlan
   // ── SUBSCRIPTION UPDATED ────────────────────────────────────────────────────
   if (event.type === 'customer.subscription.updated') {
     const subscription = event.data.object as Stripe.Subscription
-    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly } = resolveSubscription(subscription)
+    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly, hermesActive, hermesTier } = resolveSubscription(subscription)
 
     // White-label-only renewal — only update if already approved (don't re-activate pending/rejected)
     if (isWhiteLabelOnly) {
@@ -1163,6 +1191,17 @@ const creditsToSet = alreadyOnPlan
         .eq('stripe_customer_id', subscription.customer as string)
         .eq('white_label_status', 'active') // only touch if already admin-approved
       return NextResponse.json({ received: true })
+    }
+
+    // HERMES tier change (Starter <-> Pro) on an existing HERMES subscription.
+    // Tracked by hermes_subscription_id specifically so this never touches the
+    // base-plan subscription tracked by stripe_subscription_id.
+    if (hermesActive) {
+      await supabase
+        .from('user_settings')
+        .update({ hermes_active: true, hermes_tier: hermesTier })
+        .eq('hermes_subscription_id', subscription.id)
+      if (plan === null) return NextResponse.json({ received: true })
     }
 
     // A non-plan subscription (e.g. Enki) must NOT return here — it falls through
@@ -1281,13 +1320,21 @@ const creditsToSet = alreadyOnPlan
       return NextResponse.json({ received: true })
     }
 
-    const { isWhiteLabelOnly } = resolveSubscription(subscription)
+    const { isWhiteLabelOnly, hermesActive } = resolveSubscription(subscription)
 
     if (isWhiteLabelOnly) {
       await supabase
         .from('user_settings')
         .update({ white_label_active: false, white_label_tier: null })
         .eq('stripe_customer_id', subscription.customer as string)
+      return NextResponse.json({ received: true })
+    }
+
+    if (hermesActive) {
+      await supabase
+        .from('user_settings')
+        .update({ hermes_active: false, hermes_tier: null, hermes_subscription_id: null })
+        .eq('hermes_subscription_id', subscription.id)
       return NextResponse.json({ received: true })
     }
 

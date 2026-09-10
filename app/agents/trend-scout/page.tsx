@@ -63,12 +63,12 @@ export default function TrendScoutPage() {
 
   if (!isPro) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
+      <div className="min-h-screen bg-theme flex flex-col items-center justify-center p-6 text-center gap-4">
         <TrendingUp className="w-12 h-12" strokeWidth={1.5} />
-        <h1 className="text-2xl font-black text-primary">Trend Scout</h1>
-        <p className="text-secondary text-sm max-w-md">Daily AI-powered trend analysis from your tracked competitors — content angles delivered every morning. Available on Pro and Agency plans.</p>
+        <h1 className="text-2xl font-black text-theme">Trend Scout</h1>
+        <p className="text-muted text-sm max-w-md">Daily AI-powered trend analysis from your tracked competitors — content angles delivered every morning. Available on Pro and Agency plans.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme">← Back to Agents</Link>
       </div>
     )
   }
@@ -76,31 +76,31 @@ export default function TrendScoutPage() {
   const trends: Trend[] = results?.trends ?? []
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-2xl mx-auto">
       <div className="mb-8">
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
           <TrendingUp className="w-7 h-7" strokeWidth={1.5} />
-          <h1 className="text-2xl font-black text-primary">Trend Scout</h1>
+          <h1 className="text-2xl font-black text-theme">Trend Scout</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-muted text-sm">
           Every morning at 7am UTC, Trend Scout analyzes what your tracked competitors are posting and surfaces the top content angles you should be hitting — with a ready-to-use draft for each.
         </p>
         {settings.last_ran_at && (
-          <p className="text-xs text-secondary mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleDateString()}</p>
+          <p className="text-xs text-muted mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleDateString()}</p>
         )}
       </div>
 
       {loading ? (
-        <div className="text-secondary text-sm py-10 text-center">Loading…</div>
+        <div className="text-muted text-sm py-10 text-center">Loading…</div>
       ) : (
         <div className="space-y-5">
           {/* Enable toggle */}
           <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <p className="font-bold text-primary">Enable Trend Scout</p>
-              <p className="text-xs text-secondary mt-0.5">Runs every morning at 7am UTC — free, uses your tracked competitors</p>
+              <p className="font-bold text-theme">Enable Trend Scout</p>
+              <p className="text-xs text-muted mt-0.5">Runs every morning at 7am UTC — free, uses your tracked competitors</p>
             </div>
             <button
               disabled={saving}
@@ -115,13 +115,13 @@ export default function TrendScoutPage() {
           {trends.length === 0 && (
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-5">
               <p className="text-xs font-bold uppercase tracking-wide text-amber-600 mb-2">How it works</p>
-              <ul className="text-sm text-secondary space-y-1">
+              <ul className="text-sm text-muted space-y-1">
                 <li>✓ Reads your tracked competitors' recent posts</li>
                 <li>✓ AI identifies recurring themes and trending angles</li>
                 <li>✓ Delivers 5 content angles every morning</li>
                 <li>✓ Each comes with a ready-to-post draft</li>
               </ul>
-              <p className="text-xs text-secondary mt-3">
+              <p className="text-xs text-muted mt-3">
                 {results === null
                   ? <>Add competitors in <Link href="/competitors" className="text-amber-600 underline">Competitor Tracking</Link> first — Trend Scout uses that data.</>
                   : 'Enable the agent above — first results will arrive tomorrow at 7am UTC.'}
@@ -133,24 +133,24 @@ export default function TrendScoutPage() {
           {trends.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wide text-secondary">Latest Trends</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">Latest Trends</p>
                 {results?.generated_at && (
-                  <p className="text-xs text-secondary">{new Date(results.generated_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted">{new Date(results.generated_at).toLocaleDateString()}</p>
                 )}
               </div>
               {trends.map((trend, i) => (
                 <div key={i} className="bg-surface border border-theme rounded-2xl p-5">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <p className="font-black text-primary">{trend.topic}</p>
+                      <p className="font-black text-theme">{trend.topic}</p>
                       <p className="text-xs text-amber-500 mt-0.5">{trend.why_now}</p>
                     </div>
                     <TrendingUp className="w-5 h-5 shrink-0" strokeWidth={1.75} />
                   </div>
-                  <p className="text-sm text-secondary mb-3">{trend.angle}</p>
-                  <div className="bg-background border border-theme rounded-xl p-3 mb-3">
-                    <p className="text-xs font-bold text-secondary mb-1">Sample caption</p>
-                    <p className="text-sm text-primary">{trend.sample_caption}</p>
+                  <p className="text-sm text-muted mb-3">{trend.angle}</p>
+                  <div className="bg-theme border border-theme rounded-xl p-3 mb-3">
+                    <p className="text-xs font-bold text-muted mb-1">Sample caption</p>
+                    <p className="text-sm text-theme">{trend.sample_caption}</p>
                   </div>
                   <button
                     onClick={() => draftPost(trend.sample_caption)}
@@ -167,8 +167,8 @@ export default function TrendScoutPage() {
           <div className="bg-surface border border-theme rounded-2xl p-4 flex items-center gap-3">
             <Telescope className="w-5 h-5" strokeWidth={1.75} />
             <div>
-              <p className="text-sm font-semibold text-primary">Needs competitor data</p>
-              <p className="text-xs text-secondary">Trend Scout reads your competitor posts. <Link href="/competitors" className="text-amber-500 hover:underline">Add competitors →</Link></p>
+              <p className="text-sm font-semibold text-theme">Needs competitor data</p>
+              <p className="text-xs text-muted">Trend Scout reads your competitor posts. <Link href="/competitors" className="text-amber-500 hover:underline">Add competitors →</Link></p>
             </div>
           </div>
         </div>

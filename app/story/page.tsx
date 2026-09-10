@@ -55,23 +55,23 @@ export default function Story() {
         {[
           {
             title: 'Where this started',
-            body: 'I know what it means to come from nothing. To watch opportunity feel out of reach — not because of lack of drive, but because the tools, the resources, and the access were always priced for people who already had everything. I built SocialMate as a self-taught developer, solo across every role — product, design, engineering, marketing, support. No team. No investors. No safety net. Just a deep conviction that creators and small businesses deserve powerful tools without being priced out of using them.',
+            body: "I built SocialMate as a self-taught developer, working solo across every role — product, design, engineering, marketing, and support. No team, no investors, no outside funding. I built it because the tools that actually help creators and small businesses grow have historically been priced for people who already had the budget to afford them. That gatekeeping was the problem I set out to remove.",
           },
           {
             title: "The problem I couldn't ignore",
-            body: "The social media management space is dominated by tools that charge $30, $99, even $200 a month for features that should cost nothing. Basic scheduling. A few analytics. An AI caption here and there. These companies aren't expensive because the technology is expensive — they're expensive because they can be. Creators are trapped in a pay-to-play ecosystem that was never designed with them in mind.",
+            body: "The social media management space charges $30, $99, even $200 a month for scheduling, basic analytics, and AI-assisted writing — features that don't come close to costing that much to run. The price reflects what the market will bear, not what the technology requires. Creators end up locked into a pay-to-play model that was never built with them in mind.",
           },
           {
             title: 'What SocialMate is trying to be',
-            body: "The goal has always been simple: give creators and small businesses access to tools that actually feel powerful — and make them free, or as close to free as sustainably possible. Not a watered-down free tier designed to frustrate you into upgrading. A genuinely generous free plan, backed by a credit system that keeps costs predictable without gatekeeping what matters.",
+            body: "The goal is straightforward: give creators and small businesses tools that are genuinely powerful, for free or as close to free as the business can sustainably support. Not a stripped-down free tier engineered to push an upgrade — a free plan that's actually useful, backed by a credit system that keeps costs predictable without gatekeeping the features that matter most.",
           },
           {
             title: "What I'm building toward",
-            body: "SocialMate isn't just a scheduler. The vision is a full creator operating system — AI tools, growth intelligence, trend detection, content automation — all in one place, at a price that doesn't require a business budget to justify. Every dollar this product earns goes directly back into making it better, faster, and more powerful for the people using it.",
+            body: "SocialMate is built to be more than a scheduler. The direction is a full creator operating system — AI tools, growth intelligence, trend detection, and content automation in one place, priced so it doesn't require a business budget to justify. Revenue goes back into the product, directly, to make it faster, more capable, and more useful for the people relying on it.",
           },
           {
             title: 'How your data is protected',
-            body: 'SocialMate is built on Supabase with row-level security, meaning your data is isolated to your account and inaccessible to anyone else — including me. OAuth tokens for connected social platforms are encrypted at rest. No data is sold. No ads. No third-party tracking for profit.',
+            body: 'SocialMate runs on Supabase with row-level security, so your data is isolated to your account and inaccessible to anyone else, including me. OAuth tokens for connected platforms are encrypted at rest. Your data is never sold, never used for advertising, and never shared with third parties for profit.',
           },
         ].map((section, i) => (
           <div key={i}>

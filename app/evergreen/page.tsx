@@ -4,7 +4,18 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
-import { FileEdit, Inbox, Recycle, RefreshCw } from 'lucide-react'
+import { ArrowUpDown, FileEdit, Heart, Inbox, MessageCircle, Recycle, Repeat2, RefreshCw } from 'lucide-react'
+
+type BlueskyStats = { likes: number; reposts: number; replies: number; fetched_at: string } | null
+type MastodonStats = { favourites_count: number; reblogs_count: number; replies_count: number; fetched_at: string } | null
+// Auto-populated by the fetchPostAnalytics Inngest function 1h/24h after publish —
+// a second, separate engagement snapshot from the manually-triggered bluesky_stats/
+// mastodon_stats sync. Both are read here so a post shows real numbers whether or
+// not the user ever clicked "Sync" on /analytics.
+type AutoAnalytics = {
+  bluesky?:  { likes: number; replies: number; reposts: number }
+  mastodon?: { likes: number; replies: number; reposts: number }
+} | null
 
 type Post = {
   id: string
@@ -12,6 +23,43 @@ type Post = {
   platforms: string[]
   published_at: string
   evergreen: boolean
+  bluesky_stats: BlueskyStats
+  mastodon_stats: MastodonStats
+  analytics: AutoAnalytics
+}
+
+function engagementOf(post: Post): { likes: number; reposts: number; replies: number; hasData: boolean } {
+  let likes = 0, reposts = 0, replies = 0, hasData = false
+
+  const bsky = post.bluesky_stats
+    ? { likes: post.bluesky_stats.likes ?? 0, reposts: post.bluesky_stats.reposts ?? 0, replies: post.bluesky_stats.replies ?? 0 }
+    : post.analytics?.bluesky
+      ? { likes: post.analytics.bluesky.likes ?? 0, reposts: post.analytics.bluesky.reposts ?? 0, replies: post.analytics.bluesky.replies ?? 0 }
+      : null
+  if (bsky) { hasData = true; likes += bsky.likes; reposts += bsky.reposts; replies += bsky.replies }
+
+  const masto = post.mastodon_stats
+    ? { likes: post.mastodon_stats.favourites_count ?? 0, reposts: post.mastodon_stats.reblogs_count ?? 0, replies: post.mastodon_stats.replies_count ?? 0 }
+    : post.analytics?.mastodon
+      ? { likes: post.analytics.mastodon.likes ?? 0, reposts: post.analytics.mastodon.reposts ?? 0, replies: post.analytics.mastodon.replies ?? 0 }
+      : null
+  if (masto) { hasData = true; likes += masto.likes; reposts += masto.reposts; replies += masto.replies }
+
+  return { likes, reposts, replies, hasData }
+}
+
+function EngagementBadge({ post }: { post: Post }) {
+  const { likes, reposts, replies, hasData } = engagementOf(post)
+  if (!hasData) {
+    return <span className="text-xs text-gray-400 dark:text-gray-600 italic">No engagement data yet</span>
+  }
+  return (
+    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-semibold">
+      <span className="inline-flex items-center gap-1"><Heart size={11} strokeWidth={2} /> {likes}</span>
+      <span className="inline-flex items-center gap-1"><Repeat2 size={11} strokeWidth={2} /> {reposts}</span>
+      <span className="inline-flex items-center gap-1"><MessageCircle size={11} strokeWidth={2} /> {replies}</span>
+    </div>
+  )
 }
 
 export default function EvergreenPage() {
@@ -21,6 +69,7 @@ export default function EvergreenPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<'newest' | 'engagement'>('newest')
 
   useEffect(() => {
     const load = async () => {
@@ -30,7 +79,7 @@ export default function EvergreenPage() {
 
       const { data } = await supabase
         .from('posts')
-        .select('id, content, platforms, published_at, evergreen')
+        .select('id, content, platforms, published_at, evergreen, bluesky_stats, mastodon_stats, analytics')
         .eq('user_id', user.id)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
@@ -56,8 +105,17 @@ export default function EvergreenPage() {
     setToggling(null)
   }
 
-  const evergreenPosts = posts.filter(p => p.evergreen)
-  const regularPosts = posts.filter(p => !p.evergreen)
+  const totalEngagement = (p: Post) => {
+    const e = engagementOf(p)
+    return e.likes + e.reposts + e.replies
+  }
+  const sortPosts = (list: Post[]) =>
+    sortBy === 'engagement'
+      ? [...list].sort((a, b) => totalEngagement(b) - totalEngagement(a))
+      : list
+
+  const evergreenPosts = sortPosts(posts.filter(p => p.evergreen))
+  const regularPosts = sortPosts(posts.filter(p => !p.evergreen))
 
   if (loading) {
     return (
@@ -100,11 +158,11 @@ export default function EvergreenPage() {
               <h2 className="text-sm font-extrabold mb-4 flex items-center gap-1.5"><Recycle className="w-4 h-4" strokeWidth={2} /> Evergreen Queue ({evergreenPosts.length})</h2>
               <div className="space-y-3">
                 {evergreenPosts.map(post => (
-                  <div key={post.id} className="bg-white border-2 border-black rounded-2xl p-4">
+                  <div key={post.id} className="bg-white dark:bg-gray-900 border-2 border-black dark:border-white rounded-2xl p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{post.content}</p>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <span className="text-xs text-gray-400 dark:text-gray-500">
                             {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
@@ -112,11 +170,14 @@ export default function EvergreenPage() {
                             <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full font-semibold">{p}</span>
                           ))}
                         </div>
+                        <div className="mt-2">
+                          <EngagementBadge post={post} />
+                        </div>
                       </div>
                       <button
                         onClick={() => toggleEvergreen(post)}
                         disabled={toggling === post.id}
-                        className="flex-shrink-0 text-xs font-bold px-3 py-1.5 border border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-all disabled:opacity-40">
+                        className="flex-shrink-0 text-xs font-bold px-3 py-1.5 border border-red-200 dark:border-red-900 text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-all disabled:opacity-40">
                         {toggling === post.id ? '...' : 'Remove'}
                       </button>
                     </div>
@@ -127,7 +188,15 @@ export default function EvergreenPage() {
           )}
 
           <div>
-            <h2 className="text-sm font-extrabold mb-4 flex items-center gap-1.5"><FileEdit className="w-4 h-4" strokeWidth={2} /> Published Posts — mark as evergreen</h2>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h2 className="text-sm font-extrabold flex items-center gap-1.5"><FileEdit className="w-4 h-4" strokeWidth={2} /> Published Posts — mark as evergreen</h2>
+              <button
+                onClick={() => setSortBy(s => s === 'newest' ? 'engagement' : 'newest')}
+                className="text-xs font-bold px-3 py-1.5 border border-theme rounded-xl text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 transition-all inline-flex items-center gap-1.5">
+                <ArrowUpDown size={12} strokeWidth={2} />
+                Sort: {sortBy === 'newest' ? 'Newest' : 'Most engaged'}
+              </button>
+            </div>
             {regularPosts.length === 0 ? (
               <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
                 <Inbox className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
@@ -140,11 +209,11 @@ export default function EvergreenPage() {
             ) : (
               <div className="space-y-3">
                 {regularPosts.map(post => (
-                  <div key={post.id} className="bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 transition-all">
+                  <div key={post.id} className="bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{post.content}</p>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <span className="text-xs text-gray-400 dark:text-gray-500">
                             {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
@@ -152,11 +221,14 @@ export default function EvergreenPage() {
                             <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full font-semibold">{p}</span>
                           ))}
                         </div>
+                        <div className="mt-2">
+                          <EngagementBadge post={post} />
+                        </div>
                       </div>
                       <button
                         onClick={() => toggleEvergreen(post)}
                         disabled={toggling === post.id}
-                        className="flex-shrink-0 text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                        className="flex-shrink-0 text-xs font-bold px-3 py-1.5 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                         {toggling === post.id ? '...' : <span className="inline-flex items-center gap-1"><Recycle className="w-3 h-3" strokeWidth={2} /> Mark Evergreen</span>}
                       </button>
                     </div>

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useI18n } from '@/contexts/I18nContext'
-import { Landmark, MessageCircle, Plug } from 'lucide-react'
+import { Landmark, MessageCircle, PenLine, Plug, Sparkles } from 'lucide-react'
 
 const PLATFORM_LABELS: Record<string, string> = {
   bluesky: 'Bluesky',
@@ -174,33 +174,40 @@ export default function AgoraPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      {/* Ambient glow — matches the warm accent treatment used across the rest of the app */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-500/10 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative max-w-2xl mx-auto px-4 py-10">
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="mb-8 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
             <Landmark className="w-7 h-7 text-amber-400" strokeWidth={1.75} />
-            <h1 className="text-3xl font-extrabold tracking-tight">HESTIA</h1>
-            <span className="text-xs font-bold bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full">Community</span>
           </div>
-          <p className="text-gray-400 text-sm">
+          <div className="flex items-center justify-center gap-2.5 mb-2">
+            <h1 className="text-3xl font-extrabold tracking-tight">HESTIA</h1>
+            <span className="text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full">Community</span>
+          </div>
+          <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
             {t('community.tagline')}
           </p>
         </div>
 
         {/* Gate: must have at least one connected account */}
         {!hasConnected ? (
-          <div className="bg-gray-900 border border-amber-500/30 rounded-2xl p-8 text-center mb-8">
+          <div className="bg-gradient-to-b from-gray-900 to-gray-900/60 border border-amber-500/30 rounded-2xl p-8 text-center mb-8 shadow-xl shadow-black/20">
             <Plug className="w-7 h-7 mx-auto mb-3 text-amber-400" strokeWidth={1.75} />
             <p className="font-extrabold text-lg mb-2">{t('community.gate_title')}</p>
             <p className="text-gray-400 text-sm mb-5">{t('community.gate_desc')}</p>
-            <a href="/accounts" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all text-sm">
+            <a href="/accounts" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all text-sm shadow-lg shadow-amber-500/20">
               {t('community.gate_cta')}
             </a>
           </div>
         ) : (
           /* Compose box */
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6">
+          <div className="bg-gray-900/80 backdrop-blur border border-gray-800 rounded-2xl p-5 mb-6 shadow-xl shadow-black/20 focus-within:border-amber-500/40 transition-all">
             <textarea
               ref={textRef}
               value={draft}
@@ -210,7 +217,7 @@ export default function AgoraPage() {
               maxLength={500}
               className="w-full bg-transparent text-sm text-white placeholder-gray-500 resize-none outline-none leading-relaxed"
             />
-            <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">
+            <div className="flex items-center justify-between mt-3 gap-3 flex-wrap pt-3 border-t border-gray-800">
               <div className="flex gap-2 flex-wrap">
                 {CATEGORIES.filter(c => c !== 'All').map(c => (
                   <button
@@ -224,12 +231,12 @@ export default function AgoraPage() {
                   >{c}</button>
                 ))}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">{draft.length}/500</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500 tabular-nums">{draft.length}/500</span>
                 <button
                   onClick={submitPost}
                   disabled={posting || !draft.trim()}
-                  className="px-5 py-2 bg-amber-500 text-black font-bold text-sm rounded-xl hover:bg-amber-400 disabled:opacity-40 transition-all"
+                  className="px-5 py-2 bg-amber-500 text-black font-bold text-sm rounded-xl hover:bg-amber-400 disabled:opacity-40 transition-all shadow-lg shadow-amber-500/10"
                 >
                   {posting ? t('community.posting') : t('community.post_btn')}
                 </button>
@@ -255,10 +262,19 @@ export default function AgoraPage() {
 
         {/* Feed */}
         {filteredPosts.length === 0 ? (
-          <div className="text-center py-16 text-gray-600">
-            <Landmark className="w-10 h-10 mx-auto mb-3" strokeWidth={1.5} />
-            <p className="font-bold">{t('community.empty_title')} {category === 'All' ? 'HESTIA' : category}</p>
-            <p className="text-sm mt-1">{t('community.empty_subtitle')}</p>
+          <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-6 h-6 text-amber-500/70" strokeWidth={1.5} />
+            </div>
+            <p className="font-extrabold text-gray-200">{t('community.empty_title')} {category === 'All' ? 'HESTIA' : category}</p>
+            <p className="text-sm text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">{t('community.empty_subtitle')}</p>
+            {hasConnected && (
+              <button
+                onClick={() => textRef.current?.focus()}
+                className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 bg-gray-900 border border-gray-800 text-gray-300 rounded-xl hover:border-amber-500/40 hover:text-amber-400 transition-all">
+                <PenLine size={12} strokeWidth={2} /> Be the first to post
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -268,10 +284,10 @@ export default function AgoraPage() {
               const postReplies = replies[post.id] ?? []
 
               return (
-                <div key={post.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+                <div key={post.id} className="bg-gray-900/80 backdrop-blur border border-gray-800 rounded-2xl p-5 hover:border-gray-700 transition-all shadow-lg shadow-black/10">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500/30 to-amber-600/10 text-amber-400 flex items-center justify-center text-sm font-bold flex-shrink-0 border border-amber-500/20">
                         {(post.author_name ?? 'A')[0].toUpperCase()}
                       </div>
                       <div>

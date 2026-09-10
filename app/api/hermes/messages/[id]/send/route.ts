@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { dispatchHermesMessage } from '@/lib/hermes-send'
+import { getHermesAccess, HERMES_LIMITS, sentTodayCount } from '@/lib/hermes-access'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -24,9 +25,19 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const { id: message_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const supabase = getSupabaseAdmin()
+  const access = await getHermesAccess(supabase, user.id, user.email)
+  if (!access.allowed) return NextResponse.json({ error: 'HERMES is not active on your account' }, { status: 403 })
+
+  // Shared-infra safety valve: everyone sends through the same Resend domain
+  // and the same Hunter.io budget, so a per-account daily cap protects both
+  // from one runaway or malicious campaign.
+  const sentToday = await sentTodayCount(supabase, user.id)
+  const dailyLimit = HERMES_LIMITS[access.tier!].sendsPerDay
+  if (sentToday >= dailyLimit) {
+    return NextResponse.json({ error: `Daily send limit reached (${dailyLimit}/day on your plan). Try again tomorrow.` }, { status: 429 })
+  }
 
   // Load message with prospect
   const { data: message } = await supabase

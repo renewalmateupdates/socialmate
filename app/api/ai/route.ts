@@ -315,6 +315,22 @@ Apply these guidelines to all content you generate.
     const totalRemaining = newMonthly + newEarned + newPaid
     await notifyLowCredits(user.id, totalRemaining)
 
+    // Pulse/Radar cost 20 credits and previously vanished the moment you left
+    // the page — nothing persisted the report anywhere. Log it so there's a
+    // history to come back to.
+    if (tool === 'pulse' || tool === 'radar') {
+      try {
+        await getSupabaseAdmin().from('ai_scan_results').insert({
+          user_id: user.id,
+          tool,
+          niche:   content,
+          result:  text,
+        })
+      } catch (err) {
+        console.warn('[AI] scan history insert failed (non-fatal):', err)
+      }
+    }
+
     return NextResponse.json({
       result: text,
       creditCost,

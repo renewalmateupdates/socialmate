@@ -108,7 +108,7 @@ export default function AchievementsPage() {
   if (loading) return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="flex-1 flex items-center justify-center">
+      <div className="md:ml-56 flex-1 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     </div>
@@ -117,7 +117,7 @@ export default function AchievementsPage() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="md:ml-56 flex-1 overflow-auto">
         <div className="max-w-3xl mx-auto px-4 py-8">
 
           {/* Header */}

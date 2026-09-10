@@ -100,18 +100,18 @@ export default function EmailOutreachPage() {
   const remaining = credits ?? 0
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-3xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
           <Mail className="w-7 h-7" strokeWidth={1.5} />
-          <h1 className="text-2xl font-black text-primary">Email Outreach Agent</h1>
+          <h1 className="text-2xl font-black text-theme">Email Outreach Agent</h1>
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-muted text-sm">
           Write cold outreach emails for brand deals, collabs, client pitches — personalized and ready to send in seconds.
         </p>
-        <div className="mt-2 flex items-center gap-3 text-xs text-secondary">
+        <div className="mt-2 flex items-center gap-3 text-xs text-muted">
           <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full font-semibold">5 credits / email</span>
           <span>{remaining} credits remaining</span>
         </div>
@@ -121,19 +121,19 @@ export default function EmailOutreachPage() {
       <div className="bg-surface border border-theme rounded-2xl p-6 mb-6 space-y-5">
         {/* Target */}
         <div>
-          <label className="block text-xs font-bold text-secondary uppercase tracking-wide mb-1">Who are you reaching out to?</label>
+          <label className="block text-xs font-bold text-muted uppercase tracking-wide mb-1">Who are you reaching out to?</label>
           <input
             type="text"
             value={targetName}
             onChange={e => setTargetName(e.target.value)}
             placeholder="e.g. Nike, Morning Brew, Sarah at Acme Co."
-            className="w-full bg-background border border-theme rounded-xl px-4 py-2.5 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+            className="w-full bg-theme border border-theme rounded-xl px-4 py-2.5 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
           />
         </div>
 
         {/* Goal */}
         <div>
-          <label className="block text-xs font-bold text-secondary uppercase tracking-wide mb-2">What's the goal?</label>
+          <label className="block text-xs font-bold text-muted uppercase tracking-wide mb-2">What's the goal?</label>
           <div className="flex flex-wrap gap-2">
             {GOALS.map(g => (
               <button
@@ -142,7 +142,7 @@ export default function EmailOutreachPage() {
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all inline-flex items-center gap-1.5 ${
                   goal === g.id
                     ? 'bg-amber-400 text-black border-amber-400'
-                    : 'bg-background border-theme text-secondary hover:border-amber-400'
+                    : 'bg-theme border-theme text-muted hover:border-amber-400'
                 }`}
               >
                 <g.icon className="w-3.5 h-3.5" strokeWidth={2} /> {g.label}
@@ -153,19 +153,19 @@ export default function EmailOutreachPage() {
 
         {/* Your pitch */}
         <div>
-          <label className="block text-xs font-bold text-secondary uppercase tracking-wide mb-1">Your pitch — who are you & what do you offer?</label>
+          <label className="block text-xs font-bold text-muted uppercase tracking-wide mb-1">Your pitch — who are you & what do you offer?</label>
           <textarea
             value={yourPitch}
             onChange={e => setYourPitch(e.target.value)}
             rows={3}
             placeholder="e.g. I run a creator tools newsletter with 8k subscribers in the indie founder niche. I do one sponsored spot per week and my open rate is 52%."
-            className="w-full bg-background border border-theme rounded-xl px-4 py-2.5 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400 resize-none"
+            className="w-full bg-theme border border-theme rounded-xl px-4 py-2.5 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400 resize-none"
           />
         </div>
 
         {/* Tone */}
         <div>
-          <label className="block text-xs font-bold text-secondary uppercase tracking-wide mb-2">Tone</label>
+          <label className="block text-xs font-bold text-muted uppercase tracking-wide mb-2">Tone</label>
           <div className="flex gap-2 flex-wrap">
             {TONES.map(t => (
               <button
@@ -174,7 +174,7 @@ export default function EmailOutreachPage() {
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
                   tone === t.id
                     ? 'bg-amber-400 text-black border-amber-400'
-                    : 'bg-background border-theme text-secondary hover:border-amber-400'
+                    : 'bg-theme border-theme text-muted hover:border-amber-400'
                 }`}
               >
                 {t.label}
@@ -185,7 +185,7 @@ export default function EmailOutreachPage() {
 
         {/* Optional context */}
         <div>
-          <label className="block text-xs font-bold text-secondary uppercase tracking-wide mb-1">
+          <label className="block text-xs font-bold text-muted uppercase tracking-wide mb-1">
             Anything specific to mention? <span className="font-normal normal-case">(optional)</span>
           </label>
           <input
@@ -193,7 +193,7 @@ export default function EmailOutreachPage() {
             value={contextNotes}
             onChange={e => setContextNotes(e.target.value)}
             placeholder="e.g. They just launched a new product line, or I saw their campaign last week"
-            className="w-full bg-background border border-theme rounded-xl px-4 py-2.5 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+            className="w-full bg-theme border border-theme rounded-xl px-4 py-2.5 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
           />
         </div>
 
@@ -221,44 +221,44 @@ export default function EmailOutreachPage() {
             <p className="text-xs font-bold uppercase tracking-wide text-amber-500">Your Email</p>
             <button
               onClick={() => copy(`Subject: ${result.subject}\n\n${result.body}`, 'all')}
-              className="text-xs font-semibold text-secondary hover:text-primary border border-theme px-3 py-1 rounded-lg transition-all"
+              className="text-xs font-semibold text-muted hover:text-theme border border-theme px-3 py-1 rounded-lg transition-all"
             >
               {copied === 'all' ? '✓ Copied!' : 'Copy all'}
             </button>
           </div>
 
           {/* Subject */}
-          <div className="bg-background border border-theme rounded-xl p-4">
+          <div className="bg-theme border border-theme rounded-xl p-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-bold text-secondary uppercase tracking-wide">Subject</span>
+              <span className="text-xs font-bold text-muted uppercase tracking-wide">Subject</span>
               <button
                 onClick={() => copy(result.subject, 'subject')}
-                className="text-xs text-secondary hover:text-primary"
+                className="text-xs text-muted hover:text-theme"
               >
                 {copied === 'subject' ? '✓ Copied' : 'Copy'}
               </button>
             </div>
-            <p className="text-sm font-semibold text-primary">{result.subject}</p>
+            <p className="text-sm font-semibold text-theme">{result.subject}</p>
           </div>
 
           {/* Body */}
-          <div className="bg-background border border-theme rounded-xl p-4">
+          <div className="bg-theme border border-theme rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-secondary uppercase tracking-wide">Body</span>
+              <span className="text-xs font-bold text-muted uppercase tracking-wide">Body</span>
               <button
                 onClick={() => copy(result.body, 'body')}
-                className="text-xs text-secondary hover:text-primary"
+                className="text-xs text-muted hover:text-theme"
               >
                 {copied === 'body' ? '✓ Copied' : 'Copy'}
               </button>
             </div>
-            <p className="text-sm text-primary whitespace-pre-wrap leading-relaxed">{result.body}</p>
+            <p className="text-sm text-theme whitespace-pre-wrap leading-relaxed">{result.body}</p>
           </div>
 
           <button
             onClick={generate}
             disabled={loading || remaining < 5}
-            className="text-xs text-secondary hover:text-primary font-semibold border border-theme px-4 py-2 rounded-xl transition-all disabled:opacity-50"
+            className="text-xs text-muted hover:text-theme font-semibold border border-theme px-4 py-2 rounded-xl transition-all disabled:opacity-50"
           >
             {loading ? 'Regenerating…' : '↻ Regenerate'}
           </button>
@@ -270,7 +270,7 @@ export default function EmailOutreachPage() {
         <div className="bg-surface border border-theme rounded-2xl p-6">
           <button
             onClick={() => setShowHistory(h => !h)}
-            className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wide text-secondary"
+            className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wide text-muted"
           >
             <span>Previous Emails ({drafts.length})</span>
             <span>{showHistory ? <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}</span>
@@ -283,8 +283,8 @@ export default function EmailOutreachPage() {
                   onClick={() => setResult({ subject: d.subject, body: d.body })}
                   className="w-full text-left border border-theme rounded-xl p-4 hover:border-amber-400 transition-all"
                 >
-                  <p className="text-xs font-bold text-primary truncate">{d.subject}</p>
-                  <p className="text-xs text-secondary mt-0.5">To: {d.target_name} · {new Date(d.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs font-bold text-theme truncate">{d.subject}</p>
+                  <p className="text-xs text-muted mt-0.5">To: {d.target_name} · {new Date(d.created_at).toLocaleDateString()}</p>
                 </button>
               ))}
             </div>

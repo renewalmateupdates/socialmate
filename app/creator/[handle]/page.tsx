@@ -229,18 +229,18 @@ function CreatorPageInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-secondary text-sm">{t('app_creator_public.loading')}</div>
+      <div className="min-h-screen bg-theme flex items-center justify-center">
+        <div className="text-muted text-sm">{t('app_creator_public.loading')}</div>
       </div>
     )
   }
 
   if (notFound || !creator) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-6 text-center">
+      <div className="min-h-screen bg-theme flex flex-col items-center justify-center gap-4 p-6 text-center">
         <UserX className="w-12 h-12" strokeWidth={1.5} />
-        <h1 className="text-xl font-black text-primary">{t('app_creator_public.not_found_title')}</h1>
-        <p className="text-secondary text-sm">{t('app_creator_public.not_found_desc')}</p>
+        <h1 className="text-xl font-black text-theme">{t('app_creator_public.not_found_title')}</h1>
+        <p className="text-muted text-sm">{t('app_creator_public.not_found_desc')}</p>
         <Link href="/" className="text-xs text-amber-500 hover:underline">← socialmate.studio</Link>
       </div>
     )
@@ -249,7 +249,7 @@ function CreatorPageInner() {
   const hasPaywalledPosts = posts.length > 0
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-theme">
       {/* Header */}
       <div className="px-6 py-10 text-center" style={{ backgroundColor: creator.header_color || '#F59E0B' }}>
         <div className="w-16 h-16 rounded-full bg-black/20 flex items-center justify-center text-3xl mx-auto mb-3">
@@ -276,8 +276,8 @@ function CreatorPageInner() {
         {/* Fan verify prompt - shown after sub success or manually */}
         {(showVerify || (!isFan && hasPaywalledPosts && creator.subscription_enabled)) && !isFan && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-2xl p-4">
-            <p className="text-sm font-bold text-primary mb-1">{t('app_creator_public.already_subscriber')}</p>
-            <p className="text-xs text-secondary mb-3">{t('app_creator_public.already_subscriber_desc')}</p>
+            <p className="text-sm font-bold text-theme mb-1">{t('app_creator_public.already_subscriber')}</p>
+            <p className="text-xs text-muted mb-3">{t('app_creator_public.already_subscriber_desc')}</p>
             <div className="flex gap-2">
               <input
                 type="email"
@@ -285,7 +285,7 @@ function CreatorPageInner() {
                 onChange={e => setFanEmail(e.target.value)}
                 placeholder="your@email.com"
                 onKeyDown={e => e.key === 'Enter' && verifyFan()}
-                className="flex-1 bg-background border border-theme rounded-xl px-3 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="flex-1 bg-theme border border-theme rounded-xl px-3 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
               <button
                 onClick={verifyFan}
@@ -304,8 +304,8 @@ function CreatorPageInner() {
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="w-6 h-6" strokeWidth={1.75} />
               <div>
-                <p className="font-black text-primary">{t('app_creator_public.tip_title')}</p>
-                <p className="text-xs text-secondary">{t('app_creator_public.tip_desc')}</p>
+                <p className="font-black text-theme">{t('app_creator_public.tip_title')}</p>
+                <p className="text-xs text-muted">{t('app_creator_public.tip_desc')}</p>
               </div>
             </div>
 
@@ -317,7 +317,7 @@ function CreatorPageInner() {
                   className={`py-2 rounded-xl text-sm font-bold border transition-all ${
                     tipAmount === cents && !customTip
                       ? 'bg-amber-400 border-amber-400 text-black'
-                      : 'border-theme bg-background text-secondary hover:border-amber-400/50'
+                      : 'border-theme bg-theme text-muted hover:border-amber-400/50'
                   }`}
                 >
                   ${cents / 100}
@@ -331,7 +331,7 @@ function CreatorPageInner() {
                 value={customTip}
                 onChange={e => setCustomTip(e.target.value)}
                 placeholder={`Custom amount ($${creator.tip_min / 100}-$${creator.tip_max / 100})`}
-                className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="w-full bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
             </div>
 
@@ -340,13 +340,13 @@ function CreatorPageInner() {
                 value={tipName}
                 onChange={e => setTipName(e.target.value)}
                 placeholder="Your name (optional)"
-                className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="w-full bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
               <input
                 value={tipMessage}
                 onChange={e => setTipMessage(e.target.value)}
                 placeholder="Leave a message (optional)"
-                className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="w-full bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
             </div>
 
@@ -366,12 +366,12 @@ function CreatorPageInner() {
             <div className="flex items-center gap-2 mb-4">
               <Repeat2 className="w-6 h-6" strokeWidth={1.75} />
               <div>
-                <p className="font-black text-primary">{creator.subscription_name}</p>
-                <p className="text-xs text-secondary">${creator.subscription_price / 100}/month</p>
+                <p className="font-black text-theme">{creator.subscription_name}</p>
+                <p className="text-xs text-muted">${creator.subscription_price / 100}/month</p>
               </div>
             </div>
             {creator.subscription_description && (
-              <p className="text-sm text-secondary mb-4">{creator.subscription_description}</p>
+              <p className="text-sm text-muted mb-4">{creator.subscription_description}</p>
             )}
             {hasPaywalledPosts && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
@@ -393,7 +393,7 @@ function CreatorPageInner() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Lock size={18} strokeWidth={1.75} />
-              <p className="font-black text-primary">{t('app_creator_public.exclusive_posts')}</p>
+              <p className="font-black text-theme">{t('app_creator_public.exclusive_posts')}</p>
               {isFan && <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">{t('app_creator_public.fan_access')}</span>}
             </div>
             <div className="space-y-3">
@@ -406,7 +406,7 @@ function CreatorPageInner() {
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
                         {isUnlocked ? <BookOpen size={15} strokeWidth={1.75} /> : <Lock size={15} strokeWidth={1.75} />}
-                        <p className="font-bold text-primary text-sm">{post.title}</p>
+                        <p className="font-bold text-theme text-sm">{post.title}</p>
                       </div>
                       {isUnlocked && (
                         <button
@@ -418,9 +418,9 @@ function CreatorPageInner() {
                       )}
                     </div>
 
-                    <p className="text-sm text-secondary leading-relaxed mb-3">
+                    <p className="text-sm text-muted leading-relaxed mb-3">
                       {isUnlocked && isExpanded ? (post.content ?? post.preview) : post.preview}
-                      {!isUnlocked && <span className="text-secondary/50"> ...</span>}
+                      {!isUnlocked && <span className="text-muted/50"> ...</span>}
                     </p>
 
                     {!isUnlocked && (
@@ -485,7 +485,7 @@ function CreatorPageInner() {
 
 export default function CreatorPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-secondary text-sm">Loading...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-theme flex items-center justify-center"><p className="text-muted text-sm">Loading...</p></div>}>
       <CreatorPageInner />
     </Suspense>
   )

@@ -91,45 +91,45 @@ export default function CaptionAgentPage() {
 
   if (!isAgency) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
+      <div className="min-h-screen bg-theme flex flex-col items-center justify-center p-6 text-center gap-4">
         <PenLine className="w-12 h-12" strokeWidth={1.5} />
-        <h1 className="text-2xl font-black text-primary">Caption Agent</h1>
-        <p className="text-secondary text-sm max-w-md">
+        <h1 className="text-2xl font-black text-theme">Caption Agent</h1>
+        <p className="text-muted text-sm max-w-md">
           Point it at any RSS feed — news sites, blogs, YouTube channels — and it auto-drafts platform-ready posts every day.
           Available on the Agency plan.
         </p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Agency →</Link>
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme">← Back to Agents</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-theme p-6 md:p-10 max-w-2xl mx-auto">
       <div className="mb-8">
-        <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
+        <Link href="/agents" className="text-xs text-muted hover:text-theme mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
           <PenLine className="w-7 h-7" strokeWidth={1.5} />
-          <h1 className="text-2xl font-black text-primary">Caption Agent</h1>
+          <h1 className="text-2xl font-black text-theme">Caption Agent</h1>
           <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">Agency</span>
         </div>
-        <p className="text-secondary text-sm">
+        <p className="text-muted text-sm">
           Every day at 11am UTC, this agent checks your RSS feeds for new articles and auto-generates platform-ready social posts — dropped into drafts for your approval.
         </p>
         {settings.last_ran_at && (
-          <p className="text-xs text-secondary mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleDateString()}</p>
+          <p className="text-xs text-muted mt-1">Last ran: {new Date(settings.last_ran_at).toLocaleDateString()}</p>
         )}
       </div>
 
       {loading ? (
-        <div className="text-secondary text-sm py-10 text-center">Loading…</div>
+        <div className="text-muted text-sm py-10 text-center">Loading…</div>
       ) : (
         <div className="space-y-5">
           {/* Enable toggle */}
           <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center justify-between">
             <div>
-              <p className="font-bold text-primary">Enable Caption Agent</p>
-              <p className="text-xs text-secondary mt-0.5">Runs daily at 11am UTC — free, no credits charged</p>
+              <p className="font-bold text-theme">Enable Caption Agent</p>
+              <p className="text-xs text-muted mt-0.5">Runs daily at 11am UTC — free, no credits charged</p>
             </div>
             <button
               onClick={() => setSettings(s => ({ ...s, enabled: !s.enabled }))}
@@ -141,8 +141,8 @@ export default function CaptionAgentPage() {
 
           {/* RSS Feeds */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-1">RSS Feeds</p>
-            <p className="text-xs text-secondary mb-3">Add any RSS feed — blogs, news sites, YouTube channels, podcasts.</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-1">RSS Feeds</p>
+            <p className="text-xs text-muted mb-3">Add any RSS feed — blogs, news sites, YouTube channels, podcasts.</p>
             <div className="space-y-2 mb-3">
               <input
                 type="url"
@@ -150,7 +150,7 @@ export default function CaptionAgentPage() {
                 onChange={e => setFeedInput(f => ({ ...f, url: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && addFeed()}
                 placeholder="https://example.com/feed.xml"
-                className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="w-full bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
               <div className="flex gap-2">
                 <input
@@ -159,7 +159,7 @@ export default function CaptionAgentPage() {
                   onChange={e => setFeedInput(f => ({ ...f, label: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && addFeed()}
                   placeholder="Label (optional)"
-                  className="flex-1 bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                  className="flex-1 bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
                 />
                 <button onClick={addFeed} className="bg-amber-400 hover:bg-amber-300 text-black font-black px-4 py-2 rounded-xl text-sm">Add</button>
               </div>
@@ -167,23 +167,23 @@ export default function CaptionAgentPage() {
             {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
             <div className="space-y-1 max-h-40 overflow-y-auto">
               {settings.feed_urls.map(feed => (
-                <div key={feed.url} className="flex items-center justify-between bg-background border border-theme rounded-lg px-3 py-2">
+                <div key={feed.url} className="flex items-center justify-between bg-theme border border-theme rounded-lg px-3 py-2">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-primary truncate">{feed.label}</p>
-                    <p className="text-xs text-secondary truncate">{feed.url}</p>
+                    <p className="text-xs font-semibold text-theme truncate">{feed.label}</p>
+                    <p className="text-xs text-muted truncate">{feed.url}</p>
                   </div>
                   <button onClick={() => removeFeed(feed.url)} className="ml-3 text-gray-400 hover:text-red-400 text-xs shrink-0">Remove</button>
                 </div>
               ))}
               {settings.feed_urls.length === 0 && (
-                <p className="text-xs text-secondary text-center py-2">No feeds added yet</p>
+                <p className="text-xs text-muted text-center py-2">No feeds added yet</p>
               )}
             </div>
           </div>
 
           {/* Target platforms */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Target platforms</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-3">Target platforms</p>
             <div className="flex flex-wrap gap-2">
               {PLATFORMS.map(p => {
                 const active = settings.platforms.includes(p.id)
@@ -194,7 +194,7 @@ export default function CaptionAgentPage() {
                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                       active
                         ? 'bg-amber-400 border-amber-400 text-black'
-                        : 'border-theme bg-background text-secondary hover:border-amber-400/50'
+                        : 'border-theme bg-theme text-muted hover:border-amber-400/50'
                     }`}
                   >
                     {p.label}
@@ -202,13 +202,13 @@ export default function CaptionAgentPage() {
                 )
               })}
             </div>
-            <p className="text-xs text-secondary mt-2">Posts will target these platforms. Leave empty to create unplatformed drafts.</p>
+            <p className="text-xs text-muted mt-2">Posts will target these platforms. Leave empty to create unplatformed drafts.</p>
           </div>
 
           {/* Max per day */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-1">Max drafts per day</p>
-            <p className="text-xs text-secondary mb-3">Cap how many new posts the agent generates each run.</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-1">Max drafts per day</p>
+            <p className="text-xs text-muted mb-3">Cap how many new posts the agent generates each run.</p>
             <div className="flex items-center gap-3">
               {[1, 2, 3, 5].map(n => (
                 <button
@@ -217,7 +217,7 @@ export default function CaptionAgentPage() {
                   className={`w-12 h-12 rounded-xl font-black text-sm border transition-all ${
                     settings.max_per_day === n
                       ? 'bg-amber-400 border-amber-400 text-black'
-                      : 'border-theme bg-background text-secondary hover:border-amber-400/50'
+                      : 'border-theme bg-theme text-muted hover:border-amber-400/50'
                   }`}
                 >
                   {n}
@@ -228,7 +228,7 @@ export default function CaptionAgentPage() {
 
           {/* Tone hint */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <label className="block text-xs font-bold uppercase tracking-wide text-secondary mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wide text-muted mb-1">
               Tone guidance <span className="font-normal normal-case">(optional)</span>
             </label>
             <input
@@ -236,13 +236,13 @@ export default function CaptionAgentPage() {
               value={settings.tone_hint}
               onChange={e => setSettings(s => ({ ...s, tone_hint: e.target.value }))}
               placeholder="e.g. casual and punchy, avoid jargon"
-              className="w-full bg-background border border-theme rounded-xl px-4 py-2.5 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+              className="w-full bg-theme border border-theme rounded-xl px-4 py-2.5 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
             />
           </div>
 
           {/* Mode */}
           <div className="bg-surface border border-theme rounded-2xl p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Output mode</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted mb-3">Output mode</p>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { id: 'draft', label: 'Draft', desc: 'Added to Drafts for your review' },
@@ -254,11 +254,11 @@ export default function CaptionAgentPage() {
                   className={`text-left p-4 rounded-xl border transition-all ${
                     settings.mode === m.id
                       ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                      : 'border-theme bg-background hover:border-amber-400/50'
+                      : 'border-theme bg-theme hover:border-amber-400/50'
                   }`}
                 >
-                  <p className="font-bold text-sm text-primary">{m.label}</p>
-                  <p className="text-xs text-secondary mt-1">{m.desc}</p>
+                  <p className="font-bold text-sm text-theme">{m.label}</p>
+                  <p className="text-xs text-muted mt-1">{m.desc}</p>
                 </button>
               ))}
             </div>

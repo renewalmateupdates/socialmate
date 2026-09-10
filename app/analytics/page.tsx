@@ -39,6 +39,7 @@ type RecentPost = {
   published_at: string
   status: string
   bluesky_stats: { likes: number; reposts: number; replies: number; fetched_at: string } | null
+  mastodon_stats: { favourites_count: number; reblogs_count: number; replies_count: number; fetched_at: string } | null
 }
 
 type AnalyticsStats = {
@@ -381,13 +382,13 @@ export default function Analytics() {
     return posts.filter(p => new Date(p.published_at) >= cutoff)
   })()
 
-  // ── Bluesky engagement totals ──────────────────────────────────────────────
+  // ── Engagement totals (Bluesky + Mastodon combined) ────────────────────────
 
-  const bskyPosts  = stats?.recent_posts.filter(p => p.bluesky_stats) ?? []
-  const bskyLikes  = bskyPosts.reduce((s, p) => s + (p.bluesky_stats?.likes ?? 0), 0)
-  const bskyRep    = bskyPosts.reduce((s, p) => s + (p.bluesky_stats?.reposts ?? 0), 0)
-  const bskyReplies= bskyPosts.reduce((s, p) => s + (p.bluesky_stats?.replies ?? 0), 0)
-  const lastSynced = bskyPosts[0]?.bluesky_stats?.fetched_at
+  const engagedPosts = stats?.recent_posts.filter(p => p.bluesky_stats || p.mastodon_stats) ?? []
+  const bskyLikes   = engagedPosts.reduce((s, p) => s + (p.bluesky_stats?.likes ?? 0) + (p.mastodon_stats?.favourites_count ?? 0), 0)
+  const bskyRep     = engagedPosts.reduce((s, p) => s + (p.bluesky_stats?.reposts ?? 0) + (p.mastodon_stats?.reblogs_count ?? 0), 0)
+  const bskyReplies = engagedPosts.reduce((s, p) => s + (p.bluesky_stats?.replies ?? 0) + (p.mastodon_stats?.replies_count ?? 0), 0)
+  const lastSynced  = engagedPosts[0]?.bluesky_stats?.fetched_at ?? engagedPosts[0]?.mastodon_stats?.fetched_at
 
   const monthDelta = stats ? stats.published_this_month - stats.published_last_month : 0
   const maxPlatform = stats?.by_platform[0]?.count ?? 1
@@ -434,7 +435,7 @@ export default function Analytics() {
 
       <div style={{ display: 'flex', minHeight: '100vh', background: T.bg }}>
         <Sidebar />
-        <main style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+        <main className="md:ml-56" style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
           <div style={{ maxWidth: 900, margin: '0 auto' }}>
 
             {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -671,13 +672,13 @@ export default function Analytics() {
               )}
             </div>
 
-            {/* ── Bluesky Engagement ──────────────────────────────────────────── */}
-            {!loading && bskyPosts.length > 0 && (
+            {/* ── Platform Engagement (Bluesky + Mastodon) ─────────────────────── */}
+            {!loading && engagedPosts.length > 0 && (
               <div style={{ ...sectionStyle, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <div>
-                    <p style={{ ...sectionHead, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}><PlatformGlyph id="bluesky" size={15} /> Bluesky Engagement</p>
-                    <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>Platform Engagement — pulled live from AT Protocol API</p>
+                    <p style={{ ...sectionHead, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}><Heart size={15} strokeWidth={1.75} /> Platform Engagement</p>
+                    <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>Real likes, reposts, and replies pulled from Bluesky and Mastodon</p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {lastSynced && (
@@ -764,7 +765,7 @@ export default function Analytics() {
                   {/* Table header */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: bskyPosts.length > 0 ? '1fr 120px 80px 80px 80px 110px' : '1fr 120px 110px',
+                    gridTemplateColumns: engagedPosts.length > 0 ? '1fr 120px 80px 80px 80px 110px' : '1fr 120px 110px',
                     padding: '8px 24px',
                     borderBottom: `1px solid ${T.border}`,
                     fontSize: 10,
@@ -775,7 +776,7 @@ export default function Analytics() {
                   }}>
                     <span>Content</span>
                     <span>Platforms</span>
-                    {bskyPosts.length > 0 && <>
+                    {engagedPosts.length > 0 && <>
                       <span style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}><Heart size={12} strokeWidth={1.75} /></span>
                       <span style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}><MessageCircle size={12} strokeWidth={1.75} /></span>
                       <span style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}><Repeat2 size={12} strokeWidth={1.75} /></span>
@@ -785,7 +786,11 @@ export default function Analytics() {
 
                   {filteredPosts.map((post, idx) => {
                     const rowBg = idx % 2 === 0 ? T.surface : '#0f0f0f'
-                    const hasEngagement = bskyPosts.length > 0
+                    const hasEngagement = engagedPosts.length > 0
+                    const rowHasData = !!(post.bluesky_stats || post.mastodon_stats)
+                    const rowLikes   = (post.bluesky_stats?.likes ?? 0) + (post.mastodon_stats?.favourites_count ?? 0)
+                    const rowReplies = (post.bluesky_stats?.replies ?? 0) + (post.mastodon_stats?.replies_count ?? 0)
+                    const rowReposts = (post.bluesky_stats?.reposts ?? 0) + (post.mastodon_stats?.reblogs_count ?? 0)
                     return (
                       <div key={post.id} style={{
                         display: 'grid',
@@ -815,17 +820,17 @@ export default function Analytics() {
                           ))}
                         </div>
 
-                        {/* Bluesky stats */}
+                        {/* Engagement — combined across Bluesky + Mastodon */}
                         {hasEngagement && (
                           <>
-                            <span style={{ textAlign: 'right', fontSize: 13, color: post.bluesky_stats ? T.text : T.textDim }}>
-                              {post.bluesky_stats?.likes ?? '—'}
+                            <span style={{ textAlign: 'right', fontSize: 13, color: rowHasData ? T.text : T.textDim }}>
+                              {rowHasData ? rowLikes : '—'}
                             </span>
-                            <span style={{ textAlign: 'right', fontSize: 13, color: post.bluesky_stats ? T.text : T.textDim }}>
-                              {post.bluesky_stats?.replies ?? '—'}
+                            <span style={{ textAlign: 'right', fontSize: 13, color: rowHasData ? T.text : T.textDim }}>
+                              {rowHasData ? rowReplies : '—'}
                             </span>
-                            <span style={{ textAlign: 'right', fontSize: 13, color: post.bluesky_stats ? T.text : T.textDim }}>
-                              {post.bluesky_stats?.reposts ?? '—'}
+                            <span style={{ textAlign: 'right', fontSize: 13, color: rowHasData ? T.text : T.textDim }}>
+                              {rowHasData ? rowReposts : '—'}
                             </span>
                           </>
                         )}

@@ -36,17 +36,46 @@ const CHANNEL_LABELS: Record<string, string> = {
   mastodon: 'Mastodon',
 }
 
+const HERMES_TIERS = [
+  {
+    id: 'starter', priceId: 'price_HERMES_STARTER_PLACEHOLDER',
+    name: 'HERMES Starter', price: '$12/mo',
+    features: ['3 active campaigns', '75 prospects/month', 'Email + Bluesky', 'Draft mode'],
+  },
+  {
+    id: 'pro', priceId: 'price_HERMES_PRO_PLACEHOLDER',
+    name: 'HERMES Pro', price: '$25/mo',
+    features: ['10 active campaigns', '400 prospects/month', 'Email + Bluesky + Mastodon', 'Draft + Auto-send'],
+  },
+]
+
 export default function HermesPage() {
   const router = useRouter()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading]     = useState(true)
   const [isAdmin, setIsAdmin]     = useState(false)
+  const [hermesActive, setHermesActive] = useState(false)
+  const [hermesTier, setHermesTier]     = useState<string | null>(null)
+  const [gateChecked, setGateChecked]   = useState(false)
+  const [upgrading, setUpgrading]       = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/login?redirect=/hermes'); return }
-      if (user.email !== 'socialmatehq@gmail.com') { router.push('/dashboard'); return }
-      setIsAdmin(true)
+      const admin = user.email === 'socialmatehq@gmail.com'
+      setIsAdmin(admin)
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('hermes_active, hermes_tier')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      setHermesActive(!!settings?.hermes_active)
+      setHermesTier(settings?.hermes_tier ?? null)
+      setGateChecked(true)
+
+      if (!admin && !settings?.hermes_active) { setLoading(false); return }
+
       fetch('/api/hermes/campaigns')
         .then(r => r.json())
         .then(d => { setCampaigns(d.campaigns ?? []); setLoading(false) })
@@ -54,7 +83,61 @@ export default function HermesPage() {
     })
   }, [router])
 
-  if (!isAdmin) return null
+  async function handleUpgrade(priceId: string, tierId: string) {
+    setUpgrading(tierId)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      })
+      const data = await res.json()
+      if (data.url) { window.location.href = data.url; return }
+    } catch {}
+    setUpgrading(null)
+  }
+
+  if (!gateChecked) return null
+
+  if (!isAdmin && !hermesActive) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white">
+        <div className="max-w-3xl mx-auto px-6 py-16">
+          <div className="mb-8">
+            <Link href="/dashboard" className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1.5 w-fit mb-6">
+              ← Back to Dashboard
+            </Link>
+            <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mb-4"><Zap className="w-5 h-5" strokeWidth={1.75} /></div>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-2">HERMES is an add-on</h1>
+            <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+              AI-written cold outreach across email, Bluesky, and Mastodon. Add it to any SocialMate plan.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {HERMES_TIERS.map(tier => (
+              <div key={tier.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                <p className="text-sm font-extrabold mb-1">{tier.name}</p>
+                <p className="text-2xl font-extrabold text-amber-400 mb-4">{tier.price}</p>
+                <ul className="space-y-1.5 mb-5">
+                  {tier.features.map(f => (
+                    <li key={f} className="text-xs text-gray-400">{f}</li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleUpgrade(tier.priceId, tier.id)}
+                  disabled={upgrading === tier.id}
+                  className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black text-sm font-extrabold py-2.5 rounded-xl transition-all">
+                  {upgrading === tier.id ? 'Redirecting…' : 'Subscribe'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) return null
 
   const totalProspects  = campaigns.reduce((s, c) => s + (c.hermes_prospects?.[0]?.count ?? 0), 0)
   const totalMessages   = campaigns.reduce((s, c) => s + (c.hermes_messages?.[0]?.count ?? 0), 0)

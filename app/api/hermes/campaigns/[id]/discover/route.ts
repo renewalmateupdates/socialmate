@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getHermesAccess } from '@/lib/hermes-access'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage } from '@/lib/hermes-send'
 import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
@@ -76,7 +77,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: campaign_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const access = await getHermesAccess(getSupabaseAdmin(), user.id, user.email)
+  if (!access.allowed) return NextResponse.json({ error: 'HERMES is not active on your account' }, { status: 403 })
 
   const supabase = getSupabaseAdmin()
 

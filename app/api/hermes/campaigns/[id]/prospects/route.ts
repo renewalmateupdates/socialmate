@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getHermesAccess } from '@/lib/hermes-access'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -23,7 +24,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: campaign_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const access = await getHermesAccess(getSupabaseAdmin(), user.id, user.email)
+  if (!access.allowed) return NextResponse.json({ error: 'HERMES is not active on your account' }, { status: 403 })
 
   // Verify campaign ownership
   const supabase = getSupabaseAdmin()
@@ -62,7 +64,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id: campaign_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const access = await getHermesAccess(getSupabaseAdmin(), user.id, user.email)
+  if (!access.allowed) return NextResponse.json({ error: 'HERMES is not active on your account' }, { status: 403 })
 
   const { prospect_id } = await req.json()
   if (!prospect_id) return NextResponse.json({ error: 'prospect_id required' }, { status: 400 })

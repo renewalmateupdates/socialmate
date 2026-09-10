@@ -99,14 +99,15 @@ export default function SchedulesPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-theme">
       <Sidebar />
-      <main className="flex-1 p-6 md:p-10 max-w-3xl">
+      <main className="md:ml-56 flex-1 p-6 md:p-10">
+       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-black text-primary">Schedule Templates</h1>
-            <p className="text-secondary text-sm mt-1">Save posting-time presets and apply them to SOMA projects.</p>
+            <h1 className="text-2xl font-black text-theme">Schedule Templates</h1>
+            <p className="text-muted text-sm mt-1">Save posting-time presets and apply them to SOMA projects.</p>
           </div>
           <button
             onClick={() => { setShowCreate(true); setError('') }}
@@ -119,22 +120,22 @@ export default function SchedulesPage() {
         {/* Create form */}
         {showCreate && (
           <div className="bg-surface border border-amber-400 rounded-2xl p-6 mb-6">
-            <h2 className="font-black text-primary mb-4">New Template</h2>
+            <h2 className="font-black text-theme mb-4">New Template</h2>
 
             <div className="mb-4">
-              <label className="block text-xs font-bold text-secondary uppercase tracking-wide mb-1">Template name</label>
+              <label className="block text-xs font-bold text-muted uppercase tracking-wide mb-1">Template name</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. Weekday mornings, Mon–Fri 3×/day"
-                className="w-full bg-background border border-theme rounded-xl px-4 py-2.5 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+                className="w-full bg-theme border border-theme rounded-xl px-4 py-2.5 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
             </div>
 
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold text-secondary uppercase tracking-wide">Time slots</label>
+                <label className="text-xs font-bold text-muted uppercase tracking-wide">Time slots</label>
                 <button onClick={addSlot} className="text-xs font-bold text-amber-500 hover:text-amber-400">+ Add slot</button>
               </div>
               <div className="space-y-2">
@@ -143,14 +144,14 @@ export default function SchedulesPage() {
                     <select
                       value={slot.day}
                       onChange={e => updateSlot(i, 'day', e.target.value)}
-                      className="bg-background border border-theme rounded-lg px-3 py-2 text-sm text-primary focus:outline-none focus:border-amber-400"
+                      className="bg-theme border border-theme rounded-lg px-3 py-2 text-sm text-theme focus:outline-none focus:border-amber-400"
                     >
                       {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                     <select
                       value={slot.time}
                       onChange={e => updateSlot(i, 'time', e.target.value)}
-                      className="bg-background border border-theme rounded-lg px-3 py-2 text-sm text-primary focus:outline-none focus:border-amber-400 flex-1"
+                      className="bg-theme border border-theme rounded-lg px-3 py-2 text-sm text-theme focus:outline-none focus:border-amber-400 flex-1"
                     >
                       {TIMES.map(t => <option key={t} value={t}>{fmtTime(t)}</option>)}
                     </select>
@@ -174,7 +175,7 @@ export default function SchedulesPage() {
               </button>
               <button
                 onClick={() => { setShowCreate(false); setError('') }}
-                className="border border-theme text-secondary hover:text-primary px-5 py-2 rounded-xl text-sm font-semibold transition-all"
+                className="border border-theme text-muted hover:text-theme px-5 py-2 rounded-xl text-sm font-semibold transition-all"
               >
                 Cancel
               </button>
@@ -184,12 +185,12 @@ export default function SchedulesPage() {
 
         {/* Template list */}
         {loading ? (
-          <div className="text-secondary text-sm py-10 text-center">Loading templates…</div>
+          <div className="text-muted text-sm py-10 text-center">Loading templates…</div>
         ) : templates.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
             <ClipboardList className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
-            <p className="font-bold text-primary mb-1">No templates yet</p>
-            <p className="text-sm text-secondary mb-4">Save your posting schedule as a preset to reuse across projects.</p>
+            <p className="font-bold text-theme mb-1">No templates yet</p>
+            <p className="text-sm text-muted mb-4">Save your posting schedule as a preset to reuse across projects.</p>
             <button
               onClick={() => setShowCreate(true)}
               className="bg-amber-400 hover:bg-amber-300 text-black font-black px-5 py-2.5 rounded-xl text-sm transition-all"
@@ -203,8 +204,8 @@ export default function SchedulesPage() {
               <div key={t.id} className="bg-surface border border-theme rounded-2xl p-5 hover:border-amber-400/50 transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-black text-primary">{t.name}</h3>
-                    <p className="text-xs text-secondary mt-0.5">
+                    <h3 className="font-black text-theme">{t.name}</h3>
+                    <p className="text-xs text-muted mt-0.5">
                       {t.slots.length} slot{t.slots.length !== 1 ? 's' : ''} · Created {new Date(t.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -230,10 +231,11 @@ export default function SchedulesPage() {
 
         {/* Toast */}
         {toast && (
-          <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 bg-gray-900 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl">
+          <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 bg-gray-900 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl">
             {toast}
           </div>
         )}
+       </div>
       </main>
     </div>
   )

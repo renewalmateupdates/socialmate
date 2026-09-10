@@ -82,7 +82,7 @@ const TIERS = [
     badgeStyle: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
     ctaStyle: 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-extrabold',
     ctaLabel: 'Get Started',
-    ctaHref: '/pricing',
+    ctaHref: '/hermes/dashboard',
     features: [
       '3 active campaigns',
       '75 prospects / month',
@@ -103,7 +103,7 @@ const TIERS = [
     badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
     ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black font-extrabold',
     ctaLabel: 'Get Started',
-    ctaHref: '/pricing',
+    ctaHref: '/hermes/dashboard',
     features: [
       '10 active campaigns',
       '400 prospects / month',
@@ -159,7 +159,7 @@ const FAQS = [
   },
   {
     q: 'How do I add HERMES to my plan?',
-    a: "Head to the pricing page and add HERMES as an add-on to any SocialMate plan. Once added, you'll find HERMES in your sidebar and can start your first campaign immediately. Enterprise teams can contact us for custom pricing and dedicated onboarding.",
+    a: "Open HERMES from your sidebar (or hit Get Started above) and pick Starter or Pro — no separate signup needed. You're set up and can start your first campaign immediately. Enterprise teams can contact us for custom pricing and dedicated onboarding.",
   },
 ]
 
@@ -188,7 +188,7 @@ export default function HermesLandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
-              href="/pricing"
+              href="/hermes/dashboard"
               className="bg-amber-400 hover:bg-amber-300 text-black font-extrabold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center shadow-lg shadow-amber-400/20">
               Get Started →
             </Link>
@@ -378,7 +378,7 @@ export default function HermesLandingPage() {
             We don&apos;t think that&apos;s right. HERMES is $12/mo flat — or $25/mo for the Pro tier. Same AI-powered outreach, same sequences, more channels, a fraction of the price.
           </p>
           <Link
-            href="/pricing"
+            href="/hermes/dashboard"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-black font-extrabold px-8 py-4 rounded-2xl transition-all text-sm shadow-lg shadow-amber-400/20">
             Add HERMES to Your Plan →
           </Link>

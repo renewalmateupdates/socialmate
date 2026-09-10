@@ -5,9 +5,20 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
-import { CalendarDays, CheckCircle2, ClipboardList, Fish, Radar, Search, Telescope, Zap } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock, ClipboardList, Fish, History, Radar, Search, Telescope, Zap } from 'lucide-react'
 
 const CREDIT_COST = 20
+
+type ScanRecord = { id: string; niche: string; result: string; created_at: string }
+
+function timeAgo(iso: string): string {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
 
 export default function SMRadarPage() {
   const router = useRouter()
@@ -17,13 +28,27 @@ export default function SMRadarPage() {
   const [result, setResult] = useState<string | null>(null)
   const [niche, setNiche] = useState('')
   const [error, setError] = useState('')
+  const [history, setHistory] = useState<ScanRecord[]>([])
+
+  const loadHistory = () => {
+    fetch('/api/ai/scan-history?tool=radar')
+      .then(r => r.json())
+      .then(d => setHistory(d.scans ?? []))
+      .catch(() => {})
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) router.push('/login')
-      else setLoading(false)
+      else { setLoading(false); loadHistory() }
     })
   }, [router])
+
+  const viewPastScan = (scan: ScanRecord) => {
+    setResult(scan.result)
+    setNiche(scan.niche)
+    setError('')
+  }
 
   const handleGenerate = async () => {
     if (credits < CREDIT_COST) return
@@ -48,6 +73,7 @@ export default function SMRadarPage() {
       }
       setResult(data.result)
       setCredits(typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - CREDIT_COST)
+      loadHistory()
     } catch {
       setError('Network error. Please try again.')
     }
@@ -238,6 +264,24 @@ export default function SMRadarPage() {
                 className="self-start sm:self-auto text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0">
                 Get more credits →
               </Link>
+            </div>
+          )}
+
+          {/* RECENT REPORTS — reports used to vanish the moment you left the page */}
+          {history.length > 0 && (
+            <div className="mt-6 bg-surface border border-theme rounded-2xl p-5">
+              <h2 className="text-sm font-extrabold mb-3 flex items-center gap-1.5"><History className="w-4 h-4" strokeWidth={2} /> Recent reports</h2>
+              <div className="space-y-1.5">
+                {history.map(scan => (
+                  <button
+                    key={scan.id}
+                    onClick={() => viewPastScan(scan)}
+                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-left">
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{scan.niche || 'social media content creation'}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 inline-flex items-center gap-1"><Clock size={11} strokeWidth={2} /> {timeAgo(scan.created_at)}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

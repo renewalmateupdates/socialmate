@@ -26,33 +26,19 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Try to fetch with bluesky_stats column first, fall back without it
-  let posts: any[] | null = null
-  let hasBlueskyStats = true
-
-  const { data: postsWithStats, error: statsError } = await supabase
+  // select('*') rather than an explicit column list — bluesky_stats used to be
+  // handled with a fallback query for exactly this reason, but an explicit list
+  // silently drops any column it doesn't name (mastodon_stats and the
+  // auto-populated analytics column were both missing from the engagement
+  // numbers shown here because of that, not because the data didn't exist).
+  const { data: postsData, error: statsError } = await supabase
     .from('posts')
-    .select('id, content, platforms, status, created_at, scheduled_at, published_at, bluesky_stats, platform_post_ids')
+    .select('*')
     .eq('user_id', user.id)
     .order('published_at', { ascending: false })
 
-  if (statsError && statsError.message?.includes('bluesky_stats')) {
-    hasBlueskyStats = false
-    const { data: postsNoStats, error } = await supabase
-      .from('posts')
-      .select('id, content, platforms, status, created_at, scheduled_at, published_at, platform_post_ids')
-      .eq('user_id', user.id)
-      .order('published_at', { ascending: false })
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    posts = postsNoStats ?? []
-  } else if (statsError) {
-    return NextResponse.json({ error: statsError.message }, { status: 500 })
-  } else {
-    posts = postsWithStats ?? []
-  }
-
-  const allPosts = posts
+  if (statsError) return NextResponse.json({ error: statsError.message }, { status: 500 })
+  const allPosts = postsData ?? []
 
   // ── Overview counts ─────────────────────────────────────────────────────────
   const total_published = allPosts.filter(p => p.status === 'published').length
@@ -120,15 +106,32 @@ export async function GET() {
   }))
 
   // ── Recent posts (last 10 published) ─────────────────────────────────────────
-  const recent_posts = publishedPosts.slice(0, 10).map(p => ({
-    id:              p.id,
-    content:         p.content ?? '',
-    content_preview: (p.content ?? '').slice(0, 80),
-    platforms:       Array.isArray(p.platforms) ? p.platforms : [],
-    published_at:    p.published_at ?? p.created_at,
-    status:          p.status,
-    bluesky_stats:   hasBlueskyStats ? (p.bluesky_stats ?? null) : null,
-  }))
+  // Engagement lives in two places: bluesky_stats/mastodon_stats (populated only
+  // when the user clicks "Sync" here) and analytics (auto-populated 1h/24h after
+  // publish by the fetchPostAnalytics Inngest job). Prefer the manual sync when
+  // it exists — it's fetched on demand, so it's usually the freshest — and fall
+  // back to the automatic snapshot so a post still shows real numbers even if
+  // nobody ever clicked Sync.
+  const recent_posts = publishedPosts.slice(0, 10).map(p => {
+    const autoBsky  = p.analytics?.bluesky
+    const autoMasto = p.analytics?.mastodon
+    const bluesky_stats = p.bluesky_stats ?? (autoBsky
+      ? { likes: autoBsky.likes ?? 0, reposts: autoBsky.reposts ?? 0, replies: autoBsky.replies ?? 0, fetched_at: p.analytics?.fetched_at_24h ?? p.analytics?.fetched_at_1h ?? null }
+      : null)
+    const mastodon_stats = p.mastodon_stats ?? (autoMasto
+      ? { favourites_count: autoMasto.likes ?? 0, reblogs_count: autoMasto.reposts ?? 0, replies_count: autoMasto.replies ?? 0, fetched_at: p.analytics?.fetched_at_24h ?? p.analytics?.fetched_at_1h ?? null }
+      : null)
+    return {
+      id:              p.id,
+      content:         p.content ?? '',
+      content_preview: (p.content ?? '').slice(0, 80),
+      platforms:       Array.isArray(p.platforms) ? p.platforms : [],
+      published_at:    p.published_at ?? p.created_at,
+      status:          p.status,
+      bluesky_stats,
+      mastodon_stats,
+    }
+  })
 
   // ── Streaks ──────────────────────────────────────────────────────────────────
   const publishedDaySet = new Set<string>()
