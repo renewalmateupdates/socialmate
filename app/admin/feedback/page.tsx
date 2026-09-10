@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, MessageCircle } from 'lucide-react'
+import { CheckCircle2, Lock, MessageCircle } from 'lucide-react'
 
 interface FeedbackItem {
   id: string
@@ -223,7 +223,7 @@ export default function AdminFeedbackPage() {
                         {item.type}
                       </span>
                       {item.replied_at
-                        ? <span className="text-xs text-green-600 dark:text-green-400 font-semibold">✓ Replied</span>
+                        ? <span className="text-xs text-green-600 dark:text-green-400 font-semibold inline-flex items-center gap-0.5"><CheckCircle2 size={12} strokeWidth={2} /> Replied</span>
                         : <span className="text-xs text-orange-500 font-semibold">Unreplied</span>}
                     </div>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{item.message}</p>
@@ -278,7 +278,7 @@ export default function AdminFeedbackPage() {
                 <div className="text-sm text-gray-400 text-center py-4">Anonymous feedback — no email to reply to.</div>
               ) : replySuccess ? (
                 <div className="text-center py-6">
-                  <div className="text-3xl mb-2">✓</div>
+                  <CheckCircle2 className="w-7 h-7 mx-auto mb-2 text-green-500" strokeWidth={1.5} />
                   <div className="text-sm font-semibold text-green-600 dark:text-green-400">Reply sent to {selected.email}</div>
                 </div>
               ) : (

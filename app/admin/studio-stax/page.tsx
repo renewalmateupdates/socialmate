@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Gift, Lock, ShieldAlert, Star, X as CloseIcon } from 'lucide-react'
+import { AlertTriangle, Gift, Lock, ShieldAlert, Star, X as CloseIcon } from 'lucide-react'
 
 interface Listing {
   id: string
@@ -563,7 +563,7 @@ export default function AdminStudioStaxPage() {
                       {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
                     {!editCategory && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠ No category — listing won&apos;t appear on the public page.</p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 inline-flex items-center gap-1"><AlertTriangle size={11} strokeWidth={2} /> No category — listing won&apos;t appear on the public page.</p>
                     )}
                   </div>
 
