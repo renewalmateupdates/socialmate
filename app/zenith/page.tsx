@@ -23,6 +23,7 @@ const PLATFORM_COLORS: Record<string, string> = {
 interface ZenithStats {
   displayName: string
   handle: string
+  referralCode: string
   totalPosts: number
   streak: number
   platforms: string[]
@@ -58,7 +59,7 @@ export default function ZenithPage() {
         { data: recentPosts },
         { data: allPosts },
       ] = await Promise.all([
-        supabase.from('user_settings').select('display_name').eq('user_id', u.id).single(),
+        supabase.from('user_settings').select('display_name, referral_code').eq('user_id', u.id).single(),
         supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', u.id).eq('status', 'published'),
         supabase.from('connected_accounts').select('platform').eq('user_id', u.id),
         supabase.from('profiles').select('created_at').eq('id', u.id).single(),
@@ -88,6 +89,7 @@ export default function ZenithPage() {
       setStats({
         displayName: settings?.display_name || u.email?.split('@')[0] || 'Creator',
         handle: u.email?.split('@')[0] ?? 'creator',
+        referralCode: settings?.referral_code ?? '',
         totalPosts: totalPosts ?? 0,
         streak,
         platforms,
@@ -101,7 +103,8 @@ export default function ZenithPage() {
     init()
   }, [])
 
-  const cardUrl = user ? `${typeof window !== 'undefined' ? window.location.origin : 'https://socialmate.studio'}/zenith` : ''
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://socialmate.studio'
+  const cardUrl = user && stats?.referralCode ? `${origin}/z/${stats.referralCode}` : ''
 
   function copyLink() {
     navigator.clipboard.writeText(cardUrl).catch(() => {})

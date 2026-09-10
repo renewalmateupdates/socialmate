@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 async function makeClient() {
   const cookieStore = await cookies()
@@ -34,13 +35,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Pro+ gate
-  const { data: ws } = await supabase
-    .from('workspaces')
-    .select('plan')
-    .eq('owner_id', user.id)
-    .eq('is_personal', true)
-    .single()
-  const plan = (ws?.plan ?? 'free').replace('_annual', '')
+  const plan = await resolveWorkspacePlan(supabase, user.id)
   if (plan === 'free') return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
 
   const body = await req.json()

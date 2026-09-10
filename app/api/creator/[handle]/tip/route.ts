@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { resolveWorkspacePlan } from '@/lib/plan'
 import Stripe from 'stripe'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ handle: string }> }) {
@@ -24,6 +25,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
     return NextResponse.json({ error: 'Creator not found.' }, { status: 404 })
   }
   if (!creator.tip_enabled) {
+    return NextResponse.json({ error: 'Tip jar is not enabled.' }, { status: 400 })
+  }
+  const plan = await resolveWorkspacePlan(supabase, '', creator.workspace_id)
+  if (plan === 'free') {
     return NextResponse.json({ error: 'Tip jar is not enabled.' }, { status: 400 })
   }
   if (amount_cents < creator.tip_min || amount_cents > creator.tip_max) {

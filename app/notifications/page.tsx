@@ -13,12 +13,12 @@ function SkeletonBox({ className }: { className?: string }) {
 type NotifType = 'post_published' | 'post_failed' | 'credit_low' | 'team' | 'referral' | 'system'
 
 const TYPE_CONFIG: Record<NotifType, { icon: LucideIcon; color: string }> = {
-  post_published: { icon: CheckCircle2, color: 'bg-green-50 border-green-100'   },
-  post_failed:    { icon: XCircle, color: 'bg-red-50 border-red-100'       },
-  credit_low:     { icon: Zap, color: 'bg-yellow-50 border-yellow-100' },
-  team:           { icon: Users, color: 'bg-blue-50 border-blue-100'     },
-  referral:       { icon: Gift, color: 'bg-purple-50 border-purple-100' },
-  system:         { icon: Megaphone, color: 'bg-gray-50 border-gray-100'     },
+  post_published: { icon: CheckCircle2, color: 'bg-green-50 dark:bg-green-950/30 border-green-100 dark:border-green-900'     },
+  post_failed:    { icon: XCircle, color: 'bg-red-50 dark:bg-red-950/30 border-red-100 dark:border-red-900'             },
+  credit_low:     { icon: Zap, color: 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-100 dark:border-yellow-900'     },
+  team:           { icon: Users, color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900'           },
+  referral:       { icon: Gift, color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-100 dark:border-purple-900'    },
+  system:         { icon: Megaphone, color: 'bg-gray-50 dark:bg-gray-800/60 border-gray-100 dark:border-gray-700'       },
 }
 
 const PLACEHOLDER_NOTIFS = [
@@ -170,13 +170,13 @@ export default function Notifications() {
                       !n.read ? 'opacity-100' : 'opacity-60'
                     }`}>
                     <div className="flex items-start gap-3">
-                      <config.icon className="w-4 h-4 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+                      <config.icon className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-700 dark:text-gray-300" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-0.5">
                           <div className="flex items-center gap-2 min-w-0">
-                            <p className="text-xs font-extrabold truncate">{n.title}</p>
+                            <p className="text-xs font-extrabold truncate text-gray-900 dark:text-gray-100">{n.title}</p>
                             {!n.read && (
-                              <div className="w-2 h-2 rounded-full bg-black flex-shrink-0" />
+                              <div className="w-2 h-2 rounded-full bg-black dark:bg-white flex-shrink-0" />
                             )}
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
