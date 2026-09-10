@@ -17,6 +17,13 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import PostImageExporter from '@/components/PostImageExporter'
 import UnsplashCredit from '@/components/UnsplashCredit'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { AlertTriangle, CalendarClock, CalendarRange, CheckCircle2, Globe, Heart, Layers, Lock, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -61,7 +68,7 @@ function PartialBreakdown({ post }: { post: any }) {
                 ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
             }`}>
-            <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+            <PlatformGlyph id={p} size={11} />
             <span className="hidden sm:inline">{PLATFORM_NAMES[p] ?? p}</span>
             <span>{succeeded ? '✓' : '✗'}</span>
           </span>
@@ -173,7 +180,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
           <div className="flex items-center gap-1.5 flex-wrap mt-3">
             {(post.platforms || []).map((p: string) => (
               <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                <span>{PLATFORM_ICONS[p] || '📱'}</span>
+                <PlatformGlyph id={p} size={12} />
                 <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
               </span>
             ))}
@@ -181,7 +188,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
               <span
                 title={`Repeats ${post.recurrence_rule ?? 'on a schedule'}${post.recurrence_end_date ? ` until ${new Date(post.recurrence_end_date).toLocaleDateString()}` : ' forever'}`}
                 className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
-                🔁 <span className="hidden sm:inline capitalize">{post.recurrence_rule ?? 'Recurring'}</span>
+                <Repeat className="w-3 h-3" strokeWidth={2} /> <span className="hidden sm:inline capitalize">{post.recurrence_rule ?? 'Recurring'}</span>
               </span>
             )}
             {(post.tags || []).map((tag: string) => (
@@ -203,9 +210,9 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
             if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
             return (
               <div className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
-                <span>❤️ {totals.likes}</span>
-                <span>💬 {totals.replies}</span>
-                <span>🔄 {totals.reposts}</span>
+                <span className="inline-flex items-center gap-1"><Heart className="w-3 h-3" strokeWidth={2} /> {totals.likes}</span>
+                <span className="inline-flex items-center gap-1"><MessageCircle className="w-3 h-3" strokeWidth={2} /> {totals.replies}</span>
+                <span className="inline-flex items-center gap-1"><Repeat className="w-3 h-3" strokeWidth={2} /> {totals.reposts}</span>
               </div>
             )
           })()}
@@ -229,7 +236,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 }`}>
                 {evergreenLoading
                   ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  : '♻️'}
+                  : <Recycle className="w-3.5 h-3.5" strokeWidth={2} />}
                 <span>Evergreen</span>
               </button>
             )}
@@ -789,7 +796,7 @@ function QueueInner() {
                 <button
                   onClick={() => setShowUpgradeCard(v => !v)}
                   className="flex items-center gap-1.5 text-xs font-bold px-3 py-2.5 border border-[#1f1f1f] text-[#9ca3af] rounded-xl hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all">
-                  🔒 Auto-schedule Drafts
+                  <Lock className="w-3.5 h-3.5" strokeWidth={2} /> Auto-schedule Drafts
                 </button>
               ) : (
                 <button
@@ -799,7 +806,7 @@ function QueueInner() {
                   className="flex items-center gap-1.5 text-xs font-bold px-3 py-2.5 rounded-xl border border-[#F59E0B] text-[#F59E0B] bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                   {autoScheduling
                     ? <><div className="w-3 h-3 border-2 border-[#F59E0B]/40 border-t-[#F59E0B] rounded-full animate-spin" />Scheduling...</>
-                    : <>⚡ Auto-schedule Drafts{draftCount !== null && draftCount > 0 ? ` (${draftCount})` : ''}</>}
+                    : <><Zap className="w-3.5 h-3.5" strokeWidth={2} />Auto-schedule Drafts{draftCount !== null && draftCount > 0 ? ` (${draftCount})` : ''}</>}
                 </button>
               )}
               <Link href="/compose"
@@ -857,7 +864,7 @@ function QueueInner() {
                       key={p}
                       onClick={() => setPlatformFilter(platformFilter === p ? 'all' : p)}
                       className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${platformFilter === p ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
-                      {PLATFORM_ICONS[p]} {PLATFORM_FILTER_LABELS[p]}
+                      <span className="inline-flex items-center gap-1"><PlatformGlyph id={p} size={12} /> {PLATFORM_FILTER_LABELS[p]}</span>
                     </button>
                   )
                 })}
@@ -954,7 +961,7 @@ function QueueInner() {
           {autoScheduleResult && (
             <div className="mb-4 bg-[#111111] border border-[#F59E0B]/40 rounded-2xl px-5 py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="text-lg">⚡</span>
+                <Zap className="w-[18px] h-[18px] text-[#F59E0B] flex-shrink-0" strokeWidth={2} />
                 <p className="text-xs font-semibold text-[#F59E0B]">
                   <span className="font-extrabold">Scheduled {autoScheduleResult.scheduled} post{autoScheduleResult.scheduled !== 1 ? 's' : ''}</span>
                   {' '}across the next {autoScheduleResult.days} day{autoScheduleResult.days !== 1 ? 's' : ''} at optimal times
@@ -972,7 +979,7 @@ function QueueInner() {
           {showUpgradeCard && (
             <div className="mb-4 bg-[#111111] border border-[#1f1f1f] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
-                <span className="text-xl mt-0.5">⚡</span>
+                <Zap className="w-5 h-5 text-[#F59E0B] flex-shrink-0 mt-0.5" strokeWidth={2} />
                 <div>
                   <p className="text-sm font-extrabold text-white mb-0.5">Auto-scheduling is a Pro feature</p>
                   <p className="text-xs text-[#9ca3af]">Let SocialMate fill your queue automatically — Pro fills 14 days, Agency fills 30 days at peak engagement times. Upgrade for $8/mo.</p>
@@ -996,7 +1003,7 @@ function QueueInner() {
           <Link href="/compose?platform=twitter"
             className="flex items-center justify-between gap-3 mb-4 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900 rounded-2xl px-5 py-3 hover:border-sky-300 dark:hover:border-sky-700 transition-all group">
             <div className="flex items-center gap-2.5">
-              <span className="text-lg">🐦</span>
+              <PlatformGlyph id="twitter" size={18} className="text-sky-700 dark:text-sky-400" />
               <p className="text-xs font-semibold text-sky-700 dark:text-sky-400">
                 <span className="font-extrabold">New: Post to X</span> — schedule tweets alongside your other platforms
               </p>
@@ -1008,7 +1015,7 @@ function QueueInner() {
 
           {targetDate && targetDateString && (
             <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
-              <span className="text-blue-500">📅</span>
+              <CalendarClock className="w-4 h-4 text-blue-500 flex-shrink-0" strokeWidth={1.75} />
               <p className="text-xs font-semibold text-blue-700">
                 Showing schedule for{' '}
                 <span className="font-extrabold">
@@ -1024,7 +1031,7 @@ function QueueInner() {
           {!loading && partialPosts.length > 0 && (
             <div className="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-amber-500 text-base">⚠️</span>
+                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" strokeWidth={2} />
                 <p className="text-xs font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-widest">
                   Partial publishes ({partialPosts.length})
                 </p>
@@ -1073,12 +1080,12 @@ function QueueInner() {
           {!loading && posts.length > 0 && (
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
-                { label: 'Scheduled',  value: posts.length,  icon: '📅' },
-                { label: 'Days Ahead', value: daysWithPosts, icon: '🗓️' },
-                { label: 'Platforms',  value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: '📱' },
+                { label: 'Scheduled',  value: posts.length,  icon: CalendarClock },
+                { label: 'Days Ahead', value: daysWithPosts, icon: CalendarRange },
+                { label: 'Platforms',  value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: Layers },
               ].map(stat => (
                 <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
-                  <div className="text-xl mb-1">{stat.icon}</div>
+                  <stat.icon className="w-5 h-5 mx-auto mb-1 text-gray-400" strokeWidth={1.75} />
                   <p className="text-xl font-extrabold">{stat.value}</p>
                   <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
                 </div>
@@ -1092,7 +1099,7 @@ function QueueInner() {
             </div>
           ) : posts.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">📅</div>
+              <CalendarClock className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">{t('app_queue.empty')}</p>
               <p className="text-xs text-gray-400 mb-5">{t('app_queue.empty_sub')}</p>
               <Link href="/compose"
@@ -1233,7 +1240,10 @@ function QueueInner() {
         <div className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`} style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+          <span className="inline-flex items-center gap-2">
+            {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <XCircle className="w-4 h-4" strokeWidth={2} />}
+            {toast.message}
+          </span>
         </div>
       )}
     </div>
