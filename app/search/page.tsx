@@ -4,12 +4,13 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { BarChart3, CalendarDays, CalendarRange, FileText, Folder, Globe, Hash, PenLine, Search as SearchIcon, Settings, Users, X as CloseIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-const PLATFORM_ICONS: Record<string, string> = {
-  instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
-  facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
-  mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
+function PlatformGlyph({ id, size = 12, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
 }
 
 type ResultType = 'post' | 'template' | 'hashtag'
@@ -20,25 +21,25 @@ interface Result {
   title: string
   subtitle: string
   href: string
-  meta?: string
+  meta?: string[]
 }
 
-const TYPE_LABELS: Record<ResultType, { label: string; icon: string }> = {
-  post:     { label: 'Post',     icon: '✏️'  },
-  template: { label: 'Template', icon: '📝'  },
-  hashtag:  { label: 'Hashtags', icon: '#️⃣' },
+const TYPE_LABELS: Record<ResultType, { label: string; icon: LucideIcon }> = {
+  post:     { label: 'Post',     icon: PenLine  },
+  template: { label: 'Template', icon: FileText  },
+  hashtag:  { label: 'Hashtags', icon: Hash },
 }
 
 const QUICK_LINKS = [
-  { label: 'Compose new post',    href: '/compose',        icon: '✏️'  },
-  { label: 'View drafts',         href: '/drafts',         icon: '📂'  },
-  { label: 'Content calendar',    href: '/calendar',       icon: '📅'  },
-  { label: 'Bulk scheduler',      href: '/bulk-scheduler', icon: '📆'  },
-  { label: 'Analytics',           href: '/analytics',      icon: '📊'  },
-  { label: 'Hashtag collections', href: '/hashtags',       icon: '#️⃣' },
-  { label: 'Post templates',      href: '/templates',      icon: '📝'  },
-  { label: 'Team management',     href: '/team',           icon: '👥'  },
-  { label: 'Account settings',    href: '/settings',       icon: '⚙️'  },
+  { label: 'Compose new post',    href: '/compose',        icon: PenLine  },
+  { label: 'View drafts',         href: '/drafts',         icon: Folder  },
+  { label: 'Content calendar',    href: '/calendar',       icon: CalendarDays  },
+  { label: 'Bulk scheduler',      href: '/bulk-scheduler', icon: CalendarRange  },
+  { label: 'Analytics',           href: '/analytics',      icon: BarChart3  },
+  { label: 'Hashtag collections', href: '/hashtags',       icon: Hash },
+  { label: 'Post templates',      href: '/templates',      icon: FileText  },
+  { label: 'Team management',     href: '/team',           icon: Users  },
+  { label: 'Account settings',    href: '/settings',       icon: Settings  },
 ]
 
 export default function Search() {
@@ -92,7 +93,7 @@ export default function Search() {
         title: p.content?.slice(0, 80) || 'Untitled post',
         subtitle: p.status === 'scheduled' ? 'Scheduled' : p.status === 'draft' ? 'Draft' : p.status,
         href: p.status === 'draft' ? '/drafts' : '/queue',
-        meta: (p.platforms || []).map((pl: string) => PLATFORM_ICONS[pl] || '📱').join(''),
+        meta: p.platforms || [],
       })
     })
 
@@ -144,7 +145,7 @@ export default function Search() {
 
           {/* SEARCH INPUT */}
           <div className="relative mb-6">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</div>
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={2} />
             <input
               ref={inputRef}
               type="text"
@@ -156,7 +157,7 @@ export default function Search() {
             {query && (
               <button onClick={() => setQuery('')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-all text-sm">
-                ✕
+                <CloseIcon className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
             )}
           </div>
@@ -173,7 +174,7 @@ export default function Search() {
           {/* EMPTY STATE */}
           {!searching && hasSearched && results.length === 0 && (
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-              <div className="text-4xl mb-3">🔍</div>
+              <SearchIcon className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">No results for "{query}"</p>
               <p className="text-xs text-gray-400 dark:text-gray-500">Try different keywords or check your spelling.</p>
             </div>
@@ -190,8 +191,8 @@ export default function Search() {
                 return (
                   <Link key={r.id} href={r.href}
                     className="flex items-center gap-3 bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 transition-all group">
-                    <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-base flex-shrink-0">
-                      {typeInfo.icon}
+                    <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <typeInfo.icon className="w-4 h-4" strokeWidth={1.75} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -202,7 +203,11 @@ export default function Search() {
                       </div>
                       <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{r.subtitle}</p>
                     </div>
-                    {r.meta && <span className="text-sm flex-shrink-0">{r.meta}</span>}
+                    {r.meta && r.meta.length > 0 && (
+                      <span className="flex items-center gap-1 flex-shrink-0">
+                        {r.meta.map(p => <PlatformGlyph key={p} id={p} size={13} />)}
+                      </span>
+                    )}
                     <span className="text-gray-300 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-all text-xs flex-shrink-0">→</span>
                   </Link>
                 )
@@ -218,7 +223,7 @@ export default function Search() {
                 {QUICK_LINKS.map(link => (
                   <Link key={link.href} href={link.href}
                     className="flex items-center gap-2 bg-surface border border-theme rounded-xl px-3 py-2.5 hover:border-gray-300 transition-all group">
-                    <span className="text-sm flex-shrink-0">{link.icon}</span>
+                    <link.icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
                     <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white transition-all truncate">
                       {link.label}
                     </span>

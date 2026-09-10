@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import { useI18n } from '@/contexts/I18nContext'
+import { CalendarDays, CheckCircle2, DoorOpen, FileEdit, FileText, MapPin, Send, Settings, Theater, Trash2, UserPlus, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface ActivityEvent {
   id: string
@@ -14,23 +16,23 @@ interface ActivityEvent {
   created_at: string
 }
 
-const ACTION_ICONS: Record<string, string> = {
-  post_published:    '📤',
-  post_scheduled:    '📅',
-  post_drafted:      '📝',
-  post_deleted:      '🗑️',
-  post_approved:     '✅',
-  post_rejected:     '❌',
-  member_invited:    '👋',
-  member_removed:    '🚪',
-  member_role_changed: '🎭',
-  workspace_updated: '⚙️',
-  template_created:  '📋',
-  template_deleted:  '🗑️',
+const ACTION_ICONS: Record<string, LucideIcon> = {
+  post_published:    Send,
+  post_scheduled:    CalendarDays,
+  post_drafted:      FileEdit,
+  post_deleted:      Trash2,
+  post_approved:     CheckCircle2,
+  post_rejected:     XCircle,
+  member_invited:    UserPlus,
+  member_removed:    DoorOpen,
+  member_role_changed: Theater,
+  workspace_updated: Settings,
+  template_created:  FileText,
+  template_deleted:  Trash2,
 }
 
-function actionIcon(action: string) {
-  return ACTION_ICONS[action] ?? '📌'
+function actionIcon(action: string): LucideIcon {
+  return ACTION_ICONS[action] ?? MapPin
 }
 
 function actionLabel(action: string) {
@@ -100,7 +102,7 @@ export default function ActivityPage() {
           >
             {events.map(ev => (
               <div key={ev.id} className="flex items-start gap-3 px-4 py-3.5">
-                <span className="text-lg mt-0.5 flex-shrink-0">{actionIcon(ev.action)}</span>
+                {(() => { const ActionIcon = actionIcon(ev.action); return <ActionIcon className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} /> })()}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold capitalize" style={{ color: 'var(--fg)' }}>
                     {actionLabel(ev.action)}
