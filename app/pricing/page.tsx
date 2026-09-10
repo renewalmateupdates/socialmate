@@ -6,6 +6,7 @@ import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { FlipCard } from '@/components/pricing/FlipCard'
 import { track, trackOnce } from '@/lib/analytics'
+import { CreditCard, Flame, Gift, Heart, Lock, RotateCcw, Tornado, Waves, X as CloseIcon, Zap } from 'lucide-react'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -484,7 +485,7 @@ export default function Pricing() {
               <span className="text-jade text-sm font-bold">
                 {couponApplied.code} — {formatCouponDiscount(couponApplied)} applied
               </span>
-              <button onClick={removeCoupon} className="text-jade hover:text-jade/80 text-xs font-semibold">✕ Remove</button>
+              <button onClick={removeCoupon} className="text-jade hover:text-jade/80 text-xs font-semibold inline-flex items-center gap-1"><CloseIcon className="w-3 h-3" strokeWidth={2} /> Remove</button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
@@ -514,7 +515,7 @@ export default function Pricing() {
         {/* WELCOME OFFER BANNER — free users, 14+ days old, offer valid 14 days */}
         {showWelcomeOffer && (
           <div className="relative flex items-start gap-3 bg-amber/10 dark:bg-amber/10 border border-amber dark:border-amber rounded-2xl px-5 py-4 mb-8">
-            <span className="text-2xl flex-shrink-0">🎁</span>
+            <Gift className="w-6 h-6 flex-shrink-0 text-amber" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-extrabold text-amber dark:text-amber leading-tight">
                 Welcome offer — 50% off your first month
@@ -536,7 +537,7 @@ export default function Pricing() {
                 className="text-amber/60 hover:text-amber transition-colors text-sm w-6 h-6 flex items-center justify-center"
                 aria-label="Dismiss"
               >
-                ✕
+                <CloseIcon className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
             </div>
           </div>
@@ -730,15 +731,15 @@ export default function Pricing() {
         {/* SECURE CHECKOUT BADGE */}
         <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-            <span>🔒</span><span>{t('pricing.trust_stripe')}</span>
+            <Lock className="w-3.5 h-3.5" strokeWidth={1.75} /><span>{t('pricing.trust_stripe')}</span>
           </div>
           <div className="w-px h-3 bg-raised hidden sm:block" />
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-            <span>↩️</span><span>{t('pricing.trust_cancel')}</span>
+            <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.75} /><span>{t('pricing.trust_cancel')}</span>
           </div>
           <div className="w-px h-3 bg-raised hidden sm:block" />
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-            <span>💳</span><span>{t('pricing.trust_no_cc')}</span>
+            <CreditCard className="w-3.5 h-3.5" strokeWidth={1.75} /><span>{t('pricing.trust_no_cc')}</span>
           </div>
         </div>
 
@@ -870,10 +871,10 @@ export default function Pricing() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
             {[
-              { label: 'Spark',  icon: '⚡', posts: 50,  price: '$1.99'  },
-              { label: 'Boost',  icon: '🔥', posts: 120, price: '$4.99', badge: 'Popular' },
-              { label: 'Surge',  icon: '💥', posts: 250, price: '$9.99'  },
-              { label: 'Storm',  icon: '🌪️', posts: 500, price: '$19.99', badge: 'Best value' },
+              { label: 'Spark',  icon: Zap,   posts: 50,  price: '$1.99'  },
+              { label: 'Boost',  icon: Flame, posts: 120, price: '$4.99', badge: 'Popular' },
+              { label: 'Surge',  icon: Waves, posts: 250, price: '$9.99'  },
+              { label: 'Storm',  icon: Tornado, posts: 500, price: '$19.99', badge: 'Best value' },
             ].map(pack => (
               <div key={pack.label} className={`bg-panel hover:bg-raised transition-colors rounded-xl p-4 flex flex-col items-center text-center relative ${pack.badge === 'Popular' ? 'ring-1 ring-amber' : ''} ${pack.badge === 'Best value' ? 'ring-1 ring-amber' : ''}`}>
                 {pack.badge && (
@@ -881,7 +882,7 @@ export default function Pricing() {
                     {pack.badge}
                   </span>
                 )}
-                <span className="text-2xl mb-2">{pack.icon}</span>
+                <pack.icon className="w-6 h-6 mb-2 text-amber" strokeWidth={1.75} />
                 <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                 <p className="text-xs text-ink-muted mb-3">{pack.posts} extra X posts</p>
                 <p className="text-xl font-extrabold mb-3">{pack.price}</p>
@@ -994,8 +995,8 @@ export default function Pricing() {
         {/* SM-Give strip */}
         <div className="border-t border-edge mt-16 pt-10 pb-4">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <p className="text-sm text-ink-muted">
-              ❤️ <span className="font-semibold text-ink-body">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+            <p className="text-sm text-ink-muted inline-flex items-center gap-1.5 flex-wrap justify-center">
+              <Heart className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} /> <span className="font-semibold text-ink-body">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
               <a href="/give" className="text-amber hover:text-amber-bright font-semibold transition-colors">Learn about SM-Give →</a>
             </p>
           </div>

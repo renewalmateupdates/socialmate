@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { Heart } from 'lucide-react'
 
 export default function AboutPage() {
   const { t } = useI18n()
@@ -88,8 +89,8 @@ export default function AboutPage() {
             {t('about.give_para2')}
           </p>
           <Link href="/give"
-            className="inline-block border border-amber-700 hover:bg-amber-950/40 text-amber-400 font-bold px-6 py-3 rounded-xl text-sm transition-all">
-            ❤️ {t('about.give_cta')}
+            className="inline-flex items-center gap-2 border border-amber-700 hover:bg-amber-950/40 text-amber-400 font-bold px-6 py-3 rounded-xl text-sm transition-all">
+            <Heart className="w-4 h-4" strokeWidth={2} /> {t('about.give_cta')}
           </Link>
         </div>
       </section>

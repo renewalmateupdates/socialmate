@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import { ChevronDown } from 'lucide-react'
 
 const FAQS = [
   {
@@ -71,7 +72,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
           className="shrink-0 text-gray-400 transition-transform duration-200"
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
-          ▾
+          <ChevronDown className="w-4 h-4" strokeWidth={2} />
         </span>
       </button>
       {open && (
