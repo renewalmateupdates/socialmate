@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Heart, Recycle } from 'lucide-react'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
@@ -89,7 +90,7 @@ export default function VsSmarterqueue() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
-            <Link href="/give" className="text-sm font-semibold text-alert hover:text-alert transition-all">❤️ Give</Link>
+            <Link href="/give" className="text-sm font-semibold text-alert hover:text-alert transition-all inline-flex items-center gap-1"><Heart size={13} strokeWidth={2} fill="currentColor" /> Give</Link>
             <Link href="/partners" className="text-sm font-semibold text-amber hover:text-amber transition-all">Partners</Link>
             <Link href="/login" className="text-sm font-semibold text-ink-muted hover:text-ink-high dark:hover:text-ink-high transition-all">{t('vs_shared.nav_sign_in')}</Link>
             <Link href="/signup" className="bg-void bg-panel text-ink-high text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
@@ -106,7 +107,7 @@ export default function VsSmarterqueue() {
 
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-violet/10 border border-violet/40 text-violet text-xs font-bold px-4 py-2 rounded-full mb-6">
-            ♻️ SmarterQueue specializes in evergreen recycling — SocialMate has that too, for free
+            <Recycle size={13} strokeWidth={2} /> SmarterQueue specializes in evergreen recycling — SocialMate has that too, for free
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs SmarterQueue (2026)

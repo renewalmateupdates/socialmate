@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import { BookOpen, Crown } from 'lucide-react'
 
 const gold   = '#F59E0B'
 const dark   = '#0a0a0a'
@@ -144,7 +145,7 @@ export default function GilgameshGuidePage() {
                 justifyContent: 'center', flexShrink: 0,
               }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 28 }}>📖</div>
+                  <BookOpen size={28} strokeWidth={1.5} color={gold} />
                   <div style={{ fontSize: 10, color: gold, fontWeight: 800, marginTop: 6, letterSpacing: '0.05em' }}>VOL. 1</div>
                 </div>
               </div>
@@ -327,7 +328,7 @@ export default function GilgameshGuidePage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 28,
             }}>
-              👑
+              <Crown size={28} strokeWidth={1.5} color={dark} fill={dark} />
             </div>
             <div style={{ flex: 1, minWidth: 240 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>

@@ -6,6 +6,8 @@ import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import RefCodeSetter from './RefCodeSetter'
+import { BarChart3, CalendarDays, Sparkles } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -74,19 +76,19 @@ export async function generateMetadata(
 
 // ── Benefit bullets ───────────────────────────────────────────────────────────
 
-const BENEFITS = [
+const BENEFITS: { icon: LucideIcon; title: string; desc: string }[] = [
   {
-    icon: '📅',
+    icon: CalendarDays,
     title: 'Schedule to 7 platforms',
     desc: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, LinkedIn — one composer, one queue.',
   },
   {
-    icon: '✨',
+    icon: Sparkles,
     title: '15+ AI tools built in',
     desc: 'Caption writer, hook generator, thread expander, content repurposer, and more — powered by Gemini.',
   },
   {
-    icon: '📊',
+    icon: BarChart3,
     title: 'Analytics + insights',
     desc: 'Best-times heatmap, per-platform breakdown, and engagement sync — so you grow, not just post.',
   },
@@ -165,7 +167,7 @@ export default async function ReferPage(
               key={b.title}
               className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-2"
             >
-              <span className="text-2xl">{b.icon}</span>
+              <b.icon className="w-6 h-6 text-amber-400" strokeWidth={1.75} />
               <p className="font-semibold text-white text-sm">{b.title}</p>
               <p className="text-xs text-gray-400 leading-relaxed">{b.desc}</p>
             </div>
