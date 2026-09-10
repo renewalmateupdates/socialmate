@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { PenLine } from 'lucide-react'
 
 type FeedEntry = { url: string; label: string }
 
@@ -91,7 +92,7 @@ export default function CaptionAgentPage() {
   if (!isAgency) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
-        <span className="text-5xl">✍️</span>
+        <PenLine className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">Caption Agent</h1>
         <p className="text-secondary text-sm max-w-md">
           Point it at any RSS feed — news sites, blogs, YouTube channels — and it auto-drafts platform-ready posts every day.
@@ -108,7 +109,7 @@ export default function CaptionAgentPage() {
       <div className="mb-8">
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">✍️</span>
+          <PenLine className="w-7 h-7" strokeWidth={1.5} />
           <h1 className="text-2xl font-black text-primary">Caption Agent</h1>
           <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">Agency</span>
         </div>

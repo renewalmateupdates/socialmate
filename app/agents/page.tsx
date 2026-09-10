@@ -2,11 +2,12 @@
 import { useRouter } from 'next/navigation'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
+import { BarChart3, Bot, MessageCircle, Newspaper, PenLine, Recycle, Telescope, TrendingUp, Mail } from 'lucide-react'
 
 const AGENTS = [
   {
     id: 'email-outreach',
-    icon: '✉️',
+    icon: Mail,
     name: 'Email Outreach',
     tagline: 'Pitch brands, land collabs, close clients',
     description: 'Write personalized outreach emails for brand deals, sponsorships, partnerships, and client pitches in seconds.',
@@ -18,7 +19,7 @@ const AGENTS = [
   },
   {
     id: 'growth-scout',
-    icon: '🔭',
+    icon: Telescope,
     name: 'Growth Scout',
     tagline: 'Know what your competitors are doing',
     description: 'Monitors competitor posting patterns, engagement trends, and content angles so you can stay one step ahead.',
@@ -30,7 +31,7 @@ const AGENTS = [
   },
   {
     id: 'newsletter',
-    icon: '📰',
+    icon: Newspaper,
     name: 'Newsletter Agent',
     tagline: 'Your week in posts, turned into a newsletter',
     description: 'Every Sunday, your published posts become a newsletter — drafted for review or auto-sent to your subscriber list.',
@@ -42,7 +43,7 @@ const AGENTS = [
   },
   {
     id: 'client-report',
-    icon: '📊',
+    icon: BarChart3,
     name: 'Client Report Agent',
     tagline: 'Weekly reports without the manual work',
     description: 'Every Monday, a performance summary lands in your inbox — posts published, scheduled ahead, active platforms. Email to clients directly.',
@@ -54,7 +55,7 @@ const AGENTS = [
   },
   {
     id: 'repurpose',
-    icon: '♻️',
+    icon: Recycle,
     name: 'Repurpose Agent',
     tagline: 'One post. Every platform.',
     description: 'Every Wednesday, your best post gets auto-repurposed into threads, captions, LinkedIn posts, and more — dropped into your drafts.',
@@ -66,7 +67,7 @@ const AGENTS = [
   },
   {
     id: 'trend-scout',
-    icon: '📈',
+    icon: TrendingUp,
     name: 'Trend Scout',
     tagline: 'Post before the wave hits',
     description: 'Every morning, AI analyzes what your competitors posted and surfaces 5 content angles — with a ready-to-post draft for each.',
@@ -78,7 +79,7 @@ const AGENTS = [
   },
   {
     id: 'inbox-agent',
-    icon: '💬',
+    icon: MessageCircle,
     name: 'Inbox Agent',
     tagline: 'Never leave a mention on read',
     description: 'Checks your Bluesky and Mastodon mentions every 2 hours and drafts smart, on-brand replies. Review, edit, and send without leaving SocialMate.',
@@ -90,7 +91,7 @@ const AGENTS = [
   },
   {
     id: 'caption-agent',
-    icon: '✍️',
+    icon: PenLine,
     name: 'Caption Agent',
     tagline: 'Auto-draft posts from any topic',
     description: 'Point it at any RSS feed — news, blogs, YouTube channels — and it drafts platform-ready posts every day. You review, approve, publish.',
@@ -127,7 +128,7 @@ export default function AgentsPage() {
       {/* Header */}
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">🤖</span>
+          <Bot className="w-8 h-8" strokeWidth={1.5} />
           <h1 className="text-3xl font-black text-primary">{t('app_agents.title')}</h1>
         </div>
         <p className="text-secondary text-base max-w-xl">
@@ -151,7 +152,7 @@ export default function AgentsPage() {
               className="text-left bg-surface border border-theme rounded-2xl p-5 hover:border-amber-400 hover:shadow-md transition-all group"
             >
               <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{agent.icon}</span>
+                <agent.icon className="w-7 h-7" strokeWidth={1.5} />
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${TIER_COLOR[agent.tier]}`}>
                     {TIER_LABEL[agent.tier]}
@@ -186,7 +187,7 @@ export default function AgentsPage() {
               className="text-left bg-surface border border-theme rounded-2xl p-5 opacity-60"
             >
               <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl grayscale">{agent.icon}</span>
+                <agent.icon className="w-7 h-7 grayscale" strokeWidth={1.5} />
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${TIER_COLOR[agent.tier]}`}>
                     {TIER_LABEL[agent.tier]}

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 
 type Draft = {
   id:              string
@@ -101,7 +102,7 @@ export default function InboxAgentPage() {
   if (!isPro) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
-        <span className="text-5xl">💬</span>
+        <MessageCircle className="w-12 h-12" strokeWidth={1.5} />
         <h1 className="text-2xl font-black text-primary">Inbox Agent</h1>
         <p className="text-secondary text-sm max-w-md">Never leave a mention on read. AI-drafted replies to your Bluesky and Mastodon mentions — review and send with one click. Available on Pro and Agency.</p>
         <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
@@ -115,7 +116,7 @@ export default function InboxAgentPage() {
       <div className="mb-8">
         <Link href="/agents" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Back to Agents</Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">💬</span>
+          <MessageCircle className="w-7 h-7" strokeWidth={1.5} />
           <h1 className="text-2xl font-black text-primary">Inbox Agent</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>
