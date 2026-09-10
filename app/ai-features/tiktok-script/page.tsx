@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { ClipboardList, FileText, Fish, Megaphone, Music, RefreshCw } from 'lucide-react'
 
 type Script = {
   hook: string
@@ -102,7 +103,7 @@ export default function TikTokScriptPage() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-                <span>🎵</span> TikTok Script Generator
+<Music size={20} strokeWidth={1.75} /> TikTok Script Generator
               </h1>
               <p className="text-sm text-gray-400 mt-1">Generate a scroll-stopping hook, main content, and CTA for any TikTok video.</p>
             </div>
@@ -176,7 +177,7 @@ export default function TikTokScriptPage() {
                     Generating script…
                   </>
                 ) : (
-                  <>🎵 Generate Script — 5 credits</>
+                  <><Music size={14} strokeWidth={2} /> Generate Script — 5 credits</>
                 )}
               </button>
 
@@ -199,14 +200,14 @@ export default function TikTokScriptPage() {
                   onClick={copyFull}
                   className="text-xs font-bold px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all"
                 >
-                  {copied === 'full' ? '✓ Copied!' : '📋 Copy Full Script'}
+                  {copied === 'full' ? '✓ Copied!' : <><ClipboardList size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Copy Full Script</>}
                 </button>
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🎣</span>
+                    <Fish size={18} strokeWidth={1.75} />
                     <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Hook</p>
                     <span className="text-xs text-gray-400 font-normal">— first 3 seconds</span>
                   </div>
@@ -225,7 +226,7 @@ export default function TikTokScriptPage() {
               <div className="bg-surface border border-theme rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">📝</span>
+                    <FileText size={18} strokeWidth={1.75} />
                     <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Main Content</p>
                     <span className="text-xs text-gray-400 font-normal">— {duration} video</span>
                   </div>
@@ -249,7 +250,7 @@ export default function TikTokScriptPage() {
               <div className="bg-surface border border-theme rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">📢</span>
+                    <Megaphone size={18} strokeWidth={1.75} />
                     <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">CTA</p>
                     <span className="text-xs text-gray-400 font-normal">— closing call to action</span>
                   </div>
@@ -271,13 +272,13 @@ export default function TikTokScriptPage() {
                   disabled={generating}
                   className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold py-2.5 rounded-xl hover:border-amber-400 dark:hover:border-amber-500 transition-all disabled:opacity-40"
                 >
-                  🔄 Regenerate
+<RefreshCw size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Regenerate
                 </button>
                 <Link
                   href="/tiktok/studio"
                   className="flex-1 text-center bg-black dark:bg-white text-white dark:text-black text-sm font-bold py-2.5 rounded-xl hover:opacity-80 transition-all"
                 >
-                  🎵 Go to TikTok Studio →
+<Music size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Go to TikTok Studio →
                 </Link>
               </div>
             </div>

@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { CalendarDays, ClipboardList, PenLine, RefreshCw } from 'lucide-react'
 
 type Tone = 'Educational' | 'Inspirational' | 'Entertaining' | 'Promotional' | 'Mixed'
 type Goal = 'Grow followers' | 'Drive website traffic' | 'Build community' | 'Sell products' | 'Build authority'
@@ -147,7 +148,7 @@ export default function ContentCalendarPage() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-                <span>📅</span> Content Calendar AI
+<CalendarDays size={20} strokeWidth={1.75} /> Content Calendar AI
               </h1>
               <p className="text-sm text-gray-400 mt-1">Generate a complete 30-day content plan tailored to your niche and platforms.</p>
             </div>
@@ -268,7 +269,7 @@ export default function ContentCalendarPage() {
                     Building your 30-day calendar…
                   </>
                 ) : (
-                  <>📅 Generate 30-Day Calendar — 5 credits</>
+                  <><CalendarDays size={14} strokeWidth={2} /> Generate 30-Day Calendar — 5 credits</>
                 )}
               </button>
 
@@ -293,7 +294,7 @@ export default function ContentCalendarPage() {
                   onClick={exportAsText}
                   className="text-xs font-bold px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all"
                 >
-                  {copied ? '✓ Copied!' : '📋 Export as Text'}
+                  {copied ? '✓ Copied!' : <><ClipboardList size={13} strokeWidth={2} className="inline align-text-bottom mr-1" />Export as Text</>}
                 </button>
               </div>
 
@@ -354,13 +355,13 @@ export default function ContentCalendarPage() {
                   disabled={generating}
                   className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold py-2.5 rounded-xl hover:border-amber-400 dark:hover:border-amber-500 transition-all disabled:opacity-40"
                 >
-                  🔄 Regenerate
+<RefreshCw size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Regenerate
                 </button>
                 <Link
                   href="/compose"
                   className="flex-1 text-center bg-black dark:bg-white text-white dark:text-black text-sm font-bold py-2.5 rounded-xl hover:opacity-80 transition-all"
                 >
-                  ✍️ Start composing →
+<PenLine size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Start composing →
                 </Link>
               </div>
             </div>
