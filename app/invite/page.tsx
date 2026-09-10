@@ -3,6 +3,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { PartyPopper, XCircle } from 'lucide-react'
 
 function InviteInner() {
   const searchParams = useSearchParams()
@@ -82,7 +83,7 @@ function InviteInner() {
 
         {status === 'success' && (
           <>
-            <div className="text-4xl mb-4">🎉</div>
+            <PartyPopper className="w-9 h-9 mx-auto mb-4 text-amber-500" strokeWidth={1.5} />
             <h2 className="text-xl font-extrabold mb-2">You're in!</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm">Redirecting you to the dashboard...</p>
           </>
@@ -90,7 +91,7 @@ function InviteInner() {
 
         {status === 'error' && (
           <>
-            <div className="text-4xl mb-4">❌</div>
+            <XCircle className="w-9 h-9 mx-auto mb-4 text-red-400" strokeWidth={1.5} />
             <h2 className="text-xl font-extrabold mb-2">Invalid Invite</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{errorMsg}</p>
             <Link href="/login" className="text-sm font-semibold text-black underline">
