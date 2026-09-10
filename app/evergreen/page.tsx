@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { FileEdit, Inbox, Recycle, RefreshCw } from 'lucide-react'
 
 type Post = {
   id: string
@@ -74,7 +75,7 @@ export default function EvergreenPage() {
 
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">♻️</span>
+              <Recycle className="w-6 h-6 text-gray-400" strokeWidth={1.75} />
               <h1 className="text-2xl font-extrabold tracking-tight">Evergreen Recycling</h1>
             </div>
             <p className="text-sm text-gray-400 dark:text-gray-500">Mark your best posts as evergreen and they'll automatically re-queue when your schedule is empty.</p>
@@ -82,12 +83,12 @@ export default function EvergreenPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {[
-              { label: 'Published posts',  value: posts.length,          icon: '📝' },
-              { label: 'Evergreen posts',  value: evergreenPosts.length, icon: '♻️' },
-              { label: 'Auto-requeue',     value: evergreenPosts.length > 0 ? 'Active' : 'No posts', icon: '🔄' },
+              { label: 'Published posts',  value: posts.length,          icon: FileEdit },
+              { label: 'Evergreen posts',  value: evergreenPosts.length, icon: Recycle },
+              { label: 'Auto-requeue',     value: evergreenPosts.length > 0 ? 'Active' : 'No posts', icon: RefreshCw },
             ].map(stat => (
               <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-5 text-center">
-                <div className="text-2xl mb-1">{stat.icon}</div>
+                <stat.icon className="w-6 h-6 mx-auto mb-1 text-gray-400" strokeWidth={1.75} />
                 <p className="text-2xl font-extrabold">{stat.value}</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">{stat.label}</p>
               </div>
@@ -96,7 +97,7 @@ export default function EvergreenPage() {
 
           {evergreenPosts.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-sm font-extrabold mb-4">♻️ Evergreen Queue ({evergreenPosts.length})</h2>
+              <h2 className="text-sm font-extrabold mb-4 flex items-center gap-1.5"><Recycle className="w-4 h-4" strokeWidth={2} /> Evergreen Queue ({evergreenPosts.length})</h2>
               <div className="space-y-3">
                 {evergreenPosts.map(post => (
                   <div key={post.id} className="bg-white border-2 border-black rounded-2xl p-4">
@@ -126,10 +127,10 @@ export default function EvergreenPage() {
           )}
 
           <div>
-            <h2 className="text-sm font-extrabold mb-4">📝 Published Posts — mark as evergreen</h2>
+            <h2 className="text-sm font-extrabold mb-4 flex items-center gap-1.5"><FileEdit className="w-4 h-4" strokeWidth={2} /> Published Posts — mark as evergreen</h2>
             {regularPosts.length === 0 ? (
               <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-                <div className="text-4xl mb-3">📭</div>
+                <Inbox className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                 <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No published posts yet</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Publish some posts first, then come back to mark your best ones as evergreen.</p>
                 <Link href="/compose" className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
@@ -156,7 +157,7 @@ export default function EvergreenPage() {
                         onClick={() => toggleEvergreen(post)}
                         disabled={toggling === post.id}
                         className="flex-shrink-0 text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                        {toggling === post.id ? '...' : '♻️ Mark Evergreen'}
+                        {toggling === post.id ? '...' : <span className="inline-flex items-center gap-1"><Recycle className="w-3 h-3" strokeWidth={2} /> Mark Evergreen</span>}
                       </button>
                     </div>
                   </div>

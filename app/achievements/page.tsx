@@ -4,22 +4,23 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { Award, Crown, FileEdit, Flame, Gem, Globe, Link2, Medal, PenLine, Rocket, Star, Target, Trophy, Zap } from 'lucide-react'
 
 const ACHIEVEMENTS = [
-  { key: 'first_post',   icon: '🚀', label: 'First Post',       desc: 'Publish your first post',              reward: 0,   category: 'Posts'    },
-  { key: 'posts_10',     icon: '📝', label: 'Getting Started',  desc: '10 posts published',                   reward: 25,  category: 'Posts'    },
-  { key: 'posts_50',     icon: '✍️',  label: 'Content Creator',  desc: '50 posts published',                   reward: 50,  category: 'Posts'    },
-  { key: 'posts_100',    icon: '💯', label: 'Century Poster',   desc: '100 posts published',                  reward: 100, category: 'Posts'    },
-  { key: 'posts_500',    icon: '🔥', label: 'Posting Machine',  desc: '500 posts published',                  reward: 200, category: 'Posts'    },
-  { key: 'streak_7',     icon: '⚡', label: 'Week Warrior',     desc: '7-day posting streak',                 reward: 25,  category: 'Streaks'  },
-  { key: 'streak_30',    icon: '🌟', label: '30-Day Challenge', desc: '30-day posting streak',                reward: 50,  category: 'Streaks'  },
-  { key: 'streak_100',   icon: '👑', label: 'Century Streak',   desc: '100-day posting streak',               reward: 150, category: 'Streaks'  },
-  { key: 'month_3',      icon: '🎯', label: 'Committed',        desc: '3 months on SocialMate',               reward: 100, category: 'Tenure'   },
-  { key: 'month_6',      icon: '💎', label: 'Dedicated',        desc: '6 months on SocialMate',               reward: 100, category: 'Tenure'   },
-  { key: 'month_12',     icon: '🏆', label: 'Veteran Creator',  desc: '1 year on SocialMate',                 reward: 100, category: 'Tenure'   },
-  { key: 'platforms_3',     icon: '🌐', label: 'Multi-Platform',      desc: 'Connect 3+ platforms',                      reward: 25,  category: 'Account'  },
-  { key: 'bio_builder',     icon: '🔗', label: 'Bio Builder',         desc: 'Create a SIGIL (Link in Bio) page',         reward: 10,  category: 'Account'  },
-  { key: '30_day_challenge', icon: '🏅', label: '30-Day Challenge',   desc: 'Post every day for 30 consecutive days',    reward: 50,  category: 'Streaks'  },
+  { key: 'first_post',   icon: Rocket, label: 'First Post',       desc: 'Publish your first post',              reward: 0,   category: 'Posts'    },
+  { key: 'posts_10',     icon: FileEdit, label: 'Getting Started',  desc: '10 posts published',                   reward: 25,  category: 'Posts'    },
+  { key: 'posts_50',     icon: PenLine,  label: 'Content Creator',  desc: '50 posts published',                   reward: 50,  category: 'Posts'    },
+  { key: 'posts_100',    icon: Award, label: 'Century Poster',   desc: '100 posts published',                  reward: 100, category: 'Posts'    },
+  { key: 'posts_500',    icon: Flame, label: 'Posting Machine',  desc: '500 posts published',                  reward: 200, category: 'Posts'    },
+  { key: 'streak_7',     icon: Zap, label: 'Week Warrior',     desc: '7-day posting streak',                 reward: 25,  category: 'Streaks'  },
+  { key: 'streak_30',    icon: Star, label: '30-Day Challenge', desc: '30-day posting streak',                reward: 50,  category: 'Streaks'  },
+  { key: 'streak_100',   icon: Crown, label: 'Century Streak',   desc: '100-day posting streak',               reward: 150, category: 'Streaks'  },
+  { key: 'month_3',      icon: Target, label: 'Committed',        desc: '3 months on SocialMate',               reward: 100, category: 'Tenure'   },
+  { key: 'month_6',      icon: Gem, label: 'Dedicated',        desc: '6 months on SocialMate',               reward: 100, category: 'Tenure'   },
+  { key: 'month_12',     icon: Trophy, label: 'Veteran Creator',  desc: '1 year on SocialMate',                 reward: 100, category: 'Tenure'   },
+  { key: 'platforms_3',     icon: Globe, label: 'Multi-Platform',      desc: 'Connect 3+ platforms',                      reward: 25,  category: 'Account'  },
+  { key: 'bio_builder',     icon: Link2, label: 'Bio Builder',         desc: 'Create a SIGIL (Link in Bio) page',         reward: 10,  category: 'Account'  },
+  { key: '30_day_challenge', icon: Medal, label: '30-Day Challenge',   desc: 'Post every day for 30 consecutive days',    reward: 50,  category: 'Streaks'  },
 ]
 
 type Earned = { achievement_key: string; earned_at: string; credits_awarded: number }
@@ -121,7 +122,7 @@ export default function AchievementsPage() {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-extrabold tracking-tight mb-1">🏆 {t('achievements.title')}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-1 flex items-center gap-2"><Trophy className="w-6 h-6" strokeWidth={1.75} /> {t('achievements.title')}</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500">{t('achievements.subtitle')}</p>
           </div>
 
@@ -156,10 +157,10 @@ export default function AchievementsPage() {
                       <div key={ach.key} className={`bg-surface border rounded-2xl p-4 flex items-center gap-4 transition-all ${
                         isEarned ? 'border-amber-300/50 dark:border-amber-600/40' : 'border-theme'
                       }`}>
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 ${
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
                           isEarned ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-gray-100 dark:bg-gray-800 opacity-40'
                         }`}>
-                          {ach.icon}
+                          <ach.icon className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={1.75} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
