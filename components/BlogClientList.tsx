@@ -1,6 +1,12 @@
 'use client'
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import {
+  BarChart3, Bot, BookOpen, Briefcase, Building2, FileText, Heart,
+  Lightbulb, Package, Scale, Search, Sparkles, Store, TrendingUp, Users,
+  X as CloseIcon,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export type BlogPost = {
   slug:     string
@@ -9,8 +15,34 @@ export type BlogPost = {
   category: string
   excerpt:  string
   readTime: string
-  emoji:    string
   featured: boolean
+}
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  'Our Story':    Heart,
+  'Guides':       BookOpen,
+  'Tips':         Lightbulb,
+  'Resources':    Package,
+  'Growth':       TrendingUp,
+  'Comparisons':  Scale,
+  'Features':     Sparkles,
+  'Analytics':    BarChart3,
+  'AI':           Bot,
+  'Industry':     Building2,
+  'Teams':        Users,
+  'Agencies':     Briefcase,
+  'studio-stax':  Store,
+  'Studio Stax':  Store,
+  'SocialMate':   Sparkles,
+  'SOMA':         Bot,
+  'Enki':         TrendingUp,
+  'RenewalMate':  Package,
+  'Founder Story': Heart,
+}
+
+function CategoryIcon({ category, className }: { category: string; className?: string }) {
+  const Icon = CATEGORY_ICONS[category] || FileText
+  return <Icon className={className} strokeWidth={1.75} />
 }
 
 // Priority order for categories — any category not listed here appears alphabetically after
@@ -96,7 +128,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
 
         {/* Search bar */}
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" strokeWidth={1.75} />
           <input
             type="text"
             value={searchQuery}
@@ -107,8 +139,8 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-bold">
-              ✕
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <CloseIcon className="w-3.5 h-3.5" strokeWidth={2} />
             </button>
           )}
         </div>
@@ -149,7 +181,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
             </span>
             <span className="text-xs text-gray-400">{featured.date} · {featured.readTime}</span>
           </div>
-          <div className="text-3xl mb-3">{featured.emoji}</div>
+          <CategoryIcon category={featured.category} className="w-7 h-7 mb-3" />
           <h2 className="text-lg font-extrabold mb-2">{featured.title}</h2>
           <p className="text-sm text-gray-400 leading-relaxed mb-4">{featured.excerpt}</p>
           <span className="text-xs font-bold text-white/60">Read more →</span>
@@ -159,7 +191,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
       {/* ── Empty state ── */}
       {gridPosts.length === 0 && (
         <div className="text-center py-16">
-          <div className="text-4xl mb-4">🔍</div>
+          <Search className="w-9 h-9 mx-auto mb-4 text-gray-600" strokeWidth={1.5} />
           <p className="text-sm font-bold text-gray-100 mb-1">No posts found</p>
           <p className="text-xs text-gray-500">
             {searchQuery ? `No results for "${searchQuery}"` : `Nothing in ${activeCategory} yet`}
@@ -186,7 +218,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
                 </span>
                 <span className="text-xs text-gray-400 dark:text-gray-500">{post.readTime}</span>
               </div>
-              <div className="text-2xl mb-2">{post.emoji}</div>
+              <CategoryIcon category={post.category} className="w-5 h-5 mb-2 text-gray-400" />
               <h2 className="text-sm font-extrabold mb-2 leading-snug text-gray-100">{post.title}</h2>
               <p className="text-xs text-gray-400 leading-relaxed mb-3">{post.excerpt}</p>
               <div className="flex items-center justify-between">
