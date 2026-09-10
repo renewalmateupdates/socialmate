@@ -176,7 +176,7 @@ export default function VsPostPickrPage() {
               {
                 n: '4',
                 title: 'SOMA turns SocialMate into an autonomous content system',
-                desc: 'PostPickr does not have an autonomous AI content generation system. SocialMate\'s SOMA learns your brand voice, ingests your source materials, and generates a full week of platform-native posts on a schedule — automatically. No other tool in this category offers this at $5/month.',
+                desc: 'PostPickr does not have an autonomous AI content generation system. SocialMate\'s SOMA learns your brand voice, ingests your source materials, and generates a full week of platform-native posts on a schedule — automatically. No other tool in this category offers this at $8/month.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">

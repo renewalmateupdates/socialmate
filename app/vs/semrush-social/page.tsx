@@ -203,7 +203,7 @@ export default function VsSEMrushSocialPage() {
         {/* BOTTOM CTA */}
         <div className="text-center py-12 bg-void text-ink-high rounded-3xl px-8">
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Social scheduling without the SEO tax</p>
-          <h2 className="text-3xl font-extrabold mb-4">7 platforms. $5/month. No SEMrush required.</h2>
+          <h2 className="text-3xl font-extrabold mb-4">7 platforms. $8/month. No SEMrush required.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is a standalone social scheduler with TikTok, LinkedIn, Discord, and more.
             Free plan available. Pro is $8/month.

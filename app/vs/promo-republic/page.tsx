@@ -118,7 +118,7 @@ export default function VsPromoRepublicPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">TikTok + LinkedIn + 5 more. $5/month.</p>
+            <p className="font-extrabold text-lg mb-2">TikTok + LinkedIn + 5 more. $8/month.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok free (20 videos/mo) — PromoRepublic has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
@@ -202,7 +202,7 @@ export default function VsPromoRepublicPage() {
 
         {/* BOTTOM CTA */}
         <div className="text-center py-12 bg-void text-ink-high rounded-3xl px-8">
-          <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">$5/month vs $49/month</p>
+          <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">$8/month vs $49/month</p>
           <h2 className="text-3xl font-extrabold mb-4">More platforms. Way less cost.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate covers TikTok, LinkedIn, X, Bluesky, Discord, Telegram, and Mastodon.

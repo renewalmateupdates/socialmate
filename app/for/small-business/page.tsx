@@ -40,8 +40,8 @@ const PAIN_POINTS = [
 
 const FEATURES = [
   {
-    title: 'Schedule to 6 Platforms',
-    desc:  'Bluesky, X/Twitter, Mastodon, Discord, Telegram, and TikTok live today. Write once, post everywhere. LinkedIn and more on the way.',
+    title: 'Schedule to 7 Platforms',
+    desc:  'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn — all live today. Write once, post everywhere.',
     icon:  '📡',
     badge: 'Free',
   },
