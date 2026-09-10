@@ -25,7 +25,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Activity, BarChart3, Beaker, Bell, Bot, Building2, CalendarClock, CalendarDays, CalendarRange, Circle, CircleCheck, Clapperboard, Clock, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, Handshake, Hash, Heart, Images, Inbox, LayoutDashboard, Link2, ListOrdered, Map, MapPin, MessageCircle, MessagesSquare, Music2, PenLine, Plug, Puzzle, Radar, Recycle, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Beaker, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
@@ -226,13 +226,13 @@ function SortableSectionHeader({
           style={{ color: 'var(--sidebar-faint)', touchAction: 'none' }}
           onClick={e => e.stopPropagation()}
           title="Drag to reorder"
-        >⠿</span>
+        ><GripVertical className="w-3.5 h-3.5" strokeWidth={2} /></span>
         <span className="text-xs font-extrabold uppercase tracking-widest flex-1 text-left"
           style={{ color: 'var(--sidebar-faint)' }}>
           {label ?? section}
         </span>
         <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-          {isCollapsed ? '▸' : '▾'}
+          {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}
         </span>
       </button>
     </div>
@@ -673,7 +673,7 @@ function SidebarContent({
             title={isIconOnly ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-label={isIconOnly ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <span className="text-sm leading-none select-none">{isIconOnly ? '→' : '☰'}</span>
+            {isIconOnly ? <ChevronRight className="w-4 h-4" strokeWidth={2} /> : <ChevronLeft className="w-4 h-4" strokeWidth={2} />}
           </button>
         )}
 
@@ -685,10 +685,14 @@ function SidebarContent({
               className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all"
               style={{ background: 'var(--sidebar-active)', border: '1px solid var(--sidebar-border)', color: 'var(--sidebar-muted)' }}>
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
+                {activeWorkspace?.is_personal
+                  ? <Home className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+                  : <Building2 className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />}
                 <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
               </div>
-              <span className="flex-shrink-0 ml-1" style={{ color: 'var(--sidebar-faint)' }}>{wsOpen ? '▲' : '▼'}</span>
+              <span className="flex-shrink-0 ml-1" style={{ color: 'var(--sidebar-faint)' }}>
+                {wsOpen ? <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}
+              </span>
             </button>
 
             {wsOpen && (
@@ -702,7 +706,7 @@ function SidebarContent({
                       background: activeWorkspace?.id === personalWorkspace.id ? 'var(--sidebar-border)' : 'transparent',
                       color: activeWorkspace?.id === personalWorkspace.id ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
                     }}>
-                    <span>🏠</span>
+                    <Home className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
                     <span className="truncate">My Workspace</span>
                     {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto" style={{ color: 'var(--sidebar-fg)' }}>✓</span>}
                   </button>
@@ -721,7 +725,7 @@ function SidebarContent({
                           background: activeWorkspace?.id === ws.id ? 'var(--sidebar-border)' : 'transparent',
                           color: activeWorkspace?.id === ws.id ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
                         }}>
-                        <span>🏢</span>
+                        <Building2 className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
                         <span className="truncate">{ws.client_name || ws.name}</span>
                         {activeWorkspace?.id === ws.id && <span className="ml-auto" style={{ color: 'var(--sidebar-fg)' }}>✓</span>}
                       </button>
@@ -740,7 +744,7 @@ function SidebarContent({
                   <Link href="/settings?tab=Plan" onClick={() => setWsOpen(false)}
                     className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-blue-500 hover:opacity-80 transition-all"
                     style={{ borderTop: '1px solid var(--border)', display: 'flex' }}>
-                    <span>⚡</span> Upgrade for more workspaces
+                    <Zap className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} /> Upgrade for more workspaces
                   </Link>
                 )}
                 {plan === 'agency' && !atWsLimit && (
@@ -754,7 +758,7 @@ function SidebarContent({
                   <a href="mailto:support@socialmate.studio" onClick={() => setWsOpen(false)}
                     className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:opacity-80 transition-all"
                     style={{ borderTop: '1px solid var(--border)', display: 'flex' }}>
-                    <span>✉️</span> Contact us for more
+                    <Mail className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} /> Contact us for more
                   </a>
                 )}
                 {plan === 'free' && (
@@ -763,7 +767,7 @@ function SidebarContent({
                       onClick={() => setShowUpgradeNudge(p => !p)}
                       className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:opacity-80 transition-all"
                       style={{ borderTop: '1px solid var(--border)' }}>
-                      <span>🏢</span>
+                      <Building2 className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
                       <span>Client workspaces</span>
                       <span className="ml-auto text-purple-300 text-xs">Pro+</span>
                     </button>
@@ -786,9 +790,9 @@ function SidebarContent({
                 {plan === 'pro' && (
                   <button
                     onClick={() => { setWsOpen(false); router.push('/settings/plan') }}
-                    className="w-full text-left px-3 py-2 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                    className="w-full flex items-center gap-1.5 text-left px-3 py-2 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
                     style={{ borderTop: '1px solid var(--border)' }}>
-                    🚀 Upgrade to Agency — $29/mo
+                    <Rocket className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} /> Upgrade to Agency — $29/mo
                   </button>
                 )}
               </div>
@@ -858,7 +862,10 @@ function SidebarContent({
                           }}>
                           {(() => { const Icon = NAV_ICONS[item.href] ?? Circle
                             return <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} /> })()}
-                          <span className="flex-1">{NAV_LABEL[item.label] ?? item.label}{isAdminUser && item.href === '/partners' ? ' ⚙️' : ''}</span>
+                          <span className="flex-1 flex items-center gap-1">
+                            {NAV_LABEL[item.label] ?? item.label}
+                            {isAdminUser && item.href === '/partners' && <Crown className="w-3 h-3 flex-shrink-0" strokeWidth={2} />}
+                          </span>
                           {item.href === '/ai-features' && !loading && (
                             <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                               credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
@@ -902,7 +909,7 @@ function SidebarContent({
             className="w-10 h-10 flex items-center justify-center rounded-lg text-base transition-all hover:opacity-70"
             style={{ color: 'var(--sidebar-muted)' }}
           >
-            ⏻
+            <LogOut className="w-[18px] h-[18px]" strokeWidth={1.75} />
           </button>
         </div>
       ) : (
@@ -916,7 +923,7 @@ function SidebarContent({
             title={statsVisible ? 'Hide stats' : 'Show stats'}
           >
             <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-              {statsVisible ? '▾' : '▸'}
+              {statsVisible ? <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronRight className="w-3.5 h-3.5" strokeWidth={2} />}
             </span>
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sidebar-faint)' }}>
               Stats
@@ -939,18 +946,18 @@ function SidebarContent({
                 {/* Three pools */}
                 <div className="space-y-1 mt-1">
                   <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                    <span>📅 Monthly</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" strokeWidth={1.75} />Monthly</span>
                     <span>{loading ? '...' : `${monthlyCredits} / ${monthlyLimit}`}</span>
                   </div>
                   {!loading && earnedCredits > 0 && (
                     <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                      <span>🎁 Earned</span>
+                      <span className="flex items-center gap-1"><Gift className="w-3 h-3" strokeWidth={1.75} />Earned</span>
                       <span>{earnedCredits}</span>
                     </div>
                   )}
                   {!loading && paidCredits > 0 && (
                     <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                      <span>💳 Purchased</span>
+                      <span className="flex items-center gap-1"><CreditCard className="w-3 h-3" strokeWidth={1.75} />Purchased</span>
                       <span>{paidCredits}</span>
                     </div>
                   )}
@@ -1004,8 +1011,9 @@ function SidebarContent({
                   <div className="w-full rounded-full h-1.5 mb-1.5" style={{ background: 'var(--sidebar-border)' }}>
                     <div className="h-1.5 rounded-full transition-all" style={{ width: `${xBar}%`, background: xBarColor }} />
                   </div>
-                  <p className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                    {xQuota.used >= xQuota.limit ? '⚠ Limit reached · ' : ''}Resets {xResetLabel}
+                  <p className="text-xs flex items-center gap-1" style={{ color: 'var(--sidebar-faint)' }}>
+                    {xQuota.used >= xQuota.limit && <AlertTriangle className="w-3 h-3 flex-shrink-0" strokeWidth={2} />}
+                    {xQuota.used >= xQuota.limit ? 'Limit reached · ' : ''}Resets {xResetLabel}
                   </p>
                 </div>
               )}
@@ -1014,14 +1022,14 @@ function SidebarContent({
 
           {plan === 'free' && (
             <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
-              className="w-full text-center bg-black dark:bg-white text-white dark:text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-              {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro — $8/mo'}
+              className="w-full flex items-center justify-center gap-1.5 text-center bg-black dark:bg-white text-white dark:text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+              {checkoutLoading ? 'Loading...' : <><Zap className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />Upgrade to Pro — $8/mo</>}
             </button>
           )}
           {plan === 'pro' && (
             <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
-              className="w-full text-center bg-purple-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-              {checkoutLoading ? 'Loading...' : '🏢 Upgrade to Agency'}
+              className="w-full flex items-center justify-center gap-1.5 text-center bg-purple-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+              {checkoutLoading ? 'Loading...' : <><Building2 className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />Upgrade to Agency</>}
             </button>
           )}
 
@@ -1030,7 +1038,7 @@ function SidebarContent({
             <Link href="/studio-stax/apply"
               className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 transition-all hover:opacity-80"
               style={{ background: 'var(--sidebar-active)', border: '1px solid var(--sidebar-border)' }}>
-              <span className="text-base flex-shrink-0">📦</span>
+              <Package className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
               <div className="min-w-0">
                 <p className="text-xs font-bold leading-tight" style={{ color: 'var(--sidebar-fg)' }}>Get listed in Studio Stax</p>
                 <p className="text-[10px] leading-tight mt-0.5 truncate" style={{ color: 'var(--sidebar-faint)' }}>Founder-approved directory · from $100/yr</p>
@@ -1094,7 +1102,7 @@ export default function Sidebar() {
           top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
         }}
         aria-label="Open navigation menu">
-        <span className="text-xl leading-none">☰</span>
+        <Menu className="w-5 h-5" strokeWidth={2} />
       </button>
 
       {/* Mobile backdrop */}
@@ -1125,7 +1133,7 @@ export default function Sidebar() {
             border: '1px solid var(--sidebar-border)',
           }}
           aria-label="Close navigation menu">
-          ✕
+          <CloseIcon className="w-4 h-4" strokeWidth={2} />
         </button>
         {/* Mobile always gets full sidebar (no collapse) */}
         <SidebarContent onNavClick={() => setMobileOpen(false)} />

@@ -11,6 +11,13 @@ import PageTour from '@/components/PageTour'
 import { useI18n } from '@/contexts/I18nContext'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import { track, trackOnce } from '@/lib/analytics'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { AlertTriangle, Ban, BarChart3, Building2, CheckCircle2, ClipboardList, Clock, Eye, FlaskConical, Film, Globe, Hash, Image as ImageIcon, Lightbulb, Lock, Mic, MessagesSquare, RefreshCw, Repeat, Scissors, Sparkles, X as CloseIcon, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -1538,7 +1545,7 @@ function ComposeInner() {
           {/* WORKSPACE BANNER */}
           {activeWorkspace && !activeWorkspace.is_personal && (
             <div className="mb-4 bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 flex items-center gap-3">
-              <span className="text-base">🏢</span>
+              <Building2 className="w-4 h-4 text-purple-600 flex-shrink-0" strokeWidth={1.75} />
               <p className="text-xs font-semibold text-purple-700">
                 Active workspace: <span className="font-extrabold">{activeWorkspace.client_name || activeWorkspace.name}</span>
                 {' '}— posts will be scoped to this client.
@@ -1548,14 +1555,14 @@ function ComposeInner() {
 
           {templateBanner && (
             <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-center justify-between">
-              <p className="text-xs font-semibold text-blue-700">📋 {templateBanner}</p>
-              <button onClick={() => setTemplateBanner(null)} className="text-xs text-blue-400 hover:text-blue-700 ml-4 font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-100 transition-colors flex-shrink-0">✕</button>
+              <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5"><ClipboardList className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} /> {templateBanner}</p>
+              <button onClick={() => setTemplateBanner(null)} className="text-xs text-blue-400 hover:text-blue-700 ml-4 font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-100 transition-colors flex-shrink-0"><CloseIcon className="w-3.5 h-3.5" strokeWidth={2} /></button>
             </div>
           )}
 
           {showPostingDisclaimer && (
             <div className="mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 flex items-start gap-3">
-              <span className="text-amber-500 mt-0.5 shrink-0">⚠️</span>
+              <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" strokeWidth={2} />
               <div className="flex-1">
                 <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Heads up on automated posting</p>
                 <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
@@ -1583,10 +1590,10 @@ function ComposeInner() {
                     const over = charCount > p.limit
                     return (
                       <div key={id} className="flex items-center gap-2">
-                        <span className="text-sm">{p.icon}</span>
+                        <PlatformGlyph id={p.id} size={14} />
                         <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{p.name}</span>
-                        <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
-                          {charCount}/{p.limit.toLocaleString()}{over && ' ⚠️'}
+                        <span className={`ml-auto text-xs font-bold flex items-center gap-1 ${over ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                          {charCount}/{p.limit.toLocaleString()}{over && <AlertTriangle className="w-3 h-3" strokeWidth={2} />}
                         </span>
                       </div>
                     )
@@ -1661,7 +1668,7 @@ function ComposeInner() {
                         <Link key={p.id} href="/pricing"
                           title="X/Twitter requires Pro — $8/month or grab an X Booster pack"
                           className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-amber-300 hover:text-amber-500 transition-all">
-                          <span>{p.icon}</span>{p.name}
+                          <PlatformGlyph id={p.id} size={14} />{p.name}
                           <span className="text-[10px] font-extrabold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full ml-0.5">Pro</span>
                         </Link>
                       )
@@ -1673,7 +1680,7 @@ function ComposeInner() {
                             ? 'bg-black text-white border-black'
                             : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
                         }`}>
-                        <span>{p.icon}</span>{p.name}
+                        <PlatformGlyph id={p.id} size={14} />{p.name}
                         {connectedPlatforms.has(p.id) && (
                           <span title={`${p.name} is connected`}
                             className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5 flex-shrink-0" />
@@ -1692,8 +1699,8 @@ function ComposeInner() {
                         const platformInfo = PLATFORMS.find(p => p.id === pid)
                         return (
                           <div key={pid} className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">
-                              {platformInfo?.icon} {platformInfo?.name}
+                            <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0 flex items-center gap-1">
+                              {platformInfo && <PlatformGlyph id={platformInfo.id} size={12} />} {platformInfo?.name}
                             </span>
                             <select
                               value={selectedAccountIds[pid] || ''}
@@ -1715,7 +1722,7 @@ function ComposeInner() {
                 <div className="flex flex-wrap gap-2">
                   <Link href="/tiktok/studio" title="TikTok takes video — post it from TikTok Studio"
                     className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-pink-200 dark:border-pink-900 text-pink-500 dark:text-pink-400 hover:border-pink-400 transition-all">
-                    <span>🎵</span><span>TikTok</span>
+                    <PlatformGlyph id="tiktok" size={14} className="text-pink-500 dark:text-pink-400" /><span>TikTok</span>
                     {connectedPlatforms.has('tiktok') && (
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
                     )}
@@ -1724,14 +1731,14 @@ function ComposeInner() {
                   {soonPlatforms.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
-                      <span>{p.icon}</span><span>{p.name}</span>
+                      <PlatformGlyph id={p.id} size={14} className="text-blue-300" /><span>{p.name}</span>
                       <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
                     </div>
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
-                      <span>{p.icon}</span><span>{p.name}</span>
+                      <PlatformGlyph id={p.id} size={14} className="text-gray-300 dark:text-gray-600" /><span>{p.name}</span>
                       <span className="text-xs font-normal text-gray-300 dark:text-gray-600 ml-0.5">· Soon</span>
                     </div>
                   ))}
@@ -1750,7 +1757,7 @@ function ComposeInner() {
                 if (used >= limit && boosterBalance === 0) {
                   return (
                     <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2.5 rounded-lg flex items-center gap-2 border border-red-200 dark:border-red-800">
-                      <span>🚫</span>
+                      <Ban className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
                       <span className="flex-1">X quota reached ({used}/{limit}) — <Link href="/settings?tab=Plan#x-booster" className="underline font-semibold">Buy X Booster →</Link></span>
                     </div>
                   )
@@ -1758,7 +1765,7 @@ function ComposeInner() {
                 if (used >= limit && boosterBalance > 0) {
                   return (
                     <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 rounded-lg flex items-center gap-2 border border-amber-200 dark:border-amber-800">
-                      <span>⚡</span>
+                      <Zap className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
                       <span>Monthly quota reached — using booster balance ({boosterBalance} post{boosterBalance !== 1 ? 's' : ''} remaining)</span>
                     </div>
                   )
@@ -1766,7 +1773,7 @@ function ComposeInner() {
                 if (used >= Math.floor(limit * 0.8)) {
                   return (
                     <div className="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2.5 rounded-lg flex items-center gap-2 border border-yellow-200 dark:border-yellow-800">
-                      <span>⚠️</span>
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
                       <span>X quota at {used}/{limit} — running low</span>
                     </div>
                   )
@@ -1782,7 +1789,7 @@ function ComposeInner() {
                   if (!p) return null
                   return (
                     <div key={id} className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg flex items-center gap-2 border border-amber-200 dark:border-amber-800">
-                      <span>⚠️</span>
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
                       <span>No {p.name} account connected — <Link href="/accounts" className="underline font-semibold">Connect one in Accounts →</Link></span>
                     </div>
                   )
@@ -1801,7 +1808,7 @@ function ComposeInner() {
                         return (
                           <div key={platformId}>
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="text-sm">{platform.icon}</span>
+                              <PlatformGlyph id={platform.id} size={14} />
                               <span className="text-xs font-bold text-gray-700">{platform.name}</span>
                             </div>
                             {platformDests.length === 0 ? (
@@ -1892,7 +1899,7 @@ function ComposeInner() {
                         ? 'bg-indigo-600 text-white border-indigo-600'
                         : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-400 hover:text-indigo-600'
                     }`}>
-                    🧵 Thread {threadMode ? 'ON' : 'OFF'}
+                    <MessagesSquare className="w-3.5 h-3.5" strokeWidth={2} /> Thread {threadMode ? 'ON' : 'OFF'}
                   </button>
                   {!threadMode && content.trim() && (
                     <button
@@ -1900,7 +1907,7 @@ function ComposeInner() {
                       onClick={handleAutoSplit}
                       disabled={abMode}
                       className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 min-h-[36px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-all text-gray-500 dark:text-gray-400 disabled:opacity-40 disabled:cursor-not-allowed">
-                      ✂️ Auto-split
+                      <Scissors className="w-3.5 h-3.5" strokeWidth={2} /> Auto-split
                     </button>
                   )}
                   {threadMode && (
@@ -1934,13 +1941,13 @@ function ComposeInner() {
                             ? 'bg-emerald-600 text-white border-emerald-600'
                             : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-400 hover:text-emerald-600'
                         }`}>
-                        📊 Poll {showPollPanel ? 'ON' : 'OFF'}
+                        <BarChart3 className="w-3.5 h-3.5" strokeWidth={2} /> Poll {showPollPanel ? 'ON' : 'OFF'}
                       </button>
                     ) : (
                       <span
                         title="Select X or Mastodon to enable polls"
                         className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
-                        📊 Poll
+                        <BarChart3 className="w-3.5 h-3.5" strokeWidth={2} /> Poll
                       </span>
                     )
                   )}
@@ -1952,7 +1959,7 @@ function ComposeInner() {
                         type="button"
                         onClick={() => showToast('A/B testing is a Pro feature — upgrade to unlock', 'info')}
                         className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-all">
-                        ⚡ A/B Test <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-bold ml-0.5">Pro</span>
+                        <FlaskConical className="w-3.5 h-3.5" strokeWidth={2} /> A/B Test <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-bold ml-0.5">Pro</span>
                       </button>
                     ) : (
                       <button
@@ -1963,7 +1970,7 @@ function ComposeInner() {
                             ? 'bg-violet-600 text-white border-violet-600'
                             : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-violet-400 hover:text-violet-600'
                         }`}>
-                        ⚡ A/B Test {abMode ? 'ON' : 'OFF'}
+                        <FlaskConical className="w-3.5 h-3.5" strokeWidth={2} /> A/B Test {abMode ? 'ON' : 'OFF'}
                       </button>
                     )
                   )}
@@ -1981,8 +1988,8 @@ function ComposeInner() {
                           <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
                             <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Part {idx + 1}</span>
                             <div className="flex items-center gap-2">
-                              <span className={`text-xs font-semibold ${countColor}`}>
-                                {len}/{mostRestrictiveLimit}{over && ' ⚠️'}
+                              <span className={`text-xs font-semibold flex items-center gap-1 ${countColor}`}>
+                                {len}/{mostRestrictiveLimit}{over && <AlertTriangle className="w-3 h-3" strokeWidth={2} />}
                               </span>
                               {threadParts.length > 1 && (
                                 <button
@@ -2067,7 +2074,7 @@ function ComposeInner() {
                           <span className="text-xs text-violet-500 dark:text-violet-400">
                             {contentB.length} chars
                             {overLimitPlatforms.length > 0 && contentB.length > overLimitPlatforms[0].limit && (
-                              <span className="text-red-500 ml-1">⚠️ over {overLimitPlatforms[0].name} limit</span>
+                              <span className="text-red-500 ml-1 inline-flex items-center gap-1"><AlertTriangle className="w-3 h-3" strokeWidth={2} /> over {overLimitPlatforms[0].name} limit</span>
                             )}
                           </span>
                           <span className="text-xs text-violet-400 dark:text-violet-500">
@@ -2098,8 +2105,8 @@ function ComposeInner() {
                                         : ''
                           return (
                             <span key={id} className={`text-xs font-semibold flex items-center gap-1 ${color} ${bg}`}>
-                              <span className="text-sm leading-none">{p.icon}</span>
-                              <span>{charCount.toLocaleString()}<span className="font-normal opacity-60">/{p.limit.toLocaleString()}</span>{over && ' ⚠️'}</span>
+                              <PlatformGlyph id={p.id} size={13} />
+                              <span className="flex items-center gap-1">{charCount.toLocaleString()}<span className="font-normal opacity-60">/{p.limit.toLocaleString()}</span>{over && <AlertTriangle className="w-3 h-3" strokeWidth={2} />}</span>
                             </span>
                           )
                         })}
@@ -2114,7 +2121,7 @@ function ComposeInner() {
                 {/* BULK SCHEDULER PROMPT — shown when over char limit */}
                 {!threadMode && charOver && (
                   <div className="mt-2 flex items-start gap-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
-                    <span className="text-red-500 text-sm mt-0.5">⚠️</span>
+                    <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" strokeWidth={2} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed">
                         {charCount - overLimitPlatforms[0].limit} characters over {overLimitPlatforms[0].name}&apos;s {overLimitPlatforms[0].limit.toLocaleString()}-character limit.
@@ -2136,7 +2143,9 @@ function ComposeInner() {
                           {item.type === 'image' && item.preview ? (
                             <img src={item.preview} className="w-full h-full object-cover" alt="Media preview" />
                           ) : (
-                            <span className="text-2xl">{item.type === 'video' ? '🎬' : '🖼️'}</span>
+                            item.type === 'video'
+                              ? <Film className="w-6 h-6 text-gray-400" strokeWidth={1.5} />
+                              : <ImageIcon className="w-6 h-6 text-gray-400" strokeWidth={1.5} />
                           )}
                           {item.uploading && (
                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -2473,7 +2482,7 @@ function ComposeInner() {
                 {brandVoiceName ? (
                   <>
                     <span className="inline-flex items-center gap-1.5 bg-[#0a0a0a] border border-[#F59E0B]/40 text-[#F59E0B] text-xs font-bold px-3 py-1.5 rounded-full min-h-[32px]">
-                      🎙️ {brandVoiceName}
+                      <Mic className="w-3.5 h-3.5" strokeWidth={2} /> {brandVoiceName}
                     </span>
                     <Link href="/settings?tab=Brand+Voice" className="text-xs text-[#9ca3af] hover:text-[#F59E0B] transition-colors underline underline-offset-2 min-h-[32px] flex items-center">
                       Edit
@@ -2481,7 +2490,7 @@ function ComposeInner() {
                   </>
                 ) : (
                   <Link href="/settings?tab=Brand+Voice" className="text-xs text-[#9ca3af] hover:text-[#F59E0B] transition-colors min-h-[44px] flex items-center gap-1">
-                    <span>🎙️</span>
+                    <Mic className="w-3.5 h-3.5" strokeWidth={2} />
                     <span>No brand voice — <span className="underline underline-offset-2">add one</span></span>
                   </Link>
                 )}
@@ -2522,7 +2531,7 @@ function ComposeInner() {
                       showRepurposePanel ? 'bg-amber-400 text-black border-amber-400'
                       : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-amber-400 text-gray-700 dark:text-gray-300'
                     }`}>
-                    <div className="text-lg mb-1">🔄</div>
+                    <RefreshCw className="w-[18px] h-[18px] mx-auto mb-1" strokeWidth={1.75} />
                     <p className="text-xs font-bold">Repurpose</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">5 cr</p>
                   </button>
@@ -2533,7 +2542,7 @@ function ComposeInner() {
                       showHashtagSuggestPanel ? 'bg-blue-500 text-white border-blue-500'
                       : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-blue-400 text-gray-700 dark:text-gray-300'
                     }`}>
-                    <div className="text-lg mb-1">#️⃣</div>
+                    <Hash className="w-[18px] h-[18px] mx-auto mb-1" strokeWidth={1.75} />
                     <p className="text-xs font-bold">Hashtags</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">1 cr</p>
                   </button>
@@ -2803,7 +2812,7 @@ function ComposeInner() {
                   </div>
                   {plan === 'free' ? (
                     <a href="/pricing" className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-amber-500 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-all self-start sm:self-auto">
-                      🔒 Upgrade to Score
+                      <Lock className="w-3.5 h-3.5" strokeWidth={2} /> Upgrade to Score
                     </a>
                   ) : (
                     <button onClick={handleScorePost}
@@ -2811,7 +2820,7 @@ function ComposeInner() {
                       className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
                       {scoring ? (
                         <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
-                      ) : `⚡ Score Post — ${SCORE_CREDIT_COST} cr`}
+                      ) : <><Zap className="w-3.5 h-3.5" strokeWidth={2} />Score Post — {SCORE_CREDIT_COST} cr</>}
                     </button>
                   )}
                 </div>
@@ -2842,7 +2851,7 @@ function ComposeInner() {
                     </div>
                     {scoreResult.strengths.length > 0 && (
                       <div className="mb-3">
-                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1.5">✅ Strengths</p>
+                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1.5 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2} /> Strengths</p>
                         <ul className="space-y-1">
                           {scoreResult.strengths.slice(0, 3).map((s, i) => (
                             <li key={i} className="text-xs text-gray-600 dark:text-gray-300">• {s}</li>
@@ -2852,7 +2861,7 @@ function ComposeInner() {
                     )}
                     {scoreResult.improvements.length > 0 && (
                       <div>
-                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1.5">💡 Improvements</p>
+                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1.5 flex items-center gap-1"><Lightbulb className="w-3.5 h-3.5" strokeWidth={2} /> Improvements</p>
                         <ul className="space-y-1">
                           {scoreResult.improvements.slice(0, 3).map((s, i) => (
                             <li key={i} className="text-xs text-gray-600 dark:text-gray-300">• {s}</li>
@@ -2875,9 +2884,9 @@ function ComposeInner() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Schedule</p>
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    {plan === 'free'   && '⏳ Free — up to 2 weeks ahead'}
-                    {plan === 'pro'    && '⏳ Pro — up to 1 month ahead'}
-                    {plan === 'agency' && '⏳ Agency — up to 3 months ahead'}
+                    {plan === 'free'   && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Free — up to 2 weeks ahead</span>}
+                    {plan === 'pro'    && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Pro — up to 1 month ahead</span>}
+                    {plan === 'agency' && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Agency — up to 3 months ahead</span>}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -2898,7 +2907,7 @@ function ComposeInner() {
                     type="button"
                     onClick={handleUseBestTime}
                     className="flex items-center gap-1.5 text-xs font-semibold text-[#F59E0B] hover:text-amber-400 transition-colors">
-                    ✨ Use best time
+                    <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> Use best time
                   </button>
                   {bestTimeLabel && (
                     <span className="text-xs text-gray-400 dark:text-gray-500">{bestTimeLabel}</span>
@@ -2916,7 +2925,7 @@ function ComposeInner() {
                           ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-400'
                           : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                       }`}>
-                      <span>🔁</span>
+                      <Repeat className="w-3.5 h-3.5" strokeWidth={2} />
                       <span>Repeat</span>
                       {isRecurring && <span className="text-[10px] font-bold uppercase tracking-wide bg-indigo-100 dark:bg-indigo-800 px-1.5 py-0.5 rounded-full">ON</span>}
                     </button>
@@ -2980,7 +2989,7 @@ function ComposeInner() {
                       <div key={result.platform} className={`flex items-center gap-3 p-3 rounded-xl border ${
                         result.success ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'
                       }`}>
-                        <span className="text-lg">{PLATFORMS.find(p => p.id === result.platform)?.icon || '📱'}</span>
+                        <PlatformGlyph id={result.platform} size={18} />
                         <div className="flex-1">
                           <p className="text-xs font-bold text-gray-900">{PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}</p>
                           {result.error && <p className="text-xs text-red-500 mt-0.5">{result.error}</p>}
@@ -3139,7 +3148,7 @@ function ComposeInner() {
                       onClick={() => setShowPlatformPreview(true)}
                       disabled={!content.trim() && threadParts.every(p => !p.trim())}
                       className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
-                      👁 Preview
+                      <Eye className="w-3.5 h-3.5" strokeWidth={2} /> Preview
                     </button>
                     {content.trim().length > 0 && (
                       <PostImageExporter
@@ -3202,11 +3211,11 @@ function ComposeInner() {
                       const over = charCount > p.limit
                       return (
                         <div key={id} className="flex items-center gap-2">
-                          <span className="text-sm">{p.icon}</span>
+                          <PlatformGlyph id={p.id} size={14} />
                           <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{p.name}</span>
-                          <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                          <span className={`ml-auto text-xs font-bold flex items-center gap-1 ${over ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                             {charCount}/{p.limit.toLocaleString()}
-                            {over && ' ⚠️'}
+                            {over && <AlertTriangle className="w-3 h-3" strokeWidth={2} />}
                           </span>
                         </div>
                       )
@@ -3224,7 +3233,7 @@ function ComposeInner() {
                         if (!dest) return null
                         return (
                           <div key={platformId} className="flex items-center gap-1.5">
-                            <span className="text-xs">{platform?.icon}</span>
+                            {platform && <PlatformGlyph id={platform.id} size={12} />}
                             <span className="text-xs text-gray-400 dark:text-gray-500 truncate">→ {dest.label}</span>
                           </div>
                         )
