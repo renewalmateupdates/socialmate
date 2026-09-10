@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { Hash, Save, X as CloseIcon } from 'lucide-react'
 
 const LS_KEY = 'sm_hashtag_saved_sets'
 
@@ -213,14 +214,14 @@ export default function Hashtags() {
               <button
                 onClick={() => setShowSaveForm(true)}
                 className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-400 dark:text-gray-500 hover:border-gray-400 hover:text-black dark:hover:text-white transition-all">
-                💾 Save a Quick Hashtag Set (no account needed)
+                <Save className="w-3.5 h-3.5" strokeWidth={2} /> Save a Quick Hashtag Set (no account needed)
               </button>
             ) : (
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-2xl p-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-extrabold text-blue-700 dark:text-blue-400">Save Quick Set</p>
                   <button onClick={() => { setShowSaveForm(false); setQuickSetName(''); setQuickTags('') }}
-                    className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">✕</button>
+                    className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><CloseIcon className="w-3.5 h-3.5" strokeWidth={2} /></button>
                 </div>
                 <input
                   type="text"
@@ -368,7 +369,7 @@ export default function Hashtags() {
             </div>
           ) : collections.length === 0 && !showForm ? (
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl mx-auto mb-4">#️⃣</div>
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4"><Hash className="w-7 h-7 text-gray-400" strokeWidth={1.75} /></div>
               <p className="text-base font-extrabold mb-1">No hashtag collections yet</p>
               <p className="text-sm text-gray-400 dark:text-gray-500 mb-2 max-w-xs mx-auto">
                 Save groups of hashtags to quickly insert into posts with one click.

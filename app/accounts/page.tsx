@@ -12,6 +12,13 @@ import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
 import { track, trackOnce } from '@/lib/analytics'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 20, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Plug size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -29,28 +36,27 @@ type Account = {
 type PlatformStatus = 'live' | 'coming_soon' | 'planned'
 
 const PLATFORM_META: Record<string, {
-  icon: string
   color: string
   label: string
   status: PlatformStatus
   statusNote?: string
 }> = {
-  discord:   { icon: '💬', color: 'bg-indigo-50 border-indigo-200', label: 'Discord',     status: 'live'        },
-  bluesky:   { icon: '🦋', color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',     status: 'live'        },
-  telegram:  { icon: '✈️', color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'live'        },
-  mastodon:  { icon: '🐘', color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'live'        },
-  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'live' },
-  youtube:   { icon: '▶️', color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
-  pinterest: { icon: '📌', color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
-  reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
-  instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  tiktok:    { icon: '🎵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
-  threads:   { icon: '🧵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'live'                                       },
-  snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
-  lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
-  bereal:    { icon: '📷', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
+  discord:   { color: 'bg-indigo-50 border-indigo-200', label: 'Discord',     status: 'live'        },
+  bluesky:   { color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',     status: 'live'        },
+  telegram:  { color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'live'        },
+  mastodon:  { color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'live'        },
+  linkedin:  { color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'live' },
+  youtube:   { color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  tiktok:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
+  threads:   { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  twitter:   { color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'live'                                       },
+  snapchat:  { color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
+  lemon8:    { color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
+  bereal:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
 }
 
 const ALL_PLATFORMS         = Object.keys(PLATFORM_META)
@@ -82,8 +88,8 @@ function PlatformCard({
   if (!connectable) {
     return (
       <div className="flex items-center gap-3 p-4 bg-surface border border-theme rounded-2xl opacity-60">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
-          {meta.icon}
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+          <PlatformGlyph id={platform} size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{meta.label}</p>
@@ -103,8 +109,8 @@ function PlatformCard({
       atLimit ? 'border-theme opacity-60' : 'border-theme hover:border-gray-300'
     }`}>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
-          {meta.icon}
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+          <PlatformGlyph id={platform} size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -551,13 +557,13 @@ function AccountsInner() {
             'bg-purple-50 border-purple-100'
           }`}>
             <div className="flex-1">
-              <p className={`text-xs font-bold ${
+              <p className={`text-xs font-bold flex items-center gap-1.5 ${
                 plan === 'agency' ? 'text-purple-700' :
                 plan === 'pro'    ? 'text-blue-700'   : 'text-gray-700 dark:text-gray-300'
               }`}>
-                {plan === 'free'   && '🔓 Free plan — 1 account per platform across all live integrations'}
-                {plan === 'pro'    && '⚡ Pro plan — up to 5 accounts per platform'}
-                {plan === 'agency' && '🏢 Agency plan — up to 10 accounts per platform, client workspaces included'}
+                {plan === 'free'   && <><Unlock className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} /> Free plan — 1 account per platform across all live integrations</>}
+                {plan === 'pro'    && <><Zap className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} /> Pro plan — up to 5 accounts per platform</>}
+                {plan === 'agency' && <><Building2 className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} /> Agency plan — up to 10 accounts per platform, client workspaces included</>}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
                 {plan === 'free'   ? 'YouTube, Pinterest & Reddit are coming very soon. Upgrade to Pro for more accounts per platform.' :
@@ -577,7 +583,7 @@ function AccountsInner() {
           {accounts.length === 0 && (
             <div className="mb-8 bg-gradient-to-r from-black to-gray-800 rounded-2xl p-6 text-white">
               <div className="flex items-start gap-4">
-                <span className="text-3xl flex-shrink-0">🔌</span>
+                <Plug className="w-8 h-8 flex-shrink-0" strokeWidth={1.5} />
                 <div className="flex-1">
                   <p className="font-extrabold text-lg tracking-tight mb-1">Connect your first social account</p>
                   <p className="text-gray-300 text-sm leading-relaxed mb-4">
@@ -588,7 +594,7 @@ function AccountsInner() {
                       const meta = PLATFORM_META[platform]
                       return (
                         <div key={platform} className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm font-semibold">
-                          <span>{meta.icon}</span> {meta.label}
+                          <PlatformGlyph id={platform} size={16} /> {meta.label}
                         </div>
                       )
                     })}
@@ -602,14 +608,14 @@ function AccountsInner() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
-                { label: 'Connected',            value: accounts.length,                                               icon: '✅', color: 'text-green-600' },
-                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
-                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                 icon: '🔓', color: 'text-blue-600' },
+                { label: 'Connected',            value: accounts.length,                                               icon: CheckCircle2, color: 'text-green-600' },
+                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: Smartphone, color: 'text-gray-700' },
+                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                 icon: Unlock, color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{stat.label}</span>
-                    <span>{stat.icon}</span>
+                    <stat.icon className={`w-4 h-4 ${stat.color}`} strokeWidth={1.75} />
                   </div>
                   <div className={`text-2xl font-extrabold tracking-tight dark:text-gray-100 ${stat.color}`}>{stat.value}</div>
                 </div>
@@ -623,15 +629,15 @@ function AccountsInner() {
               <h2 className="text-sm font-bold tracking-tight mb-4">{t('app_accounts.manage_accounts')}</h2>
               <div className="space-y-3">
                 {accounts.map(account => {
-                  const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700', label: account.platform }
+                  const meta = PLATFORM_META[account.platform] || { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700', label: account.platform }
                   const platformCount = accountsByPlatform[account.platform]?.length || 0
                   const isConfirming = confirmDisconnect === account.id
                   const isDisconnecting = disconnecting === account.id
                   return (
                     <div key={account.id} className={`p-4 bg-surface border rounded-2xl ${meta.color} transition-all`}>
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-700 flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
-                          {meta.icon}
+                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-700 flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <PlatformGlyph id={account.platform} size={20} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -869,7 +875,7 @@ function AccountsInner() {
 
           <div className="bg-theme border border-theme rounded-2xl p-5">
             <div className="flex items-start gap-4">
-              <span className="text-2xl flex-shrink-0">🚀</span>
+              <Rocket className="w-6 h-6 flex-shrink-0" strokeWidth={1.5} />
               <div>
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -888,7 +894,7 @@ function AccountsInner() {
       {showDiscordModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <p className="text-lg font-bold mb-2">💬 Connect Discord</p>
+            <p className="text-lg font-bold mb-2 flex items-center gap-2"><PlatformGlyph id="discord" size={18} /> Connect Discord</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
               You&apos;ll pick the server to add SocialMate to, then choose a channel here.
               Make sure you&apos;re logged into the right Discord account first, and that you can

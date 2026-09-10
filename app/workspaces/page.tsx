@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { Building2, Home } from 'lucide-react'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -53,7 +54,7 @@ export default function Workspaces() {
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
-            <div className="text-5xl mb-4">🏢</div>
+            <Building2 className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
               Manage clients in fully isolated workspaces — their own accounts, posts, and analytics.
@@ -130,7 +131,7 @@ export default function Workspaces() {
                 activeWorkspace?.id === personalWs.id ? 'border-black' : 'border-theme'
               }`}>
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏠</div>
+                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0"><Home className="w-5 h-5" strokeWidth={1.75} /></div>
                   <div>
                     <p className="text-sm font-extrabold">My Workspace</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">Your personal account</p>
@@ -158,7 +159,7 @@ export default function Workspaces() {
               </div>
             ) : clientWs.length === 0 ? (
               <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
-                <div className="text-4xl mb-3">🏢</div>
+                <Building2 className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                 <p className="text-sm font-bold mb-1">No client workspaces yet</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">
                   Create a separate workspace for each client — isolated accounts, posts, and analytics.
@@ -182,7 +183,7 @@ export default function Workspaces() {
                       }`}>
 
                       <div className="flex items-center gap-3 md:gap-4">
-                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏢</div>
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5" strokeWidth={1.75} /></div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-extrabold truncate">{ws.client_name || ws.name}</p>

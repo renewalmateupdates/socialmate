@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { Hash } from 'lucide-react'
 
 type HashtagCollection = {
   id: string
@@ -333,7 +334,7 @@ export default function HashtagCollectionsPage() {
             </div>
           ) : collections.length === 0 && !showForm ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl mx-auto mb-4">#️⃣</div>
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4"><Hash className="w-7 h-7 text-gray-400" strokeWidth={1.75} /></div>
               <p className="text-base font-extrabold mb-1">No collections yet</p>
               <p className="text-sm text-gray-400 dark:text-gray-500 mb-6 max-w-xs mx-auto">
                 Save your go-to hashtag sets to reuse them in Compose with one click.

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import { useI18n } from '@/contexts/I18nContext'
+import { Link2 } from 'lucide-react'
 
 type ShortLink = {
   id: string
@@ -165,7 +166,7 @@ export default function LinksPage() {
               disabled={creating}
               className="self-start bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-50 min-h-[44px]"
             >
-              {creating ? 'Shortening…' : '🔗 Shorten URL'}
+              {creating ? 'Shortening…' : <span className="inline-flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5" strokeWidth={2} /> Shorten URL</span>}
             </button>
           </div>
         </form>
@@ -191,7 +192,7 @@ export default function LinksPage() {
               className="rounded-2xl border p-8 text-center"
               style={{ borderColor: 'var(--border-mid)', color: 'var(--text-faint)' }}
             >
-              <div className="text-3xl mb-2">🔗</div>
+              <Link2 className="w-7 h-7 mx-auto mb-2" strokeWidth={1.5} />
               <p className="text-sm font-semibold">{t('app_links.no_links')}</p>
               <p className="text-xs mt-1">{t('app_links.no_links_sub')}</p>
             </div>

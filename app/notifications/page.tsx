@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { Bell, CheckCircle2, Gift, Megaphone, Users, XCircle, Zap, X as CloseIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -10,13 +12,13 @@ function SkeletonBox({ className }: { className?: string }) {
 
 type NotifType = 'post_published' | 'post_failed' | 'credit_low' | 'team' | 'referral' | 'system'
 
-const TYPE_CONFIG: Record<NotifType, { icon: string; color: string }> = {
-  post_published: { icon: '✅', color: 'bg-green-50 border-green-100'   },
-  post_failed:    { icon: '❌', color: 'bg-red-50 border-red-100'       },
-  credit_low:     { icon: '⚡', color: 'bg-yellow-50 border-yellow-100' },
-  team:           { icon: '👥', color: 'bg-blue-50 border-blue-100'     },
-  referral:       { icon: '🎁', color: 'bg-purple-50 border-purple-100' },
-  system:         { icon: '📣', color: 'bg-gray-50 border-gray-100'     },
+const TYPE_CONFIG: Record<NotifType, { icon: LucideIcon; color: string }> = {
+  post_published: { icon: CheckCircle2, color: 'bg-green-50 border-green-100'   },
+  post_failed:    { icon: XCircle, color: 'bg-red-50 border-red-100'       },
+  credit_low:     { icon: Zap, color: 'bg-yellow-50 border-yellow-100' },
+  team:           { icon: Users, color: 'bg-blue-50 border-blue-100'     },
+  referral:       { icon: Gift, color: 'bg-purple-50 border-purple-100' },
+  system:         { icon: Megaphone, color: 'bg-gray-50 border-gray-100'     },
 }
 
 const PLACEHOLDER_NOTIFS = [
@@ -147,7 +149,7 @@ export default function Notifications() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">🔔</div>
+              <Bell className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">
                 {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
               </p>
@@ -168,7 +170,7 @@ export default function Notifications() {
                       !n.read ? 'opacity-100' : 'opacity-60'
                     }`}>
                     <div className="flex items-start gap-3">
-                      <span className="text-lg flex-shrink-0 mt-0.5">{config.icon}</span>
+                      <config.icon className="w-4 h-4 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-0.5">
                           <div className="flex items-center gap-2 min-w-0">
@@ -183,7 +185,7 @@ export default function Notifications() {
                             <button
                               onClick={e => { e.stopPropagation(); deleteNotif(n.id) }}
                               className="text-xs text-gray-300 dark:text-gray-600 hover:text-red-400 transition-all flex-shrink-0 px-1">
-                              ✕
+                              <CloseIcon className="w-3 h-3" strokeWidth={2} />
                             </button>
                           </div>
                         </div>

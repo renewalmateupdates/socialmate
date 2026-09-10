@@ -20,6 +20,13 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import UnsplashCredit from '@/components/UnsplashCredit'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { CalendarDays, ChevronDown, Globe, Sparkles, X as CloseIcon } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 interface Post {
   id: string
@@ -45,12 +52,6 @@ function retryAttempt(post: Post): number {
   return Number(post.metadata?.publish_attempts ?? 0)
 }
 
-const PLATFORM_ICONS: Record<string, string> = {
-  instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
-  facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  snapchat: '👻', bluesky: '🦋', reddit: '🤖', discord: '💬',
-  telegram: '✈️', mastodon: '🐘', lemon8: '🍋', bereal: '📷',
-}
 
 const STATUS_DOT: Record<string, string> = {
   scheduled:        'bg-blue-400',
@@ -101,7 +102,7 @@ function PlatformBreakdown({ post }: { post: Post }) {
                 ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
             }`}>
-            <span>{PLATFORM_ICONS[p] ?? '📄'}</span>
+            <PlatformGlyph id={p} size={11} />
             <span className="hidden sm:inline">{PLATFORM_NAMES[p] ?? p}</span>
             <span>{succeeded ? '✓' : '✗'}</span>
           </span>
@@ -241,7 +242,7 @@ function CalendarDayCell({
         ].join(' ')}>
           {day.getDate()}
         </span>
-        {isSelected && <span className="text-[9px] text-blue-500 font-bold">▼</span>}
+        {isSelected && <ChevronDown className="w-2.5 h-2.5 text-blue-500" strokeWidth={3} />}
       </div>
 
       {/* Desktop: text pills */}
@@ -249,15 +250,15 @@ function CalendarDayCell({
         {visible.map(post => (
           <DraggablePostPill key={post.id} post={post}>
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate leading-tight">
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate leading-tight inline-flex items-center gap-0.5">
               {/* Every platform, not just the first. A SOMA post carries
                   ['telegram','twitter','bluesky'], so showing platforms[0] made
                   an entire month of multi-platform posts look like Telegram
                   only -- and disagree with the day panel below, which has
                   always mapped the full array. */}
-              {(post.platforms ?? []).map(p => PLATFORM_ICONS[p] ?? '').join('')}
-              {(post.platforms ?? []).length > 0 ? ' ' : ''}
-              {post.content.slice(0, 16)}{post.content.length > 16 ? '…' : ''}
+              {(post.platforms ?? []).map(p => <PlatformGlyph key={p} id={p} size={9} className="flex-shrink-0" />)}
+              <span className="truncate">{(post.platforms ?? []).length > 0 ? ' ' : ''}
+              {post.content.slice(0, 16)}{post.content.length > 16 ? '…' : ''}</span>
             </span>
           </DraggablePostPill>
         ))}
@@ -639,10 +640,10 @@ export default function CalendarPage() {
           {/* Drag overlay — shows a floating ghost while dragging */}
           <DragOverlay>
             {activeDragPost && (
-              <div className="bg-white dark:bg-gray-900 border border-indigo-300 dark:border-indigo-700 rounded-lg px-2 py-1 shadow-lg text-[11px] font-semibold text-gray-700 dark:text-gray-200 max-w-[120px] truncate pointer-events-none">
-                {(activeDragPost.platforms ?? []).map(p => PLATFORM_ICONS[p] ?? '').join('')}
-                {(activeDragPost.platforms ?? []).length > 0 ? ' ' : ''}
-                {activeDragPost.content.slice(0, 24)}{activeDragPost.content.length > 24 ? '…' : ''}
+              <div className="bg-white dark:bg-gray-900 border border-indigo-300 dark:border-indigo-700 rounded-lg px-2 py-1 shadow-lg text-[11px] font-semibold text-gray-700 dark:text-gray-200 max-w-[120px] truncate pointer-events-none inline-flex items-center gap-0.5">
+                {(activeDragPost.platforms ?? []).map(p => <PlatformGlyph key={p} id={p} size={10} className="flex-shrink-0" />)}
+                <span className="truncate">{(activeDragPost.platforms ?? []).length > 0 ? ' ' : ''}
+                {activeDragPost.content.slice(0, 24)}{activeDragPost.content.length > 24 ? '…' : ''}</span>
               </div>
             )}
           </DragOverlay>
@@ -658,7 +659,7 @@ export default function CalendarPage() {
               : null
             return (
               <div className="bg-surface border border-theme rounded-2xl p-10 text-center mb-4">
-                <p className="text-3xl mb-3">📅</p>
+                <CalendarDays className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                 <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">{t('app_calendar.no_posts')}</p>
                 <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
                   {nextMonth
@@ -699,14 +700,14 @@ export default function CalendarPage() {
                   <button
                     onClick={() => setSelectedDay(null)}
                     className="w-8 h-8 flex items-center justify-center rounded-xl border border-theme text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all">
-                    ✕
+                    <CloseIcon className="w-3.5 h-3.5" strokeWidth={2} />
                   </button>
                 </div>
               </div>
 
               {selectedPosts.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-3xl mb-2">✨</p>
+                  <Sparkles className="w-7 h-7 mx-auto mb-2 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                   <p className="text-sm text-gray-400 dark:text-gray-500">
                     Nothing scheduled — a great day to add content!
                   </p>
@@ -721,8 +722,8 @@ export default function CalendarPage() {
                           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                             {(post.platforms ?? []).length > 0
                               ? post.platforms.map(p => (
-                                  <span key={p} className="text-base" title={p}>
-                                    {PLATFORM_ICONS[p] ?? '📄'}
+                                  <span key={p} title={p}>
+                                    <PlatformGlyph id={p} size={16} />
                                   </span>
                                 ))
                               : <span className="text-xs text-gray-400">No platforms</span>

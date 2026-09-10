@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import { useI18n } from '@/contexts/I18nContext'
+import { CalendarDays, Flame, Send, Trophy } from 'lucide-react'
 
 interface StreakData {
   day_map: Record<string, number>
@@ -105,10 +106,10 @@ export default function StreakPage() {
   const GAP  = 3
 
   const stats = [
-    { label: t('app_streak.current_streak'), value: data ? `${data.current_streak}d` : '—', icon: '🔥' },
-    { label: t('app_streak.longest_streak'), value: data ? `${data.longest_streak}d` : '—', icon: '🏆' },
-    { label: t('app_streak.total_posts'),    value: data ? String(data.total_posts)  : '—', icon: '📤' },
-    { label: t('app_streak.active_days'),    value: data ? String(data.active_days) : '—', icon: '📅' },
+    { label: t('app_streak.current_streak'), value: data ? `${data.current_streak}d` : '—', icon: Flame },
+    { label: t('app_streak.longest_streak'), value: data ? `${data.longest_streak}d` : '—', icon: Trophy },
+    { label: t('app_streak.total_posts'),    value: data ? String(data.total_posts)  : '—', icon: Send },
+    { label: t('app_streak.active_days'),    value: data ? String(data.active_days) : '—', icon: CalendarDays },
   ]
 
   return (
@@ -149,7 +150,7 @@ export default function StreakPage() {
                 className="rounded-2xl border p-4 text-center"
                 style={{ background: 'var(--surface)', borderColor: 'var(--border-mid)' }}
               >
-                <div className="text-2xl mb-1">{s.icon}</div>
+                <s.icon className="w-6 h-6 mx-auto mb-1" style={{ color: 'var(--text-faint)' }} strokeWidth={1.75} />
                 <div className="text-2xl font-bold tabular-nums" style={{ color: 'var(--fg)' }}>
                   {loading ? '…' : s.value}
                 </div>
@@ -281,8 +282,8 @@ export default function StreakPage() {
               className="mt-4 rounded-2xl border p-4 text-center"
               style={{ borderColor: 'var(--border-mid)', background: 'var(--surface)' }}
             >
-              <p className="text-sm font-bold" style={{ color: 'var(--fg)' }}>
-                🔥 {data.current_streak}-{t('app_streak.days')} {t('app_streak.keep_going')}
+              <p className="text-sm font-bold flex items-center justify-center gap-1.5" style={{ color: 'var(--fg)' }}>
+                <Flame className="w-4 h-4" strokeWidth={2} /> {data.current_streak}-{t('app_streak.days')} {t('app_streak.keep_going')}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
                 Consistent creators grow 3× faster. Don&apos;t break the chain.

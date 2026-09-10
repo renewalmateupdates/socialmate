@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
+import { Building2, Mail, Zap } from 'lucide-react'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse ${className}`} />
@@ -341,8 +342,8 @@ export default function Team() {
                     </p>
                     {plan !== 'agency' && (
                       <Link href="/settings?tab=Plan"
-                        className="block w-full text-center bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                        {plan === 'free' ? '⚡ Upgrade to Pro' : '🏢 Upgrade to Agency'}
+                        className="flex items-center justify-center gap-1.5 w-full text-center bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                        {plan === 'free' ? <><Zap className="w-3.5 h-3.5" strokeWidth={2} /> Upgrade to Pro</> : <><Building2 className="w-3.5 h-3.5" strokeWidth={2} /> Upgrade to Agency</>}
                       </Link>
                     )}
                   </div>
@@ -367,8 +368,8 @@ export default function Team() {
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{ROLE_META[inviteRole]?.description}</p>
                     </div>
                     <button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}
-                      className="w-full py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                      {inviting ? t('app_common.saving') : `📧 ${t('app_team.send_invite')}`}
+                      className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                      {inviting ? t('app_common.saving') : <><Mail className="w-3.5 h-3.5" strokeWidth={2} /> {t('app_team.send_invite')}</>}
                     </button>
                     <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
                       {seatsRemaining} seat{seatsRemaining !== 1 ? 's' : ''} remaining

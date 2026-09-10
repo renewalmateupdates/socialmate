@@ -6,17 +6,25 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { AlertTriangle, CalendarDays, CheckCircle2, FolderOpen, Globe, Heart, MessageCircle, Repeat, X as CloseIcon, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
+  if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
+  return <PlatformIcon name={id} size={size} className={className} />
+}
 
 const EDITABLE_PLATFORMS = [
-  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000  },
-  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300   },
-  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096  },
-  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500   },
-  { id: 'twitter',   name: 'X',         icon: '🐦', limit: 280   },
-  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000  },
-  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000  },
-  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500   },
-  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000 },
+  { id: 'discord',   name: 'Discord',   limit: 2000  },
+  { id: 'bluesky',   name: 'Bluesky',   limit: 300   },
+  { id: 'telegram',  name: 'Telegram',  limit: 4096  },
+  { id: 'mastodon',  name: 'Mastodon',  limit: 500   },
+  { id: 'twitter',   name: 'X',         limit: 280   },
+  { id: 'linkedin',  name: 'LinkedIn',  limit: 3000  },
+  { id: 'youtube',   name: 'YouTube',   limit: 5000  },
+  { id: 'pinterest', name: 'Pinterest', limit: 500   },
+  { id: 'reddit',    name: 'Reddit',    limit: 40000 },
 ]
 
 function toLocalDatetimeValue(isoString: string | null): string {
@@ -43,13 +51,6 @@ function tagColorDrafts(tag: string): string {
   let hash = 0
   for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash)
   return COLORS[Math.abs(hash) % COLORS.length]
-}
-
-const PLATFORM_ICONS: Record<string, string> = {
-  instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
-  facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
-  mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
 
 const PLATFORM_NAMES: Record<string, string> = {
@@ -262,12 +263,12 @@ function DraftsInner() {
                    filter === 'partial'   ? posts.filter(d => effectiveStatus(d) === 'partial') :
                    posts.filter(d => effectiveStatus(d) === filter)
 
-  const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-    draft:     { label: t('app_common.status_draft'),      bg: 'bg-gray-100 dark:bg-gray-800',   text: 'text-gray-500 dark:text-gray-400',   icon: '📂' },
-    scheduled: { label: t('app_common.status_scheduled'),  bg: 'bg-blue-100',   text: 'text-blue-600',   icon: '📅' },
-    published: { label: t('app_common.status_published'),  bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
-    partial:   { label: t('app_common.status_partial'),    bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⚠️' },
-    failed:    { label: t('app_common.status_failed'),     bg: 'bg-red-100',    text: 'text-red-600',    icon: '❌' },
+  const statusConfig: Record<string, { label: string; bg: string; text: string; icon: LucideIcon }> = {
+    draft:     { label: t('app_common.status_draft'),      bg: 'bg-gray-100 dark:bg-gray-800',   text: 'text-gray-500 dark:text-gray-400',   icon: FolderOpen },
+    scheduled: { label: t('app_common.status_scheduled'),  bg: 'bg-blue-100',   text: 'text-blue-600',   icon: CalendarDays },
+    published: { label: t('app_common.status_published'),  bg: 'bg-green-100',  text: 'text-green-700',  icon: CheckCircle2 },
+    partial:   { label: t('app_common.status_partial'),    bg: 'bg-yellow-100', text: 'text-yellow-700', icon: AlertTriangle },
+    failed:    { label: t('app_common.status_failed'),     bg: 'bg-red-100',    text: 'text-red-600',    icon: XCircle },
   }
 
   return (
@@ -306,13 +307,13 @@ function DraftsInner() {
           {!loading && posts.length > 0 && (
             <div className="grid grid-cols-4 gap-3 mb-6">
               {[
-                { label: 'Drafts',    value: draftCount,     icon: '📂', color: 'text-gray-700'  },
-                { label: 'Scheduled', value: scheduledCount, icon: '📅', color: 'text-blue-600'  },
-                { label: 'Published', value: publishedCount, icon: '✅', color: 'text-green-600' },
-                { label: 'Failed',    value: failedCount,    icon: '❌', color: 'text-red-500'   },
+                { label: 'Drafts',    value: draftCount,     icon: FolderOpen, color: 'text-gray-700'  },
+                { label: 'Scheduled', value: scheduledCount, icon: CalendarDays, color: 'text-blue-600'  },
+                { label: 'Published', value: publishedCount, icon: CheckCircle2, color: 'text-green-600' },
+                { label: 'Failed',    value: failedCount,    icon: XCircle, color: 'text-red-500'   },
               ].map(stat => (
                 <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
-                  <div className="text-xl mb-1">{stat.icon}</div>
+                  <stat.icon className={`w-5 h-5 mx-auto mb-1 ${stat.color}`} strokeWidth={1.75} />
                   <p className={`text-xl font-extrabold ${stat.color}`}>{stat.value}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">{stat.label}</p>
                 </div>
@@ -382,8 +383,8 @@ function DraftsInner() {
                       <div className="flex items-start gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-2">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${status.bg} ${status.text}`}>
-                              {status.icon} {status.label}
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${status.bg} ${status.text}`}>
+                              <status.icon className="w-3 h-3" strokeWidth={2} /> {status.label}
                             </span>
                             {post.scheduled_at && post.status === 'scheduled' && (
                               <span className="text-xs text-gray-400 dark:text-gray-500">
@@ -409,7 +410,7 @@ function DraftsInner() {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {(post.platforms || []).slice(0, 6).map((p: string) => (
                               <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                                <span>{PLATFORM_ICONS[p] || '📱'}</span>
+                                <PlatformGlyph id={p} size={12} />
                                 <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
                               </span>
                             ))}
@@ -436,7 +437,7 @@ function DraftsInner() {
                                         ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                         : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                     }`}>
-                                    <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+                                    <PlatformGlyph id={p} size={11} />
                                     <span className="hidden sm:inline">{PLATFORM_NAMES[p] ?? p}</span>
                                     <span>{succeeded ? '✓' : '✗'}</span>
                                   </span>
@@ -459,9 +460,9 @@ function DraftsInner() {
                               <div
                                 title="Stats fetched 1h and 24h after publish"
                                 className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
-                                <span>❤️ {totals.likes}</span>
-                                <span>💬 {totals.replies}</span>
-                                <span>🔄 {totals.reposts}</span>
+                                <span className="inline-flex items-center gap-1"><Heart className="w-3 h-3" strokeWidth={2} /> {totals.likes}</span>
+                                <span className="inline-flex items-center gap-1"><MessageCircle className="w-3 h-3" strokeWidth={2} /> {totals.replies}</span>
+                                <span className="inline-flex items-center gap-1"><Repeat className="w-3 h-3" strokeWidth={2} /> {totals.reposts}</span>
                               </div>
                             )
                           })()}
@@ -492,8 +493,8 @@ function DraftsInner() {
                           <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Editing post</span>
                           <button
                             onClick={() => closeEdit(post.id)}
-                            className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                            ✕ Cancel
+                            className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors inline-flex items-center gap-1">
+                            <CloseIcon className="w-3 h-3" strokeWidth={2} /> Cancel
                           </button>
                         </div>
 
@@ -530,7 +531,7 @@ function DraftsInner() {
                                         ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                                         : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                                     }`}>
-                                    {platform.icon} {len}/{platform.limit}
+                                    <span className="inline-flex items-center gap-1"><PlatformGlyph id={platform.id} size={11} /> {len}/{platform.limit}</span>
                                   </span>
                                 )
                               })}
@@ -555,7 +556,7 @@ function DraftsInner() {
                                       : 'border text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                                   }`}
                                   style={!selected ? { borderColor: 'var(--border-mid)', background: 'var(--bg)' } : {}}>
-                                  <span>{platform.icon}</span>
+                                  <PlatformGlyph id={platform.id} size={14} />
                                   <span>{platform.name}</span>
                                 </button>
                               )
