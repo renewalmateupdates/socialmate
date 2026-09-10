@@ -165,7 +165,7 @@ export default function VsOneUpPage() {
               {
                 n: '2',
                 title: 'No free plan vs. genuinely free forever',
-                desc: "OneUp gives you a 7-day trial. After that, you pay $18/month minimum. SocialMate is free forever with no post caps and no time limits. The free plan includes Discord, Telegram, Bluesky, Mastodon, TikTok, and LinkedIn scheduling — plus 15+ AI tools and a full link-in-bio page. That's more than OneUp's paid plan for $0.",
+                desc: "OneUp gives you a 7-day trial. After that, you pay $18/month minimum. SocialMate is free forever with 250 posts/month and no time limits. The free plan includes Discord, Telegram, Bluesky, Mastodon, TikTok, and LinkedIn scheduling — plus 15+ AI tools and a full link-in-bio page. That's more than OneUp's paid plan for $0.",
               },
               {
                 n: '3',

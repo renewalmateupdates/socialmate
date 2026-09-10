@@ -26,8 +26,8 @@ const PLATFORM_LABELS: Record<string, string> = {
 }
 
 // Only show live platforms in the template platform picker
-const LIVE_PLATFORM_IDS = ['discord', 'bluesky', 'telegram', 'mastodon']
-const SOON_PLATFORM_IDS = ['linkedin', 'youtube', 'pinterest', 'reddit']
+const LIVE_PLATFORM_IDS = ['discord', 'bluesky', 'telegram', 'mastodon', 'twitter', 'tiktok', 'linkedin']
+const SOON_PLATFORM_IDS = ['youtube', 'pinterest', 'reddit']
 
 const STARTER_TEMPLATES = [
   // ─── Promotional ───────────────────────────────────────────────

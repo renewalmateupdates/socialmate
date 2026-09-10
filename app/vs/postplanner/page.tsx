@@ -30,7 +30,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Is Post Planner's free plan actually usable?",
-    a: "Post Planner does have a free plan, but it caps at 10 posts per month across 3 social accounts. That is about 2-3 posts per week — not enough to maintain a consistent social presence. SocialMate's free plan has no post limit.",
+    a: "Post Planner does have a free plan, but it caps at 10 posts per month across 3 social accounts. That is about 2-3 posts per week — not enough to maintain a consistent social presence. SocialMate's free plan allows 250 posts a month.",
   },
   {
     q: "What is Post Planner's main selling point?",
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate a good Post Planner alternative for creators who post frequently?',
-    a: 'Yes. SocialMate has no post limit on the free plan, plus bulk scheduling, 15+ AI tools, evergreen recycling, competitor tracking, and analytics — all free. Post Planner charges $9/month and caps free usage at 10 posts.',
+    a: 'Yes. SocialMate\'s free plan gives you 250 posts a month, plus bulk scheduling, 15+ AI tools, evergreen recycling, competitor tracking, and analytics — all free. Post Planner charges $9/month and caps free usage at 10 posts.',
   },
 ]
 
@@ -117,7 +117,7 @@ export default function VsPostPlannerPage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">250 posts / month. All platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ Free forever — no post cap</li>
+              <li>✅ Free forever — 250 posts/month</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
@@ -155,7 +155,7 @@ export default function VsPostPlannerPage() {
               {
                 n: '1',
                 title: '10 posts per month is not a social media strategy',
-                desc: "Post Planner's free plan caps at 10 posts per month. If you post once every 3 days — a modest pace — you hit the limit in a month. Any real posting schedule requires a paid plan. SocialMate has no post limit on the free tier.",
+                desc: "Post Planner's free plan caps at 10 posts per month. If you post once every 3 days — a modest pace — you hit the limit in a month. Any real posting schedule requires a paid plan. SocialMate's free tier allows 250 posts a month.",
               },
               {
                 n: '2',

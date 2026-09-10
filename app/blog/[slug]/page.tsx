@@ -1386,7 +1386,7 @@ Use SocialMate's bulk scheduler to load up a week's worth of Telegram content at
 
 ## The Free Part
 
-SocialMate's free plan includes Telegram scheduling with no post limits and a 2-week scheduling window. You don't need a credit card to start. Connect your Telegram channel and schedule your first post in under 10 minutes.
+SocialMate's free plan includes Telegram scheduling with 250 posts a month and a 2-week scheduling window. You don't need a credit card to start. Connect your Telegram channel and schedule your first post in under 10 minutes.
 
 SocialMate is free to start — no credit card required.
     `,

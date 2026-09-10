@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "Planable's free plan is a 50-post lifetime cap — not monthly. Once you hit 50, you must pay. SocialMate gives you 250 posts/month, free forever.",
   openGraph: {
     title:       'SocialMate vs Planable (2026)',
-    description: "Planable gives you 50 posts total on the free plan — ever. SocialMate has no post limits and no credit card required.",
+    description: "Planable gives you 50 posts total on the free plan — ever. SocialMate gives you 250 every month, no credit card required.",
     url:         'https://socialmate.studio/vs/planable',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/planable' },

@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Does Postoplan have a free plan?',
-    a: "Postoplan has a limited free plan, but it's restricted to one connected account and a small number of scheduled posts. In practice it's more of a trial than a genuinely free tier. SocialMate's free plan includes 7 platforms, 50 AI credits/month, and no post caps — it's actually usable as a long-term free tier.",
+    a: "Postoplan has a limited free plan, but it's restricted to one connected account and a small number of scheduled posts. In practice it's more of a trial than a genuinely free tier. SocialMate's free plan includes 7 platforms, 50 AI credits/month, and 250 posts a month — it's actually usable as a long-term free tier.",
   },
   {
     q: 'Why does SocialMate support Discord and Telegram?',
@@ -159,7 +159,7 @@ export default function VsPostoplanPage() {
               {
                 n: '1',
                 title: 'SocialMate is genuinely free — not a 1-account trial',
-                desc: "Postoplan's free plan restricts you to one account and a handful of posts. It's a trial, not a real free tier. SocialMate's free plan has no post caps, supports 7 platforms, and includes 50 AI credits per month. The free tier is intentionally usable — not a funnel.",
+                desc: "Postoplan's free plan restricts you to one account and a handful of posts. It's a trial, not a real free tier. SocialMate's free plan allows 250 posts a month, supports 7 platforms, and includes 50 AI credits per month. The free tier is intentionally usable — not a funnel.",
               },
               {
                 n: '2',
