@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { CheckCircle2, Dna } from 'lucide-react'
 
 // ─── Question bank ────────────────────────────────────────────────────────────
 
@@ -413,7 +414,7 @@ export default function SomaVoicePage() {
         </Link>
 
         <div className="text-center mb-10">
-          <div className="text-5xl mb-4">🧬</div>
+          <Dna className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
           <h1 className="text-3xl font-bold text-white mb-3">{t('app_soma_voice.title')}</h1>
           <p className="text-gray-400 text-lg leading-relaxed">
             {t('app_soma_voice.subtitle')}
@@ -478,7 +479,10 @@ export default function SomaVoicePage() {
   if (phase === 'done') return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
-        <div className="text-6xl mb-6">🧬✅</div>
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <Dna className="w-12 h-12" strokeWidth={1.5} />
+          <CheckCircle2 className="w-10 h-10 text-green-400" strokeWidth={1.5} />
+        </div>
         <h2 className="text-2xl font-bold text-white mb-3">{t('app_soma_voice.done_title')}</h2>
         <p className="text-gray-400 mb-2">
           {t('app_soma_voice.done_desc')}

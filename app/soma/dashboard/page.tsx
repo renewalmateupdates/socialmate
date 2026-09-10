@@ -7,6 +7,8 @@ import Sidebar from '@/components/Sidebar'
 import SomaCreditPacks from '@/components/SomaCreditPacks'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
+import { CircleDot, ClipboardList, Dna, Moon, Rocket, Sun, Sunrise, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,12 +58,12 @@ interface DraftPost {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function timeSlotIcon(scheduledAt: string | null): string {
-  if (!scheduledAt) return '📋'
+function timeSlotIcon(scheduledAt: string | null): LucideIcon {
+  if (!scheduledAt) return ClipboardList
   const h = new Date(scheduledAt).getHours()
-  if (h < 12) return '🌅'
-  if (h < 17) return '☀️'
-  return '🌙'
+  if (h < 12) return Sunrise
+  if (h < 17) return Sun
+  return Moon
 }
 
 // Note: dayLabel is a plain function so it receives the label as a parameter
@@ -96,7 +98,7 @@ const TIERS = [
   {
     id:       'autopilot',
     priceId:  SOMA_AUTOPILOT_PRICE_ID,
-    icon:     '⚡',
+    icon:     Zap,
     name:     'Autopilot',
     price:    '$10/mo',
     color:    'border-violet-500/50 bg-violet-900/20',
@@ -112,7 +114,7 @@ const TIERS = [
   {
     id:       'full_send',
     priceId:  SOMA_FULL_SEND_PRICE_ID,
-    icon:     '🚀',
+    icon:     Rocket,
     name:     'Full Send',
     price:    '$20/mo',
     color:    'border-amber-500/50 bg-amber-900/20',
@@ -182,7 +184,7 @@ function AutopilotModal({
 
           {autopilotEnabled && (
             <div className="flex items-center gap-3 rounded-xl border border-violet-700/40 bg-violet-900/20 p-3 mb-4">
-              <span className="text-lg">⚡</span>
+              <Zap className="w-5 h-5" strokeWidth={1.75} />
               <div className="flex-1">
                 <p className="text-sm font-extrabold text-violet-300">{t('app_soma_dashboard.mode_autopilot')}</p>
                 <p className="text-xs text-gray-400">{t('app_soma_dashboard.autopilot_active_label')}</p>
@@ -197,7 +199,7 @@ function AutopilotModal({
             {visibleTiers.map(tier => (
               <div key={tier.id} className={`rounded-xl border p-4 flex flex-col ${tier.color}`}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">{tier.icon}</span>
+                  <tier.icon className="w-6 h-6" strokeWidth={1.75} />
                   <div>
                     <p className={`text-sm font-extrabold ${tier.badge}`}>{tier.name}</p>
                     <p className="text-xs text-gray-400">{tier.price}</p>
@@ -434,7 +436,7 @@ export default function SomaDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-2">
-              <span className="text-amber-400">⚡</span>
+              <Zap className="w-6 h-6 text-amber-400" strokeWidth={1.75} />
               <span className="text-white">{t('app_soma_dashboard.title')}</span>
             </h1>
             <p className="text-gray-400 text-sm mt-0.5">{t('app_soma_dashboard.subtitle')}</p>
@@ -450,7 +452,7 @@ export default function SomaDashboardPage() {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>🟢</span> {t('app_soma_dashboard.mode_safe')}
+              <CircleDot className="w-3.5 h-3.5" strokeWidth={2} /> {t('app_soma_dashboard.mode_safe')}
             </button>
             <button
               onClick={() => handleModeToggle('autopilot')}
@@ -460,7 +462,7 @@ export default function SomaDashboardPage() {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>⚡</span> {t('app_soma_dashboard.mode_autopilot')}
+              <Zap className="w-3.5 h-3.5" strokeWidth={2} /> {t('app_soma_dashboard.mode_autopilot')}
               {!credits?.autopilot_enabled && (
                 <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-800/60 text-amber-400 border border-amber-700/40 ml-0.5">
                   $10
@@ -475,7 +477,7 @@ export default function SomaDashboardPage() {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>🚀</span> {t('app_soma_dashboard.mode_full_send')}
+              <Rocket className="w-3.5 h-3.5" strokeWidth={2} /> {t('app_soma_dashboard.mode_full_send')}
               {!credits?.full_send_enabled && (
                 <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-purple-800/60 text-purple-400 border border-purple-700/40 ml-0.5">
                   $20
@@ -493,7 +495,7 @@ export default function SomaDashboardPage() {
               <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-60" />
             </span>
             <div className="flex-1">
-              <p className="text-sm font-extrabold text-amber-300">🚀 Full Send is active</p>
+              <p className="text-sm font-extrabold text-amber-300 flex items-center gap-1.5"><Rocket className="w-4 h-4" strokeWidth={1.75} /> Full Send is active</p>
               <p className="text-xs text-gray-400 mt-0.5">SOMA auto-schedules posts every day at 9am EDT — no review required. Up to 7 posts/day per platform.</p>
             </div>
             <Link href="/queue" className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors whitespace-nowrap flex-shrink-0">
@@ -617,7 +619,7 @@ export default function SomaDashboardPage() {
                 </div>
                 {voiceDnaTier !== 'none' && (
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm">🧬</span>
+                    <Dna className="w-4 h-4" strokeWidth={1.75} />
                     <p className="text-xs font-semibold text-purple-300">
                       {t('app_soma_dashboard.voice_dna_tier')} <span className="capitalize">{voiceDnaTier.replace('_', ' ')}</span> {t('app_soma_dashboard.tier_active')}
                     </p>
@@ -750,7 +752,7 @@ export default function SomaDashboardPage() {
                     {/* Content preview */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-base flex-shrink-0">{timeSlotIcon(post.scheduled_at)}</span>
+                        {(() => { const SlotIcon = timeSlotIcon(post.scheduled_at); return <SlotIcon className="w-4 h-4 flex-shrink-0 text-gray-400" strokeWidth={1.75} /> })()}
                         <span className="text-xs font-semibold text-gray-400">{dayLabel(post.scheduled_at, t('app_soma_dashboard.unscheduled'))}</span>
                         <div className="flex gap-1 flex-wrap">
                           {(post.platforms ?? []).map((p: string) => (
@@ -865,7 +867,7 @@ export default function SomaDashboardPage() {
             href="/soma/voice"
             className={`flex items-center gap-3 rounded-xl border transition-all p-4 group ${voiceDnaTier !== 'none' ? 'border-purple-600/50 bg-purple-950/30 hover:bg-purple-950/40' : 'border-purple-800/40 bg-purple-950/20 hover:border-purple-500/50 hover:bg-purple-950/30'}`}
           >
-            <span className="text-xl">🧬</span>
+            <Dna className="w-5 h-5" strokeWidth={1.75} />
             <div>
               <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{t('app_soma_dashboard.quick_voice_dna')}</p>
               {voiceDnaTier !== 'none' ? (

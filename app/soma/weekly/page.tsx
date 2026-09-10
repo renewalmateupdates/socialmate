@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
+import { Zap } from 'lucide-react'
 
 function getCurrentWeekLabel(): string {
   const now = new Date()
@@ -167,7 +168,7 @@ export default function SomaWeeklyPage() {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="text-5xl">⚡</div>
+          <Zap className="w-12 h-12 mx-auto" strokeWidth={1.5} />
           <h2 className="text-2xl font-bold text-white">{t('app_soma_weekly.done_title')}</h2>
           <p className="text-zinc-400 text-sm">
             {t('app_soma_weekly.done_sub')}
