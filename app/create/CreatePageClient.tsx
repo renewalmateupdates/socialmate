@@ -675,7 +675,7 @@ export default function CreatePageClient() {
       {/* Hidden canvas for export */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <div className="md:ml-56 flex-1 flex flex-col min-h-screen overflow-hidden">
 
         {/* Header */}
         <header className="sticky top-0 z-20 flex items-center justify-between px-5 py-3 border-b border-gray-800 bg-gray-950/95 backdrop-blur-md">

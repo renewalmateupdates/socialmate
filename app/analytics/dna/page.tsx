@@ -216,7 +216,7 @@ export default function ContentDNAPage() {
     <div style={{ display: 'flex', minHeight: '100vh', background: T.bg }}>
       <Sidebar />
 
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      <main className="md:ml-56" style={{ flex: 1, overflowY: 'auto' }}>
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 24px 64px' }}>
 
           {/* Header */}

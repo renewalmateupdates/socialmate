@@ -435,7 +435,7 @@ export default function Analytics() {
 
       <div style={{ display: 'flex', minHeight: '100vh', background: T.bg }}>
         <Sidebar />
-        <main style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+        <main className="md:ml-56" style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
           <div style={{ maxWidth: 900, margin: '0 auto' }}>
 
             {/* ── Header ──────────────────────────────────────────────────────── */}
