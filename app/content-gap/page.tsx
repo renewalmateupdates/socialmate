@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { CheckCircle2, HelpCircle, Radar, Ruler, XCircle } from 'lucide-react'
 
 const CREDIT_COST = 10
 
@@ -64,7 +65,7 @@ export default function ContentGapPage() {
           <div className="flex items-start justify-between mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">🕳️</span>
+                <Radar className="w-6 h-6" strokeWidth={1.75} />
                 <h1 className="text-2xl font-extrabold tracking-tight">Content Gap Detector</h1>
               </div>
               <p className="text-sm text-gray-400 dark:text-gray-500">
@@ -82,12 +83,12 @@ export default function ContentGapPage() {
             <h2 className="text-sm font-extrabold mb-3">What the detector catches</h2>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: '🕳️', label: 'Content gaps',   desc: 'Topics underserved or missing entirely in your niche' },
-                { icon: '❓', label: 'Audience questions', desc: 'What your audience is asking that nobody answers well' },
-                { icon: '📐', label: 'Format gaps',    desc: 'Content formats your niche is underusing' },
+                { Icon: Radar, label: 'Content gaps',   desc: 'Topics underserved or missing entirely in your niche' },
+                { Icon: HelpCircle, label: 'Audience questions', desc: 'What your audience is asking that nobody answers well' },
+                { Icon: Ruler, label: 'Format gaps',    desc: 'Content formats your niche is underusing' },
               ].map(item => (
                 <div key={item.label} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                  <span className="text-2xl block mb-2">{item.icon}</span>
+                  <span className="flex justify-center mb-2"><item.Icon className="w-6 h-6" strokeWidth={1.75} /></span>
                   <p className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">{item.label}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{item.desc}</p>
                 </div>
@@ -109,7 +110,7 @@ export default function ContentGapPage() {
           <div className="bg-black rounded-2xl p-6 mb-6 text-white flex items-center justify-between">
             <div>
               <p className="text-sm font-extrabold mb-1">
-                {result ? '✅ Analysis complete' : 'Analyze your content gaps'}
+                {result ? <span className="inline-flex items-center gap-1.5"><CheckCircle2 size={15} strokeWidth={2} /> Analysis complete</span> : 'Analyze your content gaps'}
               </p>
               <p className="text-xs text-gray-400">
                 {result
@@ -127,14 +128,14 @@ export default function ContentGapPage() {
                   Detecting gaps...
                 </>
               ) : (
-                `🕳️ Detect Gaps — ${CREDIT_COST} credits`
+                <><Radar size={14} strokeWidth={2} /> Detect Gaps — {CREDIT_COST} credits</>
               )}
             </button>
           </div>
 
           {error && (
             <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-3 mb-4">
-              <p className="text-xs font-semibold text-red-500">❌ {error}</p>
+              <p className="text-xs font-semibold text-red-500 inline-flex items-center gap-1.5"><XCircle size={13} strokeWidth={2} /> {error}</p>
             </div>
           )}
 
