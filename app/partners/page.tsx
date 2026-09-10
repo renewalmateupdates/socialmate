@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import SuspenseFallback from '@/components/SuspenseFallback'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { ClipboardList, Crown, DollarSign, Link2, Rocket, Ticket } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // Gold/purple design tokens
 const gold   = '#F59E0B'
@@ -361,14 +363,14 @@ function PartnersLoginInner() {
 
             {/* Commission cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-              {[
-                { emoji: '💰', title: '30% recurring', sub: 'On every subscription payment from your referrals' },
-                { emoji: '🚀', title: '40% at milestone', sub: 'Unlocked permanently when you hit 100 active referrals' },
-                { emoji: '🎟️', title: '10–15% on credits', sub: 'Flat commission on credit pack purchases' },
-                { emoji: '🔗', title: 'One link, all plans', sub: 'Your referral link works for Pro, Agency, and add-ons' },
-              ].map((item, i) => (
+              {([
+                { icon: DollarSign, title: '30% recurring', sub: 'On every subscription payment from your referrals' },
+                { icon: Rocket, title: '40% at milestone', sub: 'Unlocked permanently when you hit 100 active referrals' },
+                { icon: Ticket, title: '10–15% on credits', sub: 'Flat commission on credit pack purchases' },
+                { icon: Link2, title: 'One link, all plans', sub: 'Your referral link works for Pro, Agency, and add-ons' },
+              ] as { icon: LucideIcon; title: string; sub: string }[]).map((item, i) => (
                 <div key={i} style={{ background: '#111', border: `1px solid ${border}`, borderRadius: 12, padding: '14px 16px' }}>
-                  <div style={{ fontSize: 20, marginBottom: 6 }}>{item.emoji}</div>
+                  <div style={{ marginBottom: 6 }}><item.icon size={20} strokeWidth={1.75} color={gold} /></div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f1f1', marginBottom: 3 }}>{item.title}</div>
                   <div style={{ fontSize: 11, color: muted, lineHeight: 1.5 }}>{item.sub}</div>
                 </div>
@@ -377,7 +379,7 @@ function PartnersLoginInner() {
 
             {/* How to apply */}
             <div style={{ background: '#111', border: `1px solid ${border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f1f1', marginBottom: 12 }}>📋 How to apply</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f1f1', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}><ClipboardList size={15} strokeWidth={2} /> How to apply</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
                   { step: '1', text: 'Be an active Pro or Agency subscriber — we want affiliates who genuinely use the product' },
@@ -403,7 +405,7 @@ function PartnersLoginInner() {
                 background: 'rgba(124,58,237,0.08)', border: `1px solid rgba(124,58,237,0.25)`,
                 display: 'flex', gap: 10, alignItems: 'flex-start',
               }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>👑</span>
+                <Crown size={16} strokeWidth={1.75} color="#a78bfa" style={{ flexShrink: 0 }} />
                 <span style={{ fontSize: 12, color: '#c4b5fd', lineHeight: 1.6 }}>
                   <strong style={{ color: '#a78bfa' }}>Invited by Joshua?</strong>{' '}
                   Admin invitations bypass the paid plan requirement — just use the invite link you were sent to create your account and get started immediately.
