@@ -6,6 +6,13 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
+import {
+  BarChart3, CalendarDays, Clock, Fish, Flame, Gamepad2, Hash, Film,
+  Image as ImageIcon, Lightbulb, Link2, ListOrdered, Package, Palette,
+  PenLine, Radar, Recycle, RefreshCw, Repeat2, Search, ShieldCheck, Tag,
+  ClipboardList, Music, Zap,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const REPURPOSE_FORMATS = [
   { id: 'thread',        label: 'Thread'    },
@@ -79,7 +86,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
     <div className="bg-surface border border-theme rounded-2xl p-5">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🔄</span>
+          <RefreshCw className="w-6 h-6" strokeWidth={1.75} />
           <div>
             <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Content Repurpose</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Transform any content into a new format instantly</p>
@@ -146,7 +153,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
 
 const PROFILE_TOOLS = [
   {
-    emoji: '✍️',
+    icon: PenLine,
     label: 'Bio Writer',
     credits: '5 credits',
     what: 'Generate a platform-optimized bio for X, LinkedIn, Instagram, TikTok, Bluesky, or a general bio — tailored to your tone and keywords.',
@@ -156,7 +163,7 @@ const PROFILE_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🔍',
+    icon: Search,
     label: 'Profile Optimizer',
     credits: '5 credits',
     what: 'Paste your current bio and get an AI score (0–100), 3 specific improvements, and a fully rewritten version aligned to your goal.',
@@ -166,7 +173,7 @@ const PROFILE_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '📅',
+    icon: CalendarDays,
     label: 'Content Calendar AI',
     credits: '5 credits',
     what: 'Generate a structured 30-day content plan with daily themes, post ideas, caption hooks, and platform recommendations.',
@@ -179,7 +186,7 @@ const PROFILE_TOOLS = [
 
 const AI_TOOLS = [
   {
-    emoji: '✍️',
+    icon: PenLine,
     label: 'Caption Generator',
     credits: '5 credits',
     what: 'Generates platform-optimized captions based on your topic and tone.',
@@ -189,7 +196,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '#️⃣',
+    icon: Hash,
     label: 'Hashtag Generator',
     credits: '5 credits',
     what: 'Generates a set of relevant, high-performing hashtags for your post.',
@@ -199,7 +206,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🔁',
+    icon: Repeat2,
     label: 'Post Rewrite / Improver',
     credits: '5 credits',
     what: 'Takes your existing caption and makes it sharper, more engaging, and better structured.',
@@ -209,7 +216,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🎣',
+    icon: Fish,
     label: 'Viral Hook Generator',
     credits: '5 credits',
     what: 'Generates 3 scroll-stopping opening lines designed to drive clicks and engagement.',
@@ -219,7 +226,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🧵',
+    icon: ListOrdered,
     label: 'Thread Generator',
     credits: '10 credits',
     what: 'Turns a single topic or idea into a structured multi-part thread.',
@@ -229,7 +236,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '♻️',
+    icon: Recycle,
     label: 'Content Repurposer',
     credits: '5 credits',
     what: 'Paste a blog post, transcript, or long caption and get platform-ready content out the other side.',
@@ -239,7 +246,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '⚡',
+    icon: Zap,
     label: 'Post Score',
     credits: '5 credits',
     what: 'Get an AI score (0–100) on your post with specific strengths and improvements.',
@@ -249,7 +256,7 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '📅',
+    icon: CalendarDays,
     label: 'AI Content Calendar',
     credits: '25 credits',
     what: 'Generate a full 30-day content calendar based on your niche, platforms, and posting goals.',
@@ -259,7 +266,7 @@ const AI_TOOLS = [
     proOnly: true,
   },
   {
-    emoji: '🎨',
+    icon: Palette,
     label: 'AI Image Generation',
     credits: 'Coming soon',
     what: 'Generate custom images for your posts directly inside SocialMate.',
@@ -272,7 +279,7 @@ const AI_TOOLS = [
 
 const VIDEO_TOOLS = [
   {
-    emoji: '🎵',
+    icon: Music,
     label: 'TikTok Script Generator',
     credits: '5 credits',
     what: 'Generate a complete TikTok video script: a scroll-stopping 3-second hook, main content points, and a strong CTA.',
@@ -282,7 +289,7 @@ const VIDEO_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🎬',
+    icon: Film,
     label: 'Creator Studio & GIF Export',
     credits: 'Free',
     what: 'Trim video clips, apply filters, add caption overlays, and export for TikTok, YouTube, Instagram Reels, and more. Now with GIF export.',
@@ -292,7 +299,7 @@ const VIDEO_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🎮',
+    icon: Gamepad2,
     label: 'Clips Studio',
     credits: 'Free',
     what: 'Browse your Twitch clips or any YouTube channel videos and schedule them to all 7 platforms in one click.',
@@ -305,7 +312,7 @@ const VIDEO_TOOLS = [
 
 const GROWTH_TOOLS = [
   {
-    emoji: '🔥',
+    icon: Flame,
     label: 'SM-Pulse',
     credits: '20 credits per scan',
     what: 'Scans social platforms to surface what is trending in your niche right now.',
@@ -315,7 +322,7 @@ const GROWTH_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '📊',
+    icon: BarChart3,
     label: 'SM-Radar',
     credits: '20 credits per report',
     what: 'Analyzes your personal post performance to surface what is actually working for your audience.',
@@ -325,7 +332,7 @@ const GROWTH_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🕵️',
+    icon: Radar,
     label: 'Content Gap Detector',
     credits: '10 credits',
     what: 'Spots underserved topics and content gaps in your niche so you can create content nobody else is making.',
@@ -338,7 +345,7 @@ const GROWTH_TOOLS = [
 
 const SCHEDULING_TOOLS = [
   {
-    emoji: '📦',
+    icon: Package,
     label: 'Bulk Scheduler',
     credits: 'Free (manual)',
     what: 'Schedule dozens of posts at once instead of one at a time.',
@@ -348,7 +355,7 @@ const SCHEDULING_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '⏰',
+    icon: Clock,
     label: 'Best Time to Post',
     credits: 'Free',
     what: 'See when your audience is most active so you can schedule posts for maximum reach.',
@@ -358,7 +365,7 @@ const SCHEDULING_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🛡️',
+    icon: ShieldCheck,
     label: 'Platform Requirement Guard',
     credits: 'Always free',
     what: "Automatically warns you if your post violates a platform's rules before it goes live.",
@@ -371,7 +378,7 @@ const SCHEDULING_TOOLS = [
 
 const CREATOR_TOOLS = [
   {
-    emoji: '🔗',
+    icon: Link2,
     label: 'Link-in-Bio Page',
     credits: 'Free',
     what: 'A clean, shareable page that houses all your links — like Linktree, built into SocialMate.',
@@ -381,7 +388,7 @@ const CREATOR_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '📋',
+    icon: ClipboardList,
     label: 'Post Template Library',
     credits: 'Free',
     what: 'Save your best post formats as reusable templates so you never start from scratch.',
@@ -391,7 +398,7 @@ const CREATOR_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🖼️',
+    icon: ImageIcon,
     label: 'Media Library',
     credits: 'Free',
     what: 'Store and organize your images and videos inside SocialMate for quick access when scheduling.',
@@ -401,7 +408,7 @@ const CREATOR_TOOLS = [
     proOnly: false,
   },
   {
-    emoji: '🏷️',
+    icon: Tag,
     label: 'Hashtag Collections',
     credits: 'Free',
     what: 'Save groups of hashtags and apply them to posts with one click.',
@@ -424,7 +431,7 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
     }`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{tool.emoji}</span>
+          <tool.icon className="w-6 h-6" strokeWidth={1.75} />
           <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{tool.label}</p>
           {tool.proOnly && (
             <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full">{t('app_ai_features.pro_badge')}</span>
@@ -541,7 +548,7 @@ export default function AIFeaturesPage() {
           </div>
 
           <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-3 mb-8 flex items-start gap-3">
-            <span className="text-lg flex-shrink-0">💡</span>
+            <Lightbulb size={18} strokeWidth={1.75} className="flex-shrink-0" />
             <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
               <strong>{t('app_ai_features.why_credits')}</strong> {t('app_ai_features.credits_explanation')}
             </p>
@@ -556,7 +563,7 @@ export default function AIFeaturesPage() {
 
           <div className="bg-gradient-to-r from-[#010101] via-[#161616] to-[#010101] border border-gray-800 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🎵</span>
+              <Music className="w-6 h-6 text-emerald-400" strokeWidth={1.75} />
               <div>
                 <p className="text-xs font-bold text-emerald-400 uppercase tracking-wide mb-0.5">Now Live — TikTok</p>
                 <p className="text-sm font-extrabold text-white">Schedule TikTok videos directly from SocialMate</p>
