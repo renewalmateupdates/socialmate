@@ -1288,10 +1288,12 @@ function ComposeInner() {
   }
 
   const handlePublish = async () => {
-    track('post_scheduled', {
-      platforms: selectedPlatforms.join(','),
-      count: selectedPlatforms.length,
-    })
+    // post_scheduled/post_published are now recorded server-side in
+    // /api/posts/create once a post genuinely exists (see that route) --
+    // this used to fire here, before the guard clause below and before the
+    // request was even sent, so it recorded "clicked publish" rather than
+    // "a post was actually created," and could fire on an attempt that
+    // returned early and never called the API at all.
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
     setPublishing(true)
     setPublishResults(null)

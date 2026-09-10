@@ -11,6 +11,8 @@ import {
 } from '@/lib/post-limits'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import { REPLY_TO } from '@/lib/mail'
+import { recordFunnel } from '@/lib/usage'
+import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 
 
 export async function POST(request: NextRequest) {
@@ -168,6 +170,20 @@ export async function POST(request: NextRequest) {
       if (draftId) {
         await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
       }
+
+      // This is the ground truth for "did compose actually convert to a
+      // scheduled post" — the client-side track('post_scheduled') call in
+      // compose/page.tsx fired unconditionally at the top of handlePublish,
+      // before the validation guard and before this request even went out, so
+      // it recorded intent-to-click rather than success and could fire on a
+      // request that never reaches here at all. This is the one place that
+      // only runs once a post genuinely exists, and it also covers the thread
+      // and A/B compose paths, which never called track() at all since they
+      // route through this same endpoint.
+      recordFunnel(getSupabaseAdmin(), user.id, 'post_scheduled', {
+        platforms: platforms.join(','),
+        count: platforms.length,
+      })
 
       // Non-critical: store media URLs for scheduled post publish
       if (mediaUrls?.length > 0) {
@@ -334,6 +350,22 @@ export async function POST(request: NextRequest) {
 
     if (draftId && !allFailed) {
       await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
+    }
+
+    // This "Post Now" path is a second, separate implementation of publishing
+    // from /api/posts/publish's — this one is what compose's actual Post Now
+    // button hits, since handlePublish always calls /api/posts/create. The two
+    // had drifted: only /api/posts/publish called handleFirstPostCredits,
+    // updateStreak, and recordFunnel('post_published'), so an immediate publish
+    // from Compose never granted the first-post credit, never updated the
+    // streak, and was never counted in the funnel at all.
+    if (!allFailed) {
+      handleFirstPostCredits(user.id)
+      updateStreak(user.id)
+      recordFunnel(getSupabaseAdmin(), user.id, 'post_published', {
+        platforms: platforms.join(','),
+        count: platforms.length,
+      })
     }
 
     if (!allFailed && Object.keys(platformPostIds).length > 0) {
