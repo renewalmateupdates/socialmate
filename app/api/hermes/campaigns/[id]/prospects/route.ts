@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getHermesAccess } from '@/lib/hermes-access'
+import { getHermesAccess, HERMES_LIMITS, prospectsAddedThisMonth } from '@/lib/hermes-access'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -40,6 +40,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const body = await req.json()
   const { name, email, bluesky_handle, mastodon_handle, company, notes } = body
   if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+
+  // Advertised on /hermes as "75/400 prospects/month" — applies across
+  // manual adds and Discover imports combined, since both write this table.
+  const limit = HERMES_LIMITS[access.tier!].prospectsPerMonth
+  if (limit !== Infinity) {
+    const addedSoFar = await prospectsAddedThisMonth(supabase, user.id)
+    if (addedSoFar >= limit) {
+      return NextResponse.json({ error: `You've hit your ${limit} prospects/month cap. Resets next month, or upgrade for more.` }, { status: 429 })
+    }
+  }
 
   const { data, error } = await supabase
     .from('hermes_prospects')
