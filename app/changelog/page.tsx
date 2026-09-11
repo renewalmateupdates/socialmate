@@ -21,6 +21,18 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'September 10, 2026',
+    version: 'HERMES Opens Up, SOMA Add-on Fix, Faster Onboarding',
+    changes: [
+      { type: 'New',      text: 'HERMES — AI cold outreach across email, Bluesky, and Mastodon — is now available to everyone. Starter is $12/month (3 campaigns, 75 prospects/month), Pro is $25/month (10 campaigns, 400 prospects/month, weekly automated prospecting). Find it in the sidebar or at /hermes.' },
+      { type: 'Fixed',    text: 'SOMA Autopilot and Full Send now activate immediately after checkout. They were charging correctly but not turning on until we manually flipped a flag — that step is now automatic.' },
+      { type: 'Improved', text: 'Zenith\'s "share your card" link now points to an actual live page instead of a broken one.' },
+      { type: 'Improved', text: 'Creator Studio, Community, Achievements, and a few other pages no longer render clipped behind the sidebar on desktop.' },
+      { type: 'Improved', text: 'Onboarding and signup load faster and stop shifting around while they load on mobile — a referral banner was popping in after the page had already rendered, pushing everything else down.' },
+      { type: 'Improved', text: 'The roadmap is now collapsible and grouped by the month each item actually shipped.' },
+    ],
+  },
+  {
     date: 'September 1, 2026',
     version: 'Connect-to-First-Post Fixes, Sitemap Rebuild, Crawler Accuracy',
     changes: [

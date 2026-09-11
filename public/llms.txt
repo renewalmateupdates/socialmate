@@ -232,19 +232,20 @@ and content platform.
 ---
 
 
-## HERMES — Cold Outreach System (Admin-Only)
+## HERMES — Cold Outreach System
 
-Cold outreach management system for SocialMate founder/admin use only.
+AI-powered cold outreach add-on, available to any SocialMate customer.
 
+- Two tiers: Starter $12/month (3 campaigns, 75 prospects/month, email + Bluesky, 1 Discover run/month) and Pro $25/month (10 campaigns, 400 prospects/month, all 3 channels, weekly automated Discover, campaign analytics)
 - Campaign management with goal, persona, channel selection (email/Bluesky/Mastodon)
 - 4-step sequence: Intro → Follow-up 1 → Follow-up 2 → Break-up
-- Prospect management — add manually or via Hunter.io email finder (domain + name → email + confidence score)
-- Auto-discover — scrapes Substack leaderboard, GitHub user search, dev.to articles, Hashnode GraphQL for prospects
-- Gemini-2.5-flash powered message generation — personalized per prospect by source context
+- Prospect management — add manually or via Hunter.io email finder (domain + name → email + confidence score), capped per tier to protect the shared Hunter.io quota
+- Auto-discover — scrapes Substack leaderboard, GitHub user search, dev.to articles, Hashnode GraphQL for prospects; weekly automated runs are a Pro-tier feature
+- Gemini-powered message generation — personalized per prospect by source context
 - Send via Resend (email), Bluesky DM (chat.bsky.convo XRPC), or Mastodon DM (direct visibility)
 - Follow-up cron — daily Inngest function checks `next_contact_at` and sends/drafts next sequence step
 - Draft mode or auto-send mode per campaign
-- Admin only at: https://socialmate.studio/hermes
+- Landing page: https://socialmate.studio/hermes · Dashboard/upgrade: https://socialmate.studio/hermes/dashboard
 
 ---
 
@@ -490,6 +491,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 - SOMA Autopilot: $10/month
 - SOMA Full Send: $20/month
 - SOMA Credit Packs: $4.99 (75cr) / $12.99 (225cr) / $24.99 (500cr)
+- HERMES cold outreach: Starter $12/month · Pro $25/month
 
 ### Active Discounts
 - BDAY31 — 31% off any plan, active through December 15, 2026. Apply at checkout or /pricing
