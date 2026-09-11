@@ -1173,6 +1173,39 @@ Two days of Claude-driven audit work, prompted by "is everything across the app 
 - **"Marked done" in this file means grep it, not trust it.** The August repricing sweep, the LinkedIn launch, and the never-say-unlimited rule were all previously logged as complete and all had live violations months later. A changelog entry is a claim about the day it was written, not a live guarantee — re-verify with the literal string before quoting a "done" line from this file to a customer or an AI crawler.
 - **"Never say unlimited" doesn't require the word "unlimited."** "No post cap," "no caps," "no post limits ever" are the identical claim and just as wrong. Grep the meaning, not the token.
 
+**September 10-11, 2026 — HERMES becomes a real paid feature, and the day the pricing page finally meant what it said (PRs #647-#652):**
+
+The product-audit sweep that opened this session covered Creator Hub billing-state gating (tip jar/subscriptions pause automatically on downgrade, resume on resubscribe), Zenith's share link (was pointing at a static broken `/zenith`, now `/z/[code]`), `/community` and Creator Studio redesigns, SM-Pulse/SM-Radar scan history, sidebar decluttering (Community and Enki removed from the Manage section), evergreen recycling now sorted by real merged engagement, a `/schedules` layout fix, `/analytics` merging manual-sync and auto-fetched engagement into one real number, a `/notifications` dark-mode fix, and a professional rewrite of `/story` (PR #647). Building HERMES's billing surfaced the identical "checkout works, webhook never activates" bug in SOMA Autopilot/Full Send that HERMES itself had (PR #649) — same fix, adapted for workspace-scoping instead of user-scoping, since SOMA runs per-workspace while HERMES is per-user.
+
+**HERMES is now a real, priced, enforced feature** (PRs #648, #650, #651) — not an admin tool with a payment page bolted on:
+- Real Stripe prices wired into the webhook: Starter $12/mo, Pro $25/mo (see Stripe Live Price IDs below). Sidebar entry is no longer admin-gated.
+- Two of the numbers already on `/hermes`'s pricing page — "75/400 prospects/month" and "1 auto-discover run/month (Starter) vs weekly cron (Pro)" — had zero backing enforcement, on either the manual endpoints or the weekly Inngest cron. Fixed: `HERMES_LIMITS` (`lib/hermes-access.ts`) now gates prospect adds and discover runs before they happen, and the weekly cron filters to active Pro/admin accounts only — which also closed a real cost leak, since a cancelled Starter subscriber with an old campaign left `auto_discover_enabled` was getting free weekly Gemini runs forever.
+- Hunter.io email-finder (`/api/hermes/find-email`) had zero rate limiting despite billing against one account-wide quota shared by every HERMES user on this app — a single customer could exhaust a whole month's Hunter credits by themselves and silently break lookups for everyone else. Capped at 30/mo Starter, 100/mo Pro.
+- New `hermes_discover_runs` table logs every discover invocation (manual, cron, and Hunter lookup, tagged by `source`) so the monthly counters have real rows to count instead of being inferred.
+
+**Mobile performance: onboarding and signup were the worst-performing pages, and they're structurally the only two pages that are always a cold-cache load** (PR #652). Mobile RES was 72, dragged down almost entirely by `/onboarding` (RES 26, FCP 4.7s, LCP 5.77s, CLS 0.33) and `/signup` (RES 49, CLS 0.34) while every other route (`/`, `/settings`, `/accounts`, `/compose`, `/dashboard`) was green. Root cause on both, same pattern: a referral banner whose value was read inside a `useEffect` firing after mount, so it popped in after first paint and pushed the page down — likely inflating LCP too, since a layout shift above the LCP candidate re-paints it at its new position. Signup's fix was a one-line simplification (`useSearchParams()` already resolves synchronously and identically on server and client, no reason it was ever routed through state). Onboarding's `document.cookie` has no such guarantee server-side, so the real fix there was splitting `page.tsx` into a Server Component that reads the `ref_code` cookie via `cookies()` and a new `OnboardingClient.tsx` taking it as a prop — server and client now agree from the first render, no hydration mismatch, no post-mount shift. Also dynamically imported the three connect-form modals (Bluesky/Telegram/Mastodon), previously eager-loaded into every cold visit even though most sessions on step 1 never reach them.
+
+**Required SQL run in Supabase this session:**
+```sql
+ALTER TABLE workspaces ADD COLUMN IF NOT EXISTS soma_addon_subscription_id TEXT;
+
+CREATE TABLE IF NOT EXISTS hermes_discover_runs (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  campaign_id uuid REFERENCES hermes_campaigns(id) ON DELETE CASCADE,
+  source text NOT NULL DEFAULT 'manual',
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE hermes_discover_runs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own discover runs" ON hermes_discover_runs FOR SELECT USING (auth.uid() = user_id);
+```
+
+**Rules that follow:**
+
+- **A pricing-page number with no backing code is a promise nobody is keeping — and it's not an all-or-nothing failure.** HERMES's `sendsPerDay` and `campaigns` caps were real and enforced from day one; `prospectsPerMonth` and `discoverRunsPerMonth` sat right next to them as pure copy for months. Half-enforced reads as trustworthy, which makes it more dangerous than a page that's obviously all talk.
+- **A quota shared across every customer needs a per-customer cap even when the vendor doesn't require one.** Nothing about Hunter.io's billing forces SocialMate to limit any single user — the vendor is happy to let one account burn the whole month's pool. The cap has to be imposed on this side, or one customer's usage becomes every other customer's outage.
+- **Onboarding and signup carry a performance tax no other route does: they are structurally always cold.** A returning user's fifth trip to `/dashboard` benefits from a warm cache and previously-downloaded JS; nobody's fifth trip to `/signup` exists. Bundle-size and layout-shift fixes on these two specific pages are worth disproportionately more than the identical fix anywhere else in the app, because every single visitor experiences them cold.
+
 ## Pending / In Progress
 
 - **TikTok content sharing audit** — Submitted Sept 9, 2026. 2-4 week turnaround, TikTok said. This is what lifts the private-account-only restriction on Direct Post — until it clears, TikTok Studio stays private/drafts-only, same as today. Check developers.tiktok.com/apps (Manage apps → SocialMate.Studio) for status. Don't do further TikTok posting-flow work until this resolves one way or the other.
@@ -1239,6 +1272,10 @@ Two days of Claude-driven audit work, prompted by "is everything across the app 
 ## Confirmed Done (stop asking about these)
 
 - ✅ **Multi-account posting for LinkedIn/Telegram + funnel measurement fix (Sept 9-10, PRs #632, #635)** — LinkedIn/Telegram publishing now accepts an accountId like Bluesky/Mastodon/Twitter already did; a second connected account on either no longer breaks all future posts. `post_scheduled`/`post_published` funnel events moved server-side into `/api/posts/create`, firing only after a post is actually saved — the old client-side call fired before validation and undercounted thread/A-B posts to zero. First-post credit bonus + streak update now also fire on Compose's actual Post Now path (`lib/post-activation.ts`, shared by both publish routes). Never re-audit these specific bugs; DO re-run the funnel numbers periodically since the true conversion rate is still unmeasured post-fix.
+- ✅ **Onboarding + signup mobile CLS/bundle fix (Sept 10-11, PR #652)** — Both pages' referral banners now read their value synchronously on first render instead of via a post-mount `useEffect`, eliminating the layout shift that was driving mobile CLS to 0.33/0.34 ("Poor") and likely inflating LCP. `app/onboarding/page.tsx` is now a Server Component reading the `ref_code` cookie via `cookies()`, passing it to a new `app/onboarding/OnboardingClient.tsx`. The three connect-form modals (Bluesky/Telegram/Mastodon) are now `next/dynamic` instead of eager-imported. Verified via a full `next build`; the authenticated flow itself wasn't manually clicked through post-merge — do that once, then never redo this specific fix.
+- ✅ **HERMES is a real paid feature now, with real quota enforcement (Sept 10-11, PRs #648, #650, #651)** — Live Stripe prices ($12/$25, see Stripe Live Price IDs below), not admin-gated in the sidebar or on the dashboard. `HERMES_LIMITS` in `lib/hermes-access.ts` now actually enforces `prospectsPerMonth` (75/400) and `discoverRunsPerMonth` (1/4, manual-only) — both were pure marketing copy before this. The weekly auto-discover cron (`lib/inngest-hermes.ts`) now filters to active Pro/admin accounts only, closing a real cost leak (a cancelled Starter subscriber's old campaign was drawing free weekly Gemini runs forever). Hunter.io email-finder capped at 30/100 lookups per month per tier — it shares one account-wide Hunter quota across every HERMES user and had zero limiting before this. New `hermes_discover_runs` table. Never re-describe HERMES as admin-only again.
+- ✅ **SOMA Autopilot/Full Send billing bug fixed (Sept 10, PR #649)** — Same "checkout completes, webhook never activates" bug HERMES had, adapted for workspace-scoping (`workspaces.soma_autopilot_enabled`/`soma_full_send_enabled`) instead of user-scoping, keyed by new `workspaces.soma_addon_subscription_id`. SQL run. Never re-audit this specific bug; nobody has purchased since the fix to confirm end-to-end, so if a SOMA addon purchase looks broken, check here first.
+- ✅ **Product audit sweep — Creator Hub, Zenith, /community, Creator Studio, sidebar (Sept 10, PR #647)** — Creator monetization (tip jar/subscriptions) now re-checks the owner's plan via `resolveWorkspacePlan()` on every access, pausing on downgrade and resuming on resubscribe automatically. Zenith's share link fixed (`/z/[code]`, was pointing at a broken static `/zenith`). `/community` and Creator Studio (`app/create/CreatePageClient.tsx`) both had the same fixed-sidebar layout bug (missing `md:ml-56`) also found and fixed on Achievements/Analytics/Content DNA — that was the actual "unpolished" complaint, not a design problem. Community and Enki removed from the sidebar's Manage section. Evergreen, main Analytics, and SOMA dashboard now all merge `bluesky_stats`/`mastodon_stats` with the auto-fetched `analytics` JSONB fallback, the same pattern, three places. Roadmap is now collapsible and grouped by real month (from `git blame`, not guessed). Never re-run this specific sweep.
 - ✅ **TikTok Studio compliance fixes + content sharing audit filed (Sept 9, PRs #633, #634)** — Consent declaration now shows on every direct post, not only disclosed ones. `disable_auto_auth=1` added so reconnecting always shows TikTok's real consent screen. Audit submitted Sept 9 — see Pending above for status-check instructions. Don't redo these two fixes; the audit outcome is the only open question.
 - ✅ **llms.txt + blog + /vs + /for content accuracy sweep (Sept 10, PRs #636, #637, #638)** — Fixed: wrong X quota in llms.txt (was "5/month," is 0), three-way inconsistent blog post counts, a blog post + a `/vs` page both claiming "16 platforms" (fabricated), 8 `/vs` pages + 1 in-app upgrade prompt still quoting the pre-August $5/month price, LinkedIn/TikTok mislabeled "coming soon" on FAQ/Support, a real functional bug in `app/templates/page.tsx`'s platform picker (LinkedIn/X/TikTok couldn't be selected), and 25 separate "no post cap" claims across 11 files violating never-say-unlimited without using that word. Full findings in `[[project_content_accuracy_sweep_sept10]]` memory. This was a one-time sweep, not a standing fix — re-grep periodically per the rule above, don't assume it stays clean.
 - ✅ **Onboarding actually saves now (Aug 30, PRs #592, #594, #595)** — `handleFinish`
@@ -1291,7 +1328,7 @@ Two days of Claude-driven audit work, prompted by "is everything across the app 
 - ✅ **Performance bundle cut + bug sweep (May 26, PRs #431–#432)** — `.maybeSingle()` on all upsert lookups. i18n lazy loading (−394KB from every page). LazyClientComponents wrapper for `ssr:false` dynamic imports. Dead landing page auth call removed. PHLaunchBanner removed. Blog ISR + generateStaticParams. `/tiktok` landing page + nav consolidation all merged. Never redo these.
 - ✅ **Full site sweep — dark mode + mobile + accuracy (May 24, PR #426)** — All public pages: dark mode consistent, comparison tables mobile-scrollable (overflow-x-auto), all stats updated to 15+ AI tools / 7 platforms, logo.png replaces S lettermark everywhere. All 75 vs/ pages JSX-balanced. Never ask to do this sweep again — it's done.
 - ✅ **IRIS AI auto-generate (May 22, PR #401)** — Admin `/admin/iris` compose page has "Generate draft with AI" button. Gemini 2.5-flash writes subject + full body draft. Never ask to build this again.
-- ✅ **HERMES cold outreach system (May 14–18, PRs #318–#327)** — Full campaign system at `/hermes` (admin-only). Prospect discovery (free: Substack/GitHub/dev.to/Hashnode), Hunter.io email finder, Gemini-powered message generation, Resend email + Bluesky/Mastodon DM send, 4-step sequence, follow-up cron. Never ask to build HERMES again.
+- ✅ **HERMES cold outreach system (May 14–18, PRs #318–#327)** — Full campaign system at `/hermes`. Prospect discovery (free: Substack/GitHub/dev.to/Hashnode), Hunter.io email finder, Gemini-powered message generation, Resend email + Bluesky/Mastodon DM send, 4-step sequence, follow-up cron. Never ask to build HERMES again. **Admin-only was accurate here — it stopped being true Sept 10-11, 2026 (PRs #648/#650/#651); see that entry for current pricing/access/enforcement.**
 - ✅ **SM Pulse + SM Radar** — `/sm-pulse` (trend scan, 20 credits) and `/sm-radar` (content intelligence report, 20 credits) both live. Never ask to build these.
 - ✅ **ZENITH creator card (May 20)** — `/zenith` live. Shareable presence card. In sitemap. Never build again.
 - ✅ **Achievements + 30-Day Challenge (May 19–20)** — `/achievements` (13 badges, credit rewards, progress bars) + `/challenge` (30-day heatmap, 50cr reward) both live. `user_achievements` table. Daily `achievementCheckerCron`. Never build again.
@@ -1519,9 +1556,9 @@ paying customer to free. They are removed from the checkout side only
 (pricing / onboarding / settings / sidebar).
 
 **Unchanged by the repricing:** White Label ($20 / $40), all credit packs, all
-donation tiers, X Boosters, SOMA Autopilot ($10) and Full Send ($20), Studio
-Stax, and every Enki tier. When correcting pricing copy, these are the decoys
-that make a blind find-and-replace dangerous.
+donation tiers, X Boosters, SOMA Autopilot ($10) and Full Send ($20), HERMES
+($12 / $25), Studio Stax, and every Enki tier. When correcting pricing copy,
+these are the decoys that make a blind find-and-replace dangerous.
 | White Label Basic | price_1TFMHt7OMwDowUuU56Fzw4fE | $20.00/mo |
 | White Label Pro | price_1TFMIG7OMwDowUuUcjNNGB0Q | $40.00/mo |
 | Credits Starter (100cr) | price_1TFMI47OMwDowUuUhTrbe3oq | $1.99 |
@@ -1548,6 +1585,8 @@ that make a blind find-and-replace dangerous.
 | SOMA Credits Starter (75cr) | price_1TRx227OMwDowUuU8IRlxaRh | $4.99 one-time |
 | SOMA Credits Growth (225cr) | price_1TRx2U7OMwDowUuU5ZqeMu6a | $12.99 one-time |
 | SOMA Credits Pro (500cr) | price_1TRx2w7OMwDowUuU4t8lMMwe | $24.99 one-time |
+| HERMES Starter | price_1UEHaA7OMwDowUuUJ2OA4jic | $12.00/mo |
+| HERMES Pro | price_1UEHcB7OMwDowUuUFwqE1Hk6 | $25.00/mo |
 
 ---
 
