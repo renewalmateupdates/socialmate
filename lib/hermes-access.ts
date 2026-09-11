@@ -8,10 +8,23 @@ export type HermesTier = 'admin' | 'starter' | 'pro'
 // infrastructure HERMES sends through today — every customer sends from the
 // same domain and the same API budget, so one runaway campaign can't be
 // allowed to burn either for everyone else.
-export const HERMES_LIMITS: Record<HermesTier, { campaigns: number; sendsPerDay: number }> = {
-  admin:   { campaigns: Infinity, sendsPerDay: Infinity },
-  starter: { campaigns: 3, sendsPerDay: 25 },
-  pro:     { campaigns: 10, sendsPerDay: 50 },
+//
+// prospectsPerMonth and discoverRunsPerMonth back the numbers quoted on
+// /hermes ("75/400 prospects per month", "1 auto-discover run/month" vs
+// "weekly auto-discover cron") — those were pure marketing copy with no
+// enforcement anywhere until this was added. discoverRunsPerMonth gates the
+// on-demand Discover button only; the weekly cron is Pro/admin-only by tier
+// (see hermesAutoDiscoverCron in lib/inngest-hermes.ts) and is rate-limited
+// by its own weekly schedule, not this counter.
+export const HERMES_LIMITS: Record<HermesTier, {
+  campaigns: number
+  sendsPerDay: number
+  prospectsPerMonth: number
+  discoverRunsPerMonth: number
+}> = {
+  admin:   { campaigns: Infinity, sendsPerDay: Infinity, prospectsPerMonth: Infinity, discoverRunsPerMonth: Infinity },
+  starter: { campaigns: 3, sendsPerDay: 25, prospectsPerMonth: 75, discoverRunsPerMonth: 1 },
+  pro:     { campaigns: 10, sendsPerDay: 50, prospectsPerMonth: 400, discoverRunsPerMonth: 4 },
 }
 
 export async function getHermesAccess(
@@ -41,5 +54,32 @@ export async function sentTodayCount(db: SupabaseClient, userId: string): Promis
     .eq('user_id', userId)
     .eq('status', 'sent')
     .gte('sent_at', startOfDay.toISOString())
+  return count ?? 0
+}
+
+function startOfMonthUTC(): Date {
+  const d = new Date()
+  d.setUTCDate(1)
+  d.setUTCHours(0, 0, 0, 0)
+  return d
+}
+
+export async function prospectsAddedThisMonth(db: SupabaseClient, userId: string): Promise<number> {
+  const { count } = await db
+    .from('hermes_prospects')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', startOfMonthUTC().toISOString())
+  return count ?? 0
+}
+
+// Counts on-demand Discover clicks only — the weekly cron doesn't draw from
+// this (see the HERMES_LIMITS comment above).
+export async function discoverRunsThisMonth(db: SupabaseClient, userId: string): Promise<number> {
+  const { count } = await db
+    .from('hermes_discover_runs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', startOfMonthUTC().toISOString())
   return count ?? 0
 }

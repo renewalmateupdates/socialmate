@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage, type HermesChannel } from '@/lib/hermes-send'
 import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
+import { HERMES_LIMITS, prospectsAddedThisMonth } from '@/lib/hermes-access'
 
 const STEP_LABELS = ['Intro', 'Follow-up 1', 'Follow-up 2', 'Break-up']
 
@@ -204,22 +205,53 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
 
     if (!campaigns || campaigns.length === 0) return { ran: 0 }
 
+    // "Weekly auto-discover cron" is advertised as a Pro-tier feature on
+    // /hermes — Starter gets 1 manual run/month instead (enforced in the
+    // on-demand Discover route). This was never checked: the cron ran every
+    // campaign with auto_discover_enabled regardless of tier, and didn't
+    // even check whether HERMES was still active — a cancelled subscriber
+    // with an old campaign left enabled kept getting free weekly Gemini
+    // runs forever. Filter to active Pro/admin accounts only.
+    const eligibleUserIds = await step.run('filter-pro-tier-users', async () => {
+      const userIds = Array.from(new Set(campaigns.map(c => c.user_id)))
+      const { data: settingsRows } = await supabase
+        .from('user_settings')
+        .select('user_id, hermes_active, hermes_tier')
+        .in('user_id', userIds)
+      return (settingsRows ?? [])
+        .filter(s => s.hermes_active && s.hermes_tier === 'pro')
+        .map(s => s.user_id)
+    })
+    const eligibleSet = new Set(eligibleUserIds)
+    const eligibleCampaigns = campaigns.filter(c => eligibleSet.has(c.user_id))
+
+    if (eligibleCampaigns.length === 0) return { ran: 0, skippedNotProTier: campaigns.length }
+
     let totalImported = 0
     let totalSent     = 0
 
-    for (const campaign of campaigns) {
+    for (const campaign of eligibleCampaigns) {
       await step.run(`discover-campaign-${campaign.id}`, async () => {
-        const perPage = Math.min(campaign.prospects_per_run ?? 10, 25)
+        // "75/400 prospects/month" is account-wide, combined across manual
+        // adds and every discover source — check what's left before pulling
+        // more in.
+        const limit = HERMES_LIMITS.pro.prospectsPerMonth
+        const addedSoFar = await prospectsAddedThisMonth(supabase, campaign.user_id)
+        const remainingBudget = Math.max(0, limit - addedSoFar)
+        if (remainingBudget <= 0) return
+
+        const perPage = Math.min(campaign.prospects_per_run ?? 10, 25, remainingBudget)
         const { keyword, sources } = parseDiscoverConfig(campaign.apollo_query)
         const limitPerSource = Math.max(1, Math.ceil(perPage / sources.length))
 
         const found = await discoverProspects({ sources, keyword, limitPerSource })
+        await supabase.from('hermes_discover_runs').insert({ user_id: campaign.user_id, campaign_id: campaign.id, source: 'cron' })
         if (found.length === 0) return
 
         const { data: existingProspects } = await supabase
           .from('hermes_prospects').select('email').eq('campaign_id', campaign.id)
         const existingEmails = new Set((existingProspects ?? []).map((r: { email: string }) => r.email?.toLowerCase()).filter(Boolean))
-        const newPeople = found.filter(p => !existingEmails.has(p.email))
+        const newPeople = found.filter(p => !existingEmails.has(p.email)).slice(0, remainingBudget)
 
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
       || process.env.GEMINI_API_KEY
@@ -269,6 +301,6 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
       })
     }
 
-    return { ran: campaigns.length, imported: totalImported, sent: totalSent }
+    return { ran: eligibleCampaigns.length, skippedNotProTier: campaigns.length - eligibleCampaigns.length, imported: totalImported, sent: totalSent }
   }
 )

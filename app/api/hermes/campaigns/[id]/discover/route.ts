@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { getHermesAccess } from '@/lib/hermes-access'
+import { getHermesAccess, HERMES_LIMITS, discoverRunsThisMonth, prospectsAddedThisMonth } from '@/lib/hermes-access'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage } from '@/lib/hermes-send'
 import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
@@ -90,6 +90,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .single()
   if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
 
+  // ── Monthly caps — advertised on /hermes ("1 auto-discover run/month" on
+  // Starter, "75/400 prospects/month") but never enforced until now. Check
+  // the run cap before touching Gemini or the discovery sources at all.
+  const limits = HERMES_LIMITS[access.tier!]
+  const runsSoFar = await discoverRunsThisMonth(supabase, user.id)
+  if (runsSoFar >= limits.discoverRunsPerMonth) {
+    return NextResponse.json({
+      error: `You've used your ${limits.discoverRunsPerMonth} Discover run${limits.discoverRunsPerMonth === 1 ? '' : 's'} for this month. Resets next month, or upgrade for more.`,
+    }, { status: 429 })
+  }
+  const prospectsSoFar = await prospectsAddedThisMonth(supabase, user.id)
+  const remainingBudget = limits.prospectsPerMonth === Infinity ? Infinity : Math.max(0, limits.prospectsPerMonth - prospectsSoFar)
+  if (remainingBudget <= 0) {
+    return NextResponse.json({
+      error: `You've hit your ${limits.prospectsPerMonth} prospects/month cap. Resets next month, or upgrade for more.`,
+    }, { status: 429 })
+  }
+
   const body = await req.json()
 
   const keyword = body.keyword ?? parseDiscoverConfig(campaign.apollo_query).keyword
@@ -98,6 +116,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // ── Discover from all sources in parallel ────────────────────────────────
   const found = await discoverProspects({ sources, keyword, limitPerSource })
+
+  // This run counts against the monthly Discover-run cap whether or not it
+  // turns up anything new — it still hit the scraping sources and, below,
+  // may still call Gemini.
+  await supabase.from('hermes_discover_runs').insert({ user_id: user.id, campaign_id, source: 'manual' })
 
   if (found.length === 0) {
     return NextResponse.json({ discovered: 0, withEmail: found.length, imported: 0, sent: 0, skipped: 0 })
@@ -113,7 +136,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     (existingProspects ?? []).map(r => r.email?.toLowerCase()).filter(Boolean)
   )
 
-  const newProspects = found.filter(p => !existingEmails.has(p.email))
+  const dedupedProspects = found.filter(p => !existingEmails.has(p.email))
+  // Cap import quantity to what's left of this month's prospect budget —
+  // don't let one big discover run blow straight through the monthly cap.
+  const cappedByMonthlyLimit = Math.max(0, dedupedProspects.length - remainingBudget)
+  const newProspects = remainingBudget === Infinity ? dedupedProspects : dedupedProspects.slice(0, remainingBudget)
 
   // ── Import + generate + send ─────────────────────────────────────────────
   let imported = 0
@@ -175,7 +202,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     withEmail: found.length,
     imported,
     sent,
-    skipped: found.length - newProspects.length,
+    skipped: found.length - dedupedProspects.length,
+    cappedByMonthlyLimit,
     sources: sources.reduce((acc, s) => ({ ...acc, [s]: found.filter(p => p.source === s).length }), {} as Record<string, number>),
   })
 }
