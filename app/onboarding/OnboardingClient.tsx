@@ -521,7 +521,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
       {/* Progress bar */}
       <div className="w-full bg-gray-100 dark:bg-gray-800 h-1">
-        <div className="bg-black h-1 transition-all duration-500" style={{ width: `${progress}%` }} />
+        <div className="bg-gradient-to-r from-amber-400 to-amber-500 h-1 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Step pills */}
@@ -548,7 +548,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
           {/* ── STEP 1 — WELCOME ── */}
           {step === 1 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
               {referralCode && (
                 <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
                   <PartyPopper size={20} strokeWidth={1.75} className="text-emerald-600" />
@@ -558,7 +558,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
               <div className="text-center mb-7">
                 <Hand className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
-                <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
+                <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">Welcome to SocialMate</h1>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Set up in under 2 minutes.</p>
               </div>
 
@@ -629,7 +629,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
               <button
                 onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}
-                className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
+                className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150">
                 Let's go →
               </button>
 
@@ -647,10 +647,10 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
           {/* ── STEP 2 — PICK PLATFORM ── */}
           {step === 2 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
               <div className="text-center mb-8">
                 <Smartphone className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platform do you mainly post on?</h2>
+                <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">Which platform do you mainly post on?</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Pick one to start — you can connect more later from Settings.</p>
               </div>
 
@@ -700,10 +700,10 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
           {/* ── STEP 3 — CONNECT ── */}
           {step === 3 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
               <div className="text-center mb-8">
                 <div className="mb-4 flex justify-center">{selectedPlatform ? <PlatformGlyph id={selectedPlatform} size={44} /> : <Link2 size={44} strokeWidth={1.5} />}</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">
+                <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">
                   Connect your {platformData?.label} account
                 </h2>
                 {connectionDetected ? (
@@ -743,7 +743,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
                   <button
                     onClick={startConnect}
-                    className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
+                    className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150">
                     <PlatformGlyph id={selectedPlatform} size={15} /> Connect {platformData?.label}
                   </button>
                   <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
@@ -801,10 +801,10 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
           {/* ── STEP 4 — FIRST POST ── */}
           {step === 4 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
               <div className="text-center mb-6">
                 <PenLine className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Schedule your first post</h2>
+                <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">Schedule your first post</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
                   Tell us what you post about and we&apos;ll write one for you. Pick when it goes out.
                 </p>
@@ -838,7 +838,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
                     <button
                       onClick={() => { setStarterPost(generateStarterPost(topic)); setPostsGenerated(true) }}
                       disabled={!topic.trim()}
-                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
+                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150 disabled:opacity-40">
                       Write my first post →
                     </button>
                   </div>
@@ -906,7 +906,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
                     </button>
                     <button onClick={() => setStep(5)}
                       disabled={!starterPost.trim()}
-                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
+                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150 disabled:opacity-40">
                       {connectionDetected ? 'Schedule it →' : 'Save as draft →'}
                     </button>
                   </div>
@@ -925,7 +925,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
 
           {/* ── STEP 5 — DONE ── */}
           {step === 5 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 text-center">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in text-center">
               {searchParams.get('upgraded') === 'true' && (
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3 text-left">
                   <PartyPopper size={20} strokeWidth={1.75} className="text-green-600" />
@@ -937,7 +937,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
               )}
 
               <Rocket className="w-14 h-14 mx-auto mb-4" strokeWidth={1.5} />
-              <h2 className="text-3xl font-extrabold tracking-tight mb-2">
+              <h2 className="font-display text-3xl font-semibold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
               </h2>
               <p className="text-gray-400 dark:text-gray-500 mb-6 text-sm">
