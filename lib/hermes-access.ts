@@ -16,15 +16,23 @@ export type HermesTier = 'admin' | 'starter' | 'pro'
 // on-demand Discover button only; the weekly cron is Pro/admin-only by tier
 // (see hermesAutoDiscoverCron in lib/inngest-hermes.ts) and is rate-limited
 // by its own weekly schedule, not this counter.
+// hunterLookupsPerMonth exists because /api/hermes/find-email calls Hunter.io
+// directly with zero rate limiting of its own. Hunter bills against one
+// account-wide quota shared by every HERMES user on SocialMate — a single
+// customer hammering the lookup button can exhaust the whole month's credits
+// (or the whole bill) by themselves, breaking the feature for everyone else
+// in the process. These numbers are conservative defaults, not derived from
+// a specific Hunter plan — tune them to whatever plan is actually active.
 export const HERMES_LIMITS: Record<HermesTier, {
   campaigns: number
   sendsPerDay: number
   prospectsPerMonth: number
   discoverRunsPerMonth: number
+  hunterLookupsPerMonth: number
 }> = {
-  admin:   { campaigns: Infinity, sendsPerDay: Infinity, prospectsPerMonth: Infinity, discoverRunsPerMonth: Infinity },
-  starter: { campaigns: 3, sendsPerDay: 25, prospectsPerMonth: 75, discoverRunsPerMonth: 1 },
-  pro:     { campaigns: 10, sendsPerDay: 50, prospectsPerMonth: 400, discoverRunsPerMonth: 4 },
+  admin:   { campaigns: Infinity, sendsPerDay: Infinity, prospectsPerMonth: Infinity, discoverRunsPerMonth: Infinity, hunterLookupsPerMonth: Infinity },
+  starter: { campaigns: 3, sendsPerDay: 25, prospectsPerMonth: 75, discoverRunsPerMonth: 1, hunterLookupsPerMonth: 30 },
+  pro:     { campaigns: 10, sendsPerDay: 50, prospectsPerMonth: 400, discoverRunsPerMonth: 4, hunterLookupsPerMonth: 100 },
 }
 
 export async function getHermesAccess(
@@ -80,6 +88,20 @@ export async function discoverRunsThisMonth(db: SupabaseClient, userId: string):
     .from('hermes_discover_runs')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
+    .eq('source', 'manual')
+    .gte('created_at', startOfMonthUTC().toISOString())
+  return count ?? 0
+}
+
+// Shares hermes_discover_runs (source = 'hunter_lookup') rather than a new
+// table — same shape, same purpose: log an external-API-hitting action so a
+// monthly cap has real rows to count.
+export async function hunterLookupsThisMonth(db: SupabaseClient, userId: string): Promise<number> {
+  const { count } = await db
+    .from('hermes_discover_runs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('source', 'hunter_lookup')
     .gte('created_at', startOfMonthUTC().toISOString())
   return count ?? 0
 }
