@@ -46,18 +46,21 @@ function SignupForm() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [done, setDone] = useState(false)
-  const [refCode, setRefCode] = useState('')
   const [tosAccepted, setTosAccepted] = useState(false)
   const [newsletterOptIn, setNewsletterOptIn] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const redirectTo = searchParams.get('redirect') || ''
+  // Derived directly from the URL rather than mirrored into state via an
+  // effect — useSearchParams() already resolves synchronously on the first
+  // render (server and client agree, since both know the request URL), so
+  // routing it through a post-mount setState just delayed the "Invited by a
+  // friend" banner past first paint, causing it to pop in and push the form
+  // down. That was a real chunk of this page's measured CLS (0.34, "Poor").
+  const refCode = searchParams.get('ref') || ''
 
   useEffect(() => {
-    const ref = searchParams.get('ref')
-    if (ref) setRefCode(ref)
-
     // Capture UTM params + page referrer as short-lived cookies for post-signup attribution.
     // Auth callback reads these on new account creation and persists to user_settings.
     const utmSource = searchParams.get('utm_source')
