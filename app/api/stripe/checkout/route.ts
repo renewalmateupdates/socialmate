@@ -23,7 +23,19 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { priceId, fromOnboarding, coupon_code, returnStep } = await req.json()
+  const { priceId, fromOnboarding, coupon_code, returnStep, workspaceId } = await req.json()
+
+  // workspaceId reaches Stripe metadata and the webhook later trusts it
+  // outright to flip workspace-level entitlements (SOMA Autopilot/Full Send)
+  // — verify the caller actually owns it before that happens, or any
+  // authenticated user could pay for their own subscription and have it
+  // activate on someone else's workspace.
+  let verifiedWorkspaceId: string | undefined
+  if (workspaceId) {
+    const db = getSupabaseAdmin()
+    const { data: ws } = await db.from('workspaces').select('id').eq('id', workspaceId).eq('owner_id', user.id).maybeSingle()
+    if (ws) verifiedWorkspaceId = ws.id
+  }
 
   // Detect user's locale from cookie for Stripe checkout page translation
   const STRIPE_SUPPORTED: Record<string, string> = {
@@ -82,6 +94,7 @@ export async function POST(req: NextRequest) {
   // ── Build Stripe session params ──────────────────────────────────────────
   const metadata: Record<string, string> = {
     user_id: user.id,
+    ...(verifiedWorkspaceId ? { workspace_id: verifiedWorkspaceId } : {}),
     ...(couponRecord ? {
       coupon_code:  couponRecord.code,
       affiliate_id: couponRecord.affiliate_id ?? '',
@@ -108,7 +121,15 @@ export async function POST(req: NextRequest) {
     automatic_tax: { enabled: true },
     // allow_promotion_codes only when no coupon applied (can't combine with discounts[])
     ...(discounts ? { discounts } : { allow_promotion_codes: true }),
-    ...(trialDays ? { subscription_data: { trial_period_days: trialDays } } : {}),
+    // Checkout Session metadata does not carry over to the Subscription object
+    // Stripe creates from it — copying it into subscription_data.metadata too
+    // means customer.subscription.updated/deleted (which only ever see the
+    // Subscription, never the originating session) can still resolve user_id/
+    // workspace_id instead of relying solely on price-id matching.
+    subscription_data: {
+      metadata,
+      ...(trialDays ? { trial_period_days: trialDays } : {}),
+    },
     success_url: successUrl,
     cancel_url: fromOnboarding ? `${appUrl}/onboarding?step=2` : `${appUrl}/pricing`,
   })

@@ -159,6 +159,7 @@ function AutopilotModal({
   fullSendEnabled: boolean
 }) {
   const { t } = useI18n()
+  const { activeWorkspaceId } = useWorkspace()
   const [loading, setLoading] = useState<string | null>(null)
   const [err, setErr] = useState('')
 
@@ -169,7 +170,7 @@ function AutopilotModal({
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId, workspaceId: activeWorkspaceId }),
       })
       const data = await res.json()
       if (!res.ok || !data.url) { setErr(data.error || 'Could not start checkout.'); setLoading(null); return }

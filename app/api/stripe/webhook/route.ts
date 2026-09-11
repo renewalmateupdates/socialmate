@@ -36,6 +36,15 @@ const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 const STRIPE_HERMES_STARTER_PRICE_ID = 'price_HERMES_STARTER_PLACEHOLDER'
 const STRIPE_HERMES_PRO_PRICE_ID     = 'price_HERMES_PRO_PLACEHOLDER'
 
+// SOMA Autopilot/Full Send — real checkout has existed since PR #445 (app/soma/dashboard/page.tsx)
+// but nothing here ever recognized either price, so no purchase of either has
+// ever actually flipped workspaces.soma_autopilot_enabled / soma_full_send_enabled.
+// The only reason either has worked for anyone is Joshua setting the flag by
+// hand in SQL. Fixed the same way HERMES was: workspace-scoped, tracked by its
+// own subscription id column so it never collides with the base plan.
+const STRIPE_SOMA_AUTOPILOT_PRICE_ID  = 'price_1TP8rU7OMwDowUuUYLBNAVux'
+const STRIPE_SOMA_FULL_SEND_PRICE_ID  = 'price_1TPlGE7OMwDowUuUWS0QUnLw'
+
 const CREDIT_PACK_PRICES: Record<string, number> = {
   'price_1TFMI47OMwDowUuUhTrbe3oq': 100,
   'price_1TFMI77OMwDowUuU0wDZWcCL': 300,
@@ -134,12 +143,14 @@ function resolveSubscription(subscription: Stripe.Subscription): {
   isWhiteLabelOnly: boolean
   hermesActive: boolean
   hermesTier: string | null
+  somaAddon: 'autopilot' | 'full_send' | null
 } {
   let plan: string | null = null
   let whiteLabelActive = false
   let whiteLabelTier: string | null = null
   let hermesActive = false
   let hermesTier: string | null = null
+  let somaAddon: 'autopilot' | 'full_send' | null = null
 
   for (const item of subscription.items.data) {
     const priceId = item.price.id
@@ -148,9 +159,11 @@ function resolveSubscription(subscription: Stripe.Subscription): {
     if (priceId === STRIPE_WHITE_LABEL_PRO_PRICE_ID)   { whiteLabelActive = true; whiteLabelTier = 'pro'   }
     if (priceId === STRIPE_HERMES_STARTER_PRICE_ID)    { hermesActive = true; hermesTier = 'starter' }
     if (priceId === STRIPE_HERMES_PRO_PRICE_ID)        { hermesActive = true; hermesTier = 'pro'     }
+    if (priceId === STRIPE_SOMA_AUTOPILOT_PRICE_ID)    { somaAddon = 'autopilot' }
+    if (priceId === STRIPE_SOMA_FULL_SEND_PRICE_ID)    { somaAddon = 'full_send' }
   }
 
-  return { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly: plan === null && whiteLabelActive, hermesActive, hermesTier }
+  return { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly: plan === null && whiteLabelActive, hermesActive, hermesTier, somaAddon }
 }
 
 function getSupabase() {
@@ -1030,7 +1043,7 @@ export async function POST(req: NextRequest) {
 
     const customerId   = session.customer as string
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
-    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly, hermesActive, hermesTier } = resolveSubscription(subscription)
+    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly, hermesActive, hermesTier, somaAddon } = resolveSubscription(subscription)
 
     // HERMES activates immediately on payment — no approval flow like White
     // Label. Runs whether or not this checkout also bundled a base-plan price,
@@ -1045,6 +1058,32 @@ export async function POST(req: NextRequest) {
         }).eq('user_id', userId)
       } catch (err) {
         console.error('[HERMES] activation failed (non-fatal):', err)
+      }
+    }
+
+    // SOMA Autopilot/Full Send — same gap as HERMES had: real checkout has
+    // existed since PR #445, nothing here ever flipped the flag. Scoped to a
+    // workspace (Autopilot/Full Send are per-workspace, not per-user, since an
+    // Agency account runs SOMA per client) — the checkout call passes
+    // workspaceId for exactly this; falls back to the buyer's personal
+    // workspace if it's missing for any reason.
+    if (somaAddon && userId) {
+      try {
+        const targetWorkspaceId = session.metadata?.workspace_id || (
+          await supabase.from('workspaces').select('id').eq('owner_id', userId).eq('is_personal', true).maybeSingle()
+        ).data?.id
+
+        if (targetWorkspaceId) {
+          await supabase.from('workspaces').update({
+            soma_autopilot_enabled:      true,
+            soma_full_send_enabled:      somaAddon === 'full_send',
+            soma_addon_subscription_id:  subscription.id,
+          }).eq('id', targetWorkspaceId)
+        } else {
+          console.error('[SOMA addon] no workspace resolved for user', userId)
+        }
+      } catch (err) {
+        console.error('[SOMA addon] activation failed (non-fatal):', err)
       }
     }
 
@@ -1181,7 +1220,7 @@ const creditsToSet = alreadyOnPlan
   // ── SUBSCRIPTION UPDATED ────────────────────────────────────────────────────
   if (event.type === 'customer.subscription.updated') {
     const subscription = event.data.object as Stripe.Subscription
-    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly, hermesActive, hermesTier } = resolveSubscription(subscription)
+    const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly, hermesActive, hermesTier, somaAddon } = resolveSubscription(subscription)
 
     // White-label-only renewal — only update if already approved (don't re-activate pending/rejected)
     if (isWhiteLabelOnly) {
@@ -1201,6 +1240,16 @@ const creditsToSet = alreadyOnPlan
         .from('user_settings')
         .update({ hermes_active: true, hermes_tier: hermesTier })
         .eq('hermes_subscription_id', subscription.id)
+      if (plan === null) return NextResponse.json({ received: true })
+    }
+
+    // SOMA addon renewal/tier-change, tracked by soma_addon_subscription_id
+    // specifically so this never touches the base-plan subscription.
+    if (somaAddon) {
+      await supabase
+        .from('workspaces')
+        .update({ soma_autopilot_enabled: true, soma_full_send_enabled: somaAddon === 'full_send' })
+        .eq('soma_addon_subscription_id', subscription.id)
       if (plan === null) return NextResponse.json({ received: true })
     }
 
@@ -1320,7 +1369,7 @@ const creditsToSet = alreadyOnPlan
       return NextResponse.json({ received: true })
     }
 
-    const { isWhiteLabelOnly, hermesActive } = resolveSubscription(subscription)
+    const { isWhiteLabelOnly, hermesActive, somaAddon } = resolveSubscription(subscription)
 
     if (isWhiteLabelOnly) {
       await supabase
@@ -1335,6 +1384,14 @@ const creditsToSet = alreadyOnPlan
         .from('user_settings')
         .update({ hermes_active: false, hermes_tier: null, hermes_subscription_id: null })
         .eq('hermes_subscription_id', subscription.id)
+      return NextResponse.json({ received: true })
+    }
+
+    if (somaAddon) {
+      await supabase
+        .from('workspaces')
+        .update({ soma_autopilot_enabled: false, soma_full_send_enabled: false, soma_addon_subscription_id: null })
+        .eq('soma_addon_subscription_id', subscription.id)
       return NextResponse.json({ received: true })
     }
 
