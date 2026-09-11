@@ -139,7 +139,13 @@ export default async function AdminOverviewPage() {
     autopilotCount = count ?? 0
   } catch { /* graceful fallback */ }
 
-  const estimatedMRR = (proCount * 5) + (agencyCount * 20) + (autopilotCount * 10)
+  // $8/$29 per the Aug 12, 2026 repricing (PRs #555-557). This silently kept
+  // quoting the pre-repricing $5/$20 for a month, understating MRR by roughly
+  // 45% the whole time. Legacy subscribers on the old $5/$20 price still exist
+  // (their Stripe price ID is grandfathered), so this is an approximation in
+  // either direction, not exact — but it should use the current price, not a
+  // retired one.
+  const estimatedMRR = (proCount * 8) + (agencyCount * 29) + (autopilotCount * 10)
 
   // ── 3. Platform health (last 24h) ─────────────────────────────────────
   let published24h = 0
@@ -287,6 +293,7 @@ export default async function AdminOverviewPage() {
   let signupReferrers: SourceCount[] = []
   let blogAttribution: SourceCount[] = []
   let attributedCount = 0
+  let referredCount = 0
   let totalTracked = 0
 
   try {
@@ -316,6 +323,7 @@ export default async function AdminOverviewPage() {
         }
 
         if (ref) {
+          referredCount++
           try {
             const url = new URL(ref)
             const host = url.hostname.replace('www.', '')
@@ -866,8 +874,18 @@ export default async function AdminOverviewPage() {
                     <span className="v">{fmt(r.count)}</span>
                   </div>
                 ))}
+            {/* This used to say "attributedCount of totalTracked carry attribution
+                data" right under a panel full of visible referrer numbers — that
+                line is about a different, separate field (signup_source, a UTM
+                tag on the link someone clicked) than the one rendered above it
+                (signup_referrer, the browser's raw referring domain, captured
+                automatically with no link tagging required). Nobody signs up via
+                a UTM-tagged link today, so that count reads as "0" sitting right
+                below visibly nonzero numbers — correct, but it looked like the
+                page contradicting itself. Caption now describes the panel it is
+                actually under. */}
             <p className="hud-caption">
-              {fmt(attributedCount)} of {fmt(totalTracked)} signups carry attribution data.
+              {fmt(referredCount)} of {fmt(totalTracked)} signups carry a referrer domain.
             </p>
           </div>
         </div>
@@ -887,7 +905,9 @@ export default async function AdminOverviewPage() {
                     <span className="v">{fmt(s.count)}</span>
                   </div>
                 ))}
-                <p className="hud-caption">utm_source on signup</p>
+                <p className="hud-caption">
+                  utm_source on signup — {fmt(attributedCount)} of {fmt(totalTracked)} signups tagged
+                </p>
               </div>
             )}
             {blogAttribution.length > 0 && (

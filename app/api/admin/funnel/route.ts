@@ -72,9 +72,15 @@ export async function GET(req: NextRequest) {
   const published     = profiles.filter(p => publishedUsers.has(p.id)).length
   const paying        = profiles.filter(p => payingOwners.has(p.id)).length
 
-  // Platform popularity among people who actually got through.
+  // Platform popularity among people who actually got through. Ground truth
+  // above already excludes internal ids from `profiles`, but `accounts` itself
+  // was never filtered, so this used to count every connection any of our own
+  // accounts made too — disagreeing with /admin/overview's platformDist, which
+  // does exclude them, for the same conceptual "connected accounts by
+  // platform" number on a different page.
+  const externalAccounts = accounts.filter(a => !internalIds.has(a.user_id))
   const platformCounts: Record<string, number> = {}
-  for (const a of accounts) platformCounts[a.platform] = (platformCounts[a.platform] ?? 0) + 1
+  for (const a of externalAccounts) platformCounts[a.platform] = (platformCounts[a.platform] ?? 0) + 1
 
   // ── Recorded steps ───────────────────────────────────────────────────────
   const { data: eventRows, error: eventErr } = await db
@@ -90,7 +96,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: eventErr.message }, { status: 500 })
   }
 
-  const events = (eventRows ?? []) as Row[]
+  // Same exclusion as everything above. Without it, our own testing shows up
+  // as real activity — a single internal account clicking through Compose
+  // repeatedly while testing a feature was recording as "1 user published,
+  // 143 times" in the last 30 days on this exact page, directly under a Ground
+  // Truth panel reading "Published a post: 0" for the same window.
+  const events = (eventRows ?? []).filter(e => !internalIds.has(e.user_id)) as Row[]
 
   // Distinct users per step, not raw fires. "How many people" is the question;
   // raw counts just reward whoever refreshed the most.
