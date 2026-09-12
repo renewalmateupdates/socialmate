@@ -8,6 +8,7 @@ import { createServerClient } from '@supabase/ssr'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
 const MAX_CHARS = 500_000
@@ -261,9 +262,17 @@ Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celeb
       const detail = (aiErr?.message || 'unknown error').slice(0, 200)
       console.error('[SOMA Ingest] Gemini error:', detail,
         '| docChars:', content.length, '| prevChars:', prevDoc?.content?.length ?? 0)
-      // Surface the real reason to the UI so a repeat failure is diagnosable
-      // on-screen instead of a generic "please try again".
-      return NextResponse.json({ error: `AI analysis failed: ${detail}` }, { status: 500 })
+      // Surface the real reason on-screen so a repeat failure is diagnosable —
+      // but only to admins. This used to show every customer the raw Gemini
+      // error (API URLs, HTTP codes, internal messages included), which reads
+      // as broken and unprofessional to a paying Agency customer with no way
+      // to act on it. Admins still get the full detail for exactly the
+      // debugging PR #527 added this for; everyone else gets a clean message.
+      const admin = await requireAdmin()
+      return NextResponse.json(
+        { error: admin ? `AI analysis failed: ${detail}` : 'AI analysis failed. Please try again in a few minutes.' },
+        { status: 500 }
+      )
     }
 
     // Persist the new master doc version now that analysis has succeeded. Doing

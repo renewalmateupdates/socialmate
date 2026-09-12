@@ -157,6 +157,6 @@ Return ONLY the JSON array. No markdown fences, no explanations, no extra text.`
 
   } catch (err) {
     console.error('Content calendar route error:', err)
-    return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

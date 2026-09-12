@@ -118,6 +118,6 @@ Return valid JSON only. No markdown fences. No extra keys. No explanations outsi
 
   } catch (err) {
     console.error('[IRIS Generate] Error:', err)
-    return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
