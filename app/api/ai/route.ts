@@ -342,6 +342,6 @@ Apply these guidelines to all content you generate.
 
   } catch (err) {
     console.error('AI route error:', err)
-    return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
