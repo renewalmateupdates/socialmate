@@ -11,6 +11,14 @@ function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: n
   return <PlatformIcon name={id} size={size} className={className} />
 }
 
+// The 7 live platforms. This list previously omitted tiktok and included
+// instagram, which isn't live anywhere in the app. Since `platforms` state is
+// pre-selected directly from `/api/accounts/connected` (not filtered through
+// this list), a connected TikTok account was silently included in the
+// submitted project and its Schedule row — but with no pill here to show,
+// toggle, or remove it, it rendered as a bare lowercase "tiktok" with no icon
+// and no way to control it. Keep this in sync with the live platform list
+// elsewhere (e.g. onboarding's LIVE_PLATFORMS) when a new platform ships.
 const ALL_PLATFORMS = [
   { id: 'bluesky',   label: 'Bluesky' },
   { id: 'twitter',   label: 'Twitter / X' },
@@ -18,7 +26,7 @@ const ALL_PLATFORMS = [
   { id: 'discord',   label: 'Discord' },
   { id: 'telegram',  label: 'Telegram' },
   { id: 'linkedin',  label: 'LinkedIn' },
-  { id: 'instagram', label: 'Instagram' },
+  { id: 'tiktok',    label: 'TikTok' },
 ]
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
