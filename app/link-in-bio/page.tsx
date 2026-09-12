@@ -158,7 +158,7 @@ export default function LinkInBio() {
       setUser(authUser)
 
       const { data: bioData } = await supabase
-        .from('bio_pages').select('*').eq('user_id', authUser.id).single()
+        .from('bio_pages').select('*').eq('user_id', authUser.id).maybeSingle()
 
       if (bioData) {
         setRecordId(bioData.id)
