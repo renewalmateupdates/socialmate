@@ -48,11 +48,12 @@ export default function MediaLibrary() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('media_items')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+      if (error) console.error('[media] load error:', error.message)
       setFiles(data || [])
       setLoading(false)
     }
@@ -97,7 +98,7 @@ export default function MediaLibrary() {
         .upload(path, file, { upsert: false })
       if (uploadError) { showToast(`Failed to upload ${file.name}`, 'error'); continue }
       const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
-      const { data: record } = await supabase
+      const { data: record, error: insertError } = await supabase
         .from('media_items')
         .insert({
           user_id:      userId,
@@ -109,6 +110,15 @@ export default function MediaLibrary() {
         })
         .select()
         .single()
+      if (insertError) {
+        // The file above already landed in Storage, so this isn't a full
+        // failure the user can just retry — it's specifically the DB record
+        // that didn't save, which is why the library was showing zero files
+        // ever despite uploads silently succeeding at the storage layer.
+        console.error('[media] insert error:', insertError.message)
+        showToast(`${file.name} uploaded but couldn't save to your library — please try again`, 'error')
+        continue
+      }
       if (record) { setFiles(prev => [record, ...prev]); successCount++ }
     }
     setUploading(false)
