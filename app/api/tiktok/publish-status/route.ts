@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
+import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 
 /**
  * Did TikTok actually publish it?
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
   // mutate somebody else's post.
   const { data: row, error: rowErr } = await getSupabaseAdmin()
     .from('tiktok_posts')
-    .select('id, status')
+    .select('id, status, workspace_id, post_caption')
     .eq('tiktok_post_id', publish_id)
     .eq('user_id', user.id)
     .maybeSingle()
@@ -113,6 +114,14 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', row.id)
     if (e) console.error('[tiktok/publish-status] could not record published:', e.message)
+    if (!e) {
+      void syncTiktokPublishToPosts({
+        id:           row.id,
+        user_id:      user.id,
+        workspace_id: row.workspace_id ?? null,
+        post_caption: row.post_caption ?? null,
+      })
+    }
     return NextResponse.json({ status: 'published', settled: true, recorded: !e })
   }
 

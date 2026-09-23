@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
+import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 
 const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
   free:   20,
@@ -245,6 +246,13 @@ export async function POST(request: NextRequest) {
       tiktok_account_open_id: auth.openId,
     })
     .eq('id', tikPost.id)
+
+  void syncTiktokPublishToPosts({
+    id:           tikPost.id,
+    user_id:      user.id,
+    workspace_id: workspace_id || null,
+    post_caption: fullCaption,
+  })
 
   // Increment quota usage
   await getSupabaseAdmin()
