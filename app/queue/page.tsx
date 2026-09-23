@@ -305,6 +305,12 @@ type StatusOption = typeof STATUS_OPTIONS[number]
 function QueueInner() {
   const [posts, setPosts]               = useState<any[]>([])
   const [partialPosts, setPartialPosts] = useState<any[]>([])
+  // TikTok posts live in their own tiktok_posts table, not posts, so a
+  // scheduled one never showed up here at all — see lib/tiktok-post-sync.ts
+  // for why they still aren't merged into `posts` itself (would collide with
+  // the generic scheduled-post pipeline, which has no 'tiktok' case).
+  const [tiktokScheduled, setTiktokScheduled] = useState<any[]>([])
+  const [cancellingTiktok, setCancellingTiktok] = useState<string | null>(null)
   const [loading, setLoading]           = useState(true)
   const [cancelling, setCancelling]     = useState<string | null>(null)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
@@ -402,6 +408,24 @@ function QueueInner() {
     }
   }
 
+  const handleCancelTiktok = async (id: string) => {
+    setCancellingTiktok(id)
+    try {
+      const res = await fetch(`/api/tiktok/scheduled/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        showToast(d.error || 'Could not cancel that post', 'error')
+      } else {
+        setTiktokScheduled(prev => prev.filter(p => p.id !== id))
+        showToast('Scheduled TikTok post cancelled', 'success')
+      }
+    } catch {
+      showToast('Network error — try again', 'error')
+    } finally {
+      setCancellingTiktok(null)
+    }
+  }
+
   const handleDragEnd = async (event: DragEndEvent, dateKey: string) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
@@ -483,6 +507,20 @@ function QueueInner() {
       }
       const { data: partialData } = await partialQuery
       setPartialPosts(partialData || [])
+
+      // TikTok posts scheduled via TikTok Studio — separate table, separate
+      // query, not merged into `posts` (see tiktokScheduled comment above).
+      let tiktokQuery = supabase
+        .from('tiktok_posts')
+        .select('id, post_caption, scheduled_at, video_url')
+        .eq('user_id', user.id)
+        .eq('status', 'scheduled')
+        .order('scheduled_at', { ascending: true })
+      if (!activeWorkspace.is_personal) {
+        tiktokQuery = tiktokQuery.eq('workspace_id', activeWorkspace.id)
+      }
+      const { data: tiktokData } = await tiktokQuery
+      setTiktokScheduled(tiktokData || [])
 
       // Fetch draft count for auto-schedule button
       let draftQuery = supabase
@@ -1083,6 +1121,50 @@ function QueueInner() {
                   <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* TikTok posts scheduled via TikTok Studio — kept in their own
+              section rather than merged into the day-grouped list below,
+              since drag-reorder and bulk actions there write straight to
+              `posts` and would silently no-op against a tiktok_posts id. */}
+          {!loading && tiktokScheduled.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-3 px-1">
+                <PlatformGlyph id="tiktok" size={14} />
+                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Scheduled to TikTok ({tiktokScheduled.length})
+                </h2>
+              </div>
+              <div className="space-y-2">
+                {tiktokScheduled.map(tp => (
+                  <div
+                    key={tp.id}
+                    className="bg-surface border border-theme rounded-2xl p-4 flex items-start justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                        {tp.post_caption || <span className="italic text-gray-400">No caption</span>}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1.5 font-semibold">
+                        {tp.scheduled_at
+                          ? new Date(tp.scheduled_at).toLocaleString(undefined, {
+                              weekday: 'short', month: 'short', day: 'numeric',
+                              hour: 'numeric', minute: '2-digit',
+                            })
+                          : '—'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleCancelTiktok(tp.id)}
+                      disabled={cancellingTiktok === tp.id}
+                      className="flex-shrink-0 text-xs font-semibold text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                    >
+                      {cancellingTiktok === tp.id ? 'Cancelling…' : 'Cancel'}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
