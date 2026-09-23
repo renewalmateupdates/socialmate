@@ -103,14 +103,12 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
     const accountWorkspaceId: string | null = wsInfo?.is_personal ? null : resolvedWorkspaceId
 
-    // Get plan
-    const { data: settings } = await supabase
-      .from('user_settings')
-      .select('plan')
-      .eq('user_id', user.id)
-      .single()
-
-    const plan = settings?.plan || 'free'
+    // Get plan — resolved through the workspace this post is going into, not
+    // the calling user's own user_settings. A team member posting into a
+    // client workspace must be capped by that workspace's plan, not their own
+    // personal free-tier default; a bare select here is the exact bug class
+    // that cost the first paying customer their first session (PR #579).
+    const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, resolvedWorkspaceId)
 
     // Scheduling window enforcement
     if (scheduledAt) {

@@ -141,13 +141,9 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const { data: settings } = await supabase
-      .from('user_settings')
-      .select('plan')
-      .eq('user_id', user.id)
-      .single()
-
-    const plan = settings?.plan || 'free'
+    // Resolved through the workspace this draft belongs to, not the calling
+    // user's own user_settings — same bug class as posts/create (PR #579).
+    const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, resolvedWorkspaceId)
     // Saving a draft is free — it is private and nothing goes out — so the
     // quota is only enforced for statuses that actually consume it. Submitting
     // for approval does, otherwise the approval queue becomes a way past the cap.
