@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from './usage'
 import { createNotification } from './notify'
 import { REPLY_TO } from '@/lib/mail'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -47,6 +48,13 @@ export const newsletterAgent = inngest.createFunction(
     for (const cfg of settings as any[]) {
       try {
         await step.run(`newsletter-${cfg.workspace_id}`, async () => {
+          // Newsletter Agent is Pro+. Neither this cron nor its settings route
+          // ever checked plan -- a free-tier user who enabled it via the API
+          // directly would get a real Gemini-generated newsletter, sent or
+          // drafted, every Sunday, for free, indefinitely.
+          const plan = await resolveWorkspacePlan(admin, cfg.user_id, cfg.workspace_id)
+          if (plan === 'free') return
+
           const { data: posts } = await admin
             .from('posts')
             .select('content, platforms, published_at')
@@ -290,14 +298,11 @@ export const repurposeAgent = inngest.createFunction(
     for (const cfg of settings as any[]) {
       try {
         await step.run(`repurpose-${cfg.workspace_id}`, async () => {
-          // Verify Pro+ plan
-          const { data: ws } = await admin
-            .from('workspaces')
-            .select('plan')
-            .eq('id', cfg.workspace_id)
-            .single()
-
-          if (!ws || ws.plan === 'free') return
+          // Verify Pro+ plan. workspaces.plan is NULL by default, and
+          // `null === 'free'` is false -- a bare equality check here fails
+          // OPEN and would run real Gemini calls for a free workspace forever.
+          const plan = await resolveWorkspacePlan(admin, cfg.user_id, cfg.workspace_id)
+          if (plan === 'free') return
 
           // Pick the most recent published post from the last 2 weeks
           const { data: posts } = await admin
@@ -605,13 +610,10 @@ export const trendScoutAgent = inngest.createFunction(
     for (const cfg of settings as any[]) {
       try {
         await step.run(`trend-scout-${cfg.workspace_id}`, async () => {
-          const { data: ws } = await admin
-            .from('workspaces')
-            .select('plan')
-            .eq('id', cfg.workspace_id)
-            .single()
-
-          if (!ws || ws.plan === 'free') return
+          // workspaces.plan is NULL by default, and `null === 'free'` is
+          // false -- a bare equality check here fails OPEN.
+          const plan = await resolveWorkspacePlan(admin, cfg.user_id, cfg.workspace_id)
+          if (plan === 'free') return
 
           const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
           if (!apiKey) return
@@ -738,13 +740,10 @@ export const inboxAgent = inngest.createFunction(
     for (const cfg of settings as any[]) {
       try {
         await step.run(`inbox-agent-${cfg.workspace_id}`, async () => {
-          const { data: ws } = await admin
-            .from('workspaces')
-            .select('plan')
-            .eq('id', cfg.workspace_id)
-            .single()
-
-          if (!ws || ws.plan === 'free') return
+          // workspaces.plan is NULL by default, and `null === 'free'` is
+          // false -- a bare equality check here fails OPEN.
+          const plan = await resolveWorkspacePlan(admin, cfg.user_id, cfg.workspace_id)
+          if (plan === 'free') return
 
           const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
           if (!apiKey) return

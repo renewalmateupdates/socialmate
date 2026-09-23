@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -51,6 +52,15 @@ export async function POST(req: NextRequest) {
   if (!workspace_id) return NextResponse.json({ error: 'workspace_id required' }, { status: 400 })
 
   const admin = getSupabaseAdmin()
+
+  // Newsletter Agent is Pro+. This route had no plan check at all -- neither
+  // here nor in the weekly cron that actually runs it -- so a free-tier user
+  // could enable it via this endpoint and the Sunday cron would generate and
+  // send/draft it for them indefinitely, for free.
+  const plan = await resolveWorkspacePlan(admin, user.id, workspace_id)
+  if (plan === 'free') {
+    return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
+  }
 
   const { data, error } = await admin
     .from('newsletter_settings')
