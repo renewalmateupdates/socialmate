@@ -141,6 +141,27 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // This route accepted any client-supplied workspaceId with only user_id
+    // enforced on the row it writes, never verifying the caller has any
+    // relationship to that workspace at all. Same check as posts/create.
+    const { data: wsOwnerInfo } = await getSupabaseAdmin()
+      .from('workspaces')
+      .select('owner_id')
+      .eq('id', resolvedWorkspaceId)
+      .maybeSingle()
+    if (wsOwnerInfo?.owner_id && wsOwnerInfo.owner_id !== user.id) {
+      const { data: membership } = await getSupabaseAdmin()
+        .from('team_members')
+        .select('role')
+        .eq('email', user.email!)
+        .eq('owner_id', wsOwnerInfo.owner_id)
+        .eq('status', 'active')
+        .maybeSingle()
+      if (!membership) {
+        return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
+      }
+    }
+
     // Resolved through the workspace this draft belongs to, not the calling
     // user's own user_settings — same bug class as posts/create (PR #579).
     const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, resolvedWorkspaceId)
