@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getTeamOwnerRoles } from '@/lib/team-workspaces'
 
 /**
  * GET /api/workspace/activity
@@ -38,25 +39,15 @@ export async function GET(_request: NextRequest) {
 
   // Also look up workspaces where the user is a member (agency editors, etc.).
   //
-  // This read `workspace_members`, which NOTHING writes. Every membership path —
-  // team/invite, team/accept, team/remove, team/[id], user/delete — reads and
-  // writes `team_members`. So this lookup has always returned nothing and an
-  // invited editor has only ever seen their own personal workspace's activity.
-  // Both tables are empty today because nobody has invited a teammate yet, which
-  // is the only reason it has not been noticed; it would have surfaced as soon as
-  // the first Agency customer added a seat.
-  //
-  // team_members is scoped by OWNER, not by workspace — it has no workspace_id.
-  // The model is that a member belongs to an owner and therefore to all of that
-  // owner's workspaces, so resolve owners first and then their workspaces.
-  const { data: memberships, error: memberErr } = await admin
-    .from('team_members')
-    .select('owner_id')
-    .eq('member_id', user.id)
-    .eq('status', 'active')
-  if (memberErr) console.warn('[workspace/activity] membership lookup failed:', memberErr.message)
-
-  const ownerIds = Array.from(new Set((memberships ?? []).map(m => m.owner_id).filter(Boolean)))
+  // This previously read `workspace_members`, which nothing writes; a prior
+  // fix moved it to `team_members` (the table every membership path actually
+  // uses) but kept filtering on `member_id` -- a column team_members has never
+  // had. So this lookup still always returned nothing, and an invited editor
+  // has only ever seen their own personal workspace's activity -- unnoticed
+  // because nobody had invited a teammate yet, which is also why
+  // WorkspaceContext never surfacing the owner's workspace to an invited
+  // member went unnoticed too.
+  const ownerIds = user.email ? Array.from((await getTeamOwnerRoles(admin, user.email)).keys()) : []
 
   let memberWorkspaceIds: string[] = []
   if (ownerIds.length > 0) {
