@@ -98,10 +98,40 @@ export async function POST(request: NextRequest) {
     // Determine account workspace: personal accounts have workspace_id = null in connected_accounts
     const { data: wsInfo } = await getSupabaseAdmin()
       .from('workspaces')
-      .select('is_personal')
+      .select('is_personal, owner_id')
       .eq('id', resolvedWorkspaceId)
       .maybeSingle()
     const accountWorkspaceId: string | null = wsInfo?.is_personal ? null : resolvedWorkspaceId
+
+    // Editor/Client roles must submit for approval, not publish or schedule
+    // directly -- and this route does both. Enforcement lived only in
+    // compose/page.tsx's client-side choice of which endpoint to call
+    // (handleSubmitForApproval vs handlePublish); anyone with a restricted
+    // role could call this endpoint directly and bypass Owner approval
+    // entirely. Checked here, server-side, regardless of what the client asks
+    // for -- immediate publish or scheduled.
+    if (wsInfo?.owner_id && wsInfo.owner_id !== user.id) {
+      const { data: membership } = await getSupabaseAdmin()
+        .from('team_members')
+        .select('role')
+        .eq('email', user.email!)
+        .eq('owner_id', wsInfo.owner_id)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      // Also closes a second gap: this route accepted any client-supplied
+      // workspaceId with only user_id enforced on the row it writes, never
+      // verifying the caller has any relationship to that workspace at all.
+      if (!membership) {
+        return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
+      }
+      if (membership.role === 'editor' || membership.role === 'client') {
+        return NextResponse.json({
+          error: 'Your role requires posts to be submitted for approval, not published directly.',
+          requiresApproval: true,
+        }, { status: 403 })
+      }
+    }
 
     // Get plan
     const { data: settings } = await supabase
