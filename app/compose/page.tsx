@@ -565,6 +565,14 @@ function ComposeInner() {
   }, [selectedPlatforms.includes('twitter')]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const livePlatforms = PLATFORMS.filter(p => p.live)
+  // Only Bluesky, Mastodon, and X have a real reply-chain concept this app can
+  // use for Thread Mode -- Discord/Telegram messages aren't threaded the same
+  // way and LinkedIn UGC posts can't reply to each other. Restricting the
+  // picker here (and the same list server-side in create-thread/route.ts)
+  // keeps a thread from silently including a platform that can't actually
+  // thread.
+  const threadCapablePlatforms = ['bluesky', 'mastodon', 'twitter']
+  const threadPlatformChoices = livePlatforms.filter(p => threadCapablePlatforms.includes(p.id))
   const soonPlatforms = PLATFORMS.filter(p => !p.live)
 
   const activePlatform = selectedPlatforms.length > 0
@@ -1044,6 +1052,9 @@ function ComposeInner() {
   const handleToggleThreadMode = () => {
     if (!threadMode) {
       setThreadParts(content ? [content] : [''])
+      // Threads only work on Bluesky/Mastodon/X -- drop any other platform
+      // already selected rather than silently ignoring it later.
+      setSelectedPlatforms(prev => prev.filter(p => threadCapablePlatforms.includes(p)))
       setThreadMode(true)
     } else {
       setContent(threadParts.filter(p => p.trim()).join('\n\n'))
@@ -1093,51 +1104,53 @@ function ComposeInner() {
 
   const handlePublishThread = async () => {
     const parts = threadParts.filter(p => p.trim())
-    if (parts.length === 0 || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    if (parts.length === 0 || selectedPlatforms.length === 0 || mediaStillUploading) return
     setPublishing(true)
     setPublishResults(null)
     try {
-      let baseMs: number
-      if (scheduleDate) {
-        const time = scheduleTime || '09:00'
-        baseMs = new Date(`${scheduleDate}T${time}`).getTime()
-      } else {
-        baseMs = Date.now() + 5000
+      // Real sequential publishing, Post Now only -- part 2 needs part 1's
+      // actual platform post id to reply to, which only works as one
+      // synchronous request. See app/api/posts/create-thread/route.ts.
+      const res = await fetch('/api/posts/create-thread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parts,
+          platforms: selectedPlatforms,
+          workspaceId: activeWorkspace?.id,
+          selectedAccountIds,
+          mediaUrls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
+        }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        showToast(data.error || 'Thread failed to publish', 'error')
+        return
       }
-      const allResults: PublishResult[] = []
-      for (let i = 0; i < parts.length; i++) {
-        const scheduledAt = new Date(baseMs + i * 30_000).toISOString()
-        const res = await fetch('/api/posts/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: parts[i],
-            platforms: selectedPlatforms,
-            scheduledAt,
-            destinations: selectedDestinations,
-            workspaceId: activeWorkspace?.id,
-            selectedAccountIds,
-            mediaUrls: i === 0 && uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok) {
-          allResults.push({ platform: 'thread', success: false, error: data.error || 'Failed' })
-        } else {
-          allResults.push({ platform: 'thread', success: true, postId: `part-${i + 1}` })
-        }
-      }
-      const anyFailed = allResults.some(r => !r.success)
-      if (anyFailed) {
-        showToast('Some thread parts failed — check results below', 'error')
-        setPublishResults(allResults)
+
+      const chainEntries: [string, { broke: boolean }][] = Object.entries(data.chains ?? {})
+      const brokenPlatforms = chainEntries.filter(([, v]) => v.broke).map(([k]) => k)
+      const publishedParts = (data.parts ?? []).filter((p: { status: string }) => p.status !== 'failed').length
+
+      // One row per thread platform, not per part -- "did this platform's
+      // chain make it all the way through" is the useful summary here.
+      setPublishResults(chainEntries.map(([platform, v]) => ({
+        platform,
+        success: !v.broke,
+        error: v.broke ? 'Stopped partway through the thread — see Queue for the part that failed' : undefined,
+      })))
+
+      if (brokenPlatforms.length > 0) {
+        showToast(`Thread posted, but ${brokenPlatforms.join(', ')} stopped partway through`, 'error')
       } else {
-        showToast(`Thread of ${parts.length} parts scheduled ✓`)
+        showToast(`Thread of ${parts.length} parts posted ✓`)
+      }
+
+      if (publishedParts > 0) {
         setThreadParts([''])
         setContent('')
         setThreadMode(false)
-        setScheduleDate('')
-        setScheduleTime('')
         setCurrentDraftId(null)
         setScoreResult(null)
         clearMedia()
@@ -1663,7 +1676,7 @@ function ComposeInner() {
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2">
-                  {livePlatforms.map(p => {
+                  {(threadMode ? threadPlatformChoices : livePlatforms).map(p => {
                     if (p.id === 'twitter' && plan === 'free') {
                       return (
                         <Link key={p.id} href="/pricing"
@@ -2885,22 +2898,25 @@ function ComposeInner() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Schedule</p>
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    {plan === 'free'   && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Free — up to 2 weeks ahead</span>}
-                    {plan === 'pro'    && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Pro — up to 1 month ahead</span>}
-                    {plan === 'agency' && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Agency — up to 3 months ahead</span>}
+                    {threadMode && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Threads publish immediately — real reply-chaining needs each part to know the last one's live post first</span>}
+                    {!threadMode && plan === 'free'   && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Free — up to 2 weeks ahead</span>}
+                    {!threadMode && plan === 'pro'    && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Pro — up to 1 month ahead</span>}
+                    {!threadMode && plan === 'agency' && <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={2} /> Agency — up to 3 months ahead</span>}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <input type="date" value={scheduleDate}
                     min={todayLocal}
                     max={maxScheduleDate}
+                    disabled={threadMode}
                     onChange={e => handleDateChange(e.target.value)}
                     style={{ fontSize: '16px' }}
-                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all" />
+                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed" />
                   <input type="time" value={scheduleTime}
+                    disabled={threadMode}
                     onChange={e => setScheduleTime(e.target.value)}
                     style={{ fontSize: '16px' }}
-                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all" />
+                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed" />
                 </div>
                 {/* Best time picker */}
                 <div className="mt-3 flex items-center gap-3">
@@ -3063,14 +3079,12 @@ function ComposeInner() {
                         threadParts.every(p => !p.trim()) ||
                         threadParts.some(p => p.length > mostRestrictiveLimit) ||
                         selectedPlatforms.length === 0 ||
-                        !!scheduleError ||
-                        missingDestinations.length > 0 ||
                         mediaStillUploading
                       }
                       className="flex-1 bg-indigo-600 text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                       {publishing
-                        ? 'Scheduling thread...'
-                        : `Schedule Thread (${threadParts.filter(p => p.trim()).length} part${threadParts.filter(p => p.trim()).length !== 1 ? 's' : ''})`}
+                        ? 'Posting thread...'
+                        : `Post Thread Now (${threadParts.filter(p => p.trim()).length} part${threadParts.filter(p => p.trim()).length !== 1 ? 's' : ''})`}
                     </button>
                   </div>
                 ) : abMode ? (
