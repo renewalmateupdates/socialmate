@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { recordAgentRun } from '@/lib/usage'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,6 +22,16 @@ export async function GET(req: NextRequest) {
     if (!workspaceId) return NextResponse.json({ error: 'workspace_id required' }, { status: 400 })
 
     const admin = getSupabaseAdmin()
+
+    // Growth Scout is Pro+ (free to use once on Pro, per /agents copy) — this
+    // route had no plan check at all, so any authenticated free-tier user
+    // calling it directly bypassed the paywall entirely (the client-side gate
+    // in app/agents/growth-scout/page.tsx is the only thing that ever
+    // enforced it).
+    const plan = await resolveWorkspacePlan(admin, user.id, workspaceId)
+    if (plan === 'free') {
+      return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
+    }
 
     // Fetch competitor accounts for this workspace
     const { data: competitors } = await admin

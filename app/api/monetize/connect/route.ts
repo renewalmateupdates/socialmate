@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Stripe from 'stripe'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 async function makeClient() {
   const cookieStore = await cookies()
@@ -20,14 +21,11 @@ export async function GET(req: NextRequest) {
   const workspaceId = req.nextUrl.searchParams.get('workspace_id')
   if (!workspaceId) return NextResponse.json({ error: 'workspace_id required' }, { status: 400 })
 
-  // Pro+ gate
-  const { data: ws } = await supabase
-    .from('workspaces')
-    .select('plan')
-    .eq('owner_id', user.id)
-    .eq('is_personal', true)
-    .single()
-  const plan = (ws?.plan ?? 'free').replace('_annual', '')
+  // Pro+ gate — resolved through the target workspace (resolveWorkspacePlan
+  // falls back to its owner's plan), not the caller's own personal workspace,
+  // which is a different workspace whenever workspaceId isn't the caller's
+  // own. Same bare-select bug class as PR #579.
+  const plan = await resolveWorkspacePlan(supabase, user.id, workspaceId)
   if (plan === 'free') return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })

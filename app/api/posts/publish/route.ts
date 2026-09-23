@@ -33,20 +33,37 @@ export async function POST(request: NextRequest) {
   let userId: string
 
   if (fromInngest) {
-    // Inngest call — fetch post directly with service role
-    const { data: post, error } = await getSupabaseAdmin()
+    // Atomic claim. Two independent schedulers can call this with the same
+    // postId around the same moment (Inngest's own publishScheduledPost, and
+    // the GitHub Actions backstop cron) -- `if (post.published_at) return 409`
+    // was a read-then-act check, not a lock, so both could read null before
+    // either wrote and both would call publishToAll for the same post. This
+    // is a conditional UPDATE instead: only the caller whose UPDATE actually
+    // matches a row gets to proceed. A short staleness window lets a
+    // genuinely abandoned claim (the process that claimed it crashed before
+    // finishing) be retried rather than stuck forever, without reopening the
+    // race for two callers arriving within the same moment.
+    const staleBefore = new Date(Date.now() - 3 * 60_000).toISOString()
+    const { data: claimedRows, error: claimError } = await getSupabaseAdmin()
       .from('posts')
-      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls, scheduled_at, metadata')
+      .update({ publish_claimed_at: new Date().toISOString() })
       .eq('id', postId)
-      .single()
+      .eq('status', 'scheduled')
+      .or(`publish_claimed_at.is.null,publish_claimed_at.lt.${staleBefore}`)
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls, scheduled_at, metadata')
 
-    if (error || !post) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    if (claimError) {
+      console.error('[PUBLISH-CLAIM] claim query failed:', claimError.message)
+      return NextResponse.json({ error: 'Claim failed' }, { status: 500 })
     }
-
-    if (post.published_at) {
+    if (!claimedRows || claimedRows.length === 0) {
+      // Not in 'scheduled' state (already published/failed/partial) or
+      // another caller claimed it within the staleness window. Either way,
+      // this call must not publish again -- callers already treat 409 as
+      // "someone else handled it."
       return NextResponse.json({ error: 'Already published' }, { status: 409 })
     }
+    const post = claimedRows[0]
 
     userId = post.user_id
 

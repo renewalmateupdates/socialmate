@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -55,13 +56,12 @@ export async function POST(req: NextRequest) {
 
   const admin = getSupabaseAdmin()
 
-  const { data: ws } = await admin
-    .from('workspaces')
-    .select('plan')
-    .eq('id', workspace_id)
-    .single()
-
-  if (!ws || ws.plan === 'free') {
+  // workspaces.plan is NULL by default until that workspace itself goes
+  // through Stripe checkout -- `null === 'free'` is false, so a bare equality
+  // check here fails OPEN. resolveWorkspacePlan falls back through the
+  // owner's plan and normalizes NULL to 'free' explicitly.
+  const plan = await resolveWorkspacePlan(admin, user.id, workspace_id)
+  if (plan === 'free') {
     return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
   }
 

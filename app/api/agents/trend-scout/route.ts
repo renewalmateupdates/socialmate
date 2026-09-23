@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -54,14 +55,15 @@ export async function POST(req: NextRequest) {
 
   const admin = getSupabaseAdmin()
 
-  // Verify Pro+ plan
-  const { data: ws } = await admin
-    .from('workspaces')
-    .select('plan')
-    .eq('id', workspace_id)
-    .single()
-
-  if (!ws || ws.plan === 'free') {
+  // Verify Pro+ plan. workspaces.plan is NULL by default for any workspace
+  // that has never itself been through Stripe checkout -- true for most
+  // workspaces today -- and `null === 'free'` is false, so a bare equality
+  // check here fails OPEN: a free user could enable this and the cron below
+  // would run real Gemini calls for them indefinitely. resolveWorkspacePlan
+  // falls back through the workspace's owner's plan and normalizes NULL to
+  // the 'free' tier explicitly.
+  const plan = await resolveWorkspacePlan(admin, user.id, workspace_id)
+  if (plan === 'free') {
     return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
   }
 

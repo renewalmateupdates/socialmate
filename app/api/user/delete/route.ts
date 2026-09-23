@@ -63,9 +63,13 @@ export async function POST(req: NextRequest) {
     await admin.from('posts').delete().eq('user_id', userId)
 
     // Remove user from other people's teams. team_members is keyed by
-    // owner_id / member_id — it has no user_id column, so this delete matched
-    // nothing and the user stayed on every team they had joined.
-    await admin.from('team_members').delete().eq('member_id', userId)
+    // owner_id / email — it has no user_id or member_id column, so this
+    // delete matched nothing and the user stayed on every team they had
+    // joined. Every write to this table keys membership by email (see
+    // /api/team/accept, /api/team/my-role).
+    if (user.email) {
+      await admin.from('team_members').delete().eq('email', user.email)
+    }
 
     // Delete workspaces owned by this user (and their team_members via cascade or explicit)
     const { data: ownedWorkspaces } = await admin

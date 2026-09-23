@@ -9,6 +9,13 @@ import type { LucideIcon } from 'lucide-react'
 
 const STATUS_ICONS: Record<string, LucideIcon> = {
   active:   CheckCircle2,
+  // The Stripe webhook writes 'live' on a completed checkout, not 'active' --
+  // a different literal string from the one this page's status displays and
+  // "you're live" UI blocks were built to recognize. Every paying lister has
+  // seen an unstyled raw "live" status instead of confirmation their listing
+  // is actually up. Styled identically to 'active' since the webhook itself
+  // is off-limits to touch.
+  live:     CheckCircle2,
   approved: Clock,
   pending:  Clock,
   expired:  XCircle,
@@ -190,6 +197,7 @@ export default function StudioStaxPortalPage() {
   const statusColors: Record<string, string> = {
     approved: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400',
     active:   'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
+    live:     'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
     pending:  'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400',
     expired:  'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
     rejected: 'bg-panel border-edge text-gray-500 dark:text-gray-400',
@@ -197,6 +205,7 @@ export default function StudioStaxPortalPage() {
   const statusLabels: Record<string, string> = {
     approved: 'Approved — Payment Pending',
     active:   'Active',
+    live:     'Active',
     pending:  'Pending Review',
     expired:  'Expired',
     rejected: 'Rejected',
@@ -554,7 +563,7 @@ export default function StudioStaxPortalPage() {
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {new Date(renewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
-                  {listing.status === 'active' && (() => {
+                  {(listing.status === 'active' || listing.status === 'live') && (() => {
                     const daysLeft = Math.ceil((new Date(renewalDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                     return daysLeft <= 30 ? (
                       <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1 inline-flex items-center gap-1">
@@ -586,7 +595,7 @@ export default function StudioStaxPortalPage() {
             </div>
 
             {/* Renew CTA — only for active/expired */}
-            {(listing.status === 'active' || listing.status === 'expired') && (
+            {(listing.status === 'active' || listing.status === 'live' || listing.status === 'expired') && (
               <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
                 <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-2">Renew Your Listing</p>
                 <p className="text-sm text-amber-800 dark:text-amber-300 mb-4 leading-relaxed">

@@ -65,6 +65,10 @@ export type Workspace = {
   is_personal: boolean
   client_name?: string
   owner_id: string
+  // 'owner' for a workspace this user owns; otherwise their team_members
+  // role for the owner it belongs to (editor/viewer/client/admin). Absent on
+  // older cached shapes -- treat missing as 'owner' for backward compat.
+  role?: string
 }
 
 type WorkspaceContextType = {
@@ -139,10 +143,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setUserId(user.id)
 
-      const { data: ws } = await supabase
-        .from('workspaces')
-        .select('*')
-        .eq('owner_id', user.id)
+      // Own workspaces plus, if this user was invited onto another owner's
+      // team, that owner's workspaces too -- team_members has no
+      // workspace_id (membership is owner-wide), and a plain client query
+      // for someone else's workspaces returns nothing under RLS regardless.
+      // A bare `owner_id = user.id` query here (the previous version) meant
+      // an invited Editor/Viewer/Client could accept an invite and never see
+      // the workspace they were invited into anywhere in the app.
+      const ws: Workspace[] = await fetch('/api/workspaces/accessible')
+        .then(r => r.ok ? r.json() : { workspaces: [] })
+        .then(d => d.workspaces ?? [])
+        .catch(() => [])
 
       if (ws && ws.length > 0) {
         setWorkspaces(ws)
@@ -231,10 +242,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const refreshWorkspaces = useCallback(async () => {
     if (!userId) return
-    const { data: ws } = await supabase
-      .from('workspaces')
-      .select('*')
-      .eq('owner_id', userId)
+    const ws: Workspace[] = await fetch('/api/workspaces/accessible')
+      .then(r => r.ok ? r.json() : { workspaces: [] })
+      .then(d => d.workspaces ?? [])
+      .catch(() => [])
     if (ws && ws.length > 0) {
       setWorkspaces(ws)
       // Update active workspace data if it changed
