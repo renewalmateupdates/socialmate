@@ -48,12 +48,39 @@ export async function POST(request: NextRequest) {
     disable_duet      = false,
     disable_comment   = false,
     disable_stitch    = false,
+    // Commercial content disclosure -- TikTok labels the post from these and
+    // requires them collected before any direct post, immediate or scheduled.
+    brand_content_toggle = false,
+    brand_organic_toggle = false,
     scheduled_at,
     workspace_id,
   } = body
 
   if (!video_url || !video_storage_path) {
     return NextResponse.json({ error: 'video_url and video_storage_path are required' }, { status: 400 })
+  }
+
+  // Same accepted values and same private-direction fallback as init-upload --
+  // an unrecognised value is rejected by TikTok with an opaque error, and if
+  // this is going to be wrong it must be wrong in the private direction.
+  const TIKTOK_PRIVACY = [
+    'PUBLIC_TO_EVERYONE',
+    'MUTUAL_FOLLOW_FRIENDS',
+    'FOLLOWER_OF_CREATOR',
+    'SELF_ONLY',
+  ]
+  const effectivePrivacy = TIKTOK_PRIVACY.includes(privacy_level)
+    ? privacy_level
+    : 'SELF_ONLY'
+
+  // TikTok rejects branded content that is visible only to the creator, so
+  // that combination is refused here with a reason rather than passed on to
+  // come back as an opaque API error -- or, worse for a scheduled post,
+  // accepted now and rejected by TikTok hours later with nobody watching.
+  if (brand_content_toggle && effectivePrivacy === 'SELF_ONLY') {
+    return NextResponse.json({
+      error: 'Branded content cannot be visible to only you. Choose a different audience.',
+    }, { status: 400 })
   }
 
   // Check quota — resolved through resolveWorkspacePlan, not a bare user_settings
@@ -116,10 +143,12 @@ export async function POST(request: NextRequest) {
       active_filter,
       sound_id:              sound_id || null,
       sound_name:            sound_name || null,
-      privacy_level,
+      privacy_level:         effectivePrivacy,
       disable_duet,
       disable_comment,
       disable_stitch,
+      brand_content_toggle,
+      brand_organic_toggle,
       scheduled_at:          scheduled_at || null,
       status:                scheduled_at ? 'scheduled' : 'publishing',
     })
@@ -154,7 +183,7 @@ export async function POST(request: NextRequest) {
   const postBody: Record<string, unknown> = {
     post_info: {
       title:                fullCaption,
-      privacy_level,
+      privacy_level:        effectivePrivacy,
       disable_duet,
       disable_comment,
       disable_stitch,
@@ -170,6 +199,11 @@ export async function POST(request: NextRequest) {
     (postBody.post_info as Record<string, unknown>).music_id = sound_id
   }
 
+  if (brand_content_toggle || brand_organic_toggle) {
+    (postBody.post_info as Record<string, unknown>).brand_content_toggle = !!brand_content_toggle
+    ;(postBody.post_info as Record<string, unknown>).brand_organic_toggle = !!brand_organic_toggle
+  }
+
   const tikRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
     method:  'POST',
     headers: {
@@ -182,12 +216,22 @@ export async function POST(request: NextRequest) {
   const tikData = await tikRes.json().catch(() => ({}))
 
   if (!tikRes.ok) {
-    const errMsg = tikData?.error?.message || `TikTok API error ${tikRes.status}`
+    const errCode = tikData?.error?.code    || 'unknown'
+    const errMsg  = tikData?.error?.message || `TikTok API error ${tikRes.status}`
+    // Same two gates as init-upload: production access vs. the content sharing
+    // audit. Until the audit passes, an unaudited client may only post to a
+    // private TikTok account — this is not the integration breaking.
+    const friendlyMsg = errCode === 'unaudited_client_can_only_post_to_private_accounts'
+      ? 'TikTok will not let SocialMate post publicly yet. Our app is pending ' +
+        "TikTok's content sharing audit, and until it passes, direct posts can " +
+        'only go to a private TikTok account. Set your TikTok account back to ' +
+        'private, or use Send to TikTok drafts instead.'
+      : errMsg
     await getSupabaseAdmin()
       .from('tiktok_posts')
-      .update({ status: 'failed', error_message: errMsg })
+      .update({ status: 'failed', error_message: friendlyMsg })
       .eq('id', tikPost.id)
-    return NextResponse.json({ error: errMsg }, { status: 502 })
+    return NextResponse.json({ error: friendlyMsg, code: errCode }, { status: 502 })
   }
 
   const publishId   = tikData?.data?.publish_id

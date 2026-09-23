@@ -4867,7 +4867,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
     const due = await step.run('fetch-due-tiktok-posts', async () => {
       const { data } = await getSupabaseAdmin()
         .from('tiktok_posts')
-        .select('id, user_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch')
+        .select('id, user_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch, brand_content_toggle, brand_organic_toggle')
         .eq('status', 'scheduled')
         .lte('scheduled_at', new Date().toISOString())
         .limit(20)
@@ -4937,6 +4937,14 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
 
         if (post.sound_id && post.sound_id !== 'original') {
           (postBody.post_info as Record<string, unknown>).music_id = post.sound_id
+        }
+
+        // Commercial disclosure was collected at scheduling time and stored on
+        // the row precisely so it survives to this later publish — without
+        // this a scheduled branded/promotional post would go out undisclosed.
+        if (post.brand_content_toggle || post.brand_organic_toggle) {
+          (postBody.post_info as Record<string, unknown>).brand_content_toggle = !!post.brand_content_toggle
+          ;(postBody.post_info as Record<string, unknown>).brand_organic_toggle = !!post.brand_organic_toggle
         }
 
         const tikRes  = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
