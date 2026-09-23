@@ -29,6 +29,7 @@ import { runCapReached, nextRunCount } from '@/lib/soma-runs'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
+import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -4885,7 +4886,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
     const due = await step.run('fetch-due-tiktok-posts', async () => {
       const { data } = await getSupabaseAdmin()
         .from('tiktok_posts')
-        .select('id, user_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch, brand_content_toggle, brand_organic_toggle')
+        .select('id, user_id, workspace_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch, brand_content_toggle, brand_organic_toggle')
         .eq('status', 'scheduled')
         .lte('scheduled_at', new Date().toISOString())
         .limit(20)
@@ -4989,6 +4990,13 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
           .from('tiktok_posts')
           .update({ status: 'published', tiktok_post_id: tiktokPostId, tiktok_account_open_id: account.platform_user_id })
           .eq('id', post.id)
+
+        void syncTiktokPublishToPosts({
+          id:           post.id,
+          user_id:      post.user_id,
+          workspace_id: post.workspace_id ?? null,
+          post_caption: post.post_caption ?? null,
+        })
 
         // Increment monthly quota (best-effort)
         try {
