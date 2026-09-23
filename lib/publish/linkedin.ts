@@ -4,11 +4,73 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 // LinkedIn UGC posts max length
 const MAX_LINKEDIN_LENGTH = 3000
 
+// Registers an upload slot with LinkedIn's Assets API, PUTs the image bytes
+// to it, and returns the resulting asset URN to reference in the post.
+// Resilient by design: any failure here is caught by the caller and the post
+// still goes out, just without that image -- matching how Bluesky/Mastodon's
+// media upload already behaves, rather than failing the whole post over one
+// bad image URL.
+async function uploadLinkedInImage(
+  accessToken: string,
+  personUrn: string,
+  imageUrl: string,
+): Promise<string | null> {
+  const registerRes = await fetch('https://api.linkedin.com/v2/assets?action=registerUpload', {
+    method:  'POST',
+    headers: {
+      Authorization:  `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      registerUploadRequest: {
+        recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
+        owner: personUrn,
+        serviceRelationships: [
+          { relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' },
+        ],
+      },
+    }),
+  })
+  if (!registerRes.ok) {
+    console.warn('[LinkedIn] Asset registration failed for', imageUrl, await registerRes.text().catch(() => ''))
+    return null
+  }
+
+  const registerData = await registerRes.json()
+  const uploadUrl: string | undefined =
+    registerData?.value?.uploadMechanism?.['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']?.uploadUrl
+  const asset: string | undefined = registerData?.value?.asset
+  if (!uploadUrl || !asset) {
+    console.warn('[LinkedIn] Asset registration returned no upload URL for', imageUrl)
+    return null
+  }
+
+  const mediaRes = await fetch(imageUrl)
+  if (!mediaRes.ok) {
+    console.warn('[LinkedIn] Could not fetch media for upload:', imageUrl)
+    return null
+  }
+  const buffer = await mediaRes.arrayBuffer()
+
+  const putRes = await fetch(uploadUrl, {
+    method:  'PUT',
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body:    Buffer.from(buffer),
+  })
+  if (!putRes.ok) {
+    console.warn('[LinkedIn] Image PUT failed for', imageUrl, await putRes.text().catch(() => ''))
+    return null
+  }
+
+  return asset
+}
+
 export async function publishToLinkedIn(
   userId:     string,
   content:    string,
   workspaceId?: string | null,
-  accountId?:   string
+  accountId?:   string,
+  mediaUrls?:   string[],
 ): Promise<string> {
   if (content.length > MAX_LINKEDIN_LENGTH) {
     throw new Error(`Post exceeds LinkedIn's ${MAX_LINKEDIN_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
@@ -50,6 +112,31 @@ export async function publishToLinkedIn(
     throw new Error('LinkedIn token missing. Please reconnect your LinkedIn account.')
   }
 
+  const personUrn = `urn:li:person:${account.platform_user_id}`
+
+  // Media was never passed to this publisher at all -- publishToAll forwarded
+  // it to every other platform, so an image attached to a post that included
+  // LinkedIn was silently dropped for that platform only, with no error shown
+  // to the user. LinkedIn requires each image registered and uploaded as a
+  // separate asset before the post itself can reference it.
+  const shareContent: Record<string, unknown> = {
+    shareCommentary:    { text: content },
+    shareMediaCategory: 'NONE',
+  }
+
+  if (mediaUrls && mediaUrls.length > 0) {
+    const imageUrls = mediaUrls.filter(u => !u.match(/\.(mp4|mov|avi|webm)/i)).slice(0, 9)
+    const assets: string[] = []
+    for (const url of imageUrls) {
+      const asset = await uploadLinkedInImage(account.access_token, personUrn, url)
+      if (asset) assets.push(asset)
+    }
+    if (assets.length > 0) {
+      shareContent.shareMediaCategory = 'IMAGE'
+      shareContent.media = assets.map(asset => ({ status: 'READY', media: asset }))
+    }
+  }
+
   const res = await fetch('https://api.linkedin.com/v2/ugcPosts', {
     method:  'POST',
     headers: {
@@ -58,13 +145,10 @@ export async function publishToLinkedIn(
       'X-Restli-Protocol-Version': '2.0.0',
     },
     body: JSON.stringify({
-      author:            `urn:li:person:${account.platform_user_id}`,
+      author:            personUrn,
       lifecycleState:    'PUBLISHED',
       specificContent: {
-        'com.linkedin.ugc.ShareContent': {
-          shareCommentary:     { text: content },
-          shareMediaCategory:  'NONE',
-        },
+        'com.linkedin.ugc.ShareContent': shareContent,
       },
       visibility: {
         'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC',

@@ -62,7 +62,7 @@ export async function publishToAll(
           postId = await publishToYouTube(userId, content)
           break
         case 'linkedin':
-          postId = await publishToLinkedIn(userId, content, workspaceId, selectedAccountIds['linkedin'])
+          postId = await publishToLinkedIn(userId, content, workspaceId, selectedAccountIds['linkedin'], media)
           break
         case 'pinterest':
           postId = await publishToPinterest(userId, content, destId)
