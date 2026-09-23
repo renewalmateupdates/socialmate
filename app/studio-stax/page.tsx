@@ -48,10 +48,15 @@ export default async function StudioStaxPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // 'active'/'live' are the paid-and-confirmed states; 'approved' also
+  // covers a free-year listing (which never leaves that status) and a paid
+  // listing mid-checkout with a payment link already sent. The Stripe webhook
+  // itself writes the literal string 'live', not 'active', on a completed
+  // checkout -- see app/admin/studio-stax/page.tsx's isLiveListing() comment.
   const { data: listings } = await supabase
     .from('curated_listings')
     .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at, is_nsfw, featured, featured_until')
-    .eq('status', 'approved')
+    .in('status', ['approved', 'active', 'live'])
 
   // Founding spots counter
   const { count: foundingSpotsUsed } = await supabase

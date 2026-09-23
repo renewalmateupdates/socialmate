@@ -134,13 +134,15 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET — fetch approved listings (public)
+// GET — fetch live listings (public). 'active'/'live' are the paid-and-
+// confirmed states; the webhook writes the literal 'live', not 'active' --
+// see app/admin/studio-stax/page.tsx's isLiveListing() comment.
 export async function GET() {
   const db = getAdminSupabase()
   const { data, error } = await db
     .from('curated_listings')
     .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, created_at')
-    .eq('status', 'approved')
+    .in('status', ['approved', 'active', 'live'])
     .order('smgive_donated_cents', { ascending: false })
 
   if (error) return NextResponse.json({ listings: [] })

@@ -36,9 +36,23 @@ const STATUS_BADGE: Record<string, string> = {
   pending:   'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   approved:  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   active:    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  // The Stripe webhook writes 'live' on a completed checkout, not 'active' --
+  // it's a different literal string from the one this entire page (and every
+  // public listing page) was built to recognize. Every paid listing has been
+  // stuck as an unstyled, un-actionable status here since launch. Styled
+  // identically to 'active' rather than fixed at the source, since the
+  // webhook itself is off-limits to touch.
+  live:      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   suspended: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
   rejected:  'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
   expired:   'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+}
+
+// True for a listing that is actually paid and should be publicly visible --
+// 'active' is this page's own vocabulary for that state; 'live' is the
+// literal string the Stripe webhook actually writes. See STATUS_BADGE above.
+function isLiveListing(status: string): boolean {
+  return status === 'active' || status === 'live'
 }
 
 const ALL_STATUSES = ['all', 'pending', 'approved', 'active', 'suspended', 'expired', 'rejected'] as const
@@ -285,7 +299,9 @@ export default function AdminStudioStaxPage() {
   }
 
   const featuredCount = listings.filter(l => l.admin_featured).length
-  const filtered = filter === 'all' ? listings : listings.filter(l => l.status === filter)
+  const filtered = filter === 'all'
+    ? listings
+    : listings.filter(l => filter === 'active' ? isLiveListing(l.status) : l.status === filter)
 
   const statusCounts: Record<string, number> = {}
   for (const l of listings) {
@@ -293,7 +309,7 @@ export default function AdminStudioStaxPage() {
   }
 
   // Revenue: active listings — rough estimate based on known tier pricing
-  const activeCount = listings.filter(l => l.status === 'active').length
+  const activeCount = listings.filter(l => isLiveListing(l.status)).length
   const totalSmGiveCents = listings.reduce((sum, l) => sum + (l.smgive_donated_cents || 0), 0)
 
   if (forbidden) return (
@@ -428,7 +444,7 @@ export default function AdminStudioStaxPage() {
                         </button>
                       </td>
                       <td className="px-5 py-3">
-                        {listing.status === 'active' ? (
+                        {isLiveListing(listing.status) ? (
                           <button
                             onClick={() => handleTogglePaidFeatured(listing.id, listing.featured)}
                             disabled={actionLoading}
@@ -465,7 +481,7 @@ export default function AdminStudioStaxPage() {
                               Review
                             </button>
                           )}
-                          {listing.status === 'active' && (
+                          {isLiveListing(listing.status) && (
                             <button
                               onClick={() => handleStatusChange(listing.id, 'suspended')}
                               disabled={actionLoading}
@@ -631,7 +647,7 @@ export default function AdminStudioStaxPage() {
                 )}
 
                 {/* Editor's Pick toggle */}
-                {selected.status === 'active' && (
+                {isLiveListing(selected.status) && (
                   <div className={`flex items-center justify-between p-3 rounded-xl border ${
                     selected.admin_featured
                       ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
@@ -655,7 +671,7 @@ export default function AdminStudioStaxPage() {
                 )}
 
                 {/* Paid Feature toggle */}
-                {selected.status === 'active' && (
+                {isLiveListing(selected.status) && (
                   <div className={`flex items-center justify-between p-3 rounded-xl border ${
                     selected.featured
                       ? 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800'
@@ -719,7 +735,7 @@ export default function AdminStudioStaxPage() {
                     </button>
                   </>
                 )}
-                {selected.status === 'active' && (
+                {isLiveListing(selected.status) && (
                   <button
                     onClick={() => handleStatusChange(selected.id, 'suspended', adminNotes)}
                     disabled={actionLoading}
@@ -736,7 +752,7 @@ export default function AdminStudioStaxPage() {
                   </button>
                 )}
                 {/* Save notes only */}
-                {!['pending', 'active', 'suspended'].includes(selected.status) && (
+                {!['pending', 'active', 'live', 'suspended'].includes(selected.status) && (
                   <button
                     onClick={() => handleStatusChange(selected.id, selected.status, adminNotes)}
                     disabled={actionLoading}

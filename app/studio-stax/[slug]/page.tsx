@@ -50,11 +50,13 @@ async function getListing(slug: string) {
     }
   )
 
-  // Fetch all approved listings and match by derived slug
+  // Fetch all live listings and match by derived slug. 'active'/'live' are
+  // the paid-and-confirmed states; the webhook writes the literal 'live', not
+  // 'active' -- see app/admin/studio-stax/page.tsx's isLiveListing() comment.
   const { data: listings } = await supabase
     .from('curated_listings')
     .select('id, name, tagline, description, url, logo_url, category, mission_statement, is_nsfw, smgive_donated_cents, admin_featured')
-    .eq('status', 'approved')
+    .in('status', ['approved', 'active', 'live'])
 
   if (!listings) return null
 
