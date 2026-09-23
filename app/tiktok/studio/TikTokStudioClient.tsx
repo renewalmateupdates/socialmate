@@ -251,26 +251,34 @@ function PostSettingsPanel({
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5">
-              {limits.privacyOptions.map(opt => (
-                <button
-                  key={opt}
-                  onClick={() => setPrivacyLevel(opt)}
-                  className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                    privacyLevel === opt
-                      ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
-                      : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
-                  }`}
-                >
-                  {PRIVACY_LABELS[opt] ?? opt}
-                </button>
-              ))}
+              {limits.privacyOptions.map(opt => {
+                // Branded content can never be private -- TikTok rejects the
+                // combination outright, so "Only me" is locked out here rather
+                // than left clickable with just a warning underneath.
+                const lockedByBranding = brandedContent && opt === 'SELF_ONLY'
+                return (
+                  <button
+                    key={opt}
+                    onClick={() => !lockedByBranding && setPrivacyLevel(opt)}
+                    disabled={lockedByBranding}
+                    title={lockedByBranding ? 'Branded content cannot be visible to only you.' : undefined}
+                    className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      lockedByBranding
+                        ? 'bg-panel border-edge text-ink-faint opacity-40 cursor-not-allowed'
+                        : privacyLevel === opt
+                        ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
+                        : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
+                    }`}
+                  >
+                    {PRIVACY_LABELS[opt] ?? opt}
+                  </button>
+                )
+              })}
             </div>
           )}
           {!privacyLevel && limits.privacyOptions.length > 0 && (
             <p className="mt-2 text-[11px] text-ink-faint">Pick one to enable posting.</p>
           )}
-          {/* Branded content cannot be private. TikTok rejects the combination,
-              so it is blocked here with the reason rather than at the API. */}
           {brandedContent && privacyLevel === 'SELF_ONLY' && (
             <p className="mt-2 text-[11px] text-alert">
               Branded content cannot be visible to only you. Choose another audience.
@@ -457,9 +465,9 @@ function PostSettingsPanel({
           className="w-full bg-[#fe2c55] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20"
         >
           {uploading
-            ? <><Loader2 size={15} strokeWidth={2} className="animate-spin" /> Uploading to TikTok…</>
+            ? <><Loader2 size={15} strokeWidth={2} className="animate-spin" /> {scheduleMode === 'schedule' ? 'Saving video…' : 'Uploading to TikTok…'}</>
             : posting
-            ? <><Rocket size={15} strokeWidth={2} className="animate-pulse" /> Publishing…</>
+            ? <><Rocket size={15} strokeWidth={2} className="animate-pulse" /> {scheduleMode === 'schedule' ? 'Scheduling…' : 'Publishing…'}</>
             : scheduleMode === 'schedule'
             ? <><CalendarDays size={15} strokeWidth={2} /> Schedule Video</>
             : scheduleMode === 'drafts'
@@ -468,7 +476,9 @@ function PostSettingsPanel({
         </button>
         <p className="text-xs text-ink-faint text-center">
           {uploading
-            ? 'Uploading your video directly to TikTok…'
+            ? (scheduleMode === 'schedule' ? 'Saving your video so it can be posted later…' : 'Uploading your video directly to TikTok…')
+            : scheduleMode === 'schedule'
+            ? 'Your video is saved now and sent to TikTok automatically at the scheduled time.'
             : 'Your original video will be uploaded via TikTok\'s Content Posting API.'}
         </p>
       </div>
@@ -544,9 +554,12 @@ export default function TikTokStudioClient() {
   const [commercial, setCommercial]             = useState(false)
   const [yourBrand, setYourBrand]               = useState(false)
   const [brandedContent, setBrandedContent]     = useState(false)
-  const [disableDuet, setDisableDuet]           = useState(false)
-  const [disableComment, setDisableComment]     = useState(false)
-  const [disableStitch, setDisableStitch]       = useState(false)
+  // TikTok's guidelines require these OFF by default -- the creator must
+  // manually turn each one on, the same treatment already given to privacy
+  // level above. These default to true ("disabled") for exactly that reason.
+  const [disableDuet, setDisableDuet]           = useState(true)
+  const [disableComment, setDisableComment]     = useState(true)
+  const [disableStitch, setDisableStitch]       = useState(true)
   const [scheduleMode, setScheduleMode]         = useState<'now' | 'schedule' | 'drafts'>('now')
   const [scheduledAt, setScheduledAt]           = useState('')
 
@@ -1018,6 +1031,67 @@ export default function TikTokStudioClient() {
         mimeType = 'video/mp4'
       }
 
+      // Scheduled posts cannot go to TikTok now. TikTok's Direct Post API has
+      // no "publish later" parameter -- it publishes (or, unaudited, privately
+      // posts) the moment the upload completes. This used to call TikTok via
+      // FILE_UPLOAD unconditionally regardless of schedule mode, so every
+      // "Schedule" click actually posted immediately and then lied about it on
+      // the success screen. The Inngest cron that was supposed to publish it
+      // later found no stored video (FILE_UPLOAD never keeps one) and marked an
+      // already-published post "failed".
+      //
+      // A scheduled post is instead staged in our own storage now and handed to
+      // TikTok by that same cron at the scheduled time via PULL_FROM_URL --
+      // infrastructure that already existed (upload-url + /api/tiktok/post) but
+      // was never wired to this button.
+      if (scheduleMode === 'schedule') {
+        const urlRes  = await fetch('/api/tiktok/upload-url')
+        const urlData = await urlRes.json()
+        if (!urlRes.ok) throw new Error(urlData.error || 'Failed to prepare upload')
+        const { signedUrl, path, publicUrl } = urlData
+
+        const putRes = await fetch(signedUrl, {
+          method:  'PUT',
+          body:    uploadBlob,
+          headers: { 'Content-Type': mimeType },
+        })
+        if (!putRes.ok) throw new Error(`Video upload failed (${putRes.status})`)
+
+        setUploading(false)
+        setPosting(true)
+
+        const scheduleRes = await fetch('/api/tiktok/post', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            video_url:              publicUrl,
+            video_storage_path:     path,
+            video_size_bytes:       uploadBlob.size,
+            video_duration_seconds: videoDuration,
+            post_caption:           postCaption,
+            hashtags,
+            caption_overlay:        captionOverlay,
+            caption_position:       captionPosition,
+            caption_color:          captionColor,
+            active_filter:          activeFilter,
+            sound_id:               selectedSound?.id || null,
+            sound_name:             selectedSound?.name || null,
+            privacy_level:          privacyLevel,
+            disable_duet:           disableDuet,
+            disable_comment:        disableComment,
+            disable_stitch:         disableStitch,
+            brand_content_toggle:   brandedContent,
+            brand_organic_toggle:   yourBrand,
+            scheduled_at:           scheduledAt,
+          }),
+        })
+        const scheduleData = await scheduleRes.json()
+        if (!scheduleRes.ok) throw new Error(scheduleData.error || 'Failed to schedule TikTok post')
+
+        setPostSuccess(true)
+        return
+      }
+
       // Step 1: Initialize FILE_UPLOAD with TikTok
       const initRes = await fetch('/api/tiktok/init-upload', {
         method:  'POST',
@@ -1087,7 +1161,9 @@ export default function TikTokStudioClient() {
           disable_duet:           disableDuet,
           disable_comment:        disableComment,
           disable_stitch:         disableStitch,
-          scheduled_at:           scheduleMode === 'schedule' && scheduledAt ? scheduledAt : null,
+          // scheduleMode === 'schedule' returns before this point, so this call
+          // only ever runs for an immediate Post Now or a Send to drafts.
+          scheduled_at:           null,
         }),
       })
       const confirmData = await confirmRes.json()
@@ -1099,9 +1175,7 @@ export default function TikTokStudioClient() {
       // transfer and then decides separately whether the video is acceptable —
       // length, format, copyrighted audio, and so on. Nothing used to ask, so
       // the studio claimed success for videos TikTok silently rejected.
-      //
-      // Scheduled posts are not polled: nothing has been sent to TikTok yet.
-      if (scheduleMode !== 'schedule' && publish_id) {
+      if (publish_id) {
         setPublishState('checking')
         const started = Date.now()
         const poll = async (): Promise<void> => {
@@ -1142,10 +1216,10 @@ export default function TikTokStudioClient() {
     }
   }, [
     videoFile, videoUrl, trimStart, trimEnd, drawFrame,
-    hasEdits, exportEditedVideo, coverTime, volume,
+    hasEdits, exportEditedVideo, coverTime, volume, videoDuration,
     postCaption, hashtags, captionOverlay, captionPosition, captionColor,
     activeFilter, selectedSound, privacyLevel, disableDuet, disableComment,
-    disableStitch, scheduleMode, scheduledAt,
+    disableStitch, brandedContent, yourBrand, scheduleMode, scheduledAt,
   ])
 
   // ── Derived ─────────────────────────────────────────────────────────────────
@@ -1305,7 +1379,9 @@ export default function TikTokStudioClient() {
   const UploadProgressBanner = isWorking ? (
     <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-3 px-4 py-3 bg-[#fe2c55] text-white text-sm font-semibold shadow-lg">
       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
-      {uploading ? 'Uploading your video to TikTok…' : 'Publishing your post…'}
+      {uploading
+        ? (scheduleMode === 'schedule' ? 'Saving your video…' : 'Uploading your video to TikTok…')
+        : (scheduleMode === 'schedule' ? 'Scheduling your post…' : 'Publishing your post…')}
     </div>
   ) : null
 
