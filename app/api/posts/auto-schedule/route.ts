@@ -4,6 +4,7 @@ import { normalizePlan } from '@/lib/plan'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { inngest } from '@/lib/inngest'
 
 // Best send times per platform (ET hours, 24h). Weekdays only.
 const BEST_HOURS: Record<string, number[]> = {
@@ -219,6 +220,15 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (!updateError) {
+      // Every other path that sets status='scheduled' sends this event to
+      // actually trigger publishing at that time -- this one never did, so a
+      // Smart Queue post only ever went out because the GitHub Actions
+      // backstop cron independently polls for anything due. That cron is
+      // being narrowed to a true backstop (only picks up posts significantly
+      // overdue), so Smart Queue posts need their own real trigger now.
+      inngest.send({ name: 'post/scheduled', data: { postId: draft.id, scheduledAt: slot.toISOString() } })
+        .catch(err => console.error('[auto-schedule] INNGEST FAILED for', draft.id, ':', err))
+
       slots.push({
         id: draft.id,
         title: (draft.content as string ?? '').slice(0, 60) || '(no content)',
