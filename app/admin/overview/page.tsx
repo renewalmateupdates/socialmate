@@ -152,12 +152,17 @@ export default async function AdminOverviewPage() {
   let failed24h = 0
   let partial24h = 0
 
+  // Unlike every other block on this page, these three had no internal-account
+  // exclusion — socialmatehq's own SOMA automation volume was blending into
+  // what reads as a live activity gauge, the same self-contradiction #611/#655
+  // fixed elsewhere, just missed here.
   try {
     const { count } = await admin
       .from('posts')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'published')
       .gte('published_at', minus24h)
+      .not('user_id', 'in', notInternal)
     published24h = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -167,6 +172,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .eq('status', 'failed')
       .gte('updated_at', minus24h)
+      .not('user_id', 'in', notInternal)
     failed24h = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -176,6 +182,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .eq('status', 'partial')
       .gte('updated_at', minus24h)
+      .not('user_id', 'in', notInternal)
     partial24h = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -422,10 +429,15 @@ export default async function AdminOverviewPage() {
   } catch { /* graceful fallback */ }
 
   try {
+    // A post that reached some but not all selected platforms is still a real
+    // publish, not a no-op — a strict 'published' filter here was undercounting
+    // every multi-platform post that had one platform flake, which is normal
+    // and common. Matches /admin/funnel's Ground Truth, which already treats
+    // partial the same way.
     const { data } = await admin
       .from('posts')
       .select('user_id')
-      .eq('status', 'published')
+      .in('status', ['published', 'partial'])
       .not('user_id', 'in', notInternal)
     if (data) funnelPublished = new Set(data.map(r => r.user_id)).size
   } catch { /* graceful fallback */ }
@@ -434,7 +446,7 @@ export default async function AdminOverviewPage() {
     const { data } = await admin
       .from('posts')
       .select('user_id')
-      .eq('status', 'published')
+      .in('status', ['published', 'partial'])
       .gte('published_at', minus7d)
       .not('user_id', 'in', notInternal)
     if (data) funnelRetained = new Set(data.map(r => r.user_id)).size
