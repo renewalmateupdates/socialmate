@@ -162,11 +162,13 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // stax: only count approved listings
+  // stax: only count live listings. 'active'/'live' are the paid-and-
+  // confirmed states; the webhook writes the literal 'live', not 'active' --
+  // see app/admin/studio-stax/page.tsx's isLiveListing() comment.
   const staxSet = new Set<string>()
   if (staxRes.status === 'fulfilled') {
     for (const s of staxRes.value.data ?? []) {
-      if (s.status === 'approved') staxSet.add(s.applicant_email)
+      if (s.status === 'approved' || s.status === 'active' || s.status === 'live') staxSet.add(s.applicant_email)
     }
   }
 

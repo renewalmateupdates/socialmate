@@ -61,8 +61,11 @@ export async function GET() {
       .in('user_id', Array.from(internalIds)),
     db.from('affiliate_profiles').select('id', { count: 'exact', head: true })
       .eq('status', 'active'),
+    // 'active'/'live' are the paid-and-confirmed states; the webhook writes
+    // the literal 'live', not 'active' -- see the isLiveListing() comment on
+    // app/admin/studio-stax/page.tsx.
     db.from('curated_listings').select('id', { count: 'exact', head: true })
-      .eq('status', 'approved'),
+      .in('status', ['approved', 'active', 'live']),
   ])
 
   // A settled promise is not a successful query. PostgREST answers an unknown
