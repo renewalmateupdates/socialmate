@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
+import { internalIdsFrom } from '@/lib/internal-accounts'
 
 export async function GET() {
   const admin = await requireAdmin()
@@ -14,13 +15,28 @@ export async function GET() {
   const weekStart  = new Date(now); weekStart.setUTCDate(now.getUTCDate() - 7); weekStart.setUTCHours(0, 0, 0, 0)
   const monthStart = new Date(now); monthStart.setUTCDate(1); monthStart.setUTCHours(0, 0, 0, 0)
 
-  // Fetch all published/failed posts with platforms, user_id, and published_at.
-  // Time-range counts key off published_at (when it went live), not created_at:
-  // scheduled/SOMA posts are created days earlier and would undercount otherwise.
+  // Unlike every other admin dashboard, this route had no internal-account
+  // exclusion at all — socialmatehq's own SOMA/HERMES automation volume was
+  // counted as real user activity in every number below.
+  const { data: allProfiles, error: profilesError } = await db.from('profiles').select('id, email')
+  if (profilesError) console.warn('[admin/platform-stats] profiles lookup failed:', profilesError.message)
+  const internalIds = internalIdsFrom(allProfiles ?? [])
+  internalIds.add(admin.id)
+  const notInternal = `(${Array.from(internalIds).join(',')})`
+
+  // Fetch all published/partial/failed posts with platforms, user_id, and
+  // published_at. Time-range counts key off published_at (when it went live),
+  // not created_at: scheduled/SOMA posts are created days earlier and would
+  // undercount otherwise. 'partial' (published to some but not all selected
+  // platforms) used to be excluded from this fetch entirely — not just from a
+  // derived count — so a post that succeeded on 2 of 3 platforms vanished from
+  // every number here, platform breakdown included, even for the platforms it
+  // actually reached.
   const { data: posts, error } = await db
     .from('posts')
     .select('user_id, platforms, status, created_at, published_at')
-    .in('status', ['published', 'failed'])
+    .in('status', ['published', 'partial', 'failed'])
+    .not('user_id', 'in', notInternal)
     .order('created_at', { ascending: false })
     .limit(5000)
 
@@ -39,8 +55,10 @@ export async function GET() {
     }
   }
 
-  // Time-range counts (published only), keyed off published_at.
-  const published = allPosts.filter(p => p.status === 'published')
+  // Time-range counts, keyed off published_at. Includes 'partial' — a post
+  // that reached some but not all selected platforms is still a real publish,
+  // not a no-op, and used to be invisible here entirely (see the fetch above).
+  const published = allPosts.filter(p => p.status === 'published' || p.status === 'partial')
   const publishedOn = (p: { published_at: string | null }, since: Date) =>
     !!p.published_at && new Date(p.published_at) >= since
   const postsToday = published.filter(p => publishedOn(p, todayStart)).length

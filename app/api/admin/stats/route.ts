@@ -44,15 +44,20 @@ export async function GET() {
     // match the number the public counter shows. Activation ratios are the
     // opposite case and still exclude us — see /admin/overview.
     db.from('user_settings').select('user_id', { count: 'exact', head: true }),
+    // 'partial' (published to some but not all selected platforms) is still a
+    // real publish, not a no-op — a strict 'published' filter undercounted
+    // every multi-platform post that had one platform flake. Matches
+    // /admin/funnel's Ground Truth and /admin/overview's Activation Funnel,
+    // which both already treat partial the same way.
     db.from('posts').select('id', { count: 'exact', head: true })
       .gte('published_at', since)
-      .eq('status', 'published')
+      .in('status', ['published', 'partial'])
       .not('user_id', 'in', notInternal),
     // Kept, not discarded. Knowing our own posting still went out is useful; it
     // just must not be added to the number labelled as users.
     db.from('posts').select('id', { count: 'exact', head: true })
       .gte('published_at', since)
-      .eq('status', 'published')
+      .in('status', ['published', 'partial'])
       .in('user_id', Array.from(internalIds)),
     db.from('affiliate_profiles').select('id', { count: 'exact', head: true })
       .eq('status', 'active'),
