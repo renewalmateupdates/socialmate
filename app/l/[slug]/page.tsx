@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { normalizePlan } from '@/lib/plan'
+import { resolveWorkspacePlan } from '@/lib/plan'
 import BioLinkButton from './BioLinkButton'
 import { Link2, User } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
@@ -86,13 +86,14 @@ export default async function BioPage({ params }: { params: Promise<{ slug: stri
   const activeLinks = (p.links || []).filter((l) => l.active && l.title && l.url)
   const activeSocials = Object.entries(p.socials || {}).filter(([, v]) => v)
 
-  const { data: settings } = await getSupabase()
-    .from('user_settings')
-    .select('plan')
-    .eq('user_id', p.user_id)
-    .single()
-
-  const isPaid = normalizePlan(settings?.plan) !== 'free'
+  // resolveWorkspacePlan(), not a raw user_settings.plan read — SIGIL is a
+  // personal (not workspace-scoped) feature, so workspaceId is null, but a
+  // raw read here is the exact "one fact, one place" bug class (PR #579)
+  // that cost the first paying customer their first hour: it would silently
+  // keep showing "Powered by SocialMate" to a paying user whose plan lives
+  // on their workspace row instead of user_settings.
+  const bioPlan = await resolveWorkspacePlan(getSupabase(), p.user_id, null)
+  const isPaid = bioPlan !== 'free'
 
   return React.createElement(
     'div',
