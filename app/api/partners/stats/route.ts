@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { stripe } from '@/lib/stripe'
+import { getAffiliateAvailableBalanceCents } from '@/lib/affiliate-balance'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -80,7 +81,17 @@ export async function GET(req: NextRequest) {
       .select('*')
       .order('created_at', { ascending: false })
 
-    return NextResponse.json({ affiliates: affiliates ?? [] })
+    // Same real-balance fix as the affiliate's own view below -- the admin
+    // list was showing every partner's stale, never-written
+    // available_balance_cents instead of what they've actually earned.
+    const { data: realBalances } = await db.from('affiliates').select('user_id, unpaid_earnings')
+    const balanceByUser = new Map((realBalances ?? []).map(a => [a.user_id, Math.round((a.unpaid_earnings ?? 0) * 100)]))
+    const enrichedAffiliates = (affiliates ?? []).map(a => ({
+      ...a,
+      available_balance_cents: balanceByUser.get(a.user_id) ?? 0,
+    }))
+
+    return NextResponse.json({ affiliates: enrichedAffiliates })
   }
 
   // ── Admin shortcut: return isAdmin flag so partner portal can redirect ──
@@ -136,8 +147,13 @@ export async function GET(req: NextRequest) {
   // Referral link (using affiliate promo code prefix or fallback)
   const referralLink = `${appUrl}/?aff=${profile.id.slice(0, 8)}`
 
+  // The real balance -- see lib/affiliate-balance.ts. profile.available_balance_cents
+  // is never written to by the Stripe webhook and would show $0 even for an
+  // affiliate who has actually earned real commission.
+  const availableBalanceCents = await getAffiliateAvailableBalanceCents(db, user.id)
+
   return NextResponse.json({
-    profile: { ...profile, commission_rate: commissionRate },
+    profile: { ...profile, available_balance_cents: availableBalanceCents, commission_rate: commissionRate },
     referral_link: referralLink,
     promo_codes: promoCodes ?? [],
     conversions: conversions ?? [],

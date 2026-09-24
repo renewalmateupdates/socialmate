@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { payoutConfirmationEmail, payoutApprovedEmail } from '@/lib/emails/affiliateEmails'
 import { REPLY_TO } from '@/lib/mail'
+import { getAffiliateAvailableBalanceCents, deductAffiliateEarnings } from '@/lib/affiliate-balance'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -105,9 +106,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Active affiliate account required' }, { status: 403 })
   }
 
-  if (profile.available_balance_cents < 2500) {
+  // The real balance -- see lib/affiliate-balance.ts. profile.available_balance_cents
+  // is never written to by the Stripe webhook.
+  const availableBalanceCents = await getAffiliateAvailableBalanceCents(db, user.id)
+
+  if (availableBalanceCents < 2500) {
     return NextResponse.json(
-      { error: `Minimum payout is $25.00. You have ${(profile.available_balance_cents / 100).toFixed(2)} available.` },
+      { error: `Minimum payout is $25.00. You have ${(availableBalanceCents / 100).toFixed(2)} available.` },
       { status: 400 }
     )
   }
@@ -124,7 +129,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'You already have a pending payout request' }, { status: 409 })
   }
 
-  const amount = profile.available_balance_cents
+  const amount = availableBalanceCents
 
   const { data: payout, error } = await db
     .from('affiliate_payouts')
@@ -187,14 +192,16 @@ export async function PATCH(req: NextRequest) {
 
   const { data: payout } = await db
     .from('affiliate_payouts')
-    .select('*, affiliate_profiles!inner (user_id, email, available_balance_cents, stripe_account_id)')
+    .select('*, affiliate_profiles!inner (user_id, email, stripe_account_id)')
     .eq('id', id)
     .single()
 
   if (!payout) return NextResponse.json({ error: 'Payout not found' }, { status: 404 })
 
   if (action === 'approve') {
-    // Mark approved + deduct from available balance
+    // Mark approved + spend the payout amount off the real balance (see
+    // lib/affiliate-balance.ts -- affiliate_profiles.available_balance_cents
+    // was never the real balance to begin with).
     await db
       .from('affiliate_payouts')
       .update({
@@ -204,28 +211,19 @@ export async function PATCH(req: NextRequest) {
       })
       .eq('id', id)
 
-    await db
-      .from('affiliate_profiles')
-      .update({
-        available_balance_cents: Math.max(0, (payout.affiliate_profiles as any).available_balance_cents - payout.amount_cents),
-        paid_out_cents: db.rpc as any,  // done via raw update below
-      })
-      .eq('id', payout.affiliate_id)
+    const payoutUserId = (payout.affiliate_profiles as any).user_id
+    await deductAffiliateEarnings(db, payoutUserId, payout.amount_cents)
 
-    // Use a simple update for paid_out increment
     const { data: prof } = await db
       .from('affiliate_profiles')
-      .select('paid_out_cents, available_balance_cents')
+      .select('paid_out_cents')
       .eq('id', payout.affiliate_id)
       .single()
 
     if (prof) {
       await db
         .from('affiliate_profiles')
-        .update({
-          available_balance_cents: Math.max(0, prof.available_balance_cents - payout.amount_cents),
-          paid_out_cents: (prof.paid_out_cents ?? 0) + payout.amount_cents,
-        })
+        .update({ paid_out_cents: (prof.paid_out_cents ?? 0) + payout.amount_cents })
         .eq('id', payout.affiliate_id)
     }
 
