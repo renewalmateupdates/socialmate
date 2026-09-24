@@ -47,13 +47,23 @@ type ConnectKind = 'oauth' | 'modal' | 'invite'
 const LIVE_PLATFORMS: {
   id: string; label: string; desc: string
   connect: ConnectKind; needs: string | null; badge: string | null
+  // Shown on the picker only. `needs` means something you must have before you can connect;
+  // this is something you must know about what you can do once you have.
+  caveat?: string
 }[] = [
-  { id: 'tiktok',   label: 'TikTok',      desc: 'Schedule videos straight to your account',
-    connect: 'oauth',  needs: null,                          badge: '2 clicks' },
+  // LinkedIn first: it is the one two-click platform that takes text posts on the
+  // free plan today. TikTok and X connect just as easily but cannot post for a free
+  // user (X: free quota is 0; TikTok: video only, and public posting waits on
+  // TikTok's audit), and they used to lead this list. 22 of the 36 outside accounts
+  // that connected anything connected only TikTok, and none has posted.
   { id: 'linkedin', label: 'LinkedIn',    desc: 'Post to your personal profile',
     connect: 'oauth',  needs: null,                          badge: '2 clicks' },
-  { id: 'twitter',  label: 'X / Twitter', desc: '280 characters — 5 free posts a month, then $0.01 each',
-    connect: 'oauth',  needs: null,                          badge: '2 clicks' },
+  { id: 'twitter',  label: 'X / Twitter', desc: '280 characters',
+    connect: 'oauth',  needs: null,                          badge: '2 clicks',
+    caveat: 'Posting to X needs the Pro plan ($8/month)' },
+  { id: 'tiktok',   label: 'TikTok',      desc: 'For video creators',
+    connect: 'oauth',  needs: null,                          badge: '2 clicks',
+    caveat: 'Videos only. They go to your TikTok drafts until TikTok approves public posting' },
   { id: 'bluesky',  label: 'Bluesky',     desc: 'Decentralized social — great for builders & creators',
     connect: 'modal',  needs: 'an app password from bsky.app', badge: null },
   { id: 'mastodon', label: 'Mastodon',    desc: 'Federated network — engaged, ad-free community',
@@ -677,6 +687,9 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
                           <p className="text-xs text-gray-400 dark:text-gray-500">{p.desc}</p>
                           {p.needs && (
                             <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">Needs {p.needs}</p>
+                          )}
+                          {p.caveat && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">{p.caveat}</p>
                           )}
                         </div>
                         <span className="text-gray-300 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white transition-colors text-sm font-bold flex-shrink-0">→</span>

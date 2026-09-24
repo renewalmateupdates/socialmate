@@ -13,7 +13,10 @@ export async function GET() {
     httpOnly: true,
     secure:   true,
     sameSite: 'lax',
-    maxAge:   300,
+    // 30 minutes. disable_auto_auth forces TikTok's login screen (password, 2FA, captcha,
+    // or a hop to the TikTok app), which can outlast 5 minutes. From Sep 10, 4 of 19 users
+    // who tried to connect failed with invalid_state; 0 of 5 did before.
+    maxAge:   1800,
     path:     '/',
   })
 
