@@ -65,6 +65,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
     }],
     payment_intent_data: {
       transfer_data: { destination: cm.stripe_account_id! },
+      // Same fee-liability fix as the tip/subscribe routes: without
+      // on_behalf_of, Stripe's fee comes out of SocialMate's platform
+      // balance instead of the creator's payout.
+      on_behalf_of: cm.stripe_account_id!,
     },
     metadata: {
       type:         'creator_post_unlock',
