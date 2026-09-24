@@ -47,9 +47,9 @@ const PLATFORM_META: Record<string, {
   telegram:  { color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'live'        },
   mastodon:  { color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'live'        },
   linkedin:  { color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'live' },
-  youtube:   { color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
-  pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
-  reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  youtube:   { color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Awaiting Google review' },
+  pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'planned',     statusNote: 'Not approved by Pinterest yet' },
+  reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'planned',     statusNote: 'Not approved by Reddit yet' },
   instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
   facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
   tiktok:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
@@ -890,7 +890,7 @@ function AccountsInner() {
               <div>
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  YouTube, Pinterest, and Reddit are code-complete and launching very soon.
+                  YouTube is waiting on Google&apos;s review. Pinterest and Reddit have not approved our apps yet.
                   Instagram, Facebook, and Threads are planned but not started, because they need a long app review from Meta.
                   We'll notify you on your dashboard the moment each one goes live.
                 </p>

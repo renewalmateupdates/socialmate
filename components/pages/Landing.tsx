@@ -81,7 +81,7 @@ function createT(locale: string) {
 }
 
 const LIVE_PLATFORMS = ['Bluesky', 'Discord', 'Telegram', 'Mastodon', 'X', 'TikTok', 'LinkedIn']
-const SOON_PLATFORMS = ['YouTube', 'Pinterest', 'Reddit']
+const SOON_PLATFORMS = ['YouTube']
 
 // Tool names are product names and stay English in every locale, exactly as they
 // did before. Only the credit cost is data.
