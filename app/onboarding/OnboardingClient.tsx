@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { track } from '@/lib/analytics'
-import { starterDraft, starterDraftCount } from '@/lib/starter-post'
+import { starterDraft, starterDraftCount, buildDraft, starterVariantCount, type StarterPath } from '@/lib/starter-post'
+import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import { markActivated } from '@/lib/activation'
 import {
   CalendarDays, Check, FileText, Globe, Hand, Lightbulb, Link2,
@@ -137,6 +138,9 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
   const [selectedPlatform, setSelectedPlatform] = useState('')
   const [starterPost, setStarterPost] = useState('')
   const [draftIndex, setDraftIndex] = useState(0)
+  // Set once the person has used the one-sentence helper, so "Another idea"
+  // re-frames their own sentence instead of swapping it for a generic starter.
+  const [builtFrom, setBuiltFrom] = useState<{ path: StarterPath; text: string } | null>(null)
   const [scheduleDate, setScheduleDate] = useState(defaultSchedule().date)
   const [scheduleTime, setScheduleTime] = useState(defaultSchedule().time)
   // What actually happened when we tried to save. Step 5 reads this instead of
@@ -823,6 +827,17 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
                 </p>
               </div>
 
+              <StarterDraftBuilder
+                where="onboarding"
+                tone="onboarding"
+                buttonLabel="Write it"
+                onBuild={({ draft, path, text }) => {
+                  setStarterPost(draft)
+                  setBuiltFrom({ path, text })
+                  setDraftIndex(0)
+                }}
+              />
+
               <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Your first post</span>
@@ -881,6 +896,12 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
               <div className="flex gap-3 mb-3">
                 <button
                   onClick={() => {
+                    if (builtFrom) {
+                      const next = (draftIndex + 1) % starterVariantCount()
+                      setDraftIndex(next)
+                      setStarterPost(buildDraft(builtFrom.path, builtFrom.text, next))
+                      return
+                    }
                     const next = (draftIndex + 1) % starterDraftCount(onboardingGoal)
                     setDraftIndex(next)
                     setStarterPost(starterDraft(onboardingGoal, next))

@@ -13,6 +13,7 @@ import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
 import { track, trackOnce } from '@/lib/analytics'
 import { composeWithStarterHref } from '@/lib/starter-post'
+import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from 'lucide-react'
 
@@ -533,6 +534,9 @@ function AccountsInner() {
                       sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
                   : { href: composeWithStarterHref(), cta: 'Open your first post →',
                     sub: 'We put a starter draft in the composer for you. Edit it, or replace it, and send it out.' }
+                // Only where the next step is "write a post": the other branches
+                // send people somewhere that is not the composer.
+                const showBuilder = !xNeedsPro && justConnected !== 'tiktok' && !needsChannel
                 return (
                   <>
                     <div className="flex-1">
@@ -540,6 +544,14 @@ function AccountsInner() {
                         {PLATFORM_META[justConnected]?.label || justConnected} is connected.
                       </p>
                       <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-1">{next.sub}</p>
+                      {showBuilder && (
+                        <StarterDraftBuilder
+                          where="accounts"
+                          tone="card"
+                          buttonLabel="Write it →"
+                          onBuild={({ draft }) => router.push(`/compose?content=${encodeURIComponent(draft)}`)}
+                        />
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Link
