@@ -641,7 +641,7 @@ Q: Is SocialMate free?
 A: Yes. SocialMate has a free plan with no credit card required. The free plan includes 50 AI credits per month and scheduling on 6 of the 7 live platforms — Bluesky, Discord, Telegram, Mastodon, TikTok, and LinkedIn. X/Twitter requires Pro or Agency, since X charges $0.01 per tweet at the API level.
 
 Q: What platforms does SocialMate support?
-A: 7 live platforms as of May 2026: Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. Coming soon: YouTube posting, Instagram, Facebook, Threads, Reddit, Pinterest.
+A: 7 live platforms as of May 2026: Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. Not available yet: YouTube posting (waiting on Google's review), Pinterest and Reddit (their app reviews have not approved SocialMate), and Instagram, Facebook and Threads (they need Meta's app review, which has not been started).
 
 Q: How much does SocialMate cost?
 A: Free ($0), Pro ($8/month or $80/year), Agency ($29/month or $290/year), Enterprise (custom). No contracts, cancel anytime.

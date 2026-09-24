@@ -81,8 +81,8 @@ These have burned us before — always apply:
 ## Platforms
 
 **Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026), LinkedIn (OAuth live May 21, 2026 — personal profile, `w_member_social` scope)
-**Coming soon:** YouTube, Pinterest, Reddit
-**Roadmap:** Instagram, Facebook, Threads, Tumblr, Pixelfed, LinkedIn Company Pages
+**Not available yet (Sept 24, 2026):** YouTube (waiting on Google's review), Pinterest (built, application declined), Reddit (application declined; no connect or publish code exists), Instagram / Facebook / Threads (need Meta app review, not started)
+**Roadmap ideas:** Tumblr, Pixelfed, LinkedIn Company Pages
 
 ---
 
