@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { buildIrisEmailHtml as buildHtml } from '@/lib/iris-email'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -87,8 +88,13 @@ export async function POST(req: Request) {
   for (let i = 0; i < emails.length; i += CHUNK) {
     const chunk = emails.slice(i, i + CHUNK)
     try {
+      // The automated weekly IRIS cron (irisAutoDispatch) already sets
+      // replyTo; this manually-triggered admin send was missed in the Aug 30
+      // "reply-to on every sender" sweep -- socialmate.studio has no mailbox,
+      // so a reply to any of these went nowhere.
       await resend.batch.send(chunk.map(to => ({
         from: 'Joshua @ SocialMate <noreply@socialmate.studio>',
+        replyTo: REPLY_TO,
         to,
         subject,
         html: buildHtml({ edition, subject, intro, whatShipped: whatShipped ?? '', realNumbers: realNumbers ?? '', whatsNext: whatsNext ?? '', closing: closing ?? '', recipientEmail: to }),
