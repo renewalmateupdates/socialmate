@@ -44,11 +44,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
       quantity: 1,
     }],
     subscription_data: {
+      // Platform pays Stripe's fee on destination charges; on_behalf_of doesn't move it.
       transfer_data: { destination: creator.stripe_account_id! },
-      // Same fee-liability fix as the tip route: without on_behalf_of,
-      // Stripe's fee on every invoice comes out of SocialMate's platform
-      // balance instead of the creator's payout.
-      on_behalf_of: creator.stripe_account_id!,
       metadata: {
         type: 'creator_subscription',
         creator_monetization_id: creator.id,
