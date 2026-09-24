@@ -4061,17 +4061,31 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
   profile.personality_summary ? `\n\nCREATOR VOICE DNA:\n${profile.personality_summary}` : ''}`
             : 'No voice profile — use authentic, direct tone.'
 
+          // Fetch project memory to avoid repeating topics/angles already
+          // covered. soma_project_memory was previously only read by Full
+          // Send's prompt — Autopilot had its own ingest step (below) but
+          // never checked memory before it, and never wrote back after.
+          const { data: autopilotMemory } = await admin
+            .from('soma_project_memory')
+            .select('topics_covered, angles_used, running_summary')
+            .eq('project_id', project.id)
+            .maybeSingle()
+
+          const autopilotMemoryBlock = autopilotMemory?.running_summary
+            ? `\n\nSOMA MEMORY — do NOT repeat these topics/angles:\n${autopilotMemory.running_summary}\nTopics already covered: ${Array.from(autopilotMemory.topics_covered ?? []).join(', ') || 'none yet'}\nAngles already used: ${Array.from(autopilotMemory.angles_used ?? []).join(', ') || 'none yet'}`
+            : ''
+
           // Ingest: extract insights (diff if we have prev doc)
           const ingestPrompt = prevDoc
             ? `Compare these two weekly master docs. Extract what is NEW or CHANGED. Return ONLY valid JSON (no markdown):
-{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"One sentence: what changed most."}
+{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"One sentence: what changed most.","memory_update":"2-3 sentences summarizing what new ground this run covers, written as notes a social media manager would keep."}
 PREVIOUS: ${prevDoc.content.slice(0, 3000)}
-CURRENT: ${rawInput.slice(0, 3000)}
-emotional_tone must be: high, reflective, grinding, or celebratory`
+CURRENT: ${rawInput.slice(0, 3000)}${autopilotMemoryBlock}
+emotional_tone must be: high, reflective, grinding, or celebratory. The memory_update field is mandatory.`
             : `Analyze this weekly master doc. Return ONLY valid JSON (no markdown):
-{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"First week baseline."}
-MASTER DOC: ${rawInput.slice(0, 4000)}
-emotional_tone must be: high, reflective, grinding, or celebratory`
+{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"First week baseline.","memory_update":"2-3 sentences summarizing what this first run covers, written as notes a social media manager would keep."}
+MASTER DOC: ${rawInput.slice(0, 4000)}${autopilotMemoryBlock}
+emotional_tone must be: high, reflective, grinding, or celebratory. The memory_update field is mandatory.`
 
           const ingestResult = await model.generateContent(ingestPrompt)
           const extracted_insights = somaParseGeminiJson(ingestResult.response.text())
@@ -4220,6 +4234,36 @@ Rules:
           }
 
           await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion.id)
+
+          // Write back to project memory — same upsert shape as the manual
+          // ingest route, so "what have we already said" stays current
+          // whether a project runs manually, via Autopilot, or via Full Send.
+          const autopilotNewTopics = Array.from(new Set([
+            ...(autopilotMemory?.topics_covered as string[] ?? []),
+            ...(extracted_insights.key_themes ?? []),
+          ]))
+          const autopilotNewAngles = Array.from(new Set([
+            ...(autopilotMemory?.angles_used as string[] ?? []),
+            ...(extracted_insights.content_angles ?? []),
+          ]))
+          const autopilotDateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          const autopilotPrevSummary = autopilotMemory?.running_summary ?? ''
+          const autopilotNewSummary = autopilotPrevSummary
+            ? `${autopilotPrevSummary}\n\n[Autopilot — ${autopilotDateLabel}]: ${extracted_insights.memory_update ?? ''}`
+            : `[Autopilot — ${autopilotDateLabel}]: ${extracted_insights.memory_update ?? ''}`
+
+          await admin.from('soma_project_memory').upsert(
+            {
+              project_id:      project.id,
+              workspace_id:    project.workspace_id,
+              user_id:         project.user_id,
+              topics_covered:  autopilotNewTopics,
+              angles_used:     autopilotNewAngles,
+              running_summary: autopilotNewSummary,
+              updated_at:      new Date().toISOString(),
+            },
+            { onConflict: 'project_id' }
+          )
 
           // Update project runs
           await admin.from('soma_projects')
@@ -4403,11 +4447,16 @@ export const somaFullSendDailyRun = inngest.createFunction(
           // Send has been generating with no voice profile at all.
           //
           // Same columns the Autopilot run reads, plus personality_summary,
-          // which Autopilot omits.
+          // which Autopilot omits. Looked up by workspace_id, not user_id --
+          // soma_identity_profiles has a UNIQUE(workspace_id) constraint, and
+          // for an Agency workspace where a team member (not the owner who
+          // did the Voice DNA interview) created this project, project.user_id
+          // is the wrong identity to look up: it would find no profile and
+          // silently fall back to generic tone.
           const { data: identity } = await admin
             .from('soma_identity_profiles')
             .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary')
-            .eq('user_id', project.user_id)
+            .eq('workspace_id', project.workspace_id)
             .maybeSingle()
 
           const voiceBlock = identity?.personality_summary
@@ -4437,15 +4486,25 @@ ${styleBlock}
 ${voiceBlock}
 ${memoryBlock}
 
-Return ONLY a valid JSON array. Each item: { "platform": string, "content": string, "scheduled_date": "YYYY-MM-DD", "scheduled_time": "HH:MM" }.
+Return ONLY valid JSON (no markdown), shaped exactly like this:
+{"posts":[{"platform":"bluesky","content":"post text","scheduled_date":"YYYY-MM-DD","scheduled_time":"HH:MM"}],"topics_covered":["topic1"],"angles_used":["angle1"],"memory_update":"2-3 sentences summarizing what today's run covers, written as notes a social media manager would keep."}
 Generate posts spread across today and tomorrow. Platform rules: Twitter/X max 280 chars, Bluesky max 300 chars, LinkedIn professional tone, Discord casual.
-Generate exactly ${MAX_PPD} posts per platform.`
+Generate exactly ${MAX_PPD} posts per platform. The memory_update field is mandatory.`
 
           let posts: any[] = []
+          let fullSendTopics: string[] = []
+          let fullSendAngles: string[] = []
+          let fullSendMemoryUpdate = ''
           try {
             const result = await model.generateContent(prompt)
             const text = result.response.text().trim().replace(/```json\n?/g, '').replace(/```\n?/g, '')
-            posts = JSON.parse(text)
+            const parsed = JSON.parse(text)
+            // Defensive: accept the old bare-array shape too, in case Gemini
+            // ever reverts to it despite the schema above.
+            posts = Array.isArray(parsed) ? parsed : (parsed.posts ?? [])
+            fullSendTopics = Array.isArray(parsed?.topics_covered) ? parsed.topics_covered : []
+            fullSendAngles = Array.isArray(parsed?.angles_used) ? parsed.angles_used : []
+            fullSendMemoryUpdate = parsed?.memory_update ?? ''
           } catch {
             console.error(`[SomaFullSend] Gemini parse error for project ${project.id}`)
             return
@@ -4482,6 +4541,36 @@ Generate exactly ${MAX_PPD} posts per platform.`
               runs_this_month: nextRunCount(project),
               last_generated_at: new Date().toISOString(),
             }).eq('id', project.id)
+
+            // Write memory back — this run read soma_project_memory above
+            // but never saved anything to it, so "do NOT repeat" never had
+            // new ground to stand on after the first day.
+            const fullSendNewTopics = Array.from(new Set([
+              ...(memory?.topics_covered as string[] ?? []),
+              ...fullSendTopics,
+            ]))
+            const fullSendNewAngles = Array.from(new Set([
+              ...(memory?.angles_used as string[] ?? []),
+              ...fullSendAngles,
+            ]))
+            const fullSendDateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            const fullSendPrevSummary = memory?.running_summary ?? ''
+            const fullSendNewSummary = fullSendPrevSummary
+              ? `${fullSendPrevSummary}\n\n[Full Send — ${fullSendDateLabel}]: ${fullSendMemoryUpdate}`
+              : `[Full Send — ${fullSendDateLabel}]: ${fullSendMemoryUpdate}`
+
+            await admin.from('soma_project_memory').upsert(
+              {
+                project_id:      project.id,
+                workspace_id:    project.workspace_id,
+                user_id:         project.user_id,
+                topics_covered:  fullSendNewTopics,
+                angles_used:     fullSendNewAngles,
+                running_summary: fullSendNewSummary,
+                updated_at:      new Date().toISOString(),
+              },
+              { onConflict: 'project_id' }
+            )
           }
 
           console.log(`[SomaFullSend] project ${project.id} (${project.name}): ${postsCreated} posts scheduled`)
@@ -5644,13 +5733,20 @@ export const checkAchievements = inngest.createFunction(
               await db.from('user_settings').update({ earned_credits: (s?.earned_credits ?? 0) + def.reward }).eq('user_id', userId)
             }
 
-            await db.from('notifications').insert({
+            // Every other notification write in this codebase uses is_read
+            // (what /api/notifications/count and /api/notifications actually
+            // filter on) -- this one used `read`, a column that doesn't exist,
+            // and discarded the insert error, so the "Achievement Unlocked!"
+            // notification has almost certainly never shown up for anyone.
+            // The credit award above is unaffected -- that part was correct.
+            const { error: notifErr } = await db.from('notifications').insert({
               user_id: userId,
               type: 'achievement',
               title: '🏆 Achievement Unlocked!',
               message: `You earned the "${def.key.replace(/_/g, ' ')}" badge${def.reward > 0 ? ` + ${def.reward} bonus credits` : ''}`,
-              read: false,
+              is_read: false,
             })
+            if (notifErr) console.warn(`[checkAchievements] notification insert failed for ${userId}:`, notifErr.message)
 
             totalAwarded++
           }
