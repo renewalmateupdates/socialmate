@@ -197,12 +197,61 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [localSchedule, setLocalSchedule]     = useState<Record<string, PlatformSchedule>>({})
   const [savingSchedule, setSavingSchedule]   = useState(false)
 
+  const [scheduleTemplates, setScheduleTemplates] = useState<{ id: string; name: string; slots: { day: string; time: string }[] }[]>([])
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [loadingTemplates, setLoadingTemplates]   = useState(false)
+
   // Platform editing
   const [editingPlatforms, setEditingPlatforms]         = useState(false)
   const [connectedPlatforms, setConnectedPlatforms]     = useState<string[]>([])
   const [localPlatforms, setLocalPlatforms]             = useState<string[]>([])
   const [savingPlatforms, setSavingPlatforms]           = useState(false)
   const [loadingConnected, setLoadingConnected]         = useState(false)
+
+  // Maps a saved Schedule Template's {day, time} slots onto SOMA's
+  // {posts_per_day, days} shape. SOMA has no field for a specific
+  // clock time -- it schedules within morning/afternoon/evening buckets
+  // with jitter -- so a template's exact times are advisory only; what
+  // actually carries over is which days are used and the busiest day's
+  // slot count (capped at the project's mode ceiling), applied to every
+  // platform on the project.
+  const TEMPLATE_DAY_TO_INDEX: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
+
+  async function openTemplatePicker() {
+    setLoadingTemplates(true)
+    try {
+      const res = await fetch('/api/schedule-templates')
+      const data = await res.json()
+      setScheduleTemplates(Array.isArray(data.templates) ? data.templates : [])
+    } catch { setScheduleTemplates([]) }
+    finally { setLoadingTemplates(false) }
+    setShowTemplatePicker(true)
+  }
+
+  function applyTemplate(templateId: string) {
+    if (!project) return
+    const t = scheduleTemplates.find(x => x.id === templateId)
+    if (!t) return
+
+    const counts: Record<number, number> = {}
+    for (const slot of t.slots) {
+      const idx = TEMPLATE_DAY_TO_INDEX[slot.day]
+      if (idx === undefined) continue
+      counts[idx] = (counts[idx] ?? 0) + 1
+    }
+    const days = Object.keys(counts).map(Number)
+    const cap = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 3 : 2
+    const postsPerDay = Math.min(cap, Math.max(1, ...(Object.values(counts).length ? Object.values(counts) : [1])))
+    const applied: PlatformSchedule = { posts_per_day: postsPerDay, days: days.length ? days : [1, 2, 3, 4, 5] }
+
+    const existing = project.platform_schedule ?? {}
+    const next: Record<string, PlatformSchedule> = {}
+    for (const pid of Object.keys(existing)) next[pid] = { posts_per_day: applied.posts_per_day, days: [...applied.days] }
+
+    setLocalSchedule(next)
+    setEditingSchedule(true)
+    setShowTemplatePicker(false)
+  }
 
   async function openPlatformEditor() {
     if (!project) return
@@ -929,12 +978,50 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                     </p>
                   </div>
                   {!editingSchedule ? (
-                    <button
-                      onClick={() => { setLocalSchedule(JSON.parse(JSON.stringify(schedule))); setEditingSchedule(true) }}
-                      className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
-                    >
-                      Edit
-                    </button>
+                    <div className="relative flex items-center gap-3">
+                      <button
+                        onClick={openTemplatePicker}
+                        className="text-[11px] text-gray-400 hover:text-gray-200 font-semibold"
+                      >
+                        Apply template
+                      </button>
+                      <button
+                        onClick={() => { setLocalSchedule(JSON.parse(JSON.stringify(schedule))); setEditingSchedule(true) }}
+                        className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
+                      >
+                        Edit
+                      </button>
+                      {showTemplatePicker && (
+                        <div className="absolute right-0 top-6 z-10 w-56 rounded-xl border border-gray-800 bg-gray-950 shadow-xl p-2">
+                          {loadingTemplates ? (
+                            <p className="text-[11px] text-gray-500 px-2 py-1.5">Loading…</p>
+                          ) : scheduleTemplates.length === 0 ? (
+                            <div className="px-2 py-1.5">
+                              <p className="text-[11px] text-gray-500 mb-1">No saved templates yet.</p>
+                              <Link href="/schedules" className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold">
+                                Create one →
+                              </Link>
+                            </div>
+                          ) : (
+                            scheduleTemplates.map(t => (
+                              <button
+                                key={t.id}
+                                onClick={() => applyTemplate(t.id)}
+                                className="w-full text-left text-[11px] text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg px-2 py-1.5 font-semibold"
+                              >
+                                {t.name}
+                              </button>
+                            ))
+                          )}
+                          <button
+                            onClick={() => setShowTemplatePicker(false)}
+                            className="w-full text-left text-[10px] text-gray-600 hover:text-gray-400 px-2 py-1 mt-1 border-t border-gray-800"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex gap-2">
                       <button onClick={() => setEditingSchedule(false)} className="text-[11px] text-gray-500 hover:text-gray-300">Cancel</button>
