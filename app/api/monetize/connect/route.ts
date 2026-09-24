@@ -40,7 +40,17 @@ export async function GET(req: NextRequest) {
   let accountId = settings?.stripe_account_id
 
   if (!accountId) {
-    const account = await stripe.accounts.create({ type: 'express' })
+    // Created with no capabilities, an Express account can never take a destination
+    // charge: Stripe rejects the checkout with "missing the required capabilities:
+    // transfers" (reproduced in test mode). Only `transfers` is requested, which is
+    // all destination charges need and asks 5 onboarding questions instead of the 13
+    // that card_payments adds. Payouts are weekly because Connect bills 0.25% + 25
+    // cents per payout, which daily payouts multiply on tiny tips.
+    const account = await stripe.accounts.create({
+      type: 'express',
+      capabilities: { transfers: { requested: true } },
+      settings: { payouts: { schedule: { interval: 'weekly', weekly_anchor: 'monday' } } },
+    })
     accountId = account.id
 
     await supabase

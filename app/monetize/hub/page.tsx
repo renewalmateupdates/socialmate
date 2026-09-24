@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Toast from '@/components/Toast'
 import { useI18n } from '@/contexts/I18nContext'
 import { DollarSign } from 'lucide-react'
+import { MIN_CHARGE_CENTS, MIN_CHARGE_DOLLARS } from '@/lib/creator-pricing'
 
 type Settings = {
   stripe_account_id:         string | null
@@ -60,7 +61,7 @@ const DEFAULT: Settings = {
   page_bio: '',
   header_color: '#F59E0B',
   tip_enabled: false,
-  tip_min: 100,
+  tip_min: MIN_CHARGE_CENTS,
   tip_max: 10000,
   subscription_enabled: false,
   subscription_price: 500,
@@ -295,6 +296,7 @@ function MonetizeHubInner() {
               <div className="bg-surface border border-theme rounded-2xl p-4 text-center">
                 <p className="text-2xl font-black text-amber-500">${(earnings.total_tips_cents / 100).toFixed(2)}</p>
                 <p className="text-xs text-muted mt-1">{t('app_creator_hub.total_tips')}</p>
+                <p className="text-[11px] text-muted mt-0.5">Before Stripe&apos;s processing fee</p>
               </div>
               <div className="bg-surface border border-theme rounded-2xl p-4 text-center">
                 <p className="text-2xl font-black text-emerald-500">{earnings.active_subscribers}</p>
@@ -388,9 +390,9 @@ function MonetizeHubInner() {
                   <label className="block text-xs text-muted mb-1">{t('app_creator_hub.min_tip')}</label>
                   <input
                     type="number"
-                    min={1} max={100}
+                    min={MIN_CHARGE_DOLLARS} max={100}
                     value={settings.tip_min / 100}
-                    onChange={e => setSettings(s => ({ ...s, tip_min: Math.max(1, parseInt(e.target.value) || 1) * 100 }))}
+                    onChange={e => setSettings(s => ({ ...s, tip_min: Math.max(MIN_CHARGE_DOLLARS, parseInt(e.target.value) || MIN_CHARGE_DOLLARS) * 100 }))}
                     className="w-full bg-theme border border-theme rounded-lg px-3 py-1.5 text-sm text-theme focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -398,9 +400,9 @@ function MonetizeHubInner() {
                   <label className="block text-xs text-muted mb-1">{t('app_creator_hub.max_tip')}</label>
                   <input
                     type="number"
-                    min={1} max={500}
+                    min={MIN_CHARGE_DOLLARS} max={500}
                     value={settings.tip_max / 100}
-                    onChange={e => setSettings(s => ({ ...s, tip_max: Math.max(1, parseInt(e.target.value) || 1) * 100 }))}
+                    onChange={e => setSettings(s => ({ ...s, tip_max: Math.max(MIN_CHARGE_DOLLARS, parseInt(e.target.value) || MIN_CHARGE_DOLLARS) * 100 }))}
                     className="w-full bg-theme border border-theme rounded-lg px-3 py-1.5 text-sm text-theme focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -428,9 +430,9 @@ function MonetizeHubInner() {
                   <label className="block text-xs text-muted mb-1">{t('app_creator_hub.monthly_price')}</label>
                   <input
                     type="number"
-                    min={1} max={999}
+                    min={MIN_CHARGE_DOLLARS} max={999}
                     value={settings.subscription_price / 100}
-                    onChange={e => setSettings(s => ({ ...s, subscription_price: Math.max(1, parseInt(e.target.value) || 1) * 100 }))}
+                    onChange={e => setSettings(s => ({ ...s, subscription_price: Math.max(MIN_CHARGE_DOLLARS, parseInt(e.target.value) || MIN_CHARGE_DOLLARS) * 100 }))}
                     className="w-full bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -520,7 +522,7 @@ function MonetizeHubInner() {
                       <span className="text-sm text-muted">$</span>
                       <input
                         type="number"
-                        min={1}
+                        min={MIN_CHARGE_DOLLARS}
                         step={0.01}
                         value={newPost.unlock_price}
                         onChange={e => setNewPost(p => ({ ...p, unlock_price: e.target.value }))}

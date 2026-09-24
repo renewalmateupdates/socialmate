@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { MIN_CHARGE_CENTS, MIN_CHARGE_DOLLARS } from '@/lib/creator-pricing'
 
 async function makeClient() {
   const cookieStore = await cookies()
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'title, preview, and content are required' }, { status: 400 })
     }
 
+    const unlockPrice = unlock_price_cents ? parseInt(unlock_price_cents) : null
+    if (unlockPrice !== null && (Number.isNaN(unlockPrice) || unlockPrice < MIN_CHARGE_CENTS)) {
+      return NextResponse.json({ error: `Unlock prices start at $${MIN_CHARGE_DOLLARS}.` }, { status: 400 })
+    }
+
     const admin = getSupabaseAdmin()
 
     // Get creator_monetization_id
@@ -71,7 +77,7 @@ export async function POST(req: NextRequest) {
         title: title.trim(),
         preview: preview.trim(),
         content: content.trim(),
-        unlock_price_cents: unlock_price_cents ? parseInt(unlock_price_cents) : null,
+        unlock_price_cents: unlockPrice,
       })
       .select()
       .single()
