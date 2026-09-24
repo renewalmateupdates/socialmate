@@ -51,6 +51,10 @@ export const FUNNEL_EVENTS = [
 
   // ── First value ──────────────────────────────────────────────────────────
   'compose_opened',
+  'compose_left',         // { had_content, platforms_selected, connected_selectable, blocking_reason } flags only, never content
+  'draft_created',        // server-side, only when a new draft row is inserted
+  'post_attempted',       // clicked Post/Schedule and the client checks passed
+  'post_failed',          // { status | reason } the request was refused or errored, before or after a row existed
   'post_scheduled',       // { platforms, count }
   'post_published',       // { platforms, count }
 

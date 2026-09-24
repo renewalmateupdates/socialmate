@@ -245,7 +245,19 @@ export default function AdminFunnelPage() {
                         </span>
                       </div>
                     ))}
+                    {/* Steps that only started being recorded recently. Before that date
+                        the absence means "not measured", never "zero", so say so. */}
+                    {NEW_EVENTS.filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
+                      <div key={name} className="flex items-center justify-between border-b border-edge px-5 py-2.5 last:border-b-0">
+                        <span className="font-mono text-xs text-ink-body">{name}</span>
+                        <span className="font-mono text-xs text-ink-muted">not recorded yet</span>
+                      </div>
+                    ))}
                   </div>
+                  <p className="border-t border-edge px-5 py-3 text-xs text-ink-muted">
+                    Composer steps ({NEW_EVENTS.join(', ')}) are recorded from {NEW_EVENTS_SINCE} onward.
+                    Anything earlier was not measured, so read a missing number there as unknown, not zero.
+                  </p>
                 </Panel>
               </>
             )}
@@ -255,3 +267,7 @@ export default function AdminFunnelPage() {
     </div>
   )
 }
+
+// Composer steps added after the rest of the funnel. See lib/analytics.ts.
+const NEW_EVENTS = ['compose_left', 'draft_created', 'post_attempted', 'post_failed']
+const NEW_EVENTS_SINCE = 'Sep 24, 2026'

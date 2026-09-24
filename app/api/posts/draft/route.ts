@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { postLimitFor, postsUsedThisMonth, postLimitReachedBody, countsAgainstQuota } from '@/lib/post-limits'
 import { resolveWorkspacePlan } from '@/lib/plan'
+import { recordFunnel } from '@/lib/usage'
 
 
 export async function POST(request: NextRequest) {
@@ -221,6 +222,10 @@ export async function POST(request: NextRequest) {
         console.warn('[draft] approval notification failed (non-fatal):', e)
       }
     }
+
+    // A new draft row exists. Updates to an existing draft return earlier and
+    // are not counted, so this is "people who saved something", not saves.
+    recordFunnel(getSupabaseAdmin(), user.id, 'draft_created', {})
 
     return NextResponse.json({ success: true, postId: post.id })
 

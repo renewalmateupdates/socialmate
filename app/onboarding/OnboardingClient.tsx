@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { track } from '@/lib/analytics'
+import { starterDraft, starterDraftCount } from '@/lib/starter-post'
 import { markActivated } from '@/lib/activation'
 import {
   CalendarDays, Check, FileText, Globe, Hand, Lightbulb, Link2,
@@ -97,29 +98,9 @@ const STEPS = [
   { id: 5, label: "You're in!" },
 ]
 
-// One post, not five.
-//
-// Onboarding asked people to review and schedule five posts before they had
-// published anything at all. That is a lot of commitment to ask for from
-// someone still deciding whether the product works. One post they can actually
-// put on a calendar and watch go out is the whole point of the step.
-//
-// Random rather than fixed, so "Rewrite it" gives a genuinely different angle.
-function generateStarterPost(topic: string): string {
-  const t = topic.trim() || 'my journey'
-  const options = [
-    `Hot take: most people overthink ${t}. The ones who win just start before they feel ready and adjust as they go. Consistency beats perfection every time.`,
-    `3 things I wish I knew starting out with ${t}:
-
-1. Show up on the days you don't feel like it.
-2. Don't compare your start to someone else's middle.
-3. Master the basics before chasing shortcuts.`,
-    `The biggest mistake I see people make with ${t}: waiting for the "right time" to begin. There isn't one. Start small, stay steady, and let momentum do the heavy lifting.`,
-    `Quick ${t} tip: pick one thing to improve this week and go deep on it instead of spreading yourself thin. Small, focused reps compound fast. Save this for when you need it.`,
-    `Real talk: ${t} is harder than people make it look. The thing that changed everything for me? I stopped waiting to feel motivated and built a routine I could keep on my worst days.`,
-  ]
-  return options[Math.floor(Math.random() * options.length)]
-}
+// One post, not five, and it arrives already written. The step used to ask for
+// a topic and return a generic template with a one-click Skip; nobody who got
+// there saved a post. The drafts live in lib/starter-post.ts.
 
 // Default the picker to tomorrow at 09:00 local. Far enough away to feel
 // deliberate, close enough that they see it happen.
@@ -138,12 +119,14 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
   // Where people fall out of the flow. Fires on every step change, so the
   // shape of the drop-off is visible rather than just the endpoints.
   useEffect(() => { track('onboarding_step', { step }) }, [step])
+  // Declared in FUNNEL_EVENTS since the funnel shipped but never fired anywhere,
+  // so the top of onboarding had no denominator.
+  useEffect(() => { track('onboarding_started') }, [])
   const [displayName, setDisplayName] = useState('')
   const [irisOptIn, setIrisOptIn] = useState(true)
   const [selectedPlatform, setSelectedPlatform] = useState('')
-  const [topic, setTopic] = useState('')
   const [starterPost, setStarterPost] = useState('')
-  const [postsGenerated, setPostsGenerated] = useState(false)
+  const [draftIndex, setDraftIndex] = useState(0)
   const [scheduleDate, setScheduleDate] = useState(defaultSchedule().date)
   const [scheduleTime, setScheduleTime] = useState(defaultSchedule().time)
   // What actually happened when we tried to save. Step 5 reads this instead of
@@ -174,6 +157,14 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
   // most of this page's CLS.
   const [referralCode] = useState<string | null>(initialReferralCode)
   const [onboardingGoal, setOnboardingGoal] = useState<string | null>(null)
+  // Arriving at step 4 should show a finished draft, not a form. Runs on the
+  // step change only, so clearing the box by hand is not undone mid-edit.
+  useEffect(() => {
+    if (step === 4 && !starterPost.trim()) {
+      setStarterPost(starterDraft(onboardingGoal, draftIndex))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const checkConnectionRef = useRef<(() => Promise<boolean>) | null>(null)
 
@@ -332,6 +323,10 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
     }).eq('id', user.id)
 
     const platforms = (selectedPlatform && connectionDetected) ? [selectedPlatform] : []
+    // TikTok takes video, and the scheduler has no text path for it, so a text
+    // starter post "scheduled" to TikTok would just fail at publish time. Save it
+    // as a draft instead; TikTok posting happens in TikTok Studio.
+    const textPlatforms = platforms.filter(p => p !== 'tiktok')
     // `use_case` was in this payload and has never existed on user_settings.
     // Nothing reads it either. `default_platforms` also did not exist until the
     // 20260812 migration — it had been created on `workspaces` by mistake.
@@ -403,11 +398,11 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
       const when = new Date(y, (mo ?? 1) - 1, d ?? 1, hh ?? 9, mm ?? 0)
       const valid = !Number.isNaN(when.getTime())
 
-      const connected = platforms.length > 0
+      const connected = textPlatforms.length > 0
       const { error: postErr } = await supabase.from('posts').insert({
         user_id: user.id,
         content,
-        platforms,
+        platforms: textPlatforms,
         status: connected ? 'scheduled' : 'draft',
         // A draft has no destination, so a scheduled_at on it would only invite
         // the scheduler to sweep it up and stamp it failed.
@@ -800,128 +795,100 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
           )}
 
           {/* ── STEP 4 — FIRST POST ── */}
-          {step === 4 && (
+          {step === 4 && (() => {
+            // TikTok takes video and the scheduler has no text path for it, so a text
+            // starter post can only be saved as a draft for a TikTok-only user.
+            const tiktokOnly = connectionDetected && selectedPlatform === 'tiktok'
+            const canScheduleText = connectionDetected && !tiktokOnly
+            return (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
               <div className="text-center mb-6">
                 <PenLine className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
-                <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">Schedule your first post</h2>
+                <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">Your first post is ready</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  Tell us what you post about and we&apos;ll write one for you. Pick when it goes out.
+                  We wrote a starter you can post as it is or change. Pick when it goes out.
                 </p>
               </div>
 
-              {!postsGenerated ? (
-                <>
-                  <div className="mb-6">
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
-                      What do you create or post about?
-                    </label>
+              <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Your first post</span>
+                  <span className={`text-xs font-semibold ${starterPost.length > charLimit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {starterPost.length} / {charLimit}
+                  </span>
+                </div>
+                <textarea
+                  value={starterPost}
+                  onChange={e => setStarterPost(e.target.value)}
+                  rows={5}
+                  className="w-full text-sm text-gray-800 dark:text-gray-200 bg-transparent resize-none outline-none leading-relaxed"
+                />
+              </div>
+
+              {tiktokOnly ? (
+                <div className="mb-5 rounded-2xl border border-pink-200 dark:border-pink-900 bg-pink-50 dark:bg-pink-950/20 px-4 py-3">
+                  <p className="text-xs text-pink-700 dark:text-pink-300">
+                    TikTok takes video, not text, so this starter will be saved as a draft. To post on TikTok, upload a video in TikTok Studio.
+                  </p>
+                  <Link href="/tiktok/studio"
+                    className="inline-flex items-center mt-2 text-xs font-bold text-pink-600 dark:text-pink-400 hover:underline">
+                    Open TikTok Studio →
+                  </Link>
+                </div>
+              ) : canScheduleText ? (
+                <div className="mb-5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
+                    When should it go out?
+                  </label>
+                  <div className="flex gap-3">
                     <input
-                      type="text"
-                      value={topic}
-                      onChange={e => setTopic(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && topic.trim() && (setStarterPost(generateStarterPost(topic)), setPostsGenerated(true))}
-                      placeholder="e.g. fitness tips, my SaaS startup, photography, cooking"
-                      className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
-                      autoFocus
+                      type="date"
+                      value={scheduleDate}
+                      onChange={e => setScheduleDate(e.target.value)}
+                      className="flex-1 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
                     />
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
-                      Be specific — &quot;vegan meal prep for busy parents&quot; beats &quot;food&quot;
-                    </p>
+                    <input
+                      type="time"
+                      value={scheduleTime}
+                      onChange={e => setScheduleTime(e.target.value)}
+                      className="w-36 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
+                    />
                   </div>
-
-                  <div className="flex gap-3 mb-4">
-                    <button onClick={() => setStep(3)}
-                      className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                      ← Back
-                    </button>
-                    <button
-                      onClick={() => { setStarterPost(generateStarterPost(topic)); setPostsGenerated(true) }}
-                      disabled={!topic.trim()}
-                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150 disabled:opacity-40">
-                      Write my first post →
-                    </button>
-                  </div>
-
-                  <button onClick={() => setStep(5)}
-                    className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-2">
-                    Skip — I&apos;ll write my own later
-                  </button>
-                </>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                    Goes to {platformData?.label} in your local time. Change it anytime from the calendar.
+                  </p>
+                </div>
               ) : (
-                <>
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Your first post</span>
-                      <span className={`text-xs font-semibold ${starterPost.length > charLimit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
-                        {starterPost.length} / {charLimit}
-                      </span>
-                    </div>
-                    <textarea
-                      value={starterPost}
-                      onChange={e => setStarterPost(e.target.value)}
-                      rows={5}
-                      className="w-full text-sm text-gray-800 dark:text-gray-200 bg-transparent resize-none outline-none leading-relaxed"
-                    />
-                  </div>
-
-                  {/* When it goes out. Previously this was implicit — five posts,
-                      30 minutes apart, starting two hours from now, with no say
-                      in it. Picking a day and a time is the thing people came to
-                      this product to do. */}
-                  {connectionDetected ? (
-                    <div className="mb-5">
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
-                        When should it go out?
-                      </label>
-                      <div className="flex gap-3">
-                        <input
-                          type="date"
-                          value={scheduleDate}
-                          onChange={e => setScheduleDate(e.target.value)}
-                          className="flex-1 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
-                        />
-                        <input
-                          type="time"
-                          value={scheduleTime}
-                          onChange={e => setScheduleTime(e.target.value)}
-                          className="w-36 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
-                        Goes to {platformData?.label} in your local time. Change it anytime from the calendar.
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-center text-amber-600 dark:text-amber-500 mb-5">
-                      No account connected yet, so we&apos;ll save this as a draft. Connect a platform
-                      and you can schedule it from Drafts in one click.
-                    </p>
-                  )}
-
-                  <div className="flex gap-3 mb-3">
-                    <button onClick={() => setPostsGenerated(false)}
-                      className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                      ← Rewrite
-                    </button>
-                    <button onClick={() => setStep(5)}
-                      disabled={!starterPost.trim()}
-                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150 disabled:opacity-40">
-                      {connectionDetected ? 'Schedule it →' : 'Save as draft →'}
-                    </button>
-                  </div>
-
-                  {/* Skip stayed available on the input screen but vanished the
-                      moment a post was generated, so the only ways out were
-                      Redo or commit. */}
-                  <button onClick={() => { setStarterPost(''); setStep(5) }}
-                    className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-2">
-                    Skip — I&apos;ll do this later
-                  </button>
-                </>
+                <p className="text-xs text-center text-amber-600 dark:text-amber-500 mb-5">
+                  No account connected yet, so we&apos;ll save this as a draft. Connect a platform
+                  and you can schedule it from Drafts in one click.
+                </p>
               )}
+
+              <div className="flex gap-3 mb-3">
+                <button
+                  onClick={() => {
+                    const next = (draftIndex + 1) % starterDraftCount(onboardingGoal)
+                    setDraftIndex(next)
+                    setStarterPost(starterDraft(onboardingGoal, next))
+                  }}
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  Another idea
+                </button>
+                <button onClick={() => setStep(5)}
+                  disabled={!starterPost.trim()}
+                  className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150 disabled:opacity-40">
+                  {canScheduleText ? 'Schedule it →' : 'Save as draft →'}
+                </button>
+              </div>
+
+              <button onClick={() => { setStarterPost(''); setStep(5) }}
+                className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-2">
+                Skip for now
+              </button>
             </div>
-          )}
+            )
+          })()}
 
           {/* ── STEP 5 — DONE ── */}
           {step === 5 && (
