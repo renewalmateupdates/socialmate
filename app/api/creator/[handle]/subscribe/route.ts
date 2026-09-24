@@ -44,6 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
       quantity: 1,
     }],
     subscription_data: {
+      // Platform pays Stripe's fee on destination charges; on_behalf_of doesn't move it.
       transfer_data: { destination: creator.stripe_account_id! },
       metadata: {
         type: 'creator_subscription',

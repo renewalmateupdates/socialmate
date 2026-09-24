@@ -69,6 +69,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
       quantity: 1,
     }],
     payment_intent_data: {
+      // Destination charge: Stripe's fee is debited from the platform balance, and
+      // on_behalf_of does not change that (Stripe docs, connect/destination-charges).
+      // Recovering it takes application_fee_amount. Open decision, see CLAUDE.md.
       transfer_data: { destination: creator.stripe_account_id! },
       metadata: {
         type: 'creator_tip',
