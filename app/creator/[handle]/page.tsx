@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useI18n } from '@/contexts/I18nContext'
 import { BookOpen, DollarSign, Lock, Repeat2, User, UserX } from 'lucide-react'
+import { MIN_CHARGE_CENTS } from '@/lib/creator-pricing'
 
 type CreatorProfile = {
   page_handle:              string
@@ -29,7 +30,7 @@ type PaywalledPost = {
   created_at:          string
 }
 
-const TIP_PRESETS = [100, 300, 500, 1000] // cents
+const TIP_PRESETS = [300, 500, 1000, 2500] // cents; the floor is MIN_CHARGE_CENTS
 const LS_FAN_KEY  = (handle: string) => `fan_verified_${handle}`
 const LS_UNLOCK_KEY = (postId: string) => `post_unlocked_${postId}`
 
@@ -150,8 +151,9 @@ function CreatorPageInner() {
   async function sendTip() {
     if (!creator) return
     const amount = customTip ? Math.round(parseFloat(customTip) * 100) : tipAmount
-    if (!amount || amount < creator.tip_min) {
-      showToast(`Minimum tip is $${creator.tip_min / 100}`, 'error'); return
+    const effectiveMin = Math.max(creator.tip_min, MIN_CHARGE_CENTS)
+    if (!amount || amount < effectiveMin) {
+      showToast(`Minimum tip is $${effectiveMin / 100}`, 'error'); return
     }
     if (amount > creator.tip_max) {
       showToast(`Maximum tip is $${creator.tip_max / 100}`, 'error'); return
@@ -330,7 +332,7 @@ function CreatorPageInner() {
                 type="number"
                 value={customTip}
                 onChange={e => setCustomTip(e.target.value)}
-                placeholder={`Custom amount ($${creator.tip_min / 100}-$${creator.tip_max / 100})`}
+                placeholder={`Custom amount ($${Math.max(creator.tip_min, MIN_CHARGE_CENTS) / 100}-$${creator.tip_max / 100})`}
                 className="w-full bg-theme border border-theme rounded-xl px-4 py-2 text-sm text-theme placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
               />
             </div>

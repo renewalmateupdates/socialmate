@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
+import { MIN_CHARGE_CENTS, MIN_CHARGE_DOLLARS, applicationFeeCents } from '@/lib/creator-pricing'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -34,6 +35,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
   if (!post.unlock_price_cents) {
     return NextResponse.json({ error: 'This post requires a fan subscription to unlock.' }, { status: 400 })
   }
+  if (post.unlock_price_cents < MIN_CHARGE_CENTS) {
+    return NextResponse.json({ error: `Unlock prices start at $${MIN_CHARGE_DOLLARS}.` }, { status: 400 })
+  }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
@@ -64,8 +68,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
       quantity: 1,
     }],
     payment_intent_data: {
-      // Platform pays Stripe's fee on destination charges; on_behalf_of doesn't move it.
+      // Platform pays Stripe's fee on destination charges; the application fee
+      // equals it, so SocialMate keeps nothing. See lib/creator-pricing.ts.
       transfer_data: { destination: cm.stripe_account_id! },
+      application_fee_amount: applicationFeeCents(post.unlock_price_cents),
     },
     metadata: {
       type:         'creator_post_unlock',

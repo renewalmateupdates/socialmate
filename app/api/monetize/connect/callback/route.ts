@@ -32,7 +32,9 @@ export async function GET(req: NextRequest) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
     try {
       const account = await stripe.accounts.retrieve(settings.stripe_account_id)
-      const complete = account.details_submitted && account.charges_enabled
+      // charges_enabled follows the card_payments capability, which is not requested
+      // (destination charges only need transfers), so it would stay false forever.
+      const complete = account.details_submitted && account.capabilities?.transfers === 'active'
 
       await supabase
         .from('creator_monetization')

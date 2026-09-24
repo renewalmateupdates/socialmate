@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import Stripe from 'stripe'
+import { MIN_CHARGE_CENTS, MIN_CHARGE_DOLLARS, creatorTransferPercent } from '@/lib/creator-pricing'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params
@@ -25,6 +26,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
     return NextResponse.json({ error: 'Fan subscriptions are not enabled.' }, { status: 400 })
   }
 
+  if (!creator.subscription_price || creator.subscription_price < MIN_CHARGE_CENTS) {
+    return NextResponse.json({ error: `Subscriptions start at $${MIN_CHARGE_DOLLARS} a month.` }, { status: 400 })
+  }
+
   const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
@@ -44,8 +49,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
       quantity: 1,
     }],
     subscription_data: {
-      // Platform pays Stripe's fee on destination charges; on_behalf_of doesn't move it.
-      transfer_data: { destination: creator.stripe_account_id! },
+      // Platform pays Stripe's fee on destination charges. application_fee_percent
+      // needs a Stripe-Account header, so the platform keeps the fee's share of each
+      // invoice via amount_percent instead. See lib/creator-pricing.ts.
+      transfer_data: {
+        destination: creator.stripe_account_id!,
+        amount_percent: creatorTransferPercent(creator.subscription_price),
+      },
       metadata: {
         type: 'creator_subscription',
         creator_monetization_id: creator.id,

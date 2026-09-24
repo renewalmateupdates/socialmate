@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { resolveWorkspacePlan } from '@/lib/plan'
+import { MIN_CHARGE_CENTS, MIN_CHARGE_DOLLARS } from '@/lib/creator-pricing'
 
 async function makeClient() {
   const cookieStore = await cookies()
@@ -48,6 +49,18 @@ export async function POST(req: NextRequest) {
 
   if (!workspace_id) return NextResponse.json({ error: 'workspace_id required' }, { status: 400 })
 
+  // One shared minimum (lib/creator-pricing.ts). Below it the fixed 30 cent Stripe
+  // fee eats a third or more of the payment.
+  if (tip_min != null && tip_min < MIN_CHARGE_CENTS) {
+    return NextResponse.json({ error: `Tips start at $${MIN_CHARGE_DOLLARS}.` }, { status: 400 })
+  }
+  if (tip_max != null && tip_max < (tip_min ?? MIN_CHARGE_CENTS)) {
+    return NextResponse.json({ error: 'The maximum tip must be at least the minimum.' }, { status: 400 })
+  }
+  if (subscription_price != null && subscription_price < MIN_CHARGE_CENTS) {
+    return NextResponse.json({ error: `Subscriptions start at $${MIN_CHARGE_DOLLARS} a month.` }, { status: 400 })
+  }
+
   if (page_handle) {
     if (!/^[a-z0-9-]{3,30}$/.test(page_handle)) {
       return NextResponse.json({ error: 'Handle must be 3–30 lowercase letters, numbers, or hyphens.' }, { status: 400 })
@@ -71,7 +84,7 @@ export async function POST(req: NextRequest) {
       page_bio: page_bio || null,
       avatar_url: avatar_url || null,
       tip_enabled: tip_enabled ?? false,
-      tip_min: tip_min ?? 100,
+      tip_min: tip_min ?? MIN_CHARGE_CENTS,
       tip_max: tip_max ?? 10000,
       subscription_enabled: subscription_enabled ?? false,
       subscription_price: subscription_price ?? 500,

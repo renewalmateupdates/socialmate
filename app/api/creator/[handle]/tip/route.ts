@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import Stripe from 'stripe'
+import { MIN_CHARGE_CENTS, MIN_CHARGE_DOLLARS, applicationFeeCents } from '@/lib/creator-pricing'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params
   const body = await req.json()
   const { amount_cents, message, supporter_name } = body
 
-  if (!amount_cents || amount_cents < 100) {
-    return NextResponse.json({ error: 'Minimum tip is $1.' }, { status: 400 })
+  if (!amount_cents || amount_cents < MIN_CHARGE_CENTS) {
+    return NextResponse.json({ error: `Minimum tip is $${MIN_CHARGE_DOLLARS}.` }, { status: 400 })
   }
 
   const supabase = getSupabaseAdmin()
@@ -31,9 +32,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
   if (plan === 'free') {
     return NextResponse.json({ error: 'Tip jar is not enabled.' }, { status: 400 })
   }
-  if (amount_cents < creator.tip_min || amount_cents > creator.tip_max) {
+  // A creator's own minimum can only raise the platform floor, never lower it.
+  const effectiveMin = Math.max(MIN_CHARGE_CENTS, creator.tip_min ?? 0)
+  if (amount_cents < effectiveMin || amount_cents > creator.tip_max) {
     return NextResponse.json({
-      error: `Tip must be between $${creator.tip_min / 100} and $${creator.tip_max / 100}.`
+      error: `Tip must be between $${effectiveMin / 100} and $${creator.tip_max / 100}.`
     }, { status: 400 })
   }
 
@@ -69,10 +72,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
       quantity: 1,
     }],
     payment_intent_data: {
-      // Destination charge: Stripe's fee is debited from the platform balance, and
-      // on_behalf_of does not change that (Stripe docs, connect/destination-charges).
-      // Recovering it takes application_fee_amount. Open decision, see CLAUDE.md.
+      // Destination charge: Stripe's fee is debited from the platform balance
+      // (on_behalf_of does not change that). The application fee equals that fee,
+      // so SocialMate keeps nothing and the creator nets what any Stripe merchant
+      // would. See lib/creator-pricing.ts.
       transfer_data: { destination: creator.stripe_account_id! },
+      application_fee_amount: applicationFeeCents(amount_cents),
       metadata: {
         type: 'creator_tip',
         tip_id: tip!.id,
