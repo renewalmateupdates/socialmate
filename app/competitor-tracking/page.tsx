@@ -138,13 +138,14 @@ export default function CompetitorTracking() {
     if (competitors.length >= MAX_COMPETITORS) { setError(`Limited to ${MAX_COMPETITORS} competitors`); return }
     setSaving(true)
     setError('')
-    const { data, error: dbError } = await supabase
-      .from('competitor_accounts')
-      .insert({ user_id: userId, name, platform, handle, notes })
-      .select()
-      .single()
-    if (dbError) { setError('Failed to save — try again'); setSaving(false); return }
-    setCompetitors(prev => [data, ...prev])
+    const res = await fetch('/api/competitors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, platform, handle, notes }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) { setError(json.error || 'Failed to save — try again'); setSaving(false); return }
+    setCompetitors(prev => [json.competitor, ...prev])
     setName(''); setPlatform('bluesky'); setHandle(''); setNotes('')
     setShowForm(false)
     showToast('Competitor added — posts will be fetched tonight')
