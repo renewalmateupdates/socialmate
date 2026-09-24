@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { supabase } from '@/lib/supabase'
 import {
   Camera, Circle, Download, FileVideo, Film, Gamepad2, Globe,
   Image as ImageIcon, Layers, Music, Package, Palette, Pause, Play,
@@ -270,6 +271,7 @@ export default function CreatePageClient() {
   // Export state
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
+  const [schedulingVideo, setSchedulingVideo] = useState(false)
 
   // Notify state
   const [filterEmail, setFilterEmail] = useState('')
@@ -398,7 +400,11 @@ export default function CreatePageClient() {
 
   // ── Export video ─────────────────────────────────────────────────────────────
 
-  async function exportVideo() {
+  // onReady, when given, receives the exported blob instead of triggering a
+  // browser download -- used by scheduleVideo() below to upload it rather
+  // than save it to disk. The two "Export for {spec}" buttons call this with
+  // no argument and keep the original download behavior.
+  async function exportVideo(onReady?: (blob: Blob) => void) {
     const v = videoRef.current
     const canvas = canvasRef.current
     if (!v || !canvas) return
@@ -462,12 +468,16 @@ export default function CreatePageClient() {
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type: 'video/webm' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `socialmate-export-${selectedPlatform}.webm`
-      a.click()
-      setTimeout(() => URL.revokeObjectURL(url), 10000)
+      if (onReady) {
+        onReady(blob)
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `socialmate-export-${selectedPlatform}.webm`
+        a.click()
+        setTimeout(() => URL.revokeObjectURL(url), 10000)
+      }
       setExporting(false)
     }
 
@@ -538,6 +548,44 @@ export default function CreatePageClient() {
     }
 
     animFrameRef.current = requestAnimationFrame(drawFrame)
+  }
+
+  // ── Schedule this video ──────────────────────────────────────────────────────
+  // "Schedule this video →" used to call router.push('/compose') with no
+  // parameters at all -- the edited video was never actually transferred,
+  // Compose just opened blank. Same underlying bug as Clips' "Schedule" and
+  // the Templates library's "Use" button, both of which hand off text via
+  // ?content= (now read by Compose) -- but a video can't fit in a URL, so
+  // this uploads the export to the same storage bucket the Media Library
+  // uses and hands Compose a URL to pre-attach instead.
+  async function scheduleVideo() {
+    if (schedulingVideo || exporting) return
+    setSchedulingVideo(true)
+    setExportError(null)
+    try {
+      await exportVideo(async (blob) => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) { setExportError('Please sign in again to schedule this video.'); return }
+
+          const path = `create-exports/${user.id}/${Date.now()}-${selectedPlatform}.webm`
+          const { error: uploadError } = await supabase.storage
+            .from('media')
+            .upload(path, blob, { contentType: 'video/webm' })
+          if (uploadError) {
+            setExportError('Could not upload video: ' + uploadError.message)
+            return
+          }
+
+          const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+          router.push(`/compose?media=${encodeURIComponent(urlData.publicUrl)}`)
+        } catch (err) {
+          setExportError(err instanceof Error ? err.message : 'Could not prepare this video for Compose.')
+        }
+      })
+    } finally {
+      setSchedulingVideo(false)
+    }
   }
 
   // ── Export GIF ──────────────────────────────────────────────────────────────
@@ -1107,7 +1155,7 @@ export default function CreatePageClient() {
                               )}
 
                               <button
-                                onClick={exportVideo}
+                                onClick={() => exportVideo()}
                                 disabled={exporting}
                                 className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-60 flex items-center gap-2"
                               >
@@ -1131,10 +1179,11 @@ export default function CreatePageClient() {
                       {/* Bottom action bar */}
                       <div className="flex items-center gap-3 pt-2 border-t border-gray-800 flex-wrap">
                         <button
-                          onClick={() => router.push('/compose')}
-                          className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all"
+                          onClick={scheduleVideo}
+                          disabled={schedulingVideo || exporting}
+                          className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-60"
                         >
-                          Schedule this video →
+                          {schedulingVideo ? 'Preparing…' : 'Schedule this video →'}
                         </button>
                         <button
                           onClick={captureThumbnail}
@@ -1145,7 +1194,7 @@ export default function CreatePageClient() {
                           <Camera size={13} strokeWidth={2} className="inline align-text-bottom mr-1.5" />Capture Thumbnail
                         </button>
                         <button
-                          onClick={exportVideo}
+                          onClick={() => exportVideo()}
                           disabled={exporting}
                           className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all disabled:opacity-60"
                         >
@@ -1297,7 +1346,7 @@ export default function CreatePageClient() {
               <div className="flex flex-col gap-2">
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">Quick Actions</p>
                 <button
-                  onClick={exportVideo}
+                  onClick={() => exportVideo()}
                   disabled={exporting}
                   className="w-full px-4 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                 >
@@ -1323,10 +1372,11 @@ export default function CreatePageClient() {
                   <FileVideo size={14} strokeWidth={2} /> Export GIF <span className="text-xs text-gray-500">(max 5s)</span>
                 </button>
                 <button
-                  onClick={() => router.push('/compose')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all"
+                  onClick={scheduleVideo}
+                  disabled={schedulingVideo || exporting}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Schedule this video →
+                  {schedulingVideo ? 'Preparing…' : 'Schedule this video →'}
                 </button>
                 {exportError && (
                   <p className="text-xs text-red-400 mt-1">{exportError}</p>

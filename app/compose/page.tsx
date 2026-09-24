@@ -301,6 +301,11 @@ function ComposeInner() {
   type MediaItem = { file: File; preview: string; url?: string; type: 'image' | 'video'; uploading: boolean }
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
   const [draftMediaUrls, setDraftMediaUrls] = useState<string[] | null>(null)
+  // Pre-attached media handed off from elsewhere via ?media=<url> (Creator
+  // Studio's "Schedule this video") -- already uploaded, so it skips the
+  // mediaItems file-upload pipeline entirely rather than needing a synthetic
+  // File object.
+  const [externalMediaUrls, setExternalMediaUrls] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
@@ -520,6 +525,19 @@ function ComposeInner() {
     const templateId        = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
     const draftId           = searchParams.get('draft') || searchParams.get('id')
+    // Four separate "send this to Compose" buttons (Clips' Schedule, the
+    // Templates library, Trend Scout's Draft Post) all navigate here with
+    // ?content=<text> and none of it was ever read -- this effect only knew
+    // about draft/template/starterTemplate. Every one of those buttons opened
+    // a blank composer and silently dropped what the user picked.
+    const contentParam      = searchParams.get('content')
+    // Creator Studio's "Schedule this video" -- a video can't fit in a URL,
+    // so it uploads first and hands off a URL instead of raw text.
+    const mediaParam        = searchParams.get('media')
+
+    if (mediaParam) {
+      setExternalMediaUrls([mediaParam])
+    }
 
     if (draftId) return
 
@@ -552,6 +570,11 @@ function ComposeInner() {
         }
       }
       loadTemplate()
+    } else if (contentParam) {
+      setContent(contentParam)
+      setTemplateBanner('Content loaded — review and adjust before posting.')
+    } else if (mediaParam) {
+      setTemplateBanner('Video attached — pick your platforms and caption before posting.')
     }
   }, [searchParams])
 
@@ -1489,7 +1512,7 @@ function ComposeInner() {
     setMediaItems([])
   }
 
-  const uploadedMediaUrls = mediaItems.filter(m => m.url).map(m => m.url!)
+  const uploadedMediaUrls = [...mediaItems.filter(m => m.url).map(m => m.url!), ...externalMediaUrls]
   const mediaStillUploading = mediaItems.some(m => m.uploading)
 
   const scoreColor = scoreResult
@@ -2205,6 +2228,22 @@ function ComposeInner() {
                     <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
                       <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">Attached image (from SOMA)</p>
                       <UnsplashCredit mediaUrls={draftMediaUrls} size="md" />
+                    </div>
+                  )}
+
+                  {/* Video handed off from Creator Studio via ?media= */}
+                  {externalMediaUrls.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 w-fit">
+                        <Film className="w-4 h-4 text-gray-400 flex-shrink-0" strokeWidth={1.75} />
+                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Video from Creator Studio attached</span>
+                        <button
+                          type="button"
+                          onClick={() => setExternalMediaUrls([])}
+                          className="text-gray-400 hover:text-red-500 transition-colors font-bold text-xs ml-1">
+                          ×
+                        </button>
+                      </div>
                     </div>
                   )}
 
