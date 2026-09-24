@@ -70,12 +70,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
     }],
     payment_intent_data: {
       transfer_data: { destination: creator.stripe_account_id! },
-      // Without on_behalf_of, Stripe's processing fee is deducted from
-      // SocialMate's own platform balance on every tip, not the creator's
-      // payout -- undocumented cost on a feature promised as 0% platform
-      // cut. Setting it moves fee liability to the connected account,
-      // matching what "0% cut" actually means.
-      on_behalf_of: creator.stripe_account_id!,
       metadata: {
         type: 'creator_tip',
         tip_id: tip!.id,
