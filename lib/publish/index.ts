@@ -50,7 +50,10 @@ export async function publishToAll(
           postId = await publishToDiscord(userId, content, destId, media)
           break
         case 'bluesky':
-          postId = await publishToBluesky(userId, content, workspaceId, selectedAccountIds['bluesky'], media)
+          // publishToBluesky now returns { uri, cid } -- cid is needed to
+          // reply to a post (see the thread-builder path), which the
+          // general pipeline here has no use for.
+          postId = (await publishToBluesky(userId, content, workspaceId, selectedAccountIds['bluesky'], media)).uri
           break
         case 'telegram':
           postId = await publishToTelegram(userId, content, destId, media, selectedAccountIds['telegram'])

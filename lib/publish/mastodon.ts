@@ -8,7 +8,8 @@ export async function publishToMastodon(
   content:      string,
   workspaceId?: string | null,
   accountId?:   string,
-  mediaUrls?:   string[]
+  mediaUrls?:   string[],
+  replyToId?:   string,
 ): Promise<string> {
   // Enforce 500 character limit (Mastodon default; some instances allow more)
   if (content.length > MAX_MASTODON_LENGTH) {
@@ -95,6 +96,7 @@ export async function publishToMastodon(
       status:     content,
       visibility: 'public',
       ...(mediaIds.length > 0 ? { media_ids: mediaIds } : {}),
+      ...(replyToId ? { in_reply_to_id: replyToId } : {}),
     }),
   })
 

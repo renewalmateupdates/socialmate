@@ -55,7 +55,8 @@ export async function publishToTwitter(
   content:      string,
   workspaceId?: string | null,
   accountId?:   string,
-  mediaUrls?:   string[]
+  mediaUrls?:   string[],
+  replyToId?:   string,
 ): Promise<string> {
   // Feature kill switch — check admin flags table
   const { data: flags } = await getSupabaseAdmin()
@@ -249,6 +250,9 @@ export async function publishToTwitter(
   const tweetBody: Record<string, unknown> = { text: tweetText }
   if (mediaIds.length > 0) {
     tweetBody.media = { media_ids: mediaIds }
+  }
+  if (replyToId) {
+    tweetBody.reply = { in_reply_to_tweet_id: replyToId }
   }
 
   const res = await fetch('https://api.twitter.com/2/tweets', {

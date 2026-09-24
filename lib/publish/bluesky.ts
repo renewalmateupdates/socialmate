@@ -13,13 +13,17 @@ function truncateToGraphemes(str: string, max: number): string {
   return segs.slice(0, max - 1).map(s => s.segment).join('') + '…'
 }
 
+export type BlueskyPostRef = { uri: string; cid: string }
+export type BlueskyReplyTo = { root: BlueskyPostRef; parent: BlueskyPostRef }
+
 export async function publishToBluesky(
   userId:     string,
   content:    string,
   workspaceId?: string | null,
   accountId?:   string,
-  mediaUrls?:   string[]
-): Promise<string> {
+  mediaUrls?:   string[],
+  replyTo?:     BlueskyReplyTo,
+): Promise<BlueskyPostRef> {
   // If a specific account ID was selected, query by it directly
   let query = getSupabaseAdmin()
     .from('connected_accounts')
@@ -154,6 +158,7 @@ export async function publishToBluesky(
         text:      content,
         createdAt: new Date().toISOString(),
         ...(embed ? { embed } : {}),
+        ...(replyTo ? { reply: replyTo } : {}),
       },
     }),
   })
@@ -180,5 +185,9 @@ export async function publishToBluesky(
     console.log(`[Bluesky] Published: https://bsky.app/profile/${handle}/post/${rkey}`)
   }
 
-  return post.uri
+  // Both uri and cid are needed to reply to this post later -- Bluesky's
+  // reply record requires a strong ref (uri + cid), not just the uri this
+  // function used to return alone. See publishToAll's caller for the
+  // general-pipeline case, which only ever needed the uri.
+  return { uri: post.uri, cid: post.cid }
 }
