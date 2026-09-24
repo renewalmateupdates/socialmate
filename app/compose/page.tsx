@@ -597,6 +597,13 @@ function ComposeInner() {
   const threadCapablePlatforms = ['bluesky', 'mastodon', 'twitter']
   const threadPlatformChoices = livePlatforms.filter(p => threadCapablePlatforms.includes(p.id))
   const soonPlatforms = PLATFORMS.filter(p => !p.live)
+  // Connected platforms this composer can actually post to. TikTok takes video
+  // (TikTok Studio) and X is only postable on Pro, so someone whose only
+  // connections are those has nothing to select and, until now, no explanation.
+  // 22 of the 36 outside accounts with a connection are in exactly that state.
+  const selectableConnected = livePlatforms.filter(
+    p => connectedPlatforms.has(p.id) && !(p.id === 'twitter' && plan === 'free')
+  )
 
   const activePlatform = selectedPlatforms.length > 0
     ? (PLATFORMS.find(p => selectedPlatforms[0] === p.id) || PLATFORMS[0])
@@ -1339,6 +1346,7 @@ function ComposeInner() {
     // "a post was actually created," and could fire on an attempt that
     // returned early and never called the API at all.
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    track('post_attempted', { platforms: selectedPlatforms.length, scheduled: !!scheduleDate })
     setPublishing(true)
     setPublishResults(null)
     try {
@@ -1369,7 +1377,8 @@ function ComposeInner() {
       })
 
       const data = await res.json()
-      if (!res.ok) { showApiError(data); return }
+      if (!res.ok) { track('post_failed', { status: res.status }); showApiError(data); return }
+      publishedThisVisitRef.current = true
 
       if (scheduledAt) {
         showToast('Post scheduled successfully! ✓')
@@ -1386,7 +1395,7 @@ function ComposeInner() {
         setPublishResults(data.results || [])
         const allFailed  = data.results?.every((r: PublishResult) => !r.success)
         const someFailed = data.results?.some((r: PublishResult) => !r.success)
-        if (allFailed) showToast('Failed to publish to all platforms', 'error')
+        if (allFailed) { track('post_failed', { reason: 'all_platforms_failed' }); showToast('Failed to publish to all platforms', 'error') }
         else if (someFailed) showToast('Published to some platforms — check results below', 'info')
         else {
           showToast('Published successfully! ✓')
@@ -1397,6 +1406,7 @@ function ComposeInner() {
         }
       }
     } catch {
+      track('post_failed', { reason: 'network' })
       showToast('Network error. Please try again.', 'error')
     } finally {
       setPublishing(false)
@@ -1527,6 +1537,41 @@ function ComposeInner() {
 
   const uploadedMediaUrls = [...mediaItems.filter(m => m.url).map(m => m.url!), ...externalMediaUrls]
   const mediaStillUploading = mediaItems.some(m => m.uploading)
+
+  // What the composer looked like when the person left it. The Post button is
+  // disabled whenever a gate fails, so a blocked user never fires a click and a
+  // click-based event cannot see them. Flags only: no post content is recorded.
+  const leaveStateRef = useRef({ hasContent: false, selected: 0, selectable: 0, blocker: '' })
+  const composeLeftRef = useRef(false)
+  const publishedThisVisitRef = useRef(false)
+  leaveStateRef.current = {
+    hasContent: content.trim().length > 0,
+    selected: selectedPlatforms.length,
+    selectable: selectableConnected.length,
+    blocker:
+      !content.trim() ? 'no_content'
+      : selectedPlatforms.length === 0 ? (selectableConnected.length === 0 ? 'nothing_connected_to_post_to' : 'no_platform_selected')
+      : charOver ? 'over_limit'
+      : scheduleError ? 'schedule_error'
+      : missingDestinations.length > 0 ? 'missing_destination'
+      : mediaStillUploading ? 'media_uploading'
+      : '',
+  }
+  useEffect(() => {
+    const sendLeft = () => {
+      if (composeLeftRef.current || publishedThisVisitRef.current) return
+      composeLeftRef.current = true
+      const s = leaveStateRef.current
+      track('compose_left', {
+        had_content: s.hasContent,
+        platforms_selected: s.selected,
+        connected_selectable: s.selectable,
+        blocking_reason: s.blocker || 'none',
+      })
+    }
+    window.addEventListener('pagehide', sendLeft)
+    return () => { window.removeEventListener('pagehide', sendLeft); sendLeft() }
+  }, [])
 
   const scoreColor = scoreResult
     ? scoreResult.score >= 80 ? 'text-green-600'
@@ -1696,6 +1741,30 @@ function ComposeInner() {
                       className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-2 min-h-[44px] rounded-xl bg-amber-500 hover:bg-amber-400 text-white text-xs font-bold transition-colors">
                       Connect an account →
                     </Link>
+                  </div>
+                )}
+                {!loading && connectedPlatforms.size > 0 && selectableConnected.length === 0 && (
+                  <div className="mb-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                      {connectedPlatforms.has('tiktok') ? 'TikTok takes video, not text' : 'X needs Pro to post'}
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                      {connectedPlatforms.has('tiktok')
+                        ? 'Post to TikTok from TikTok Studio. To send text posts from here, connect Bluesky, Discord, LinkedIn or Mastodon. You can still save this as a draft.'
+                        : 'X charges per post, so posting there needs Pro. Connect Bluesky, Discord, LinkedIn or Mastodon to post for free. You can still save this as a draft.'}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-2.5">
+                      {connectedPlatforms.has('tiktok') && (
+                        <Link href="/tiktok/studio"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl bg-amber-500 hover:bg-amber-400 text-white text-xs font-bold transition-colors">
+                          Open TikTok Studio →
+                        </Link>
+                      )}
+                      <Link href="/accounts"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
+                        Connect another platform →
+                      </Link>
+                    </div>
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2">
