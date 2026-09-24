@@ -12,6 +12,7 @@ import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
 import { track, trackOnce } from '@/lib/analytics'
+import { composeWithStarterHref } from '@/lib/starter-post'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from 'lucide-react'
 
@@ -49,10 +50,10 @@ const PLATFORM_META: Record<string, {
   youtube:   { color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
   pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
   reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
-  instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
+  facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
   tiktok:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
-  threads:   { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  threads:   { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
   twitter:   { color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'live'                                       },
   snapchat:  { color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
   lemon8:    { color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
@@ -229,6 +230,16 @@ function AccountsInner() {
     } else if (error) {
       const [platform, ...rest] = error.split('_')
       track('connect_failed', { platform, reason: rest.join('_') || error })
+    }
+    // Strip the outcome params once they have been recorded. Without this a
+    // reload of /accounts?success=tiktok_connected fired connect_succeeded again
+    // (34 success events from 18 TikTok users), inflating the funnel.
+    if (success || error) {
+      const cleaned = new URL(window.location.href)
+      ;['success', 'error', 'limit', 'plan'].forEach(k => cleaned.searchParams.delete(k))
+      // `searchParams` above is this render's snapshot, so the plan-limit toast
+      // below still reads the values it needs.
+      window.history.replaceState(null, '', cleaned.pathname + cleaned.search)
     }
     // The cap is now enforced server-side in every connect callback, so a user
     // can arrive back here having been refused. One handler covers all
@@ -520,8 +531,8 @@ function AccountsInner() {
                       href: justConnected === 'discord' ? '#needs-channel-discord' : '/accounts/destinations',
                       cta: justConnected === 'discord' ? 'Pick your channel ↓' : 'Choose a channel →',
                       sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
-                  : { href: '/compose', cta: 'Write your first post →',
-                    sub: 'Write your first post and send it out. It takes about a minute.' }
+                  : { href: composeWithStarterHref(), cta: 'Open your first post →',
+                    sub: 'We put a starter draft in the composer for you. Edit it, or replace it, and send it out.' }
                 return (
                   <>
                     <div className="flex-1">
@@ -880,7 +891,7 @@ function AccountsInner() {
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                   YouTube, Pinterest, and Reddit are code-complete and launching very soon.
-                  Instagram, Facebook, and Threads are in developer review.
+                  Instagram, Facebook, and Threads are planned but not started, because they need a long app review from Meta.
                   We'll notify you on your dashboard the moment each one goes live.
                 </p>
               </div>
