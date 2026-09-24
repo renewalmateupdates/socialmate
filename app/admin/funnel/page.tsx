@@ -269,5 +269,5 @@ export default function AdminFunnelPage() {
 }
 
 // Composer steps added after the rest of the funnel. See lib/analytics.ts.
-const NEW_EVENTS = ['compose_left', 'draft_created', 'post_attempted', 'post_failed']
+const NEW_EVENTS = ['compose_left', 'draft_created', 'post_attempted', 'post_failed', 'starter_built']
 const NEW_EVENTS_SINCE = 'Sep 24, 2026'
