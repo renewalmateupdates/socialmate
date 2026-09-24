@@ -619,7 +619,7 @@ export default function Templates() {
               </span>
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-              Ready-made formats for the 4 live platforms. Hit "Use →" to open in Compose, or "Save" to add to your collection.
+              Ready-made formats for the live platforms. Hit "Use →" to open in Compose, or "Save" to add to your collection.
             </p>
 
             {/* Starter search + filter */}
