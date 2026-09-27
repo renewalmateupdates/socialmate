@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { checkAccountSlot } from '@/lib/account-limits'
+import { isLegacyDiscordAccount } from '@/lib/discord-accounts'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -127,9 +128,24 @@ export async function GET(request: NextRequest) {
     .eq('platform_user_id', platformAccountId)
     .maybeSingle()
 
+  // An older login-only Discord connection (no server, so it could never post)
+  // is upgraded in place the first time the bot is added. That keeps one row,
+  // leaves anything pointing at it alone, and does not need a free slot: a free
+  // plan's single Discord slot is exactly what these accounts were sitting in.
+  let legacyId: string | null = null
+  if (!existing) {
+    const { data: legacyRows } = await supabase
+      .from('connected_accounts')
+      .select('id, platform, metadata')
+      .eq('user_id', user.id)
+      .eq('platform', 'discord')
+      .is('workspace_id', null)
+    legacyId = (legacyRows ?? []).find(isLegacyDiscordAccount)?.id ?? null
+  }
+
   // Plan cap on connected accounts per platform. Reconnecting an account this
   // workspace already holds is a token refresh, not a new slot, so it passes.
-  if (!existing) {
+  if (!existing && !legacyId) {
     const slot = await checkAccountSlot(user.id, 'discord', null, platformAccountId)
     if (!slot.allowed) {
       return NextResponse.redirect(
@@ -144,6 +160,27 @@ export async function GET(request: NextRequest) {
       .from('connected_accounts')
       .update({ access_token, refresh_token, expires_at, scope, metadata })
       .eq('id', existing.id)
+  } else if (legacyId) {
+    const { error: upgradeErr } = await supabase
+      .from('connected_accounts')
+      .update({
+        platform_user_id: platformAccountId,
+        account_name:     guildName ?? discordUser.global_name ?? discordUser.username,
+        profile_image_url: discordUser.avatar
+          ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
+          : null,
+        access_token,
+        refresh_token,
+        expires_at,
+        scope,
+        metadata,
+      })
+      .eq('id', legacyId)
+
+    if (upgradeErr) {
+      console.error('Discord bot upgrade error:', upgradeErr)
+      return NextResponse.redirect(`${appUrl}/accounts?error=discord_db_error`)
+    }
   } else {
     const { error: dbError } = await supabase
       .from('connected_accounts')

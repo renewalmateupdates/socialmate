@@ -14,6 +14,7 @@ import MastodonConnectModal from '@/components/MastodonConnectModal'
 import { track, trackOnce } from '@/lib/analytics'
 import { composeWithStarterHref } from '@/lib/starter-post'
 import StarterDraftBuilder from '@/components/StarterDraftBuilder'
+import { isLegacyDiscordAccount } from '@/lib/discord-accounts'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from 'lucide-react'
 
@@ -33,6 +34,7 @@ type Account = {
   profile_image_url: string
   created_at: string
   is_active: boolean
+  metadata?: unknown
 }
 
 type PlatformStatus = 'live' | 'coming_soon' | 'planned'
@@ -83,7 +85,9 @@ function PlatformCard({
   const { t } = useI18n()
   const meta = PLATFORM_META[platform]
   const isConnecting = connectingPlatform === platform
-  const platformCount = accountsByPlatform[platform]?.length || 0
+  // A login-only Discord connection cannot post and is not counted: it would
+  // otherwise show "Upgrade" to a free user whose one slot it is using.
+  const platformCount = (accountsByPlatform[platform] || []).filter(a => !isLegacyDiscordAccount(a)).length
   const atLimit = platformCount >= accountsPerPlatform
   const isConnected = platformCount > 0
 
@@ -144,6 +148,11 @@ function PlatformCard({
       {platform === 'twitter' && !atLimit && (
         <p className="text-xs text-gray-400 leading-relaxed pl-1">
           Connecting your X account registers it globally. Disconnecting starts a 45-day reconnection pause. This protects against abuse.
+        </p>
+      )}
+      {platform === 'tiktok' && !atLimit && (
+        <p className="text-xs text-gray-400 leading-relaxed pl-1">
+          Videos only. They go to your TikTok drafts until TikTok approves public posting.
         </p>
       )}
     </div>
@@ -312,7 +321,7 @@ function AccountsInner() {
   // Loaded lazily, and only when it can actually be acted on: a connected
   // Discord with no channel chosen yet.
   const needsDiscordChannel =
-    accounts.some(a => a.platform === 'discord') && !destinationPlatforms.has('discord')
+    accounts.some(a => a.platform === 'discord' && !isLegacyDiscordAccount(a)) && !destinationPlatforms.has('discord')
 
   useEffect(() => {
     if (!needsDiscordChannel || dcChannels || dcChannelsError) return
@@ -436,7 +445,7 @@ function AccountsInner() {
 
   const handleConnect = (platform: string) => {
     track('connect_clicked', { platform })
-    const platformAccounts = accounts.filter(a => a.platform === platform)
+    const platformAccounts = accounts.filter(a => a.platform === platform && !isLegacyDiscordAccount(a))
     if (platformAccounts.length >= accountsPerPlatform) {
       // Hitting the per-platform cap is a real drop reason and looks identical
       // to abandoning unless it is recorded separately.
@@ -653,7 +662,8 @@ function AccountsInner() {
               <div className="space-y-3">
                 {accounts.map(account => {
                   const meta = PLATFORM_META[account.platform] || { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700', label: account.platform }
-                  const platformCount = accountsByPlatform[account.platform]?.length || 0
+                  const platformCount = (accountsByPlatform[account.platform] || []).filter(a => !isLegacyDiscordAccount(a)).length
+                  const isLegacyDiscord = isLegacyDiscordAccount(account)
                   const isConfirming = confirmDisconnect === account.id
                   const isDisconnecting = disconnecting === account.id
                   return (
@@ -665,7 +675,11 @@ function AccountsInner() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-bold">{meta.label}</p>
-                            <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{t('app_accounts.connected')}</span>
+                            {isLegacyDiscord && !destinationPlatforms.has('discord') ? (
+                              <span className="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">Can&apos;t post yet</span>
+                            ) : (
+                              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{t('app_accounts.connected')}</span>
+                            )}
                             {platformCount > 1 && (
                               <span className="text-xs text-gray-400 dark:text-gray-500">{platformCount}/{accountsPerPlatform} accounts</span>
                             )}
@@ -686,8 +700,30 @@ function AccountsInner() {
                           publish anything, and nothing on this page used to say so.
                           Surfaced on the card itself, not just at connect time, so
                           it is still findable on a later visit. */}
+                      {/* An older login-only Discord connection has no server, so
+                          it can never post and the channel picker below has nothing
+                          to list. Adding the bot upgrades this same row in place
+                          (see the bot callback), so it needs no second slot. */}
+                      {isLegacyDiscord && !destinationPlatforms.has('discord') && !isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800/50">
+                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">
+                            This Discord connection can&apos;t post yet.
+                          </p>
+                          <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
+                            It was made before SocialMate could add a bot to your server. Add the bot, pick a server you manage, and it upgrades this connection. It won&apos;t use a second slot.
+                          </p>
+                          <button
+                            onClick={() => setShowDiscordModal(true)}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors"
+                          >
+                            Add the SocialMate bot &rarr;
+                          </button>
+                        </div>
+                      )}
+
                       {DESTINATION_PLATFORMS.includes(account.platform)
                         && !destinationPlatforms.has(account.platform)
+                        && !isLegacyDiscord
                         && !isConfirming && (
                         <div id={'needs-channel-' + account.platform} className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800/50">
                           <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
