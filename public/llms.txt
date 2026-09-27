@@ -286,9 +286,9 @@ Built-in charitable giving initiative. Percentage of every subscription goes to 
 
 ## Creator Monetization Hub
 
-Live for Pro+ users. Full Stripe Connect Express integration — 0% platform cut (all payments go directly to the creator).
+Live for Pro+ users. Full Stripe Connect Express integration — 0% SocialMate cut. Payments go to the creator's own Stripe account; Stripe's standard processing fee (about 2.9% + 30 cents for a US card) comes out of each payment, not out of SocialMate's balance. Minimum payment is $3 for tips, paywalled-post unlocks and subscriptions.
 
-- Tip jar — preset amounts ($1/$3/$5/$10) + custom amount, name/message support
+- Tip jar — preset amounts ($3/$5/$10/$25) + custom amount (minimum $3), name/message support
 - Fan subscriptions — recurring fan support with custom name/description/price
 - Public creator page at /creator/[handle] — accessible to anyone, no SocialMate account required
 - Stripe Connect onboarding at /monetize/hub
@@ -424,6 +424,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 
 ### Discord
 - Post to any Discord channel via bot/webhook
+- Connect Discord from /accounts: SocialMate's bot is added to a server you manage (needs the Manage Server permission), then you pick the channel to post into from a dropdown in the app
 - Unique competitive advantage — most schedulers don't support Discord at all
 - Word filter + automations API integration
 - Discord management hub for connected servers
@@ -449,7 +450,8 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 ### TikTok
 - Production API approved May 17, 2026
 - FILE_UPLOAD posting method — full end-to-end confirmed working
-- Connect at /accounts, schedule videos from TikTok Studio at /tiktok/studio
+- Connect at /accounts, schedule videos from TikTok Studio at /tiktok/studio (TikTok takes video only, not text posts)
+- Public posting is pending TikTok's content sharing audit. Until it clears, TikTok limits posts made through any third-party app to private visibility or the account's drafts
 - TikTok Script Generator at /ai-features/tiktok-script
 - Quota: Free 20/month · Pro 60/month · Agency 200/month
 - No per-post charge from TikTok (only egress costs ~$0.09/GB)
@@ -547,9 +549,9 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 3. SOMA — fully autonomous AI content OS with voice learning, project memory, and per-platform scheduling
 4. Discord and Telegram scheduling — natively supported, which almost no competitor offers
 5. SM-Give — 2% of subscriptions go to charity; built-in giving at the infrastructure level
-6. Free truly means free — 6 of 7 platforms fully available on Free (Bluesky, Discord, Telegram, Mastodon, TikTok, LinkedIn); X/Twitter requires Pro+ since X charges $0.01/tweet
+6. Free truly means free — 6 of 7 platforms available on Free (Bluesky, Discord, Telegram, Mastodon, TikTok, LinkedIn; TikTok public posting is pending TikTok's audit); X/Twitter requires Pro+ since X charges $0.01/tweet
 7. 8 autonomous AI agents — most competitors have 0
-8. Creator-owned monetization — 0% platform cut via Stripe Connect
+8. Creator-owned monetization — 0% SocialMate cut via Stripe Connect (Stripe's own processing fee applies)
 
 ---
 
@@ -593,7 +595,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 - Schedule once, publish everywhere — 7 platforms in one compose action
 - SOMA generates a full week of posts from your existing content
 - Voice DNA ensures AI sounds like you, not generic AI
-- Creator monetization with tip jar and fan subscriptions (0% cut)
+- Creator monetization with tip jar and fan subscriptions (0% SocialMate cut, Stripe fees apply)
 
 ### Streamers (Twitch & YouTube)
 - Clips Studio: browse and schedule Twitch clips without leaving SocialMate
@@ -621,7 +623,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 - Audience page: https://socialmate.studio/for/linkedin-creators
 
 ### TikTok Creators
-- TikTok Production API approved May 2026 — fully live
+- TikTok Production API approved May 2026; public posting is pending TikTok's content sharing audit, so posts are private or go to drafts for now
 - TikTok Script Generator (AI hook/body/CTA, 5 credits)
 - TikTok Studio at /tiktok/studio
 - GIF and video export tools in Creator Studio

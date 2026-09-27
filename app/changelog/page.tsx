@@ -21,6 +21,18 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'September 26, 2026',
+    version: 'Discord Connects Again, First Post Made Easier, Honest Platform Status',
+    changes: [
+      { type: 'Fixed',    text: 'Connecting Discord was failing with an "Invalid OAuth2 redirect" error for everyone since September 3. It works again: SocialMate\'s bot is added to a server you manage, then you pick the channel to post into from a dropdown in the app.' },
+      { type: 'New',      text: 'Write your first post from one sentence. Pick a kind of post (share an update, promote something, teach something), type a rough sentence or paste a link, and get an editable draft back. It appears in onboarding and on the Accounts page right after you connect a platform.' },
+      { type: 'Improved', text: 'Onboarding now suggests the platforms that connect in two clicks first, and warns you before you pick one with a catch: X needs Pro to post, and TikTok takes video only and goes to your drafts until TikTok approves public posting.' },
+      { type: 'Improved', text: 'If the only thing you have connected is TikTok, or X on the free plan, Compose now tells you why it cannot post text and what to connect instead.' },
+      { type: 'Fixed',    text: 'Creator Hub now has a $3 minimum for tips, paywalled unlocks and subscriptions, and Stripe\'s processing fee comes out of each payment instead of SocialMate\'s balance. Newly connected Stripe accounts also could not accept payments at all until now.' },
+      { type: 'Improved', text: 'The Accounts page says plainly which platforms are still waiting on approval: YouTube is awaiting Google, Instagram, Facebook and Threads need Meta app review, and Pinterest and Reddit have not approved our API applications yet.' },
+    ],
+  },
+  {
     date: 'September 10, 2026',
     version: 'HERMES Opens Up, SOMA Add-on Fix, Faster Onboarding',
     changes: [
