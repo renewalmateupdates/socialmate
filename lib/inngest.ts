@@ -26,6 +26,7 @@ import {
   type TruthSignal, type TruthStrategy,
 } from '@/lib/enki/truth-mode'
 import { runCapReached, nextRunCount } from '@/lib/soma-runs'
+import { fullSendSlots } from '@/lib/soma-schedule'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
@@ -4487,8 +4488,10 @@ ${voiceBlock}
 ${memoryBlock}
 
 Return ONLY valid JSON (no markdown), shaped exactly like this:
-{"posts":[{"platform":"bluesky","content":"post text","scheduled_date":"YYYY-MM-DD","scheduled_time":"HH:MM"}],"topics_covered":["topic1"],"angles_used":["angle1"],"memory_update":"2-3 sentences summarizing what today's run covers, written as notes a social media manager would keep."}
-Generate posts spread across today and tomorrow. Platform rules: Twitter/X max 280 chars, Bluesky max 300 chars, LinkedIn professional tone, Discord casual.
+{"posts":[{"platform":"bluesky","content":"post text"}],"topics_covered":["topic1"],"angles_used":["angle1"],"memory_update":"2-3 sentences summarizing what today's run covers, written as notes a social media manager would keep."}
+Today's date is ${now.toISOString().slice(0, 10)}. Do not put dates or times anywhere: publish times are assigned separately.
+Never state a price, plan limit or feature count unless it appears in the About text above. Example posts show voice only; do not copy their facts or numbers.
+Platform rules: Twitter/X max 280 chars, Bluesky max 300 chars, LinkedIn professional tone, Discord casual.
 Generate exactly ${MAX_PPD} posts per platform. The memory_update field is mandatory.`
 
           let posts: any[] = []
@@ -4505,29 +4508,66 @@ Generate exactly ${MAX_PPD} posts per platform. The memory_update field is manda
             fullSendTopics = Array.isArray(parsed?.topics_covered) ? parsed.topics_covered : []
             fullSendAngles = Array.isArray(parsed?.angles_used) ? parsed.angles_used : []
             fullSendMemoryUpdate = parsed?.memory_update ?? ''
-          } catch {
-            console.error(`[SomaFullSend] Gemini parse error for project ${project.id}`)
-            return
+          } catch (err: any) {
+            // This used to return quietly, so a dead API key or a malformed
+            // response looked like a run that succeeded and happened to produce
+            // nothing. The calendar then sat empty for three weeks with no
+            // signal. Throw, so the run reports the failure.
+            console.error(`[SomaFullSend] Gemini call or parse failed for project ${project.id}:`, err?.message)
+            throw err
           }
 
           // Insert posts into the approval queue (full_send = auto-schedule directly)
-          let postsCreated = 0
+          // Group by platform, cap each at MAX_PPD, and assign the times here.
+          // Whatever dates the model returned are ignored: it does not know what
+          // day it is (see lib/soma-schedule.ts).
+          const byPlatform = new Map<string, string[]>()
           for (const post of posts) {
-            if (!post.content || !post.platform) continue
-            const scheduledAt = post.scheduled_date && post.scheduled_time
-              ? new Date(`${post.scheduled_date}T${post.scheduled_time}:00Z`).toISOString()
-              : new Date(Date.now() + 30 * 60 * 1000).toISOString()
+            let platform = String(post?.platform ?? '').toLowerCase().trim()
+            if (platform === 'x') platform = 'twitter'
+            const content = typeof post?.content === 'string' ? post.content.trim() : ''
+            if (!content || !platforms.includes(platform)) continue
+            const list = byPlatform.get(platform) ?? []
+            if (list.length < MAX_PPD) list.push(content)
+            byPlatform.set(platform, list)
+          }
 
-            const { error: insertErr } = await admin.from('posts').insert({
-              user_id: project.user_id,
-              workspace_id: project.workspace_id,
-              content: post.content,
-              platforms: [post.platform],
-              status: 'scheduled',
-              scheduled_at: scheduledAt,
-              metadata: { soma_project_id: project.id, soma_run: weekLabel, auto_source: 'full_send_daily' },
-            })
-            if (!insertErr) postsCreated++
+          // Two projects on the same platform should not fire in the same minute.
+          const projectOffsetMin = parseInt(String(project.id).slice(0, 4), 16) % 9
+
+          let postsCreated = 0
+          for (let idx = 0; idx < platforms.length; idx++) {
+            const platform = platforms[idx]
+            const contents = byPlatform.get(platform) ?? []
+            const slots = fullSendSlots(now, contents.length, idx, projectOffsetMin)
+
+            for (let i = 0; i < contents.length; i++) {
+              const scheduledAt = slots[i].toISOString()
+              const { data: inserted, error: insertErr } = await admin.from('posts').insert({
+                user_id: project.user_id,
+                workspace_id: project.workspace_id,
+                content: contents[i],
+                platforms: [platform],
+                status: 'scheduled',
+                scheduled_at: scheduledAt,
+                metadata: { soma_project_id: project.id, soma_run: weekLabel, auto_source: 'full_send_daily' },
+              }).select('id').single()
+
+              if (insertErr || !inserted) {
+                console.error('[SomaFullSend] insert failed:', insertErr?.message)
+                continue
+              }
+              postsCreated++
+
+              // Hand the post to the primary scheduler, the same as Autopilot
+              // does. Without this event nothing publishes it at its time; it
+              // sits as 'scheduled' until a backstop sweeps it up, hours late.
+              try {
+                await inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt } })
+              } catch (err: any) {
+                console.error('[SomaFullSend] could not queue post', inserted.id, err?.message)
+              }
+            }
           }
 
           // Deduct credits
