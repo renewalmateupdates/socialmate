@@ -35,6 +35,8 @@ type Account = {
   created_at: string
   is_active: boolean
   metadata?: unknown
+  /** Only set for platforms whose tokens lapse with no refresh (LinkedIn). */
+  expires_at?: string | null
 }
 
 type PlatformStatus = 'live' | 'coming_soon' | 'planned'
@@ -511,6 +513,38 @@ function AccountsInner() {
               {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}
             </div>
           </div>
+
+          {/* LinkedIn tokens last 60 days and cannot be refreshed, so the
+              connection quietly dies on a fixed date. Say so while there is
+              still time, and after it has happened. */}
+          {accounts
+            .filter(a => a.platform === 'linkedin' && a.expires_at &&
+              new Date(a.expires_at).getTime() < Date.now() + 7 * 86_400_000)
+            .map(a => {
+              const msLeft = new Date(a.expires_at as string).getTime() - Date.now()
+              const daysLeft = Math.ceil(msLeft / 86_400_000)
+              const who = a.account_name ? ` (${a.account_name})` : ''
+              return (
+                <div key={a.id} className="mb-6 rounded-2xl px-5 py-4 border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                      {msLeft <= 0
+                        ? `Your LinkedIn connection${who} has expired`
+                        : `Your LinkedIn connection${who} expires ${daysLeft <= 1 ? 'tomorrow' : `in ${daysLeft} days`}`}
+                    </p>
+                    <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+                      LinkedIn only keeps a connection for 60 days. Reconnect now and scheduled posts keep going out.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => window.open('/api/accounts/linkedin/connect', '_blank')}
+                    className="shrink-0 min-h-[44px] text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black px-4 py-2.5 rounded-xl transition-all"
+                  >
+                    Reconnect LinkedIn
+                  </button>
+                </div>
+              )
+            })}
 
           {/* The step after connecting. This is the cliff: every external account
               that connected a platform stopped here, because the only

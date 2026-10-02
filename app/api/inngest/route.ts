@@ -33,6 +33,7 @@ import {
 import { newsletterAgent, clientReportAgent, repurposeAgent, captionAgent, trendScoutAgent, inboxAgent } from '@/lib/inngest-agents'
 import { hermesFollowUpCron, hermesAutoDiscoverCron } from '@/lib/inngest-hermes'
 import { stoppedPostingEmails } from '@/lib/inngest-lifecycle'
+import { tokenExpiryWarnings } from '@/lib/inngest-token-expiry'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -73,5 +74,6 @@ export const { GET, POST, PUT } = serve({
     hermesFollowUpCron,
     hermesAutoDiscoverCron,
     stoppedPostingEmails,
+    tokenExpiryWarnings,
   ],
 })

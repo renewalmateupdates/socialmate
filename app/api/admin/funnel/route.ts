@@ -20,6 +20,29 @@ import { internalIdsFrom } from '@/lib/internal-accounts'
  * recorded steps can say why.
  */
 
+/**
+ * PostgREST silently caps any response at 1000 rows. posts passed that long ago
+ * (1,600+ published alone), so an unpaged `select` returned an arbitrary 1000
+ * and "who has published" depended on which 1000 the database happened to pick.
+ * The first external publisher's post could simply be missing. Page through.
+ */
+async function fetchAllPosts(db: ReturnType<typeof getSupabaseAdmin>) {
+  const PAGE = 1000
+  const rows: { user_id: string; status: string; published_at: string | null }[] = []
+  for (let from = 0; from < 100_000; from += PAGE) {
+    const { data, error } = await db
+      .from('posts')
+      .select('user_id, status, published_at')
+      .order('created_at', { ascending: true, nullsFirst: true })
+      .order('id', { ascending: true })
+      .range(from, from + PAGE - 1)
+    if (error) return { data: null, error }
+    rows.push(...(data ?? []))
+    if ((data?.length ?? 0) < PAGE) break
+  }
+  return { data: rows, error: null }
+}
+
 type Row = { user_id: string; event_type: string; metadata: Record<string, unknown> | null; created_at: string }
 
 export async function GET(req: NextRequest) {
@@ -34,7 +57,7 @@ export async function GET(req: NextRequest) {
   const [profilesRes, accountsRes, postsRes, workspacesRes] = await Promise.all([
     db.from('profiles').select('id, created_at, email'),
     db.from('connected_accounts').select('user_id, platform'),
-    db.from('posts').select('user_id, status, published_at'),
+    fetchAllPosts(db),
     db.from('workspaces').select('owner_id, plan').neq('plan', 'free'),
   ])
 
@@ -153,7 +176,42 @@ export async function GET(req: NextRequest) {
     Object.entries(onboardingUsers).map(([step, users]) => [step, users.size])
   )
 
+  // ── Publish failures, from the posts themselves ──────────────────────────
+  //
+  // Why posts are failing, per platform, in plain words. A Discord permission
+  // problem sat unseen until one user emailed because nothing aggregated
+  // platform_errors. Numbers and ids are stripped so the same reason groups.
+  const { data: failedRows, error: failedErr } = await db
+    .from('posts')
+    .select('user_id, platforms, platform_errors, created_at')
+    .in('status', ['failed', 'partial'])
+    .gte('created_at', since)
+    .limit(5000)
+  if (failedErr) console.warn('[admin/funnel] failed-posts query failed (non-fatal):', failedErr.message)
+
+  const failureGroups: Record<string, { platform: string; reason: string; posts: number; users: Set<string> }> = {}
+  for (const row of failedRows ?? []) {
+    if (internalIds.has(row.user_id)) continue
+    const errs = (row.platform_errors ?? {}) as Record<string, unknown>
+    // Rows written before failures were saved on Post Now have no reason.
+    const entries = Object.keys(errs).length > 0
+      ? Object.entries(errs)
+      : (row.platforms ?? []).map((pl: string) => [pl, 'No reason recorded'] as [string, unknown])
+    for (const [platform, raw] of entries) {
+      const reason = String(raw).replace(/\d{6,}/g, '#').replace(/\s+/g, ' ').slice(0, 140)
+      const key = `${platform}|${reason}`
+      const g = (failureGroups[key] ??= { platform, reason, posts: 0, users: new Set() })
+      g.posts++
+      g.users.add(row.user_id)
+    }
+  }
+  const publishFailures = Object.values(failureGroups)
+    .map(g => ({ platform: g.platform, reason: g.reason, posts: g.posts, users: g.users.size }))
+    .sort((a, b) => b.users - a.users || b.posts - a.posts)
+    .slice(0, 15)
+
   return NextResponse.json({
+    publishFailures,
     windowDays: days,
     // Since instrumentation only starts now, the UI needs to say so rather
     // than present an empty recorded funnel as a real zero.

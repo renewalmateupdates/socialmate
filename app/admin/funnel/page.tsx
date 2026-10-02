@@ -25,6 +25,7 @@ type Funnel = {
   steps: { step: string; users: number; fires: number }[]
   connectByPlatform: { platform: string; clicked: number; succeeded: number }[]
   failures: { reason: string; count: number }[]
+  publishFailures: { platform: string; reason: string; posts: number; users: number }[]
   onboardingSteps: { step: string; fires: number }[]
 }
 
@@ -169,6 +170,33 @@ export default function AdminFunnelPage() {
                 rows={data.platformCounts.map(p => ({ label: p.platform, a: p.count }))}
                 empty="No connected accounts yet."
               />
+            </Panel>
+
+            {/* ── Why posts fail, from the posts themselves ────────────── */}
+            <Panel>
+              <div className="border-b border-edge px-5 py-3.5">
+                <Label>Why posts failed · last {data.windowDays} days · external users</Label>
+              </div>
+              {data.publishFailures.length === 0 ? (
+                <p className="px-5 py-4 text-xs text-ink-faint">No failed posts in this window.</p>
+              ) : (
+                <div className="flex flex-col">
+                  {data.publishFailures.map(f => (
+                    <div key={`${f.platform}|${f.reason}`} className="flex items-start justify-between gap-4 border-b border-edge px-5 py-2.5 last:border-b-0">
+                      <span className="text-xs text-ink-body">
+                        <span className="font-mono capitalize text-ink-high">{f.platform}</span>
+                        <span className="ml-2">{f.reason}</span>
+                      </span>
+                      <span className="shrink-0 font-mono text-xs tabular-nums text-alert">
+                        {f.users} user{f.users === 1 ? '' : 's'} · {f.posts}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="border-t border-edge px-5 py-3 text-[11px] text-ink-faint">
+                Posts from Compose's Post Now only started saving a reason on Oct 2, 2026. Older failures read "No reason recorded".
+              </p>
             </Panel>
 
             {/* ── Recorded ─────────────────────────────────────────────── */}
