@@ -132,10 +132,12 @@ export async function publishToDiscord(
   // Parse error body for actionable message
   const errText = await res.text().catch(() => '')
   let errDetail = `HTTP ${res.status}`
+  let errCode: number | undefined
 
   try {
     const errJson = JSON.parse(errText)
     errDetail = errJson.message || errDetail
+    errCode = typeof errJson.code === 'number' ? errJson.code : undefined
   } catch {
     if (errText.length < 200) errDetail = errText || errDetail
   }
@@ -148,8 +150,13 @@ export async function publishToDiscord(
       : 'Discord webhook not found. It may have been deleted. Please update your destination configuration.')
   }
   if (res.status === 401 || res.status === 403) {
+    // 50001 = Missing Access (the bot cannot see the channel at all);
+    // 50013 = Missing Permissions (it can see it but not post). The fix differs.
+    const how = errCode === 50013
+      ? 'In Discord, open the channel settings, then Permissions, add the SocialMate role and allow Send Messages (and Attach Files for images).'
+      : 'In Discord, open the channel settings, then Permissions, add the SocialMate role and allow View Channel and Send Messages (and Attach Files for images).'
     throw new Error(viaBot
-      ? 'SocialMate cannot post in that channel. Give the SocialMate bot permission to send messages there, or pick another channel.'
+      ? `SocialMate cannot post in that channel. ${how} Or pick a different channel on the Accounts page.`
       : 'Discord webhook unauthorized. Please check the webhook URL and recreate it if needed.')
   }
   if (res.status === 429) {

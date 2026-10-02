@@ -340,6 +340,12 @@ export async function POST(request: NextRequest) {
     const platformPostIds: Record<string, string> = {}
     results.forEach(r => { if (r.success && r.postId) platformPostIds[r.platform] = r.postId })
 
+    // Keep the reason each platform failed. The scheduled path (/api/posts/publish)
+    // always did; this path did not, so an immediate post that failed left a
+    // 'failed' row with no way to learn why.
+    const platformErrors: Record<string, string> = {}
+    results.forEach(r => { if (!r.success && r.error) platformErrors[r.platform] = r.error })
+
     // Insert once with the correct status — no update step needed
     const { data: post, error: dbError } = await supabase
       .from('posts')
@@ -353,6 +359,7 @@ export async function POST(request: NextRequest) {
         destinations: destinations || {},
         tags:         Array.isArray(tags) && tags.length > 0 ? tags : null,
         poll_data:    poll_data || null,
+        platform_errors: Object.keys(platformErrors).length > 0 ? platformErrors : null,
       })
       .select('id')
       .single()
