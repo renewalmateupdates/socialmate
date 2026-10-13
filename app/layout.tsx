@@ -74,7 +74,11 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
-  alternates: { canonical: APP_URL },
+  // No canonical here. Metadata set on the root layout is inherited by every
+  // page that does not set its own, so a canonical of the home page told
+  // search engines that all 14 guides, /about, /faq, /changelog, /soma and
+  // some 200 other pages were duplicates of the home page. The landing sets
+  // its own in generateLocaleMetadata.
 }
 
 export const viewport: Viewport = {
