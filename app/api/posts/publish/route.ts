@@ -12,6 +12,7 @@ import { dispatchWebhook } from '@/lib/webhooks'
 import { recordFunnel } from '@/lib/usage'
 import { REPLY_TO } from '@/lib/mail'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
+import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       .eq('id', postId)
       .eq('status', 'scheduled')
       .or(`publish_claimed_at.is.null,publish_claimed_at.lt.${staleBefore}`)
-      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls, scheduled_at, metadata')
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls, scheduled_at, metadata, platform_post_ids')
 
     if (claimError) {
       console.error('[PUBLISH-CLAIM] claim query failed:', claimError.message)
@@ -66,6 +67,23 @@ export async function POST(request: NextRequest) {
     const post = claimedRows[0]
 
     userId = post.user_id
+
+    // Already sent on an earlier attempt whose status write failed. Repair
+    // the status and stop: publishing again would post a duplicate. The
+    // Inngest function has always checked this before calling here, but the
+    // backstop cron calls this route directly and nothing checked on its
+    // behalf.
+    if (sentPlatformIds(post)) {
+      const repair = await repairSentPost(post, 'publish-route')
+      if (!repair.ok) {
+        return NextResponse.json({
+          publishedOk: true,
+          error: 'Status repair failed',
+          detail: repair.error,
+        }, { status: 500 })
+      }
+      return NextResponse.json({ status: repair.status, repaired: true })
+    }
 
     // Resolve account workspace: personal accounts have workspace_id = null in connected_accounts
     let accountWorkspaceId: string | null = null

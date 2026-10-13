@@ -30,6 +30,7 @@ import { fullSendSlots } from '@/lib/soma-schedule'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
+import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
@@ -154,41 +155,18 @@ export const publishScheduledPost = inngest.createFunction(
         return { skipped: true, status: innerPostCheck?.status }
       }
 
-      const existingPostIds = (innerPostCheck?.platform_post_ids &&
-        typeof innerPostCheck.platform_post_ids === 'object')
-        ? innerPostCheck.platform_post_ids as Record<string, string>
-        : null
-      const hasExistingPostIds = existingPostIds && Object.keys(existingPostIds).length > 0
-
-      if (hasExistingPostIds) {
+      if (innerPostCheck && sentPlatformIds(innerPostCheck)) {
         // Post was published in a previous attempt but the status write failed.
         // Repair the status now so the post doesn't stay stuck as 'scheduled'.
-        const allPlatforms: string[] = innerPostCheck?.platforms || []
-        const publishedCount = Object.keys(existingPostIds).length
-        const repairedStatus = publishedCount >= allPlatforms.length ? 'published' : 'partial'
-        await getSupabaseAdmin()
-          .from('posts')
-          .update({ status: repairedStatus, published_at: new Date().toISOString() })
-          .eq('id', postId)
-          .eq('status', 'scheduled') // safe guard — only repair if still scheduled
-        console.log(`[PUBLISH-GUARD] Post ${postId} platform_post_ids already set — repaired status → ${repairedStatus}`)
-
-        // The normal path through /api/posts/publish fires these on every
-        // successful status write; this repair branch bypasses that path
-        // entirely and used to skip them, so a repaired post never generated a
-        // post_published funnel event and its owner never got the first-post
-        // credit or streak bump for it.
-        if (innerPostCheck?.user_id) {
-          recordFunnel(getSupabaseAdmin(), innerPostCheck.user_id, 'post_published', {
-            platforms: allPlatforms.join(','),
-            count: allPlatforms.length,
-            source: 'scheduled_repair',
-          })
-          await handleFirstPostCredits(innerPostCheck.user_id)
-          await updateStreak(innerPostCheck.user_id)
+        // This used to discard the update's error and log "repaired" either
+        // way, so a write that could never succeed looked like a fixed post.
+        const repair = await repairSentPost({ id: postId, ...innerPostCheck }, 'inngest')
+        if (!repair.ok) {
+          // Throw so the run shows as failed. The post has been sent and the
+          // guard above stops any retry from sending it again.
+          throw new Error(`Post ${postId} was sent but its status could not be repaired: ${repair.error}`)
         }
-
-        return { skipped: true, reason: 'platform_post_ids already set', repaired: repairedStatus }
+        return { skipped: true, reason: 'platform_post_ids already set', repaired: repair.status }
       }
       // ─────────────────────────────────────────────────────────────────────
 
