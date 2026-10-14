@@ -32,6 +32,9 @@ import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
+import { getValidAccessToken } from '@/lib/tiktok-auth'
+import { createNotification } from '@/lib/notify'
+import { sendScheduledTiktok, draftsNotice, type TiktokSendOutcome } from '@/lib/tiktok-scheduled'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -4984,154 +4987,153 @@ export const postPerformanceAlerts = inngest.createFunction(
 )
 
 // ── TikTok Scheduled Post Publisher ──────────────────────────────────────────
-// Runs every 5 minutes, picks up tiktok_posts due for publishing
+// Runs every 5 minutes, picks up tiktok_posts due for publishing.
+//
+// Rebuilt in October 2026. What changed, and why:
+//   - A direct post that TikTok refuses only because our content sharing audit
+//     is still pending now goes to the creator's TikTok drafts instead of
+//     failing. See lib/tiktok-scheduled.ts.
+//   - The token comes from getValidAccessToken. This job had its own copy of
+//     the refresh with the two bugs that helper was written to fix: a row with
+//     no expiry never refreshed, and a failed refresh carried on with the dead
+//     token. It also refreshed with the sandbox key whenever one was set.
+//   - The row is claimed with a conditional update before anything is sent, so
+//     two overlapping runs cannot both send the same video.
+//   - Sending never throws. A throw makes Inngest retry the step, and a retry
+//     after TikTok accepted the video would send it twice.
+//   - The quota is no longer counted a second time here. /api/tiktok/post
+//     counts a scheduled video when it is scheduled, and cancelling gives the
+//     slot back, so every scheduled video used to cost two of the month's slots.
+//   - The creator hears about the outcome. A failed scheduled video used to
+//     drop out of the queue with nothing anywhere saying what happened.
 
 export const publishScheduledTiktokPosts = inngest.createFunction(
   { id: 'publish-scheduled-tiktok-posts', concurrency: { limit: 3 } },
   { cron: '*/5 * * * *' },
   async ({ step }) => {
     const due = await step.run('fetch-due-tiktok-posts', async () => {
-      const { data } = await getSupabaseAdmin()
+      const { data, error } = await getSupabaseAdmin()
         .from('tiktok_posts')
-        .select('id, user_id, workspace_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch, brand_content_toggle, brand_organic_toggle')
+        .select('id, user_id, workspace_id, video_url, post_caption, sound_id, privacy_level, disable_duet, disable_comment, disable_stitch, brand_content_toggle, brand_organic_toggle')
         .eq('status', 'scheduled')
         .lte('scheduled_at', new Date().toISOString())
         .limit(20)
+      // Nothing has been sent yet, so letting Inngest retry the read is safe.
+      if (error) throw new Error(`[tiktok-scheduled] could not read due posts: ${error.message}`)
       return data ?? []
     })
 
-    let published = 0
+    const counts = { published: 0, in_drafts: 0, failed: 0, skipped: 0 }
 
     for (const post of due) {
-      await step.run(`publish-tiktok-${post.id}`, async () => {
-        const clientKey    = process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY!
-        const clientSecret = process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET!
-
-        // Get + refresh token
-        const { data: account } = await getSupabaseAdmin()
-          .from('connected_accounts')
-          .select('id, access_token, refresh_token, expires_at, platform_user_id')
-          .eq('user_id', post.user_id)
-          .eq('platform', 'tiktok')
-          .maybeSingle()
-
-        if (!account) {
-          await getSupabaseAdmin()
-            .from('tiktok_posts')
-            .update({ status: 'failed', error_message: 'TikTok account disconnected' })
-            .eq('id', post.id)
-          return
+      // Its own step, so a retry of anything below can never claim or send again.
+      const claimed = await step.run(`claim-tiktok-${post.id}`, async () => {
+        const { data, error } = await getSupabaseAdmin()
+          .from('tiktok_posts')
+          .update({ status: 'publishing' })
+          .eq('id', post.id)
+          .eq('status', 'scheduled')
+          .select('id')
+        if (error) {
+          console.warn(`[tiktok-scheduled] claim failed for ${post.id}:`, error.message)
+          return false
         }
+        return (data?.length ?? 0) > 0
+      })
+      if (!claimed) { counts.skipped++; continue }
 
-        let token = account.access_token
-        if (account.expires_at && new Date(account.expires_at).getTime() - Date.now() < 5 * 60_000 && account.refresh_token) {
-          const refreshRes = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-              client_key: clientKey, client_secret: clientSecret,
-              grant_type: 'refresh_token', refresh_token: account.refresh_token,
-            }),
-          })
-          if (refreshRes.ok) {
-            const rd = await refreshRes.json()
-            token = rd.access_token
-            const expires_at = rd.expires_in ? new Date(Date.now() + rd.expires_in * 1000).toISOString() : null
-            await getSupabaseAdmin()
-              .from('connected_accounts')
-              .update({ access_token: token, refresh_token: rd.refresh_token, expires_at })
-              .eq('id', account.id)
+      const outcome = await step.run(`send-tiktok-${post.id}`, async (): Promise<TiktokSendOutcome & { openId: string | null }> => {
+        try {
+          const auth = await getValidAccessToken(post.user_id)
+          if (!auth.ok) return { kind: 'failed', code: auth.reason, message: auth.message, openId: null }
+          const result = await sendScheduledTiktok(post, auth.token)
+          return { ...result, openId: auth.openId }
+        } catch (err) {
+          console.error(`[tiktok-scheduled] send threw for ${post.id}:`, err instanceof Error ? err.message : err)
+          return {
+            kind: 'failed', code: 'exception', openId: null,
+            message: 'Something went wrong on our side while sending this video to TikTok.',
           }
         }
+      })
 
-        await getSupabaseAdmin().from('tiktok_posts').update({ status: 'publishing' }).eq('id', post.id)
+      // Separate from the send: if a write here fails, Inngest retries only
+      // this step, and TikTok is not asked a second time.
+      await step.run(`record-tiktok-${post.id}`, async () => {
+        const db = getSupabaseAdmin()
 
-        const postBody: Record<string, unknown> = {
-          post_info: {
-            title:                    post.post_caption,
-            privacy_level:            post.privacy_level,
-            disable_duet:             post.disable_duet,
-            disable_comment:          post.disable_comment,
-            disable_stitch:           post.disable_stitch,
-            video_cover_timestamp_ms: 0,
-          },
-          source_info: {
-            source:    'PULL_FROM_URL',
-            video_url: post.video_url,
-          },
-        }
-
-        if (post.sound_id && post.sound_id !== 'original') {
-          (postBody.post_info as Record<string, unknown>).music_id = post.sound_id
-        }
-
-        // Commercial disclosure was collected at scheduling time and stored on
-        // the row precisely so it survives to this later publish — without
-        // this a scheduled branded/promotional post would go out undisclosed.
-        if (post.brand_content_toggle || post.brand_organic_toggle) {
-          (postBody.post_info as Record<string, unknown>).brand_content_toggle = !!post.brand_content_toggle
-          ;(postBody.post_info as Record<string, unknown>).brand_organic_toggle = !!post.brand_organic_toggle
-        }
-
-        const tikRes  = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
-          method:  'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
-          body:    JSON.stringify(postBody),
-        })
-
-        const tikData = await tikRes.json().catch(() => ({}))
-
-        if (!tikRes.ok) {
-          const errMsg = tikData?.error?.message || `TikTok API error ${tikRes.status}`
-          await getSupabaseAdmin()
+        if (outcome.kind === 'published') {
+          const { error } = await db
             .from('tiktok_posts')
-            .update({ status: 'failed', error_message: errMsg })
+            .update({ status: 'published', tiktok_post_id: outcome.postId, tiktok_account_open_id: outcome.openId, error_message: null })
             .eq('id', post.id)
+          if (error) throw new Error(`[tiktok-scheduled] could not record published ${post.id}: ${error.message}`)
+          await syncTiktokPublishToPosts({
+            id:           post.id,
+            user_id:      post.user_id,
+            workspace_id: post.workspace_id ?? null,
+            post_caption: post.post_caption ?? null,
+          })
           return
         }
 
-        const publishId    = tikData?.data?.publish_id
-        const tiktokPostId = tikData?.data?.publicaly_available_post_id?.[0] || publishId
+        if (outcome.kind === 'in_drafts') {
+          const { error } = await db
+            .from('tiktok_posts')
+            .update({ status: 'in_drafts', tiktok_post_id: outcome.publishId, tiktok_account_open_id: outcome.openId, error_message: null })
+            .eq('id', post.id)
+          if (error) throw new Error(`[tiktok-scheduled] could not record in_drafts ${post.id}: ${error.message}`)
+          const notice = draftsNotice(outcome.directCode, post.post_caption)
+          await createNotification(db, {
+            userId:  post.user_id,
+            type:    'post_published',
+            title:   notice.title,
+            message: notice.message,
+            href:    '/tiktok/studio',
+            data:    { tiktok_post_id: post.id, direct_code: outcome.directCode },
+          })
+          return
+        }
 
-        await getSupabaseAdmin()
+        const { error } = await db
           .from('tiktok_posts')
-          .update({ status: 'published', tiktok_post_id: tiktokPostId, tiktok_account_open_id: account.platform_user_id })
+          .update({ status: 'failed', error_message: outcome.message })
           .eq('id', post.id)
+        if (error) throw new Error(`[tiktok-scheduled] could not record failure ${post.id}: ${error.message}`)
 
-        void syncTiktokPublishToPosts({
-          id:           post.id,
-          user_id:      post.user_id,
-          workspace_id: post.workspace_id ?? null,
-          post_caption: post.post_caption ?? null,
-        })
-
-        // Increment monthly quota (best-effort)
-        try {
-          const { data: ws } = await getSupabaseAdmin()
+        // The slot was counted when this was scheduled and the video never
+        // posted, so give it back, the same as cancelling does.
+        const { data: ws, error: wsErr } = await db
+          .from('workspaces')
+          .select('tiktok_videos_this_month')
+          .eq('owner_id', post.user_id)
+          .eq('is_personal', true)
+          .maybeSingle()
+        if (wsErr) {
+          console.warn(`[tiktok-scheduled] quota read failed for ${post.user_id}:`, wsErr.message)
+        } else if (ws) {
+          const { error: refundErr } = await db
             .from('workspaces')
-            .select('tiktok_videos_this_month')
+            .update({ tiktok_videos_this_month: Math.max(0, (ws.tiktok_videos_this_month ?? 0) - 1) })
             .eq('owner_id', post.user_id)
             .eq('is_personal', true)
-            .maybeSingle()
-          if (ws) {
-            await getSupabaseAdmin()
-              .from('workspaces')
-              .update({ tiktok_videos_this_month: (ws.tiktok_videos_this_month ?? 0) + 1 })
-              .eq('owner_id', post.user_id)
-              .eq('is_personal', true)
-          }
-        } catch { /* non-fatal */ }
+          if (refundErr) console.warn(`[tiktok-scheduled] quota refund failed for ${post.user_id}:`, refundErr.message)
+        }
 
-        published++
-      }).catch(async (err: { message?: string }) => {
-        await getSupabaseAdmin()
-          .from('tiktok_posts')
-          .update({ status: 'failed', error_message: err?.message || 'Unknown error' })
-          .eq('id', post.id)
+        await createNotification(db, {
+          userId:  post.user_id,
+          type:    'post_failed',
+          title:   'Your scheduled TikTok video was not posted',
+          message: outcome.message,
+          href:    '/tiktok/studio',
+          data:    { tiktok_post_id: post.id, code: outcome.code },
+        })
       })
+
+      counts[outcome.kind]++
     }
 
-    return { published, total: due.length }
+    return { ...counts, total: due.length }
   }
 )
 

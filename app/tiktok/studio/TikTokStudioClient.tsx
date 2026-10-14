@@ -120,6 +120,9 @@ interface PostSettingsPanelProps {
   scheduledAt:     string
   setScheduledAt:  (v: string) => void
   postError:       string | null
+  /** Set when TikTok refused a direct post that the creator could still send to drafts. */
+  postRemedy:      'drafts_or_private' | null
+  sendToDraftsInstead: () => void
   videoUrl:        string | null
   isWorking:       boolean
   uploading:       boolean
@@ -139,7 +142,7 @@ function PostSettingsPanel({
   disableComment, setDisableComment,
   scheduleMode, setScheduleMode,
   scheduledAt, setScheduledAt,
-  postError, videoUrl, isWorking, uploading, posting, handlePost,
+  postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, handlePost,
 }: PostSettingsPanelProps) {
   // Same gate as the parent, derived from props so the panel never enables a
   // button the parent would reject.
@@ -414,9 +417,13 @@ function PostSettingsPanel({
             <span className={`text-xs font-bold inline-flex items-center gap-1.5 ${scheduleMode === 'drafts' ? 'text-[#fe2c55]' : 'text-ink-high'}`}>
               <Music size={13} strokeWidth={2} /> Send to TikTok drafts
             </span>
+            {/* This used to end "On desktop, use Post Now instead", which sent
+                creators with public accounts to the one option TikTok refuses
+                until our content sharing audit passes. */}
             <span className="block text-[11px] text-ink-muted mt-0.5 leading-snug">
-              Adds any sound from TikTok's library &mdash; but drafts open only in the
-              TikTok phone app. On desktop, use Post Now instead.
+              Finish it in the TikTok phone app, where you can add any sound from
+              TikTok&apos;s library. Works even before TikTok approves SocialMate for
+              public posts.
             </span>
           </button>
           {scheduleMode === 'schedule' && (
@@ -435,8 +442,21 @@ function PostSettingsPanel({
       <div className="pt-4 mt-4 border-t border-edge space-y-2">
         {postError && (
           <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 rounded-xl">
-            <AlertTriangle className="text-red-400 mt-0.5" size={13} strokeWidth={2} />
-            <p className="text-xs text-red-400">{postError}</p>
+            <AlertTriangle className="text-red-400 mt-0.5 shrink-0" size={13} strokeWidth={2} />
+            <div className="space-y-2 min-w-0">
+              <p className="text-xs text-red-400">{postError}</p>
+              {/* The error already named drafts as the way through. Make it one
+                  tap instead of switching modes and starting over by hand. */}
+              {postRemedy === 'drafts_or_private' && scheduleMode !== 'drafts' && (
+                <button
+                  onClick={sendToDraftsInstead}
+                  disabled={isWorking}
+                  className="w-full min-h-[44px] px-3 rounded-xl bg-[#fe2c55] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 hover:opacity-90 disabled:opacity-40 transition-opacity"
+                >
+                  <Music size={13} strokeWidth={2} /> Send to TikTok drafts instead
+                </button>
+              )}
+            </div>
           </div>
         )}
         {/* TikTok requires a consent declaration before the publish button on
@@ -478,7 +498,7 @@ function PostSettingsPanel({
           {uploading
             ? (scheduleMode === 'schedule' ? 'Saving your video so it can be posted later…' : 'Uploading your video directly to TikTok…')
             : scheduleMode === 'schedule'
-            ? 'Your video is saved now and sent to TikTok automatically at the scheduled time.'
+            ? "Saved now and sent to TikTok at the time you pick. If TikTok won't take a direct post from SocialMate yet, it goes to your TikTok drafts at that time instead."
             : 'Your original video will be uploaded via TikTok\'s Content Posting API.'}
         </p>
       </div>
@@ -578,6 +598,7 @@ export default function TikTokStudioClient() {
   const [uploading, setUploading]   = useState(false)
   const [posting, setPosting]       = useState(false)
   const [postError, setPostError]   = useState<string | null>(null)
+  const [postRemedy, setPostRemedy] = useState<'drafts_or_private' | null>(null)
   const [postSuccess, setPostSuccess] = useState(false)
   // TikTok processes asynchronously, so "uploaded" is not "published". Until
   // this settles we are still waiting on their answer, not on ourselves.
@@ -998,9 +1019,13 @@ export default function TikTokStudioClient() {
 
   // ── Export + upload + post ──────────────────────────────────────────────────
 
-  const handlePost = useCallback(async () => {
+  // `modeOverride` lets "Send to TikTok drafts instead" retry in drafts mode
+  // right away, without waiting for the scheduleMode state update to land.
+  const handlePost = useCallback(async (modeOverride?: 'now' | 'schedule' | 'drafts') => {
     if (!videoFile || !videoUrl) return
+    const mode = modeOverride ?? scheduleMode
     setPostError(null)
+    setPostRemedy(null)
     setUploading(true)
 
     try {
@@ -1044,7 +1069,7 @@ export default function TikTokStudioClient() {
       // TikTok by that same cron at the scheduled time via PULL_FROM_URL --
       // infrastructure that already existed (upload-url + /api/tiktok/post) but
       // was never wired to this button.
-      if (scheduleMode === 'schedule') {
+      if (mode === 'schedule') {
         const urlRes  = await fetch('/api/tiktok/upload-url')
         const urlData = await urlRes.json()
         if (!urlRes.ok) throw new Error(urlData.error || 'Failed to prepare upload')
@@ -1113,11 +1138,14 @@ export default function TikTokStudioClient() {
           // the original file the creator dropped in.
           video_cover_timestamp_ms:
             coverTime === null ? 0 : Math.max(0, Math.round((coverTime - trimStart) * 1000)),
-          destination: scheduleMode === 'drafts' ? 'inbox' : 'direct',
+          destination: mode === 'drafts' ? 'inbox' : 'direct',
         }),
       })
       const initData = await initRes.json()
-      if (!initRes.ok) throw new Error(initData.error || 'Failed to initialize TikTok upload')
+      if (!initRes.ok) {
+        if (initData.remedy === 'drafts_or_private') setPostRemedy('drafts_or_private')
+        throw new Error(initData.error || 'Failed to initialize TikTok upload')
+      }
       const { upload_url, publish_id, open_id, full_caption } = initData
 
       // Step 2: PUT original file directly to TikTok's upload URL
@@ -1195,7 +1223,6 @@ export default function TikTokStudioClient() {
             // two minutes and then reported "still processing" about a video
             // that was already sitting in TikTok waiting to be posted.
             if (d.status === 'in_drafts') { setPublishState('drafted'); return }
-            if (d.status === 'in_drafts')  { setPublishState('drafted'); return }
             if (d.status === 'failed') {
               setPublishReason(d.reason ?? null)
               setPublishState('rejected')
@@ -1222,6 +1249,11 @@ export default function TikTokStudioClient() {
     disableStitch, brandedContent, yourBrand, scheduleMode, scheduledAt,
   ])
 
+  const sendToDraftsInstead = useCallback(() => {
+    setScheduleMode('drafts')
+    void handlePost('drafts')
+  }, [handlePost])
+
   // ── Derived ─────────────────────────────────────────────────────────────────
 
   // Disclosure is incomplete if switched on with neither box ticked, and TikTok
@@ -1246,7 +1278,10 @@ export default function TikTokStudioClient() {
     disableComment, setDisableComment,
     scheduleMode, setScheduleMode,
     scheduledAt, setScheduledAt,
-    postError, videoUrl, isWorking, uploading, posting, handlePost,
+    postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting,
+    // Wrapped: the panel passes this straight to onClick, and the click event
+    // must not arrive as handlePost's mode override.
+    handlePost: () => { void handlePost() },
   }
 
   // ── Loading / not-connected / success screens ───────────────────────────────
@@ -1326,7 +1361,7 @@ export default function TikTokStudioClient() {
                 : 'Uploaded to TikTok'
               const body =
                 scheduled
-                  ? `Your video will go live on ${new Date(scheduledAt).toLocaleString()}.`
+                  ? `We'll send it to TikTok on ${new Date(scheduledAt).toLocaleString()}. If TikTok won't take a direct post from SocialMate yet, it lands in your TikTok drafts instead, and you'll get a notification here and in TikTok.`
                 : publishState === 'checking'
                   ? 'The upload finished. Waiting for TikTok to finish processing it — this is usually quick.'
                 : publishState === 'live'
