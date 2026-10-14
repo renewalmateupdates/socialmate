@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
+import ResendConfirmation from '@/components/auth/ResendConfirmation'
 import { useI18n } from '@/contexts/I18nContext'
 import LoginSkeleton from './LoginSkeleton'
 import AuthShell from '@/components/instrument/AuthShell'
@@ -19,6 +20,9 @@ function LoginInner() {
   const [showPassword, setShowPassword] = useState(false)
   const [magicSent, setMagicSent] = useState(false)
   const [mode, setMode] = useState<'password' | 'magic'>('password')
+  // Signed up by email but never clicked the confirmation link. Supabase's own
+  // text for this is just "Email not confirmed", with no way forward.
+  const [unconfirmed, setUnconfirmed] = useState(false)
 
   // 2FA state
   const [mfaRequired, setMfaRequired] = useState(false)
@@ -54,6 +58,7 @@ function LoginInner() {
     if (mode === 'password' && !password) { setError('Enter your password'); return }
     setLoading(true)
     setError('')
+    setUnconfirmed(false)
 
     if (mode === 'magic') {
       if (isDisposableEmail(email)) { setError('Disposable email addresses are not allowed.'); setLoading(false); return }
@@ -71,7 +76,13 @@ function LoginInner() {
       })
 
       if (error) {
-        setError(error.message === 'Invalid login credentials' ? 'Wrong email or password' : error.message)
+        const notConfirmed = error.code === 'email_not_confirmed' || /email not confirmed/i.test(error.message)
+        setUnconfirmed(notConfirmed)
+        setError(
+          notConfirmed ? 'Confirm your email first. We sent you a link when you signed up.'
+          : error.message === 'Invalid login credentials' ? 'Wrong email or password'
+          : error.message
+        )
         setLoading(false)
         return
       }
@@ -265,7 +276,7 @@ function LoginInner() {
             name="email"
             autoComplete="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => { setEmail(e.target.value); setUnconfirmed(false) }}
             placeholder="you@example.com"
             autoFocus
           />
@@ -313,6 +324,13 @@ function LoginInner() {
         )}
 
         {error && <ErrorNote>{error}</ErrorNote>}
+        {unconfirmed && (
+          <ResendConfirmation
+            email={email}
+            redirect={redirectTo !== '/dashboard' ? redirectTo : undefined}
+            label="Send the link again"
+          />
+        )}
 
         <Submit
           loading={loading}
