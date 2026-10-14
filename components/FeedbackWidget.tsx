@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Bug, HeartHandshake, Lightbulb, MessageCircle, X as CloseIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -19,6 +20,11 @@ export default function FeedbackWidget() {
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [failed, setFailed]     = useState(false)
+  const pathname = usePathname()
+  // On a phone the trigger sits on top of the right edge of the primary
+  // button on these two pages. Wider screens have room for both.
+  const onAuthPage = pathname === '/login' || pathname === '/signup'
 
   // Try to pre-fill email from Supabase session
   useEffect(() => {
@@ -41,12 +47,16 @@ export default function FeedbackWidget() {
   const handleSubmit = async () => {
     if (!message.trim()) return
     setLoading(true)
+    setFailed(false)
     try {
-      await fetch('/api/feedback', {
+      const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, message, email: email.trim() || undefined }),
       })
+      // fetch only throws when the network is down. A 500 resolves normally,
+      // and this used to thank the sender for a message that was never saved.
+      if (!res.ok) throw new Error(`feedback returned ${res.status}`)
       setDone(true)
       setMessage('')
       setTimeout(() => {
@@ -55,6 +65,7 @@ export default function FeedbackWidget() {
       }, 2000)
     } catch (err) {
       console.error(err)
+      setFailed(true)
     } finally {
       setLoading(false)
     }
@@ -144,9 +155,15 @@ export default function FeedbackWidget() {
                   {loading ? 'Sending...' : 'Send Feedback →'}
                 </button>
 
-                <p className="text-xs text-gray-300 dark:text-gray-500 text-center mt-2">
-                  Goes straight to the founder
-                </p>
+                {failed ? (
+                  <p role="alert" className="text-xs text-red-500 text-center mt-2">
+                    That did not send. Your message is still here, so try again, or email socialmatehq@gmail.com.
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-300 dark:text-gray-500 text-center mt-2">
+                    Goes straight to the founder
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -156,8 +173,9 @@ export default function FeedbackWidget() {
       {/* Floating trigger button — bottom right */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors flex items-center justify-center"
-        title="Send feedback">
+        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors items-center justify-center ${onAuthPage ? 'hidden md:flex' : 'flex'}`}
+        title="Send feedback"
+        aria-label="Send feedback">
         {open ? <CloseIcon size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}
       </button>
     </>

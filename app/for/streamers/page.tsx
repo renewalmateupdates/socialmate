@@ -79,11 +79,11 @@ const FEATURES = [
     badge: 'Live now',
   },
   {
-    title: 'TikTok & Kick Scheduling',
-    desc:  'Directly schedule your best clips to TikTok and Kick from the same dashboard. API access is being finalized.',
+    title: 'TikTok Scheduling',
+    desc:  'Upload a clip in TikTok Studio and schedule it from the same dashboard. Until TikTok finishes its content sharing audit of SocialMate, posts go out as private or land in your TikTok drafts.',
     icon:  Music2,
-    live:  false,
-    badge: 'Coming soon',
+    live:  true,
+    badge: 'Live now',
   },
   {
     title: 'Clip Calendar & Bulk Scheduling',
@@ -160,7 +160,7 @@ const FAQ = [
   },
   {
     q: 'Is TikTok or Kick scheduling available yet?',
-    a: 'Not yet — we\'re finalizing platform API access. Those platforms are in the roadmap and will be added as direct scheduling targets. Current posting goes to Bluesky, X, Mastodon, Discord, and Telegram.',
+    a: 'TikTok is live through TikTok Studio: upload a video and schedule it. Until TikTok finishes its content sharing audit of SocialMate, posts publish as private or go to your TikTok drafts. Kick is not supported yet.',
   },
   {
     q: 'How much does it cost?',
@@ -168,7 +168,7 @@ const FAQ = [
   },
   {
     q: 'What platforms can I schedule to right now?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are live today. Kick, Instagram, Reddit, and more are on the active roadmap.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are live today. YouTube is waiting on Google\'s review. Instagram, Facebook, Threads and Kick are not available yet.',
   },
   {
     q: 'Do you have a clip editor?',

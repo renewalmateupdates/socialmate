@@ -27,15 +27,45 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://socialmate.studio/blog' },
 }
 
+// Rows were inserted over months with whatever spelling the batch used:
+// 'Guides', 'guides' and 'guide' were three separate filters, 'studio-stax'
+// sat beside 'Studio Stax'. One display name per category.
+const CATEGORY_ALIASES: Record<string, string> = {
+  guide: 'Guides',
+  comparison: 'Comparisons',
+  about: 'Our Story',
+}
+function normalizeCategory(raw: string | null): string {
+  const c = (raw || '').trim()
+  if (!c) return 'Studio Stax'
+  const alias = CATEGORY_ALIASES[c.toLowerCase()]
+  if (alias) return alias
+  // Leave anything already written with capitals alone ('AI & Development').
+  if (c !== c.toLowerCase()) return c
+  return c.split(/[-_\s]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+}
+
 async function getDbPosts() {
   try {
     const admin = getSupabaseAdmin()
-    const { data } = await admin
-      .from('blog_posts')
-      .select('slug, title, excerpt, category, author, published_at, content')
-      .order('published_at', { ascending: false })
-      .limit(500)
-    if (!data) return []
+    // Page through. This was a single .limit(500) against a table that has
+    // since passed 670 rows, so the oldest posts had dropped off the index.
+    const PAGE = 500
+    const data: any[] = []
+    for (let from = 0; from < 5000; from += PAGE) {
+      const { data: rows, error } = await admin
+        .from('blog_posts')
+        .select('slug, title, excerpt, category, author, published_at, content')
+        .order('published_at', { ascending: false })
+        .order('slug', { ascending: true })
+        .range(from, from + PAGE - 1)
+      if (error) {
+        console.warn('[blog] blog_posts query failed:', error.message)
+        break
+      }
+      data.push(...(rows ?? []))
+      if ((rows?.length ?? 0) < PAGE) break
+    }
     return data.map((d: any) => {
       const wordCount = (d.content || '').trim().split(/\s+/).length
       const readMins  = Math.max(1, Math.round(wordCount / 200))
@@ -43,7 +73,7 @@ async function getDbPosts() {
         slug:      d.slug as string,
         title:     d.title as string,
         date:      new Date(d.published_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        category:  (d.category || 'Studio Stax') as string,
+        category:  normalizeCategory(d.category),
         excerpt:   (d.excerpt || '') as string,
         readTime:  `${readMins} min read`,
         featured:  false,
