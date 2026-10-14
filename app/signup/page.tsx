@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { track, trackOnce } from '@/lib/analytics'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
+import { suggestEmailFix, inboxLinkFor } from '@/lib/email-help'
+import ResendConfirmation from '@/components/auth/ResendConfirmation'
 import { useI18n } from '@/contexts/I18nContext'
 import AuthShell from '@/components/instrument/AuthShell'
 import { Label, Input, ErrorNote, Submit } from '@/components/instrument/form'
@@ -48,6 +50,11 @@ function SignupForm() {
   const [done, setDone] = useState(false)
   const [tosAccepted, setTosAccepted] = useState(false)
   const [newsletterOptIn, setNewsletterOptIn] = useState(true)
+  // "Did you mean gmail.com?" One signup in five typed by email never
+  // confirmed, and one of them had typed gmaip.com: that confirmation could
+  // never arrive. Submit is held once per address; pressing again keeps it.
+  const [typoSuggestion, setTypoSuggestion] = useState<string | null>(null)
+  const [typoKeptFor, setTypoKeptFor] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -123,6 +130,13 @@ function SignupForm() {
     if (!email.trim()) { setError('Enter your email'); return }
     if (!email.includes('@')) { setError('Enter a valid email'); return }
     if (isDisposableEmail(email)) { setError('Disposable email addresses are not allowed. Please use a real email.'); return }
+    const fix = suggestEmailFix(email)
+    if (fix && typoKeptFor !== email.trim()) {
+      setTypoSuggestion(fix)
+      setTypoKeptFor(email.trim())
+      setError(`Did you mean ${fix}? Fix it above, or press Create account again to keep ${email.trim()}.`)
+      return
+    }
     if (!password) { setError('Choose a password'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     if (password !== confirmPassword) { setError('Passwords do not match'); return }
@@ -147,6 +161,7 @@ function SignupForm() {
   }
 
   if (done) {
+    const inbox = inboxLinkFor(email)
     return (
       <AuthShell
         headline="Confirm your email"
@@ -157,10 +172,39 @@ function SignupForm() {
       >
         <div className="rounded-2xl border border-edge bg-panel p-6">
           <p className="font-mono text-eyebrow uppercase text-ink-muted">Sent to</p>
-          <p className="mt-2 font-mono text-mono text-ink-high">{email}</p>
+          <p className="mt-2 break-all font-mono text-mono text-ink-high">{email}</p>
           <p className="mt-5 text-small leading-relaxed text-ink-muted">
             Open the link in that email to finish setting up. If it hasn&apos;t arrived
             in a few minutes, check your spam folder.
+          </p>
+          {inbox && (
+            <a
+              href={inbox.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tap mt-5 flex min-h-[44px] w-full items-center justify-center rounded-xl bg-amber text-small font-semibold text-void transition-colors hover:bg-amber/90"
+            >
+              {inbox.label}
+            </a>
+          )}
+        </div>
+
+        {/* This screen used to be a dead end: no way to send the email again,
+            and no way back to fix a mistyped address. */}
+        <div className="mt-6 space-y-5">
+          <div>
+            <p className="mb-2 text-small text-ink-muted">Nothing after a few minutes?</p>
+            <ResendConfirmation email={email} redirect={redirectTo || undefined} startCoolingDown />
+          </div>
+          <p className="text-small text-ink-muted">
+            Wrong address?{' '}
+            <button
+              type="button"
+              onClick={() => { setDone(false); setError('') }}
+              className="text-amber underline underline-offset-2 transition-colors hover:text-amber/80"
+            >
+              Change it
+            </button>
           </p>
         </div>
 
@@ -227,9 +271,29 @@ function SignupForm() {
             name="email"
             autoComplete="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => { setEmail(e.target.value); setTypoSuggestion(null) }}
+            onBlur={() => {
+              const fix = suggestEmailFix(email)
+              setTypoSuggestion(fix && typoKeptFor !== email.trim() ? fix : null)
+            }}
             placeholder="you@example.com"
           />
+          {typoSuggestion && (
+            <p className="mt-2 text-small text-ink-muted">
+              Did you mean{' '}
+              {/* The "?" sits inside the button: a <button> always renders as
+                  inline-block, so outside it the "?" wrapped onto its own line
+                  after a long address on a phone. */}
+              <button
+                type="button"
+                onClick={() => { setEmail(typoSuggestion); setTypoSuggestion(null); setError('') }}
+                className="break-all py-1 text-left font-mono text-amber transition-colors hover:text-amber/80"
+              >
+                <span className="underline underline-offset-2">{typoSuggestion}</span>
+                <span className="font-sans text-ink-muted">?</span>
+              </button>
+            </p>
+          )}
         </div>
 
         <div>
