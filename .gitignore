@@ -55,3 +55,7 @@ android/local.properties
 
 # Lighthouse run artifacts
 lh-*.json
+
+# Python bytecode (scripts/ has Python tools)
+__pycache__/
+*.pyc
