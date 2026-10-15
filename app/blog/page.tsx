@@ -4,6 +4,7 @@ import PublicLayout from '@/components/PublicLayout'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import BlogClientList from '@/components/BlogClientList'
 import BlogI18nStrings from '@/components/BlogI18nStrings'
+import { describePost } from '@/lib/blog/describe'
 
 // Cache blog index for 24h — fetches 500 posts from Supabase; without this it was SSR on every request.
 export const revalidate = 86400
@@ -74,7 +75,7 @@ async function getDbPosts() {
         title:     d.title as string,
         date:      new Date(d.published_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         category:  normalizeCategory(d.category),
-        excerpt:   (d.excerpt || '') as string,
+        excerpt:   describePost(d),
         readTime:  `${readMins} min read`,
         featured:  false,
       }
