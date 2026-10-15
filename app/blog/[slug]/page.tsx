@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import BlogInlineCTA from '@/components/BlogInlineCTA'
+import BlogToolCard from '@/components/BlogToolCard'
+import { relatedToolFor } from '@/lib/tools/related-tool'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import PublicFooter from '@/components/PublicFooter'
 import { CalendarDays, Clock, Heart, PenLine } from 'lucide-react'
@@ -4675,6 +4677,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   }
 
   const otherPosts = await getRelatedPosts(slug, post.category)
+  const relatedTool = relatedToolFor({ slug, title: post.title })
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -4742,6 +4745,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         <div className="space-y-2 mb-16">
           {renderContent(post.content, slug)}
         </div>
+
+        {relatedTool && <BlogToolCard slug={slug} tool={relatedTool} />}
 
         <div className="bg-amber-500 text-gray-950 rounded-3xl p-8 text-center mb-16">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Try SocialMate free</h2>
