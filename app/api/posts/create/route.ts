@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
 import {
-  scheduleWeeksFor, scheduleWindowLabel, postLimitFor, postsUsedThisMonth, postLimitReachedBody,
+  scheduleWeeksFor, scheduleWindowLabel, scheduleUpgradeCopyFor, postLimitFor, postsUsedThisMonth, postLimitReachedBody,
 } from '@/lib/post-limits'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import { REPLY_TO } from '@/lib/mail'
@@ -145,7 +145,13 @@ export async function POST(request: NextRequest) {
       const scheduleDate  = new Date(scheduledAt)
       const now           = new Date()
       const scheduleWeeks = scheduleWeeksFor(plan)
-      const maxDate       = new Date(now.getTime() + scheduleWeeks * 7 * 24 * 60 * 60 * 1000)
+      // Compose and the bulk scheduler let you pick the last allowed *date* at
+      // any time, so the whole of that day is admitted here. This stopped at
+      // exactly N weeks from this instant, so 9pm on the last offered day was
+      // refused, with an error the composer showed as a toast reading "true".
+      // The first engaged outside user hit it twice. A day of slack covers
+      // every time zone the picker could be in.
+      const maxDate       = new Date(now.getTime() + scheduleWeeks * 7 * 24 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000)
 
       if (scheduleDate <= now) {
         return NextResponse.json({ error: 'Scheduled time must be in the future' }, { status: 400 })
@@ -155,7 +161,10 @@ export async function POST(request: NextRequest) {
         const label = scheduleWindowLabel(plan)
         return NextResponse.json({
           error: `Your ${plan} plan can only schedule up to ${label} in advance`,
-          upgrade: plan !== 'agency',
+          // Copy, like every other plan wall. It was a boolean, which the
+          // composer rendered as the toast's whole message.
+          upgrade: scheduleUpgradeCopyFor(plan),
+          upgradeHref: '/pricing',
         }, { status: 403 })
       }
     }

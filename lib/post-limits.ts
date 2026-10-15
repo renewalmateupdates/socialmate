@@ -97,6 +97,16 @@ export function upgradeCopyFor(plan: string): string | null {
     : `Upgrade to Agency for ${PLAN_POST_LIMITS.agency.toLocaleString()} posts/month`
 }
 
+// The same kind of copy for the scheduling-window wall: what the next tier
+// gets, or null at the top. No price in it, so it cannot drift from Stripe.
+export function scheduleUpgradeCopyFor(plan: string): string | null {
+  const tier = normalizePlan(plan)
+  if (tier === 'agency') return null
+  return tier === 'free'
+    ? `Upgrade to Pro to schedule up to ${scheduleWindowLabel('pro')} ahead`
+    : `Upgrade to Agency to schedule up to ${scheduleWindowLabel('agency')} ahead`
+}
+
 // The 403 body returned when the quota is spent. `upgrade` is the part the UI
 // is expected to act on rather than discard — hitting this wall is the moment a
 // free user is most likely to convert, so it carries a real next step.
