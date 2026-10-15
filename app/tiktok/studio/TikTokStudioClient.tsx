@@ -11,6 +11,7 @@ import {
   MessageCircle, Palette, XCircle, Zap,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { track } from '@/lib/analytics'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -527,6 +528,15 @@ export default function TikTokStudioClient() {
 
   const [creatorLoading, setCreatorLoading] = useState(true)
 
+  // Once per visit, after the connection check settles: did TikTok users ever
+  // get here at all? Until this, nothing could say.
+  const openedTracked = useRef(false)
+  useEffect(() => {
+    if (creatorLoading || openedTracked.current) return
+    openedTracked.current = true
+    track('tiktok_studio_opened', { connected: !!creator?.connected })
+  }, [creatorLoading, creator?.connected])
+
   // File state
   const [videoFile, setVideoFile]     = useState<File | null>(null)
   const [videoUrl, setVideoUrl]       = useState<string | null>(null)
@@ -934,14 +944,21 @@ export default function TikTokStudioClient() {
 
   // ── File handling ───────────────────────────────────────────────────────────
 
+  // TikTok caps duration per account, and it is not always 10 minutes. This
+  // callback used to have no dependencies, so it kept the default limit from
+  // the first render, before the account's real one arrived, and its message
+  // said "10 minutes" whatever the account allowed.
+  const maxDurationSec = limits.maxDurationSec
   const handleFile = useCallback((file: File) => {
     setFileError(null)
     if (!ACCEPTED_FORMATS.includes(file.type)) {
       setFileError('Only MP4 and MOV files are supported.')
+      track('tiktok_video_rejected', { reason: 'format', type: file.type || 'unknown' })
       return
     }
     if (file.size > MAX_FILE_BYTES) {
       setFileError(`File too large. Max 500 MB (yours: ${formatBytes(file.size)}).`)
+      track('tiktok_video_rejected', { reason: 'too_large', mb: Math.round(file.size / 1e6) })
       return
     }
 
@@ -951,12 +968,13 @@ export default function TikTokStudioClient() {
     tempVideo.onloadedmetadata = () => {
       if (tempVideo.duration < MIN_DURATION_S) {
         setFileError(`Video too short. Minimum ${MIN_DURATION_S} seconds.`)
+        track('tiktok_video_rejected', { reason: 'too_short', seconds: Math.round(tempVideo.duration) })
         URL.revokeObjectURL(url)
         return
       }
-      // TikTok caps duration per account, and it is not always 10 minutes.
-      if (tempVideo.duration > limits.maxDurationSec) {
-        setFileError(`Video too long. Maximum 10 minutes (yours: ${formatTime(tempVideo.duration)}).`)
+      if (tempVideo.duration > maxDurationSec) {
+        setFileError(`Video too long. Your TikTok account allows up to ${formatTime(maxDurationSec)} (yours: ${formatTime(tempVideo.duration)}).`)
+        track('tiktok_video_rejected', { reason: 'too_long', seconds: Math.round(tempVideo.duration), limit: maxDurationSec })
         URL.revokeObjectURL(url)
         return
       }
@@ -966,8 +984,9 @@ export default function TikTokStudioClient() {
       setTrimEnd(tempVideo.duration)
       setCurrentTime(0)
       setIsPlaying(false)
+      track('tiktok_video_added', { seconds: Math.round(tempVideo.duration), mb: Math.round(file.size / 1e6) })
     }
-  }, [])
+  }, [maxDurationSec])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -1028,6 +1047,11 @@ export default function TikTokStudioClient() {
     setPostRemedy(null)
     setUploading(true)
 
+    // Where a failure happened, for the funnel. Moved forward as each step starts.
+    let stage = hasEdits ? 'export' : 'upload'
+    let tiktokCode = ''
+    track('tiktok_post_attempted', { mode })
+
     try {
       // Send what they actually made. This was `const uploadBlob = videoFile`,
       // so the original was uploaded untouched and every edit in this studio
@@ -1070,6 +1094,7 @@ export default function TikTokStudioClient() {
       // infrastructure that already existed (upload-url + /api/tiktok/post) but
       // was never wired to this button.
       if (mode === 'schedule') {
+        stage = 'stage_upload'
         const urlRes  = await fetch('/api/tiktok/upload-url')
         const urlData = await urlRes.json()
         if (!urlRes.ok) throw new Error(urlData.error || 'Failed to prepare upload')
@@ -1085,6 +1110,7 @@ export default function TikTokStudioClient() {
         setUploading(false)
         setPosting(true)
 
+        stage = 'schedule'
         const scheduleRes = await fetch('/api/tiktok/post', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1113,11 +1139,13 @@ export default function TikTokStudioClient() {
         const scheduleData = await scheduleRes.json()
         if (!scheduleRes.ok) throw new Error(scheduleData.error || 'Failed to schedule TikTok post')
 
+        track('tiktok_post_done', { mode })
         setPostSuccess(true)
         return
       }
 
       // Step 1: Initialize FILE_UPLOAD with TikTok
+      stage = 'init'
       const initRes = await fetch('/api/tiktok/init-upload', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1143,12 +1171,14 @@ export default function TikTokStudioClient() {
       })
       const initData = await initRes.json()
       if (!initRes.ok) {
+        tiktokCode = String(initData.code ?? '')
         if (initData.remedy === 'drafts_or_private') setPostRemedy('drafts_or_private')
         throw new Error(initData.error || 'Failed to initialize TikTok upload')
       }
       const { upload_url, publish_id, open_id, full_caption } = initData
 
       // Step 2: PUT original file directly to TikTok's upload URL
+      stage = 'upload'
       const end = uploadBlob.size - 1
       const tikPutRes = await fetch(upload_url, {
         method:  'PUT',
@@ -1168,6 +1198,7 @@ export default function TikTokStudioClient() {
       setPosting(true)
 
       // Step 3: Record the post in our DB + decrement quota
+      stage = 'confirm'
       const confirmRes = await fetch('/api/tiktok/confirm-upload', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1197,6 +1228,7 @@ export default function TikTokStudioClient() {
       const confirmData = await confirmRes.json()
       if (!confirmRes.ok) throw new Error(confirmData.error || 'Failed to save post record')
 
+      track('tiktok_post_done', { mode })
       setPostSuccess(true)
 
       // Uploading the bytes is not publishing. TikTok returns 200 for the
@@ -1226,6 +1258,7 @@ export default function TikTokStudioClient() {
             if (d.status === 'failed') {
               setPublishReason(d.reason ?? null)
               setPublishState('rejected')
+              track('tiktok_post_failed', { mode, stage: 'tiktok_processing', code: String(d.reason ?? '').slice(0, 60) })
               return
             }
           } catch { /* a dropped check is not a failed post; try again */ }
@@ -1236,6 +1269,7 @@ export default function TikTokStudioClient() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
       setPostError(msg)
+      track('tiktok_post_failed', { mode, stage, ...(tiktokCode && { code: tiktokCode }) })
     } finally {
       setExporting(false)
       setUploading(false)
