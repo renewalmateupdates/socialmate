@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
@@ -87,44 +87,18 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login`)
 
-  // --- Platform Account Jail: check if this Twitter account is locked/in use elsewhere ---
-  const { data: registryRecord } = await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .select('id, status, connected_to_user, cooling_until')
-    .eq('platform', 'twitter')
-    .eq('platform_account_id', platform_user_id)
-    .maybeSingle()
-
-  if (registryRecord) {
-    // Account is actively connected to a different SocialMate user
-    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
-      cookieStore.delete('twitter_oauth_state')
-      cookieStore.delete('twitter_code_verifier')
-      return NextResponse.redirect(`${appUrl}/accounts?error=twitter_already_connected`)
-    }
-
-    // Account is in the 45-day cooling period.
-    //
-    // The cooldown is an anti-abuse measure against an X account being cycled
-    // between different SocialMate users. It was also blocking the person who
-    // owned it from coming back -- which matters because an expired token
-    // surfaces as "Please reconnect your X account", so following our own
-    // instructions could cost someone six weeks of X.
-    //
-    // Reconnecting your own account is not the abuse case, so let it through.
-    const isOwnAccountReturning =
-      registryRecord.connected_to_user === user.id
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until && !isOwnAccountReturning) {
-      const coolingUntil = new Date(registryRecord.cooling_until)
-      if (coolingUntil > new Date()) {
-        cookieStore.delete('twitter_oauth_state')
-        cookieStore.delete('twitter_code_verifier')
-        const until = coolingUntil.toISOString()
-        return NextResponse.redirect(`${appUrl}/accounts?error=twitter_in_cooldown&until=${encodeURIComponent(until)}`)
-      }
-    }
+  // One owner per X account, and a 45-day pause before a different
+  // SocialMate user can pick it up. Reconnecting your own is always allowed.
+  const verdict = await checkReconnect('twitter', platform_user_id, user.id)
+  if (!verdict.allowed) {
+    cookieStore.delete('twitter_oauth_state')
+    cookieStore.delete('twitter_code_verifier')
+    return NextResponse.redirect(
+      verdict.reason === 'already_connected'
+        ? `${appUrl}/accounts?error=twitter_already_connected`
+        : `${appUrl}/accounts?error=twitter_in_cooldown&until=${encodeURIComponent(verdict.until)}`
+    )
   }
-  // ---------------------------------------------------------------------------------------
 
   // Upsert connected account
   const { data: existing } = await supabase
@@ -172,21 +146,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Register account in jail registry (upsert — marks it as active, owned by this user)
-  await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .upsert(
-      {
-        platform: 'twitter',
-        platform_account_id: platform_user_id,
-        connected_to_user: user.id,
-        status: 'active',
-        disconnected_at: null,
-        cooling_until: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'platform,platform_account_id' }
-    )
+  await markConnected('twitter', platform_user_id, user.id)
 
   // Clean up cookies
   cookieStore.delete('twitter_oauth_state')

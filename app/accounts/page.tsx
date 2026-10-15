@@ -74,6 +74,50 @@ const PLANNED_PLATFORMS     = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status 
 // the same name in app/compose/page.tsx.
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
+// Wording a failure needs beyond what its reason says, keyed by the exact
+// `?error=` value a callback sends.
+const CONNECT_ERROR_COPY: Record<string, string> = {
+  mastodon_no_instance:          'No instance provided',
+  mastodon_instance_unreachable: 'Could not reach that Mastodon instance',
+  mastodon_register_failed:      'Failed to register with that instance',
+  twitter_user_failed:           'Could not fetch your X profile. Please try again.',
+  twitter_db_error:              'X connected but failed to save. Please try again.',
+  youtube_no_channel:            'No YouTube channel found on this account',
+}
+
+// Every connect callback comes back here as `<platform>_<reason>`, so the
+// reason alone can say what happened. This used to be one hand-written line
+// per platform and reason, and TikTok had none: twelve refused TikTok connects,
+// eight of them a failed state check, landed on this page with no message.
+function connectErrorMessage(error: string, until: string | null): string {
+  const specific = CONNECT_ERROR_COPY[error]
+  if (specific) return specific
+  const [platform, ...rest] = error.split('_')
+  // The bare forms (`invalid_state`, `token_failed`, `db_error`) name no platform.
+  const known = PLATFORM_META[platform]
+  const label = platform === 'twitter' ? 'X' : known?.label
+  switch (known ? rest.join('_') : error) {
+    case 'denied':
+      return label ? `${label} connection cancelled` : 'Connection cancelled'
+    case 'invalid_state':
+      // The state cookie lasts 30 minutes and lives in the browser that started
+      // the connect, so this is an expired attempt or one finished elsewhere.
+      return 'That connection expired or was finished in a different browser. Please start again from this page.'
+    case 'db_error':
+      return 'Something went wrong saving your account. Please try again.'
+    case 'already_connected':
+      return `This ${label} account is already connected to another SocialMate account`
+    case 'in_cooldown': {
+      const date = until
+        ? new Date(until).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        : 'a later date'
+      return `This ${label} account was recently disconnected from another SocialMate account. It can be connected to a new one on ${date}.`
+    }
+    default:
+      return label ? `Could not connect ${label}. Please try again.` : 'Could not connect. Please try again.'
+  }
+}
+
 function PlatformCard({
   platform, connectable, accountsPerPlatform, accountsByPlatform, connectingPlatform, onConnect,
 }: {
@@ -149,7 +193,7 @@ function PlatformCard({
       </div>
       {platform === 'twitter' && !atLimit && (
         <p className="text-xs text-gray-400 leading-relaxed pl-1">
-          Connecting your X account registers it globally. Disconnecting starts a 45-day reconnection pause. This protects against abuse.
+          Each X account can belong to one SocialMate account. After you disconnect it, only you can reconnect it for 45 days. This protects against abuse.
         </p>
       )}
       {platform === 'tiktok' && !atLimit && (
@@ -248,7 +292,7 @@ function AccountsInner() {
     // (34 success events from 18 TikTok users), inflating the funnel.
     if (success || error) {
       const cleaned = new URL(window.location.href)
-      ;['success', 'error', 'limit', 'plan'].forEach(k => cleaned.searchParams.delete(k))
+      ;['success', 'error', 'limit', 'plan', 'until'].forEach(k => cleaned.searchParams.delete(k))
       // `searchParams` above is this render's snapshot, so the plan-limit toast
       // below still reads the values it needs.
       window.history.replaceState(null, '', cleaned.pathname + cleaned.search)
@@ -274,40 +318,10 @@ function AccountsInner() {
     if (success === 'linkedin_connected')  showToast('LinkedIn connected successfully!', 'success')
     if (success === 'twitter_connected')   showToast('X (Twitter) connected successfully!', 'success')
     if (success === 'youtube_connected')   showToast('YouTube connected successfully!', 'success')
-    if (error === 'discord_denied')                showToast('Discord connection cancelled', 'error')
-    if (error === 'mastodon_denied')               showToast('Mastodon connection cancelled', 'error')
-    if (error === 'mastodon_no_instance')          showToast('No instance provided', 'error')
-    if (error === 'mastodon_instance_unreachable') showToast('Could not reach that Mastodon instance', 'error')
-    if (error === 'mastodon_register_failed')      showToast('Failed to register with that instance', 'error')
-    if (error === 'mastodon_invalid_state')        showToast('Security check failed — please try again', 'error')
-    if (error === 'mastodon_token_failed')         showToast('Failed to connect Mastodon — please try again', 'error')
-    if (error === 'mastodon_db_error')             showToast('Something went wrong saving your account', 'error')
-    if (error === 'pinterest_denied')              showToast('Pinterest connection cancelled', 'error')
-    if (error === 'pinterest_invalid_state')       showToast('Security check failed — please try again', 'error')
-    if (error === 'pinterest_token_failed')        showToast('Failed to connect Pinterest — please try again', 'error')
-    if (error === 'pinterest_db_error')            showToast('Something went wrong saving your account', 'error')
-    if (error === 'linkedin_denied')               showToast('LinkedIn connection cancelled', 'error')
-    if (error === 'twitter_denied')                showToast('X connection cancelled', 'error')
-    if (error === 'twitter_token_failed')          showToast('Failed to connect X — please try again', 'error')
-    if (error === 'twitter_user_failed')           showToast('Failed to fetch X profile — please try again', 'error')
-    if (error === 'twitter_db_error')              showToast('X connected but failed to save — please try again', 'error')
-    if (error === 'twitter_already_connected')     showToast('This X account is already connected to another SocialMate account', 'error')
-    if (error === 'twitter_in_cooldown') {
-      const until = searchParams.get('until')
-      const date  = until ? new Date(until).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'a future date'
-      showToast(`This X account is in a 45-day reconnection pause until ${date}`, 'error')
+    // Every other refusal gets a message too, the plan cap having its own above.
+    if (error && !error.endsWith('_plan_limit')) {
+      showToast(connectErrorMessage(error, searchParams.get('until')), 'error')
     }
-    if (error === 'linkedin_invalid_state')        showToast('Security check failed — please try again', 'error')
-    if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn — please try again', 'error')
-    if (error === 'linkedin_db_error')             showToast('Something went wrong saving your account', 'error')
-    if (error === 'youtube_denied')                showToast('YouTube connection cancelled', 'error')
-    if (error === 'youtube_invalid_state')         showToast('Security check failed — please try again', 'error')
-    if (error === 'youtube_token_failed')          showToast('Failed to connect YouTube — please try again', 'error')
-    if (error === 'youtube_no_channel')            showToast('No YouTube channel found on this account', 'error')
-    if (error === 'youtube_db_error')              showToast('Something went wrong saving your account', 'error')
-    if (error === 'invalid_state')                 showToast('Security check failed — please try again', 'error')
-    if (error === 'token_failed')                  showToast('Failed to connect — please try again', 'error')
-    if (error === 'db_error')                      showToast('Something went wrong saving your account', 'error')
   }, [searchParams])
 
   // Record the view exactly once per mount.
@@ -871,9 +885,9 @@ function AccountsInner() {
                       {isConfirming && (
                         <div className="mt-3 pt-3 border-t border-white/60 flex flex-col sm:flex-row items-start sm:items-center gap-2">
                           <p className="text-xs text-red-600 font-semibold flex-1">
-                            {account.platform === 'twitter'
-                              ? `Disconnecting @${account.account_name} will lock this X account from reconnecting for 45 days. Are you sure?`
-                              : `Disconnect @${account.account_name} from ${meta.label}? This cannot be undone.`}
+                            {/* Owners can always reconnect (lib/platform-jail.ts), so neither
+                                "locked for 45 days" nor "cannot be undone" was true. */}
+                            {`Disconnect @${account.account_name} from ${meta.label}? You can reconnect it any time.`}
                           </p>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <button onClick={() => handleDisconnect(account.id, account.platform)}

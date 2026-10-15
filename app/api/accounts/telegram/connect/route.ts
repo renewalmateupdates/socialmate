@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function POST(request: NextRequest) {
@@ -52,30 +52,19 @@ export async function POST(request: NextRequest) {
   const account_name = username || first_name || 'Telegram Bot'
   const platform_user_id = String(id)
 
-  // --- Platform Jail: check if this Telegram bot is in cooldown ---
-  const { data: registryRecord } = await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .select('id, status, connected_to_user, cooling_until')
-    .eq('platform', 'telegram')
-    .eq('platform_account_id', platform_user_id)
-    .maybeSingle()
-
-  if (registryRecord) {
-    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
+  // One owner per Telegram bot, and a 45-day pause before a different SocialMate
+  // user can pick it up. Reconnecting your own is always allowed.
+  const verdict = await checkReconnect('telegram', platform_user_id, user.id)
+  if (!verdict.allowed) {
+    if (verdict.reason === 'already_connected') {
       return NextResponse.json({ error: 'This Telegram bot is already connected to another SocialMate account.' }, { status: 409 })
     }
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
-      const coolingUntil = new Date(registryRecord.cooling_until)
-      if (coolingUntil > new Date()) {
-        const until = coolingUntil.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-        return NextResponse.json({
-          error: `This account was recently disconnected. You can reconnect it on ${until}. This protects against abuse.`,
-          cooldown_until: registryRecord.cooling_until,
-        }, { status: 429 })
-      }
-    }
+    const until = new Date(verdict.until).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    return NextResponse.json({
+      error: `This Telegram bot was recently disconnected from another SocialMate account. It can be connected to a new one on ${until}.`,
+      cooldown_until: verdict.until,
+    }, { status: 429 })
   }
-  // ----------------------------------------------------------------
 
   // Check for existing account in THIS workspace (or personal if no workspaceId)
   let existingQuery = supabase
@@ -134,21 +123,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Register in jail registry
-  await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .upsert(
-      {
-        platform: 'telegram',
-        platform_account_id: platform_user_id,
-        connected_to_user: user.id,
-        status: 'active',
-        disconnected_at: null,
-        cooling_until: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'platform,platform_account_id' }
-    )
+  await markConnected('telegram', platform_user_id, user.id)
 
   return NextResponse.json({ success: true, username: account_name })
 }

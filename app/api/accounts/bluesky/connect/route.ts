@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function POST(request: NextRequest) {
@@ -55,30 +55,19 @@ export async function POST(request: NextRequest) {
   const session = await sessionRes.json()
   const { accessJwt, refreshJwt, did, handle: resolvedHandle } = session
 
-  // --- Platform Jail: check if this Bluesky DID is in cooldown ---
-  const { data: registryRecord } = await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .select('id, status, connected_to_user, cooling_until')
-    .eq('platform', 'bluesky')
-    .eq('platform_account_id', did)
-    .maybeSingle()
-
-  if (registryRecord) {
-    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
+  // One owner per Bluesky account, and a 45-day pause before a different SocialMate
+  // user can pick it up. Reconnecting your own is always allowed.
+  const verdict = await checkReconnect('bluesky', did, user.id)
+  if (!verdict.allowed) {
+    if (verdict.reason === 'already_connected') {
       return NextResponse.json({ error: 'This Bluesky account is already connected to another SocialMate account.' }, { status: 409 })
     }
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
-      const coolingUntil = new Date(registryRecord.cooling_until)
-      if (coolingUntil > new Date()) {
-        const until = coolingUntil.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-        return NextResponse.json({
-          error: `This account was recently disconnected. You can reconnect it on ${until}. This protects against abuse.`,
-          cooldown_until: registryRecord.cooling_until,
-        }, { status: 429 })
-      }
-    }
+    const until = new Date(verdict.until).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    return NextResponse.json({
+      error: `This Bluesky account was recently disconnected from another SocialMate account. It can be connected to a new one on ${until}.`,
+      cooldown_until: verdict.until,
+    }, { status: 429 })
   }
-  // ----------------------------------------------------------------
 
   const profileRes = await fetch(
     `https://bsky.social/xrpc/app.bsky.actor.getProfile?actor=${did}`,
@@ -153,21 +142,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Register in jail registry (upsert — marks as active, owned by this user)
-  await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .upsert(
-      {
-        platform: 'bluesky',
-        platform_account_id: did,
-        connected_to_user: user.id,
-        status: 'active',
-        disconnected_at: null,
-        cooling_until: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'platform,platform_account_id' }
-    )
+  await markConnected('bluesky', did, user.id)
 
   return NextResponse.json({ success: true, handle: resolvedHandle, displayName: account_name })
 }

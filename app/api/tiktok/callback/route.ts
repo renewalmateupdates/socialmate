@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
@@ -103,29 +104,17 @@ export async function GET(request: NextRequest) {
 
   const platformUserId = open_id as string
 
-  // --- Platform Jail: check if this TikTok user is in cooldown ---
-  const { data: registryRecord } = await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .select('id, status, connected_to_user, cooling_until')
-    .eq('platform', 'tiktok')
-    .eq('platform_account_id', platformUserId)
-    .maybeSingle()
-
-  if (registryRecord) {
-    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
-      cookieStore.delete('tiktok_oauth_state')
-      return NextResponse.redirect(`${appUrl}/accounts?error=tiktok_already_connected`)
-    }
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
-      const coolingUntil = new Date(registryRecord.cooling_until)
-      if (coolingUntil > new Date()) {
-        cookieStore.delete('tiktok_oauth_state')
-        const until = coolingUntil.toISOString()
-        return NextResponse.redirect(`${appUrl}/accounts?error=tiktok_in_cooldown&until=${encodeURIComponent(until)}`)
-      }
-    }
+  // One owner per TikTok account, and a 45-day pause before a different
+  // SocialMate user can pick it up. Reconnecting your own is always allowed.
+  const verdict = await checkReconnect('tiktok', platformUserId, user.id)
+  if (!verdict.allowed) {
+    cookieStore.delete('tiktok_oauth_state')
+    return NextResponse.redirect(
+      verdict.reason === 'already_connected'
+        ? `${appUrl}/accounts?error=tiktok_already_connected`
+        : `${appUrl}/accounts?error=tiktok_in_cooldown&until=${encodeURIComponent(verdict.until)}`
+    )
   }
-  // ---------------------------------------------------------------
 
   // Upsert connected_account
   const { data: existing } = await getSupabaseAdmin()
@@ -177,21 +166,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Register in jail registry
-  await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .upsert(
-      {
-        platform: 'tiktok',
-        platform_account_id: platformUserId,
-        connected_to_user: user.id,
-        status: 'active',
-        disconnected_at: null,
-        cooling_until: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'platform,platform_account_id' }
-    )
+  await markConnected('tiktok', platformUserId, user.id)
 
   cookieStore.delete('tiktok_oauth_state')
 
