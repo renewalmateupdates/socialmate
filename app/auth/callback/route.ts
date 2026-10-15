@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic'
 import { createServerClient } from '@supabase/ssr'
 import { recordFunnel } from '@/lib/usage'
+import { isFirstSignIn } from '@/lib/new-account'
+import { ATTRIBUTION_COOKIES, ATTRIBUTION_DONE_COOKIE, mergeAttribution, readAttribution, referrerHost } from '@/lib/attribution'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -35,6 +37,17 @@ export async function GET(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
+
+      // One answer to "is this the account's first sign-in?", used by every
+      // new-account step below. It is not simply "created in the last minute":
+      // see lib/new-account.ts for the email signups that rule silently dropped.
+      const isNewAccount = isFirstSignIn(session.user)
+      const attribution = isNewAccount
+        ? mergeAttribution(
+            readAttribution(name => cookieStore.get(name)?.value),
+            session.user.user_metadata?.attribution,
+          )
+        : {}
  
       // Auto-create personal workspace if it doesn't exist yet
       try {
@@ -94,8 +107,6 @@ export async function GET(request: NextRequest) {
       // Welcome email — only on first signup (account created within 60s + no flag set)
       try {
         const email = session.user.email
-        const createdAt = new Date(session.user.created_at).getTime()
-        const isNewAccount = Date.now() - createdAt < 60_000
 
         const { data: emailFlagRow } = await adminSupabase
           .from('user_settings')
@@ -109,22 +120,31 @@ export async function GET(request: NextRequest) {
         // Guarded by !alreadySent so a re-auth inside the 60s window
         // cannot record a second signup for the same person.
         if (isNewAccount && !alreadySent) {
+          const fromHost = referrerHost(attribution.referrer)
           recordFunnel(adminSupabase, session.user.id, 'signup_completed', {
             provider: session.user.app_metadata?.provider ?? 'email',
+            ...(attribution.landing && { landing: attribution.landing }),
+            ...(fromHost            && { referrer_host: fromHost }),
+            ...(attribution.source  && { utm_source: attribution.source }),
           })
         }
 
         if (email && isNewAccount && !alreadySent) {
-          await adminSupabase
+          // Upsert, not update: an update on a missing row changes nothing and
+          // reports no error, which left the flag unset and the guard above open.
+          const { error: flagError } = await adminSupabase
             .from('user_settings')
-            .update({ welcome_email_sent: true })
-            .eq('user_id', session.user.id)
+            .upsert({ user_id: session.user.id, welcome_email_sent: true }, { onConflict: 'user_id' })
+          if (flagError) console.error('[auth/callback] welcome flag write failed:', flagError.message)
 
           // Fire onboarding email sequence via Inngest (Day 0 welcome, Day 3 AI tools, Day 7 upgrade nudge)
           const firstName = (session.user.user_metadata?.full_name as string | undefined)?.split(' ')[0]
             || (session.user.user_metadata?.name as string | undefined)?.split(' ')[0]
             || undefined
+          // The id makes this idempotent: Inngest runs the sequence once per
+          // account even if a second first-sign-in callback gets this far.
           inngest.send({
+            id:   `user-signup-${session.user.id}`,
             name: 'user/signup',
             data: { email, firstName },
           }).catch((err: unknown) => console.error('[auth/callback] Failed to send user/signup event:', err))
@@ -164,31 +184,28 @@ export async function GET(request: NextRequest) {
         console.error('Login tracking error:', trackErr)
       }
 
-      // UTM / referrer attribution — read cookies set by signup page, persist on first sign-in only
-      if (Date.now() - new Date(session.user.created_at).getTime() < 60_000) {
+      // Where the account came from: recorded on the first page the visitor
+      // landed on, or carried in the account's metadata from the signup form.
+      // Persisted on the first sign-in only. See lib/attribution.ts.
+      if (isNewAccount) {
         try {
-          const utmSource = cookieStore.get('sm_utm_source')?.value
-          const utmMedium = cookieStore.get('sm_utm_medium')?.value
-          const utmCampaign = cookieStore.get('sm_utm_campaign')?.value
-          const smReferrer = cookieStore.get('sm_referrer')?.value
-
-          if (utmSource || utmMedium || utmCampaign || smReferrer) {
-            await adminSupabase
+          if (attribution.source || attribution.medium || attribution.campaign || attribution.referrer) {
+            const { error: attributionError } = await adminSupabase
               .from('user_settings')
               .upsert({
                 user_id: session.user.id,
-                ...(utmSource   && { signup_source:   decodeURIComponent(utmSource)   }),
-                ...(utmMedium   && { signup_medium:   decodeURIComponent(utmMedium)   }),
-                ...(utmCampaign && { signup_campaign: decodeURIComponent(utmCampaign) }),
-                ...(smReferrer  && { signup_referrer: decodeURIComponent(smReferrer)  }),
+                ...(attribution.source   && { signup_source:   attribution.source   }),
+                ...(attribution.medium   && { signup_medium:   attribution.medium   }),
+                ...(attribution.campaign && { signup_campaign: attribution.campaign }),
+                ...(attribution.referrer && { signup_referrer: attribution.referrer }),
               }, { onConflict: 'user_id' })
+            if (attributionError) console.error('[auth/callback] attribution write failed:', attributionError.message)
           }
 
-          // Clean up attribution cookies regardless
-          cookieStore.delete('sm_utm_source')
-          cookieStore.delete('sm_utm_medium')
-          cookieStore.delete('sm_utm_campaign')
-          cookieStore.delete('sm_referrer')
+          // Clean up, and stop this browser recording a source for an account
+          // that already exists.
+          for (const name of Object.values(ATTRIBUTION_COOKIES)) cookieStore.delete(name)
+          cookieStore.set(ATTRIBUTION_DONE_COOKIE, '1', { path: '/', maxAge: 365 * 24 * 60 * 60, sameSite: 'lax' })
         } catch (err) {
           console.error('UTM attribution error:', err)
         }

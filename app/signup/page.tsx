@@ -7,6 +7,7 @@ import { Check } from 'lucide-react'
 import { track, trackOnce } from '@/lib/analytics'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
 import { suggestEmailFix, inboxLinkFor } from '@/lib/email-help'
+import { readBrowserAttribution } from '@/lib/attribution-client'
 import ResendConfirmation from '@/components/auth/ResendConfirmation'
 import { useI18n } from '@/contexts/I18nContext'
 import AuthShell from '@/components/instrument/AuthShell'
@@ -67,22 +68,10 @@ function SignupForm() {
   // down. That was a real chunk of this page's measured CLS (0.34, "Poor").
   const refCode = searchParams.get('ref') || ''
 
-  useEffect(() => {
-    // Capture UTM params + page referrer as short-lived cookies for post-signup attribution.
-    // Auth callback reads these on new account creation and persists to user_settings.
-    const utmSource = searchParams.get('utm_source')
-    const utmMedium = searchParams.get('utm_medium')
-    const utmCampaign = searchParams.get('utm_campaign')
-    const referrer = typeof document !== 'undefined' ? document.referrer : ''
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
-    if (utmSource) document.cookie = `sm_utm_source=${encodeURIComponent(utmSource)};path=/;expires=${expires};SameSite=Lax`
-    if (utmMedium) document.cookie = `sm_utm_medium=${encodeURIComponent(utmMedium)};path=/;expires=${expires};SameSite=Lax`
-    if (utmCampaign) document.cookie = `sm_utm_campaign=${encodeURIComponent(utmCampaign)};path=/;expires=${expires};SameSite=Lax`
-    // Only store external referrers (skip self-referrals from the same domain)
-    if (referrer && !referrer.includes('socialmate.studio')) {
-      document.cookie = `sm_referrer=${encodeURIComponent(referrer)};path=/;expires=${expires};SameSite=Lax`
-    }
-  }, [searchParams])
+  // Where this visitor came from is recorded on the first page they landed on,
+  // by components/AttributionCapture in the root layout. It used to be recorded
+  // here, which lost the source for everyone who clicked through from another
+  // page first (see lib/attribution.ts).
 
   // Arrival. Anonymous, so GA4 only.
   useEffect(() => { track('signup_viewed'); trackOnce('signup_viewed') }, [])
@@ -148,7 +137,13 @@ function SignupForm() {
         emailRedirectTo: redirectTo
           ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
           : `${window.location.origin}/auth/callback`,
-        data: { referral_code: refCode || null, newsletter_opted_in: newsletterOptIn },
+        // Attribution rides along on the account too: the confirmation link is
+        // often opened on another device, where none of these cookies exist.
+        data: {
+          referral_code: refCode || null,
+          newsletter_opted_in: newsletterOptIn,
+          attribution: readBrowserAttribution(),
+        },
       },
     })
     if (error) {
