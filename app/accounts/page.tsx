@@ -100,8 +100,12 @@ function connectErrorMessage(error: string, until: string | null): string {
     case 'denied':
       return label ? `${label} connection cancelled` : 'Connection cancelled'
     case 'invalid_state':
+    case 'state_missing':
+    case 'state_mismatch':
       // The state cookie lasts 30 minutes and lives in the browser that started
       // the connect, so this is an expired attempt or one finished elsewhere.
+      // TikTok reports the two cases apart (lib/oauth-state.ts) so the funnel
+      // can tell them apart; to the person they mean the same thing.
       return 'That connection expired or was finished in a different browser. Please start again from this page.'
     case 'db_error':
       return 'Something went wrong saving your account. Please try again.'

@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
+import { checkOAuthState, isRepeatOfFreshConnect } from '@/lib/oauth-state'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -20,9 +21,39 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies()
-  const storedState = cookieStore.get('tiktok_oauth_state')?.value
-  if (!storedState || storedState !== state) {
-    return NextResponse.redirect(`${appUrl}/accounts?error=tiktok_invalid_state`)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (s) => s.forEach(({ name, value, options }) =>
+          cookieStore.set(name, value, options)
+        ),
+      },
+    }
+  )
+
+  const stateCheck = checkOAuthState(cookieStore.get('tiktok_oauth_state')?.value, state)
+  if (!stateCheck.ok) {
+    // Most of these were a second hit on this callback seconds after a connect
+    // that worked (lib/oauth-state.ts). If this person's TikTok row was just
+    // written, show them the success they missed. Nothing is linked here.
+    const { data: { user: maybeUser } } = await supabase.auth.getUser()
+    if (maybeUser) {
+      const { data: latest, error: latestErr } = await getSupabaseAdmin()
+        .from('connected_accounts')
+        .select('updated_at')
+        .eq('user_id', maybeUser.id)
+        .eq('platform', 'tiktok')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+      if (latestErr) console.warn('[TikTok OAuth] recent-connect lookup failed:', latestErr.message)
+      if (isRepeatOfFreshConnect(latest?.[0]?.updated_at)) {
+        return NextResponse.redirect(`${appUrl}/accounts?success=tiktok_connected`)
+      }
+    }
+    return NextResponse.redirect(`${appUrl}/accounts?error=tiktok_${stateCheck.reason}`)
   }
 
   // Exchange code for tokens
@@ -86,19 +117,6 @@ export async function GET(request: NextRequest) {
 
   const account_name = displayName
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (s) => s.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        ),
-      },
-    }
-  )
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login`)
 
@@ -143,7 +161,9 @@ export async function GET(request: NextRequest) {
   if (existing) {
     await getSupabaseAdmin()
       .from('connected_accounts')
-      .update({ access_token, refresh_token, expires_at, account_name, profile_image_url: avatarUrl })
+      // updated_at is set explicitly: it is what tells a repeat hit on this
+      // callback from a real failure (see the state check above).
+      .update({ access_token, refresh_token, expires_at, account_name, profile_image_url: avatarUrl, updated_at: new Date().toISOString() })
       .eq('id', existing.id)
   } else {
     const { error: dbError } = await getSupabaseAdmin()
