@@ -317,7 +317,7 @@ export default function AdminFunnelPage() {
                     ))}
                     {/* Steps that only started being recorded recently. Before that date
                         the absence means "not measured", never "zero", so say so. */}
-                    {NEW_EVENTS.filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
+                    {[...NEW_EVENTS, ...TIKTOK_EVENTS].filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
                       <div key={name} className="flex items-center justify-between border-b border-edge px-5 py-2.5 last:border-b-0">
                         <span className="font-mono text-xs text-ink-body">{name}</span>
                         <span className="font-mono text-xs text-ink-muted">not recorded yet</span>
@@ -325,7 +325,8 @@ export default function AdminFunnelPage() {
                     ))}
                   </div>
                   <p className="border-t border-edge px-5 py-3 text-xs text-ink-muted">
-                    Composer steps ({NEW_EVENTS.join(', ')}) are recorded from {NEW_EVENTS_SINCE} onward.
+                    Composer steps ({NEW_EVENTS.join(', ')}) are recorded from {NEW_EVENTS_SINCE} onward, and
+                    TikTok Studio steps ({TIKTOK_EVENTS.join(', ')}) from {TIKTOK_EVENTS_SINCE}.
                     Anything earlier was not measured, so read a missing number there as unknown, not zero.
                   </p>
                 </Panel>
@@ -341,3 +342,10 @@ export default function AdminFunnelPage() {
 // Composer steps added after the rest of the funnel. See lib/analytics.ts.
 const NEW_EVENTS = ['compose_left', 'draft_created', 'post_attempted', 'post_failed', 'starter_built']
 const NEW_EVENTS_SINCE = 'Sep 24, 2026'
+
+// Where TikTok-only users stop. Most people who connect anything connect only TikTok.
+const TIKTOK_EVENTS = [
+  'tiktok_studio_opened', 'tiktok_video_rejected', 'tiktok_video_added',
+  'tiktok_post_attempted', 'tiktok_post_done', 'tiktok_post_failed',
+]
+const TIKTOK_EVENTS_SINCE = 'Oct 15, 2026'

@@ -5068,6 +5068,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
             .update({ status: 'published', tiktok_post_id: outcome.postId, tiktok_account_open_id: outcome.openId, error_message: null })
             .eq('id', post.id)
           if (error) throw new Error(`[tiktok-scheduled] could not record published ${post.id}: ${error.message}`)
+          recordFunnel(db, post.user_id, 'tiktok_post_done', { mode: 'scheduled_fire', result: 'published' })
           await syncTiktokPublishToPosts({
             id:           post.id,
             user_id:      post.user_id,
@@ -5083,6 +5084,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
             .update({ status: 'in_drafts', tiktok_post_id: outcome.publishId, tiktok_account_open_id: outcome.openId, error_message: null })
             .eq('id', post.id)
           if (error) throw new Error(`[tiktok-scheduled] could not record in_drafts ${post.id}: ${error.message}`)
+          recordFunnel(db, post.user_id, 'tiktok_post_done', { mode: 'scheduled_fire', result: 'in_drafts', direct_code: outcome.directCode })
           const notice = draftsNotice(outcome.directCode, post.post_caption)
           await createNotification(db, {
             userId:  post.user_id,
@@ -5100,6 +5102,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
           .update({ status: 'failed', error_message: outcome.message })
           .eq('id', post.id)
         if (error) throw new Error(`[tiktok-scheduled] could not record failure ${post.id}: ${error.message}`)
+        recordFunnel(db, post.user_id, 'tiktok_post_failed', { mode: 'scheduled_fire', code: outcome.code })
 
         // The slot was counted when this was scheduled and the video never
         // posted, so give it back, the same as cancelling does.

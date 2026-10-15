@@ -59,6 +59,17 @@ export const FUNNEL_EVENTS = [
   'post_scheduled',       // { platforms, count }
   'post_published',       // { platforms, count }
 
+  // ── TikTok Studio ────────────────────────────────────────────────────────
+  // Most people who connect anything connect only TikTok, and it takes video,
+  // not text, so their first post happens here rather than in Compose. These
+  // say where they stop. Flags and sizes only, never the video or caption.
+  'tiktok_studio_opened',   // { connected } once per visit
+  'tiktok_video_rejected',  // { reason: format | too_large | too_short | too_long }
+  'tiktok_video_added',     // { seconds, mb } a usable video is loaded
+  'tiktok_post_attempted',  // { mode: now | schedule | drafts }
+  'tiktok_post_done',       // { mode } handed to TikTok, or scheduled; server: { mode: scheduled_fire, result }
+  'tiktok_post_failed',     // { mode, stage, code }
+
   // ── Money ────────────────────────────────────────────────────────────────
   'upgrade_viewed',       // reached /pricing or the plan tab
   'upgrade_clicked',      // { plan }
