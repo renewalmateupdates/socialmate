@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
@@ -89,29 +89,17 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login`)
 
-  // --- Platform Jail: check if this Mastodon account is in cooldown ---
-  const { data: registryRecord } = await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .select('id, status, connected_to_user, cooling_until')
-    .eq('platform', 'mastodon')
-    .eq('platform_account_id', platform_user_id)
-    .maybeSingle()
-
-  if (registryRecord) {
-    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
-      cookieStore.delete('mastodon_oauth')
-      return NextResponse.redirect(`${appUrl}/accounts?error=mastodon_already_connected`)
-    }
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
-      const coolingUntil = new Date(registryRecord.cooling_until)
-      if (coolingUntil > new Date()) {
-        cookieStore.delete('mastodon_oauth')
-        const until = coolingUntil.toISOString()
-        return NextResponse.redirect(`${appUrl}/accounts?error=mastodon_in_cooldown&until=${encodeURIComponent(until)}`)
-      }
-    }
+  // One owner per Mastodon account, and a 45-day pause before a different
+  // SocialMate user can pick it up. Reconnecting your own is always allowed.
+  const verdict = await checkReconnect('mastodon', platform_user_id, user.id)
+  if (!verdict.allowed) {
+    cookieStore.delete('mastodon_oauth')
+    return NextResponse.redirect(
+      verdict.reason === 'already_connected'
+        ? `${appUrl}/accounts?error=mastodon_already_connected`
+        : `${appUrl}/accounts?error=mastodon_in_cooldown&until=${encodeURIComponent(verdict.until)}`
+    )
   }
-  // ----------------------------------------------------------------
 
   const { data: existing } = await supabase
     .from('connected_accounts')
@@ -162,21 +150,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Register in jail registry
-  await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .upsert(
-      {
-        platform: 'mastodon',
-        platform_account_id: platform_user_id,
-        connected_to_user: user.id,
-        status: 'active',
-        disconnected_at: null,
-        cooling_until: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'platform,platform_account_id' }
-    )
+  await markConnected('mastodon', platform_user_id, user.id)
 
   cookieStore.delete('mastodon_oauth')
   cookieStore.delete('pending_workspace_id')

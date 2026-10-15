@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { startCooling } from '@/lib/platform-jail'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -59,25 +59,9 @@ export async function POST(request: NextRequest) {
   const { error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Put the Twitter account into the 45-day cooling jail
-  if (platformUserId) {
-    const now = new Date()
-    const coolingUntil = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000)
-    await getSupabaseAdmin()
-      .from('platform_account_registry')
-      .update({
-        status: 'cooling',
-        // Deliberately NOT nulled. The cooldown exists to stop an account being
-        // passed between different SocialMate users, not to lock someone out of
-        // their own. Keeping the owner is what lets the callback tell those two
-        // cases apart.
-        disconnected_at: now.toISOString(),
-        cooling_until: coolingUntil.toISOString(),
-        updated_at: now.toISOString(),
-      })
-      .eq('platform', 'twitter')
-      .eq('platform_account_id', platformUserId)
-  }
+  // Start the 45-day pause. It stops a different SocialMate user picking this
+  // account up; the owner can reconnect at any time (lib/platform-jail.ts).
+  if (platformUserId) await startCooling('twitter', platformUserId)
 
   return NextResponse.json({ ok: true })
 }

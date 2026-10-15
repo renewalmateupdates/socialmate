@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
 import { isLegacyDiscordAccount } from '@/lib/discord-accounts'
 
@@ -95,29 +95,17 @@ export async function GET(request: NextRequest) {
   const metadata   = guildId ? { guild_id: guildId, guild_name: guildName } : {}
   const platformAccountId = guildId ?? discordUser.id
 
-  // --- Platform Jail: check if this Discord guild/account is in cooldown ---
-  const { data: registryRecord } = await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .select('id, status, connected_to_user, cooling_until')
-    .eq('platform', 'discord')
-    .eq('platform_account_id', platformAccountId)
-    .maybeSingle()
-
-  if (registryRecord) {
-    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
-      cookieStore.delete('discord_bot_state')
-      return NextResponse.redirect(`${appUrl}/accounts?error=discord_already_connected`)
-    }
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
-      const coolingUntil = new Date(registryRecord.cooling_until)
-      if (coolingUntil > new Date()) {
-        cookieStore.delete('discord_bot_state')
-        const until = coolingUntil.toISOString()
-        return NextResponse.redirect(`${appUrl}/accounts?error=discord_in_cooldown&until=${encodeURIComponent(until)}`)
-      }
-    }
+  // One owner per Discord account, and a 45-day pause before a different
+  // SocialMate user can pick it up. Reconnecting your own is always allowed.
+  const verdict = await checkReconnect('discord', platformAccountId, user.id)
+  if (!verdict.allowed) {
+    cookieStore.delete('discord_bot_state')
+    return NextResponse.redirect(
+      verdict.reason === 'already_connected'
+        ? `${appUrl}/accounts?error=discord_already_connected`
+        : `${appUrl}/accounts?error=discord_in_cooldown&until=${encodeURIComponent(verdict.until)}`
+    )
   }
-  // -----------------------------------------------------------------------
 
   // Check if a bot-connected account already exists for this guild
   const { data: existing } = await supabase
@@ -205,21 +193,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Register in jail registry
-  await getSupabaseAdmin()
-    .from('platform_account_registry')
-    .upsert(
-      {
-        platform: 'discord',
-        platform_account_id: platformAccountId,
-        connected_to_user: user.id,
-        status: 'active',
-        disconnected_at: null,
-        cooling_until: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'platform,platform_account_id' }
-    )
+  await markConnected('discord', platformAccountId, user.id)
 
   cookieStore.delete('discord_bot_state')
   return NextResponse.redirect(`${appUrl}/accounts?success=discord_connected`)
