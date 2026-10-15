@@ -341,8 +341,12 @@ function PostSettingsPanel({
                       off ? 'bg-raised opacity-40 cursor-not-allowed' : allowed ? 'bg-[#fe2c55]' : 'bg-raised'
                     }`}
                   >
-                    <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                      allowed ? 'translate-x-4' : 'translate-x-0.5'
+                    {/* left-0.5 is load-bearing. Without it the knob, an inline
+                        span, takes the button's centered static position: an off
+                        switch drew its knob flush right and read as on, which is
+                        the one thing TikTok's guidelines say these must not do. */}
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                      allowed ? 'translate-x-4' : 'translate-x-0'
                     }`} />
                   </button>
                 </div>
@@ -366,10 +370,12 @@ function PostSettingsPanel({
                 setCommercial(next)
                 if (!next) { setYourBrand(false); setBrandedContent(false) }
               }}
+              role="switch"
+              aria-checked={commercial}
               aria-label="Disclose commercial content"
               className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${commercial ? 'bg-[#fe2c55]' : 'bg-raised'}`}
             >
-              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${commercial ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${commercial ? 'translate-x-4' : 'translate-x-0'}`} />
             </button>
           </div>
           <p className="mt-1 text-[11px] text-ink-faint">
