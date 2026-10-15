@@ -600,7 +600,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/studio-stax`,         lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/studio-stax/apply`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/give`,                lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/wall-of-love`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/discount`,            lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/tools`,               lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/tools/thread-splitter`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },

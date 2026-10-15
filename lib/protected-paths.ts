@@ -38,6 +38,14 @@ export const PROTECTED_PATHS = [
   '/competitor-tracking',
   '/content-gap',
   '/search',
+  // App screens that rendered an empty shell or "Loading..." to logged-out
+  // visitors and sat in the sitemap. Signing in is the only useful next step.
+  '/achievements',
+  '/challenge',
+  '/community',
+  '/hashtag-collections',
+  '/monetize/hub',
+  '/zenith',
 ]
 
 export function isProtectedPath(pathname: string): boolean {
