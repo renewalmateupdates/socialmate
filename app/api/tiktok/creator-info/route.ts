@@ -84,6 +84,11 @@ export async function GET() {
   }
 
   let info: CreatorInfo | null = null
+  // TikTok's reason when it will not take posts from this creator right now
+  // (spam_risk_too_many_posts, reached_active_user_cap, ...). The guidelines
+  // require telling the creator to try later; without the code, the studio
+  // could only say "could not reach TikTok, reconnect", which was wrong advice.
+  let infoErrorCode: string | null = null
   try {
     const res = await fetch('https://open.tiktokapis.com/v2/post/publish/creator_info/query/', {
       method: 'POST',
@@ -97,7 +102,9 @@ export async function GET() {
       const data = await res.json()
       info = (data?.data ?? null) as CreatorInfo | null
     } else {
-      console.warn('[tiktok/creator-info] query failed:', res.status, (await res.text().catch(() => '')).slice(0, 200))
+      const body = await res.text().catch(() => '')
+      try { infoErrorCode = JSON.parse(body)?.error?.code ?? null } catch { /* not JSON */ }
+      console.warn('[tiktok/creator-info] query failed:', res.status, body.slice(0, 200))
     }
   } catch (err) {
     console.warn('[tiktok/creator-info] query threw (non-fatal):', err)
@@ -121,5 +128,6 @@ export async function GET() {
     // fallback, so it can say "we could not reach TikTok" instead of showing
     // an empty privacy list as though the account had no options.
     info_ok: info !== null,
+    info_error_code: infoErrorCode,
   })
 }
