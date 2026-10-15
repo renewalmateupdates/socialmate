@@ -159,6 +159,28 @@ export async function GET(req: NextRequest) {
     }))
     .sort((a, b) => b.clicked - a.clicked)
 
+  // Where signups came from. signup_completed carries landing, referrer_host
+  // and utm_source from PR #698 (deployed Oct 15, 2026 00:45 UTC) onward.
+  // Earlier ones carry only the provider, so they are counted apart rather
+  // than reported as "no source", which would read like a real answer.
+  const SOURCES_RECORDED_FROM = Date.parse('2026-10-15T00:45:00Z')
+  const sourceUsers: Record<string, Set<string>> = {}
+  const landingUsers: Record<string, Set<string>> = {}
+  let signupsBeforeSourceTracking = 0
+  for (const e of events) {
+    if (e.event_type !== 'funnel_signup_completed') continue
+    if (Date.parse(e.created_at) < SOURCES_RECORDED_FROM) { signupsBeforeSourceTracking++; continue }
+    const m = e.metadata ?? {}
+    const source = m.utm_source ? `utm: ${String(m.utm_source)}` : m.referrer_host ? String(m.referrer_host) : '(no referrer)'
+    ;(sourceUsers[source] ??= new Set()).add(e.user_id)
+    ;(landingUsers[m.landing ? String(m.landing) : '(unknown)'] ??= new Set()).add(e.user_id)
+  }
+  const ranked = (sets: Record<string, Set<string>>) =>
+    Object.entries(sets)
+      .map(([label, users]) => ({ label, users: users.size }))
+      .sort((a, b) => b.users - a.users)
+      .slice(0, 12)
+
   // Onboarding drop-off by step number.
   //
   // Distinct users per step, not raw fires — same rule as every other count
@@ -212,6 +234,9 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     publishFailures,
+    signupSources:  ranked(sourceUsers),
+    signupLandings: ranked(landingUsers),
+    signupsBeforeSourceTracking,
     windowDays: days,
     // Since instrumentation only starts now, the UI needs to say so rather
     // than present an empty recorded funnel as a real zero.
