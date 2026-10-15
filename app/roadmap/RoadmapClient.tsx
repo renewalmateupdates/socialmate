@@ -22,6 +22,10 @@ function formatMonth(ym: string): string {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
+  { date: '2026-10', title: 'Free tools', desc: 'A thread splitter sized for X, Bluesky and Mastodon, counted the way each platform counts, and a Discord timestamp generator. Free, no signup, at /tools.', status: 'shipped', category: 'Growth' },
+  { date: '2026-10', title: 'Scheduled TikTok videos go to drafts', desc: 'Until TikTok approves SocialMate for public posting, a scheduled video TikTok will not post publicly lands in your TikTok drafts at the time you picked, instead of failing.', status: 'shipped', category: 'Platforms' },
+  { date: '2026-10', title: 'Smoother signup', desc: 'Catches email typos, lets you resend the confirmation or fix the address, and offers a resend if you sign in before confirming.', status: 'shipped', category: 'Onboarding' },
+  { date: '2026-10', title: 'LinkedIn expiry warnings', desc: 'LinkedIn connections expire after 60 days. You get a notice and an email a week before.', status: 'shipped', category: 'Platforms' },
   { date: '2026-09', title: 'Discord bot connect + channel picker', desc: 'Connect Discord from Accounts by adding the SocialMate bot to a server you manage, then pick the channel to post into from a dropdown. No webhook copying.', status: 'shipped', category: 'Platforms' },
   { date: '2026-09', title: 'One-sentence first post', desc: 'Pick a kind of post, give one rough sentence or a link, and get an editable draft. Shown in onboarding and right after you connect a platform.', status: 'shipped', category: 'Onboarding' },
   { date: '2026-04', title: 'SOMA per-platform schedule', desc: 'Set different posts/day counts and day-of-week schedules per platform when creating a SOMA project. Bluesky 2x weekdays, X 1x weekends — all configured independently.', status: 'shipped', category: 'AI' },

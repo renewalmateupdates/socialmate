@@ -462,9 +462,10 @@ Rules that follow from it:
 
 ### Active — fix when touching the file
 
-No open known bugs as of August 30, 2026 (evening). Both audits are clean, and
-`audit-schema-drift.py` + `audit-dead-features.py` were both re-run after the
-#585–#595 sweep: no phantom columns, all 35 upsert targets indexed.
+No open known bugs as of October 15, 2026. `audit-schema-drift.py` and
+`audit-dead-features.py` were both re-run that day: no phantom columns across
+901 files, all 35 upsert targets indexed. (Previously clean after the #585–#595
+sweep on August 30.)
 
 **Both audits were clean on the morning of Aug 30 and five never-ran features
 were found anyway.** The audits catch phantom columns and impossible upserts.
@@ -1274,13 +1275,52 @@ Every Reddit comment Joshua screenshots now gets four steps: reply, verify again
 - **A secret pasted into chat is burned; rotate it.** Never ask for one. Client IDs are public and fine to share.
 - **Keep Reddit replies to 2–4 sentences.** Detail goes in chat and in the feedback log, not the reply.
 
+**September 27 to October 13, 2026: Discord and LinkedIn delivery, and a first post that kept re-sending (PRs #690–#694):**
+
+- **#690.** Seven outside users still had Discord connections from the login-only flow replaced on Sept 3. Those can never post, and each held the free plan's single Discord slot, so "reconnect" walked them into an Upgrade wall. `lib/discord-accounts.ts` `isLegacyDiscordAccount()`; adding the bot now upgrades the old row in place, and old rows no longer count toward the cap. The TikTok card says "videos only, to your drafts until TikTok approves public posting" before anyone connects.
+- **#691.** The bot invite permissions (268503040) claimed View Channel and did not include it (bit 10), so restricted channels returned 403, and Attach Files was missing too. Now 268536832, keeping Manage Roles for the auto-role feature. Already-connected servers keep the old permissions until the bot is re-invited or given the channel role. Post Now saves `platform_errors` like the scheduled path, and the 403 message says which channel permission to change (50001 cannot see, 50013 cannot send).
+- **#692.** LinkedIn tokens last 60 days with no refresh. New daily cron `token-expiry-warnings` (16:00 UTC) sends one in-app notice and one email per connection, from 7 days before expiry to 3 after. `/admin/funnel` gained "Why posts failed" (from `platform_errors`), and its ground-truth posts query is paged (PostgREST caps at 1,000 rows and there are 1,600+ published).
+- **#693.** An outside user's first scheduled LinkedIn post went out, stayed `scheduled`, and was re-sent by the GitHub Actions backstop on every pass. Cause: the March trigger `on_first_post_published` selected `referral_conversions.referrer_user_id`, a column that does not exist, so every first publish through an UPDATE raised 42703; and `/api/posts/publish`, which the backstop calls, never checked `platform_post_ids`. `lib/publish/repair-sent.ts` is now the one repair, used by both paths, and a post that already has ids is repaired instead of re-sent. The trigger is gone.
+- **#694.** About 200 pages declared the home page as their canonical URL (the root layout set `alternates.canonical` and every page inherited it). Blog index paged (it stopped at 500 of 674 rows) and categories normalized. Stale copy fixed: annual "up to 13%", `/for/streamers` calling TikTok "coming soon", the founder bio's present-tense deli job. The feedback widget said "Thanks" when the send failed.
+
+**October 14–15, 2026: The first outside publishers, and fixing what the data pointed at (PRs #695–#703):**
+
+Read-only pull of the funnel, Sept 24 to Oct 14, all internal accounts excluded:
+
+- **Two outside users have published, the first ever.** A Discord and Bluesky user (signed up Oct 2, several posts, scheduled ones firing on their own) and a LinkedIn user (Oct 9, used the one-sentence starter from `/accounts`). 199 external accounts, 59 ever connected, 18 with any post row.
+- **TikTok is the wall.** Of 22 people who connected anything since Sept 24, 16 connected only TikTok and none can post publicly until the content sharing audit clears. With a text platform connected, 2 of 6 published.
+- **Signups are falling:** 24 and 25 a week in mid-September, then 15, 7, 6.
+- **AI works in production again:** an Oct 9 call kept its credits (a failed call refunds them). The 8 repurpose calls of Sept 24–29 were mostly refunded, so it was down then. The Gemini key in local `.env.local` is dead, so AI does not run in local dev.
+- **Both audits clean** (no phantom columns across 901 files, all 35 upsert targets indexed). The 49 zero-row tables checked so far are unused features, not broken writes (guide capture is on all 14 guides and wired correctly).
+
+What shipped:
+
+- **#695** repo hygiene: three i18n checkers kept (`scripts/check-i18n-keys.js`, `check-translations.js`, `check-placeholders.js`), `supabase/blog_batch_18.sql`, `.claude/launch.json`. The repo is public: the memoir, signed CMO contracts, backups and store assets in its root are excluded locally in `.git/info/exclude`, never in `.gitignore`.
+- **#696** TikTok: a scheduled video TikTok refuses only because of the audit (`unaudited_client_can_only_post_to_private_accounts`, or `privacy_level_option_mismatch`) now goes to the creator's TikTok drafts at the scheduled time through the inbox endpoint, instead of failing with TikTok's raw text. Logic in `lib/tiktok-scheduled.ts`, pure and tested. The job also stopped hand-rolling token refresh (it skipped NULL expiries and used the sandbox key), claims each row before sending, never throws mid-send, stops counting a scheduled video twice against the quota, refunds a failed one, and notifies the creator. TikTok Studio offers one tap, "Send to TikTok drafts instead", after a refused Post Now. A real user's video scheduled for Nov 25 is the first live test.
+- **#697** signup: 5 of 22 email signups since Sept 24 never confirmed (Google: 21 of 21), one at `gmaip.com`. `lib/email-help.ts` suggests a fix for lookalike domains and holds submit once; the confirmation screen has an inbox button, "Send it again" with Supabase's 60-second limit counted down, and "Change it"; login recognizes `email_not_confirmed` and offers the same resend.
+- **#698** auth: "new account" meant `created_at` under 60 seconds, but an email account is created at form submit and the callback runs at the confirmation click. **All 7 email signups since Aug 1 that took over a minute got no `signup_completed`, no welcome sequence and no saved newsletter choice.** `lib/new-account.ts` `isFirstSignIn()` also accepts an email confirmed in the last 15 minutes; the welcome flag is upserted and `user/signup` carries an idempotency id. Signup source was captured only on `/signup`, so 85 of 125 signups from Aug 17 had none: `components/AttributionCapture` (mounted in `LazyClientComponents`) now records referrer, UTM and landing page on the first page a visitor loads, the signup form copies it into the account metadata, and `signup_completed` carries `landing`, `referrer_host` and `utm_source`. Of the sources that survived before this: Google 18, ChatGPT 16.
+- **#699** daily cron `cleanup-staged-tiktok-videos` (07:30 UTC) deletes our copy of a scheduled video a day after it is sent, a week after it fails. Only cancelling did before. A read-only dry run said the first run (07:30 UTC Oct 15) frees 99.3 MB.
+- **#700** `/admin/funnel` opens its recorded section with "Where signups came from": source and first landing page, from Oct 15 00:45 UTC on. Earlier signups are counted apart, never shown as "no source".
+- **#701** TikTok Studio funnel: `tiktok_studio_opened`, `tiktok_video_rejected`, `tiktok_video_added`, `tiktok_post_attempted`, `tiktok_post_done`, `tiktok_post_failed` (with `stage` and TikTok's `code`), plus the scheduled job's real outcome. Also fixed: the video-length check used the default 10 minutes forever (a `useCallback` with no dependencies), never the creator's real limit.
+- **#702** compose: the scheduling-window 403 sent `upgrade: true` while every other plan wall sends copy, so the toast read "true". It now says why and what Pro allows ("Upgrade to Pro to schedule up to 1 month ahead"), and the server admits the whole last day the date picker offers. The active Discord user hit this twice: the first outside user to touch a paid limit.
+- **#703** free tools at `/tools`: a thread splitter (X weighted 280, Bluesky 300 graphemes, Mastodon 500, links counted the way each platform counts) and a Discord timestamp generator. No AI, everything in the browser, a "Start free" CTA with no UTM so the real source survives. English only. Fuzzed: 200 messy inputs per platform, every part fits, no text lost.
+- **Confirmation email resent once** (Joshua approved, Oct 15) to the 9 unconfirmed email signups since Aug 15, one per hour so a low Supabase email cap could not block a real signup; the `gmaip.com` typo was skipped. Do not resend to this cohort.
+
+**Rules that follow:**
+
+- **"Created in the last minute" is not "new account".** Email signups confirm minutes later. Use `isFirstSignIn()`.
+- **Capture where a visit starts, not where the form is.** Almost nobody lands on `/signup`.
+- **A response field has one type everywhere.** If the UI reads `upgrade` as copy, no route may send a boolean. Grep the consumers before changing a response shape.
+- **Fuzz anything that rewrites user text.** The splitter's first sentence regex silently dropped whatever it could not match, and only random input showed it.
+- **A `useCallback` with no dependencies freezes what it read on the first render.** Treat that lint warning as a bug report.
+
 ## Pending / In Progress
 
-- **Open as of Sept 26, 2026 (Joshua's side):** replies to the emails sent to the 38 (triage them with Claude); re-record and resubmit the TikTok audit video (must end on TikTok's own UI showing the live post); delete the 4 public posts that state the old $5 price (2 on X, 1 on Bluesky, 1 on Telegram); reconnect LinkedIn (60-day token expired) and do NOT retry the 7 failed LinkedIn posts; put funds in the Gemini account or set up a fresh free-tier project; confirm the reply to the Discord bug reporter was sent (reporter's second report is Sept 25); one real live-mode Creator Hub tip before announcing it. Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), and trimming the Discord bot's Manage Roles permission.
+- **Open as of Oct 15, 2026 (Joshua's side):** **re-record and resubmit the TikTok audit video** (must end on TikTok's own UI showing the live post); it is now the biggest lever there is, since 16 of the last 22 people to connect anything connected only TikTok. Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
 
 - **Creator Hub payments: fee pass-through, $3 floor, Connect capability fix (Sept 24, merged in #683).** Decision (Joshua): SocialMate does not absorb Stripe's fee. Tip, unlock and subscription checkouts now carry an application fee equal to Stripe's fee (`application_fee_amount` for one-time payments, `transfer_data.amount_percent` for subscriptions, which cannot use `application_fee_percent`), so SocialMate keeps nothing and creators net what any Stripe merchant would. The landing page already says "Just Stripe (~2.9% + 30c)". `lib/creator-pricing.ts` holds the math; verified against real test-mode charges to the cent at $3/$5/$10/$25 for US cards. **Found while testing:** Connect accounts were created with no capabilities requested, so Stripe rejects every destination-charge checkout with "missing the required capabilities: transfers" and `charges_enabled` could never become true; Creator Hub could not have taken a payment. Accounts now request `transfers` only (5 onboarding requirements vs 13 with `card_payments`) and onboarding-complete means `transfers` is active. Payouts are set to weekly because Connect bills 0.25% + 25c per payout. One shared $3 minimum for tips, unlocks and subscriptions (server-enforced; tip presets now $3/$5/$10/$25). **Still true:** international cards cost 1.5% more and currency conversion 1%, absorbed by SocialMate (about 7c on a $5 tip); Stripe Billing adds 0.7% on subscriptions (included in the subscription fee); Connect charges $2 per active creator per month, covered by the creator's Pro plan. Zero creators exist, so nothing needs grandfathering. **Not verifiable in test mode** (Custom accounts need a Connect platform-profile setting): a full transfer with a real active account. Run one real live-mode tip end to end before announcing Creator Hub. #679's `on_behalf_of` attempt was wrong and reverted in #681.
 
-- **TikTok content sharing audit — REJECTED Sept 15, 2026.** Reference `20260910025309`. TikTok's stated reason: the demo video didn't show the complete end-to-end flow, and didn't end with proof the post actually went live on TikTok — reads as a video problem, not a code problem, since the app's actual UX (privacy dropdown, duet/comment/stitch toggles, disclosure + consent, `publishState === 'live'` confirmation) already matches TikTok's published requirements. Resubmission needs a re-recorded demo video that ends on TikTok's own UI showing the live post, not just the app's "Published to TikTok" status card. Script drafted on request, not yet written; Joshua plans to record solo and resubmit himself. See `[[project_tiktok_content_sharing_audit]]` for the full breakdown. Until this clears, TikTok Studio stays private/drafts-only, same as today. Don't do further TikTok posting-flow work until this resolves one way or the other.
+- **TikTok content sharing audit — REJECTED Sept 15, 2026.** Reference `20260910025309`. TikTok's stated reason: the demo video didn't show the complete end-to-end flow, and didn't end with proof the post actually went live on TikTok — reads as a video problem, not a code problem, since the app's actual UX (privacy dropdown, duet/comment/stitch toggles, disclosure + consent, `publishState === 'live'` confirmation) already matches TikTok's published requirements. Resubmission needs a re-recorded demo video that ends on TikTok's own UI showing the live post, not just the app's "Published to TikTok" status card. Script drafted on request, not yet written; Joshua plans to record solo and resubmit himself. See `[[project_tiktok_content_sharing_audit]]` for the full breakdown. Until this clears, TikTok Studio stays private/drafts-only, same as today. Don't change any audit-reviewed TikTok UI until this resolves. The Oct 14 changes (#696, #701) only touched what happens after TikTok refuses a post, and measurement; the reviewed screens are unchanged.
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
 
@@ -1293,6 +1333,14 @@ Every Reddit comment Joshua screenshots now gets four steps: reply, verify again
   wrong for five months because it counted our own accounts, and the onboarding
   flow was saving nothing at all. Both found by walking the product, not reading
   it. Lead with the measurement error; the bug fixes are the supporting detail.
+
+- **Activation, Oct 14 update.** The first two outside users published in
+  October (Discord and Bluesky from Oct 2, LinkedIn on Oct 9): 199 external
+  accounts, 59 ever connected, 18 with any post row. Of people with a text
+  platform connected since Sept 24, 2 of 6 published; of the 16 who connected
+  only TikTok, none could. Signups fell to about 6 a week, so getting people in
+  the door (free tools, #703) now matters as much as activation. The history
+  below is kept for context.
 
 - **Activation is the whole problem.** Measured 30 Aug with **all four internal
   accounts excluded**: 103 accounts, 18 connected a platform, **0 external users
@@ -1342,6 +1390,10 @@ Every Reddit comment Joshua screenshots now gets four steps: reply, verify again
 - **Product Hunt follow-up** — "We've shipped 50+ features since launch." Target: June 1, 2026.
 
 ## Confirmed Done (stop asking about these)
+
+- ✅ **Oct 14–15 batch, PRs #695–#703, all merged and deployed.** TikTok scheduled videos fall back to drafts, staged video cleanup, TikTok Studio funnel, signup typo check and resend, late-confirmer new-account fix, first-touch signup attribution and its `/admin/funnel` panel, the scheduling-window toast and boundary, free tools at `/tools`, repo hygiene. Inngest resynced by Joshua after #699 and #701. See the Oct 14–15 entry above; do not redo any of these.
+- ✅ **Confirmation email resend (Oct 15)**: once, to the 9 unconfirmed email signups since Aug 15. Never resend to that cohort.
+- ✅ **Sept 27 to Oct 13 batch, PRs #690–#694.** Legacy Discord upgrade, bot permissions and actionable 403s, LinkedIn expiry warnings, the re-sent first post and its trigger, canonical URLs and the blog index.
 
 - ✅ **Discord connect fixed and verified end to end (Sept 26, 2026)** — `DISCORD_CLIENT_ID`/`DISCORD_CLIENT_SECRET` in Vercel now point at the April app (`1492662834012885163`), which owns the `bot-callback` redirect and the bot. A real connect, channel pick and Compose post landed in the community server. Never re-diagnose "Invalid OAuth2 redirect_uri" as a code bug; check which Discord app the env vars point to.
 - ✅ **SOMA Full Send scheduling fix (Sept 26, PR #687)** — times assigned in code (`lib/soma-schedule.ts`), `post/scheduled` sent per post, Gemini failures throw, stale price removed from the voice profile. Not verified against a real run (both projects were deleted afterward). Never trust model-returned dates again.
