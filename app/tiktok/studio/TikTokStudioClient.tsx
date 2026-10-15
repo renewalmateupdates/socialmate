@@ -75,6 +75,8 @@ export interface CreatorLimits {
   stitchDisabled: boolean
   maxDurationSec: number
   infoOk: boolean
+  /** TikTok's reason for refusing posts right now, when it gave one. */
+  infoErrorCode: string | null
 }
 
 type CreatorInfo = {
@@ -85,7 +87,15 @@ type CreatorInfo = {
   username?:    string | null
   creator_info?: Record<string, unknown>
   info_ok?:     boolean
+  info_error_code?: string | null
 }
+
+// TikTok's required text for a disclosure that is switched on with nothing chosen.
+const DISCLOSURE_REQUIRED = 'You need to indicate if your content promotes yourself, a third party, or both.'
+
+// creator_info errors that mean "this account cannot post right now", which the
+// guidelines say to answer with "try again later", not with "reconnect".
+const CANT_POST_NOW = new Set(['spam_risk_too_many_posts', 'spam_risk_user_banned_from_posting', 'reached_active_user_cap'])
 
 // ── Post settings panel (shared between right panel and mobile Post tab) ──────
 
@@ -121,6 +131,8 @@ interface PostSettingsPanelProps {
   scheduledAt:     string
   setScheduledAt:  (v: string) => void
   postError:       string | null
+  /** The creator's TikTok nickname, shown so they know which account gets the post. */
+  accountName:     string | null
   /** Set when TikTok refused a direct post that the creator could still send to drafts. */
   postRemedy:      'drafts_or_private' | null
   sendToDraftsInstead: () => void
@@ -143,7 +155,7 @@ function PostSettingsPanel({
   disableComment, setDisableComment,
   scheduleMode, setScheduleMode,
   scheduledAt, setScheduledAt,
-  postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, handlePost,
+  postError, accountName, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, handlePost,
 }: PostSettingsPanelProps) {
   // Same gate as the parent, derived from props so the panel never enables a
   // button the parent would reject.
@@ -151,6 +163,14 @@ function PostSettingsPanel({
     !!privacyLevel &&
     !(commercial && !yourBrand && !brandedContent) &&
     !(brandedContent && privacyLevel === 'SELF_ONLY')
+
+  // Why the button is disabled, in TikTok's own words where the guidelines
+  // give them. Shown when hovering the disabled button.
+  const blockedReason =
+    commercial && !yourBrand && !brandedContent ? DISCLOSURE_REQUIRED
+    : brandedContent && privacyLevel === 'SELF_ONLY' ? 'Branded content visibility cannot be set to private.'
+    : !privacyLevel ? 'Choose who can see this video.'
+    : null
 
   return (
     <div className="flex flex-col h-full">
@@ -249,43 +269,40 @@ function PostSettingsPanel({
           </label>
           {limits.privacyOptions.length === 0 ? (
             <p className="text-xs text-amber">
-              {limits.infoOk
+              {limits.infoErrorCode && CANT_POST_NOW.has(limits.infoErrorCode)
+                ? 'TikTok is not accepting new posts from this account right now. Try again later.'
+                : limits.infoOk
                 ? 'TikTok reports no available privacy settings for this account.'
                 : 'Could not reach TikTok for this account settings. Reconnect TikTok and try again.'}
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-1.5">
+            // A dropdown with no default, as TikTok's guidelines specify. The
+            // options are exactly what this account allows, from creator_info.
+            <select
+              value={privacyLevel}
+              onChange={e => setPrivacyLevel(e.target.value)}
+              aria-label="Who can see this video"
+              className="w-full min-h-[44px] rounded-xl border border-edge bg-panel px-3 text-sm text-ink-high focus:border-[#fe2c55] focus:outline-none"
+            >
+              <option value="" disabled>Choose who can see this video</option>
               {limits.privacyOptions.map(opt => {
-                // Branded content can never be private -- TikTok rejects the
-                // combination outright, so "Only me" is locked out here rather
-                // than left clickable with just a warning underneath.
+                // Branded content can never be private, so "Only me" is
+                // unavailable while it is selected.
                 const lockedByBranding = brandedContent && opt === 'SELF_ONLY'
                 return (
-                  <button
-                    key={opt}
-                    onClick={() => !lockedByBranding && setPrivacyLevel(opt)}
-                    disabled={lockedByBranding}
-                    title={lockedByBranding ? 'Branded content cannot be visible to only you.' : undefined}
-                    className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                      lockedByBranding
-                        ? 'bg-panel border-edge text-ink-faint opacity-40 cursor-not-allowed'
-                        : privacyLevel === opt
-                        ? 'bg-[#fe2c55] border-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
-                        : 'bg-panel border-edge text-ink-muted hover:border-edge-lit hover:text-ink-high'
-                    }`}
-                  >
-                    {PRIVACY_LABELS[opt] ?? opt}
-                  </button>
+                  <option key={opt} value={opt} disabled={lockedByBranding}>
+                    {PRIVACY_LABELS[opt] ?? opt}{lockedByBranding ? ' (not available for branded content)' : ''}
+                  </option>
                 )
               })}
-            </div>
+            </select>
           )}
           {!privacyLevel && limits.privacyOptions.length > 0 && (
-            <p className="mt-2 text-[11px] text-ink-faint">Pick one to enable posting.</p>
+            <p className="mt-2 text-[11px] text-ink-faint">Choose one to enable posting.</p>
           )}
-          {brandedContent && privacyLevel === 'SELF_ONLY' && (
-            <p className="mt-2 text-[11px] text-alert">
-              Branded content cannot be visible to only you. Choose another audience.
+          {brandedContent && (
+            <p className={`mt-2 text-[11px] ${privacyLevel === 'SELF_ONLY' ? 'text-alert' : 'text-ink-muted'}`}>
+              Branded content visibility cannot be set to private.
             </p>
           )}
         </div>
@@ -295,33 +312,42 @@ function PostSettingsPanel({
             These were free toggles. A creator whose account has comments off
             saw a comment switch that did nothing, and the audit checks exactly
             this. */}
+        {/* "Allow" switches, all off until the creator turns them on, in
+            TikTok's own wording and order. They used to read "Disable X" and
+            start switched on: the same setting, but on screen the opposite of
+            what the guidelines describe. */}
         <div>
           <label className="text-xs font-bold text-ink-muted uppercase tracking-wider block mb-2">Interactions</label>
           <div className="space-y-2">
             {[
-              { key: 'duet',    label: 'Disable Duets',    val: disableDuet,    set: setDisableDuet,    off: limits.duetDisabled },
-              { key: 'stitch',  label: 'Disable Stitch',   val: disableStitch,  set: setDisableStitch,  off: limits.stitchDisabled },
-              { key: 'comment', label: 'Disable Comments', val: disableComment, set: setDisableComment, off: limits.commentDisabled },
-            ].map(({ key, label, val, set, off }) => (
-              <div key={key} className="flex items-center justify-between">
-                <span className={`text-xs ${off ? 'text-ink-faint' : 'text-ink-muted'}`}>
-                  {label}
-                  {off && <span className="ml-1.5 text-[10px] text-ink-faint">off for your account</span>}
-                </span>
-                <button
-                  onClick={() => !off && set(!val)}
-                  disabled={off}
-                  aria-label={label}
-                  className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${
-                    off ? 'bg-raised opacity-40 cursor-not-allowed' : val ? 'bg-[#fe2c55]' : 'bg-raised'
-                  }`}
-                >
-                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                    off || val ? 'translate-x-4' : 'translate-x-0.5'
-                  }`} />
-                </button>
-              </div>
-            ))}
+              { key: 'comment', label: 'Allow Comment', disabled: disableComment, setDisabled: setDisableComment, off: limits.commentDisabled },
+              { key: 'duet',    label: 'Allow Duet',    disabled: disableDuet,    setDisabled: setDisableDuet,    off: limits.duetDisabled },
+              { key: 'stitch',  label: 'Allow Stitch',  disabled: disableStitch,  setDisabled: setDisableStitch,  off: limits.stitchDisabled },
+            ].map(({ key, label, disabled, setDisabled, off }) => {
+              const allowed = !off && !disabled
+              return (
+                <div key={key} className="flex items-center justify-between">
+                  <span className={`text-xs ${off ? 'text-ink-faint' : 'text-ink-muted'}`}>
+                    {label}
+                    {off && <span className="ml-1.5 text-[10px] text-ink-faint">turned off in your TikTok settings</span>}
+                  </span>
+                  <button
+                    onClick={() => !off && setDisabled(!disabled)}
+                    disabled={off}
+                    role="switch"
+                    aria-checked={allowed}
+                    aria-label={label}
+                    className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${
+                      off ? 'bg-raised opacity-40 cursor-not-allowed' : allowed ? 'bg-[#fe2c55]' : 'bg-raised'
+                    }`}
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                      allowed ? 'translate-x-4' : 'translate-x-0.5'
+                    }`} />
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -333,7 +359,7 @@ function PostSettingsPanel({
             and it changes with what they select. */}
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-ink-muted uppercase tracking-wider">Disclose content</label>
+            <label className="text-xs font-bold text-ink-muted uppercase tracking-wider">Content disclosure</label>
             <button
               onClick={() => {
                 const next = !commercial
@@ -371,14 +397,15 @@ function PostSettingsPanel({
               ))}
 
               {!yourBrand && !brandedContent && (
-                <p className="text-[11px] text-alert">Pick at least one, or turn disclosure off.</p>
+                <p className="text-[11px] text-alert">{DISCLOSURE_REQUIRED}</p>
               )}
 
+              {/* TikTok's wording, word for word. */}
               {(yourBrand || brandedContent) && (
                 <p className="text-[11px] leading-relaxed text-ink-muted">
                   {brandedContent
-                    ? 'Your video will be labelled Paid partnership.'
-                    : 'Your video will be labelled Promotional content.'}
+                    ? "Your video will be labeled as 'Paid partnership'"
+                    : "Your video will be labeled as 'Promotional content'"}
                 </p>
               )}
             </div>
@@ -480,9 +507,18 @@ function PostSettingsPanel({
                className="text-[#fe2c55] underline underline-offset-2">Music Usage Confirmation</a>.
           </p>
         )}
+        {/* Which account gets the post. The guidelines require the creator's
+            nickname on the posting page; the header shows it too. */}
+        {accountName && (
+          <p className="text-xs text-ink-muted text-center">
+            {scheduleMode === 'drafts' ? 'Sending to the drafts of ' : 'Posting to '}
+            <span className="font-semibold text-ink-high">{accountName}</span> on TikTok
+          </p>
+        )}
         <button
           onClick={handlePost}
           disabled={!videoUrl || isWorking || !canPost || (scheduleMode === 'schedule' && !scheduledAt)}
+          title={blockedReason ?? undefined}
           className="w-full bg-[#fe2c55] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20"
         >
           {uploading
@@ -500,7 +536,9 @@ function PostSettingsPanel({
             ? (scheduleMode === 'schedule' ? 'Saving your video so it can be posted later…' : 'Uploading your video directly to TikTok…')
             : scheduleMode === 'schedule'
             ? "Saved now and sent to TikTok at the time you pick. If TikTok won't take a direct post from SocialMate yet, it goes to your TikTok drafts at that time instead."
-            : 'Your original video will be uploaded via TikTok\'s Content Posting API.'}
+            : scheduleMode === 'drafts'
+            ? 'It can take a few minutes to arrive in your TikTok drafts. Finish and post it in the TikTok app.'
+            : 'After you post, TikTok can take a few minutes to process your video before it appears on your profile.'}
         </p>
       </div>
     </div>
@@ -524,6 +562,7 @@ export default function TikTokStudioClient() {
     stitchDisabled:  ci.stitch_disabled  !== false,
     maxDurationSec:  typeof ci.max_video_post_duration_sec === 'number' ? ci.max_video_post_duration_sec : MAX_DURATION_S,
     infoOk:          creator?.info_ok === true,
+    infoErrorCode:   creator?.info_error_code ?? null,
   }
 
   const [creatorLoading, setCreatorLoading] = useState(true)
@@ -1313,6 +1352,7 @@ export default function TikTokStudioClient() {
     scheduleMode, setScheduleMode,
     scheduledAt, setScheduledAt,
     postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting,
+    accountName: creator?.account_name ?? null,
     // Wrapped: the panel passes this straight to onClick, and the click event
     // must not arrive as handlePost's mode override.
     handlePost: () => { void handlePost() },
@@ -1397,7 +1437,7 @@ export default function TikTokStudioClient() {
                 scheduled
                   ? `We'll send it to TikTok on ${new Date(scheduledAt).toLocaleString()}. If TikTok won't take a direct post from SocialMate yet, it lands in your TikTok drafts instead, and you'll get a notification here and in TikTok.`
                 : publishState === 'checking'
-                  ? 'The upload finished. Waiting for TikTok to finish processing it — this is usually quick.'
+                  ? 'The upload finished. TikTok can take a few minutes to process a video before it appears on your profile.'
                 : publishState === 'live'
                   ? 'TikTok confirmed the video is published.'
                 : publishState === 'drafted'
@@ -1489,7 +1529,9 @@ export default function TikTokStudioClient() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full ring-2 ring-edge" />
             )}
-            <span className="text-xs text-ink-muted hidden sm:block">{creator.account_name}</span>
+            {/* Visible at every width: the guidelines want the creator to see
+                which account the post goes to. It was hidden on phones. */}
+            <span className="max-w-32 truncate text-xs text-ink-muted">{creator.account_name}</span>
             <button
               onClick={() => fetch('/api/tiktok/disconnect', { method: 'POST' }).then(() => setCreator({ connected: false }))}
               className="text-xs text-ink-faint hover:text-ink-muted transition-colors"
