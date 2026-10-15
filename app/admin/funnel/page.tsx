@@ -27,6 +27,9 @@ type Funnel = {
   failures: { reason: string; count: number }[]
   publishFailures: { platform: string; reason: string; posts: number; users: number }[]
   onboardingSteps: { step: string; fires: number }[]
+  signupSources: { label: string; users: number }[]
+  signupLandings: { label: string; users: number }[]
+  signupsBeforeSourceTracking: number
 }
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -225,6 +228,45 @@ export default function AdminFunnelPage() {
               </Panel>
             ) : (
               <>
+                {/* Top of the funnel. Recorded on the first page a visitor
+                    lands on (lib/attribution.ts), not only on /signup. */}
+                <Panel>
+                  <div className="border-b border-edge px-5 py-3.5">
+                    <Label>Where signups came from</Label>
+                  </div>
+                  {data.signupSources.length === 0 ? (
+                    <p className="px-5 py-4 text-xs text-ink-faint">
+                      No signups with a recorded source in this window yet. Sources are recorded from Oct 14, 2026.
+                    </p>
+                  ) : (
+                    <div className="grid sm:grid-cols-2">
+                      <div className="sm:border-r sm:border-edge">
+                        <p className="px-5 pt-4"><Label>Source</Label></p>
+                        <Bars rows={data.signupSources.map(s => ({ label: s.label, a: s.users }))} empty="" />
+                      </div>
+                      <div className="border-t border-edge sm:border-t-0">
+                        <p className="px-5 pt-4"><Label>First page they landed on</Label></p>
+                        <div className="flex flex-col gap-2 px-5 py-4">
+                          {data.signupLandings.map(l => (
+                            <div key={l.label} className="flex items-center justify-between gap-3">
+                              <span className="truncate font-mono text-xs text-ink-body" title={l.label}>{l.label}</span>
+                              <span className="shrink-0 font-mono text-xs tabular-nums text-ink-muted">{l.users}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <p className="border-t border-edge px-5 py-3 text-[11px] text-ink-faint">
+                    Distinct signups, external only. &ldquo;(no referrer)&rdquo; means a direct visit, a bookmark, an app
+                    that strips referrers, or a declined cookie banner.
+                    {data.signupsBeforeSourceTracking > 0 && (
+                      <> {data.signupsBeforeSourceTracking} signup{data.signupsBeforeSourceTracking === 1 ? '' : 's'} in
+                      this window came before sources were recorded and are not shown.</>
+                    )}
+                  </p>
+                </Panel>
+
                 <Panel>
                   <div className="border-b border-edge px-5 py-3.5">
                     <Label>Connect: clicked vs succeeded</Label>
