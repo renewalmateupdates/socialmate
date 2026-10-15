@@ -1,39 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-
-// Routes that require authentication — redirect to /login if no session
-const PROTECTED_PATHS = [
-  '/dashboard',
-  '/analytics',
-  '/compose',
-  '/calendar',
-  '/queue',
-  '/drafts',
-  '/settings',
-  '/accounts',
-  '/ai-features',
-  '/sm-pulse',
-  '/sm-radar',
-  '/bulk-scheduler',
-  '/hashtags',
-  '/affiliate',
-  '/notifications',
-  '/team',
-  '/workspaces',
-  '/onboarding',
-  '/inbox',
-  '/social-inbox',
-  '/link-in-bio',
-  '/rss-import',
-  '/media',
-  '/templates',
-  '/approvals',
-  '/evergreen',
-  '/best-times',
-  '/competitor-tracking',
-  '/content-gap',
-  '/search',
-]
+// Routes that require authentication; redirect to /login if no session. The
+// list is shared with the sitemap so the two cannot disagree.
+import { isProtectedPath } from '@/lib/protected-paths'
 
 // Attach the ?ref=CODE capture to a response. Runs on every route (referral
 // links land on public marketing pages, not just protected ones).
@@ -43,7 +12,10 @@ function captureRefCode(request: NextRequest, response: NextResponse): NextRespo
     response.cookies.set('sm_ref', refCode, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 30,
+      // 60 days: /affiliates promises partners "a 60-day cookie window so late
+      // converts still count", and this cookie is what auth/callback attributes
+      // the signup from. It was 30.
+      maxAge: 60 * 60 * 24 * 60,
       path: '/',
       sameSite: 'lax',
     })
@@ -53,7 +25,7 @@ function captureRefCode(request: NextRequest, response: NextResponse): NextRespo
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const isProtected = PROTECTED_PATHS.some(path => pathname.startsWith(path))
+  const isProtected = isProtectedPath(pathname)
 
   // PUBLIC ROUTES: no auth call at all.
   //
