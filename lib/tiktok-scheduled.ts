@@ -151,6 +151,44 @@ export async function sendScheduledTiktok(
   }
 }
 
+/**
+ * A scheduled video is copied into our storage so TikTok can pull it at the
+ * scheduled time. Nothing removed that copy afterwards (only cancelling did),
+ * so every scheduled video stayed in the media bucket for good: 146.7 MB across
+ * 6 files by Oct 14, 2026, and each new one adds 25 to 50 MB.
+ *
+ * TikTok pulls the file within minutes of the send, so a day is a wide margin.
+ * A failed video is kept a week in case someone looks into why it failed. A
+ * video that is still scheduled or mid-send is never touched.
+ */
+export interface StagedTiktokRow {
+  id: string
+  status: string
+  video_storage_path: string | null
+  video_url: string | null
+  scheduled_at: string | null
+  created_at: string
+}
+
+export const STAGED_KEEP_AFTER_SEND_MS = 24 * 60 * 60 * 1000
+export const STAGED_KEEP_AFTER_FAIL_MS = 7 * 24 * 60 * 60 * 1000
+
+export function stagedFilesToClean(rows: StagedTiktokRow[], now: number = Date.now()): StagedTiktokRow[] {
+  return rows.filter(row => {
+    if (!row.video_storage_path) return false
+    const sentAt = Date.parse(row.scheduled_at ?? row.created_at)
+    if (!Number.isFinite(sentAt)) return false
+    if (row.status === 'published' || row.status === 'in_drafts') return now - sentAt > STAGED_KEEP_AFTER_SEND_MS
+    if (row.status === 'failed') return now - sentAt > STAGED_KEEP_AFTER_FAIL_MS
+    return false
+  })
+}
+
+/** Our proxy link to a staged file dies with the file. TikTok's own link, which replaces it once a post is live, is kept. */
+export function isStagedVideoUrl(url: string | null): boolean {
+  return !!url && url.includes('/api/tiktok/video/')
+}
+
 /** The in-app notice for a video that went to drafts instead of posting. */
 export function draftsNotice(directCode: string, caption: string | null): { title: string; message: string } {
   const why = directCode === 'privacy_level_option_mismatch'
