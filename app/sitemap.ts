@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { isProtectedPath } from '@/lib/protected-paths'
 
 // Blog posts live in two places: the hardcoded POSTS map in
 // app/blog/[slug]/page.tsx and the `blog_posts` table. generateStaticParams
@@ -615,8 +616,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/integrations`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/hashtag-collections`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/beta`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
-    { url: `${base}/analytics`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/calendar`,            lastModified: now, changeFrequency: 'monthly' as const, priority: 0.7 },
     { url: `${base}/blog`,                lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/vs`,                  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/privacy`,             lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
@@ -639,8 +638,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/guides/reddit-marketing`,             lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/support`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/changelog`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
-    { url: `${base}/clips`,              lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/create`,             lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/streamers`,        lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/agencies`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/small-business`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
@@ -660,7 +657,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/about`,                lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/press`,                lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/referral`,           lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${base}/analytics/dna`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/monetize`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/glossary`,           lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/grants`,             lastModified: now, changeFrequency: 'daily',   priority: 0.8 },
@@ -668,12 +664,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/achievements`,       lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/challenge`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/zenith`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
-    { url: `${base}/sm-pulse`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
-    { url: `${base}/sm-radar`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/enterprise`,         lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/soma`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
     { url: `${base}/agents`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
-    { url: `${base}/ai-features`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/monetize/hub`,       lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/tiktok/studio`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
   ]
@@ -796,8 +789,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Final guard: a duplicate <loc> is wasted crawl budget, and core/comparisons
   // are hand-maintained lists that can pick one up the same way BLOG_SLUGS did.
+  // Sign-in-only pages are dropped too: eight of them were listed here, and a
+  // search engine sent to one only ever gets a redirect to /login.
   const seen = new Set<string>()
   return [...core, ...comparisons, ...blogPosts].filter(entry => {
+    if (isProtectedPath(new URL(entry.url).pathname)) return false
     if (seen.has(entry.url)) return false
     seen.add(entry.url)
     return true
