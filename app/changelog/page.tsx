@@ -21,6 +21,31 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'October 15, 2026',
+    version: 'Free Tools, TikTok Drafts Fallback, Smoother Signup',
+    changes: [
+      { type: 'New',      text: 'Free tools, no signup: a thread splitter that turns long text into a numbered thread sized for X, Bluesky or Mastodon (counted the way each platform counts), and a Discord timestamp generator whose codes show in every reader\'s own time zone. At /tools.' },
+      { type: 'Improved', text: 'A scheduled TikTok video that TikTok will not post publicly yet now goes to your TikTok drafts at the time you picked, instead of failing, and the notification includes your caption to paste into TikTok. If it fails for another reason, the notification says why.' },
+      { type: 'Improved', text: 'If TikTok turns down a Post Now, one tap sends the same video to your TikTok drafts instead.' },
+      { type: 'Fixed',    text: 'A scheduled TikTok video was counted twice against your monthly TikTok allowance, and a failed one was never given back.' },
+      { type: 'Fixed',    text: 'TikTok Studio checked videos against a 10-minute limit even when your TikTok account allows less, so a too-long video was only rejected later by TikTok.' },
+      { type: 'New',      text: 'Signup catches common email typos ("Did you mean gmail.com?"). The confirmation screen can send the email again, open your inbox, or let you fix the address, and signing in before confirming offers a resend.' },
+      { type: 'Fixed',    text: 'If you took more than a minute to click your confirmation link, you never got the welcome emails or kept your newsletter choice.' },
+      { type: 'Fixed',    text: 'Scheduling past your plan\'s window showed a message that just said "true". It now says why and what upgrading allows, and every time on the last day the date picker offers can be scheduled.' },
+    ],
+  },
+  {
+    date: 'October 2–13, 2026',
+    version: 'Discord and LinkedIn Delivery Fixes',
+    changes: [
+      { type: 'Fixed',    text: 'Posts to restricted Discord channels failed because the SocialMate bot asked for too few permissions. New connections ask for the right ones, and a refused post now says which channel permission to change.' },
+      { type: 'Improved', text: 'LinkedIn connections expire after 60 days with no way to renew them automatically. You now get a notice and an email a week before.' },
+      { type: 'Fixed',    text: 'A first scheduled post could be sent more than once if its status failed to save. Posts that already went out are now marked published instead of being sent again.' },
+      { type: 'Fixed',    text: 'Discord accounts connected before September 3 could not post. Adding the SocialMate bot now upgrades them in place, without needing a free slot.' },
+      { type: 'Fixed',    text: 'The blog index now shows every post, and each page tells search engines its own address.' },
+    ],
+  },
+  {
     date: 'September 26, 2026',
     version: 'Discord Connects Again, First Post Made Easier, Honest Platform Status',
     changes: [
