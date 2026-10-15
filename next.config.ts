@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // One host. www.socialmate.studio served the whole app instead of
+      // redirecting, so anyone who arrived on www got their cookies there: an
+      // OAuth connect started on www set its one-time state on www, every
+      // platform returns to the bare domain, and the state check failed every
+      // time. Sign-ins split across the two hosts the same way. API routes and
+      // the auth callback stay reachable on www so a webhook or an in-flight
+      // sign-in pointed at it keeps working.
+      {
+        source: '/:path((?!api/|auth/|_next/).*)',
+        has: [{ type: 'host', value: 'www.socialmate.studio' }],
+        destination: 'https://socialmate.studio/:path',
+        permanent: true,
+      },
       // Legacy route redirects
       {
         source: '/listings',
