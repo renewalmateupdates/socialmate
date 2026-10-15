@@ -193,7 +193,7 @@ function PlatformCard({
       </div>
       {platform === 'twitter' && !atLimit && (
         <p className="text-xs text-gray-400 leading-relaxed pl-1">
-          Connecting your X account registers it globally. Disconnecting starts a 45-day reconnection pause. This protects against abuse.
+          Each X account can belong to one SocialMate account. After you disconnect it, only you can reconnect it for 45 days. This protects against abuse.
         </p>
       )}
       {platform === 'tiktok' && !atLimit && (
@@ -885,9 +885,9 @@ function AccountsInner() {
                       {isConfirming && (
                         <div className="mt-3 pt-3 border-t border-white/60 flex flex-col sm:flex-row items-start sm:items-center gap-2">
                           <p className="text-xs text-red-600 font-semibold flex-1">
-                            {account.platform === 'twitter'
-                              ? `Disconnecting @${account.account_name} will lock this X account from reconnecting for 45 days. Are you sure?`
-                              : `Disconnect @${account.account_name} from ${meta.label}? This cannot be undone.`}
+                            {/* Owners can always reconnect (lib/platform-jail.ts), so neither
+                                "locked for 45 days" nor "cannot be undone" was true. */}
+                            {`Disconnect @${account.account_name} from ${meta.label}? You can reconnect it any time.`}
                           </p>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <button onClick={() => handleDisconnect(account.id, account.platform)}
