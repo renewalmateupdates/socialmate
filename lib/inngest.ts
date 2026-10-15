@@ -34,7 +34,7 @@ import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { createNotification } from '@/lib/notify'
-import { sendScheduledTiktok, draftsNotice, type TiktokSendOutcome } from '@/lib/tiktok-scheduled'
+import { sendScheduledTiktok, draftsNotice, stagedFilesToClean, isStagedVideoUrl, type TiktokSendOutcome, type StagedTiktokRow } from '@/lib/tiktok-scheduled'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -5134,6 +5134,56 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
     }
 
     return { ...counts, total: due.length }
+  }
+)
+
+// ── TikTok staged video cleanup ───────────────────────────────────────────────
+// Deletes our copy of a scheduled TikTok video once TikTok has it. Nothing did
+// before, so every scheduled video stayed in the media bucket for good. Which
+// rows qualify, and why, is in stagedFilesToClean (lib/tiktok-scheduled.ts).
+
+export const cleanupStagedTiktokVideos = inngest.createFunction(
+  { id: 'cleanup-staged-tiktok-videos', retries: 2 },
+  { cron: '30 7 * * *' },
+  async ({ step }) => {
+    const candidates = await step.run('find-staged-videos', async () => {
+      const { data, error } = await getSupabaseAdmin()
+        .from('tiktok_posts')
+        .select('id, status, video_storage_path, video_url, scheduled_at, created_at')
+        .not('video_storage_path', 'is', null)
+        .in('status', ['published', 'in_drafts', 'failed'])
+        .order('created_at', { ascending: true })
+        .limit(300)
+      if (error) throw new Error(`[tiktok-cleanup] could not read staged videos: ${error.message}`)
+      return stagedFilesToClean((data ?? []) as StagedTiktokRow[])
+    })
+    if (candidates.length === 0) return { removed: 0 }
+
+    return await step.run('remove-staged-videos', async () => {
+      const db = getSupabaseAdmin()
+      const paths = candidates.map(row => row.video_storage_path as string)
+
+      // Storage skips a path that is already gone without an error, so a clean
+      // call means every one of these files is gone now.
+      const { error: removeError } = await db.storage.from('media').remove(paths)
+      if (removeError) throw new Error(`[tiktok-cleanup] storage remove failed: ${removeError.message}`)
+
+      // Cleared only after the files are gone, so a failed removal is simply
+      // picked up again tomorrow. A retry of this step is harmless for the same reason.
+      const { error: pathError } = await db
+        .from('tiktok_posts')
+        .update({ video_storage_path: null })
+        .in('id', candidates.map(row => row.id))
+      if (pathError) throw new Error(`[tiktok-cleanup] could not clear staged paths: ${pathError.message}`)
+
+      const deadLinks = candidates.filter(row => isStagedVideoUrl(row.video_url)).map(row => row.id)
+      if (deadLinks.length > 0) {
+        const { error: urlError } = await db.from('tiktok_posts').update({ video_url: null }).in('id', deadLinks)
+        if (urlError) console.warn('[tiktok-cleanup] could not clear dead video links:', urlError.message)
+      }
+
+      return { removed: paths.length }
+    })
   }
 )
 
