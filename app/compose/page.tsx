@@ -728,9 +728,14 @@ function ComposeInner() {
   // everywhere instead of depending on which handler caught it. The API sends
   // `upgrade` + `upgradeHref` on quota rejections (lib/post-limits.ts); a plain
   // error just shows its message as before.
-  const showApiError = (data: { error?: string; upgrade?: string | null; upgradeHref?: string }) => {
-    if (data?.upgrade) {
-      showToast(data.upgrade, 'info', { label: 'See plans', href: data.upgradeHref || '/pricing' })
+  //
+  // Says what happened, then what upgrading gets them. It used to show only the
+  // upgrade copy, dropping the reason, and a route that sent `upgrade: true`
+  // produced a toast whose whole message was "true". Only copy is shown now.
+  const showApiError = (data: { error?: string; upgrade?: string | boolean | null; upgradeHref?: string }) => {
+    if (typeof data?.upgrade === 'string' && data.upgrade) {
+      const why = data.error ? `${data.error.replace(/\.$/, '')}. ` : ''
+      showToast(`${why}${data.upgrade}.`, 'info', { label: 'See plans', href: data.upgradeHref || '/pricing' })
       return
     }
     showToast(data?.error || 'Something went wrong', 'error')
