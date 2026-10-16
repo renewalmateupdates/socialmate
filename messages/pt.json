@@ -319,6 +319,8 @@
     "faq_headline": "Perguntas frequentes",
     "trust_stripe": "Seguro por Stripe",
     "trust_cancel": "Cancele a qualquer momento",
+    "all_sales_final": "Todas as vendas são finais. As assinaturas podem ser canceladas a qualquer momento para interromper a próxima renovação.",
+    "refund_policy": "Política de reembolso",
     "trust_no_cc": "Sem CC para plano grátis"
   },
   "signup": {

@@ -319,6 +319,8 @@
     "faq_headline": "Preguntas frecuentes",
     "trust_stripe": "Protegido por Stripe",
     "trust_cancel": "Cancela en cualquier momento",
+    "all_sales_final": "Todas las ventas son definitivas. Las suscripciones se pueden cancelar en cualquier momento para detener la próxima renovación.",
+    "refund_policy": "Política de reembolso",
     "trust_no_cc": "No se requiere tarjeta para el plan gratuito"
   },
   "signup": {

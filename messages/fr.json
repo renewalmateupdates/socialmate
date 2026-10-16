@@ -319,6 +319,8 @@
     "faq_headline": "Questions fréquemment posées",
     "trust_stripe": "Sécurisé par Stripe",
     "trust_cancel": "Annulez à tout moment",
+    "all_sales_final": "Toutes les ventes sont définitives. Les abonnements peuvent être résiliés à tout moment pour arrêter le prochain renouvellement.",
+    "refund_policy": "Politique de remboursement",
     "trust_no_cc": "Pas de carte de crédit pour le plan gratuit"
   },
   "signup": {

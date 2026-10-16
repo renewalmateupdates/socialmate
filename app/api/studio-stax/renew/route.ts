@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
@@ -87,6 +88,7 @@ export async function POST(req: NextRequest) {
         quantity: 1,
       }],
       customer_email: slot!.buyer_email,
+      custom_text:    FINAL_SALE_CHECKOUT_TEXT,
       success_url:    `${appUrl}/studio-stax/checkout/success?billing=renewal`,
       cancel_url:     `${appUrl}/studio-stax/renew?token=${token}`,
       metadata: {

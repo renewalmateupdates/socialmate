@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 let _stripe: Stripe | null = null
 function getStripe() {
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: [{ price: pack.price_id, quantity: 1 }],
+      custom_text: FINAL_SALE_CHECKOUT_TEXT,
       success_url: `${APP_URL}/soma/dashboard?soma_credits_success=1`,
       cancel_url:  `${APP_URL}/soma/dashboard`,
       metadata: {

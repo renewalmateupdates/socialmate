@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
 import { ANNUAL_FOUNDER_CENTS, ANNUAL_STANDARD_CENTS, FOUNDING_SLOT_LIMIT } from '@/app/api/studio-stax/pricing/route'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 // Stripe recurring price IDs (for reference / future subscription migration)
 const STRIPE_PRICE_FOUNDING = 'price_1TP8wi7OMwDowUuUNQW7ER95'  // $100/yr recurring
@@ -109,6 +110,7 @@ export async function POST(req: NextRequest) {
       }],
       customer_email: listing!.applicant_email,
       allow_promotion_codes: true,
+      custom_text:    FINAL_SALE_CHECKOUT_TEXT,
       success_url:    `${appUrl}/studio-stax/checkout/success?billing=annual`,
       cancel_url:     `${appUrl}/studio-stax/checkout?token=${token}`,
       metadata: {

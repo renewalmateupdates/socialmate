@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { stripe } from '@/lib/stripe'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 const BOOSTER_TIERS: Record<string, { amount: number; priceEnvVar: string }> = {
   spark:  { amount: 50,  priceEnvVar: 'TWITTER_BOOSTER_SPARK_PRICE_ID'  },
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode:        'payment',
       line_items:  [{ price: priceId, quantity: 1 }],
+      custom_text: FINAL_SALE_CHECKOUT_TEXT,
       success_url: `${appUrl}/settings?tab=Plan&booster=purchased#x-booster`,
       cancel_url:  `${appUrl}/settings?tab=Plan#x-booster`,
       metadata: {
