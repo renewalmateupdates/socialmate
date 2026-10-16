@@ -6,8 +6,9 @@ import { STARTER_PATHS, buildDraft, isStarterLink, type StarterPath } from '@/li
 
 export type StarterBuild = { draft: string; path: StarterPath; text: string }
 
-// One component, two places. Onboarding puts the result in its editable draft
-// box; the Accounts post-connect card sends it to the composer. Keeping the
+// One component, three places. Onboarding puts the result in its editable draft
+// box; the Accounts post-connect card sends it to the composer; Compose shows it
+// above an empty box for someone who has never made a post. Keeping the
 // frame logic and the form in one place is the point: two copies of "the first
 // post helper" is how this codebase has drifted before.
 const TONES = {
@@ -29,17 +30,28 @@ const TONES = {
     input: 'border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 dark:text-gray-100 focus:border-emerald-500',
     button: 'bg-emerald-600 text-white hover:bg-emerald-500',
   },
+  compose: {
+    wrap: 'rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-4',
+    label: 'text-xs font-bold text-gray-700 dark:text-gray-200',
+    hint: 'text-xs text-gray-500 dark:text-gray-400',
+    chipOn: 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white',
+    chipOff: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500',
+    input: 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:border-black dark:focus:border-gray-400',
+    button: 'bg-black text-white hover:opacity-80 dark:bg-white dark:text-black',
+  },
 } as const
 
 export default function StarterDraftBuilder({
   where,
   tone,
   buttonLabel,
+  heading = 'Want it to say something specific?',
   onBuild,
 }: {
-  where: 'onboarding' | 'accounts'
+  where: 'onboarding' | 'accounts' | 'compose'
   tone: keyof typeof TONES
   buttonLabel: string
+  heading?: string
   onBuild: (build: StarterBuild) => void
 }) {
   const [path, setPath] = useState<StarterPath>('update')
@@ -57,7 +69,7 @@ export default function StarterDraftBuilder({
 
   return (
     <div className={t.wrap}>
-      <p className={t.label}>Want it to say something specific?</p>
+      <p className={t.label}>{heading}</p>
       <p className={`${t.hint} mt-1 mb-3`}>
         Pick a kind of post, add one rough sentence or a link, and we&apos;ll write the post around it.
       </p>
