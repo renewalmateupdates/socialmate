@@ -131,7 +131,7 @@ If you need those things, the Pro plan is $8/month and covers most of them. But 
 
 ## How to Get Started
 
-Creating an account takes about 60 seconds. Connect your first platform — Bluesky, Discord, Mastodon, or Telegram are all live now. Compose your first post. Schedule it or publish immediately.
+Creating an account takes about 60 seconds. Connect your first platform — Bluesky, Discord, Mastodon, Telegram, or LinkedIn are all live now. Compose your first post. Schedule it or publish immediately.
 
 If you've been putting off social media scheduling because you couldn't justify paying for another tool, this is the time to stop waiting. The free plan is genuinely free.
     `,
@@ -281,7 +281,7 @@ The per-seat model on team plans has similar issues. Adding a content creator to
 
 SocialMate was built on the premise that the per-channel, per-seat model is the wrong foundation for a scheduling tool aimed at individual creators and small teams.
 
-The free plan includes all 7 live platforms — Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. Connecting a Bluesky account and a TikTok account doesn't cost more than connecting just one. The platform count doesn't drive the pricing.
+The free plan includes 6 of the 7 live platforms — Bluesky, Discord, Telegram, Mastodon, TikTok, and LinkedIn. X/Twitter needs Pro, because X charges per post. Connecting a Bluesky account and a TikTok account doesn't cost more than connecting just one. The platform count doesn't drive the pricing.
 
 Team seats follow the same logic. The free plan includes 2 team members. The Pro plan ($8/month flat, not per channel) includes 5. Agency ($29/month) includes 15. You're not paying per person.
 
@@ -574,7 +574,7 @@ SocialMate's Best Times tool analyzes your own post performance over time and te
 
 ## Cross-Posting to Multiple Platforms
 
-One of the highest-leverage things you can do with a scheduling tool is write a post once and send it to multiple platforms simultaneously. SocialMate lets you compose one post and distribute it to Bluesky, Mastodon, Discord, and Telegram at the same time.
+One of the highest-leverage things you can do with a scheduling tool is write a post once and send it to multiple platforms simultaneously. SocialMate lets you compose one post and distribute it to Bluesky, Mastodon, Discord, Telegram, and LinkedIn at the same time.
 
 Some notes on cross-posting:
 - Bluesky and Mastodon have similar character limits and both reward conversational, direct content
@@ -695,7 +695,7 @@ This guide covers tools that are either completely free or have free tiers that 
 
 **SocialMate (free plan)**
 Best for: multi-platform scheduling without per-channel fees.
-Free tier includes: Bluesky, Discord, Telegram, Mastodon, 250 posts/month, bulk scheduler, 50 AI credits, 2 team seats, analytics, link-in-bio page.
+Free tier includes: Bluesky, Discord, Telegram, Mastodon, LinkedIn, 250 posts/month, bulk scheduler, 50 AI credits, 2 team seats, analytics, link-in-bio page.
 Why it stands out: Most schedulers charge per connected account. SocialMate charges nothing on the free plan regardless of how many accounts you connect.
 Link: socialmate.studio
 
@@ -1499,7 +1499,7 @@ The goal isn't to remove yourself from social media. The goal is to automate the
 
 **Scheduling and publishing.** This is the obvious one. Write your posts in batches, schedule them for optimal times, let them go out automatically. This alone recovers hours per week.
 
-**Cross-platform distribution.** Write once, post to multiple platforms. SocialMate lets you compose a post and distribute it to Bluesky, Discord, Mastodon, Telegram, and more simultaneously. With minor adjustments per platform, you get 4x the coverage with roughly 1.2x the effort.
+**Cross-platform distribution.** Write once, post to multiple platforms. SocialMate lets you compose a post and distribute it to Bluesky, Discord, Mastodon, Telegram, LinkedIn, and more simultaneously. With minor adjustments per platform, you get 4x the coverage with roughly 1.2x the effort.
 
 **Content queuing.** Instead of scheduling individual posts one at a time, build a queue of evergreen content that cycles automatically. Good evergreen posts — tips, how-tos, opinions on your topic — can be recycled on a 60-90 day cycle without feeling repetitive to most followers.
 
@@ -2038,7 +2038,7 @@ Take the core idea and reframe it as a question or prompt. "What do you think ab
 SocialMate's compose screen lets you write once and post to multiple platforms simultaneously. Here's the workflow:
 
 1. Write your full version in the compose area
-2. Select all four platforms (Discord, Bluesky, Mastodon, Telegram)
+2. Select all four platforms (Discord, Bluesky, Mastodon, Telegram, LinkedIn)
 3. Post it directly, or schedule it for your optimal time
 
 For platform-specific versions, create separate drafts and use SocialMate's AI Caption Rewriter to adapt tone for each platform without rewriting from scratch.
@@ -2098,7 +2098,7 @@ Before comparing tools, here are the features that actually matter for independe
 
 **Hootsuite** dropped its free plan years ago. It's an enterprise tool — overkill (and overpriced) for most independent creators.
 
-**SocialMate** was built for the 2026 creator landscape. It supports Bluesky, Mastodon, Discord, Telegram, and traditional platforms in one place. The free tier includes real scheduling (not just drafts), a content calendar, and analytics. No credit card required to start.
+**SocialMate** was built for the 2026 creator landscape. It supports Bluesky, Mastodon, Discord, Telegram, LinkedIn, and traditional platforms in one place. The free tier includes real scheduling (not just drafts), a content calendar, and analytics. No credit card required to start.
 
 ## Free Doesn't Have to Mean Limited
 
@@ -2137,13 +2137,13 @@ The limitation: it's Instagram-only. If you're posting to other platforms, you'l
 
 Tools like Buffer and Later offer free tiers that include Instagram scheduling. Buffer's free plan covers 3 social channels with 10 scheduled posts each. Later's free tier allows a limited number of Instagram posts per month.
 
-These tools are solid if Instagram is your primary (or only) platform. They fall short if you're also active on Bluesky, Mastodon, Discord, or Telegram — platforms that most legacy tools don't support at all.
+These tools are solid if Instagram is your primary (or only) platform. They fall short if you're also active on Bluesky, Mastodon, Discord, Telegram, or LinkedIn — platforms that most legacy tools don't support at all.
 
 ## Option 3: A Multi-Platform Free Scheduler
 
 If Instagram is one piece of a larger content strategy, you want a scheduler that handles all your platforms — not just the legacy ones.
 
-SocialMate lets you schedule Instagram posts alongside Bluesky, Mastodon, Discord, and Telegram, all on the free tier. You write the post once, choose your platforms, pick a time, and you're done. No credit card required.
+SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, and LinkedIn, all on the free tier. (Instagram is not in SocialMate yet: it needs Meta's app review.) You write the post once, choose your platforms, pick a time, and you're done. No credit card required.
 
 ## How to Build a Free Instagram Scheduling System
 
@@ -2160,7 +2160,7 @@ The platform you use matters less than the habit you build. The best Instagram s
 
 Pick a free option, batch your first week of content, and schedule it. The consistency you build in the first month matters far more than which tool you use.
 
-[Try SocialMate free](/signup) — schedule Instagram alongside every other platform in your stack, no credit card needed.
+[Try SocialMate free](/signup) — schedule Bluesky, LinkedIn, Discord and the rest of your stack from one place, no credit card needed.
     `,
   },
 
@@ -2246,7 +2246,7 @@ They're organized by type so you can pick what fits your voice and your audience
 
 Fifty ideas are only useful if you act on them. Pick 5 that resonate, write them this week, and schedule them. That's it.
 
-SocialMate lets you schedule across Bluesky, Mastodon, Discord, Telegram, Instagram, and more — so you can batch these posts once and publish them everywhere your audience lives. [Start free at /signup](/signup).
+SocialMate lets you schedule across Bluesky, Mastodon, Discord, Telegram, LinkedIn, and more — so you can batch these posts once and publish them everywhere your audience lives. [Start free at /signup](/signup).
     `,
   },
 
@@ -2293,7 +2293,7 @@ What doesn't work: promotional content that feels like ad copy, posting links wi
 
 For business accounts on Bluesky, a good starting cadence is 3-5 posts per week. Consistency matters more than volume — showing up regularly builds the algorithm's sense that you're an active account worth surfacing.
 
-Batch your Bluesky content alongside your other platforms. SocialMate lets you schedule to Bluesky, Mastodon, Discord, and Telegram in one workflow, so you're not treating each platform as a separate task. Write once, schedule everywhere.
+Batch your Bluesky content alongside your other platforms. SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, and LinkedIn in one workflow, so you're not treating each platform as a separate task. Write once, schedule everywhere.
 
 ## How to Grow Your Bluesky Following
 
@@ -2346,7 +2346,7 @@ The limitation: you can only schedule one platform at a time, and the queue isn'
 
 **Buffer** supports Pinterest on its free tier (3 channels, 10 posts each). If you're already using Buffer for other platforms, adding Pinterest makes sense. The interface is clean and straightforward.
 
-**SocialMate** focuses on newer platforms — Bluesky, Mastodon, Discord, Telegram — alongside traditional social networks. If your primary need is cross-platform scheduling that includes the platforms legacy tools ignore, SocialMate is worth comparing against Pinterest-specific options.
+**SocialMate** focuses on newer platforms — Bluesky, Mastodon, Discord, Telegram, LinkedIn — alongside traditional social networks. If your primary need is cross-platform scheduling that includes the platforms legacy tools ignore, SocialMate is worth comparing against Pinterest-specific options.
 
 ## The Right Tool Depends on Your Pinterest Strategy
 
@@ -2404,7 +2404,7 @@ The most effective anti-burnout system for creators is batch creation and schedu
 
 This separates creation from publishing. You're never scrambling for something to post. You're never manually logging in at 9 AM to hit publish. The content goes out whether you're working, sleeping, or taking a day off.
 
-SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, and other platforms in one session, so your batch day covers your entire cross-platform presence — not just one network.
+SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, LinkedIn, and other platforms in one session, so your batch day covers your entire cross-platform presence — not just one network.
 
 ## Setting Sustainable Expectations
 
@@ -2643,7 +2643,7 @@ The tool matters less than keeping it updated. A link-in-bio page with outdated 
 
 Review yours monthly. Make sure every link works. Add your newest content or project. Remove anything that's no longer relevant.
 
-Pair your link-in-bio with a consistent posting schedule — [SocialMate's free plan](/signup) helps you stay active across Bluesky, Mastodon, Discord, and Telegram so there's always something new to link to.
+Pair your link-in-bio with a consistent posting schedule — [SocialMate's free plan](/signup) helps you stay active across Bluesky, Mastodon, Discord, Telegram, and LinkedIn so there's always something new to link to.
     `,
   },
 
@@ -2709,7 +2709,7 @@ The practical move for most creators is 2 public social platforms (e.g., Bluesky
 
 ## Managing Multiple Platforms Without Losing Your Mind
 
-The multiplication of platforms is a real challenge. SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, and more from one place — so cross-platform presence doesn't mean cross-platform chaos.
+The multiplication of platforms is a real challenge. SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, LinkedIn, and more from one place — so cross-platform presence doesn't mean cross-platform chaos.
 
 [Start building your multi-platform presence for free](/signup).
     `,
@@ -2775,7 +2775,7 @@ You'll still do a weekly writing session, but you'll never show up to it blank �
 
 The calendar is the plan. The scheduling tool is what executes it.
 
-SocialMate's content calendar view lets you see your scheduled posts across all platforms — Bluesky, Mastodon, Discord, Telegram, and others — in a single calendar interface. You can create posts directly in the calendar, drag to reschedule, and see gaps in your posting schedule at a glance.
+SocialMate's content calendar view lets you see your scheduled posts across all platforms — Bluesky, Mastodon, Discord, Telegram, LinkedIn, and others — in a single calendar interface. You can create posts directly in the calendar, drag to reschedule, and see gaps in your posting schedule at a glance.
 
 ## A Simple Starting Template
 
@@ -3009,7 +3009,7 @@ The underlying idea stays the same. The packaging changes to match what each pla
 
 3. **Adaptation pass (30-45 min):** Work through the 10-platform checklist, adapting the core idea for each format.
 
-4. **Schedule everything (15 min):** Use SocialMate to schedule each adapted version to the appropriate platform. Bluesky, Mastodon, Discord, and Telegram can all be scheduled from the same interface.
+4. **Schedule everything (15 min):** Use SocialMate to schedule each adapted version to the appropriate platform. Bluesky, Mastodon, Discord, Telegram, and LinkedIn can all be scheduled from the same interface.
 
 5. **Repeat:** One batch session per week produces 10 pieces of content across 10 platforms. That's enough for consistent presence on every platform you care about.
 
@@ -3044,7 +3044,7 @@ A handful of tools have found ways to make X scheduling work without the API:
 
 **Browser extension-based schedulers** bypass the API cost issue entirely by operating through the browser rather than direct API calls. They work by essentially automating the native X interface.
 
-**SocialMate** supports X scheduling as part of its free plan. You can schedule posts to X alongside Bluesky, Mastodon, Discord, and Telegram from the same interface — no credit card required. For creators who want to maintain a presence on X while also building on other platforms, SocialMate's multi-platform approach means you're not paying separately for each network.
+**SocialMate** supports X scheduling as part of its free plan. You can schedule posts to X alongside Bluesky, Mastodon, Discord, Telegram, and LinkedIn from the same interface — no credit card required. For creators who want to maintain a presence on X while also building on other platforms, SocialMate's multi-platform approach means you're not paying separately for each network.
 
 ## The Case for Dual-Platform Posting
 
@@ -3069,7 +3069,7 @@ X Premium ($8-22/month depending on tier) does restore some scheduling access an
 
 But for most creators who use X as one platform among several, paying separately for X Premium plus a separate scheduler doesn't make financial sense. A free multi-platform tool that includes X scheduling is the better path.
 
-[Schedule your X posts alongside Bluesky, Discord, Mastodon, and Telegram — all free on SocialMate](/signup).
+[Schedule your X posts alongside Bluesky, Discord, Mastodon, Telegram, and LinkedIn on SocialMate](/signup).
     `,
   },
 
@@ -3121,7 +3121,7 @@ Threads work well. Bluesky's threading format encourages multi-post ideas develo
 
 One of the practical challenges for Bluesky creators: the platform doesn't have a native scheduler. To post consistently without being online every day, you need a third-party tool.
 
-SocialMate supports Bluesky scheduling on its free plan. You can write and queue posts, set specific times, and maintain a consistent publishing schedule without manual daily effort. Since SocialMate also handles Mastodon, Discord, Telegram, and X, you can run a multi-platform strategy from one place.
+SocialMate supports Bluesky scheduling on its free plan. You can write and queue posts, set specific times, and maintain a consistent publishing schedule without manual daily effort. Since SocialMate also handles Mastodon, Discord, Telegram, X, and LinkedIn, you can run a multi-platform strategy from one place.
 
 ## Building an Audience on Bluesky in 2026
 
@@ -3172,7 +3172,7 @@ SocialPilot positions as a budget-friendly agency tool. More affordable than Hoo
 Enterprise-grade pricing ($249+/month) for enterprise-grade features. Not relevant for most individual creators or small businesses.
 
 **SocialMate**
-The free plan includes Bluesky, Mastodon, Discord, Telegram, and X scheduling. No credit card required. Genuinely free — not a trial. Paid plans add more advanced features but the free tier is fully functional for most individual creator workflows.
+The free plan includes Bluesky, Mastodon, Discord, Telegram, and LinkedIn scheduling. No credit card required. Genuinely free — not a trial. Paid plans add more advanced features but the free tier is fully functional for most individual creator workflows.
 
 ## Platform Support Comparison
 
@@ -3190,7 +3190,7 @@ This is a significant differentiator. Most legacy tools were built when Facebook
 
 Most "free" plans in this market are effectively trials. They're crippled in ways that make them frustrating to use long-term — post limits, channel limits, or feature locks that make the tool useless without upgrading.
 
-SocialMate's free plan is built differently. The goal was to make the free tier genuinely useful, not to pressure upgrades. For a solo creator managing Bluesky, Mastodon, Telegram, Discord, and X, the free plan handles the full workflow.
+SocialMate's free plan is built differently. The goal was to make the free tier genuinely useful, not to pressure upgrades. For a solo creator managing Bluesky, Mastodon, Telegram, Discord, and LinkedIn, the free plan handles the full workflow.
 
 ## Who Each Tool Is Best For
 
@@ -3198,7 +3198,7 @@ SocialMate's free plan is built differently. The goal was to make the free tier 
 - **Buffer:** Small teams primarily focused on Facebook, Instagram, and LinkedIn
 - **Later:** Visual creators with Instagram and TikTok as primary channels
 - **SocialPilot:** Agencies managing multiple client accounts
-- **SocialMate:** Creators and small businesses focused on Bluesky, Mastodon, Discord, Telegram, and X who want a genuinely free option
+- **SocialMate:** Creators and small businesses focused on Bluesky, Mastodon, Discord, Telegram, and LinkedIn who want a genuinely free option
 
 [Compare SocialMate side-by-side with every major tool](/vs) or [start your free account today](/signup).
     `,
@@ -3241,7 +3241,7 @@ Use a scheduler when:
 - You batch your content creation and want to schedule everything at once
 - You want analytics across platforms, not just per-server Discord data
 
-A scheduler like SocialMate lets you write a post once and schedule it to Discord, Bluesky, Mastodon, Telegram, and X from the same interface. If you're managing a content calendar across multiple platforms, a scheduler is the right tool.
+A scheduler like SocialMate lets you write a post once and schedule it to Discord, Bluesky, Mastodon, Telegram, X, and LinkedIn from the same interface. If you're managing a content calendar across multiple platforms, a scheduler is the right tool.
 
 ## When You Need Both
 
@@ -3330,7 +3330,7 @@ Practical steps:
 
 Mastodon doesn't have a native scheduler. For consistent posting, you need a third-party tool.
 
-SocialMate supports Mastodon scheduling on its free plan. You can queue posts with specific times, maintain a consistent presence without daily manual posting, and manage Mastodon alongside Bluesky, Discord, Telegram, and X from one interface.
+SocialMate supports Mastodon scheduling on its free plan. You can queue posts with specific times, maintain a consistent presence without daily manual posting, and manage Mastodon alongside Bluesky, Discord, Telegram, and LinkedIn from one interface.
 
 [Start scheduling your Mastodon posts for free](/signup) — no credit card required.
     `,
@@ -3354,7 +3354,7 @@ If you want an actually free tool — one you can use indefinitely without enter
 ## Tools That Are Genuinely Free
 
 **SocialMate**
-No credit card required. The free plan covers Bluesky, Mastodon, Discord, Telegram, and X scheduling. Not a trial — the free tier is permanent. The platform is funded by users who upgrade to paid plans for advanced features, not by locking free users into billing cycles.
+No credit card required. The free plan covers Bluesky, Mastodon, Discord, Telegram, and LinkedIn scheduling. Not a trial — the free tier is permanent. The platform is funded by users who upgrade to paid plans for advanced features, not by locking free users into billing cycles.
 
 **Buffer's free plan**
 Buffer allows 3 channels and 10 scheduled posts per channel without a credit card. Functional for light use, but limiting if you post daily or manage more than 3 platforms.
@@ -3416,7 +3416,7 @@ For each idea, write versions for each platform you post on:
 **Step 3: Scheduling session (weekly, ~20 min)**
 After your batch session, open SocialMate and schedule everything. Set specific times per platform, spread posts across the week, and you're done until next week.
 
-SocialMate handles Bluesky, Mastodon, Discord, Telegram, and X from the same interface. You write once, schedule everywhere.
+SocialMate handles Bluesky, Mastodon, Discord, Telegram, X, and LinkedIn from the same interface. You write once, schedule everywhere.
 
 ## The Timing Logic
 
@@ -3592,7 +3592,7 @@ That's it. Most creators don't need team collaboration features, approval workfl
 
 ## Real Prices for 2026
 
-**SocialMate** — Free (Bluesky, Mastodon, Discord, Telegram, X) | Paid plans for advanced features
+**SocialMate** — Free (Bluesky, Mastodon, Discord, Telegram, LinkedIn) | Paid plans for advanced features
 
 **Buffer** — Free for 3 channels, 10 posts/channel | $6/month/channel for Essentials
 
@@ -3803,7 +3803,7 @@ For nonprofits working in tech access, digital rights, environmental advocacy, o
 
 ## Free Tools That Actually Work for Nonprofits
 
-**SocialMate** — Free plan covering Bluesky, Mastodon, Discord, Telegram, and X. No credit card required. Particularly useful for nonprofits because the free plan is permanent — no time-limited trial that forces an upgrade at an inconvenient time.
+**SocialMate** — Free plan covering Bluesky, Mastodon, Discord, Telegram, and LinkedIn. No credit card required. Particularly useful for nonprofits because the free plan is permanent — no time-limited trial that forces an upgrade at an inconvenient time.
 
 **Buffer's free plan** — 3 channels, 10 posts per channel per month. Good for organizations posting primarily to Facebook, Instagram, and one other platform.
 
@@ -3819,7 +3819,7 @@ A realistic nonprofit social media system looks like:
 
 2. **Batch creation:** One 90-minute session per week to write the week's posts. The key is repurposing — one story or update becomes content for multiple platforms with minor adaptation.
 
-3. **Scheduling:** 20 minutes per week to schedule everything in advance using SocialMate. Posts to Bluesky, Mastodon, Telegram, Discord, and X can all be scheduled from one interface.
+3. **Scheduling:** 20 minutes per week to schedule everything in advance using SocialMate. Posts to Bluesky, Mastodon, Telegram, Discord, X, and LinkedIn can all be scheduled from one interface.
 
 4. **Engagement monitoring:** Check replies and mentions twice per week. Respond to questions and thank supporters.
 
@@ -3945,7 +3945,7 @@ The goal isn't to avoid AI. It's to use AI as a starting point, not a finished p
 
 AI helps you create content faster. Scheduling ensures that content actually gets published consistently. The combination — batch creation with AI assistance followed by scheduled publishing — is how solo creators in 2026 maintain presence across 5 platforms without burning out.
 
-SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, and X from one interface. [Start for free — no credit card required](/signup).
+SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, X, and LinkedIn from one interface. [Start for free — no credit card required](/signup).
     `,
   },
 
@@ -3987,7 +3987,7 @@ Manual publishing with a team creates coordination problems. Three people at thr
 
 A scheduler solves this. Content gets written and approved in advance, then scheduled for the optimal time. No one needs to be online at the moment of publishing.
 
-SocialMate supports Bluesky, Mastodon, Discord, Telegram, and X scheduling from one interface. Small teams use it to queue content in advance, review the week's schedule at a glance, and maintain a consistent posting cadence without daily coordination overhead.
+SocialMate supports Bluesky, Mastodon, Discord, Telegram, X, and LinkedIn scheduling from one interface. Small teams use it to queue content in advance, review the week's schedule at a glance, and maintain a consistent posting cadence without daily coordination overhead.
 
 ## Content Workflow for Small Teams
 
@@ -4066,7 +4066,7 @@ Some creators worry that scheduled posts feel less authentic. This is largely a 
 
 What audiences can tell: whether the content is genuine and useful. Scheduled content that's genuinely written by you is more authentic than rushed manual posts cranked out under daily pressure.
 
-[Schedule your core content for free with SocialMate — Bluesky, Mastodon, Discord, Telegram, and X](/signup).
+[Schedule your core content for free with SocialMate — Bluesky, Mastodon, Discord, Telegram, and LinkedIn](/signup).
     `,
   },
 
@@ -4135,7 +4135,7 @@ Realistic expectations for building audiences from scratch across multiple platf
 
 The creators who give up in months 1-3 never see months 7-12. Consistency through the slow early period is the actual differentiator.
 
-[Start scheduling across all your platforms for free with SocialMate](/signup) — Bluesky, Mastodon, Discord, Telegram, and X.
+[Start scheduling across all your platforms for free with SocialMate](/signup) — Bluesky, Mastodon, Discord, Telegram, and LinkedIn.
     `,
   },
 
@@ -4249,7 +4249,7 @@ That's not guaranteed, but it's in active development and progress is being made
 
 For creators, the current moment is an early-adopter window. Bluesky and Mastodon audiences are engaged and growing. Getting established on these platforms now, while competition for attention is relatively low, builds a position that's harder to achieve later.
 
-SocialMate supports Bluesky, Mastodon, Discord, and Telegram scheduling alongside X — all free.
+SocialMate supports Bluesky, Mastodon, Discord, Telegram, and LinkedIn scheduling for free, with X on Pro.
 
 [Start building your decentralized social media presence today](/signup).
     `,

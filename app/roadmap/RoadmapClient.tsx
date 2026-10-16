@@ -22,6 +22,9 @@ function formatMonth(ym: string): string {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
+  { date: '2026-10', title: 'Public TikTok posting', desc: 'SocialMate\'s request to post publicly on TikTok went back to TikTok on October 15 with a new demo. Until TikTok approves it, TikTok keeps posts from any third-party app private or in your drafts.', status: 'in-progress', category: 'Platforms' },
+  { date: '2026-10', title: 'Reconnect your own account any time', desc: 'The 45-day waiting period after a disconnect now only stops an account moving to a different SocialMate account. Refused connections say why.', status: 'shipped', category: 'Platforms' },
+  { date: '2026-10', title: 'Blog cleanup', desc: 'Links to posts that were never written now return "not found", every post has a search summary, and posts describe today\'s plans and platforms.', status: 'shipped', category: 'Growth' },
   { date: '2026-10', title: 'Free tools', desc: 'A thread splitter sized for X, Bluesky and Mastodon, counted the way each platform counts, and a Discord timestamp generator. Free, no signup, at /tools.', status: 'shipped', category: 'Growth' },
   { date: '2026-10', title: 'Scheduled TikTok videos go to drafts', desc: 'Until TikTok approves SocialMate for public posting, a scheduled video TikTok will not post publicly lands in your TikTok drafts at the time you picked, instead of failing.', status: 'shipped', category: 'Platforms' },
   { date: '2026-10', title: 'Smoother signup', desc: 'Catches email typos, lets you resend the confirmation or fix the address, and offers a resend if you sign in before confirming.', status: 'shipped', category: 'Onboarding' },

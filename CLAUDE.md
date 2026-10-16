@@ -462,10 +462,14 @@ Rules that follow from it:
 
 ### Active — fix when touching the file
 
-No open known bugs as of October 15, 2026. `audit-schema-drift.py` and
-`audit-dead-features.py` were both re-run that day: no phantom columns across
-901 files, all 35 upsert targets indexed. (Previously clean after the #585–#595
-sweep on August 30.)
+No open known bugs in code as of October 15, 2026. `audit-schema-drift.py` and
+`audit-dead-features.py` were both re-run that evening, after #707–#714: no
+phantom columns across 930 files, all 35 upsert targets indexed. (Also clean
+that morning across 901 files, and after the #585–#595 sweep on August 30.)
+
+**Open, not code:** `/support` tells users to email `support@socialmate.studio`,
+and that domain has no mailbox (its MX is Resend inbound and nothing forwards
+it). Which inbox should be the public one is Joshua's call; see Pending.
 
 **Both audits were clean on the morning of Aug 30 and five never-ran features
 were found anyway.** The audits catch phantom columns and impossible upserts.
@@ -1314,13 +1318,36 @@ What shipped:
 - **Fuzz anything that rewrites user text.** The splitter's first sentence regex silently dropped whatever it could not match, and only random input showed it.
 - **A `useCallback` with no dependencies freezes what it read on the first render.** Treat that lint warning as a bug report.
 
+**October 15, 2026 (evening): the TikTok audit went back in, and what the first logged-out crawl found (PRs #704–#714):**
+
+- **TikTok content sharing audit resubmitted** (reference `20261015204558`, 2–4 week review). Claude recorded the new demo on Joshua's computer with his permission: connect, TikTok Studio's posting screen, a real post, and TikTok's own UI showing it live (kept private on @socialmatehq). Before recording, **#706** matched the posting screen to TikTok's guidelines word for word: "Allow" switches for comments, Duets and Stitch, all off by default; privacy as a dropdown with no default; branded content cannot be private; TikTok's exact disclosure and processing notices; the account name above the button. **#708** fixed the switch knobs, which sat on the wrong side when off.
+- **#704** synced the docs that morning. **#705** links blog posts about Discord and threads to the matching free tool (`lib/tools/related-tool.ts`, `components/BlogToolCard.tsx`, recorded as `blog_cta_clicked` with position `tool`).
+- **#707** the 45-day account lock blocked owners from reconnecting their own accounts. `reconnectVerdict()` in `lib/platform-jail.ts` now decides reconnects for all six platforms: the owner can always reconnect, and a different SocialMate account is refused while the account is active or cooling. Every refused connect explains itself on `/accounts`.
+- **#709** a repeated TikTok callback (double tap, reload) showed a false failure because the one-time state cookie was already spent. `lib/oauth-state.ts` splits `state_missing` from `state_mismatch`, and a callback that finds a connection written in the last 2 minutes reports success. `www.socialmate.studio` now 308s to the apex; it used to serve the whole app.
+- **#710** `/affiliates` was behind login. Protected paths now live in `lib/protected-paths.ts` (segment matching), shared by `proxy.ts` and the sitemap. IndexNow is set up (`node scripts/indexnow-submit.mjs`). The referral cookie went from 30 to 60 days to match what `/affiliates` promised.
+- **#711** the sitemap's hand-kept blog list had 38 slugs with no post, each a "coming soon" page served with a 200. The sitemap is now derived from `lib/blog/static-posts.ts` plus `blog_posts`.
+- **#712** 12 public pages got their own titles and descriptions; 6 app screens moved behind sign-in; `/wall-of-love` is noindex until it has testimonials.
+- **#713** unknown blog slugs still returned 200 in production: `app/blog/loading.tsx` streamed the page before `notFound()` ran. The index and its loading file moved into `app/blog/(index)/`. Verified live: all 38 return 404, all 730 real posts return 200.
+- **#714** 56 `blog_posts` rows had an empty excerpt and shipped with no meta description. `lib/blog/describe.ts` falls back to the post's opening sentence, for the meta tags and the index cards.
+- **Blog accuracy sweep (production data, approved by Joshua).** 126 `blog_posts` rows and 36 lines of `lib/blog/static-posts.ts` corrected: 23 database posts and 3 static lines said SocialMate posts to Instagram, Reels, Facebook or Pinterest, or soon would; 26 posts gave the free plan as 50 posts a month (it is 250); 12 posts and 8 static lines put X on the free plan; 28 posts said "12 AI tools" (now "15+"); BDAY31's "~$3.45/month", left over from the $5 price, became "first month ~$5.52"; SocialMate's own platform lists gained LinkedIn. Originals are in the git-excluded `blog_price_backup_oct15_accuracy.json` at the repo root.
+- **Crawler files.** `llms.txt`, `ai.txt`, `humans.txt` and `.well-known/ai-plugin.json` now give every plan's post cap, X on Pro only, 730+ blog posts, SOMA as Pro and Agency only (it has its own credit pool, not the AI credits), honest status for platforms not available yet, Next.js 16 and `gemini-3.6-flash`, and no login-walled page in their reading lists.
+- **IndexNow sends:** the 930 sitemap URLs, the 20 pages #711/#712 changed, the 38 removed posts, the 56 described posts, and the corrected posts once this sync deploys.
+
+**Rules that follow:**
+
+- **Never put a `loading.tsx` above a route that calls `notFound()`.** The stream starts with a 200 before the 404 is known.
+- **Derive lists of what exists; never hand-maintain them.** 38 phantom posts came from one hand-kept slug list.
+- **A lock against abuse must not lock out the person it protects.**
+- **Blog posts are claims, and they drift faster than code.** The Sept 10 sweep fixed the site; this one still found Instagram claims and a free cap five times too low in the pages AI crawlers read most. Re-scan the blog after any pricing or platform change.
+- **GitHub can report a false conflict when one PR moves a file another edits.** `git merge-tree` shows whether it is real; merging main into the branch clears it.
+
 ## Pending / In Progress
 
-- **Open as of Oct 15, 2026 (Joshua's side):** **re-record and resubmit the TikTok audit video** (must end on TikTok's own UI showing the live post); it is now the biggest lever there is, since 16 of the last 22 people to connect anything connected only TikTok. Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
+- **Open as of Oct 15, 2026 (Joshua's side):** the TikTok audit is resubmitted; wait for TikTok's answer (2–4 weeks). **Decide which inbox is public:** `/support` sends people to `support@socialmate.studio`, which has no mailbox, while the legal pages, `llms.txt` and `humans.txt` give `socialmate.updates@gmail.com` and replies go to `socialmatehq@gmail.com`. Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
 
 - **Creator Hub payments: fee pass-through, $3 floor, Connect capability fix (Sept 24, merged in #683).** Decision (Joshua): SocialMate does not absorb Stripe's fee. Tip, unlock and subscription checkouts now carry an application fee equal to Stripe's fee (`application_fee_amount` for one-time payments, `transfer_data.amount_percent` for subscriptions, which cannot use `application_fee_percent`), so SocialMate keeps nothing and creators net what any Stripe merchant would. The landing page already says "Just Stripe (~2.9% + 30c)". `lib/creator-pricing.ts` holds the math; verified against real test-mode charges to the cent at $3/$5/$10/$25 for US cards. **Found while testing:** Connect accounts were created with no capabilities requested, so Stripe rejects every destination-charge checkout with "missing the required capabilities: transfers" and `charges_enabled` could never become true; Creator Hub could not have taken a payment. Accounts now request `transfers` only (5 onboarding requirements vs 13 with `card_payments`) and onboarding-complete means `transfers` is active. Payouts are set to weekly because Connect bills 0.25% + 25c per payout. One shared $3 minimum for tips, unlocks and subscriptions (server-enforced; tip presets now $3/$5/$10/$25). **Still true:** international cards cost 1.5% more and currency conversion 1%, absorbed by SocialMate (about 7c on a $5 tip); Stripe Billing adds 0.7% on subscriptions (included in the subscription fee); Connect charges $2 per active creator per month, covered by the creator's Pro plan. Zero creators exist, so nothing needs grandfathering. **Not verifiable in test mode** (Custom accounts need a Connect platform-profile setting): a full transfer with a real active account. Run one real live-mode tip end to end before announcing Creator Hub. #679's `on_behalf_of` attempt was wrong and reverted in #681.
 
-- **TikTok content sharing audit — REJECTED Sept 15, 2026.** Reference `20260910025309`. TikTok's stated reason: the demo video didn't show the complete end-to-end flow, and didn't end with proof the post actually went live on TikTok — reads as a video problem, not a code problem, since the app's actual UX (privacy dropdown, duet/comment/stitch toggles, disclosure + consent, `publishState === 'live'` confirmation) already matches TikTok's published requirements. Resubmission needs a re-recorded demo video that ends on TikTok's own UI showing the live post, not just the app's "Published to TikTok" status card. Script drafted on request, not yet written; Joshua plans to record solo and resubmit himself. See `[[project_tiktok_content_sharing_audit]]` for the full breakdown. Until this clears, TikTok Studio stays private/drafts-only, same as today. Don't change any audit-reviewed TikTok UI until this resolves. The Oct 14 changes (#696, #701) only touched what happens after TikTok refuses a post, and measurement; the reviewed screens are unchanged.
+- **TikTok content sharing audit — RESUBMITTED Oct 15, 2026** (reference `20261015204558`) with a new demo that ends on TikTok's own UI showing the live post. When it clears: remove the 13 blog notes (search the blog for "content sharing audit"), flip TikTok copy from "private or drafts" to public posting, and update `llms.txt` and `ai.txt`. History: **rejected Sept 15, 2026**, reference `20260910025309`. TikTok's stated reason then: the demo didn't show the complete flow and didn't end with proof the post went live on TikTok. That was a video problem, and the Oct 15 recording fixes it. See `[[project_tiktok_content_sharing_audit]]` for what was submitted and how it was recorded. Until this clears, TikTok Studio stays private/drafts-only. Don't change the audit-reviewed posting screen (as it stands after #706 and #708) while the review is open.
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
 
@@ -1391,6 +1418,9 @@ What shipped:
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Oct 15 (evening) batch, PRs #704–#714, merged and deployed.** Reconnect your own account any time, clearer refused-connect messages, TikTok repeat-callback fix, www redirect, `/affiliates` public, IndexNow, 60-day referral cookie, derived sitemap, real 404s for unwritten posts, page titles, blog meta descriptions, blog-to-tool cards, TikTok Studio matched to TikTok's guidelines. See the Oct 15 (evening) entry above; do not redo these.
+- ✅ **TikTok audit resubmitted (Oct 15)**, reference `20261015204558`. Do not resubmit again while it is in review.
+- ✅ **Blog accuracy sweep (Oct 15)**: 126 database posts and the static posts corrected. Never re-run it from scratch; re-scan only after a pricing or platform change.
 - ✅ **Oct 14–15 batch, PRs #695–#703, all merged and deployed.** TikTok scheduled videos fall back to drafts, staged video cleanup, TikTok Studio funnel, signup typo check and resend, late-confirmer new-account fix, first-touch signup attribution and its `/admin/funnel` panel, the scheduling-window toast and boundary, free tools at `/tools`, repo hygiene. Inngest resynced by Joshua after #699 and #701. See the Oct 14–15 entry above; do not redo any of these.
 - ✅ **Confirmation email resend (Oct 15)**: once, to the 9 unconfirmed email signups since Aug 15. Never resend to that cohort.
 - ✅ **Sept 27 to Oct 13 batch, PRs #690–#694.** Legacy Discord upgrade, bot permissions and actionable 403s, LinkedIn expiry warnings, the re-sent first post and its trigger, canonical URLs and the blog index.
