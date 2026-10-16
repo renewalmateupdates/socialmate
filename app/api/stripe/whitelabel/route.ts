@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 const WHITE_LABEL_PRICES: Record<string, string> = {
   basic: 'price_1TFMHt7OMwDowUuU56Fzw4fE',
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
       white_label_tier: tier,
     },
     allow_promotion_codes: true,
+    custom_text: FINAL_SALE_CHECKOUT_TEXT,
     success_url: `${appUrl}/settings?tab=White Label&white_label=activated`,
     cancel_url: `${appUrl}/settings?tab=White Label`,
   }

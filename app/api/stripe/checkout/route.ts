@@ -4,6 +4,7 @@ import { stripe } from '@/lib/stripe'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -130,6 +131,7 @@ export async function POST(req: NextRequest) {
       metadata,
       ...(trialDays ? { trial_period_days: trialDays } : {}),
     },
+    custom_text: FINAL_SALE_CHECKOUT_TEXT,
     success_url: successUrl,
     cancel_url: fromOnboarding ? `${appUrl}/onboarding?step=2` : `${appUrl}/pricing`,
   })

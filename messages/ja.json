@@ -319,6 +319,8 @@
     "faq_headline": "よくある質問",
     "trust_stripe": "Stripeでセキュア",
     "trust_cancel": "いつでもキャンセル",
+    "all_sales_final": "すべての購入は最終的なものです。サブスクリプションはいつでも解約でき、次回の更新を停止できます。",
+    "refund_policy": "返金ポリシー",
     "trust_no_cc": "無料プランにCC不要"
   },
   "signup": {

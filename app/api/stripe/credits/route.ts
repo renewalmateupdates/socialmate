@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 
 const VALID_CREDIT_PRICE_IDS = new Set([
   'price_1TFMI47OMwDowUuUhTrbe3oq', // Starter  100cr
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
     },
     automatic_tax: { enabled: true },
     allow_promotion_codes: true,
+    custom_text: FINAL_SALE_CHECKOUT_TEXT,
     success_url: `${appUrl}/settings?tab=Plan&credits=purchased`,
     cancel_url: `${appUrl}/settings?tab=Plan`,
   })

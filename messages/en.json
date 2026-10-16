@@ -319,6 +319,8 @@
     "faq_headline": "Frequently asked questions",
     "trust_stripe": "Secured by Stripe",
     "trust_cancel": "Cancel anytime",
+    "all_sales_final": "All sales are final. Subscriptions can be canceled anytime to stop the next renewal.",
+    "refund_policy": "Refund policy",
     "trust_no_cc": "No CC for free plan"
   },
   "signup": {

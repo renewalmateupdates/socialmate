@@ -742,6 +742,10 @@ export default function Pricing() {
             <CreditCard className="w-3.5 h-3.5" strokeWidth={1.75} /><span>{t('pricing.trust_no_cc')}</span>
           </div>
         </div>
+        <p className="text-center text-xs text-ink-faint -mt-5 mb-8">
+          {t('pricing.all_sales_final')}{' '}
+          <Link href="/terms#refund-policy" className="underline underline-offset-2 hover:text-ink-muted">{t('pricing.refund_policy')}</Link>
+        </p>
 
         {/* WHITE LABEL ADD-ON */}
         <div className="bg-panel border border-edge rounded-2xl p-6 mb-8">

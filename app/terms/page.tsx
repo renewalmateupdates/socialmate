@@ -22,7 +22,7 @@ export default function TermsOfService() {
           <img src="/logo.png" alt="SocialMate" className="w-24 h-24 rounded-3xl" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Terms of Service</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: May 6, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: October 16, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Please read these Terms carefully before using SocialMate. By accessing or using the Service, you agree to be bound by these Terms.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -123,9 +123,10 @@ export default function TermsOfService() {
           </section>
 
           {/* ── 8. Refund Policy ── */}
-          <section>
+          <section id="refund-policy" className="scroll-mt-24">
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">8. Refund Policy</h2>
-            <p><span className="font-semibold">Subscriptions:</span> Subscription payments are generally non-refundable. We may, at our sole discretion, issue a refund within <span className="font-semibold">7 days of the initial purchase</span> if the Service is not functioning as materially described and the issue cannot be resolved within a reasonable time. Refunds will not be issued for: dissatisfaction with AI-generated content quality; posts that fail to publish due to third-party platform API errors; downtime of connected third-party platforms; or change of mind after purchase.</p>
+            <p><span className="font-semibold">All sales are final.</span> Except where the law requires otherwise, payments for subscriptions, AI credit packs, X Boosters, SOMA credits, add-ons and Studio Stax listings are not refunded. Canceling a subscription stops the next renewal, and you keep access until the end of the period you paid for.</p>
+            <p className="mt-2"><span className="font-semibold">Subscriptions:</span> Subscription payments are generally non-refundable. We may, at our sole discretion, issue a refund within <span className="font-semibold">7 days of the initial purchase</span> if the Service is not functioning as materially described and the issue cannot be resolved within a reasonable time. Refunds will not be issued for: dissatisfaction with AI-generated content quality; posts that fail to publish due to third-party platform API errors; downtime of connected third-party platforms; or change of mind after purchase.</p>
             <p className="mt-2"><span className="font-semibold">AI Credit Packs:</span> All AI credit pack purchases are <span className="font-semibold">final and non-refundable</span> once the order is confirmed, regardless of whether credits have been used.</p>
             <p className="mt-2"><span className="font-semibold">Annual Plans:</span> Annual subscription payments are non-refundable. You will retain access to the paid plan for the full annual term regardless of cancellation.</p>
             <p className="mt-2">To request a refund consideration, contact <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with your account email and Stripe transaction ID. We will respond within 5 business days.</p>

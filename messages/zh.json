@@ -319,6 +319,8 @@
     "faq_headline": "常见问题",
     "trust_stripe": "由 Stripe 提供安全保障",
     "trust_cancel": "随时取消",
+    "all_sales_final": "所有购买均为最终交易。订阅可随时取消，以停止下次续订。",
+    "refund_policy": "退款政策",
     "trust_no_cc": "免费计划无需信用卡"
   },
   "signup": {

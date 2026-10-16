@@ -319,6 +319,8 @@
     "faq_headline": "Häufig gestellte Fragen",
     "trust_stripe": "Gesichert durch Stripe",
     "trust_cancel": "Jederzeit kündbar",
+    "all_sales_final": "Alle Verkäufe sind endgültig. Abonnements können jederzeit gekündigt werden, um die nächste Verlängerung zu stoppen.",
+    "refund_policy": "Rückerstattungsrichtlinie",
     "trust_no_cc": "Keine Kreditkarte für kostenlosen Plan"
   },
   "signup": {
