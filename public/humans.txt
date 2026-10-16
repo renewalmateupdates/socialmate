@@ -10,25 +10,25 @@ Built with Claude Code by Anthropic
 Powered by Google Gemini, Supabase, Vercel, Inngest, Stripe, Resend
 
 /* SITE */
-Last updated: September 3, 2026
+Last updated: October 15, 2026
 Launch date: March 26, 2026
 Official Product Hunt launch: April 1, 2026
 Language: English (primary), + 8 locales (es, de, fr, pt, ru, zh, ja, ko)
 Standards: HTML5, CSS3, TypeScript
 Components: React 19, Tailwind CSS v4
-Framework: Next.js 15 (App Router)
+Framework: Next.js 16 (App Router)
 Database: Supabase (PostgreSQL + RLS)
 Auth: Supabase Auth
 Background jobs: Inngest
 Payments: Stripe
-AI: Google Gemini API (gemini-2.5-flash)
+AI: Google Gemini API (gemini-3.6-flash)
 Deployment: Vercel
-Analytics: Vercel Analytics + Google Analytics 4
+Analytics: Vercel Analytics and Speed Insights, Google Analytics 4, first-party funnel events
 Email: Resend
 Storage: Supabase Storage
 
 /* TECHNOLOGY */
-- Next.js 15 / React 19 / TypeScript / Tailwind CSS v4
+- Next.js 16 / React 19 / TypeScript / Tailwind CSS v4
 - Supabase PostgreSQL with Row Level Security on every table
 - Inngest for background job scheduling and cron functions
 - Stripe for subscriptions, one-time payments, and Stripe Connect

@@ -22,6 +22,22 @@ interface ChangelogEntry {
 const CHANGELOG: ChangelogEntry[] = [
   {
     date: 'October 15, 2026',
+    version: 'Reconnect Any Time, Clearer Connect Errors, an Accurate Blog',
+    changes: [
+      { type: 'Fixed',    text: 'Disconnecting an account no longer locks you out of it for 45 days. You can reconnect your own account any time. The waiting period now only stops an account moving to a different SocialMate account.' },
+      { type: 'Improved', text: 'When a connection is refused, Accounts says why: the account is connected to another SocialMate account, it is in its waiting period (with the date it ends), or the sign-in link expired or opened in a different browser.' },
+      { type: 'Fixed',    text: 'Connecting TikTok could show a failure even though the connection worked, when TikTok\'s sign-in page loaded twice. It now shows the success.' },
+      { type: 'Improved', text: 'TikTok Studio\'s posting screen now follows TikTok\'s posting guidelines word for word: comments, Duets and Stitch start off, privacy is a dropdown with no default, and the screen names the account you are posting to.' },
+      { type: 'Fixed',    text: 'Switches in TikTok Studio drew their knob on the wrong side when off.' },
+      { type: 'Fixed',    text: 'The partner program page at /affiliates asked visitors to sign in. It is open to everyone again, and referral links now credit you for 60 days, as the page says.' },
+      { type: 'Fixed',    text: '38 blog links led to posts that were never written. They now show a proper "not found" page, and the sitemap lists only real posts.' },
+      { type: 'Fixed',    text: 'Blog posts now describe SocialMate as it is today: 7 platforms, 250 free posts a month, X on Pro, and no Instagram, Facebook or Pinterest yet.' },
+      { type: 'Improved', text: 'Every blog post has a summary for search results, and public pages have their own titles.' },
+      { type: 'Improved', text: 'Blog posts about Discord and threads link to the matching free tool.' },
+    ],
+  },
+  {
+    date: 'October 14, 2026',
     version: 'Free Tools, TikTok Drafts Fallback, Smoother Signup',
     changes: [
       { type: 'New',      text: 'Free tools, no signup: a thread splitter that turns long text into a numbered thread sized for X, Bluesky or Mastodon (counted the way each platform counts), and a Discord timestamp generator whose codes show in every reader\'s own time zone. At /tools.' },
