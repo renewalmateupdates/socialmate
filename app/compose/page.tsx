@@ -11,6 +11,7 @@ import PageTour from '@/components/PageTour'
 import { useI18n } from '@/contexts/I18nContext'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import { track, trackOnce } from '@/lib/analytics'
+import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { AlertTriangle, BadgePercent, Ban, BarChart3, Bookmark, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ClipboardList, Clock, Eye, Fish, FlaskConical, Film, Flame, Globe, Hash, Heart, HeartHandshake, HelpCircle, Image as ImageIcon, Lightbulb, ListOrdered, Lock, Mic, MessageCircle, MessagesSquare, Newspaper, Paperclip, PartyPopper, PenLine, Recycle, RefreshCw, Repeat, Repeat2, Reply, Rocket, Scissors, Sparkles, Star, TrendingUp, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -341,6 +342,15 @@ function ComposeInner() {
   const [savingTemplate, setSavingTemplate] = useState(false)
   const [templateSaveMsg, setTemplateSaveMsg] = useState<{ text: string; ok: boolean } | null>(null)
 
+  // The one-sentence starter, shown above an empty box to someone who has never
+  // made a post. Measured 2026-10-16: since Sep 24, 17 outside users opened
+  // Compose and 6 have any post row; all 3 who used this helper (in onboarding
+  // or on the Accounts card) saved a post. The bracketed STARTER_TEMPLATES still
+  // leave a blank page to fill. Decided once on arrival, never re-shown: typing,
+  // building or "Start from scratch" hides it for the rest of the visit.
+  const [starterEligible, setStarterEligible] = useState(false)
+  const [starterDismissed, setStarterDismissed] = useState(false)
+
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
@@ -353,6 +363,32 @@ function ComposeInner() {
     plan === 'free'   ? '2 weeks' :
     plan === 'pro'    ? '1 month' :
     '3 months'
+
+  useEffect(() => {
+    // Anything that arrives with content of its own is not a blank page.
+    const prefilled = ['draft', 'id', 'template', 'starterTemplate', 'content', 'media']
+      .some(k => searchParams.get(k))
+    if (prefilled) return
+    let cancelled = false
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user || cancelled) return
+      const { count, error } = await supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', data.user.id)
+      if (error) { console.warn('[compose] post count for starter failed', error); return }
+      if (!cancelled && count === 0) setStarterEligible(true)
+    })
+    return () => { cancelled = true }
+    // Arrival only: a later ?content= navigation must not bring it back.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (content.trim()) setStarterDismissed(true)
+  }, [content])
+
+  const showStarter = starterEligible && !starterDismissed && !threadMode && !abMode && !content.trim()
 
   // Show posting disclaimer once per session
   useEffect(() => {
@@ -2137,6 +2173,23 @@ function ComposeInner() {
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400 dark:text-gray-500">Version A</span>
                         <span className="text-xs text-gray-400 dark:text-gray-500">· publishes first</span>
+                      </div>
+                    )}
+                    {showStarter && (
+                      <div>
+                        <StarterDraftBuilder
+                          where="compose"
+                          tone="compose"
+                          heading="Not sure what to write first?"
+                          buttonLabel="Write my post"
+                          onBuild={({ draft }) => { setContent(draft); setScoreResult(null); setStarterDismissed(true) }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setStarterDismissed(true)}
+                          className="mt-1 px-1 min-h-[44px] text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                          Start from scratch
+                        </button>
                       </div>
                     )}
                     <textarea
