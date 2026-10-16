@@ -8,6 +8,7 @@ import PublicFooter from '@/components/PublicFooter'
 import { CalendarDays, Clock, Heart, PenLine } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { POSTS } from '@/lib/blog/static-posts'
+import { describePost } from '@/lib/blog/describe'
 
 // Revalidate every 24h — blog posts rarely change; shorter TTL caused hourly ISR cache misses
 // that hit the origin server, causing 3s+ FCP for international visitors on each cache expiry.
@@ -248,17 +249,17 @@ export async function generateMetadata(
   }
   return {
     title: `${post.title} — SocialMate Blog`,
-    description: post.excerpt,
+    description: describePost(post),
     openGraph: {
       title:       post.title,
-      description: post.excerpt,
+      description: describePost(post),
       url:         `https://socialmate.studio/blog/${slug}`,
       images:      [{ url: '/og-image.png', width: 1270, height: 760, alt: post.title }],
     },
     twitter: {
       card:        'summary_large_image',
       title:       post.title,
-      description: post.excerpt,
+      description: describePost(post),
       images:      ['/og-image.png'],
     },
     alternates: { canonical: `https://socialmate.studio/blog/${slug}` },
@@ -452,7 +453,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
-    description: post.excerpt || '',
+    description: describePost(post),
     author: {
       '@type': 'Person',
       name: (post as { author?: string }).author || 'SocialMate Team',
