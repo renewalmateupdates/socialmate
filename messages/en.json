@@ -2857,7 +2857,13 @@
     "footer_cta_title": "Want more from Joshua?",
     "footer_cta_desc": "SocialMate is the tool he built while writing these guides — a full social media OS for creators and businesses. Free plan, always. Because power to the people isn't just a tagline.",
     "about_guide_cta": "About Gilgamesh's Guide",
-    "footer_copy": "© Gilgamesh Enterprise LLC — Written by Joshua Bostic. All guides are free, forever."
+    "footer_copy": "© Gilgamesh Enterprise LLC — Written by Joshua Bostic. All guides are free, forever.",
+    "shop_badge": "Take them offline",
+    "shop_title": "All 14 guides in one PDF",
+    "shop_desc": "The guides stay free to read here. The Complete Edition collects all fourteen in one 192-page PDF, corrected for late 2026, with 10 printable worksheets added.",
+    "shop_cta": "Get the Complete Edition, {price}",
+    "shop_browse": "Browse the Gilgamesh shop",
+    "shop_note": "Instant PDF download, in English. 25% of every sale goes to SM-Give."
   },
   "about": {
     "hero_title": "Built by one person.",

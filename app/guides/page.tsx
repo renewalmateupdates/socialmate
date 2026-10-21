@@ -3,6 +3,7 @@ import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { Coffee, Crown, Heart } from 'lucide-react'
+import { PRODUCTS, shopHomeUrl, shopUrl } from '@/lib/shop/guide-products'
 
 const GUIDES = [
   {
@@ -431,6 +432,43 @@ export default function GuidesHubPage() {
                 )}
               </article>
             ))}
+          </div>
+        </section>
+
+        {/* The paid edition, for people who want them offline */}
+        <section className="border-t border-[#1f1f1f] px-6 py-16">
+          <div className="mx-auto max-w-3xl">
+            <div className="flex flex-col items-center gap-8 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-7 sm:flex-row sm:p-9">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={PRODUCTS.complete.image}
+                alt={`Cover of ${PRODUCTS.complete.name}`}
+                width={140}
+                height={182}
+                loading="lazy"
+                className="h-auto w-[140px] flex-none rounded-md border border-[#2a2a2a] shadow-lg shadow-black/40"
+              />
+              <div className="text-center sm:text-left">
+                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">{t('guides_landing.shop_badge')}</p>
+                <h2 className="mb-3 text-2xl font-black text-white">{t('guides_landing.shop_title')}</h2>
+                <p className="mb-6 text-sm leading-relaxed text-gray-400">{t('guides_landing.shop_desc')}</p>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href={shopUrl(PRODUCTS.complete, 'hub', 'guides_hub')}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-amber-500 px-6 text-sm font-bold text-black transition-colors hover:bg-amber-400"
+                  >
+                    {t('guides_landing.shop_cta', { price: PRODUCTS.complete.price })}
+                  </a>
+                  <a
+                    href={shopHomeUrl('guides_hub')}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#111111] px-6 text-sm font-bold text-white transition-colors hover:border-amber-500/30"
+                  >
+                    {t('guides_landing.shop_browse')}
+                  </a>
+                </div>
+                <p className="mt-4 text-xs text-gray-600">{t('guides_landing.shop_note')}</p>
+              </div>
+            </div>
           </div>
         </section>
 
