@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -777,6 +778,7 @@ export default function MarketingZeroBudgetPage() {
                 </div>
               </section>
 
+              <GuideShopCard guide="marketing-zero-budget" />
               <GuideEmailCapture />
               <GuidePDFDownload title="Marketing on Zero Budget" />
 
