@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -483,6 +484,7 @@ export default function AIToolsForCreatorsPage() {
                 </div>
               </section>
 
+              <GuideShopCard guide="ai-tools-for-creators-2026" />
               <GuideEmailCapture />
               <GuidePDFDownload title="AI Tools for Creators: The Complete 2026 Handbook" />
 

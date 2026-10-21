@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -554,6 +555,7 @@ export default function First30DaysSocialMediaPage() {
                 </div>
               </section>
 
+              <GuideShopCard guide="first-30-days-social-media" />
               <GuideEmailCapture />
               <GuidePDFDownload title="Your First 30 Days on Social Media" />
 

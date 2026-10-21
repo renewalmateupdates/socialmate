@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -486,6 +487,7 @@ export default function SideHustleToFullTimePage() {
                 </div>
               </section>
 
+              <GuideShopCard guide="side-hustle-to-full-time-creator" />
               <GuideEmailCapture />
               <GuidePDFDownload title="From Side Hustle to Full-Time Creator" />
 

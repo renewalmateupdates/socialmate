@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -658,6 +659,7 @@ export default function EmailListBuildingPage() {
                 </div>
               </section>
 
+              <GuideShopCard guide="email-list-building" />
               <GuideEmailCapture />
               <GuidePDFDownload title="Email List Building From Zero" />
 

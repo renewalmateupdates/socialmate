@@ -33,6 +33,7 @@ export const FUNNEL_EVENTS = [
   'signup_viewed',        // reached /signup
   'signup_started',       // typed into the form or clicked an OAuth button
   'blog_cta_clicked',     // clicked through from a blog post
+  'shop_clicked',         // { from, guide, product } left for shop.gilgameshenterprise.com
 
   // ── Account created ──────────────────────────────────────────────────────
   'signup_completed',     // first successful sign-in on a new account
