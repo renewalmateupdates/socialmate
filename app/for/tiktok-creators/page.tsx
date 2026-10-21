@@ -13,6 +13,10 @@ function PlatformGlyph({ id, size = 16, className = '' }: { id: string; size?: n
   return <PlatformIcon name={id} size={size} className={className} />
 }
 
+// While TikTok's content sharing audit is open, a scheduled video for a public
+// account lands in the creator's TikTok drafts (lib/tiktok-scheduled.ts), so
+// this page and the for_tiktok / tiktok_landing strings say so. Restore the
+// direct-posting wording when the audit clears.
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -46,7 +50,7 @@ const faqSchema = {
       name: 'How does SocialMate post to TikTok?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: "SocialMate uses TikTok's official Production-approved Content Posting API (FILE_UPLOAD method). When you schedule a video, SocialMate uploads it to secure storage and at your scheduled time, calls the TikTok API to publish directly to your profile. No manual posting, no third-party workarounds.",
+        text: "SocialMate uses TikTok's official Content Posting API, approved for production. When you schedule a video, SocialMate stores it securely and sends it to TikTok at the time you picked. TikTok is still reviewing SocialMate for public posting, so until that review clears, a video scheduled for a public account lands in your TikTok drafts and TikTok notifies you to finish posting. Private accounts post directly. No third-party workarounds.",
       },
     },
   ],
@@ -72,7 +76,7 @@ const COMING_PLATFORMS = [
 const PAIN_POINTS = [
   {
     before: 'Set an alarm at 7 PM. Open TikTok. Hope you don\'t forget. Post manually every single day.',
-    after:  'Schedule weeks of TikTok videos in one session. They go live automatically.',
+    after:  'Schedule weeks of TikTok videos in one session. Each one reaches TikTok at the time you picked.',
     icon:   AlarmClock,
   },
   {
@@ -90,7 +94,7 @@ const PAIN_POINTS = [
 const FEATURES = [
   {
     title: 'TikTok Direct Scheduling',
-    desc:  'Schedule TikTok videos using the official Production-approved Content Posting API. Pick your video, write a caption, set a time — SocialMate posts it automatically.',
+    desc:  'Schedule TikTok videos through the official Content Posting API. Pick your video, write a caption, set a time, and SocialMate sends it to TikTok then. Until TikTok finishes reviewing SocialMate for public posting, it lands in your TikTok drafts and TikTok notifies you to finish posting.',
     icon:  Music2,
     live:  true,
     badge: 'Live now',
@@ -111,7 +115,7 @@ const FEATURES = [
   },
   {
     title: 'Cross-Platform Posting',
-    desc:  'Schedule the same video or content to all 7 platforms at once. One compose session reaches TikTok, Bluesky, X, Mastodon, Discord, Telegram, and LinkedIn simultaneously.',
+    desc:  'Post TikTok videos from TikTok Studio and everything else from one compose window. Bluesky, X, Mastodon, Discord, Telegram and LinkedIn go out together.',
     icon:  Rocket,
     live:  true,
     badge: 'Live now',
@@ -124,8 +128,8 @@ const FEATURES = [
     badge: 'Live now',
   },
   {
-    title: 'Scheduling Calendar',
-    desc:  'Full drag-and-drop calendar view of every scheduled TikTok post. See gaps, move posts around, and bulk-schedule an entire week of content in one session.',
+    title: 'TikTok Queue',
+    desc:  'Every scheduled TikTok video shows in your Queue with its time, and you can cancel one before it goes out.',
     icon:  CalendarDays,
     live:  true,
     badge: 'Live now',
@@ -403,7 +407,7 @@ export default function TikTokCreatorsPage() {
               },
               {
                 q: 'How does SocialMate post to TikTok?',
-                a: "SocialMate uses TikTok's official Production-approved Content Posting API (FILE_UPLOAD method). When you schedule a video, SocialMate uploads it to secure storage and at your scheduled time, calls the TikTok API to publish directly to your profile. No manual posting, no third-party workarounds.",
+                a: "SocialMate uses TikTok's official Content Posting API, approved for production. When you schedule a video, SocialMate stores it securely and sends it to TikTok at the time you picked. TikTok is still reviewing SocialMate for public posting, so until that review clears, a video scheduled for a public account lands in your TikTok drafts and TikTok notifies you to finish posting. Private accounts post directly. No third-party workarounds.",
               },
             ].map((item, i) => (
               <div key={i} className="border-b border-edge pb-6 last:border-0">
