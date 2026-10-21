@@ -2857,7 +2857,13 @@
     "footer_cta_title": "Joshua에게서 더 많은 것을 원하시나요?",
     "footer_cta_desc": "SocialMate는 그가 이 가이드들을 쓰면서 만든 도구입니다——크리에이터와 비즈니스를 위한 완전한 소셜 OS. 무료 플랜, 항상. 왜냐하면 사람들에게 권력이란 단순한 슬로건이 아니기 때문입니다.",
     "about_guide_cta": "길가메쉬의 가이드에 대해",
-    "footer_copy": "© Gilgamesh Enterprise LLC——Joshua Bostic 작성. 모든 가이드는 영구 무료."
+    "footer_copy": "© Gilgamesh Enterprise LLC——Joshua Bostic 작성. 모든 가이드는 영구 무료.",
+    "shop_badge": "오프라인으로 읽기",
+    "shop_title": "14권의 가이드를 하나의 PDF로",
+    "shop_desc": "가이드는 여기서 계속 무료로 읽을 수 있습니다. Complete Edition은 14권 전부를 192페이지 PDF 하나로 묶고, 2026년 말 기준으로 업데이트했으며, 인쇄용 워크시트 10장을 더했습니다.",
+    "shop_cta": "Complete Edition 받기, {price}",
+    "shop_browse": "Gilgamesh 숍 둘러보기",
+    "shop_note": "PDF 즉시 다운로드(영어). 판매 금액의 25%는 SM-Give에 기부됩니다."
   },
   "about": {
     "hero_title": "한 사람이 만들었습니다.",

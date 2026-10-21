@@ -2857,7 +2857,13 @@
     "footer_cta_title": "想要更多来自 Joshua 的内容？",
     "footer_cta_desc": "SocialMate 是他在撰写这些指南时构建的工具——为创作者和企业提供完整的社交 OS。免费计划，永远如此。因为权力归于人民不只是一句口号。",
     "about_guide_cta": "关于吉尔伽美什指南",
-    "footer_copy": "© Gilgamesh Enterprise LLC——由 Joshua Bostic 撰写。所有指南永久免费。"
+    "footer_copy": "© Gilgamesh Enterprise LLC——由 Joshua Bostic 撰写。所有指南永久免费。",
+    "shop_badge": "离线阅读",
+    "shop_title": "全部 14 本指南，一个 PDF",
+    "shop_desc": "指南在这里依然免费阅读。Complete Edition 将全部十四本汇集成一个 192 页的 PDF，更新至 2026 年底，并附 10 份可打印的练习表。",
+    "shop_cta": "获取 Complete Edition，{price}",
+    "shop_browse": "浏览 Gilgamesh 商店",
+    "shop_note": "即时下载 PDF，英文版。每笔销售的 25% 捐给 SM-Give。"
   },
   "about": {
     "hero_title": "由一个人构建。",

@@ -102,7 +102,13 @@ export function shopPickFor(guide: string): GuideShopPick | null {
   return { ...pick, bundle: pick.product === PRODUCTS.complete ? null : PRODUCTS.complete }
 }
 
-export function shopUrl(product: ShopProduct, guide: string): string {
-  const q = new URLSearchParams({ utm_source: 'socialmate', utm_medium: 'guide', utm_campaign: guide })
+export function shopUrl(product: ShopProduct, guide: string, medium = 'guide'): string {
+  const q = new URLSearchParams({ utm_source: 'socialmate', utm_medium: medium, utm_campaign: guide })
   return `${SHOP}/products/${product.handle}?${q}`
+}
+
+/** The shop's home page, tagged with where on socialmate.studio the click came from. */
+export function shopHomeUrl(medium: 'nav' | 'footer' | 'guides_hub'): string {
+  const q = new URLSearchParams({ utm_source: 'socialmate', utm_medium: medium })
+  return `${SHOP}/?${q}`
 }

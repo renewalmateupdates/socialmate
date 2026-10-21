@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES, localeFromPath } from '@/lib/i18n'
+import { shopHomeUrl } from '@/lib/shop/guide-products'
 import { Check, Handshake, X as CloseIcon } from 'lucide-react'
 
 // Locale-prefixed landing pages — switching language navigates to the locale URL
@@ -46,6 +47,7 @@ const PRODUCTS = [
   { label: 'Monetize',      href: '/monetize'    },
   { label: 'TikTok Studio', href: '/tiktok'      },
   { label: 'Merch',         href: '/merch'       },
+  { label: 'Gilgamesh Shop', href: shopHomeUrl('nav') },
 ]
 
 type DropdownKey = 'audiences' | 'products' | 'resources'
@@ -338,6 +340,7 @@ export default function PublicNav() {
                   { label: 'Monetize',      href: '/monetize'    },
                   { label: 'TikTok Studio', href: '/tiktok'      },
                   { label: 'Enterprise',    href: '/enterprise'  },
+                  { label: 'Gilgamesh Shop', href: shopHomeUrl('nav') },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}

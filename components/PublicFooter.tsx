@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { shopHomeUrl } from '@/lib/shop/guide-products'
 
 // Single source of truth for the public footer. Rendered by PublicLayout (which
 // wraps most public pages), by the home page, and by the handful of pages that
@@ -35,6 +36,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
       { label: 'Our Story',   href: '/story'      },
       { label: 'Blog',        href: '/blog'       },
       { label: 'Merch',       href: '/merch'      },
+      { label: 'Gilgamesh Shop', href: shopHomeUrl('footer') },
       { label: 'Affiliates',  href: '/affiliates' },
       { label: 'Referral',    href: '/referral'   },
       { label: "Gil's Guide", href: '/guides'     },
