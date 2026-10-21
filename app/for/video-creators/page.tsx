@@ -33,7 +33,7 @@ const PAIN_POINTS = [
   {
     icon: Clapperboard,
     problem: 'Managing TikTok, Twitter, and Discord separately for every video upload — three tabs, three captions, three times the effort.',
-    solution: 'One dashboard. Write once, publish to all 7 platforms in one click. TikTok + Discord + Bluesky + LinkedIn in 30 seconds flat.',
+    solution: 'One dashboard for all 7 platforms. Post the video from TikTok Studio, then share it to Discord, Bluesky and LinkedIn together from Compose.',
   },
   {
     icon: PenLine,
@@ -59,7 +59,7 @@ const FEATURES = [
   },
   {
     title: 'Clips Studio (Twitch + YouTube)',
-    desc:  'Browse your Twitch clips via OAuth or paste a YouTube channel URL — no API key needed. Pick any clip and schedule it to all platforms in one click.',
+    desc:  'Browse your Twitch clips via OAuth or paste a YouTube channel URL — no API key needed. Pick any clip and schedule a post about it in one click.',
     icon:  Gamepad2,
     live:  true,
     badge: 'Live now',
