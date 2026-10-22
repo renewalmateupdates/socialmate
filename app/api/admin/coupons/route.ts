@@ -16,11 +16,13 @@ export async function GET(_req: NextRequest) {
 
   const db = getSupabaseAdmin()
 
+  // `affiliates` has no email column. Asking for one failed the whole query
+  // (42703), so this page never listed a single existing code.
   const { data: coupons, error } = await db
     .from('coupons')
     .select(`
       *,
-      affiliates ( id, full_name, email )
+      affiliates ( id, full_name )
     `)
     .order('created_at', { ascending: false })
 
