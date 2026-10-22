@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
+import { inngest } from '@/lib/inngest'
 
 const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
   free:   20,
@@ -160,13 +161,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create post record' }, { status: 500 })
   }
 
-  // If scheduled, return immediately — Inngest cron will publish at the right time
+  // If scheduled, return immediately. publishScheduledTiktokPosts sleeps until
+  // the scheduled time; its hourly cron is the backstop if this send fails.
   if (scheduled_at) {
     await getSupabaseAdmin()
       .from('workspaces')
       .update({ tiktok_videos_this_month: videosThisMonth + 1 })
       .eq('owner_id', user.id)
       .eq('is_personal', true)
+
+    try {
+      await inngest.send({ name: 'tiktok/scheduled', data: { tiktokPostId: tikPost.id, scheduledAt: scheduled_at } })
+    } catch (err) {
+      console.warn('[tiktok/post] schedule event failed; the hourly backstop will send it:', err)
+    }
 
     return NextResponse.json({ success: true, tiktok_post_id: tikPost.id, scheduled: true })
   }

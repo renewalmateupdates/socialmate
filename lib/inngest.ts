@@ -835,12 +835,17 @@ export const evergreenRecycler = inngest.createFunction(
   }
 )
 
-// ─── Discord Welcome Message Poller — every 5 minutes ─────────────────────────
+// ─── Discord Welcome Message Poller — hourly ──────────────────────────────────
 // Polls each enabled discord_welcome_configs row for new members and sends
 // welcome messages + assigns auto-roles.
+//
+// Hourly, down from every 15 minutes. No server has welcome messages set up
+// (0 rows in discord_welcome_configs, Oct 22), so 96 runs a day found nothing,
+// and each run and step counts against the Inngest Hobby plan's 50,000 monthly
+// executions. If servers start using it, a faster schedule is a one-line change.
 export const discordWelcomePoller = inngest.createFunction(
   { id: 'discord-welcome-poller', name: 'Discord Welcome Message Poller', retries: 2 },
-  { cron: '*/15 * * * *' },
+  { cron: '0 * * * *' },
   async ({ step }) => {
     // Fetch all enabled welcome configs
     const configs = await step.run('fetch-welcome-configs', async () => {
@@ -4758,11 +4763,23 @@ export const postPerformanceAlerts = inngest.createFunction(
 //     slot back, so every scheduled video used to cost two of the month's slots.
 //   - The creator hears about the outcome. A failed scheduled video used to
 //     drop out of the queue with nothing anywhere saying what happened.
+//   - Woken by the post's own schedule, not a 5-minute poll. /api/tiktok/post
+//     sends tiktok/scheduled with the time, and the run sleeps until then. The
+//     poll ran 288 times a day to find, almost always, nothing (one scheduled
+//     post in all of October), and every run and step counts against the
+//     Inngest Hobby plan's 50,000 monthly executions. The hourly cron stays as
+//     a backstop for a post whose event was lost; the claim below means the
+//     two can never both send the same video.
 
 export const publishScheduledTiktokPosts = inngest.createFunction(
   { id: 'publish-scheduled-tiktok-posts', concurrency: { limit: 3 } },
-  { cron: '*/5 * * * *' },
-  async ({ step }) => {
+  [{ event: 'tiktok/scheduled' }, { cron: '0 * * * *' }],
+  async ({ event, step }) => {
+    const scheduledAt = (event as any)?.data?.scheduledAt
+    if (event.name === 'tiktok/scheduled' && scheduledAt) {
+      await step.sleepUntil('wait-until-scheduled', new Date(scheduledAt))
+    }
+
     const due = await step.run('fetch-due-tiktok-posts', async () => {
       const { data, error } = await getSupabaseAdmin()
         .from('tiktok_posts')
