@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
+import { recordCodeReferral } from '@/lib/partner-commission'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -147,6 +148,17 @@ export async function POST(req: NextRequest) {
       }),
       db.rpc('increment_coupon_redemptions', { coupon_id: couponRecord.id }),
     ]).catch(err => console.error('[Checkout] Coupon redemption record error:', err))
+
+    // A partner's code makes this buyer their referral, so the partner earns
+    // on every invoice the same way their link does (lib/partner-commission.ts).
+    // It used to pay once, on the first payment.
+    if (couponRecord.affiliate_id) {
+      await recordCodeReferral(db, {
+        buyerUserId: user.id,
+        affiliateId: couponRecord.affiliate_id,
+        code:        couponRecord.code,
+      }).catch(err => console.error('[Checkout] Code referral record error:', err))
+    }
   }
 
   return NextResponse.json({ url: session.url })

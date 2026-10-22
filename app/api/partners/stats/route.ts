@@ -167,11 +167,11 @@ export async function GET(req: NextRequest) {
     times_used:      c.current_redemptions ?? 0,
   }))
 
-  // Conversions. Commission lands in three places depending on how the sale
-  // came in: affiliate_conversions keyed by the profile id (credit packs) or by
-  // the affiliates id (partner codes), and referral_conversions for sign-ups
-  // through the referral link. This used to read only the first, so a partner
-  // never saw a single real sale.
+  // Conversions. Every payment a partner earns on is a row in
+  // affiliate_conversions keyed by their affiliates id (lib/partner-commission.ts);
+  // older rows may be keyed by the profile id. Referred sign-ups that haven't
+  // paid yet come from referral_conversions. This used to read only the
+  // profile-id rows, so a partner never saw a single real sale.
   const conversionOwnerIds = [profile.id, affiliateRow?.id].filter(Boolean) as string[]
   const [{ data: codeConversions }, { data: linkConversions }] = await Promise.all([
     db.from('affiliate_conversions')
@@ -188,12 +188,13 @@ export async function GET(req: NextRequest) {
   const conversions = [
     ...(codeConversions ?? []).map(c => ({
       ...c,
-      event_type: c.event_type ?? (c.conversion_type === 'credit_pack' ? 'credit pack' : 'code'),
+      event_type: c.event_type ?? (c.conversion_type === 'credit_pack' ? 'credit pack' : 'payment'),
     })),
-    ...(linkConversions ?? []).map(r => ({
+    // Paying referrals already appear above, one row per payment.
+    ...(linkConversions ?? []).filter(r => !((r.total_earned ?? 0) > 0)).map(r => ({
       id:                  r.id,
       referred_user_email: null,
-      event_type:          (r.total_earned ?? 0) > 0 ? 'subscription' : 'sign-up',
+      event_type:          'sign-up',
       plan:                null,
       amount_cents:        0,
       commission_cents:    Math.round((r.total_earned ?? 0) * 100),

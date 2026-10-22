@@ -790,7 +790,7 @@ export default function PartnersDashboardPage() {
               <Gift size={16} strokeWidth={2} />
               <h3 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>SocialMate Codes</h3>
             </div>
-            <p style={{ margin: '0 0 14px', fontSize: 11, color: '#4b5563' }}>Customers enter it in the code box at socialmate.studio/pricing. You earn on the payment they make with it. Sign-ups through your link earn on every payment.</p>
+            <p style={{ margin: '0 0 14px', fontSize: 11, color: '#4b5563' }}>Customers enter it in the code box at socialmate.studio/pricing. You earn on every payment they make after that, the same as with your link.</p>
             {promo_codes.length === 0 ? (
               <p style={{ fontSize: 13, color: muted, margin: 0 }}>No code yet. Your referral link above works now; reply to any email from SocialMate Partners to ask for a code.</p>
             ) : (
