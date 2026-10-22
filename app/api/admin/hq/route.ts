@@ -48,19 +48,22 @@ export async function GET(req: NextRequest) {
     Promise.allSettled([stripeSummary(getStripe(), sinceSec)]).then(r => r[0]),
     Promise.allSettled([socialmateDbSummary(getSupabaseAdmin(), sinceIso)]).then(r => r[0]),
     shopifyConfigured()     ? Promise.allSettled([shopifySummary(sinceIso)]).then(r => r[0]) : Promise.resolve(null),
-    renewalmateConfigured() ? Promise.allSettled([renewalmateSummary(sinceIso, sinceSec)]).then(r => r[0]) : Promise.resolve(null),
+    renewalmateConfigured() ? Promise.allSettled([renewalmateSummary(sinceIso)]).then(r => r[0]) : Promise.resolve(null),
   ])
 
   const sources: SourceStatus[] = []
   const stripe      = settle('Stripe (Gilgamesh Enterprise)', stripeR, sources)
   const socialmate  = settle('SocialMate database', dbR, sources)
-  const shopify     = settle('Gilgamesh shop (Shopify)', shopifyR, sources, 'Add SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_TOKEN in Vercel.')
+  const shopify     = settle('Gilgamesh shop (Shopify)', shopifyR, sources, 'Add SHOPIFY_STORE_DOMAIN, SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET in Vercel.')
   const renewalmate = settle('RenewalMate', renewalR, sources, 'Add RENEWALMATE_SUPABASE_URL and RENEWALMATE_SUPABASE_SERVICE_ROLE_KEY in Vercel.')
 
-  const totalCents =
-    (stripe?.netCents ?? 0) +
-    (shopify?.grossCents ?? 0) +
-    (renewalmate?.revenue?.netCents ?? 0)
+  // RenewalMate bills through the same Stripe account, so its money is already
+  // inside stripe.netCents; it is broken out here, never added twice.
+  const totalCents = (stripe?.netCents ?? 0) + (shopify?.grossCents ?? 0)
+  const renewalmateRevenue = stripe ? {
+    cents:    stripe.byGroup.find(g => g.group === 'RenewalMate')?.cents ?? 0,
+    mrrCents: stripe.mrrByGroup.find(g => g.group === 'RenewalMate')?.cents ?? 0,
+  } : null
 
   return NextResponse.json({
     days,
@@ -70,6 +73,7 @@ export async function GET(req: NextRequest) {
     stripe,
     shopify,
     renewalmate,
+    renewalmateRevenue,
     socialmate,
     smGive: {
       recordedCents:   socialmate?.smGiveCents ?? 0,

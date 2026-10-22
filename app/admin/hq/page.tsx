@@ -21,17 +21,15 @@ type HQ = {
   sources: { name: string; status: 'ok' | 'not_connected' | 'error'; detail?: string }[]
   stripe: {
     grossCents: number; refundedCents: number; netCents: number; byGroup: Group[]
-    mrrCents: number; activeSubscriptions: number
+    mrrCents: number; mrrByGroup: { group: string; cents: number }[]; activeSubscriptions: number
     recent: { at: string; label: string; group: string; cents: number; email: string | null }[]
     failedPayments: { at: string; cents: number; email: string | null; reason: string }[]
     webhookFailures: { total: number; byType: { type: string; count: number }[] }
     truncated: boolean
   } | null
   shopify: { grossCents: number; orders: number; smGiveOwedCents: number; recent: { at: string; name: string; cents: number; status: string }[] } | null
-  renewalmate: {
-    users: number; newUsers: number; paying: number; plans: { plan: string; count: number }[]
-    revenue: { netCents: number; mrrCents: number } | null; revenueNote: string | null
-  } | null
+  renewalmate: { users: number; newUsers: number; paying: number; plans: { plan: string; count: number }[] } | null
+  renewalmateRevenue: { cents: number; mrrCents: number } | null
   socialmate: {
     waiting: { label: string; count: number; href: string | null }[]
     feedback: { open: number; recent: { type: string; message: string; email: string | null; at: string }[] }
@@ -155,7 +153,7 @@ export default function AdminHQPage() {
               <Panel className="p-5">
                 <Label>Came in, last {data.days} days</Label>
                 <div className="mt-2 font-mono text-3xl font-semibold tabular-nums text-jade">{usd(data.totalCents)}</div>
-                <div className="mt-1 text-xs text-ink-muted">After refunds, before tax. Every connected venture.</div>
+                <div className="mt-1 text-xs text-ink-muted">After refunds, before tax. Stripe (SocialMate and RenewalMate) plus the shop.</div>
               </Panel>
               <Panel className="p-5">
                 <Label>Waiting on you</Label>
@@ -172,7 +170,7 @@ export default function AdminHQPage() {
             {/* ── Revenue by venture ───────────────────────────────────── */}
             <div className="grid gap-4 md:grid-cols-3">
               <Panel>
-                <PanelHead icon={CircleDollarSign} title="SocialMate · Stripe" />
+                <PanelHead icon={CircleDollarSign} title="Stripe · every product" />
                 <div className="grid grid-cols-2 gap-4 p-5">
                   {s ? (
                     <>
@@ -202,9 +200,8 @@ export default function AdminHQPage() {
                       <Stat
                         label="Paying"
                         value={String(data.renewalmate.paying)}
-                        sub={data.renewalmate.revenue ? `${usd(data.renewalmate.revenue.netCents)} in · ${usd(data.renewalmate.revenue.mrrCents)} MRR` : undefined}
+                        sub={data.renewalmateRevenue ? `${usd(data.renewalmateRevenue.cents)} in · ${usd(data.renewalmateRevenue.mrrCents)} MRR` : undefined}
                       />
-                      {data.renewalmate.revenueNote && <div className="col-span-2"><NotConnected text={data.renewalmate.revenueNote} /></div>}
                     </>
                   ) : <div className="col-span-2"><NotConnected text="Not connected yet. Needs RenewalMate's Supabase keys (see Sources)." /></div>}
                 </div>

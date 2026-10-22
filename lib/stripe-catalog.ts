@@ -5,6 +5,7 @@
 // than breaking anything.
 
 export type RevenueGroup =
+  | 'RenewalMate'
   | 'SocialMate plans'
   | 'Add-ons'
   | 'Credits & boosters'
@@ -61,8 +62,16 @@ const PRICES: Record<string, PriceInfo> = {
   price_1TMtkc7OMwDowUuU8aepieuq: { label: 'Enki Cloud Runner',     group: 'Enki' },
 }
 
-export function priceInfo(priceId: string | null | undefined): PriceInfo | null {
-  return priceId ? PRICES[priceId] ?? null : null
+// RenewalMate bills through the same Stripe account. Matched by product, so
+// every price on Plus or Family (monthly, annual, future) is labelled; its
+// price IDs live in RenewalMate's own env (STRIPE_PLUS_PRICE_ID and friends).
+const PRODUCTS: Record<string, PriceInfo> = {
+  prod_VGHFVBZkBRj9be: { label: 'RenewalMate Plus',   group: 'RenewalMate' },
+  prod_VGHFhUDMyDQ4k4: { label: 'RenewalMate Family', group: 'RenewalMate' },
+}
+
+export function priceInfo(priceId: string | null | undefined, productId?: string | null): PriceInfo | null {
+  return (priceId && PRICES[priceId]) || (productId && PRODUCTS[productId]) || null
 }
 
 // One-time Checkout Sessions tag themselves with metadata.type (see the
