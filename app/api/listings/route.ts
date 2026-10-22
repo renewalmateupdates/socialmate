@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
+import { LISTING_QUERY_STATUSES, isPublicListing } from '@/lib/studio-stax'
 
 function getAdminSupabase() {
   return createClient(
@@ -134,17 +135,20 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET — fetch live listings (public). 'active'/'live' are the paid-and-
-// confirmed states; the webhook writes the literal 'live', not 'active' --
-// see app/admin/studio-stax/page.tsx's isLiveListing() comment.
+// GET — fetch public listings. Which ones are public: lib/studio-stax.ts.
 export async function GET() {
   const db = getAdminSupabase()
   const { data, error } = await db
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, created_at')
-    .in('status', ['approved', 'active', 'live'])
+    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, created_at, status, checkout_token')
+    .in('status', [...LISTING_QUERY_STATUSES])
     .order('smgive_donated_cents', { ascending: false })
 
-  if (error) return NextResponse.json({ listings: [] })
-  return NextResponse.json({ listings: data ?? [] })
+  if (error) {
+    console.warn('[Listings] GET failed:', error.message)
+    return NextResponse.json({ listings: [] })
+  }
+  // status and checkout_token are only for the filter; never send the token out.
+  const listings = (data ?? []).filter(isPublicListing).map(({ status: _s, checkout_token: _t, ...l }) => l)
+  return NextResponse.json({ listings })
 }

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
 import ListingViewTracker from './ListingViewTracker'
+import { LISTING_QUERY_STATUSES, isPublicListing } from '@/lib/studio-stax'
 import { ArrowRight, Crown, Eye, Flame, Heart, Medal, Sprout, Star, TrendingUp } from 'lucide-react'
 
 const CATEGORIES = [
@@ -48,15 +49,14 @@ export default async function StudioStaxPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // 'active'/'live' are the paid-and-confirmed states; 'approved' also
-  // covers a free-year listing (which never leaves that status) and a paid
-  // listing mid-checkout with a payment link already sent. The Stripe webhook
-  // itself writes the literal string 'live', not 'active', on a completed
-  // checkout -- see app/admin/studio-stax/page.tsx's isLiveListing() comment.
-  const { data: listings } = await supabase
+  // Which listings are public: see lib/studio-stax.ts. An applicant who was
+  // sent a payment link and never paid is 'approved' too, and used to show here.
+  const { data: rows, error: listingsErr } = await supabase
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at, is_nsfw, featured, featured_until')
-    .in('status', ['approved', 'active', 'live'])
+    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at, is_nsfw, featured, featured_until, status, checkout_token')
+    .in('status', [...LISTING_QUERY_STATUSES])
+  if (listingsErr) console.warn('[StudioStax] listings query failed:', listingsErr.message)
+  const listings = (rows ?? []).filter(isPublicListing)
 
   // Founding spots counter
   const { count: foundingSpotsUsed } = await supabase

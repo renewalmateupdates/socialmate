@@ -208,18 +208,38 @@ export async function GET(req: NextRequest) {
   }
 
   // ── 2. Expire lapsed slots + reclaim offer ────────────────────────────────
-  // Mark any expired active slots as expired
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-  const { data: justExpiredSlots } = await admin
+  // Every active slot past its end date, not only those that lapsed in the
+  // last 24h: that window meant one missed run left a slot active forever.
+  const { data: justExpiredSlots, error: lapsedErr } = await admin
     .from('studio_stax_slots')
     .select('id, listing_id, amount_paid_cents')
     .eq('status', 'active')
     .lt('expires_at', now.toISOString())
-    .gt('expires_at', yesterday.toISOString()) // expired in last 24h
+  if (lapsedErr) console.warn('[StaxRenewals] lapsed slot lookup failed:', lapsedErr.message)
 
   if (justExpiredSlots && justExpiredSlots.length > 0) {
     for (const lapsed of justExpiredSlots) {
       await admin.from('studio_stax_slots').update({ status: 'expired' }).eq('id', lapsed.id)
+    }
+
+    // Take the listing out of the directory too. Expiring the slot alone left
+    // the listing 'live', so it stayed public for free once the paid year ended.
+    // Skipped when another active slot covers it (a renewal), when it's a
+    // founder (Garrison) listing, or when an admin granted free time.
+    const lapsedListingIds = Array.from(new Set(justExpiredSlots.map(s => s.listing_id).filter(Boolean)))
+    for (const listingId of lapsedListingIds) {
+      const [{ data: stillActive }, { data: listing }] = await Promise.all([
+        admin.from('studio_stax_slots').select('id').eq('listing_id', listingId).eq('status', 'active').gt('expires_at', now.toISOString()).limit(1),
+        admin.from('curated_listings').select('status, admin_featured, free_until').eq('id', listingId).maybeSingle(),
+      ])
+      const freeTime = listing?.free_until && new Date(listing.free_until) > now
+      if ((stillActive?.length ?? 0) > 0 || !listing || listing.admin_featured || freeTime) continue
+      if (listing.status !== 'live' && listing.status !== 'active') continue
+      const { error: expErr } = await admin
+        .from('curated_listings')
+        .update({ status: 'expired', updated_at: now.toISOString() })
+        .eq('id', listingId)
+      if (expErr) console.warn(`[StaxRenewals] could not expire listing ${listingId}:`, expErr.message)
     }
 
     // Count how many of the just-expired slots were founder-priced (≤$100)
