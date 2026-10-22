@@ -47,14 +47,14 @@ export async function GET(req: NextRequest) {
   const [stripeR, dbR, shopifyR, renewalR] = await Promise.all([
     Promise.allSettled([stripeSummary(getStripe(), sinceSec)]).then(r => r[0]),
     Promise.allSettled([socialmateDbSummary(getSupabaseAdmin(), sinceIso)]).then(r => r[0]),
-    shopifyConfigured()     ? Promise.allSettled([shopifySummary(sinceIso)]).then(r => r[0]) : Promise.resolve(null),
+    shopifyConfigured()     ? Promise.allSettled([shopifySummary(getSupabaseAdmin(), sinceIso)]).then(r => r[0]) : Promise.resolve(null),
     renewalmateConfigured() ? Promise.allSettled([renewalmateSummary(sinceIso)]).then(r => r[0]) : Promise.resolve(null),
   ])
 
   const sources: SourceStatus[] = []
   const stripe      = settle('Stripe (Gilgamesh Enterprise)', stripeR, sources)
   const socialmate  = settle('SocialMate database', dbR, sources)
-  const shopify     = settle('Gilgamesh shop (Shopify)', shopifyR, sources, 'Add SHOPIFY_STORE_DOMAIN, SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET in Vercel.')
+  const shopify     = settle('Gilgamesh shop (Shopify)', shopifyR, sources, 'Add SHOPIFY_WEBHOOK_SECRET in Vercel and create the order webhooks in Shopify.')
   const renewalmate = settle('RenewalMate', renewalR, sources, 'Add RENEWALMATE_SUPABASE_URL and RENEWALMATE_SUPABASE_SERVICE_ROLE_KEY in Vercel.')
 
   // RenewalMate bills through the same Stripe account, so its money is already
