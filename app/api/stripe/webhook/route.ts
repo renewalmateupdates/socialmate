@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
+import { creditPartnerCommission, invoiceCommissionBase } from '@/lib/partner-commission'
 
 // Aug 2026 pricing: Pro $5 -> $8, Agency $20 -> $29, annual moved to two months
 // free. New prices were created against the same Stripe products, so reporting
@@ -43,6 +44,19 @@ const STRIPE_HERMES_PRO_PRICE_ID     = 'price_1UEHcB7OMwDowUuUFwqE1Hk6'
 // own subscription id column so it never collides with the base plan.
 const STRIPE_SOMA_AUTOPILOT_PRICE_ID  = 'price_1TP8rU7OMwDowUuUYLBNAVux'
 const STRIPE_SOMA_FULL_SEND_PRICE_ID  = 'price_1TPlGE7OMwDowUuUWS0QUnLw'
+
+// Every SocialMate subscription a partner earns on: the plans (current and
+// legacy, monthly and annual) and the add-ons. Not creator fan subscriptions,
+// which run through Stripe on the creator's behalf, and not Enki.
+const COMMISSIONABLE_PRICE_IDS = new Set([
+  STRIPE_PRO_PRICE_ID, STRIPE_AGENCY_PRICE_ID,
+  STRIPE_PRO_ANNUAL_PRICE_ID, STRIPE_AGENCY_ANNUAL_PRICE_ID,
+  STRIPE_PRO_PRICE_ID_LEGACY, STRIPE_AGENCY_PRICE_ID_LEGACY,
+  STRIPE_PRO_ANNUAL_PRICE_ID_LEGACY, STRIPE_AGENCY_ANNUAL_PRICE_ID_LEGACY,
+  STRIPE_WHITE_LABEL_BASIC_PRICE_ID, STRIPE_WHITE_LABEL_PRO_PRICE_ID,
+  STRIPE_HERMES_STARTER_PRICE_ID, STRIPE_HERMES_PRO_PRICE_ID,
+  STRIPE_SOMA_AUTOPILOT_PRICE_ID, STRIPE_SOMA_FULL_SEND_PRICE_ID,
+])
 
 const CREDIT_PACK_PRICES: Record<string, number> = {
   'price_1TFMI47OMwDowUuUhTrbe3oq': 100,
@@ -112,18 +126,6 @@ const PLAN_CREDITS: Record<string, number> = {
   free:   50,
   pro:    500,
   agency: 2000,
-}
-
-// Drives affiliate commission (see processAffiliateConversion below), so these
-// have to track the real prices. Missed by the Aug 2026 rollout: left at 5/20
-// they would have paid 30% of the old price, short-changing every affiliate by
-// a third on Pro and by a quarter on Agency.
-//
-// Known approximation, unchanged here: `plan` arrives normalised, so an annual
-// subscriber is valued at the monthly figure rather than the annual one.
-const PLAN_MONTHLY_VALUE: Record<string, number> = {
-  pro:    8.00,
-  agency: 29.00,
 }
 
 // Stacking credit model: every 5 paying referrals = +100 bonus credits
@@ -247,8 +249,11 @@ async function processReferralCredits(
       .select('status')
       .eq('affiliate_user_id', conversion.affiliate_user_id)
 
+    // 'locked' is a paying referral still inside the 60-day hold. Leaving it
+    // out meant a referral who paid in their first 60 days (nearly all of
+    // them) was never counted, so no referrer ever reached a tier.
     const payingCount = (allConversions || []).filter(
-      (r: any) => r.status === 'eligible' || r.status === 'paid'
+      (r: any) => r.status === 'locked' || r.status === 'eligible' || r.status === 'paid'
     ).length
 
     // Stacking model: award 100 credits at each multiple of 5 paying referrals
@@ -279,7 +284,7 @@ async function processReferralCredits(
             user_id: conversion.affiliate_user_id,
             type: 'referral_credited',
             title: '🎉 Referral reward earned!',
-            message: 'Someone you referred just upgraded. 25 bonus credits added to your account.',
+            message: `You've reached ${payingCount} paying referrals. ${REFERRAL_CREDITS_PER_TIER} bonus credits added to your account.`,
             is_read: false,
             data: { href: '/settings?tab=referrals' },
           })
@@ -298,64 +303,6 @@ async function processReferralCredits(
     }
   } catch (err) {
     console.error('Referral credit award error:', err)
-  }
-}
-
-async function processAffiliateCommission(
-  supabase: ReturnType<typeof getSupabase>,
-  referredUserId: string,
-  plan: string,
-  isNewSubscription: boolean
-) {
-  try {
-    const { data: conversion } = await supabase
-      .from('referral_conversions')
-      .select('*')
-      .eq('referred_user_id', referredUserId)
-      .single()
-    if (!conversion) return
-
-    const { data: affiliate } = await supabase
-      .from('affiliates')
-      .select('*')
-      .eq('user_id', conversion.affiliate_user_id)
-      .single()
-    if (!affiliate || affiliate.status !== 'active') return
-
-    const activeCount  = affiliate.active_referral_count ?? 0
-    const rate         = activeCount >= 100 ? 0.40 : 0.30
-    const monthlyValue = PLAN_MONTHLY_VALUE[plan] ?? 0
-    const commission   = parseFloat((monthlyValue * rate).toFixed(2))
-    if (commission <= 0) return
-
-    const lockExpired = new Date(conversion.lock_expires_at) <= new Date()
-    const newStatus   = lockExpired ? 'eligible' : 'locked'
-
-    await supabase
-      .from('referral_conversions')
-      .update({
-        status:             newStatus,
-        monthly_commission: commission,
-        total_earned:       (conversion.total_earned ?? 0) + commission,
-      })
-      .eq('id', conversion.id)
-
-    const newUnpaid      = parseFloat(((affiliate.unpaid_earnings ?? 0) + commission).toFixed(2))
-    const newTotal       = parseFloat(((affiliate.total_earnings  ?? 0) + commission).toFixed(2))
-    const newActiveCount = isNewSubscription ? (affiliate.active_referral_count ?? 0) + 1 : (affiliate.active_referral_count ?? 0)
-    const updatedRate    = newActiveCount >= 100 ? 0.40 : 0.30
-
-    await supabase
-      .from('affiliates')
-      .update({
-        unpaid_earnings:       newUnpaid,
-        total_earnings:        newTotal,
-        active_referral_count: newActiveCount,
-        commission_rate:       updatedRate,
-      })
-      .eq('user_id', conversion.affiliate_user_id)
-  } catch (err) {
-    console.error('Affiliate commission error:', err)
   }
 }
 
@@ -393,6 +340,55 @@ async function handleAffiliateChurn(
   } catch (err) {
     console.error('Affiliate churn handler error:', err)
   }
+}
+
+// The subscription an invoice belongs to, in either payload shape: `subscription`
+// (API 2024-06-20, which lib/stripe.ts pins) or `parent.subscription_details`
+// (newer versions, if the webhook endpoint is set to one).
+function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const inv = invoice as any
+  const sub = inv.subscription ?? inv.parent?.subscription_details?.subscription ?? null
+  return typeof sub === 'string' ? sub : sub?.id ?? null
+}
+
+// One paid invoice: the partner who referred this customer earns 30% (40% at
+// 100+ active referrals) of what was paid, excluding tax. Covers the first
+// payment, renewals monthly or annual, upgrades and the add-ons.
+async function creditInvoiceCommission(
+  supabase: ReturnType<typeof getSupabase>,
+  invoice: Stripe.Invoice,
+  subscriptionId: string,
+) {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const priceIds = subscription.items.data.map(i => i.price?.id).filter(Boolean) as string[]
+  if (!priceIds.some(id => COMMISSIONABLE_PRICE_IDS.has(id))) return
+
+  // /api/stripe/checkout copies user_id into the subscription's metadata. White
+  // label attaches to the user's existing customer instead.
+  let userId: string | null = subscription.metadata?.user_id || null
+  if (!userId) {
+    const { data } = await supabase.from('user_settings').select('user_id').eq('stripe_subscription_id', subscriptionId).maybeSingle()
+    userId = data?.user_id ?? null
+  }
+  if (!userId && typeof invoice.customer === 'string') {
+    const { data } = await supabase.from('user_settings').select('user_id').eq('stripe_customer_id', invoice.customer).maybeSingle()
+    userId = data?.user_id ?? null
+  }
+  if (!userId) {
+    console.warn('[commission] no user for invoice', invoice.id)
+    return
+  }
+
+  const result = await creditPartnerCommission(supabase, {
+    buyerUserId: userId,
+    amountCents: invoiceCommissionBase(invoice as any),
+    sourceId:    invoice.id!,
+    kind:        'subscription',
+  })
+
+  // Referral credits for the referrer (partner or ordinary user), once, on the
+  // referral's first subscription payment.
+  if (result.becamePaying) await processReferralCredits(supabase, userId, '', true)
 }
 
 // ── Regenerate a single-use promo code after it's been redeemed ─────────────
@@ -626,8 +622,19 @@ export async function POST(req: NextRequest) {
         .update(updatePayload)
         .eq('user_id', userId)
 
-      // Track affiliate promo code commission for credit pack purchases
+      // Partner commission on credit packs: 10% on Starter/Popular, 15% on
+      // Pro/Max, for a referred buyer or one using a legacy partner promo code.
+      // It used to be written to affiliate_conversions and never added to the
+      // partner's payable balance. lib/partner-commission.ts does both.
       try {
+        const CREDIT_PACK_RATES: Record<string, number> = {
+          'price_1TFMI47OMwDowUuUhTrbe3oq': 0.10, // Starter 100cr
+          'price_1TFMI77OMwDowUuU0wDZWcCL': 0.10, // Popular 300cr
+          'price_1TFMIA7OMwDowUuUwI3SEGCR': 0.15, // Pro Pack 750cr
+          'price_1TFMID7OMwDowUuU2sQgbIx9': 0.15, // Max Pack 2000cr
+        }
+        let partnerUserId: string | null = null
+
         if (session.discounts && session.discounts.length > 0) {
           for (const discount of session.discounts) {
             if (discount.promotion_code) {
@@ -642,28 +649,14 @@ export async function POST(req: NextRequest) {
                 .maybeSingle()
 
               if (promoRecord?.affiliate_id) {
-                // 10% on Starter/Popular, 15% on Pro/Max
-                const CREDIT_PACK_RATES: Record<string, number> = {
-                  'price_1TFMI47OMwDowUuUhTrbe3oq': 0.10, // Starter 100cr
-                  'price_1TFMI77OMwDowUuU0wDZWcCL': 0.10, // Popular 300cr
-                  'price_1TFMIA7OMwDowUuUwI3SEGCR': 0.15, // Pro Pack 750cr
-                  'price_1TFMID7OMwDowUuU2sQgbIx9': 0.15, // Max Pack 2000cr
-                }
-                const rate = CREDIT_PACK_RATES[priceId] ?? 0.10
-                const amountCents = session.amount_total ?? 0
-                const commissionCents = Math.floor(amountCents * rate)
-
-                if (commissionCents > 0) {
-                  await supabase.from('affiliate_conversions').insert({
-                    affiliate_id:      promoRecord.affiliate_id,
-                    amount_cents:      amountCents,
-                    commission_cents:  commissionCents,
-                    status:            'holding',
-                    converted_at:      new Date().toISOString(),
-                    conversion_type:   'credit_pack',
-                    stripe_session_id: session.id,
-                  })
-                }
+                // Legacy codes point at affiliate_profiles; the balance lives on
+                // the `affiliates` row with the same user_id.
+                const { data: profile } = await supabase
+                  .from('affiliate_profiles')
+                  .select('user_id')
+                  .eq('id', promoRecord.affiliate_id)
+                  .maybeSingle()
+                partnerUserId = profile?.user_id ?? null
 
                 // Track usage + issue fresh single-use code
                 await supabase.from('affiliate_promo_codes')
@@ -674,6 +667,15 @@ export async function POST(req: NextRequest) {
             }
           }
         }
+
+        await creditPartnerCommission(supabase, {
+          buyerUserId: userId,
+          amountCents: Math.max(0, (session.amount_total ?? 0) - (session.total_details?.amount_tax ?? 0)),
+          sourceId:    session.id,
+          kind:        'credit_pack',
+          rate:        CREDIT_PACK_RATES[priceId] ?? 0.10,
+          partnerUserId,
+        })
       } catch (err) {
         console.warn('Credit pack affiliate commission failed (non-fatal):', err)
       }
@@ -1136,10 +1138,9 @@ const creditsToSet = alreadyOnPlan
       console.warn('SM-Give subscription allocation failed (non-fatal):', err)
     }
 
-    if (userId) {
-      await processReferralCredits(supabase, userId, plan, true)
-      await processAffiliateCommission(supabase, userId, plan, true)
-    }
+    // Partner commission and referral credits are paid from
+    // invoice.payment_succeeded, once per paid invoice (see
+    // creditInvoiceCommission). Paying here too would double the first payment.
 
     // Track affiliate promo code usage + regenerate (single-use codes)
     try {
@@ -1172,48 +1173,9 @@ const creditsToSet = alreadyOnPlan
       console.warn('Promo code usage tracking failed (non-fatal):', err)
     }
 
-    // ── Coupon-based affiliate commission (coupons table with affiliate_id in metadata) ──
-    try {
-      const couponAffiliateId = session.metadata?.affiliate_id
-      const couponCode        = session.metadata?.coupon_code
-      if (couponAffiliateId && couponCode) {
-        const { data: affiliate } = await supabase
-          .from('affiliates')
-          .select('id, unpaid_earnings, total_earnings, active_referral_count, status')
-          .eq('id', couponAffiliateId)
-          .single()
-
-        if (affiliate && affiliate.status === 'active') {
-          const rate            = (affiliate.active_referral_count ?? 0) >= 100 ? 0.40 : 0.30
-          const amountCents     = session.amount_total ?? 0
-          const commissionCents = Math.floor(amountCents * rate)
-
-          if (commissionCents > 0) {
-            await supabase.from('affiliate_conversions').insert({
-              affiliate_id:      affiliate.id,
-              amount_cents:      amountCents,
-              commission_cents:  commissionCents,
-              status:            'holding',
-              converted_at:      new Date().toISOString(),
-              conversion_type:   'coupon_subscription',
-              stripe_session_id: session.id,
-            })
-
-            const newUnpaid = parseFloat(((affiliate.unpaid_earnings ?? 0) + commissionCents / 100).toFixed(2))
-            const newTotal  = parseFloat(((affiliate.total_earnings  ?? 0) + commissionCents / 100).toFixed(2))
-            const newActive = (affiliate.active_referral_count ?? 0) + 1
-            await supabase.from('affiliates').update({
-              unpaid_earnings:       newUnpaid,
-              total_earnings:        newTotal,
-              active_referral_count: newActive,
-              commission_rate:       newActive >= 100 ? 0.40 : 0.30,
-            }).eq('id', affiliate.id)
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('Coupon affiliate commission failed (non-fatal):', err)
-    }
+    // A partner code no longer pays a one-off commission here. The checkout
+    // route records the buyer as the partner's referral (recordCodeReferral),
+    // so the code earns on every invoice, the same as the link.
   }
 
   // ── SUBSCRIPTION UPDATED ────────────────────────────────────────────────────
@@ -1291,9 +1253,10 @@ const creditsToSet = alreadyOnPlan
 
       await syncWorkspacePlan(supabase, current?.user_id, plan)
 
-      if (current?.user_id) {
-        await processAffiliateCommission(supabase, current.user_id, plan, false)
-      }
+      // No commission here. This event fires on any change to a subscription
+      // (a renewal, but also a card update or a cancel toggle), and it used to
+      // pay a flat $8 or $29 x 30% every time. Partners are paid per invoice
+      // in invoice.payment_succeeded.
     }
   }
 
@@ -1427,8 +1390,20 @@ const creditsToSet = alreadyOnPlan
   // ── INVOICE PAID (subscription renewal) ────────────────────────────────────
   if (event.type === 'invoice.payment_succeeded') {
     const invoice = event.data.object as Stripe.Invoice
+    const subscriptionId = invoiceSubscriptionId(invoice)
+
+    // Partner commission, every paid subscription invoice. Non-fatal: a
+    // failure here must never fail the webhook for the payment itself.
+    if (subscriptionId && (invoice.amount_paid ?? 0) > 0) {
+      try {
+        await creditInvoiceCommission(supabase, invoice, subscriptionId)
+      } catch (err) {
+        console.warn('[commission] invoice commission failed (non-fatal):', err)
+      }
+    }
+
     // Only track renewals (billing_reason = 'subscription_cycle'), not initial checkout
-    if ((invoice as any).billing_reason === 'subscription_cycle' && (invoice as any).subscription) {
+    if ((invoice as any).billing_reason === 'subscription_cycle' && subscriptionId) {
       try {
         const amountPaidCents = invoice.amount_paid ?? 0
         if (amountPaidCents > 0) {

@@ -23,7 +23,8 @@ The SocialMate Affiliate Program ("Program") allows approved partners ("Affiliat
 2. COMMISSION RATES
 • Subscriptions: 30% recurring base commission; 40% when Affiliate maintains 100+ active referrals
 • Credit packs: 10% one-time commission on Starter and Popular packs, 15% on Pro and Max packs
-• Commissions are calculated on net revenue after refunds, chargebacks, and payment processing fees
+• Commission is calculated on each payment your referral makes, excluding sales tax, whether they came through your link or your code
+• SocialMate may deduct commission on payments that are later refunded or charged back
 
 3. PROMO CODES
 SocialMate may issue an Affiliate one or more discount codes tied to the Affiliate's account. Affiliates may not use their own codes or referral link for personal purchases.
