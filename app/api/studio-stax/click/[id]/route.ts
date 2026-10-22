@@ -21,9 +21,12 @@ export async function GET(
 
   const destination = listing?.url ?? '/studio-stax'
 
-  // Increment click counter (fire and forget — don't block the redirect)
+  // Awaited: on Vercel the function can be frozen as soon as the response is
+  // returned, so a fire-and-forget call could drop the click entirely. These
+  // counts are what listers see in the portal.
   const today = new Date().toISOString().slice(0, 10)
-  admin.rpc('increment_stax_click', { p_listing_id: id, p_date: today }).then(() => {})
+  const { error: clickErr } = await admin.rpc('increment_stax_click', { p_listing_id: id, p_date: today })
+  if (clickErr) console.warn('[StaxClick] increment failed:', clickErr.message)
 
   return NextResponse.redirect(destination, { status: 302 })
 }

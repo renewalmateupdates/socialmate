@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { LISTING_QUERY_STATUSES, isPublicListing } from '@/lib/studio-stax'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import PublicLayout from '@/components/PublicLayout'
@@ -43,17 +44,17 @@ async function getListing(slug: string) {
   // found their own listing.
   const supabase = getSupabaseAdmin()
 
-  // Fetch all live listings and match by derived slug. 'active'/'live' are
-  // the paid-and-confirmed states; the webhook writes the literal 'live', not
-  // 'active' -- see app/admin/studio-stax/page.tsx's isLiveListing() comment.
-  const { data: listings } = await supabase
+  // Fetch all public listings and match by derived slug. Which listings are
+  // public: lib/studio-stax.ts.
+  const { data: listings, error } = await supabase
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, mission_statement, is_nsfw, smgive_donated_cents, admin_featured')
-    .in('status', ['approved', 'active', 'live'])
+    .select('id, name, tagline, description, url, logo_url, category, mission_statement, is_nsfw, smgive_donated_cents, admin_featured, status, checkout_token')
+    .in('status', [...LISTING_QUERY_STATUSES])
 
+  if (error) console.warn('[StudioStax] listing lookup failed:', error.message)
   if (!listings) return null
 
-  return listings.find(l => nameToSlug(l.name) === slug) ?? null
+  return listings.filter(isPublicListing).find(l => nameToSlug(l.name) === slug) ?? null
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -67,6 +67,10 @@ export async function PATCH(req: NextRequest) {
       .update({
         status: 'approved',
         free_until: freeUntil,
+        // If a payment link went out first, drop it: a pending checkout token
+        // keeps a listing out of the public directory (lib/studio-stax.ts).
+        checkout_token: null,
+        checkout_token_expires: null,
         admin_notes: admin_notes || null,
         updated_at: new Date().toISOString(),
       })
@@ -104,9 +108,9 @@ export async function PATCH(req: NextRequest) {
           <p style="margin:0 0 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;">What's next</p>
           <ul style="margin:0;padding-left:16px;font-size:13px;color:#374151;line-height:1.9;">
             <li>Your listing is now live in the directory</li>
-            <li>You'll receive a <strong>quarterly blog post feature</strong> — we'll shout you out on social when each goes live</li>
+            <li>Your own listing page, with view and click stats in the lister portal</li>
             <li>The listing is <strong>free for 12 months</strong></li>
-            <li>After 12 months, renewal is <strong>$100/year</strong></li>
+            <li>No card on file, so nothing is ever charged automatically</li>
           </ul>
         </div>
 
@@ -191,8 +195,7 @@ export async function PATCH(req: NextRequest) {
           <ul style="margin:0;padding-left:16px;font-size:13px;color:#374151;line-height:1.8;">
             <li>Listed in the SM-Give ranked public directory</li>
             <li>Ranked by SM-Give donations (the more you give, the higher you rank)</li>
-            <li>Top-3 rotation protection — no tool holds top spot more than 3 consecutive months</li>
-            <li>Annual blog feature when your year is up</li>
+            <li>A feature on the SocialMate blog after 90 days, then every 90 days while you're listed</li>
           </ul>
         </div>
 
