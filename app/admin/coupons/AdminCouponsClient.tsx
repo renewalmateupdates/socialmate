@@ -14,7 +14,7 @@ interface Coupon {
   active: boolean
   note: string | null
   created_at: string
-  affiliates: { id: string; full_name: string | null; email: string } | null
+  affiliates: { id: string; full_name: string | null; email?: string } | null
 }
 
 interface Affiliate {
