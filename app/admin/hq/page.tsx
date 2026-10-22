@@ -188,7 +188,7 @@ export default function AdminHQPage() {
                       <Stat label="Sales" value={usd(data.shopify.grossCents)} sub={`${data.shopify.orders} paid order${data.shopify.orders === 1 ? '' : 's'}`} />
                       <Stat label="Owed to SM-Give" value={usd(data.shopify.smGiveOwedCents)} sub="25% of sales" />
                     </>
-                  ) : <div className="col-span-2"><NotConnected text="Not connected yet. Needs a Shopify app token (see Sources)." /></div>}
+                  ) : <div className="col-span-2"><NotConnected text="Not connected yet. Needs the Shopify order webhook (see Sources)." /></div>}
                 </div>
               </Panel>
               <Panel>
