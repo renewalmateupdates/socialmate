@@ -1,5 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import PublicLayout from '@/components/PublicLayout'
@@ -38,17 +37,11 @@ interface Props {
 }
 
 async function getListing(slug: string) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll() {},
-      },
-    }
-  )
+  // A plain service-role client. This used createServerClient with the
+  // visitor's cookies, which sends a signed-in visitor's own token instead of
+  // the service key, so with RLS on curated_listings they would only ever have
+  // found their own listing.
+  const supabase = getSupabaseAdmin()
 
   // Fetch all live listings and match by derived slug. 'active'/'live' are
   // the paid-and-confirmed states; the webhook writes the literal 'live', not
