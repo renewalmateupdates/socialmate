@@ -7,6 +7,7 @@ import { Resend } from 'resend'
 import { affiliateWelcomeEmail } from '@/lib/emails/affiliateEmails'
 import Stripe from 'stripe'
 import { REPLY_TO } from '@/lib/mail'
+import { ensureAffiliateRecord, ensureReferralCode, partnerReferralLink } from '@/lib/partners'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -162,41 +163,19 @@ export async function POST(req: NextRequest) {
       .update({ onboarding_completed: true, status: 'active' })
       .eq('id', profile.id)
 
-    // Generate promo codes — one per subscription type + one for credits
-    const email = user.email || profile.email
-    const base  = email.split('@')[0].replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8)
+    // An invited partner has no `affiliates` row, which is where the webhook
+    // pays commission and where the payout balance is read. Create it, or they
+    // finish onboarding and never earn anything.
+    await ensureAffiliateRecord(db, { userId: user.id, fullName: profile.full_name })
+    const referralCode = await ensureReferralCode(db, user.id)
 
-    const codeDefs: [string, number | null, number, string, string][] = [
-      // [suffix, duration_months (null = forever), discount_value, description, label]
-      ['MONTHLY', 1,    10, '10% off — monthly billing',      'Monthly subscription'],
-      ['3M',      3,    20, '20% off for 3 months',            '3-month subscription'],
-      ['6M',      6,    15, '15% off for 6 months',            '6-month subscription'],
-      ['12M',     12,   10, '10% off for 12 months',           '12-month subscription'],
-      ['CR',      null, 15, '15% off AI credit packs',         'Credit pack purchases'],
-    ]
-
-    for (const [suffix, durationMonths, discountValue, desc] of codeDefs) {
-      let code = base + suffix
-      const { data: existing } = await db
-        .from('affiliate_promo_codes')
-        .select('id')
-        .eq('code', code)
-        .maybeSingle()
-      if (existing) code = code + Math.random().toString(36).slice(2, 4).toUpperCase()
-
-      await db.from('affiliate_promo_codes').insert({
-        affiliate_id:    profile.id,
-        code,
-        discount_type:   'percent',
-        discount_value:  discountValue,
-        duration_months: durationMonths,
-        description:     desc,
-      })
-    }
+    // No auto-generated promo codes. The five this used to insert were never
+    // created in Stripe, so no checkout ever accepted them. A partner's code
+    // is made in /admin/coupons against their affiliates row instead.
 
     // Send welcome email
     if (user.email) {
-      const referralLink = `${appUrl}/?aff=${profile.id.slice(0, 8)}`
+      const referralLink = partnerReferralLink(referralCode) ?? `${appUrl}/partners/dashboard`
       await getResend().emails.send({
         from: 'SocialMate Partners <hello@socialmate.studio>',
         replyTo: REPLY_TO,

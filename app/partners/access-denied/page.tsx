@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Calendar, Check, CheckCircle2, Clock, CreditCard, Handshake, PartyPopper } from 'lucide-react'
+import { Calendar, CheckCircle2, Clock, Handshake, PartyPopper } from 'lucide-react'
 
 const gold   = '#F59E0B'
 const purple = '#7C3AED'
@@ -16,7 +16,7 @@ const AUDIENCE_SIZES = ['Under 500','500 – 2,000','2,000 – 10,000','10,000 �
 const MONTHLY_REACHES = ['Under 1,000','1,000 – 5,000','5,000 – 20,000','20,000 – 100,000','100,000+']
 const ENGAGEMENT_RATES = ['Under 1%','1 – 3%','3 – 6%','6 – 10%','10%+']
 
-type PageState = 'loading' | 'not_logged_in' | 'check_plan' | 'upgrade_required' | 'form' | 'pending' | 'rejected_cooldown' | 'active'
+type PageState = 'loading' | 'not_logged_in' | 'form' | 'pending' | 'rejected_cooldown' | 'active' | 'suspended'
 
 export default function AccessDeniedPage() {
   const [state, setState] = useState<PageState>('loading')
@@ -57,6 +57,7 @@ export default function AccessDeniedPage() {
         if (aff) {
           setAffiliateData(aff)
           if (aff.status === 'active') { setState('active'); return }
+          if (aff.status === 'suspended') { setState('suspended'); return }
           if (aff.status === 'pending_review') { setState('pending'); return }
           if (aff.status === 'rejected') {
             if (aff.can_reapply_at && new Date(aff.can_reapply_at) > new Date()) {
@@ -67,20 +68,10 @@ export default function AccessDeniedPage() {
         }
       }
 
-      setState('check_plan')
-
-      // Check if paid subscriber via user_settings
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('plan')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!settings || settings.plan === 'free') {
-        setState('upgrade_required')
-      } else {
-        setState('form')
-      }
+      // No paid plan needed to apply: /affiliates promises that, and partners
+      // who sign up here have no plan. This used to stop everyone at
+      // "Paid plan required".
+      setState('form')
     }
     check()
   }, [])
@@ -140,7 +131,7 @@ export default function AccessDeniedPage() {
 
   // ── States ──
 
-  if (state === 'loading' || state === 'check_plan') {
+  if (state === 'loading') {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', border: `3px solid ${gold}`, borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
@@ -168,29 +159,15 @@ export default function AccessDeniedPage() {
     )
   }
 
-  if (state === 'upgrade_required') {
+  if (state === 'suspended') {
     return (
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ width: '100%', maxWidth: 480, textAlign: 'center' }}>
-          <CreditCard size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Paid plan required</h1>
+        <div style={{ width: '100%', maxWidth: 440, textAlign: 'center' }}>
+          <Clock size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 20 }} />
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>Your partner account is paused</h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
-            SocialMate affiliates must be active paid subscribers. We want our affiliates to genuinely know and use the product — that's what makes for real, trustworthy recommendations.
+            Commission you earned before the pause is still yours. If you have questions, reply to any email from SocialMate Partners.
           </p>
-          <div style={{ background: '#111', border: `1px solid ${border}`, borderRadius: 14, padding: 24, marginBottom: 32, textAlign: 'left' }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>What affiliates earn</p>
-            {['30% recurring on every referral subscription','40% at 100+ active referrals','10–15% on credit pack purchases via your promo code','Unique single-use promo codes that auto-regenerate'].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: i < 3 ? 10 : 0 }}>
-                <Check size={15} strokeWidth={2.5} color={gold} style={{ flexShrink: 0, marginTop: 2 }} />
-                <span style={{ fontSize: 14, color: '#d1d5db', lineHeight: 1.5 }}>{item}</span>
-              </div>
-            ))}
-          </div>
-          <Link href="/settings?tab=Plan" style={{
-            display: 'block', padding: '12px 24px', borderRadius: 10,
-            background: `linear-gradient(135deg, ${gold}, ${purple})`,
-            color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none', textAlign: 'center', marginBottom: 12,
-          }}>Upgrade to Pro →</Link>
           <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/partners')}
             style={{ padding: '11px 24px', borderRadius: 10, background: 'transparent', border: `1px solid ${border}`, color: muted, fontSize: 14, fontWeight: 600, cursor: 'pointer', width: '100%', fontFamily: 'inherit' }}>
             Sign out
@@ -246,8 +223,9 @@ export default function AccessDeniedPage() {
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ textAlign: 'center' }}>
           <CheckCircle2 size={36} strokeWidth={1.5} color={gold} style={{ marginBottom: 16 }} />
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f1f1', marginBottom: 12 }}>You're already an affiliate!</h1>
-          <Link href="/partners/dashboard" style={{ color: gold, fontSize: 14, textDecoration: 'none', fontWeight: 700 }}>Go to your dashboard →</Link>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f1f1', marginBottom: 12 }}>You're approved!</h1>
+          {/* Onboarding sends a finished partner straight on to the dashboard. */}
+          <Link href="/partners/onboarding" style={{ color: gold, fontSize: 14, textDecoration: 'none', fontWeight: 700 }}>Finish setting up your partner account →</Link>
         </div>
       </div>
     )

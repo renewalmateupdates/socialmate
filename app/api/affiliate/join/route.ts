@@ -43,26 +43,17 @@ export async function POST(req: Request) {
 
   const adminSupabase = getAdminSupabase()
 
-  // Must be on any paid plan (monthly or annual)
-  const { data: settings } = await adminSupabase
-    .from('user_settings')
-    .select('plan, stripe_subscription_id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!settings || settings.plan === 'free') {
-    return NextResponse.json(
-      { error: 'You must be on a paid plan to apply.' },
-      { status: 403 }
-    )
-  }
+  // No paid-plan requirement. /affiliates promises "it's not required. We
+  // approve applications based on your audience fit and content, not whether
+  // you're a paying customer", and partners who sign up through /partners
+  // have no plan at all. This route used to refuse every one of them.
 
   // Check if already applied
   const { data: existing } = await adminSupabase
     .from('affiliates')
     .select('id, status, can_reapply_at')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     if (existing.status !== 'rejected') {

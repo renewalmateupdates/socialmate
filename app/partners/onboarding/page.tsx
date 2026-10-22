@@ -22,15 +22,15 @@ The SocialMate Affiliate Program ("Program") allows approved partners ("Affiliat
 
 2. COMMISSION RATES
 • Subscriptions: 30% recurring base commission; 40% when Affiliate maintains 100+ active referrals
-• Credit packs: 10% flat one-time commission
+• Credit packs: 10% one-time commission on Starter and Popular packs, 15% on Pro and Max packs
 • Commissions are calculated on net revenue after refunds, chargebacks, and payment processing fees
 
 3. PROMO CODES
-Each Affiliate receives unique promo codes: a 3-month 20%-off code and a 6-month 15%-off code. Affiliates may not use their own promo codes for personal purchases.
+SocialMate may issue an Affiliate one or more discount codes tied to the Affiliate's account. Affiliates may not use their own codes or referral link for personal purchases.
 
 4. PAYOUT RULES
 • New earnings are subject to a 60-day holding period for fraud protection
-• Payouts are processed weekly after the 60-day hold, via Stripe Connect
+• Payouts are reviewed and sent after the 60-day hold, via Stripe Connect
 • Minimum payout balance: $25.00
 • SocialMate reserves the right to withhold payouts pending investigation of fraudulent activity
 
@@ -51,7 +51,7 @@ SocialMate may suspend or terminate any Affiliate account at any time for violat
 SocialMate's total liability to any Affiliate shall not exceed the commissions earned in the prior 30 days.
 
 9. GOVERNING LAW
-This Agreement is governed by the laws of the State of [Gilgamesh Enterprise LLC's jurisdiction]. Any disputes shall be resolved by binding arbitration.
+This Agreement is governed by the laws of the State of Wyoming. Any disputes shall be resolved by binding arbitration.
 
 By accepting this Agreement, you confirm you have read, understood, and agree to all terms above.
 `

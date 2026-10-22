@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import PartnersHeader from '@/components/partners/PartnersHeader'
 import {
-  AlertTriangle, BarChart3, Bell, Bot, CalendarDays, ClipboardList, Clock, CreditCard,
+  AlertTriangle, BarChart3, Bell, CalendarDays, ClipboardList, Clock, CreditCard,
   Crown, DollarSign, Flame, Gem, Gift, Hand, Handshake, Link2, Lightbulb, Lock,
-  Map as MapIcon, Medal, PartyPopper, Rocket, Star, Swords, TrendingUp, Trophy,
+  Map as MapIcon, Medal, PartyPopper, Rocket, Star, TrendingUp, Trophy,
   Users, CheckCircle2,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -790,9 +790,9 @@ export default function PartnersDashboardPage() {
               <Gift size={16} strokeWidth={2} />
               <h3 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>SocialMate Codes</h3>
             </div>
-            <p style={{ margin: '0 0 14px', fontSize: 11, color: '#4b5563' }}>Share for discounts. You earn on every sub and renewal they make.</p>
+            <p style={{ margin: '0 0 14px', fontSize: 11, color: '#4b5563' }}>Customers enter it in the code box at socialmate.studio/pricing. You earn on the payment they make with it. Sign-ups through your link earn on every payment.</p>
             {promo_codes.length === 0 ? (
-              <p style={{ fontSize: 13, color: muted, margin: 0 }}>Promo codes appear here after setup. Contact support if missing.</p>
+              <p style={{ fontSize: 13, color: muted, margin: 0 }}>No code yet. Your referral link above works now; reply to any email from SocialMate Partners to ask for a code.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                 {promo_codes.map(code => (
@@ -810,7 +810,7 @@ export default function PartnersDashboardPage() {
                         </span>
                       </div>
                       <div style={{ fontSize: 11, color: '#4b5563', marginTop: 2 }}>
-                        {code.times_used > 0 ? `Used ${code.times_used}× · earning on renewals` : 'Share it to start earning'}
+                        {code.times_used > 0 ? `Used ${code.times_used}×` : 'Share it to start earning'}
                       </div>
                     </div>
                     <button
@@ -829,55 +829,6 @@ export default function PartnersDashboardPage() {
                 ))}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* ── Enki promo codes (Coming Soon) ── */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(124,58,237,0.06), rgba(245,158,11,0.05))',
-          border: `1px solid rgba(124,58,237,0.2)`,
-          borderRadius: 16, padding: 24, marginBottom: 24,
-          position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.12), transparent)', pointerEvents: 'none' }} />
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-                <Bot size={20} strokeWidth={1.75} />
-                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#f1f1f1' }}>Enki Promo Codes</h3>
-                <span style={{
-                  background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)',
-                  borderRadius: 20, padding: '2px 12px',
-                  fontSize: 10, fontWeight: 800, color: '#c4b5fd', letterSpacing: '0.06em',
-                }}>
-                  COMING SOON
-                </span>
-              </div>
-              <p style={{ margin: '0 0 16px', fontSize: 13, color: muted, lineHeight: 1.75, maxWidth: 560 }}>
-                When Enki launches, your affiliate account automatically covers it — same dashboard, same commission structure.
-                You'll get dedicated Enki promo codes right here covering Commander and Emperor subscriptions.
-              </p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {[
-                  { tier: 'Citizen',   color: '#10b981', sub: 'Free · No promo needed',   icon: Gift },
-                  { tier: 'Commander', color: gold,      sub: '30%–40% commission',        icon: Swords },
-                  { tier: 'Emperor',   color: purple,    sub: '30%–40% commission',        icon: Crown },
-                ].map(t => (
-                  <div key={t.tier} style={{
-                    background: '#0a0a0a', border: `1px solid ${border}`,
-                    borderRadius: 10, padding: '8px 14px',
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    opacity: 0.65,
-                  }}>
-                    <t.icon size={14} strokeWidth={1.75} color={t.color} />
-                    <div>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: t.color }}>{t.tier}</div>
-                      <div style={{ fontSize: 10, color: '#4b5563' }}>{t.sub}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1075,7 +1026,8 @@ export default function PartnersDashboardPage() {
                           </td>
                           <td style={{ padding: '12px 0', color: '#d1d5db', textTransform: 'capitalize' }}>{c.event_type}</td>
                           <td style={{ padding: '12px 0', color: '#9ca3af' }}>{c.plan ?? '—'}</td>
-                          <td style={{ padding: '12px 0', textAlign: 'right', color: '#d1d5db' }}>{cents(c.amount_cents)}</td>
+                          {/* Link sign-ups record the commission, not the payment. */}
+                          <td style={{ padding: '12px 0', textAlign: 'right', color: '#d1d5db' }}>{c.amount_cents ? cents(c.amount_cents) : '—'}</td>
                           <td style={{ padding: '12px 0', textAlign: 'right', color: gold, fontWeight: 700 }}>{cents(c.commission_cents)}</td>
                           <td style={{ padding: '12px 16px' }}>{statusBadge(c.status)}</td>
                           <td style={{ padding: '12px 16px', color: '#6b7280' }}>{new Date(c.converted_at).toLocaleDateString()}</td>
