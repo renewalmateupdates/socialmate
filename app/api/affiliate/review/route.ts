@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
+import { ensurePartnerProfile, ensureReferralCode, partnerReferralLink, syncPartnerProfileStatus } from '@/lib/partners'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
 
@@ -87,6 +88,10 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    // The partner portal checks its own copy of the status at login and on
+    // payout requests, so a suspension has to reach it too.
+    await syncPartnerProfileStatus(adminSupabase, affiliate.user_id, nextStatus)
+
     return NextResponse.json({ success: true, action: `${action}d`, status: nextStatus })
   }
 
@@ -107,14 +112,17 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    // Without a portal profile the approved partner can't get past /partners.
     if (email) {
-      const { data: settings } = await adminSupabase
-        .from('user_settings')
-        .select('referral_code')
-        .eq('user_id', affiliate.user_id)
-        .single()
+      await ensurePartnerProfile(adminSupabase, { userId: affiliate.user_id, email, fullName: affiliate.full_name })
+    }
+    // Partners who signed up through /partners may have no referral code yet;
+    // the old email printed "?ref=undefined" for them.
+    const referralCode = await ensureReferralCode(adminSupabase, affiliate.user_id)
 
-      const referralLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'}/?ref=${settings?.referral_code}`
+    if (email) {
+      const appUrl       = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+      const referralLink = partnerReferralLink(referralCode) ?? `${appUrl}/partners/dashboard`
 
       await getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
@@ -137,10 +145,10 @@ export async function POST(req: NextRequest) {
             </div>
             <p style="color: #555; font-size: 14px; line-height: 1.6;">
               Share your link anywhere — every user who signs up and subscribes earns you commission automatically.
-              Log in to your <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'}/affiliate" style="color: #000; font-weight: 600;">affiliate dashboard</a> to track earnings and referrals.
+              Next, log in to the <a href="${appUrl}/partners" style="color: #000; font-weight: 600;">partner portal</a> with this email to accept the partner agreement and set up payouts, then track earnings and referrals there.
             </p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-            <p style="color: #aaa; font-size: 12px;">SocialMate · 60-day lock period · Payouts processed manually</p>
+            <p style="color: #aaa; font-size: 12px;">SocialMate · 60-day hold on new commission · Payouts through Stripe once you reach $25</p>
           </div>
         `,
       })

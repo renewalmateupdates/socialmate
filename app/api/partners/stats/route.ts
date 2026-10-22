@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { getAffiliateAvailableBalanceCents } from '@/lib/affiliate-balance'
+import { ensurePartnerProfile, ensureReferralCode, partnerReferralLink } from '@/lib/partners'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -100,11 +101,31 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Affiliate view: own profile ───────────────────────────────────────
-  const { data: profile } = await db
+  let { data: profile } = await db
     .from('affiliate_profiles')
     .select('*')
     .eq('user_id', user.id)
     .maybeSingle()
+
+  // Approved before approval started creating the portal profile: create it
+  // now, or the portal bounces them between onboarding and access-denied.
+  if (!profile && user.email) {
+    const { data: approved } = await db
+      .from('affiliates')
+      .select('full_name')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle()
+    if (approved) {
+      await ensurePartnerProfile(db, { userId: user.id, email: user.email, fullName: approved.full_name })
+      const { data: created } = await db
+        .from('affiliate_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      profile = created
+    }
+  }
 
   if (!profile) return NextResponse.json({ profile: null })
 
@@ -114,20 +135,75 @@ export async function GET(req: NextRequest) {
     ? null
     : { rate: '40%', remaining: 100 - profile.active_referral_count }
 
-  // Promo codes
-  const { data: promoCodes } = await db
-    .from('affiliate_promo_codes')
-    .select('*')
-    .eq('affiliate_id', profile.id)
-    .eq('is_active', true)
+  // The partner's `affiliates` row: the webhook credits commission against its
+  // id, and partner codes in `coupons` point at it.
+  const { data: affiliateRow } = await db
+    .from('affiliates')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle()
 
-  // Recent conversions
-  const { data: conversions } = await db
-    .from('affiliate_conversions')
-    .select('*')
-    .eq('affiliate_id', profile.id)
-    .order('converted_at', { ascending: false })
-    .limit(50)
+  // Codes: the ones in `coupons` with this partner's affiliate_id. Those are
+  // what the code box on /pricing, onboarding and settings accepts, and the
+  // webhook credits the partner's real balance for them. The auto-generated
+  // affiliate_promo_codes are not shown: the onboarding ones never existed in
+  // Stripe, and none of them earned anything on a subscription.
+  const { data: couponRows, error: couponErr } = affiliateRow
+    ? await db
+        .from('coupons')
+        .select('id, code, discount_type, discount_value, current_redemptions')
+        .eq('affiliate_id', affiliateRow.id)
+        .eq('active', true)
+    : { data: [], error: null }
+  if (couponErr) console.warn('[partners/stats] coupons lookup failed:', couponErr.message)
+  const promoCodes = (couponRows ?? []).map(c => ({
+    id:              c.id,
+    code:            c.code,
+    discount_value:  Number(c.discount_value),
+    duration_months: null,
+    description:     c.discount_type === 'percent'          ? `${Number(c.discount_value)}% off the first payment`
+                   : c.discount_type === 'fixed'            ? `$${Number(c.discount_value)} off the first payment`
+                   :                                          `${Number(c.discount_value)} extra trial days`,
+    times_used:      c.current_redemptions ?? 0,
+  }))
+
+  // Conversions. Commission lands in three places depending on how the sale
+  // came in: affiliate_conversions keyed by the profile id (credit packs) or by
+  // the affiliates id (partner codes), and referral_conversions for sign-ups
+  // through the referral link. This used to read only the first, so a partner
+  // never saw a single real sale.
+  const conversionOwnerIds = [profile.id, affiliateRow?.id].filter(Boolean) as string[]
+  const [{ data: codeConversions }, { data: linkConversions }] = await Promise.all([
+    db.from('affiliate_conversions')
+      .select('*')
+      .in('affiliate_id', conversionOwnerIds)
+      .order('converted_at', { ascending: false })
+      .limit(50),
+    db.from('referral_conversions')
+      .select('id, status, total_earned, converted_at, lock_expires_at')
+      .eq('affiliate_user_id', user.id)
+      .order('converted_at', { ascending: false })
+      .limit(50),
+  ])
+  const conversions = [
+    ...(codeConversions ?? []).map(c => ({
+      ...c,
+      event_type: c.event_type ?? (c.conversion_type === 'credit_pack' ? 'credit pack' : 'code'),
+    })),
+    ...(linkConversions ?? []).map(r => ({
+      id:                  r.id,
+      referred_user_email: null,
+      event_type:          (r.total_earned ?? 0) > 0 ? 'subscription' : 'sign-up',
+      plan:                null,
+      amount_cents:        0,
+      commission_cents:    Math.round((r.total_earned ?? 0) * 100),
+      status:              r.status,
+      converted_at:        r.converted_at,
+      hold_until:          r.lock_expires_at,
+    })),
+  ]
+    .sort((a, b) => new Date(b.converted_at).getTime() - new Date(a.converted_at).getTime())
+    .slice(0, 50)
 
   // Payouts
   const { data: payouts } = await db
@@ -144,8 +220,10 @@ export async function GET(req: NextRequest) {
     .order('sent_at', { ascending: false })
     .limit(20)
 
-  // Referral link (using affiliate promo code prefix or fallback)
-  const referralLink = `${appUrl}/?aff=${profile.id.slice(0, 8)}`
+  // ?ref=<referral code> is the link the app actually records (proxy.ts ->
+  // sm_ref cookie -> referral_conversions at signup). This used to be
+  // ?aff=<profile id>, which nothing reads, so no partner link ever counted.
+  const referralLink = partnerReferralLink(await ensureReferralCode(db, user.id)) ?? `${appUrl}/partners/dashboard`
 
   // The real balance -- see lib/affiliate-balance.ts. profile.available_balance_cents
   // is never written to by the Stripe webhook and would show $0 even for an
@@ -155,8 +233,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     profile: { ...profile, available_balance_cents: availableBalanceCents, commission_rate: commissionRate },
     referral_link: referralLink,
-    promo_codes: promoCodes ?? [],
-    conversions: conversions ?? [],
+    promo_codes: promoCodes,
+    conversions,
     payouts: payouts ?? [],
     commission_label: commissionLabel,
     next_tier: nextTier,
