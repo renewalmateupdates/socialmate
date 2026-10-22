@@ -3,9 +3,15 @@
 // SM-Give. Shopify sales never reach sm_give_allocations, so this is the only
 // place that number is computed.
 //
-// Needs two env vars from a Shopify app with the read_orders scope:
-//   SHOPIFY_STORE_DOMAIN  e.g. tvmfct-ew.myshopify.com
-//   SHOPIFY_ADMIN_TOKEN   the app's Admin API access token
+// Needs a Shopify app with the read_orders scope, installed on the store:
+//   SHOPIFY_STORE_DOMAIN   e.g. tvmfct-ew.myshopify.com
+//   SHOPIFY_CLIENT_ID      the app's Client ID (Dev Dashboard > app > Settings)
+//   SHOPIFY_CLIENT_SECRET  the app's Client secret
+// Since Jan 2026 Shopify only creates apps in its Dev Dashboard. Those don't
+// get a permanent token: the server trades the client ID and secret for one
+// that lasts 24 hours (client credentials grant, which works because the app
+// and the store are in the same Shopify organization). A legacy permanent
+// token in SHOPIFY_ADMIN_TOKEN is still accepted instead.
 //
 // API 2025-10: when Shopify retires a version it serves the oldest supported
 // one instead, so this keeps working.
@@ -18,7 +24,35 @@ export interface ShopifySummary {
 }
 
 export function shopifyConfigured(): boolean {
-  return Boolean(process.env.SHOPIFY_STORE_DOMAIN && process.env.SHOPIFY_ADMIN_TOKEN)
+  return Boolean(
+    process.env.SHOPIFY_STORE_DOMAIN &&
+    (process.env.SHOPIFY_ADMIN_TOKEN || (process.env.SHOPIFY_CLIENT_ID && process.env.SHOPIFY_CLIENT_SECRET)),
+  )
+}
+
+// The token lasts 24 hours; keep it for 23 within a warm server instance.
+let cached: { token: string; expires: number } | null = null
+
+async function accessToken(domain: string): Promise<string> {
+  if (process.env.SHOPIFY_ADMIN_TOKEN) return process.env.SHOPIFY_ADMIN_TOKEN
+  if (cached && cached.expires > Date.now()) return cached.token
+
+  const res = await fetch(`https://${domain}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type:    'client_credentials',
+      client_id:     process.env.SHOPIFY_CLIENT_ID!,
+      client_secret: process.env.SHOPIFY_CLIENT_SECRET!,
+    }),
+    cache: 'no-store',
+  })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.access_token) {
+    throw new Error(`Shopify token: ${json?.error_description ?? json?.error ?? `HTTP ${res.status}`}`)
+  }
+  cached = { token: json.access_token, expires: Date.now() + 23 * 3_600_000 }
+  return json.access_token
 }
 
 const COUNTED = new Set(['PAID', 'PARTIALLY_REFUNDED'])
@@ -39,7 +73,7 @@ export async function shopifySummary(sinceIso: string): Promise<ShopifySummary> 
 
   const res = await fetch(`https://${domain}/admin/api/2025-10/graphql.json`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': process.env.SHOPIFY_ADMIN_TOKEN! },
+    headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': await accessToken(domain) },
     body: JSON.stringify({ query }),
     cache: 'no-store',
   })

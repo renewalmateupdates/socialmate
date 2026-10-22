@@ -20,6 +20,7 @@ export interface StripeSummary {
   netCents: number
   byGroup: { group: RevenueGroup; cents: number; count: number }[]
   mrrCents: number
+  mrrByGroup: { group: RevenueGroup; cents: number }[]
   activeSubscriptions: number
   recent: Payment[]
   failedPayments: { at: string; cents: number; email: string | null; reason: string }[]
@@ -71,7 +72,9 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
     const subMeta = inv.subscription_details?.metadata ?? inv.parent?.subscription_details?.metadata ?? {}
     if (CREATOR_HUB_TYPES.has(subMeta.type)) continue
     const lines: any[] = inv.lines?.data ?? []
-    const info = lines.map(l => priceInfo(l.price?.id ?? l.pricing?.price_details?.price)).find(Boolean)
+    const info = lines
+      .map(l => priceInfo(l.price?.id ?? l.pricing?.price_details?.price, l.price?.product ?? l.pricing?.price_details?.product))
+      .find(Boolean)
     payments.push({
       at: iso(inv.created), cents, email: inv.customer_email ?? null,
       label: info?.label ?? 'Other subscription', group: info?.group ?? 'Other',
@@ -104,11 +107,17 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
 
   let mrr = 0
   let activeSubscriptions = 0
+  const mrrGroups = new Map<RevenueGroup, number>()
   for (const sub of subs.items as any[]) {
     if (sub.status !== 'active' && sub.status !== 'past_due') continue
     if (CREATOR_HUB_TYPES.has(sub.metadata?.type)) continue
     activeSubscriptions += 1
-    for (const item of sub.items?.data ?? []) mrr += monthlyCents(item.price, item.quantity)
+    for (const item of sub.items?.data ?? []) {
+      const cents = monthlyCents(item.price, item.quantity)
+      const group = priceInfo(item.price?.id, item.price?.product)?.group ?? 'Other'
+      mrr += cents
+      mrrGroups.set(group, (mrrGroups.get(group) ?? 0) + cents)
+    }
   }
 
   const failedPayments = (charges.items as any[])
@@ -128,6 +137,7 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
     netCents: grossCents - refundedCents,
     byGroup: Array.from(groups.entries()).map(([group, v]) => ({ group, ...v })).sort((a, b) => b.cents - a.cents),
     mrrCents: Math.round(mrr),
+    mrrByGroup: Array.from(mrrGroups.entries()).map(([group, cents]) => ({ group, cents: Math.round(cents) })),
     activeSubscriptions,
     recent: payments.slice(0, 12),
     failedPayments: failedPayments.slice(0, 10),
