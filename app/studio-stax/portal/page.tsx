@@ -80,17 +80,21 @@ export default function StudioStaxPortalPage() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { router.push('/login?redirect=/studio-stax/portal'); return }
 
       try {
         // Match by applicant_email — curated_listings doesn't have user_id
-        const { data: listingData } = await supabase
+        const { data: listingData, error: listingErr } = await supabase
           .from('curated_listings')
           .select('id, name, tagline, description, category, url, logo_url, status, renewal_date, smgive_donated_cents, plan_tier, free_until')
-          .eq('applicant_email', user.email ?? '')
+          .ilike('applicant_email', user.email ?? '')
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
+
+        // RLS returns only rows whose email matches exactly (case aside), so
+        // ilike's "_" wildcard cannot reach someone else's listing here.
+        if (listingErr) console.warn('[StaxPortal] listing lookup failed:', listingErr.message)
 
         if (!listingData) {
           setNoListing(true)
@@ -131,15 +135,17 @@ export default function StudioStaxPortalPage() {
     setEditError('')
     setEditSuccess(false)
     try {
-      const { error } = await supabase
-        .from('curated_listings')
-        .update({ description: editDesc, url: editUrl })
-        .eq('id', listing.id)
+      const res = await fetch('/api/studio-stax/listing', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: editDesc, url: editUrl }),
+      })
+      const json = await res.json().catch(() => ({}))
 
-      if (error) {
-        setEditError(error.message || 'Failed to save changes.')
+      if (!res.ok) {
+        setEditError(json.error || 'Failed to save changes.')
       } else {
-        setListing(l => l ? { ...l, description: editDesc, url: editUrl } : l)
+        setListing(l => l ? { ...l, description: json.description, url: json.url } : l)
         setEditMode(false)
         setEditSuccess(true)
         setTimeout(() => setEditSuccess(false), 3000)
