@@ -25,6 +25,9 @@ export default function FeedbackWidget() {
   // On a phone the trigger sits on top of the right edge of the primary
   // button on these two pages. Wider screens have room for both.
   const onAuthPage = pathname === '/login' || pathname === '/signup'
+  // Compose pins its Post bar to the bottom of the screen, full width below
+  // the desktop layout, where this button would cover its right-hand button.
+  const onCompose = pathname === '/compose'
 
   // Try to pre-fill email from Supabase session
   useEffect(() => {
@@ -173,7 +176,7 @@ export default function FeedbackWidget() {
       {/* Floating trigger button — bottom right */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors items-center justify-center ${onAuthPage ? 'hidden md:flex' : 'flex'}`}
+        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors items-center justify-center ${onAuthPage ? 'hidden md:flex' : onCompose ? 'hidden lg:flex' : 'flex'}`}
         title="Send feedback"
         aria-label="Send feedback">
         {open ? <CloseIcon size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}
