@@ -202,7 +202,7 @@ function PlatformCard({
       )}
       {platform === 'tiktok' && !atLimit && (
         <p className="text-xs text-gray-400 leading-relaxed pl-1">
-          Videos only. They go to your TikTok drafts until TikTok approves public posting.
+          Videos only. Post and schedule them from TikTok Studio.
         </p>
       )}
     </div>

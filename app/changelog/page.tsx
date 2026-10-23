@@ -21,6 +21,13 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'October 23, 2026',
+    version: 'Public TikTok Posting',
+    changes: [
+      { type: 'New', text: 'TikTok approved SocialMate for direct posting. Videos you post or schedule from TikTok Studio now go straight to your TikTok profile, with the privacy you choose, instead of only to a private account or your drafts.' },
+    ],
+  },
+  {
     date: 'October 15, 2026',
     version: 'Reconnect Any Time, Clearer Connect Errors, an Accurate Blog',
     changes: [

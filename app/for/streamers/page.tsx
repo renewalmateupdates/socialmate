@@ -80,7 +80,7 @@ const FEATURES = [
   },
   {
     title: 'TikTok Scheduling',
-    desc:  'Upload a clip in TikTok Studio and schedule it from the same dashboard. Until TikTok finishes its content sharing audit of SocialMate, posts go out as private or land in your TikTok drafts.',
+    desc:  'Upload a clip in TikTok Studio and schedule it from the same dashboard. It posts straight to your TikTok profile at the time you pick.',
     icon:  Music2,
     live:  true,
     badge: 'Live now',
@@ -160,7 +160,7 @@ const FAQ = [
   },
   {
     q: 'Is TikTok or Kick scheduling available yet?',
-    a: 'TikTok is live through TikTok Studio: upload a video and schedule it. Until TikTok finishes its content sharing audit of SocialMate, posts publish as private or go to your TikTok drafts. Kick is not supported yet.',
+    a: 'TikTok is live through TikTok Studio: upload a video and schedule it, and it posts straight to your TikTok profile. Kick is not supported yet.',
   },
   {
     q: 'How much does it cost?',
