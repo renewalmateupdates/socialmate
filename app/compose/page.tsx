@@ -1654,7 +1654,12 @@ function ComposeInner() {
           { target: 'compose-schedule',  title: 'Schedule for later or post now', body: 'Pick a date and time to schedule, or leave it blank to publish instantly.' },
         ]}
       />
-      <div className="md:ml-56 flex-1 flex flex-col overflow-y-auto">
+      {/* overflow-x-clip, not overflow-y-auto. This box never scrolls (the window
+          does), but overflow-y-auto still made it the scroll container for every
+          sticky inside, so the Post bar and the live preview never stuck at any
+          size. clip keeps wide content from scrolling the page sideways without
+          capturing sticky. */}
+      <div className="md:ml-56 flex-1 flex flex-col min-w-0 overflow-x-clip">
         <div className="flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
@@ -3000,8 +3005,11 @@ function ComposeInner() {
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">AI predicts how your post will perform before you publish</p>
                   </div>
                   {plan === 'free' ? (
-                    <a href="/pricing" className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-amber-500 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-all self-start sm:self-auto">
-                      <Lock className="w-3.5 h-3.5" strokeWidth={2} /> Upgrade to Score
+                    // Outlined, not filled. It was the boldest button on the
+                    // page for a free user, above the Post button, and it leads
+                    // away from the post they are writing.
+                    <a href="/pricing" className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-xl hover:border-amber-400 hover:text-amber-600 transition-all self-start sm:self-auto">
+                      <Lock className="w-3.5 h-3.5" strokeWidth={2} /> Unlock with Pro
                     </a>
                   ) : (
                     <button onClick={handleScorePost}
@@ -3242,8 +3250,14 @@ function ComposeInner() {
                 )}
               </div>
 
-              {/* ACTIONS — sticky on mobile so keyboard doesn't push buttons off screen */}
-              <div className="sticky bottom-0 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0"
+              {/* ACTIONS — pinned to the bottom of the screen at every size. On
+                  mobile that keeps the keyboard from pushing them off screen. On
+                  desktop the bar used to sit below every tool panel (media, GIFs,
+                  poll, tags, hashtags, AI tools, Post Score, schedule), a long
+                  scroll from the editor. Two people who connected LinkedIn wrote a
+                  post, had it ticked, left Compose without pressing Post, and one
+                  went straight to /pricing (Oct 6 and 9, 2026). */}
+              <div className="sticky bottom-0 z-10 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1"
                 style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                 {threadMode ? (
                   <div className="flex items-center gap-3">
