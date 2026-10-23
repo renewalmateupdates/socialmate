@@ -218,6 +218,10 @@ function AccountsInner() {
   // after three seconds and left the page with no next step at all. Sixteen
   // external accounts connected a platform; none of them ever created a post.
   const [justConnected, setJustConnected] = useState<string | null>(null)
+  // A draft already written and waiting for somewhere to go, usually the
+  // starter post from onboarding. Ten outside accounts held one with nothing
+  // connected (Oct 22); connecting used to offer them a new starter instead.
+  const [waitingDraftId, setWaitingDraftId] = useState<string | null>(null)
   // Discord and Telegram need a second step after the account connects: a
   // channel to post into. Measured 2026-09-01: six external accounts had
   // connected Discord and `post_destinations` held three rows in total, so
@@ -254,6 +258,27 @@ function AccountsInner() {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
+
+  useEffect(() => {
+    // TikTok takes video, so a text draft is not its next step.
+    if (!justConnected || justConnected === 'tiktok') { setWaitingDraftId(null); return }
+    let cancelled = false
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data, error } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'draft')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (error) { console.warn('[accounts] waiting draft lookup failed:', error.message); return }
+      if (!cancelled) setWaitingDraftId(data?.id ?? null)
+    })()
+    return () => { cancelled = true }
+  }, [justConnected])
 
   const refreshAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -593,11 +618,14 @@ function AccountsInner() {
                       href: justConnected === 'discord' ? '#needs-channel-discord' : '/accounts/destinations',
                       cta: justConnected === 'discord' ? 'Pick your channel ↓' : 'Choose a channel →',
                       sub: `Now pick the ${PLATFORM_META[justConnected]?.label || justConnected} channel to post into. Until you do, posts have nowhere to go.` }
+                  : waitingDraftId ? { href: `/compose?draft=${waitingDraftId}`, cta: 'Open your draft →',
+                    sub: `Your saved draft is ready. Open it, check it, and send it to ${PLATFORM_META[justConnected]?.label || justConnected}.` }
                   : { href: composeWithStarterHref(), cta: 'Open your first post →',
                     sub: 'We put a starter draft in the composer for you. Edit it, or replace it, and send it out.' }
                 // Only where the next step is "write a post": the other branches
-                // send people somewhere that is not the composer.
-                const showBuilder = !xNeedsPro && justConnected !== 'tiktok' && !needsChannel
+                // send people somewhere that is not the composer, and someone
+                // with a draft waiting already has their post.
+                const showBuilder = !xNeedsPro && justConnected !== 'tiktok' && !needsChannel && !waitingDraftId
                 return (
                   <>
                     <div className="flex-1">

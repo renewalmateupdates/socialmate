@@ -146,7 +146,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
   // What actually happened when we tried to save. Step 5 reads this instead of
   // asserting success, because it used to claim "5 posts scheduled" after an
   // insert that never ran.
-  const [saveResult, setSaveResult] = useState<{ kind: 'scheduled' | 'draft' | 'none' | 'error'; detail?: string } | null>(null)
+  const [saveResult, setSaveResult] = useState<{ kind: 'scheduled' | 'draft' | 'none' | 'error'; detail?: string; postId?: string } | null>(null)
   const [saving, setSaving] = useState(false)
   const [hasFinished, setHasFinished] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
@@ -413,7 +413,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
       const valid = !Number.isNaN(when.getTime())
 
       const connected = textPlatforms.length > 0
-      const { error: postErr } = await supabase.from('posts').insert({
+      const { data: saved, error: postErr } = await supabase.from('posts').insert({
         user_id: user.id,
         content,
         platforms: textPlatforms,
@@ -421,7 +421,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
         // A draft has no destination, so a scheduled_at on it would only invite
         // the scheduler to sweep it up and stamp it failed.
         scheduled_at: connected && valid ? when.toISOString() : null,
-      })
+      }).select('id').maybeSingle()
 
       if (postErr) {
         console.error('[onboarding] starter post insert failed:', postErr.message)
@@ -432,6 +432,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
           detail: connected && valid
             ? when.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
             : undefined,
+          postId: saved?.id,
         })
       }
     }
@@ -1026,7 +1027,11 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
                   Setting up your account…
                 </div>
               ) : (
-                <Link href={didSchedule ? '/calendar' : didDraft ? '/drafts' : '/compose'}
+                // The draft itself, in Compose, where it can be sent once a
+                // platform is connected. /drafts could only list it.
+                <Link href={didSchedule ? '/calendar'
+                  : didDraft ? (saveResult?.postId ? `/compose?draft=${saveResult.postId}` : '/drafts')
+                  : '/compose'}
                   className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
                   {didSchedule
                     ? <><CalendarDays size={14} strokeWidth={2} /> View Your Scheduled Post →</>

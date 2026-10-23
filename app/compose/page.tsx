@@ -514,7 +514,8 @@ function ComposeInner() {
       // rather than racing the effect that applies them.
       const draftId     = searchParams.get('draft') || searchParams.get('id')
       const hasTemplate = !!(searchParams.get('template') || searchParams.get('starterTemplate'))
-      if (!draftId && !hasTemplate) {
+      let defaultSelection: string[] = []
+      if (!hasTemplate) {
         // .maybeSingle(), not .single(): a user with no user_settings row is a
         // zero-row lookup, which .single() reports as PGRST116 and which the
         // discarded-error pattern would then swallow.
@@ -529,20 +530,25 @@ function ComposeInner() {
         const saved    = Array.isArray(uSettings?.default_platforms) ? uSettings.default_platforms : []
         const usable   = saved.filter((p: string) => live.has(p) && platformsSet.has(p))
         const fallback = Array.from(platformsSet).filter(p => live.has(p))
-        setSelectedPlatforms(usable.length > 0 ? usable : fallback)
+        defaultSelection = usable.length > 0 ? usable : fallback
+        if (!draftId) setSelectedPlatforms(defaultSelection)
       }
 
       // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
       if (draftId) {
-        const { data: draft } = await supabase
+        const { data: draft, error: draftErr } = await supabase
           .from('posts')
           .select('*')
           .eq('id', draftId)
           .eq('user_id', data.user.id)
-          .single()
+          .maybeSingle()
+        if (draftErr) console.warn('[compose] draft lookup failed', draftErr)
         if (draft) {
           setContent(draft.content || '')
-          if (draft.platforms?.length > 0) setSelectedPlatforms(draft.platforms)
+          // A draft saved before anything was connected (onboarding's starter
+          // post) carries no platforms. It used to open with nothing ticked,
+          // one more step between the person and sending it.
+          setSelectedPlatforms(draft.platforms?.length > 0 ? draft.platforms : defaultSelection)
           if (draft.tags?.length > 0) setPostTags(draft.tags)
           if (draft.media_urls?.length > 0) setDraftMediaUrls(draft.media_urls)
           setCurrentDraftId(draftId)
@@ -550,6 +556,9 @@ function ComposeInner() {
           setTemplateBanner(isFailed
             ? 'Retrying failed post — edit if needed, then publish.'
             : 'Editing draft — make your changes and save or publish.')
+        } else {
+          // Deleted, or not theirs: compose a new post as usual.
+          setSelectedPlatforms(defaultSelection)
         }
       }
 
