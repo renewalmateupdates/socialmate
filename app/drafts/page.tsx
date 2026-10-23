@@ -22,9 +22,8 @@ const EDITABLE_PLATFORMS = [
   { id: 'mastodon',  name: 'Mastodon',  limit: 500   },
   { id: 'twitter',   name: 'X',         limit: 280   },
   { id: 'linkedin',  name: 'LinkedIn',  limit: 3000  },
-  { id: 'youtube',   name: 'YouTube',   limit: 5000  },
-  { id: 'pinterest', name: 'Pinterest', limit: 500   },
-  { id: 'reddit',    name: 'Reddit',    limit: 40000 },
+  // YouTube, Pinterest and Reddit used to be offered here. None of them can be
+  // posted to, so a post tagged with one could only ever fail on it.
 ]
 
 function toLocalDatetimeValue(isoString: string | null): string {
@@ -205,37 +204,62 @@ function DraftsInner() {
   const saveEdit = useCallback(async (postId: string) => {
     const es = editMap[postId]
     if (!es) return
+    const post = posts.find(p => p.id === postId)
     setEditMap(prev => ({ ...prev, [postId]: { ...prev[postId], saving: true } }))
 
-    // Convert local datetime-local value back to ISO
-    let scheduledAtIso: string | null = null
-    if (es.scheduled_at) {
-      scheduledAtIso = new Date(es.scheduled_at).toISOString()
-    }
-
+    // Text and platforms only. The time used to be written here too, which did
+    // two wrong things: a draft given a time stayed a draft and never went out,
+    // and a scheduled post given a new time kept its old wake-up.
     const { error } = await supabase
       .from('posts')
       .update({
         content: es.content,
         platforms: es.platforms,
-        scheduled_at: scheduledAtIso,
         updated_at: new Date().toISOString(),
       })
       .eq('id', postId)
 
     if (error) {
+      console.warn('[drafts] save failed:', error.message)
       showToast('Failed to save changes', 'error')
       setEditMap(prev => ({ ...prev, [postId]: { ...prev[postId], saving: false } }))
       return
     }
 
+    // A scheduled post's new time goes through the API, which also tells the
+    // scheduler. Blank means unchanged: clearing it would leave a scheduled
+    // post with no time at all.
+    let scheduledAt: string | null = post?.scheduled_at ?? null
+    let timeFailed = false
+    if (post?.status === 'scheduled' && es.scheduled_at) {
+      const next = new Date(es.scheduled_at).toISOString()
+      if (!post.scheduled_at || next !== new Date(post.scheduled_at).toISOString()) {
+        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ scheduled_at: next }),
+        }).catch(() => null)
+        if (res?.ok) scheduledAt = next
+        else timeFailed = true
+      }
+    }
+
     setPosts(prev => prev.map(p => p.id === postId
-      ? { ...p, content: es.content, platforms: es.platforms, scheduled_at: scheduledAtIso }
+      ? { ...p, content: es.content, platforms: es.platforms, scheduled_at: scheduledAt }
       : p
     ))
+    if (timeFailed) {
+      showToast('Saved the text, but the new time did not save', 'error')
+      setEditMap(prev => ({ ...prev, [postId]: { ...prev[postId], saving: false } }))
+      return
+    }
     showToast('Post updated', 'success')
     closeEdit(postId)
-  }, [editMap, closeEdit])
+  }, [editMap, posts, closeEdit])
 
   const handleDelete = async (id: string) => {
     setDeleting(id)
@@ -470,6 +494,15 @@ function DraftsInner() {
 
                         {!isConfirming && (
                           <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                            {/* A draft never goes out on its own, and this page
+                                cannot send one. Compose can, with every check
+                                it carries, so the draft opens there. */}
+                            {resolvedStatus === 'draft' && (
+                              <Link href={`/compose?draft=${post.id}`}
+                                className="text-xs font-bold px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all whitespace-nowrap">
+                                Post or schedule →
+                              </Link>
+                            )}
                             {isEditable && (
                               <button
                                 onClick={() => openEdit(post)}
@@ -564,23 +597,35 @@ function DraftsInner() {
                           </div>
                         </div>
 
-                        {/* Scheduled time (only for scheduled posts or drafts) */}
-                        <div>
-                          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">
-                            Scheduled time <span className="font-normal">(leave blank for draft)</span>
-                          </label>
-                          <input
-                            type="datetime-local"
-                            value={editState.scheduled_at}
-                            onChange={e => updateEditField(post.id, 'scheduled_at', e.target.value)}
-                            className="text-sm rounded-xl px-3 py-2.5 outline-none transition-all"
-                            style={{
-                              background: 'var(--bg)',
-                              border: '1px solid var(--border-mid)',
-                              color: 'var(--text)',
-                            }}
-                          />
-                        </div>
+                        {/* The time is only editable on a post that is already
+                            scheduled. On a draft this field promised scheduling
+                            ("leave blank for draft") and saved a time that
+                            nothing ever acted on. */}
+                        {resolvedStatus === 'scheduled' ? (
+                          <div>
+                            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">
+                              Scheduled time
+                            </label>
+                            <input
+                              type="datetime-local"
+                              value={editState.scheduled_at}
+                              onChange={e => updateEditField(post.id, 'scheduled_at', e.target.value)}
+                              className="text-sm rounded-xl px-3 py-2.5 outline-none transition-all"
+                              style={{
+                                background: 'var(--bg)',
+                                border: '1px solid var(--border-mid)',
+                                color: 'var(--text)',
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Drafts don&apos;t go out on their own. To post or schedule this one,{' '}
+                            <Link href={`/compose?draft=${post.id}`} className="font-bold underline underline-offset-2">
+                              open it in Compose
+                            </Link>.
+                          </p>
+                        )}
 
                         {/* Save / Cancel */}
                         <div className="flex items-center gap-2 pt-1">
