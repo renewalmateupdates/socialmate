@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
+import { setScheduledTime } from '@/lib/post-schedule'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
@@ -458,12 +459,10 @@ function QueueInner() {
         .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
     })
 
-    // Persist to DB
-    await Promise.all(
-      updates.map(u =>
-        supabase.from('posts').update({ scheduled_at: u.scheduled_at }).eq('id', u.id)
-      )
-    )
+    // Persist through the API so each moved post gets a wake-up for its new
+    // time. Written straight to the table, a post moved earlier waited for the
+    // backstop sweep, which GitHub runs every few hours (lib/post-schedule.ts).
+    await Promise.all(updates.map(u => setScheduledTime(u.id, u.scheduled_at)))
   }
 
   // Reload posts when active workspace changes

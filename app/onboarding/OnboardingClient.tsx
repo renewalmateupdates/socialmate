@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { normalizePlan } from '@/lib/plan'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { setScheduledTime } from '@/lib/post-schedule'
 import dynamic from 'next/dynamic'
 import { track } from '@/lib/analytics'
 import { starterDraft, starterDraftCount, buildDraft, starterVariantCount, type StarterPath } from '@/lib/starter-post'
@@ -413,6 +414,9 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
       const valid = !Number.isNaN(when.getTime())
 
       const connected = textPlatforms.length > 0
+      // A scheduled post with no time is one nothing can ever pick up, so an
+      // unreadable picker value falls back to ten minutes from now.
+      const sendAt = valid ? when.toISOString() : new Date(Date.now() + 10 * 60_000).toISOString()
       const { data: saved, error: postErr } = await supabase.from('posts').insert({
         user_id: user.id,
         content,
@@ -420,8 +424,12 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
         status: connected ? 'scheduled' : 'draft',
         // A draft has no destination, so a scheduled_at on it would only invite
         // the scheduler to sweep it up and stamp it failed.
-        scheduled_at: connected && valid ? when.toISOString() : null,
+        scheduled_at: connected ? sendAt : null,
       }).select('id').maybeSingle()
+
+      // A row inserted from the browser has no wake-up queued, so this first
+      // post used to wait for the backstop sweep: hours late (lib/post-schedule.ts).
+      if (!postErr && connected && saved?.id) await setScheduledTime(saved.id, sendAt)
 
       if (postErr) {
         console.error('[onboarding] starter post insert failed:', postErr.message)
