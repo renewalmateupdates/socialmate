@@ -195,6 +195,7 @@ export async function GET(request: NextRequest) {
   // is the one place connect outcomes are recorded for /admin/funnel. Skipping
   // it meant TikTok connects — successes and failures both — were invisible in
   // the funnel that exists to explain why 62 of 74 accounts never connect
-  // anything. The studio is one click away from the TikTok card.
+  // anything. That page records the connect, then forwards TikTok on to the
+  // studio by itself.
   return NextResponse.redirect(`${appUrl}/accounts?success=tiktok_connected`)
 }

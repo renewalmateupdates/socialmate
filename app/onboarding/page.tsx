@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { Suspense } from 'react'
 import OnboardingInner from './OnboardingClient'
+import { ONBOARDING_LEAD_COOKIE } from '@/lib/attribution'
 
 function OnboardingSkeleton() {
   return (
@@ -40,10 +41,14 @@ function OnboardingSkeleton() {
 export default async function Onboarding() {
   const cookieStore = await cookies()
   const initialReferralCode = cookieStore.get('ref_code')?.value || null
+  // Read here for the same reason: the platform list is in its final order on
+  // the first paint. Set by app/auth/callback for accounts that first landed
+  // on a TikTok page.
+  const leadWithTiktok = cookieStore.get(ONBOARDING_LEAD_COOKIE)?.value === 'tiktok'
 
   return (
     <Suspense fallback={<OnboardingSkeleton />}>
-      <OnboardingInner initialReferralCode={initialReferralCode} />
+      <OnboardingInner initialReferralCode={initialReferralCode} leadWithTiktok={leadWithTiktok} />
     </Suspense>
   )
 }
