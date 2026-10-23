@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { inngest } from '@/lib/inngest'
 
 export async function PATCH(
   request: NextRequest,
@@ -24,12 +25,16 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Verify ownership
-  const { data: post } = await getSupabaseAdmin()
+  const { data: post, error: lookupError } = await getSupabaseAdmin()
     .from('posts')
-    .select('id, user_id')
+    .select('id, user_id, status')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
+  if (lookupError) {
+    console.error('[posts/patch] lookup failed:', lookupError.message)
+    return NextResponse.json({ error: 'Lookup failed' }, { status: 500 })
+  }
   if (!post || post.user_id !== user.id) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
@@ -58,6 +63,18 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // The post's existing wake-up still carries the old time. Queue one for the
+  // new time: if it moved earlier, this one fires on time; if it moved later,
+  // the old one wakes first, finds it not due, and stands down (see
+  // lib/publish/due.ts). Whichever wakes at the right time publishes once,
+  // because the publish route claims the post atomically.
+  if (updates.scheduled_at && post.status === 'scheduled') {
+    await inngest.send({
+      name: 'post/scheduled',
+      data: { postId: id, scheduledAt: updates.scheduled_at },
+    }).catch(err => console.error('[posts/patch] inngest.send failed:', err))
+  }
 
   return NextResponse.json(updated)
 }

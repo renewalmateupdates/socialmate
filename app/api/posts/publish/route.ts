@@ -13,6 +13,7 @@ import { recordFunnel } from '@/lib/usage'
 import { REPLY_TO } from '@/lib/mail'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
+import { notDueYet } from '@/lib/publish/due'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -65,6 +66,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Already published' }, { status: 409 })
     }
     const post = claimedRows[0]
+
+    // Moved later since this run was queued. Every caller of this branch only
+    // means to publish a post that is due, so a post that isn't is released
+    // untouched and given a wake-up for the time it actually holds. 409 is
+    // what the Inngest job already reads as "handled elsewhere".
+    if (notDueYet(post.scheduled_at)) {
+      const { error: releaseError } = await getSupabaseAdmin()
+        .from('posts')
+        .update({ publish_claimed_at: null })
+        .eq('id', postId)
+      if (releaseError) console.warn('[PUBLISH-NOT-DUE] claim release failed:', releaseError.message)
+
+      await inngest.send({
+        name: 'post/scheduled',
+        data: { postId, scheduledAt: post.scheduled_at },
+      }).catch(err => console.error('[PUBLISH-NOT-DUE] inngest.send failed:', err))
+
+      console.log(`[PUBLISH-NOT-DUE] Post ${postId} was moved to ${post.scheduled_at}; requeued, not sent`)
+      return NextResponse.json({ error: 'Not due yet', scheduledAt: post.scheduled_at }, { status: 409 })
+    }
 
     userId = post.user_id
 
