@@ -140,7 +140,7 @@ export default function SideHustleToFullTimePage() {
                   I&apos;m going to tell you something most creator guides won&apos;t: going full-time is not the goal. Building something sustainable enough that you have the option to go full-time is the goal. That distinction matters, because a lot of creators quit their jobs prematurely — chasing the dream of full-time freedom — and end up back at a job six months later, with a depleted savings account and a damaged relationship with the thing they loved building.
                 </p>
                 <p className="mb-4 leading-relaxed text-gray-300">
-                  As of this writing, I&apos;m still at my deli job. I still work shifts. I still build at night. And I&apos;m telling you that not as a failure — but as a choice. I won&apos;t quit until the numbers are there. Because going full-time too early doesn&apos;t just risk your finances — it risks your relationship with building. When your only income is your creative work, the pressure changes everything. Content decisions become survival decisions. You stop making what&apos;s true and start making what pays.
+                  When I first wrote this, I was still at my deli job, working shifts and building at night. (I&apos;ve since left the deli, and there&apos;s an update on that further down.) And I&apos;m telling you that not as a failure — but as a choice. I won&apos;t go full-time until the numbers are there. Because going full-time too early doesn&apos;t just risk your finances — it risks your relationship with building. When your only income is your creative work, the pressure changes everything. Content decisions become survival decisions. You stop making what&apos;s true and start making what pays.
                 </p>
                 <p className="mb-4 leading-relaxed text-gray-300">
                   The goal of this guide is to give you a realistic picture of what full-time actually requires, what the journey looks like from here to there, and how to build toward it in a way that doesn&apos;t destroy you on the way.
@@ -472,7 +472,7 @@ export default function SideHustleToFullTimePage() {
                     A Note from Joshua
                   </p>
                   <p className="mb-4 leading-relaxed text-gray-300">
-                    I wrote this guide from the middle. Not from the other side of a big exit or a viral moment. I&apos;m still at my deli job. I&apos;m still building at night. I don&apos;t write that as a complaint — I write it because I want you to know that this guide is from someone who is in it with you, not someone who finished the race and is telling you about it from a beach.
+                    I wrote this guide from the middle. Not from the other side of a big exit or a viral moment. I&apos;m still working a day job, tree work now instead of the deli. I&apos;m still building at night. I don&apos;t write that as a complaint — I write it because I want you to know that this guide is from someone who is in it with you, not someone who finished the race and is telling you about it from a beach.
                   </p>
                   <p className="mb-4 leading-relaxed text-gray-300">
                     The numbers I shared are real. The timeline is real. The mental game is real. Trust the process, protect your time, stack your revenue, and build toward the freedom you want one system at a time.
