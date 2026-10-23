@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { internalIdsFrom } from '@/lib/internal-accounts'
+import { INTERNAL_EMAILS, internalIdsFrom } from '@/lib/internal-accounts'
 
 // The SocialMate-database half of /admin/hq: what is waiting on Joshua, what
 // users have reported, what is failing, and the SM-Give recorded.
@@ -13,7 +13,12 @@ export interface WaitingItem { label: string; count: number; href: string | null
 export interface SocialMateDbSummary {
   waiting: WaitingItem[]
   feedback: { open: number; recent: { type: string; message: string; email: string | null; at: string }[] }
-  publishFailures: { failed: number; partial: number; topErrors: { platform: string; reason: string; posts: number }[] }
+  // Customers' posts only. `ours` counts failures on our own accounts
+  // (lib/internal-accounts.ts), shown apart and never as a problem.
+  publishFailures: {
+    failed: number; partial: number; ours: number
+    topErrors: { platform: string; reason: string; posts: number; lastAt: string }[]
+  }
   newSignups: number
   smGiveCents: number
 }
@@ -27,7 +32,7 @@ export async function socialmateDbSummary(db: SupabaseClient, sinceIso: string):
   const head = { count: 'exact' as const, head: true }
   const feedbackSince = new Date(Date.now() - 90 * 86_400_000).toISOString()
 
-  const [stax, applications, payouts, whiteLabel, enterprise, feedbackOpen, feedbackRecent, posts, profiles, give] = await Promise.all([
+  const [stax, applications, payouts, whiteLabel, enterprise, feedbackOpen, feedbackRecent, posts, profiles, give, ourProfiles] = await Promise.all([
     db.from('curated_listings').select('id', head).eq('status', 'pending'),
     db.from('affiliates').select('id', head).eq('status', 'pending_review'),
     db.from('affiliate_payouts').select('id', head).eq('status', 'requested'),
@@ -36,9 +41,10 @@ export async function socialmateDbSummary(db: SupabaseClient, sinceIso: string):
     db.from('feedback').select('id', head).is('replied_at', null).gte('created_at', feedbackSince),
     db.from('feedback').select('type, message, email, created_at').is('replied_at', null).gte('created_at', feedbackSince)
       .order('created_at', { ascending: false }).limit(8),
-    db.from('posts').select('status, platform_errors').in('status', ['failed', 'partial']).gte('updated_at', sinceIso).limit(2000),
+    db.from('posts').select('user_id, status, platforms, platform_errors, updated_at').in('status', ['failed', 'partial']).gte('updated_at', sinceIso).limit(2000),
     db.from('profiles').select('id, email, created_at').gte('created_at', sinceIso).limit(5000),
     db.from('sm_give_allocations').select('give_cents').gte('created_at', sinceIso).limit(5000),
+    db.from('profiles').select('id, email').in('email', INTERNAL_EMAILS),
   ])
 
   const waiting: WaitingItem[] = [
@@ -50,21 +56,35 @@ export async function socialmateDbSummary(db: SupabaseClient, sinceIso: string):
     { label: 'Enterprise inquiries (new)', count: must('enterprise_inquiries', enterprise).count ?? 0, href: null },
   ]
 
-  const failedRows = (must('posts', posts).data ?? []) as { status: string; platform_errors: Record<string, unknown> | null }[]
-  const errors = new Map<string, { platform: string; reason: string; posts: number }>()
-  for (const p of failedRows) {
-    for (const [platform, message] of Object.entries(p.platform_errors ?? {})) {
-      const reason = String(message).slice(0, 140)
-      const key = `${platform}::${reason}`
-      const cur = errors.get(key) ?? { platform, reason, posts: 0 }
-      cur.posts += 1
-      errors.set(key, cur)
-    }
-  }
-
-  // Our own accounts are not signups (lib/internal-accounts.ts).
+  // Our own accounts are neither signups nor customers' problems. Their ids come
+  // from a lookup of every internal account, not just this window's signups:
+  // on Oct 22 seven of the twelve "failed posts" were our own SOMA posts from
+  // Sept 26, counted as problems for a month.
   const profileRows = (must('profiles', profiles).data ?? []) as { id: string; email: string | null }[]
-  const internal = internalIdsFrom(profileRows)
+  const ourRows     = (must('profiles (internal)', ourProfiles).data ?? []) as { id: string; email: string | null }[]
+  const internal    = internalIdsFrom([...profileRows, ...ourRows])
+
+  type FailedRow = { user_id: string; status: string; platforms: string[] | null; platform_errors: Record<string, unknown> | null; updated_at: string }
+  const allFailed  = (must('posts', posts).data ?? []) as FailedRow[]
+  const failedRows = allFailed.filter(p => !internal.has(p.user_id))
+  const errors = new Map<string, { platform: string; reason: string; posts: number; lastAt: string }>()
+  const tally = (platform: string, reason: string, at: string) => {
+    const key = `${platform}::${reason}`
+    const cur = errors.get(key) ?? { platform, reason, posts: 0, lastAt: at }
+    cur.posts += 1
+    if (at > cur.lastAt) cur.lastAt = at
+    errors.set(key, cur)
+  }
+  for (const p of failedRows) {
+    const entries = Object.entries(p.platform_errors ?? {})
+    // Post Now did not save its errors before Oct 13 (#691). Those posts still
+    // failed, so they are listed rather than silently missing from the total.
+    if (entries.length === 0) {
+      tally((p.platforms ?? []).join(', ') || 'unknown', 'No error was saved for this post.', p.updated_at)
+      continue
+    }
+    for (const [platform, message] of entries) tally(platform, String(message).slice(0, 140), p.updated_at)
+  }
 
   return {
     waiting,
@@ -77,6 +97,7 @@ export async function socialmateDbSummary(db: SupabaseClient, sinceIso: string):
     publishFailures: {
       failed:  failedRows.filter(p => p.status === 'failed').length,
       partial: failedRows.filter(p => p.status === 'partial').length,
+      ours:    allFailed.length - failedRows.length,
       topErrors: Array.from(errors.values()).sort((a, b) => b.posts - a.posts).slice(0, 6),
     },
     newSignups: profileRows.filter(p => !internal.has(p.id)).length,

@@ -22,8 +22,13 @@ export interface StripeSummary {
   mrrCents: number
   mrrByGroup: { group: RevenueGroup; cents: number }[]
   activeSubscriptions: number
+  // Still active but set to cancel: paid through, not coming back. Kept out of
+  // MRR, which is what will renew.
+  endingSubscriptions: { count: number; mrrCents: number; nextEndsAt: string | null }
   recent: Payment[]
-  failedPayments: { at: string; cents: number; email: string | null; reason: string }[]
+  // blocked: Radar refused it as likely fraud. Nothing was charged and nobody
+  // is waiting on a fix, so it is not a problem to act on.
+  failedPayments: { at: string; cents: number; email: string | null; reason: string; blocked: boolean }[]
   webhookFailures: { total: number; byType: { type: string; count: number }[] }
   truncated: boolean
 }
@@ -108,9 +113,21 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
   let mrr = 0
   let activeSubscriptions = 0
   const mrrGroups = new Map<RevenueGroup, number>()
+  const ending = { count: 0, mrr: 0, ends: [] as number[] }
   for (const sub of subs.items as any[]) {
     if (sub.status !== 'active' && sub.status !== 'past_due') continue
     if (CREATOR_HUB_TYPES.has(sub.metadata?.type)) continue
+    const subCents = (sub.items?.data ?? []).reduce((s: number, item: any) => s + monthlyCents(item.price, item.quantity), 0)
+    // The first paying customer cancelled in August and kept their paid year,
+    // so Stripe still lists them as active until Aug 2027. Counting that as
+    // MRR showed $6.67 a month that will never renew.
+    if (sub.cancel_at_period_end || sub.cancel_at) {
+      ending.count += 1
+      ending.mrr += subCents
+      const endsAt = sub.cancel_at ?? sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end
+      if (endsAt) ending.ends.push(endsAt)
+      continue
+    }
     activeSubscriptions += 1
     for (const item of sub.items?.data ?? []) {
       const cents = monthlyCents(item.price, item.quantity)
@@ -120,13 +137,21 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
     }
   }
 
+  // Radar blocks show the customer a generic "card was declined", and that is
+  // also what failure_message says. outcome.type is what tells them apart.
   const failedPayments = (charges.items as any[])
     .filter(c => c.status === 'failed')
-    .map(c => ({
-      at: iso(c.created), cents: c.amount ?? 0,
-      email: c.billing_details?.email ?? c.receipt_email ?? null,
-      reason: c.failure_message ?? c.outcome?.seller_message ?? 'Declined',
-    }))
+    .map(c => {
+      const blocked = c.outcome?.type === 'blocked'
+      return {
+        at: iso(c.created), cents: c.amount ?? 0,
+        email: c.billing_details?.email ?? c.receipt_email ?? null,
+        reason: blocked
+          ? `Blocked by Stripe Radar as likely fraud (risk: ${c.outcome?.risk_level ?? 'elevated'}). Nothing was charged.`
+          : c.failure_message ?? c.outcome?.seller_message ?? 'Declined',
+        blocked,
+      }
+    })
 
   const byType = new Map<string, number>()
   for (const e of events.items as any[]) byType.set(e.type, (byType.get(e.type) ?? 0) + 1)
@@ -139,6 +164,11 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
     mrrCents: Math.round(mrr),
     mrrByGroup: Array.from(mrrGroups.entries()).map(([group, cents]) => ({ group, cents: Math.round(cents) })),
     activeSubscriptions,
+    endingSubscriptions: {
+      count: ending.count,
+      mrrCents: Math.round(ending.mrr),
+      nextEndsAt: ending.ends.length ? iso(Math.min(...ending.ends)) : null,
+    },
     recent: payments.slice(0, 12),
     failedPayments: failedPayments.slice(0, 10),
     webhookFailures: {

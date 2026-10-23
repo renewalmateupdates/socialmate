@@ -22,8 +22,9 @@ type HQ = {
   stripe: {
     grossCents: number; refundedCents: number; netCents: number; byGroup: Group[]
     mrrCents: number; mrrByGroup: { group: string; cents: number }[]; activeSubscriptions: number
+    endingSubscriptions: { count: number; mrrCents: number; nextEndsAt: string | null }
     recent: { at: string; label: string; group: string; cents: number; email: string | null }[]
-    failedPayments: { at: string; cents: number; email: string | null; reason: string }[]
+    failedPayments: { at: string; cents: number; email: string | null; reason: string; blocked: boolean }[]
     webhookFailures: { total: number; byType: { type: string; count: number }[] }
     truncated: boolean
   } | null
@@ -33,7 +34,7 @@ type HQ = {
   socialmate: {
     waiting: { label: string; count: number; href: string | null }[]
     feedback: { open: number; recent: { type: string; message: string; email: string | null; at: string }[] }
-    publishFailures: { failed: number; partial: number; topErrors: { platform: string; reason: string; posts: number }[] }
+    publishFailures: { failed: number; partial: number; ours: number; topErrors: { platform: string; reason: string; posts: number; lastAt: string }[] }
     newSignups: number
     smGiveCents: number
   } | null
@@ -43,6 +44,7 @@ type HQ = {
 const usd = (cents: number) =>
   `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 const day = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+const fullDay = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
 function Label({ children }: { children: React.ReactNode }) {
   return <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">{children}</span>
@@ -94,8 +96,12 @@ export default function AdminHQPage() {
 
   const s = data?.stripe
   const sm = data?.socialmate
+  // Things to act on. A payment Radar blocked as fraud charged nobody and needs
+  // nothing, and our own accounts' failed posts are not a customer's problem;
+  // both are still listed in their panels.
+  const realFailedPayments = s?.failedPayments.filter(f => !f.blocked).length ?? 0
   const problems =
-    (s?.failedPayments.length ?? 0) + (s?.webhookFailures.total ?? 0) +
+    realFailedPayments + (s?.webhookFailures.total ?? 0) +
     (sm?.publishFailures.failed ?? 0) + (sm?.feedback.open ?? 0)
   const waitingTotal = sm?.waiting.reduce((n, w) => n + w.count, 0) ?? 0
 
@@ -163,7 +169,7 @@ export default function AdminHQPage() {
               <Panel className="p-5">
                 <Label>Problems</Label>
                 <div className={`mt-2 font-mono text-3xl font-semibold tabular-nums ${problems ? 'text-alert' : 'text-ink-high'}`}>{problems}</div>
-                <div className="mt-1 text-xs text-ink-muted">Failed payments, webhook misses, failed posts, open feedback.</div>
+                <div className="mt-1 text-xs text-ink-muted">Customers&apos; failed payments and posts, webhook misses, open feedback.</div>
               </Panel>
             </div>
 
@@ -175,7 +181,13 @@ export default function AdminHQPage() {
                   {s ? (
                     <>
                       <Stat label="Net" value={usd(s.netCents)} sub={s.refundedCents ? `${usd(s.refundedCents)} refunded` : undefined} />
-                      <Stat label="MRR" value={usd(s.mrrCents)} sub={`${s.activeSubscriptions} active subscription${s.activeSubscriptions === 1 ? '' : 's'}`} />
+                      <Stat
+                        label="MRR"
+                        value={usd(s.mrrCents)}
+                        sub={`${s.activeSubscriptions} renewing${s.endingSubscriptions.count
+                          ? ` · ${s.endingSubscriptions.count} paid up, ends ${s.endingSubscriptions.nextEndsAt ? fullDay(s.endingSubscriptions.nextEndsAt) : 'soon'}`
+                          : ''}`}
+                      />
                     </>
                   ) : <NotConnected text="Stripe didn't load. See Sources below." />}
                 </div>
@@ -286,7 +298,7 @@ export default function AdminHQPage() {
             {/* ── Problems ────────────────────────────────────────────── */}
             <div className="grid gap-4 md:grid-cols-2">
               <Panel>
-                <PanelHead icon={CreditCard} title="Failed payments" right={<span className="font-mono text-xs text-ink-faint">{s?.failedPayments.length ?? 0}</span>} />
+                <PanelHead icon={CreditCard} title="Failed payments" right={<span className="font-mono text-xs text-ink-faint">{realFailedPayments}</span>} />
                 {!s?.failedPayments.length ? (
                   <p className="px-5 py-4 text-xs text-ink-faint">None in this window.</p>
                 ) : (
@@ -294,10 +306,10 @@ export default function AdminHQPage() {
                     {s.failedPayments.map((f, i) => (
                       <li key={i} className="px-5 py-2.5">
                         <div className="flex justify-between gap-3 text-xs">
-                          <span className="truncate text-ink-high">{f.email ?? 'Unknown customer'}</span>
-                          <span className="font-mono tabular-nums text-alert">{usd(f.cents)}</span>
+                          <span className={`truncate ${f.blocked ? 'text-ink-muted' : 'text-ink-high'}`}>{f.email ?? 'Unknown customer'}</span>
+                          <span className={`font-mono tabular-nums ${f.blocked ? 'text-ink-faint line-through' : 'text-alert'}`}>{usd(f.cents)}</span>
                         </div>
-                        <div className="truncate text-[11px] text-ink-faint">{day(f.at)} · {f.reason}</div>
+                        <div className="text-[11px] leading-snug text-ink-faint">{day(f.at)} · {f.reason}</div>
                       </li>
                     ))}
                   </ul>
@@ -331,7 +343,10 @@ export default function AdminHQPage() {
                     right={<span className="font-mono text-xs text-ink-faint">{sm.publishFailures.failed} failed · {sm.publishFailures.partial} partial</span>}
                   />
                   {!sm.publishFailures.topErrors.length ? (
-                    <p className="px-5 py-4 text-xs text-ink-faint">No publish errors in this window.</p>
+                    <p className="px-5 py-4 text-xs text-ink-faint">
+                      No customer posts failed in this window.
+                      {sm.publishFailures.ours > 0 && ` ${sm.publishFailures.ours} of ours did; see the failure log.`}
+                    </p>
                   ) : (
                     <ul className="divide-y divide-edge">
                       {sm.publishFailures.topErrors.map((e, i) => (
@@ -340,10 +355,13 @@ export default function AdminHQPage() {
                             <span className="capitalize text-ink-high">{e.platform}</span>
                             <span className="font-mono tabular-nums text-alert">{e.posts}</span>
                           </div>
-                          <div className="text-[11px] leading-snug text-ink-faint">{e.reason}</div>
+                          <div className="text-[11px] leading-snug text-ink-faint">{e.reason} · last {day(e.lastAt)}</div>
                         </li>
                       ))}
                       <li className="px-5 py-2.5">
+                        {sm.publishFailures.ours > 0 && (
+                          <p className="mb-1 text-[11px] text-ink-faint">Not counted: {sm.publishFailures.ours} on our own accounts.</p>
+                        )}
                         <Link href="/admin/failure-log" className="text-[11px] text-ink-muted hover:text-ink-high">Open the failure log →</Link>
                       </li>
                     </ul>
