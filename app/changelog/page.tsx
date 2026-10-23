@@ -24,7 +24,31 @@ const CHANGELOG: ChangelogEntry[] = [
     date: 'October 23, 2026',
     version: 'Public TikTok Posting',
     changes: [
-      { type: 'New', text: 'TikTok approved SocialMate for direct posting. Videos you post or schedule from TikTok Studio now go straight to your TikTok profile, with the privacy you choose, instead of only to a private account or your drafts.' },
+      { type: 'New',      text: 'TikTok approved SocialMate for direct posting. Videos you post or schedule from TikTok Studio now go straight to your TikTok profile, with the privacy you choose, instead of only to a private account or your drafts.' },
+      { type: 'Improved', text: 'Connecting TikTok takes you straight to TikTok Studio, ready for your first video.' },
+      { type: 'Improved', text: 'If you found SocialMate through one of our TikTok pages, onboarding shows TikTok first.' },
+      { type: 'Fixed',    text: 'Every scheduled post now goes out at its time. Some posts scheduled from the calendar, queue or onboarding could go out hours late.' },
+      { type: 'Fixed',    text: 'Moving a scheduled post to a later time no longer lets it go out at the old time.' },
+      { type: 'Fixed',    text: 'A saved draft can be opened in Compose and sent. Before, every way back to it led to a list.' },
+      { type: 'Fixed',    text: 'The Post button in Compose stays on screen instead of sitting below the tools.' },
+    ],
+  },
+  {
+    date: 'October 22, 2026',
+    version: 'Partners and Studio Stax',
+    changes: [
+      { type: 'Fixed',    text: 'The partner program works end to end: approving an application sets up the partner portal too, partner links carry the right referral code, and commission is paid on every paid invoice instead of only the first.' },
+      { type: 'Fixed',    text: 'Studio Stax listings appear only once they are paid or approved free, and paid listings expire when their year is up.' },
+      { type: 'Improved', text: 'Partner and listing data is locked to the people it belongs to.' },
+    ],
+  },
+  {
+    date: 'October 16, 2026',
+    version: 'Checkout Clarity and a First-Post Starter',
+    changes: [
+      { type: 'Improved', text: 'Checkout, the pricing page and the Terms all say that sales are final and that you can cancel anytime to stop the next renewal.' },
+      { type: 'New',      text: 'Your first time in Compose, a one-sentence starter turns an idea or a link into an editable first post.' },
+      { type: 'New',      text: 'Each free guide ends with the shop product that fits it, and the Gilgamesh shop is in the menu and footer.' },
     ],
   },
   {

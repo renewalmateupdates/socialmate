@@ -1,6 +1,6 @@
 # AI Crawler Policy and Information — SocialMate
 # https://socialmate.studio/ai.txt
-# Last updated: October 15, 2026
+# Last updated: October 23, 2026
 
 ## Permissions
 

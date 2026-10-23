@@ -12,7 +12,7 @@ Location: Indiana, USA
 Contact: socialmate.updates@gmail.com
 Twitter/X: @socialmatehq
 Discord community: discord.gg/2se6FGrbRU
-Last updated: October 15, 2026
+Last updated: October 23, 2026
 
 ---
 
@@ -376,6 +376,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 
 - Guides hub: https://socialmate.studio/guides
 - All guides include email capture, PDF download (native print dialog with watermark, no external service)
+- Offline edition: Gilgamesh's Guides: The Complete Edition, all 14 guides in one 192-page PDF plus 10 worksheets, $19 at https://shop.gilgameshenterprise.com (25% of every sale goes to SM-Give). The guides stay free to read online.
 
 ### Available Volumes (14 guides, all free)
 - Vol. 1 — Starting a Business From Scratch: https://socialmate.studio/guides/starting-a-business

@@ -23,6 +23,9 @@ function formatMonth(ym: string): string {
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
   { date: '2026-10', title: 'Public TikTok posting', desc: 'TikTok approved SocialMate for direct posting on October 23. Videos you post or schedule from TikTok Studio go straight to your profile, with the privacy you choose.', status: 'shipped', category: 'Platforms' },
+  { date: '2026-10', title: 'Straight to TikTok Studio after connecting', desc: 'Connecting TikTok takes you right into TikTok Studio to post your first video, and onboarding shows TikTok first for creators who came from our TikTok pages.', status: 'shipped', category: 'Onboarding' },
+  { date: '2026-10', title: 'Scheduled posts go out on time', desc: 'Every scheduled post queues its own send time, so posts set from the calendar, queue or onboarding no longer wait hours, and a post moved later never goes out at its old time.', status: 'shipped', category: 'Scheduling' },
+  { date: '2026-10', title: 'Partner program, end to end', desc: 'Partners get a working portal, the right referral link, and commission on every paid invoice.', status: 'shipped', category: 'Growth' },
   { date: '2026-10', title: 'Reconnect your own account any time', desc: 'The 45-day waiting period after a disconnect now only stops an account moving to a different SocialMate account. Refused connections say why.', status: 'shipped', category: 'Platforms' },
   { date: '2026-10', title: 'Blog cleanup', desc: 'Links to posts that were never written now return "not found", every post has a search summary, and posts describe today\'s plans and platforms.', status: 'shipped', category: 'Growth' },
   { date: '2026-10', title: 'Free tools', desc: 'A thread splitter sized for X, Bluesky and Mastodon, counted the way each platform counts, and a Discord timestamp generator. Free, no signup, at /tools.', status: 'shipped', category: 'Growth' },
