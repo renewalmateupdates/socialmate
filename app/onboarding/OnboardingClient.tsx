@@ -54,10 +54,10 @@ const LIVE_PLATFORMS: {
   caveat?: string
 }[] = [
   // LinkedIn first: it is the one two-click platform that takes text posts on the
-  // free plan today. TikTok and X connect just as easily but cannot post for a free
-  // user (X: free quota is 0; TikTok: video only, and public posting waits on
-  // TikTok's audit), and they used to lead this list. 22 of the 36 outside accounts
-  // that connected anything connected only TikTok, and none has posted.
+  // free plan today. TikTok and X connect just as easily but cannot take the text
+  // starter post (X: free quota is 0; TikTok: video only, posted from TikTok
+  // Studio), and they used to lead this list. 22 of the 36 outside accounts that
+  // connected anything connected only TikTok, and none had posted.
   { id: 'linkedin', label: 'LinkedIn',    desc: 'Post to your personal profile',
     connect: 'oauth',  needs: null,                          badge: '2 clicks' },
   { id: 'twitter',  label: 'X / Twitter', desc: '280 characters',
@@ -65,7 +65,7 @@ const LIVE_PLATFORMS: {
     caveat: 'Posting to X needs the Pro plan ($8/month)' },
   { id: 'tiktok',   label: 'TikTok',      desc: 'For video creators',
     connect: 'oauth',  needs: null,                          badge: '2 clicks',
-    caveat: 'Videos only. They go to your TikTok drafts until TikTok approves public posting' },
+    caveat: 'Videos only. Post and schedule them from TikTok Studio' },
   { id: 'bluesky',  label: 'Bluesky',     desc: 'Decentralized social — great for builders & creators',
     connect: 'modal',  needs: 'an app password from bsky.app', badge: null },
   { id: 'mastodon', label: 'Mastodon',    desc: 'Federated network — engaged, ad-free community',

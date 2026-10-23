@@ -456,8 +456,7 @@ function PostSettingsPanel({
                 until our content sharing audit passes. */}
             <span className="block text-[11px] text-ink-muted mt-0.5 leading-snug">
               Finish it in the TikTok phone app, where you can add any sound from
-              TikTok&apos;s library. Works even before TikTok approves SocialMate for
-              public posts.
+              TikTok&apos;s library.
             </span>
           </button>
           {scheduleMode === 'schedule' && (
@@ -541,7 +540,7 @@ function PostSettingsPanel({
           {uploading
             ? (scheduleMode === 'schedule' ? 'Saving your video so it can be posted later…' : 'Uploading your video directly to TikTok…')
             : scheduleMode === 'schedule'
-            ? "Saved now and sent to TikTok at the time you pick. If TikTok won't take a direct post from SocialMate yet, it goes to your TikTok drafts at that time instead."
+            ? "Saved now and posted to TikTok at the time you pick, with the privacy you chose."
             : scheduleMode === 'drafts'
             ? 'It can take a few minutes to arrive in your TikTok drafts. Finish and post it in the TikTok app.'
             : 'After you post, TikTok can take a few minutes to process your video before it appears on your profile.'}
@@ -1441,7 +1440,7 @@ export default function TikTokStudioClient() {
                 : 'Uploaded to TikTok'
               const body =
                 scheduled
-                  ? `We'll send it to TikTok on ${new Date(scheduledAt).toLocaleString()}. If TikTok won't take a direct post from SocialMate yet, it lands in your TikTok drafts instead, and you'll get a notification here and in TikTok.`
+                  ? `We'll post it to TikTok on ${new Date(scheduledAt).toLocaleString()}. If anything stops it, you'll get a notification here.`
                 : publishState === 'checking'
                   ? 'The upload finished. TikTok can take a few minutes to process a video before it appears on your profile.'
                 : publishState === 'live'
