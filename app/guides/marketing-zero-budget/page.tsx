@@ -755,7 +755,7 @@ export default function MarketingZeroBudgetPage() {
                   Every system in this guide — the content flywheel, the platform seeding, the
                   scheduled consistency — I do it with SocialMate. Not because I built it and
                   I have to say that. Because when I was doing all of this manually, it was
-                  taking hours I didn&apos;t have. Working a deli job doesn&apos;t leave you with
+                  taking hours I didn&apos;t have. Working a deli job didn&apos;t leave me with
                   three hours a day for content management.
                 </p>
                 <p className="mb-4 leading-relaxed text-gray-300">

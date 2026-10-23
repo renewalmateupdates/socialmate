@@ -1765,7 +1765,7 @@ these are the decoys that make a blind find-and-replace dangerous.
 
 ## Context: The Human Behind This
 
-Joshua works a deli job and builds this in his spare hours. He's solo, bootstrapped, budget-conscious. Every decision needs to consider:
+Joshua works tree service by day (he left the Walmart deli in June 2026) and builds this nights and weekends. He's solo, bootstrapped, budget-conscious. Every decision needs to consider:
 
 1. Does this cost money at scale?
 2. Can we use a free tier, prebuilt solution, or existing pattern instead?
