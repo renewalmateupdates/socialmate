@@ -1,7 +1,9 @@
 'use client'
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import Toast from '@/components/Toast'
 import FilmstripTimeline from '@/components/tiktok/FilmstripTimeline'
 import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
 import PhotoComposer from '@/components/tiktok/PhotoComposer'
@@ -572,13 +574,33 @@ export default function TikTokStudioClient() {
 
   const [creatorLoading, setCreatorLoading] = useState(true)
 
+  // Arriving straight from connecting TikTok: /accounts records the connect and
+  // forwards here with ?connected=1. Read once, then dropped from the address so
+  // a reload is an ordinary visit.
+  const searchParams = useSearchParams()
+  const viaConnect = useRef(searchParams.get('connected') === '1')
+  const [connectedToast, setConnectedToast] = useState('')
+  useEffect(() => {
+    if (!viaConnect.current) return
+    setConnectedToast('TikTok connected. Drop a video below to post it.')
+    const cleaned = new URL(window.location.href)
+    cleaned.searchParams.delete('connected')
+    window.history.replaceState(null, '', cleaned.pathname + cleaned.search)
+    const timer = setTimeout(() => setConnectedToast(''), 4000)
+    return () => clearTimeout(timer)
+  }, [])
+
   // Once per visit, after the connection check settles: did TikTok users ever
-  // get here at all? Until this, nothing could say.
+  // get here at all? Until this, nothing could say. `via: 'connect'` marks the
+  // visits that came straight from connecting.
   const openedTracked = useRef(false)
   useEffect(() => {
     if (creatorLoading || openedTracked.current) return
     openedTracked.current = true
-    track('tiktok_studio_opened', { connected: !!creator?.connected })
+    track('tiktok_studio_opened', {
+      connected: !!creator?.connected,
+      ...(viaConnect.current && { via: 'connect' }),
+    })
   }, [creatorLoading, creator?.connected])
 
   // File state
@@ -1510,6 +1532,7 @@ export default function TikTokStudioClient() {
     <div className="min-h-dvh bg-void flex">
       <Sidebar />
       {UploadProgressBanner}
+      <Toast message={connectedToast} type="success" />
 
       <div className="md:ml-56 flex-1 flex flex-col">
 

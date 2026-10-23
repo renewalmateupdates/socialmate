@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { createServerClient } from '@supabase/ssr'
 import { recordFunnel } from '@/lib/usage'
 import { isFirstSignIn } from '@/lib/new-account'
-import { ATTRIBUTION_COOKIES, ATTRIBUTION_DONE_COOKIE, mergeAttribution, readAttribution, referrerHost } from '@/lib/attribution'
+import { ATTRIBUTION_COOKIES, ATTRIBUTION_DONE_COOKIE, ONBOARDING_LEAD_COOKIE, ONBOARDING_LEAD_MAX_AGE_SECONDS, landedOnTiktok, mergeAttribution, readAttribution, referrerHost } from '@/lib/attribution'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -200,6 +200,12 @@ export async function GET(request: NextRequest) {
                 ...(attribution.referrer && { signup_referrer: attribution.referrer }),
               }, { onConflict: 'user_id' })
             if (attributionError) console.error('[auth/callback] attribution write failed:', attributionError.message)
+          }
+
+          // The landing page is gone once these cookies are, so tell onboarding
+          // now whether to lead with TikTok.
+          if (landedOnTiktok(attribution.landing)) {
+            cookieStore.set(ONBOARDING_LEAD_COOKIE, 'tiktok', { path: '/', maxAge: ONBOARDING_LEAD_MAX_AGE_SECONDS, sameSite: 'lax' })
           }
 
           // Clean up, and stop this browser recording a source for an account

@@ -106,3 +106,23 @@ export function referrerHost(referrer?: string): string | undefined {
   if (!referrer) return undefined
   try { return new URL(referrer).hostname.replace(/^www\./, '') || undefined } catch { return undefined }
 }
+
+/**
+ * Set on a new account's first sign-in when it first landed on a TikTok page,
+ * so onboarding can lead with TikTok. The attribution cookies are deleted at
+ * that same moment, and the landing page is only saved in a funnel event
+ * written in the background, so onboarding has nothing else it can read in time.
+ */
+export const ONBOARDING_LEAD_COOKIE = 'sm_onboard_lead'
+export const ONBOARDING_LEAD_MAX_AGE_SECONDS = 7 * 24 * 60 * 60
+
+/**
+ * Whether a first landing page is about TikTok. ChatGPT sends most new signups
+ * to /for/tiktok-creators (7 of the 12 from Oct 15 to 23, 2026). The video
+ * creators page counts too: TikTok is the only platform that takes their video.
+ */
+export function landedOnTiktok(landing?: string): boolean {
+  if (!landing) return false
+  const path = landing.split(/[?#]/)[0].toLowerCase().replace(/\/+$/, '')
+  return path.includes('tiktok') || path === '/for/video-creators'
+}

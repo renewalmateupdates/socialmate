@@ -310,7 +310,16 @@ function AccountsInner() {
       // this page. If the account is not marked activated here it never is,
       // because the onboarding tab that would have done it is behind this one
       // and nobody goes back to it.
-      void markActivated()
+      const activated = markActivated()
+      // TikTok goes on to TikTok Studio, because uploading a video is the only
+      // next step it has. Its "Open TikTok Studio" card on this page was
+      // skipped by half of the people who connected TikTok from Oct 15 to 23.
+      // Recorded and activated first, which is why the callback still lands here.
+      if (platform === 'tiktok') {
+        void activated.finally(() => router.replace('/tiktok/studio?connected=1'))
+        return
+      }
+      void activated
       setJustConnected(platform)
     } else if (error) {
       const [platform, ...rest] = error.split('_')
@@ -351,7 +360,7 @@ function AccountsInner() {
     if (error && !error.endsWith('_plan_limit')) {
       showToast(connectErrorMessage(error, searchParams.get('until')), 'error')
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   // Record the view exactly once per mount.
   //

@@ -58,6 +58,9 @@ const LIVE_PLATFORMS: {
   // starter post (X: free quota is 0; TikTok: video only, posted from TikTok
   // Studio), and they used to lead this list. 22 of the 36 outside accounts that
   // connected anything connected only TikTok, and none had posted.
+  // Someone who first landed on a TikTok page sees TikTok first instead
+  // (TWO_CLICK_TIKTOK_FIRST): that is what they came for, and since TikTok
+  // approved public posting on Oct 23, 2026 it is a real first post.
   { id: 'linkedin', label: 'LinkedIn',    desc: 'Post to your personal profile',
     connect: 'oauth',  needs: null,                          badge: '2 clicks' },
   { id: 'twitter',  label: 'X / Twitter', desc: '280 characters',
@@ -78,6 +81,10 @@ const LIVE_PLATFORMS: {
 
 const TWO_CLICK   = LIVE_PLATFORMS.filter(p => p.connect === 'oauth')
 const NEEDS_SETUP = LIVE_PLATFORMS.filter(p => p.connect !== 'oauth')
+const TWO_CLICK_TIKTOK_FIRST = [
+  ...TWO_CLICK.filter(p => p.id === 'tiktok'),
+  ...TWO_CLICK.filter(p => p.id !== 'tiktok'),
+]
 
 // Where each OAuth platform's consent flow starts. Same routes /accounts uses.
 const OAUTH_ROUTES: Record<string, string> = {
@@ -122,7 +129,10 @@ function defaultSchedule(): { date: string; time: string } {
   return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, time: '09:00' }
 }
 
-export default function OnboardingInner({ initialReferralCode }: { initialReferralCode: string | null }) {
+export default function OnboardingInner({ initialReferralCode, leadWithTiktok }: {
+  initialReferralCode: string | null
+  leadWithTiktok: boolean
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -676,7 +686,7 @@ export default function OnboardingInner({ initialReferralCode }: { initialReferr
                   this about to be" are the same question at this step, and
                   hiding the second half is what loses people one screen later. */}
               {([
-                { title: 'Connects in two clicks', items: TWO_CLICK   },
+                { title: 'Connects in two clicks', items: leadWithTiktok ? TWO_CLICK_TIKTOK_FIRST : TWO_CLICK },
                 { title: 'Needs one thing first',  items: NEEDS_SETUP },
               ]).map(group => (
                 <div key={group.title} className="mb-6">
