@@ -1264,6 +1264,11 @@ export default function TikTokStudioClient() {
           disable_duet:           disableDuet,
           disable_comment:        disableComment,
           disable_stitch:         disableStitch,
+          // What TikTok was told at init-upload. The inbox endpoint takes no
+          // post_info, so a draft carries no disclosure; the creator sets it in
+          // the TikTok app.
+          brand_content_toggle:   mode === 'drafts' ? false : brandedContent,
+          brand_organic_toggle:   mode === 'drafts' ? false : yourBrand,
           // scheduleMode === 'schedule' returns before this point, so this call
           // only ever runs for an immediate Post Now or a Send to drafts.
           scheduled_at:           null,
