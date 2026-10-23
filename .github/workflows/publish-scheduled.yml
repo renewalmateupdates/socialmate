@@ -2,7 +2,10 @@ name: Publish Scheduled Posts
 
 on:
   schedule:
-    # Every 5 minutes (GitHub's minimum interval)
+    # Asks for every 5 minutes (GitHub's minimum interval), but GitHub throttles
+    # scheduled workflows: in October 2026 it ran every 3 to 5 hours. This is a
+    # backstop only. Posts go out on time because every scheduling path queues
+    # an Inngest post/scheduled event (browser pages via lib/post-schedule.ts).
     - cron: '*/5 * * * *'
   workflow_dispatch: # allow manual trigger
 

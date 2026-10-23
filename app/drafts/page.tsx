@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
+import { setScheduledTime } from '@/lib/post-schedule'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
@@ -234,16 +235,7 @@ function DraftsInner() {
     if (post?.status === 'scheduled' && es.scheduled_at) {
       const next = new Date(es.scheduled_at).toISOString()
       if (!post.scheduled_at || next !== new Date(post.scheduled_at).toISOString()) {
-        const { data: { session } } = await supabase.auth.getSession()
-        const res = await fetch(`/api/posts/${postId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-          },
-          body: JSON.stringify({ scheduled_at: next }),
-        }).catch(() => null)
-        if (res?.ok) scheduledAt = next
+        if (await setScheduledTime(postId, next)) scheduledAt = next
         else timeFailed = true
       }
     }

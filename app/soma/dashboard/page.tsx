@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { setScheduledTime } from '@/lib/post-schedule'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
@@ -434,7 +435,15 @@ export default function SomaDashboardPage() {
     setActionLoading(p => ({ ...p, [id]: true }))
     const post = drafts.find(d => d.id === id)
     const scheduled_at = post?.scheduled_at ?? new Date(Date.now() + 10 * 60 * 1000).toISOString()
-    await supabase.from('posts').update({ status: 'scheduled', scheduled_at }).eq('id', id)
+    const { error } = await supabase.from('posts').update({ status: 'scheduled', scheduled_at }).eq('id', id)
+    if (error) {
+      console.warn('[soma] approve failed:', error.message)
+      setActionLoading(p => ({ ...p, [id]: false }))
+      return
+    }
+    // Queue the wake-up too. Without it an approved post waited for the
+    // backstop sweep, which GitHub runs every few hours (lib/post-schedule.ts).
+    await setScheduledTime(id, scheduled_at)
     setDrafts(p => p.filter(d => d.id !== id))
     setActionLoading(p => ({ ...p, [id]: false }))
   }
@@ -452,9 +461,19 @@ export default function SomaDashboardPage() {
   const approveAll = async () => {
     if (drafts.length === 0) return
     setApprovingAll(true)
-    const ids = drafts.map(d => d.id)
-    await supabase.from('posts').update({ status: 'scheduled' }).in('id', ids)
-    setDrafts([])
+    // Same as approving one at a time. This used to set status alone, so a post
+    // with no time became 'scheduled' with nothing to fire it and nothing the
+    // sweep could ever select, and no post got a wake-up.
+    const fallback = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    const results = await Promise.all(drafts.map(async d => {
+      const at = d.scheduled_at ?? fallback
+      const { error } = await supabase.from('posts').update({ status: 'scheduled', scheduled_at: at }).eq('id', d.id)
+      if (error) { console.warn('[soma] approve failed for', d.id, error.message); return d.id }
+      await setScheduledTime(d.id, at)
+      return null
+    }))
+    const failed = new Set(results.filter((id): id is string => id !== null))
+    setDrafts(p => p.filter(d => failed.has(d.id)))
     setApprovingAll(false)
   }
 
