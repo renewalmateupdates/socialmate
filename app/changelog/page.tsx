@@ -29,6 +29,9 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'Fixed',    text: 'Full Send\'s daily runs no longer use up the month\'s runs, so the Generate button and the Monday run keep working.' },
       { type: 'New',      text: 'Save a link to your master doc and SOMA checks it every Monday on Autopilot and Full Send, reading the new version when it has changed.' },
       { type: 'Improved', text: 'A SOMA run that finds every slot already filled tells you so and uses no credits.' },
+      { type: 'Improved', text: 'The SOMA dashboard leads with one next step, puts your projects first with a mode on each, and keeps credits at the bottom.' },
+      { type: 'Improved', text: 'SOMA has one voice interview. The separate identity interview is part of Voice DNA now, free, with an optional screen for posts you wrote and house rules.' },
+      { type: 'Fixed',    text: 'Discarding a SOMA draft removes it, so the next run can fill that slot. Skipped drafts used to come back.' },
     ],
   },
   {

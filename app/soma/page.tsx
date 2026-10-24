@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
-import { Download, FolderKanban, Mic, RefreshCw, Rocket, ShieldCheck, Target, Zap } from 'lucide-react'
+import { Download, FolderKanban, RefreshCw, Rocket, ShieldCheck, Target, Zap } from 'lucide-react'
 import { SOMA_MODE_LIMITS, SOMA_PLATFORMS, SOMA_PROJECT_LIMITS } from '@/lib/soma-mode'
 import { SOMA_COSTS, SOMA_FULL_RUN_COST, SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
 
@@ -140,7 +140,6 @@ const FAQS = [
 const CREDIT_ACTIONS = [
   { action: 'Read your master doc', credits: SOMA_COSTS.ingest_weekly,   desc: 'Gemini reads the new version and pulls out what changed since the last one. Also charged when the Monday run finds a saved link has changed.', icon: Download },
   { action: 'Generate a run',       credits: SOMA_COSTS.generate_week,   desc: `Posts for every platform in the project, ${L.safe.windowDays} to ${L.full_send.windowDays} days ahead depending on mode.`, icon: Zap },
-  { action: 'Identity interview',   credits: SOMA_COSTS.identity_update, desc: 'Charged once, when you first finish it. Voice DNA updates after that are free.', icon: Mic },
 ]
 
 export default function SomaLandingPage() {
@@ -383,7 +382,7 @@ export default function SomaLandingPage() {
           </div>
 
           <div className="bg-panel border border-edge rounded-2xl overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
               {CREDIT_ACTIONS.map(item => (
                 <div key={item.action} className="p-6 flex items-start gap-4">
                   <item.icon className="w-6 h-6 flex-shrink-0 text-ink-muted" strokeWidth={1.75} />

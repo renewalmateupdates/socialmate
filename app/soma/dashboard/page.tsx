@@ -69,13 +69,16 @@ export default function SomaDashboardPage() {
         setCredits(c)
       }
 
-      const [identityRes, voiceRes, projectsRes] = await Promise.all([
-        fetch('/api/soma/identity'),
+      const [voiceRes, projectsRes] = await Promise.all([
         fetch('/api/soma/voice'),
         fetch('/api/soma/projects'),
       ])
-      if (identityRes.ok) setInterviewDone(!!(await identityRes.json()).profile?.interview_completed)
-      if (voiceRes.ok) setVoiceTier((await voiceRes.json()).personality_tier ?? 'none')
+      if (voiceRes.ok) {
+        const v = await voiceRes.json()
+        setVoiceTier(v.personality_tier ?? 'none')
+        // Finished the old identity interview (now merged into Voice DNA) but not Voice DNA.
+        setInterviewDone(!!v.legacy_interview)
+      }
       if (projectsRes.ok) {
         const pd = await projectsRes.json()
         setProjects(pd.projects ?? [])
