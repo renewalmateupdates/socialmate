@@ -336,13 +336,19 @@ type Tier = keyof typeof TIER_CONFIG
 export default function SomaVoicePage() {
   const router = useRouter()
   const { t } = useI18n()
-  const [phase, setPhase] = useState<'intro' | 'quiz' | 'done'>('intro')
+  // 'extras' is the optional last screen: example posts and house rules, the
+  // part of the old identity interview (/soma/onboarding) Voice DNA lacked.
+  const [phase, setPhase] = useState<'intro' | 'quiz' | 'extras' | 'done'>('intro')
   const [selectedTier, setSelectedTier] = useState<Tier>('foundation')
   const [currentIdx, setCurrentIdx] = useState(0)
   const [answers, setAnswers] = useState<Record<string, any>>({})
   const [saving, setSaving] = useState(false)
   const [existingTier, setExistingTier] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [examples, setExamples] = useState<string[]>(['', '', ''])
+  const [rules, setRules] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [summaryNote, setSummaryNote] = useState(false)
 
   useEffect(() => {
     fetch('/api/soma/voice')
@@ -352,6 +358,8 @@ export default function SomaVoicePage() {
           setExistingTier(d.personality_tier)
           if (d.personality_answers) setAnswers(d.personality_answers)
         }
+        if (Array.isArray(d.voice_examples)) setExamples([0, 1, 2].map(i => d.voice_examples[i] ?? ''))
+        if (typeof d.house_rules === 'string') setRules(d.house_rules)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -385,15 +393,20 @@ export default function SomaVoicePage() {
 
   async function handleFinish() {
     setSaving(true)
+    setSaveError('')
     try {
-      await fetch('/api/soma/voice', {
+      const res = await fetch('/api/soma/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers, tier: selectedTier }),
+        body: JSON.stringify({ answers, tier: selectedTier, examples, rules }),
       })
+      // This used to show "saved" whatever happened.
+      if (!res.ok) { setSaveError(t('app_soma_voice.save_failed')); return }
+      const data = await res.json()
+      setSummaryNote(!data.summary_written)
       setPhase('done')
     } catch {
-      // ignore
+      setSaveError(t('app_soma_voice.save_failed'))
     } finally {
       setSaving(false)
     }
@@ -409,8 +422,8 @@ export default function SomaVoicePage() {
   if (phase === 'intro') return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4 py-16">
       <div className="max-w-2xl w-full">
-        <Link href="/soma/projects" className="text-gray-500 hover:text-gray-300 text-sm mb-8 inline-flex items-center gap-1">
-          {t('app_soma_voice.back_to_projects')}
+        <Link href="/soma/dashboard" className="text-gray-500 hover:text-gray-300 text-sm mb-8 inline-flex items-center gap-1">
+          {t('app_soma_voice.back_to_soma')}
         </Link>
 
         <div className="text-center mb-10">
@@ -421,7 +434,7 @@ export default function SomaVoicePage() {
           </p>
           {existingTier && (
             <div className="mt-4 inline-flex items-center gap-2 bg-purple-900/30 border border-purple-700 rounded-lg px-4 py-2 text-sm text-purple-300">
-              ✓ You completed <strong>{TIER_CONFIG[existingTier as Tier]?.label ?? existingTier}</strong> — {t('app_soma_voice.existing_tier_note')}
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" strokeWidth={2} /> You completed <strong>{TIER_CONFIG[existingTier as Tier]?.label ?? existingTier}</strong> — {t('app_soma_voice.existing_tier_note')}
             </div>
           )}
         </div>
@@ -490,6 +503,7 @@ export default function SomaVoicePage() {
         <p className="text-gray-500 text-sm mb-8">
           {t('app_soma_voice.done_feedback')}
         </p>
+        {summaryNote && <p className="text-amber-300 text-sm -mt-4 mb-8">{t('app_soma_voice.summary_pending')}</p>}
         <div className="flex flex-col gap-3">
           <Link
             href="/soma/dashboard"
@@ -504,6 +518,54 @@ export default function SomaVoicePage() {
             {t('app_soma_voice.retake')}
           </button>
         </div>
+      </div>
+    </div>
+  )
+
+  // ── Extras: example posts and house rules (optional) ───────────────────────
+  if (phase === 'extras') return (
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4 py-12">
+      <div className="max-w-xl w-full">
+        <div className="flex items-center justify-between mb-8">
+          <span className="text-gray-500 text-sm">{TIER_CONFIG[selectedTier].label}</span>
+          <button onClick={() => setPhase('quiz')} className="text-gray-500 hover:text-gray-300 text-sm">{t('app_soma_voice.back')}</button>
+        </div>
+        <h2 className="text-2xl font-semibold text-white mb-2 leading-snug">{t('app_soma_voice.extras_title')}</h2>
+        <p className="text-gray-400 text-sm mb-6">{t('app_soma_voice.extras_sub')}</p>
+        <div className="space-y-3 mb-6">
+          {examples.map((ex, i) => (
+            <label key={i} className="block">
+              <span className="block text-xs text-gray-500 mb-1">{t('app_soma_voice.example_label', { n: i + 1 })}</span>
+              <textarea
+                value={ex}
+                onChange={e => setExamples(prev => prev.map((v, j) => (j === i ? e.target.value : v)))}
+                placeholder={t('app_soma_voice.example_placeholder')}
+                rows={3}
+                maxLength={1500}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 resize-none focus:outline-none focus:border-purple-500 transition-colors"
+              />
+            </label>
+          ))}
+        </div>
+        <label className="block mb-8">
+          <span className="block text-xs text-gray-500 mb-1">{t('app_soma_voice.rules_label')}</span>
+          <textarea
+            value={rules}
+            onChange={e => setRules(e.target.value)}
+            placeholder={t('app_soma_voice.rules_placeholder')}
+            rows={2}
+            maxLength={500}
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 resize-none focus:outline-none focus:border-purple-500 transition-colors"
+          />
+        </label>
+        {saveError && <p className="text-sm text-red-400 mb-3">{saveError}</p>}
+        <button
+          onClick={handleFinish}
+          disabled={saving}
+          className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-semibold transition-colors"
+        >
+          {saving ? t('app_soma_voice.building') : t('app_soma_voice.build_btn')}
+        </button>
       </div>
     </div>
   )
@@ -590,16 +652,16 @@ export default function SomaVoicePage() {
               </button>
             ) : (
               <button
-                onClick={handleFinish}
-                disabled={saving}
-                className="flex-1 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-semibold transition-colors"
+                onClick={() => setPhase('extras')}
+                disabled={!canProceed() && currentQ.type !== 'text'}
+                className="flex-1 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-colors"
               >
-                {saving ? t('app_soma_voice.building') : t('app_soma_voice.build_btn')}
+                {t('app_soma_voice.next')}
               </button>
             )}
             {currentQ.type !== 'text' && (
               <button
-                onClick={() => currentIdx < activeQuestions.length - 1 ? setCurrentIdx(i => i + 1) : handleFinish()}
+                onClick={() => currentIdx < activeQuestions.length - 1 ? setCurrentIdx(i => i + 1) : setPhase('extras')}
                 className="px-4 py-3.5 rounded-xl border border-gray-700 text-gray-500 hover:text-gray-300 text-sm transition-colors"
               >
                 {t('app_soma_voice.skip')}

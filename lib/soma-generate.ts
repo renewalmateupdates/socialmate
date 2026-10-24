@@ -29,6 +29,7 @@ import { SOMA_MODE_LIMITS, capSchedule, effectiveSomaMode, isSomaPlatform, type 
 import { nextRunCount } from './soma-runs'
 import { planGapSlots, utcDayKey, windowDayKeys, type PlannedSlot } from './soma-schedule'
 import { MAX_DOC_CHARS, fetchDocText } from './soma-fetch-doc'
+import { cleanExamples, houseRules } from './soma-voice'
 
 export const SOMA_MODEL = 'gemini-3.6-flash'
 export const GENERATE_COST = SOMA_COSTS.generate_week
@@ -265,19 +266,41 @@ interface VoiceProfile {
 
 // ── Context for the prompt ──────────────────────────────────────────────────
 
-function voiceContext(profile: VoiceProfile | null): string {
-  if (!profile) return 'No voice profile: use an authentic, direct, human tone.'
-  const examples = Array.isArray(profile.voice_examples) && profile.voice_examples.length
-    ? (profile.voice_examples as string[]).join(' | ')
-    : 'none'
-  const base = `CREATOR VOICE PROFILE:
-Tone: ${JSON.stringify(profile.tone_profile ?? {})}
-Style: ${JSON.stringify(profile.writing_style_rules ?? {})}
-Personality: ${JSON.stringify(profile.behavioral_traits ?? {})}
-Example posts (voice only; do not copy their facts or numbers): ${examples}`
-  if (!profile.personality_summary) return base
-  const tier = String(profile.personality_tier ?? 'foundation').replace('_', ' ')
-  return `CREATOR VOICE DNA (${tier} tier):\n${profile.personality_summary}\n\n${base}`
+function hasContent(v: unknown): boolean {
+  if (v == null) return false
+  if (Array.isArray(v)) return v.length > 0
+  if (typeof v === 'object') return Object.values(v as Record<string, unknown>).some(hasContent)
+  return String(v).trim().length > 0
+}
+
+/**
+ * The voice block every prompt opens with: the Voice DNA summary, house rules,
+ * whatever structured profile an older identity interview left, and example
+ * posts. Only what is filled in is printed; an empty "Tone: {}" told the model
+ * nothing and read like an instruction.
+ */
+export function voiceContext(profile: VoiceProfile | null): string {
+  const fallback = 'No voice profile: use an authentic, direct, human tone.'
+  if (!profile) return fallback
+  const parts: string[] = []
+  if (profile.personality_summary) {
+    const tier = String(profile.personality_tier ?? 'foundation').replace('_', ' ')
+    parts.push(`CREATOR VOICE DNA (${tier} tier):\n${profile.personality_summary}`)
+  }
+  const rules = houseRules(profile.tone_profile)
+  if (rules) parts.push(`HOUSE RULES (always follow): ${rules}`)
+  const tone = Object.fromEntries(
+    Object.entries((profile.tone_profile ?? {}) as Record<string, unknown>).filter(([k]) => k !== 'house_rules'),
+  )
+  const structured = [
+    hasContent(tone) ? `Tone: ${JSON.stringify(tone)}` : null,
+    hasContent(profile.writing_style_rules) ? `Style: ${JSON.stringify(profile.writing_style_rules)}` : null,
+    hasContent(profile.behavioral_traits) ? `Personality: ${JSON.stringify(profile.behavioral_traits)}` : null,
+  ].filter(Boolean)
+  if (structured.length) parts.push(`CREATOR VOICE PROFILE:\n${structured.join('\n')}`)
+  const examples = cleanExamples(profile.voice_examples)
+  if (examples.length) parts.push(`POSTS THEY WROTE (match the voice; do not copy their facts or numbers):\n${examples.map(e => `- ${e}`).join('\n')}`)
+  return parts.length ? parts.join('\n\n') : fallback
 }
 
 function insightContext(project: SomaRunProject, insights: SomaInsights | null): string {

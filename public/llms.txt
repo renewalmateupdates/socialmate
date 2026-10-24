@@ -176,7 +176,7 @@ SOMA is SocialMate's autonomous content generation layer. It learns your brand v
 Landing page: https://socialmate.studio/soma
 
 ### How SOMA Works
-1. Identity Interview — 5-step onboarding to capture brand voice, tone, audience, and style
+1. Voice DNA Interview — 10, 25 or 40 questions (free), plus optional example posts and house rules; one voice profile per workspace
 2. Create a Project — define target platforms, posting frequency, and per-platform schedule
 3. Ingest Source Material — paste or upload documents, or link a Google Doc (shared with anyone with the link), a GitHub file or a public web page; up to 500,000 characters; on Autopilot and Full Send a saved link is checked every Monday and re-read (25 credits) when it has changed; SOMA performs Gemini-powered diff analysis against your master doc, storing versioned history
 4. Generate — SOMA generates platform-native posts per platform in chunked Gemini calls; in Safe mode they go to your drafts, on Autopilot and Full Send they are scheduled
@@ -191,7 +191,6 @@ Landing page: https://socialmate.studio/soma
 ### SOMA Credit Costs (SOMA has its own credit pool: 500 a month on Pro, 2,000 on Agency, plus one-time SOMA credit packs)
 - Ingest document: 25 credits
 - Generate full week: 75 credits
-- Identity interview: 15 credits, charged once when first completed (Voice DNA updates are free)
 - Full weekly run total: 100 credits (ingest + generate)
 
 ### SOMA Projects
@@ -206,7 +205,8 @@ Landing page: https://socialmate.studio/soma
 - Video URL attachment — paste a video URL on a project; generate route injects it into the Gemini prompt for posts that reference your video content
 
 ### SOMA Voice DNA Builder
-- 40-question personality interview in 3 configurable tiers: Foundation (10 questions, ~5 min) / Deep Dive (25 questions) / Advanced (40 questions)
+- 40-question personality interview in 3 configurable tiers: Foundation (10 questions, ~5 min) / Deep Dive (25 questions) / Advanced (40 questions); free
+- Optional last screen: up to 3 posts you wrote (voice reference) and house rules SOMA always follows
 - Gemini generates a 150–200 word Voice DNA summary injected as a "CREATOR VOICE DNA" block into every future SOMA content prompt
 - Post-publish feedback modal — manual "Give Feedback" button in generate result section; 3 rotating questions from a pool of 8; every response saved to `soma_voice_feedback`; Gemini rebuilds Voice DNA from the last 20 responses
 - Voice DNA dashboard: https://socialmate.studio/soma/voice
@@ -216,7 +216,6 @@ Landing page: https://socialmate.studio/soma
 - New project: https://socialmate.studio/soma/projects/new
 - Project detail: https://socialmate.studio/soma/projects/[id]
 - Voice DNA Builder: https://socialmate.studio/soma/voice
-- Weekly view: https://socialmate.studio/soma/weekly
 - Upgrade: https://socialmate.studio/soma/upgrade
 
 ### SOMA Credit Packs (one-time, separate from main AI credit packs)
