@@ -25,7 +25,8 @@ import {
   truthCalcCorrelation,
   type TruthSignal, type TruthStrategy,
 } from '@/lib/enki/truth-mode'
-import { runCapReached, nextRunCount } from '@/lib/soma-runs'
+import { runCapReached, nextRunCount, runCapForMode } from '@/lib/soma-runs'
+import { SOMA_MODE_LIMITS, effectiveSomaMode, isSomaPlatform } from '@/lib/soma-mode'
 import { fullSendSlots } from '@/lib/soma-schedule'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
@@ -3678,7 +3679,7 @@ export const somaAutopilotRun = inngest.createFunction(
         .from('soma_projects')
         .select(`
           id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
-          workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled)
+          workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled)
         `)
         .in('mode', ['autopilot', 'full_send'])
 
@@ -3689,13 +3690,15 @@ export const somaAutopilotRun = inngest.createFunction(
 
       return (projects ?? []).filter((p: any) => {
         const ws = p.workspaces
-        if (!ws?.soma_autopilot_enabled) return false
+        // The mode the workspace pays for: a Full Send project in an
+        // Autopilot-only workspace runs on Autopilot's limits.
+        if (effectiveSomaMode(p.mode, ws) === 'safe') return false
         // Skip paused projects
         if (p.paused) return false
         const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
         // Run cap check — see lib/soma-runs.ts. The stored counter reads as
         // zero once the month rolls over, which is the reset.
-        const runCap = p.mode === 'full_send' ? 12 : 8
+        const runCap = runCapForMode(effectiveSomaMode(p.mode, ws))
         if (runCapReached(p, runCap)) return false
         return remaining >= GENERATE_COST
       })
@@ -3745,9 +3748,10 @@ export const somaAutopilotRun = inngest.createFunction(
           const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
           const ws = (project as any).workspaces
 
-          const platforms = (project.platforms as string[]) ?? ['bluesky']
-          const windowDays = project.content_window_days ?? 7
-          const postsPerDay = project.posts_per_day ?? 2
+          const paidMode = effectiveSomaMode(project.mode, (project as any).workspaces)
+          const platforms = ((project.platforms as string[]) ?? ['bluesky']).filter(isSomaPlatform)
+          const windowDays = Math.min(project.content_window_days ?? 7, SOMA_MODE_LIMITS[paidMode].windowDays)
+          const postsPerDay = Math.min(project.posts_per_day ?? 2, SOMA_MODE_LIMITS[paidMode].postsPerDay)
 
           // Fetch latest master doc for this project as context
           const { data: docs } = await admin

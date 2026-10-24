@@ -6,6 +6,12 @@ import Sidebar from '@/components/Sidebar'
 import SomaVoiceFeedbackModal from '@/components/soma/SomaVoiceFeedbackModal'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Check, ChevronDown, ChevronUp, CircleDot, Dna, Film, Globe, Mic, Pause, Play, Rocket, Target, Zap } from 'lucide-react'
+import { SOMA_MODE_LIMITS, isSomaMode, isSomaPlatform } from '@/lib/soma-mode'
+
+/** Posts per day a project's mode allows, from lib/soma-mode.ts. This page used to say 3 for Autopilot. */
+function perDayCap(mode: string | null | undefined): number {
+  return SOMA_MODE_LIMITS[isSomaMode(mode) ? mode : 'safe'].postsPerDay
+}
 
 function PlatformGlyph({ id, size = 12, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -240,7 +246,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       counts[idx] = (counts[idx] ?? 0) + 1
     }
     const days = Object.keys(counts).map(Number)
-    const cap = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 3 : 2
+    const cap = perDayCap(project.mode)
     const postsPerDay = Math.min(cap, Math.max(1, ...(Object.values(counts).length ? Object.values(counts) : [1])))
     const applied: PlatformSchedule = { posts_per_day: postsPerDay, days: days.length ? days : [1, 2, 3, 4, 5] }
 
@@ -255,12 +261,12 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
   async function openPlatformEditor() {
     if (!project) return
-    setLocalPlatforms([...project.platforms])
+    setLocalPlatforms(project.platforms.filter(isSomaPlatform))
     setLoadingConnected(true)
     try {
       const res = await fetch('/api/accounts/connected')
       const data = await res.json()
-      setConnectedPlatforms(Array.isArray(data.platforms) ? data.platforms : [])
+      setConnectedPlatforms(Array.isArray(data.platforms) ? data.platforms.filter(isSomaPlatform) : [])
     } catch { setConnectedPlatforms([]) }
     finally { setLoadingConnected(false) }
     setEditingPlatforms(true)
@@ -272,7 +278,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
     try {
       // Build updated platform_schedule: keep existing entries, add defaults for new, drop removed
       const existing = project.platform_schedule ?? {}
-      const maxPerDay = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 3 : 2
+      const maxPerDay = perDayCap(project.mode)
       const newSchedule: Record<string, PlatformSchedule> = {}
       for (const p of localPlatforms) {
         newSchedule[p] = existing[p] ?? { posts_per_day: Math.min(1, maxPerDay), days: [0,1,2,3,4,5,6] }
@@ -974,7 +980,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                   <div>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Posting Schedule</h2>
                     <p className="text-[10px] text-gray-600 mt-0.5">
-                      Max {project.mode === 'full_send' ? '7' : project.mode === 'autopilot' ? '3' : '2'}/day per platform on {project.mode === 'full_send' ? 'Full Send' : project.mode === 'autopilot' ? 'Autopilot' : 'Safe'} mode
+                      Max {perDayCap(project.mode)}/day per platform on {project.mode === 'full_send' ? 'Full Send' : project.mode === 'autopilot' ? 'Autopilot' : 'Safe'} mode
                     </p>
                   </div>
                   {!editingSchedule ? (
@@ -1042,7 +1048,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                           <div className="flex items-center gap-1">
                             <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.max(1, s[pid].posts_per_day - 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">−</button>
                             <span className="text-[11px] text-amber-400 font-bold w-8 text-center">{cfg.posts_per_day}/day</span>
-                            <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.min(project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 3 : 2, s[pid].posts_per_day + 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">+</button>
+                            <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.min(perDayCap(project.mode), s[pid].posts_per_day + 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">+</button>
                           </div>
                         ) : (
                           <span className="text-[11px] text-amber-400 font-bold">{cfg.posts_per_day}/day</span>

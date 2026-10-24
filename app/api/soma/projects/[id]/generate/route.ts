@@ -15,6 +15,7 @@ import { SOMA_COSTS } from '@/lib/soma-costs'
 import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
 import { runCapForMode, runCapReached, nextRunCount } from '@/lib/soma-runs'
+import { SOMA_MODE_LIMITS, effectiveSomaMode, isSomaPlatform } from '@/lib/soma-mode'
 import { REPLY_TO } from '@/lib/mail'
 
 const GENERATE_COST = SOMA_COSTS.generate_week // 75
@@ -210,11 +211,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Credits check
     const { data: workspace } = await admin
       .from('workspaces')
-      .select('id, soma_credits_monthly, soma_credits_used, soma_credits_purchased')
+      .select('id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled')
       .eq('id', project.workspace_id)
       .single()
 
     if (!workspace) return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
+
+    // The mode the workspace pays for right now, not the one saved on the
+    // project. A cancelled add-on falls back to Safe: drafts that wait for
+    // approval instead of posts that go live on their own.
+    const mode = effectiveSomaMode(project.mode, workspace)
 
     const monthly   = workspace.soma_credits_monthly ?? 0
     const used      = workspace.soma_credits_used ?? 0
@@ -226,7 +232,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Run cap check. runCapReached reads the stored counter as zero when the
     // last generation predates this month, which is what makes the monthly
     // reset happen at all — nothing else in the system ever cleared it.
-    const runCap = runCapForMode(project.mode)
+    const runCap = runCapForMode(mode)
     if (runCapReached(project, runCap)) {
       return NextResponse.json({ error: 'monthly_run_cap_reached', cap: runCap }, { status: 429 })
     }
@@ -266,11 +272,11 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
       : 'No voice profile — use authentic, direct, human tone.'
 
     const insights    = ingestion.extracted_insights as any
-    const platforms   = project.platforms as string[]
-    const windowDays  = project.content_window_days ?? 7
+    const platforms   = ((project.platforms ?? []) as string[]).filter(isSomaPlatform)
+    const windowDays  = Math.min(project.content_window_days ?? 7, SOMA_MODE_LIMITS[mode].windowDays)
     const globalPpd   = project.posts_per_day ?? 2
     const schedule    = (project.platform_schedule ?? {}) as Record<string, { posts_per_day: number; days: number[] }>
-    const maxPpd      = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 5 : 2
+    const maxPpd      = SOMA_MODE_LIMITS[mode].postsPerDay
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
@@ -318,12 +324,11 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
     type Job = { platform: string; ppd: number; instruction: string; chunk: { dayOffset: number; dayIdx: number; slotIdx: number }[] }
     const jobs: Job[] = []
 
+    if (((project.platforms ?? []) as string[]).includes('tiktok')) {
+      platformErrors['tiktok'] = 'SOMA writes text, and TikTok takes video only, so TikTok was skipped. Post videos from TikTok Studio.'
+    }
+
     for (const platform of platforms) {
-      // TikTok requires video content — skip if no video URL is set on the project
-      if (platform === 'tiktok' && !includeVideoUrl) {
-        platformErrors['tiktok'] = 'TikTok skipped: no video URL set on this project. Add a video URL in project settings to post to TikTok.'
-        continue
-      }
       const cfg        = schedule[platform] ?? { posts_per_day: globalPpd, days: [0,1,2,3,4,5,6] }
       const ppd        = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPpd)
       const activeDows = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
@@ -443,7 +448,7 @@ Rules:
             workspace_id: project.workspace_id,
             content:      post.content,
             platforms:    [platform],
-            status:       project.mode === 'safe' ? 'draft' : 'scheduled',
+            status:       mode === 'safe' ? 'draft' : 'scheduled',
             scheduled_at: scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date),
             destinations: {},
             ...(mediaUrls ? { media_urls: mediaUrls } : {}),
@@ -455,7 +460,7 @@ Rules:
         else if (inserted) {
           allPostIds.push(inserted.id)
           platformCounts[platform] = (platformCounts[platform] ?? 0) + 1
-          if (project.mode !== 'safe') {
+          if (mode !== 'safe') {
             const scheduledAtIso = scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date)
             inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt: scheduledAtIso } }).catch(() => {})
           }
@@ -507,7 +512,7 @@ Rules:
     if (user.email && process.env.RESEND_API_KEY) {
       try {
         const resend      = new Resend(process.env.RESEND_API_KEY)
-        const isAutomated = project.mode === 'autopilot' || project.mode === 'full_send'
+        const isAutomated = mode !== 'safe'
         const subject     = isAutomated
           ? `SOMA scheduled ${postsCreated} posts across ${platforms.join(', ')}`
           : `Your SOMA content queue is ready to review`
@@ -523,9 +528,9 @@ Rules:
               ? `<strong>${postsCreated} posts scheduled</strong> across <strong>${platforms.join(', ')}</strong> for the next ${windowDays} days.`
               : `<strong>${postsCreated} drafts</strong> are ready for your review.`}
             <br/><br/>
-            <a href="https://socialmate.studio/${project.mode === 'safe' ? 'soma/dashboard' : 'queue'}"
+            <a href="https://socialmate.studio/${mode === 'safe' ? 'soma/dashboard' : 'queue'}"
                style="background:#f59e0b;color:#000;font-weight:700;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px;">
-              ${project.mode === 'safe' ? 'Review Queue →' : 'View Schedule →'}
+              ${mode === 'safe' ? 'Review Queue →' : 'View Schedule →'}
             </a>
           </p>`,
         })
@@ -538,7 +543,7 @@ Rules:
       success: true,
       posts_created: postsCreated,
       post_ids: allPostIds,
-      mode: project.mode,
+      mode,
       platform_counts: platformCounts,
       platform_errors: Object.keys(platformErrors).length > 0 ? platformErrors : undefined,
     })

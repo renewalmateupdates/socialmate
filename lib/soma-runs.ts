@@ -21,6 +21,8 @@
  * again. The stored value is repaired on the next write.
  */
 
+import { SOMA_MODE_LIMITS, isSomaMode } from './soma-mode'
+
 export interface RunCounted {
   runs_this_month?: number | null
   last_generated_at?: string | null
@@ -55,9 +57,7 @@ export function nextRunCount(project: RunCounted, now: Date = new Date()): numbe
 
 /** Monthly cap by mode. Full Send's daily cron has its own higher cap. */
 export function runCapForMode(mode: string | null | undefined): number {
-  if (mode === 'full_send') return 12
-  if (mode === 'autopilot') return 8
-  return 4
+  return SOMA_MODE_LIMITS[isSomaMode(mode) ? mode : 'safe'].runsPerMonth
 }
 
 /** True when the project has no runs left this month. */
