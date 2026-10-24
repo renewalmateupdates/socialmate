@@ -179,7 +179,6 @@ export default function NewSomaProjectPage() {
   const [schedule, setSchedule]       = useState<Record<string, PlatformSchedule>>({})
   const [windowDays, setWindowDays]   = useState(7)
   const [mode, setMode]               = useState<'safe' | 'autopilot' | 'full_send'>('safe')
-  const [autoCollect, setAutoCollect] = useState(false)
   const [autoUrl, setAutoUrl]         = useState('')
   const [hasTiktok, setHasTiktok]     = useState(false)
 
@@ -263,8 +262,8 @@ export default function NewSomaProjectPage() {
           posts_per_day:        Math.max(...platforms.map(p => platformSchedule[p].posts_per_day)),
           content_window_days:  windowDays,
           mode,
-          auto_collect_enabled: autoCollect,
-          auto_collect_url:     autoUrl,
+          auto_collect_enabled: false,
+          auto_collect_url:     autoUrl.trim() || null,
           platform_schedule:    platformSchedule,
         }),
       })
@@ -464,32 +463,21 @@ export default function NewSomaProjectPage() {
               </div>
             )}
 
-            {/* Auto-collect */}
-            <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-6">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">Auto-Collect</h2>
-                  <p className="text-xs text-gray-500 mt-1">SOMA automatically pulls context from a URL instead of you uploading a doc each week.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setAutoCollect(p => !p)}
-                  className={`relative inline-flex h-5 w-10 flex-shrink-0 rounded-full border-2 transition-colors ${
-                    autoCollect ? 'bg-amber-500 border-amber-500' : 'bg-gray-700 border-gray-600'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${autoCollect ? 'translate-x-5' : 'translate-x-0'}`} />
-                </button>
-              </div>
-              {autoCollect && (
-                <input
-                  type="url"
-                  value={autoUrl}
-                  onChange={e => setAutoUrl(e.target.value)}
-                  placeholder="https://notion.so/your-page or https://docs.google.com/..."
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 mt-3"
-                />
-              )}
+            {/* Master doc link. This was an "Auto-Collect" toggle promising SOMA
+                would pull a URL each week; nothing ever fetched it. The link is
+                saved and filled in on the project page, where Ingest reads it. */}
+            <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Master doc link (optional)</h2>
+              <p className="text-xs text-gray-500 mt-1">
+                A public page SOMA reads when you run an ingestion, so you don&apos;t paste the doc each week. Works with web pages, Google Docs shared with &quot;Anyone with the link&quot;, and GitHub files.
+              </p>
+              <input
+                type="url"
+                value={autoUrl}
+                onChange={e => setAutoUrl(e.target.value)}
+                placeholder="https://docs.google.com/document/d/..."
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 mt-3"
+              />
             </div>
 
             {error && (

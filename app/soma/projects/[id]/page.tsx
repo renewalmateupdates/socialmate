@@ -186,6 +186,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [inputMethod, setInputMethod]   = useState<'text' | 'file' | 'url'>('text')
   const [docContent, setDocContent]     = useState('')
   const [docUrl, setDocUrl]             = useState('')
+  // Fill in the link saved on the project, if there is one.
+  const savedDocUrl = project?.auto_collect_url ?? ''
+  useEffect(() => { if (savedDocUrl) setDocUrl(u => u || savedDocUrl) }, [savedDocUrl])
   const [filename, setFilename]         = useState('')
   const [ingesting, setIngesting]       = useState(false)
   const [ingestResult, setIngestResult] = useState<any>(null)
@@ -502,7 +505,8 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content:      inputMethod === 'url' ? `Auto-collected from: ${docUrl}` : docContent,
+          // The server reads the link itself (lib/soma-fetch-doc.ts).
+          content:      inputMethod === 'url' ? '' : docContent,
           input_method: inputMethod,
           filename:     filename || undefined,
           source_url:   inputMethod === 'url' ? docUrl : undefined,
@@ -516,7 +520,8 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       setIngestResult(data)
       // Clear the input so the panel is ready for the next doc (or clearly shows it was saved)
       setDocContent('')
-      setDocUrl('')
+      // A link stays filled in: the server saved it on the project.
+      if (inputMethod !== 'url') setDocUrl(project?.auto_collect_url ?? '')
       setFilename('')
       await load()
     } catch {
@@ -938,10 +943,10 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                     type="url"
                     value={docUrl}
                     onChange={e => setDocUrl(e.target.value)}
-                    placeholder="https://notion.so/your-page"
+                    placeholder="https://docs.google.com/document/d/..."
                     className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
                   />
-                  <p className="text-xs text-gray-500 mt-2">Public Notion pages and Google Docs share links supported.</p>
+                  <p className="text-xs text-gray-500 mt-2">Works with public web pages, Google Docs shared with &quot;Anyone with the link&quot;, and GitHub files. Notion pages load their text with JavaScript, so paste those instead.</p>
                 </div>
               )}
 
