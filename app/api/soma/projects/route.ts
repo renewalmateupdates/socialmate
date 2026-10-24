@@ -3,19 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { SOMA_MODE_LIMITS, capSchedule, effectiveSomaMode, isSomaMode, isSomaPlatform } from '@/lib/soma-mode'
-
-const PLAN_PROJECT_LIMITS: Record<string, number> = {
-  free:          0,
-  pro:           1,
-  pro_annual:    1,
-  agency:        10,
-  agency_annual: 10,
-}
-
-function planProjectLimit(plan: string | null): number {
-  return PLAN_PROJECT_LIMITS[plan ?? 'free'] ?? 0
-}
+import { SOMA_MODE_LIMITS, SOMA_PROJECT_LIMITS, capSchedule, effectiveSomaMode, isSomaMode, isSomaPlatform } from '@/lib/soma-mode'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -58,10 +47,11 @@ export async function GET() {
 
     if (error) throw new Error(error.message)
 
+    const plan = await resolveWorkspacePlan(admin, user.id, workspace.id)
     return NextResponse.json({
       projects: projects ?? [],
-      limit: planProjectLimit(workspace.plan),
-      plan: workspace.plan,
+      limit: SOMA_PROJECT_LIMITS[plan],
+      plan,
     })
   } catch (err) {
     console.error('[SOMA Projects GET]', err)
@@ -108,7 +98,7 @@ export async function POST(req: NextRequest) {
     if (!workspace) return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
 
     // Check project limit
-    const limit = planProjectLimit(workspace.plan)
+    const limit = SOMA_PROJECT_LIMITS[await resolveWorkspacePlan(admin, user.id, workspace.id)]
     const { count } = await admin
       .from('soma_projects')
       .select('id', { count: 'exact', head: true })

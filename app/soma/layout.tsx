@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'SOMA — AI Marketing Agent | SocialMate',
+  title: 'SOMA — AI Marketing Agent',
   description:
-    'SOMA is your AI marketing agent. Upload your weekly master doc, SOMA reads what changed, and generates platform-native posts across your entire content calendar. Safe Mode, Autopilot, Full Send.',
+    'SOMA, included with SocialMate Pro and Agency, reads what changed in your weekly master doc and writes platform-native posts for X, LinkedIn, Bluesky, Mastodon, Discord and Telegram. Safe Mode, Autopilot, Full Send.',
 }
 
 export default function SomaLayout({ children }: { children: React.ReactNode }) {

@@ -31,6 +31,10 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'Fixed',    text: 'Moving a scheduled post to a later time no longer lets it go out at the old time.' },
       { type: 'Fixed',    text: 'A saved draft can be opened in Compose and sent. Before, every way back to it led to a list.' },
       { type: 'Fixed',    text: 'The Post button in Compose stays on screen instead of sitting below the tools.' },
+      { type: 'Fixed',    text: 'SOMA reads a master doc link for real. Google Docs, GitHub files and public web pages are read in full; before, only the link itself reached SOMA.' },
+      { type: 'Fixed',    text: 'SOMA projects follow the mode your workspace has, on every run, and can no longer be set past that mode\'s limits.' },
+      { type: 'Fixed',    text: 'TikTok is no longer offered as a SOMA platform. SOMA writes text and TikTok takes video, so those posts could only fail. Post videos from TikTok Studio.' },
+      { type: 'Improved', text: 'The SOMA page lists the real limits, credit costs and platforms.' },
     ],
   },
   {

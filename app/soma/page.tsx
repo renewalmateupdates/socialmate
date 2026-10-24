@@ -2,144 +2,145 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
-import { Building2, Download, FolderKanban, Mic, PenLine, RefreshCw, Rocket, Target, Zap } from 'lucide-react'
+import { Download, FolderKanban, Mic, RefreshCw, Rocket, ShieldCheck, Target, Zap } from 'lucide-react'
+import { SOMA_MODE_LIMITS, SOMA_PLATFORMS, SOMA_PROJECT_LIMITS } from '@/lib/soma-mode'
+import { SOMA_COSTS, SOMA_FULL_RUN_COST, SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
+
+// Every number on this page comes from the code that enforces it: limits from
+// lib/soma-mode.ts, costs and monthly credits from lib/soma-costs.ts. This page
+// used to promise 10 posts a day, 15 runs, "unlimited" Enterprise runs,
+// Instagram and TikTok, and said SOMA spent your regular AI credits.
+const L = SOMA_MODE_LIMITS
 
 const STATS = [
-  { value: '6+',   label: 'Live Platforms' },
-  { value: '21',   label: 'Posts / Week' },
-  { value: '$10',  label: 'Starting Price' },
-  { value: '3',    label: 'Automation Modes' },
+  { value: String(SOMA_PLATFORMS.length),                    label: 'Platforms' },
+  { value: '3',                                              label: 'Automation Modes' },
+  { value: SOMA_MONTHLY_CREDITS.pro.toLocaleString('en-US'), label: 'SOMA Credits / Month on Pro' },
+  { value: String(SOMA_FULL_RUN_COST),                       label: 'Credits per Full Run' },
 ]
 
 const STEPS = [
   {
     number: '01',
-    title: 'Upload Your Master Doc',
-    desc: 'Paste text, upload a .txt/.md file, or link a public URL (Notion, Google Doc). SOMA saves it and compares it against last week\'s version automatically.',
+    title: 'Add Your Master Doc',
+    desc: 'Paste text, upload a .txt or .md file, or link a Google Doc, a GitHub file or a public web page. SOMA saves each version and compares it with the last one.',
   },
   {
     number: '02',
     title: 'SOMA Reads the Diff',
-    desc: 'Gemini extracts what changed — wins, themes, directional shifts, content angles. The delta between this week and last week is the story.',
+    desc: 'Gemini pulls out what changed: wins, themes, shifts, content angles. Project memory tracks what SOMA already covered, so it doesn\'t repeat itself.',
   },
   {
     number: '03',
-    title: 'Content Goes Live',
-    desc: 'Platform-native posts are generated and scheduled. You approve in Safe Mode, auto-post with Autopilot, or set-and-forget with Full Send.',
+    title: 'Posts Get Written',
+    desc: 'Platform-native posts for every platform in the project. In Safe Mode they wait in your drafts for approval. On Autopilot and Full Send they\'re scheduled, and you can edit or delete any of them before it publishes.',
   },
 ]
 
+const perDay = (n: number) => `Up to ${n} posts a day per platform`
+
 const MODES = [
+  {
+    name: 'Safe Mode',
+    icon: ShieldCheck,
+    price: 'Included',
+    priceSub: 'with Pro and Agency',
+    badge: 'Start Here',
+    badgeKey: null,
+    border: 'border-2 border-jade/50',
+    ctaStyle: 'bg-panel hover:bg-raised border border-edge text-ink-high font-extrabold',
+    ctaLabel: 'Open SOMA',
+    ctaHref: '/soma/dashboard',
+    desc: 'SOMA writes the posts, you decide. Everything lands in your drafts to approve, edit or skip. Nothing goes out without you.',
+    features: [
+      `${L.safe.windowDays} days of posts per run`,
+      perDay(L.safe.postsPerDay),
+      `${L.safe.runsPerMonth} runs a month`,
+      'Every post waits for your approval',
+    ],
+  },
   {
     name: 'Autopilot',
     icon: Zap,
     price: '$10',
-    priceSub: '/month add-on',
+    priceSub: 'a month, on top of Pro or Agency',
     badge: 'Most Popular',
     badgeKey: 'app_soma_landing.most_popular',
-    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
     border: 'border-2 border-amber-400',
-    headerText: 'text-gray-900 dark:text-white',
-    subText: 'text-gray-500 dark:text-gray-400',
-    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
     ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold',
     ctaLabel: 'Get Started',
     ctaHref: '/soma/dashboard',
-    desc: 'SOMA generates and schedules content on your behalf. Posts go live on schedule — you can review, edit, or skip anything before it publishes.',
+    desc: 'SOMA writes and schedules for you, and runs by itself every Monday. Each post waits in your queue first, so you can edit or delete it before it goes out.',
     features: [
-      '14-day content window',
-      'Up to 5 posts/day',
-      '8 generation runs/month',
-      'All connected platforms',
-      'Auto-schedules with review option',
+      `${L.autopilot.windowDays} days of posts per run`,
+      perDay(L.autopilot.postsPerDay),
+      `${L.autopilot.runsPerMonth} runs a month, Mondays included`,
+      'Posts are scheduled automatically',
     ],
   },
   {
     name: 'Full Send',
     icon: Rocket,
     price: '$20',
-    priceSub: '/month add-on',
+    priceSub: 'a month, on top of Pro or Agency',
     badge: 'Full Autonomous',
     badgeKey: 'app_soma_landing.full_autonomous',
-    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
     border: 'border-2 border-amber-500',
-    headerText: 'text-gray-900 dark:text-white',
-    subText: 'text-gray-500 dark:text-gray-400',
-    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
     ctaStyle: 'bg-amber-600 hover:bg-amber-700 text-void font-extrabold',
     ctaLabel: 'Upgrade to Full Send',
     ctaHref: '/soma/dashboard',
-    desc: 'Drop your master doc and walk away. SOMA handles everything — platform-native posts, optimized schedules, zero friction, no approvals needed.',
+    desc: `Everything in Autopilot, plus a run every day. Each run uses ${SOMA_COSTS.generate_week} SOMA credits, so a month of daily runs takes more than a plan includes. Credit packs cover the rest.`,
     features: [
-      '30-day content window',
-      'Up to 10 posts/day',
-      '15 generation runs/month',
-      'All connected platforms',
-      'Fully autonomous — no approval needed',
-    ],
-  },
-  {
-    name: 'Enterprise',
-    icon: Building2,
-    price: 'Custom',
-    priceSub: 'Contact us for pricing',
-    badge: 'Enterprise',
-    badgeKey: null,
-    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
-    border: 'border-2 border-amber-500',
-    headerText: 'text-gray-900 dark:text-white',
-    subText: 'text-gray-500 dark:text-gray-400',
-    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
-    ctaStyle: 'bg-amber-600 hover:bg-amber-700 text-void font-extrabold',
-    ctaLabel: 'Contact Us',
-    ctaHref: '/enterprise',
-    desc: 'Unlimited generation, custom integrations, dedicated onboarding, and SLA. For agencies and teams that need more than the standard tiers allow.',
-    features: [
-      'Unlimited posts/day',
-      'Unlimited generation runs',
-      'All connected platforms',
-      'Custom content workflows',
-      'Dedicated support + SLA',
+      `${L.full_send.windowDays} days of posts per run`,
+      perDay(L.full_send.postsPerDay),
+      `${L.full_send.runsPerMonth} runs a month, plus a daily run`,
+      'Posts are scheduled automatically',
     ],
   },
 ]
 
-const PLATFORMS = [
-  { name: 'Twitter / X',  format: 'Punchy ≤280 chars. Max 2 hashtags.',      live: true  },
-  { name: 'Bluesky',      format: 'Conversational ≤300 chars.',               live: true  },
-  { name: 'Mastodon',     format: 'Community-native tone. ≤500 chars.',       live: true  },
-  { name: 'Discord',      format: 'Server announcement style.',                live: true  },
-  { name: 'Telegram',     format: 'Clean, direct copy.',                      live: true  },
-  { name: 'LinkedIn',     format: 'Professional long-form. 3-6 sentences.',   live: true  },
-  { name: 'Instagram',    format: 'Caption + 5-8 hashtags.',                  live: false },
-  { name: 'TikTok',       format: 'Short punchy caption for video.',          live: false },
-]
+// The same rules the generator gives Gemini (app/api/soma/projects/[id]/generate/route.ts).
+const PLATFORM_FORMATS: Record<(typeof SOMA_PLATFORMS)[number], { name: string; format: string }> = {
+  twitter:  { name: 'X / Twitter', format: 'Punchy, 280 characters max, 2 hashtags at most. Counts toward your plan\'s X quota.' },
+  bluesky:  { name: 'Bluesky',     format: 'Conversational, 300 characters max.' },
+  mastodon: { name: 'Mastodon',    format: 'Community-native tone, 500 characters max.' },
+  discord:  { name: 'Discord',     format: 'Casual announcement style.' },
+  telegram: { name: 'Telegram',    format: 'Friendly and direct, can run a little longer.' },
+  linkedin: { name: 'LinkedIn',    format: 'Professional but human, 3 to 6 sentences.' },
+}
+const PLATFORMS = SOMA_PLATFORMS.map(id => PLATFORM_FORMATS[id])
 
 const FAQS = [
   {
     q: 'What is a master doc?',
-    a: 'It\'s your weekly source of truth — a running doc where you capture what happened, what shipped, what changed. Think of it like a changelog for your life or business.',
+    a: 'It\'s your weekly source of truth: a running doc where you capture what happened, what shipped, what changed. Think of it as a changelog for your life or business.',
   },
   {
     q: 'How does the diff work?',
-    a: 'SOMA saves each week\'s master doc. When you submit a new one, Gemini compares it to the previous version and extracts what\'s new — wins, themes, shifts. That delta becomes the content.',
+    a: 'SOMA saves every version of your master doc. When you add a new one, Gemini compares it with the previous version and pulls out what\'s new. That difference is what the posts are about.',
   },
   {
     q: 'Can I use SOMA for multiple clients or projects?',
-    a: 'Yes. SOMA Projects let you create named projects, each with their own master doc history, platform settings, and voice profile. Agencies can manage multiple clients from one workspace.',
+    a: `Yes. Each SOMA project has its own master doc history, memory, platforms and schedule. Pro includes ${SOMA_PROJECT_LIMITS.pro} project and Agency includes ${SOMA_PROJECT_LIMITS.agency}. Projects in a workspace share its voice profile.`,
   },
   {
     q: 'What does "platform-native" mean?',
-    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. Bluesky gets conversational copy. Mastodon gets community-native tone. Discord gets announcement style. TikTok gets caption-optimized copy. LinkedIn gets professional long-form. For platforms not yet connected, SOMA generates the content anyway — it auto-queues the moment you connect.',
+    a: 'The same core message is rewritten for each platform: punchy for X, conversational for Bluesky, community-native for Mastodon, announcement style for Discord, direct for Telegram, professional for LinkedIn. You pick a project\'s platforms from the accounts you\'ve connected.',
   },
   {
     q: 'Will SOMA spam my followers?',
-    a: 'No. Every tier has hard daily and monthly caps — Full Send maxes at 10 posts/day. SOMA is built around sustainable posting, not volume blasting. We\'ll also warn you if you approach platform-recommended limits.',
+    a: `No. Every mode has hard caps: up to ${L.safe.postsPerDay}, ${L.autopilot.postsPerDay} or ${L.full_send.postsPerDay} posts a day per platform, a monthly run limit, and a credit check before every run. In Safe Mode nothing posts without your approval.`,
   },
   {
-    q: 'What if I don\'t post anything in a week?',
-    a: 'SOMA still generates content — it uses your voice profile and last known themes to keep the calendar consistent. You can always review and skip anything that doesn\'t fit.',
+    q: 'What if I don\'t update my doc in a week?',
+    a: 'On Autopilot and Full Send, SOMA runs on schedule anyway, working from your latest master doc and its memory of what it already covered. In Safe Mode nothing runs until you start it.',
   },
+]
+
+const CREDIT_ACTIONS = [
+  { action: 'Read your master doc', credits: SOMA_COSTS.ingest_weekly,   desc: 'Gemini reads the new version and pulls out what changed since the last one.', icon: Download },
+  { action: 'Generate a run',       credits: SOMA_COSTS.generate_week,   desc: `Posts for every platform in the project, ${L.safe.windowDays} to ${L.full_send.windowDays} days ahead depending on mode.`, icon: Zap },
+  { action: 'Identity interview',   credits: SOMA_COSTS.identity_update, desc: 'Charged once, when you first finish it. Voice DNA updates after that are free.', icon: Mic },
 ]
 
 export default function SomaLandingPage() {
@@ -249,22 +250,20 @@ export default function SomaLandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {MODES.map(mode => (
-              <div key={mode.name} className={`rounded-2xl p-6 flex flex-col ${mode.cardBg} ${mode.border}`}>
+              <div key={mode.name} className={`rounded-2xl p-6 flex flex-col bg-panel ${mode.border}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <mode.icon className="w-5 h-5" strokeWidth={1.75} />
-                    <h3 className={`text-sm font-extrabold ${mode.headerText}`}>{mode.name}</h3>
+                    <mode.icon className="w-5 h-5 text-ink-high" strokeWidth={1.75} />
+                    <h3 className="text-sm font-extrabold text-ink-high">{mode.name}</h3>
                   </div>
-                  {mode.badge && (
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
-                      {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
-                    </span>
-                  )}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-300">
+                    {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
+                  </span>
                 </div>
-                <p className={`text-xs leading-relaxed mb-4 flex-1 ${mode.subText}`}>{mode.desc}</p>
+                <p className="text-xs leading-relaxed mb-4 flex-1 text-ink-muted">{mode.desc}</p>
                 <ul className="space-y-2">
                   {mode.features.map(f => (
-                    <li key={f} className={`flex items-center gap-2 text-xs ${mode.subText}`}>
+                    <li key={f} className="flex items-center gap-2 text-xs text-ink-muted">
                       <span className="flex-shrink-0 text-emerald-500 font-bold">✓</span> {f}
                     </li>
                   ))}
@@ -284,21 +283,19 @@ export default function SomaLandingPage() {
                 {t('app_soma_landing.platforms_sub')}
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
               {PLATFORMS.map((p) => (
                 <div key={p.name} className="px-6 py-5 border-b border-r border-edge">
-                  <p className={`text-sm font-bold mb-1 flex items-center gap-2 ${p.live ? 'text-amber-400' : 'text-gray-600'}`}>
-                    <span>{p.live ? '◆' : '○'}</span> {p.name}
-                    {!p.live && <span className="text-[10px] font-semibold bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">{t('app_soma_landing.platform_soon_badge')}</span>}
+                  <p className="text-sm font-bold mb-1 flex items-center gap-2 text-amber-400">
+                    <span>◆</span> {p.name}
                   </p>
                   <p className="text-xs text-gray-500">{p.format}</p>
                 </div>
               ))}
             </div>
-            <div className="px-8 py-4 border-t border-edge bg-gray-900/40">
+            <div className="px-8 py-4 bg-gray-900/40">
               <p className="text-xs text-gray-500">
-                <span className="text-amber-400 font-semibold">{t('app_soma_landing.platform_live_note')}</span>{t('app_soma_landing.platform_live_desc')}{' '}
-                <span className="text-gray-400 font-semibold">{t('app_soma_landing.platform_soon_note')}</span>{t('app_soma_landing.platform_soon_desc')}
+                <span className="text-amber-400 font-semibold">{t('app_soma_landing.platform_live_note')}</span>{t('app_soma_landing.platform_live_desc')}
               </p>
             </div>
           </div>
@@ -317,9 +314,9 @@ export default function SomaLandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { icon: FolderKanban, title: 'Named Projects', desc: 'Create a project per client or brand. Each has its own master doc history, voice profile, and platform selections.' },
+              { icon: FolderKanban, title: 'Named Projects', desc: 'A project per client or brand, each with its own master doc history, memory and platforms.' },
               { icon: RefreshCw, title: 'Automatic Diffing', desc: 'SOMA auto-compares each new doc against the previous version. Drop in an update and the diff becomes the content.' },
-              { icon: Target, title: 'Per-Project Settings', desc: 'Different clients post on different platforms at different frequencies. SOMA respects each project\'s settings independently.' },
+              { icon: Target, title: 'Per-Project Schedules', desc: 'Different clients post on different platforms at different frequencies. Each project keeps its own schedule.' },
             ].map(f => (
               <div key={f.title} className="bg-panel border border-edge rounded-2xl p-6">
                 <f.icon className="w-6 h-6 mb-3 text-ink-muted" strokeWidth={1.75} />
@@ -340,26 +337,23 @@ export default function SomaLandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {MODES.map(mode => (
-              <div key={`pricing-${mode.name}`} className={`rounded-2xl p-6 flex flex-col ${mode.cardBg} ${mode.border}`}>
+              <div key={`pricing-${mode.name}`} className={`rounded-2xl p-6 flex flex-col bg-panel ${mode.border}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <mode.icon className="w-5 h-5" strokeWidth={1.75} />
-                    <h3 className={`text-base font-extrabold ${mode.headerText}`}>{mode.name}</h3>
+                    <mode.icon className="w-5 h-5 text-ink-high" strokeWidth={1.75} />
+                    <h3 className="text-base font-extrabold text-ink-high">{mode.name}</h3>
                   </div>
-                  {mode.badge && (
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
-                      {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
-                    </span>
-                  )}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-300">
+                    {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
+                  </span>
                 </div>
                 <div className="flex items-end gap-1 mb-1">
-                  <span className={`text-4xl font-extrabold ${mode.headerText}`}>{mode.price}</span>
-                  {mode.price.startsWith('$') && <span className={`text-xs mb-1.5 ${mode.subText}`}>/mo</span>}
+                  <span className="text-4xl font-extrabold text-ink-high">{mode.price}</span>
                 </div>
-                <p className={`text-xs mb-5 ${mode.subText}`}>{mode.priceSub}</p>
+                <p className="text-xs mb-5 text-ink-muted">{mode.priceSub}</p>
                 <ul className="space-y-2.5 flex-1 mb-6">
                   {mode.features.map(f => (
-                    <li key={f} className={`flex items-center gap-2 text-xs ${mode.subText}`}>
+                    <li key={f} className="flex items-center gap-2 text-xs text-ink-muted">
                       <span className="flex-shrink-0 text-emerald-500 font-bold">✓</span> {f}
                     </li>
                   ))}
@@ -370,6 +364,10 @@ export default function SomaLandingPage() {
               </div>
             ))}
           </div>
+          <p className="text-center text-xs text-ink-muted mt-6">
+            SOMA comes with Pro and Agency; it isn&apos;t on the free plan.{' '}
+            <Link href="/enterprise" className="font-semibold text-amber-400 hover:text-amber-300">Need custom limits for a team? Talk to us →</Link>
+          </p>
         </section>
 
         {/* ── CREDIT COSTS ── */}
@@ -385,13 +383,8 @@ export default function SomaLandingPage() {
           </div>
 
           <div className="bg-panel border border-edge rounded-2xl overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
-              {[
-                { action: 'Ingest master doc', credits: 25, desc: 'AI reads your doc, extracts themes, diffs against last week', icon: Download },
-                { action: 'Generate full week', credits: 75, desc: 'Platform-native posts for all connected platforms, 7–14 days', icon: Zap },
-                { action: 'Update voice profile', credits: 15, desc: 'Refresh SOMA\'s understanding of your tone and style', icon: Mic },
-                { action: 'Generate single post', credits: 5, desc: 'One-off post generation outside the weekly cycle', icon: PenLine },
-              ].map(item => (
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
+              {CREDIT_ACTIONS.map(item => (
                 <div key={item.action} className="p-6 flex items-start gap-4">
                   <item.icon className="w-6 h-6 flex-shrink-0 text-ink-muted" strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
@@ -409,11 +402,16 @@ export default function SomaLandingPage() {
             <div className="px-6 py-4 bg-panel/50 border-t border-edge">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">{t('app_soma_landing.credits_full_run')}</span>
-                  {' '}{t('app_soma_landing.credits_pro_covers')}
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{t('app_soma_landing.credits_full_run', { n: SOMA_FULL_RUN_COST })}</span>
+                  {' '}{t('app_soma_landing.credits_pro_covers', {
+                    pro: SOMA_MONTHLY_CREDITS.pro.toLocaleString('en-US'),
+                    proRuns: Math.floor(SOMA_MONTHLY_CREDITS.pro / SOMA_FULL_RUN_COST),
+                    agency: SOMA_MONTHLY_CREDITS.agency.toLocaleString('en-US'),
+                    agencyRuns: Math.floor(SOMA_MONTHLY_CREDITS.agency / SOMA_FULL_RUN_COST),
+                  })}
                 </div>
                 <div className="flex items-center gap-4 text-xs font-semibold flex-shrink-0">
-                  <span className="text-gray-500">{t('app_soma_landing.credits_packs_from')} <span className="text-amber-600 dark:text-amber-400">$1.99</span></span>
+                  <span className="text-gray-500">{t('app_soma_landing.credits_packs_from')} <span className="text-amber-600 dark:text-amber-400">$4.99</span></span>
                   <a href="/pricing" className="text-amber-600 dark:text-amber-400 hover:underline">{t('app_soma_landing.credits_see_plans')}</a>
                 </div>
               </div>
@@ -475,10 +473,6 @@ export default function SomaLandingPage() {
           <div className="flex items-center justify-center gap-4">
             <Link href="/pricing" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               {t('app_soma_landing.socialmate_plans')}
-            </Link>
-            <span className="text-gray-300 dark:text-gray-700">|</span>
-            <Link href="/enki" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
-              {t('app_soma_landing.enki_link')}
             </Link>
           </div>
         </section>

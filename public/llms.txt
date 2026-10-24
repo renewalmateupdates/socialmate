@@ -178,24 +178,24 @@ Landing page: https://socialmate.studio/soma
 ### How SOMA Works
 1. Identity Interview — 5-step onboarding to capture brand voice, tone, audience, and style
 2. Create a Project — define target platforms, posting frequency, and per-platform schedule
-3. Ingest Source Material — paste or upload documents (up to 500,000 characters, no truncation); SOMA performs Gemini-powered diff analysis against your master doc, storing versioned history
-4. Generate — SOMA generates a full week of platform-native posts per platform in chunked Gemini calls; posts go into your approval queue
+3. Ingest Source Material — paste or upload documents, or link a Google Doc (shared with anyone with the link), a GitHub file or a public web page; up to 500,000 characters; SOMA performs Gemini-powered diff analysis against your master doc, storing versioned history
+4. Generate — SOMA generates platform-native posts per platform in chunked Gemini calls; in Safe mode they go to your drafts, on Autopilot and Full Send they are scheduled
 5. Review & Approve — review queue in Safe mode, or let Autopilot/Full Send schedule automatically
 
 ### SOMA Modes
-- Safe Mode (included with Pro and Agency; SOMA is not on the free plan) — generates content for manual review; you approve each post before scheduling
-- Autopilot (+$10/month add-on) — automatically schedules approved content; runs weekly on Monday 9am EDT
-- Full Send (+$20/month add-on) — maximum posting cadence (up to 7 posts/day per platform); daily cron at 9am EDT; bypasses approval queue
+- Safe Mode (included with Pro and Agency; SOMA is not on the free plan) — generates content for manual review; you approve each post before scheduling. Up to 2 posts a day per platform, 7 days ahead, 4 runs a month
+- Autopilot (+$10/month add-on) — writes and schedules posts automatically, and also runs by itself every Monday at 8am Eastern; scheduled posts can be edited or deleted before they publish. Up to 5 posts a day per platform, 14 days ahead, 8 runs a month
+- Full Send (+$20/month add-on, includes Autopilot) — adds a run every day at 9am Eastern; no review required. Up to 7 posts a day per platform, 30 days ahead, 12 runs a month plus the daily run. Each run costs 75 SOMA credits, so daily runs need more credits than a plan includes
+- Platforms SOMA writes for: Bluesky, X/Twitter, Mastodon, Discord, Telegram and LinkedIn. Not TikTok, which takes video only (post videos from TikTok Studio). X posts count toward the plan's X quota
 
 ### SOMA Credit Costs (SOMA has its own credit pool: 500 a month on Pro, 2,000 on Agency, plus one-time SOMA credit packs)
 - Ingest document: 25 credits
 - Generate full week: 75 credits
-- Update voice profile: 15 credits
-- Single post generation: 5 credits
-- Full weekly run total: approximately 100 credits
+- Identity interview: 15 credits, charged once when first completed (Voice DNA updates are free)
+- Full weekly run total: 100 credits (ingest + generate)
 
 ### SOMA Projects
-- Named projects — separate voice, schedule, and memory per client or brand
+- Named projects — separate master doc history, schedule and memory per client or brand (Pro: 1 project, Agency: 10); projects in a workspace share its voice profile
 - Per-platform schedule — posts/day picker (1–N, capped by mode tier) + day presets (Every day / Mon–Fri / Weekends / Custom) + S M T W T F S custom picker per platform
 - Document history — versioned diffs; ingest compares new document to previous master and extracts only what changed
 - Run caps — prevent over-posting per project
