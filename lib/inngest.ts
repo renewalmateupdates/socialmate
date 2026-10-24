@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { createDecipheriv } from 'crypto'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { SOMA_COSTS } from '@/lib/soma-costs'
+import { SOMA_COSTS, SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
 import { buildIrisEmailHtml } from '@/lib/iris-email'
 import { lifecycleEmail, getActivationState } from '@/lib/lifecycle-emails'
 import {
@@ -28,6 +28,7 @@ import {
 import { runCapReached, nextRunCount, runCapForMode } from '@/lib/soma-runs'
 import { SOMA_MODE_LIMITS, effectiveSomaMode, isSomaPlatform } from '@/lib/soma-mode'
 import { fullSendSlots } from '@/lib/soma-schedule'
+import { normalizePlan } from '@/lib/plan'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
@@ -3485,7 +3486,7 @@ export const resetSomaCredits = inngest.createFunction(
       // Fetch all workspaces with their plan
       const { data: workspaces, error } = await admin
         .from('workspaces')
-        .select('id, plan')
+        .select('id, plan, owner_id')
 
       if (error) {
         console.error('[ResetSomaCredits] Failed to fetch workspaces:', error.message)
@@ -3494,12 +3495,24 @@ export const resetSomaCredits = inngest.createFunction(
 
       if (!workspaces?.length) return { reset: 0 }
 
-      // Map plan → monthly SOMA credit allowance
-      function planToSomaCredits(plan: string | null): number {
-        if (!plan) return 0
-        if (plan === 'pro' || plan === 'pro_annual')       return 1000
-        if (plan === 'agency' || plan === 'agency_annual') return 5000
-        return 0
+      // The plan, resolved the way lib/plan.ts resolveWorkspacePlan does it: the
+      // workspace's own plan, else its owner's user_settings.plan. Batched, since
+      // this runs over every workspace. The allowance itself is
+      // SOMA_MONTHLY_CREDITS; this used to grant 1,000 / 5,000 while the credits
+      // API granted 500 / 2,000.
+      const ownerIds = Array.from(new Set(workspaces.filter(w => !w.plan && w.owner_id).map(w => w.owner_id as string)))
+      const ownerPlan = new Map<string, string | null>()
+      for (let i = 0; i < ownerIds.length; i += 100) {
+        const { data: settings, error: sErr } = await admin
+          .from('user_settings')
+          .select('user_id, plan')
+          .in('user_id', ownerIds.slice(i, i + 100))
+        if (sErr) console.warn('[ResetSomaCredits] user_settings lookup failed:', sErr.message)
+        for (const row of settings ?? []) ownerPlan.set(row.user_id as string, row.plan as string | null)
+      }
+      function planToSomaCredits(w: { plan: string | null; owner_id: string | null }): number {
+        const raw = w.plan || (w.owner_id ? ownerPlan.get(w.owner_id) : null) || null
+        return SOMA_MONTHLY_CREDITS[normalizePlan(raw)]
       }
 
       const now = new Date().toISOString()
@@ -3515,7 +3528,7 @@ export const resetSomaCredits = inngest.createFunction(
         // Group by credit amount to minimise DB round trips
         const buckets: Record<number, string[]> = {}
         for (const w of batch) {
-          const credits = planToSomaCredits(w.plan)
+          const credits = planToSomaCredits(w)
           if (!buckets[credits]) buckets[credits] = []
           buckets[credits].push(w.id)
         }

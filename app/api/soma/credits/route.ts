@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { SOMA_COSTS } from '@/lib/soma-costs'
+import { SOMA_COSTS, SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 export { SOMA_COSTS }
 
@@ -40,15 +41,15 @@ export async function GET() {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    // Auto-provision SOMA credits if Pro/Agency workspace has never had them set
-    const SOMA_MONTHLY: Record<string, number> = { pro: 500, pro_annual: 500, agency: 2000, agency_annual: 2000 }
+    // Auto-provision SOMA credits if a Pro/Agency workspace has never had them set
+    const admin = getSupabaseAdmin()
+    const plan = await resolveWorkspacePlan(admin, user.id, workspace.id)
     let monthly = workspace.soma_credits_monthly ?? 0
-    const plan = workspace.plan ?? 'free'
 
-    if (monthly === 0 && SOMA_MONTHLY[plan]) {
-      const admin = getSupabaseAdmin()
-      monthly = SOMA_MONTHLY[plan]
-      await admin.from('workspaces').update({ soma_credits_monthly: monthly }).eq('id', workspace.id)
+    if (monthly === 0 && SOMA_MONTHLY_CREDITS[plan] > 0) {
+      monthly = SOMA_MONTHLY_CREDITS[plan]
+      const { error: provisionErr } = await admin.from('workspaces').update({ soma_credits_monthly: monthly }).eq('id', workspace.id)
+      if (provisionErr) console.warn('[SOMA Credits GET] could not provision monthly credits:', provisionErr.message)
     }
 
     const used      = workspace.soma_credits_used ?? 0

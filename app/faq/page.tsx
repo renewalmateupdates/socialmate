@@ -44,7 +44,7 @@ const sections = [
     faqs: [
       {
         q: 'What is SOMA?',
-        a: 'SOMA is your AI marketing agent. Each week, you drop in a "master doc" — a brain dump of what happened, what you shipped, what changed, how you\'re feeling. SOMA diffs it against last week\'s doc, extracts what\'s new, and generates a full content calendar of platform-native posts (formatted correctly for Twitter, LinkedIn, Instagram, Bluesky, etc.). One upload. One click. A week or two of scheduled content.',
+        a: 'SOMA is your AI marketing agent. Each week, you drop in a "master doc" — a brain dump of what happened, what you shipped, what changed, how you\'re feeling. SOMA diffs it against last week\'s doc, extracts what\'s new, and generates a content calendar of platform-native posts for X, LinkedIn, Bluesky, Mastodon, Discord and Telegram. One upload, one click, and one to four weeks of posts depending on your mode.',
       },
       {
         q: 'What\'s a master doc?',
@@ -56,19 +56,19 @@ const sections = [
       },
       {
         q: 'What are the three SOMA modes?',
-        a: 'Safe: SOMA generates posts as drafts. You review and approve each one before anything goes live. Autopilot: Posts are auto-scheduled. You get a notification to review the batch — you can still edit or remove before publish time. Full Send: Fully autonomous. Posts are scheduled and published with no review required. You set it, SOMA runs it.',
+        a: 'Safe: SOMA generates posts as drafts. You review and approve each one before anything goes live. Autopilot: Posts are auto-scheduled. You get a notification to review the batch — you can still edit or remove before publish time. Full Send: Everything in Autopilot, plus a run every day and the highest caps. No review required. You set it, SOMA runs it.',
       },
       {
         q: 'Will SOMA spam my followers?',
-        a: 'No. SOMA has hard monthly run caps per mode (Safe: 4 runs/mo, Autopilot: 8 runs/mo, Full Send: 12 runs/mo), plus a credit gate before every generation run. You also control posts-per-day and the content window (7 or 14 days). We built responsible defaults into every layer. We also include a usage disclaimer in-app for transparency.',
+        a: 'No. SOMA has hard monthly run caps per mode (Safe: 4 runs/mo, Autopilot: 8 runs/mo, Full Send: 12 runs/mo plus a daily run), daily caps per platform (2, 5 or 7 posts), and a credit check before every generation run. You also control posts per day and how far ahead each run fills (up to 7, 14 or 30 days by mode). We built responsible defaults into every layer. We also include a usage disclaimer in-app for transparency.',
       },
       {
         q: 'What does SOMA cost?',
-        a: 'SOMA is an add-on for Pro and Agency users. Safe Mode is included free. Autopilot is $10/month — posts auto-schedule, you get a notification batch to review. Full Send is $20/month — fully autonomous, zero review. Each generation run costs 75 SOMA credits. Weekly ingestion costs 25 credits. Pro users receive 500 credits/month, Agency 2,000/month. Credit packs start at $4.99.',
+        a: 'SOMA comes with Pro and Agency; it isn\'t on the free plan. Safe Mode is included at no extra cost. Autopilot is $10/month: posts schedule themselves and wait in your queue, where you can edit or remove them. Full Send is $20/month and adds a run every day. Each generation run costs 75 SOMA credits, so daily runs need more credits than a plan includes. Weekly ingestion costs 25 credits. Pro users receive 500 credits/month, Agency 2,000/month. Credit packs start at $4.99.',
       },
       {
         q: 'Can I use SOMA for multiple clients?',
-        a: 'Yes — if you\'re on the Agency plan. Agency gives you up to 10 SOMA projects (each with their own master doc history, voice profile, platform settings, and schedule). Each project runs independently. Pro users get 1 project.',
+        a: 'Yes — if you\'re on the Agency plan. Agency gives you up to 10 SOMA projects, each with its own master doc history, memory, platforms and schedule. Projects share the workspace\'s voice profile. Pro users get 1 project.',
       },
       {
         q: 'Does SOMA learn my voice?',

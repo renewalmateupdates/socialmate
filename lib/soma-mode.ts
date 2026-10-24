@@ -6,9 +6,18 @@
 // accepted any field at all, mode included. The project form, the project
 // routes, the generator and the Autopilot cron all read from here now.
 //
-// Pure: no imports, safe in the browser.
+// Pure: no runtime imports, safe in the browser.
+
+import type { PlanTier } from './plan'
 
 export type SomaMode = 'safe' | 'autopilot' | 'full_send'
+
+/** SOMA projects a workspace can have, by plan. */
+export const SOMA_PROJECT_LIMITS: Record<PlanTier, number> = {
+  free:   0,
+  pro:    1,
+  agency: 10,
+}
 
 export const SOMA_MODES: readonly SomaMode[] = ['safe', 'autopilot', 'full_send']
 
