@@ -72,7 +72,7 @@ const sections = [
       },
       {
         q: 'Does SOMA learn my voice?',
-        a: 'Yes. SOMA uses your identity profile (tone, writing style, behavioral traits, example posts) that you set up during the SOMA onboarding interview. It injects your voice profile into every generation call so posts sound like you, not like a generic AI assistant.',
+        a: 'Yes. The Voice DNA interview (10 questions for Foundation, 25 for Deep Dive, 40 for Advanced, all free) builds a voice summary, and you can add posts you have written and house rules SOMA must always follow. SOMA uses that profile in every generation so posts sound like you, not like a generic AI assistant.',
       },
     ],
   },
