@@ -15,25 +15,26 @@ Mission: Power to the people. Tear down gatekeeping walls. Build the door.
 
 ---
 
-## Hearthforge (Co-Founded Venture — Partnership with Butch Chiappinelli)
+## Raid Ready Labs (Co-Founded Venture, Partnership with Butch Chiappinelli)
 
-**Hearthforge** — 3D printing product company. Co-founded 50/50 with Butch Chiappinelli. Separate from Gilgamesh Enterprise LLC.
-Co-founder: **Butch Chiappinelli** (handles manufacturing + CAD design; owns a Bambu Lab H2C).
-Joshua handles web, software, and business side.
-**Domain:** hearth-forge.com (live on Vercel, GitHub: renewalmateupdates/hearthforge-web)
+**Raid Ready Labs** (formerly Hearthforge; renamed July 9, 2026). 3D printing product company, co-founded with Butch Chiappinelli. Separate from Gilgamesh Enterprise LLC.
+Co-founder: **Butch Chiappinelli** (handles CAD design and manufacturing; owns the printer, a Bambu Lab H2C).
+Joshua handles the marketing, web, software and business side.
+**Domain:** raidreadylabs.com (confirmed July 17, 2026; site code lives in `renewalmateupdates/hearthforge-web`). The old hearth-forge.com is retired and returns a 404, so never link it.
 
-**Logo:** Confirmed June 2026 — bold H letterform with flame integrated between the vertical pillars. Black/white. Designed by Butch. Embossable version for physical prints. Logo is `public/logo.png` in the repo.
+**Logo:** Confirmed July 17, 2026. A silver backpack with a rolled sleeping mat, centered on a black heraldic banner, flat monochrome stencil style. The old H+flame mark is retired.
 
-**First product:** Modular desk rail system for streamers and content creators.
+**First product:** Modular desk rail system (the T-rail) for streamers and content creators.
 - Horizontal rail clamps to back edge of a gaming desk
 - Accessories clip on at adjustable positions: mic holder, camera mount, headphone hook, Stream Deck stand, cable management clips
 - Design language: matte black, minimal, premium
 - C-clamps integrated into the rail as one printed piece; end caps still in design as of June 2026
+- **Oct 23, 2026:** Joshua has the first physical T-rail prototype from Butch. Better than expected, still room to refine.
 
 **Business model:** Sell STL files digitally + ship physical prints + eventual file subscriptions.
 **Entity:** No LLC yet. Will do joint LLC or DBA under Gilgamesh Enterprise LLC when revenue starts.
-**Do NOT make:** Anything water-inclusive (cookie cutters, plant pots) — micro holes trap moisture and mold.
-**Important:** Always describe Hearthforge as a CO-FOUNDED PARTNERSHIP with Butch — never as Joshua's solo venture. Misrepresenting this would be misleading to Butch.
+**Do NOT make:** Anything water-inclusive (cookie cutters, plant pots), because micro holes trap moisture and mold.
+**Important:** Always describe Raid Ready Labs as a CO-FOUNDED PARTNERSHIP with Butch, never as Joshua's solo venture. Misrepresenting this would be misleading to Butch. Don't state the equity split publicly.
 
 ---
 
@@ -80,7 +81,7 @@ These have burned us before — always apply:
 
 ## Platforms
 
-**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026), LinkedIn (OAuth live May 21, 2026 — personal profile, `w_member_social` scope)
+**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026; Direct Post audit approved Oct 23, 2026, so videos post publicly), LinkedIn (OAuth live May 21, 2026 — personal profile, `w_member_social` scope)
 **Not available yet (Sept 24, 2026):** YouTube (waiting on Google's review), Pinterest (built, application declined), Reddit (application declined; no connect or publish code exists), Instagram / Facebook / Threads (need Meta app review, not started)
 **Roadmap ideas:** Tumblr, Pixelfed, LinkedIn Company Pages
 
@@ -130,6 +131,7 @@ claiming otherwise. Enterprise seats are the single exception.
 - Free: 20 videos/month | Pro: 60/month | Agency: 200/month
 - Uses PULL_FROM_URL — TikTok pulls video from Supabase storage. Cost: only egress (~$0.09/GB)
 - Production API approved May 17, 2026. Connect button live on /accounts. TikTok Studio live at /tiktok/studio. Sandbox banner removed.
+- Content sharing audit (Direct Post) approved Oct 23, 2026: videos post to public profiles with the privacy the creator picks. Verified with a public post that day.
 
 **Platform philosophy:** Open social (Bluesky, Mastodon, Discord, Telegram, TikTok) = free. Gatekept social (X/Twitter charges $0.01/tweet) = Pro+ required.
 
@@ -1267,7 +1269,7 @@ Every Reddit comment Joshua screenshots now gets four steps: reply, verify again
 - **Creator Hub (#683, #681).** #679's `on_behalf_of` fix was wrong (reverted). Real fix: Stripe's fee is passed through to the creator via the application fee, one shared $3 minimum (tip presets $3/$5/$10/$25), Connect accounts now request the `transfers` capability (they had none, so no payment could ever complete), weekly payouts. Zero creators and zero tips exist; a real live-mode tip has NOT been run (Joshua declined).
 - **Platform status copy (#684).** YouTube awaiting Google review; Instagram/Facebook/Threads need Meta app review (not started); Pinterest and Reddit have not approved our API applications; Snapchat/Lemon8/BeReal have no public posting API. Reddit has no connect or publish code at all.
 - **Discord (Sept 25–26).** Connect Discord had been failing for every new user since Sept 3 (commit f2d21963 switched /accounts and onboarding to the bot invite flow that had never produced a production row). Discord showed "Invalid OAuth2 redirect_uri" before ever calling us back, so the funnel recorded clicks and no failures. Cause: there are **two Discord apps**. Vercel's `DISCORD_CLIENT_ID`/`SECRET` still pointed at the March 13 app (`1481871523105996810`, identify-only login); the `bot-callback` redirect and the bot are on the April 11 app (`1492662834012885163`). Joshua switched both env vars to the April app and redeployed; a full connect, channel pick and Compose post to #general was verified live. The 7 older external Discord accounts are identify-only and can never post; they must reconnect. Bot permissions still include Manage Roles, which posting does not need.
-- **SOMA Full Send (#687).** On Sept 26 the 13:00 UTC run created 28 posts dated March 30–31, 2026: the prompt never gave Gemini today's date, the code trusted the `scheduled_date` it returned, and the run never sent `post/scheduled`. They were filed under March and published in one burst about two hours later (probably the every-5-minutes GitHub Actions backstop, `.github/workflows/publish-scheduled.yml`, best effort). 21 published, 7 LinkedIn failed on an expired token, and 4 published posts said "$5/mo" (from `soma_identity_profiles.voice_examples`, fixed with SQL). The Gemini catch block used to `return` quietly, so nothing was generated Sept 3–25 and nothing said so. Fix: `lib/soma-schedule.ts` assigns every time in code (7 per platform, 9:30 AM–7:30 PM Eastern), the prompt states the date and forbids unsourced prices, each post sends `post/scheduled`, Gemini failures throw. **Both SOMA projects were then deleted by Joshua; start a new one in Safe mode with the current CLAUDE.md, and watch the first Full Send run before trusting it.**
+- **SOMA Full Send (#687).** On Sept 26 the 13:00 UTC run created 28 posts dated March 30–31, 2026: the prompt never gave Gemini today's date, the code trusted the `scheduled_date` it returned, and the run never sent `post/scheduled`. They were filed under March and published in one burst about two hours later (probably the GitHub Actions backstop, `.github/workflows/publish-scheduled.yml`, which asks for every 5 minutes but in practice runs every 3 to 5 hours). 21 published, 7 LinkedIn failed on an expired token, and 4 published posts said "$5/mo" (from `soma_identity_profiles.voice_examples`, fixed with SQL). The Gemini catch block used to `return` quietly, so nothing was generated Sept 3–25 and nothing said so. Fix: `lib/soma-schedule.ts` assigns every time in code (7 per platform, 9:30 AM–7:30 PM Eastern), the prompt states the date and forbids unsourced prices, each post sends `post/scheduled`, Gemini failures throw. **Both SOMA projects were then deleted by Joshua; start a new one in Safe mode with the current CLAUDE.md, and watch the first Full Send run before trusting it.**
 - **Docs and blogs.** llms.txt, changelog and roadmap updated for the above. Nine blog posts corrected in Supabase (Discord connect steps rewritten for the bot flow, stale "coming soon" for LinkedIn/Pinterest/Instagram/Facebook, Full Send "posts per day" is per platform); originals backed up in the session scratchpad (`blog-backup-sept26.json`). On Sept 27 Joshua approved adding an "Update, September 2026" note to the 13 TikTok scheduling posts (private visibility or drafts until TikTok's content sharing audit clears); done, backups extended (22 posts total). **Remove those 13 notes (search the blog for "content sharing audit") when the audit is approved.**
 - **Gemini.** Joshua reports the AI tools were down for lack of funds; real use was about 7 SOMA actions a month, so cost is not the problem. Flash pricing doubles Jan 1, 2027; Flash-Lite is the lever. The pricing page did not list `gemini-3.6-flash` (the model the code uses): confirm it still exists with `models.list` on the production key.
 
@@ -1341,13 +1343,45 @@ What shipped:
 - **Blog posts are claims, and they drift faster than code.** The Sept 10 sweep fixed the site; this one still found Instagram claims and a free cap five times too low in the pages AI crawlers read most. Re-scan the blog after any pricing or platform change.
 - **GitHub can report a false conflict when one PR moves a file another edits.** `git merge-tree` shows whether it is real; merging main into the branch clears it.
 
+**October 16–22, 2026: partners, the HQ page, and posts that went out late or not at all (PRs #715–#736):**
+
+- **#715** synced the docs and crawler files to Oct 15 and shipped the blog accuracy sweep. **#716** shows "All sales are final" at Stripe Checkout, on /pricing and in the Terms (the Terms already said so; checkout didn't). **#717** is a nightly delivery check (09:30 UTC) that asks each platform, with free reads only, whether posts published 1 to 48 hours earlier are actually live. **#718** offers the one-sentence starter in Compose to anyone with zero posts.
+- **#719** made the TikTok pages honest while the audit was open (superseded by #737 once it cleared). **#720** built the one-shot "TikTok public posting is live" email, locked behind a confirm phrase. **#721/#722**: every free guide ends with a card for its matching shop product, and the shop is in the nav, footer and /guides hub, all with UTMs.
+- **#723** locked down the partner and Studio Stax tables: the public anon key could read invite tokens (enough to claim a partner account), applicant emails and webhook idempotency rows. The SQL ran; verified Oct 23 that the anon key now reads 0 rows from all six tables. **#724** joined the two half-programs (`affiliates` held applications and earnings, `affiliate_profiles` the portal and payouts; every entry path created only one). **#725** fixed Studio Stax: unpaid listings were public, paid ones never expired, renewal emails ran twice. **#726** pays commission on every paid invoice (30%, 40% past 100 active payments, excluding tax) from `invoice.payment_succeeded`, once per invoice; a partner's code records the buyer as a referral. The live webhook endpoint now listens to `invoice.payment_succeeded` (API version 2026-02-25.clover, so code reads both payload shapes). Not handled yet: refund clawback, the 60-day payout hold. **#728** fixed /admin/coupons, which listed nothing (it embedded a nonexistent `affiliates.email`) and had an empty partner dropdown. Vouchrs is the first outside partner.
+- **#727** cut about 16,500 idle Inngest runs a month (TikTok scheduled publishing is event-driven with an hourly backstop, Enki's four jobs are unregistered, the Discord welcome poller is hourly). Hobby allows 50,000 executions a month and every step counts.
+- **#729–#731**: `/admin/hq` shows real Stripe revenue, MRR, what is waiting on Joshua, failed payments, webhook misses, failed posts, feedback and SM-Give owed, across SocialMate, the Gilgamesh shop and RenewalMate. Shopify feeds it through order webhooks (`/api/shopify/orders-webhook` into `shop_orders`). HereNow, RJ's Tree Care and Raid Ready Labs are left out on purpose. RenewalMate's database had no table GRANTs at all; Joshua's SQL fixed it Oct 22.
+- **#732**: a post moved later published at its old time, because its wake-up sleeps until the time it was queued with. **#733**: a saved draft had no way to be sent. **#734**: HQ counted 13 "problems" and none needed action (a Stripe Radar fraud block, internal accounts' old failures). **#735**: every scheduled post now queues its own wake-up (`lib/post-schedule.ts` `setScheduledTime()`); the GitHub Actions sweep asks for every 5 minutes but GitHub runs it every 3 to 5 hours, so posts that pages scheduled directly were hours late. **#736**: Compose's Post button was never on screen on desktop; two LinkedIn users wrote a post with nothing blocking and left without pressing Post.
+
+**Rules that follow:**
+
+- **Every path that makes a post scheduled queues a `post/scheduled` event.** The GitHub sweep is a 3 to 5 hour backstop, not a schedule. Don't fix lateness with a sub-hourly cron; the Inngest budget can't take it.
+- **The same fact in two tables, again.** The partner program was two programs that never met. Check for a second table before trusting the first.
+
+**October 23, 2026: TikTok approves public posting (PRs #737–#741):**
+
+- **TikTok approved the Content Posting API Direct Post audit** (email 6:06 AM Eastern). It was resubmitted Oct 15 (reference `20261015204558`) after the Sept 15 rejection. Production access since May 17 had only allowed private, "Only me" direct posts.
+- **Verified live before telling anyone:** @socialmatehq was switched to public, and a Post Now from TikTok Studio with privacy Everyone published at 18:53 UTC (`tiktok.com/@socialmatehq/video/7699938242325499150`). TikTok's oEmbed returns the same stub for public and private videos, so it can't check visibility.
+- **#737** flipped every "drafts until TikTok approves" line: the /accounts card, the onboarding caveat, TikTok Studio, /for/tiktok-creators, /for/streamers, the roadmap, the changelog, two strings in all nine locales, `llms.txt` and `ai.txt`. The drafts fallback in `lib/tiktok-scheduled.ts` stays, because it also covers `privacy_level_option_mismatch`.
+- **The TikTok-live email (#720) went to all 48 outside users with TikTok connected** (45 had connected nothing else), 0 failed, after a test copy was read in socialmatehq@gmail.com. Recorded in `usage_events` as `tiktok_live_email`, so it can never re-send. The 13 blog "Update, September 2026" notes were removed and sent to IndexNow.
+- **#738**: confirm-upload never stored the commercial-disclosure flags, so every Post Now row said "not disclosed". TikTok itself always received them.
+- **#739**: `POST /api/admin/revalidate` with `{"paths": [...]}` (admin only) refreshes ISR pages after a database edit, instead of waiting out the 24-hour blog cache or a deploy. Verified on production: the next visit comes back `REVALIDATED`.
+- **#740**: connecting TikTok lands in TikTok Studio. The callback still returns to /accounts, which records `connect_succeeded` and marks the account activated, then forwards with `?connected=1` (a toast, plus `via: 'connect'` on `tiktok_studio_opened`). Onboarding lists TikTok first for accounts whose first page was about TikTok (`landedOnTiktok()` in `lib/attribution.ts`; `auth/callback` sets `sm_onboard_lead`). Why: from Oct 15 to 23, 8 outside accounts connected TikTok and 4 never opened Studio.
+- **#741**: the deli is past everywhere it read as current (this file, the about-page bio in 9 locales including laptop to desktop, the guides tagline, two guide pages, `llms.txt`).
+- **11 blog posts corrected in the database**, refreshed and sent to IndexNow: present-tense deli lines, "laptop", "No upsell" (the guides end with a shop card now), BDAY31 sold as "permanent" (it is one payment; the annual price renews at $80), and TikTok missing from what Pro includes. Originals in the git-excluded `blog_price_backup_oct23_deli.json`.
+- **Joshua's own SOMA setup removed at his request** (voice profile, 9 uploads, 42 ledger rows, 29 feedback answers, the admin workspace's SOMA flags). Backed up first to the git-excluded `soma_setup_backup_oct23.json`; Joshua runs the delete SQL himself. Nothing from SOMA was queued.
+- **Third outside publisher:** the Oct 22 ChatGPT signup's Bluesky starter went out at 07:00 UTC. Outside publishers: Discord (7 posts), Bluesky (1), LinkedIn (1). 1,654 published posts in total.
+
+**Rules that follow:**
+
+- **An approval email is not proof.** Make one real public post before telling 48 people it works.
+- **When one request sends a value and another writes the row, both need it.** #738 was the disclosure reaching TikTok in init-upload and never reaching confirm-upload.
+- **A database edit to a cached page isn't live until it's refreshed.** Edit, call `/api/admin/revalidate`, confirm with curl, then IndexNow.
+
 ## Pending / In Progress
 
-- **Open as of Oct 15, 2026 (Joshua's side):** the TikTok audit is resubmitted; wait for TikTok's answer (2–4 weeks). **Decide which inbox is public:** `/support` sends people to `support@socialmate.studio`, which has no mailbox, while the legal pages, `llms.txt` and `humans.txt` give `socialmate.updates@gmail.com` and replies go to `socialmatehq@gmail.com`. Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
+- **Open as of Oct 23, 2026 (Joshua's side):** run the SOMA removal SQL from Oct 23 if it hasn't run yet, and read replies to the TikTok-live email in socialmatehq@gmail.com. **Decide which inbox is public:** `/support` sends people to `support@socialmate.studio`, which has no mailbox, while the legal pages, `llms.txt` and `humans.txt` give `socialmate.updates@gmail.com` and replies go to `socialmatehq@gmail.com`. Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
 
 - **Creator Hub payments: fee pass-through, $3 floor, Connect capability fix (Sept 24, merged in #683).** Decision (Joshua): SocialMate does not absorb Stripe's fee. Tip, unlock and subscription checkouts now carry an application fee equal to Stripe's fee (`application_fee_amount` for one-time payments, `transfer_data.amount_percent` for subscriptions, which cannot use `application_fee_percent`), so SocialMate keeps nothing and creators net what any Stripe merchant would. The landing page already says "Just Stripe (~2.9% + 30c)". `lib/creator-pricing.ts` holds the math; verified against real test-mode charges to the cent at $3/$5/$10/$25 for US cards. **Found while testing:** Connect accounts were created with no capabilities requested, so Stripe rejects every destination-charge checkout with "missing the required capabilities: transfers" and `charges_enabled` could never become true; Creator Hub could not have taken a payment. Accounts now request `transfers` only (5 onboarding requirements vs 13 with `card_payments`) and onboarding-complete means `transfers` is active. Payouts are set to weekly because Connect bills 0.25% + 25c per payout. One shared $3 minimum for tips, unlocks and subscriptions (server-enforced; tip presets now $3/$5/$10/$25). **Still true:** international cards cost 1.5% more and currency conversion 1%, absorbed by SocialMate (about 7c on a $5 tip); Stripe Billing adds 0.7% on subscriptions (included in the subscription fee); Connect charges $2 per active creator per month, covered by the creator's Pro plan. Zero creators exist, so nothing needs grandfathering. **Not verifiable in test mode** (Custom accounts need a Connect platform-profile setting): a full transfer with a real active account. Run one real live-mode tip end to end before announcing Creator Hub. #679's `on_behalf_of` attempt was wrong and reverted in #681.
-
-- **TikTok content sharing audit — RESUBMITTED Oct 15, 2026** (reference `20261015204558`) with a new demo that ends on TikTok's own UI showing the live post. When it clears: remove the 13 blog notes (search the blog for "content sharing audit"), flip TikTok copy from "private or drafts" to public posting, and update `llms.txt` and `ai.txt`. History: **rejected Sept 15, 2026**, reference `20260910025309`. TikTok's stated reason then: the demo didn't show the complete flow and didn't end with proof the post went live on TikTok. That was a video problem, and the Oct 15 recording fixes it. See `[[project_tiktok_content_sharing_audit]]` for what was submitted and how it was recorded. Until this clears, TikTok Studio stays private/drafts-only. Don't change the audit-reviewed posting screen (as it stands after #706 and #708) while the review is open.
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
 
@@ -1355,11 +1389,12 @@ What shipped:
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — CLAUDE.md updated August 30 (evening) with PRs
-  #585–#595. Ready to resubmit. Strongest material: the activation number was
-  wrong for five months because it counted our own accounts, and the onboarding
-  flow was saving nothing at all. Both found by walking the product, not reading
-  it. Lead with the measurement error; the bug fixes are the supporting detail.
+- **Activation, Oct 23 update.** TikTok posts publicly now, the 48 outside
+  users with TikTok connected were emailed, and connecting TikTok lands in
+  TikTok Studio (#740). Three outside users have published (Discord, Bluesky,
+  LinkedIn). Signups run about 1.3 a day; 9 of the 12 since Oct 15 came from
+  ChatGPT, 7 of them landing on /for/tiktok-creators. Watch whether TikTok
+  connectors now post.
 
 - **Activation, Oct 14 update.** The first two outside users published in
   October (Discord and Bluesky from Oct 2, LinkedIn on Oct 9): 199 external
@@ -1418,6 +1453,8 @@ What shipped:
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Oct 23 batch, PRs #737–#741, merged and deployed.** TikTok audit approved and verified with a public post, copy flipped, TikTok-live email sent to the 48 (never resend), 13 blog audit notes removed, disclosure recorded on Post Now rows, `/api/admin/revalidate`, TikTok-first connect and onboarding, the deli fixed everywhere, 11 blog posts corrected. See the Oct 23 entry above; do not redo these.
+- ✅ **Oct 16–22 batch, PRs #715–#736, merged and deployed.** Including the partner-table RLS SQL (verified Oct 23: the anon key reads 0 rows). See the Oct 16–22 entry above.
 - ✅ **Oct 15 (evening) batch, PRs #704–#714, merged and deployed.** Reconnect your own account any time, clearer refused-connect messages, TikTok repeat-callback fix, www redirect, `/affiliates` public, IndexNow, 60-day referral cookie, derived sitemap, real 404s for unwritten posts, page titles, blog meta descriptions, blog-to-tool cards, TikTok Studio matched to TikTok's guidelines. See the Oct 15 (evening) entry above; do not redo these.
 - ✅ **TikTok audit resubmitted (Oct 15)**, reference `20261015204558`. Do not resubmit again while it is in review.
 - ✅ **Blog accuracy sweep (Oct 15)**: 126 database posts and the static posts corrected. Never re-run it from scratch; re-scan only after a pricing or platform change.
@@ -1642,6 +1679,8 @@ The diff = the story. Ship it to every platform.
 ---
 
 ## SOMA Content Guidelines
+
+> Joshua's own SOMA setup (voice profile, uploads, credits) was removed Oct 23, 2026 at his request. These guidelines apply only if he sets SOMA up again.
 
 When SOMA generates content from this document, follow these behavioral rules on every run:
 
