@@ -28,9 +28,12 @@ import { SOMA_COSTS } from './soma-costs'
 import { SOMA_MODE_LIMITS, capSchedule, effectiveSomaMode, isSomaPlatform, type SomaMode, type PlatformSchedule } from './soma-mode'
 import { nextRunCount } from './soma-runs'
 import { planGapSlots, utcDayKey, windowDayKeys, type PlannedSlot } from './soma-schedule'
+import { MAX_DOC_CHARS, fetchDocText } from './soma-fetch-doc'
 
 export const SOMA_MODEL = 'gemini-3.6-flash'
 export const GENERATE_COST = SOMA_COSTS.generate_week
+/** Reading a new master doc version, pasted or pulled from a saved link. */
+export const INGEST_COST = SOMA_COSTS.ingest_weekly
 
 export type SomaTrigger = 'manual' | 'weekly' | 'daily'
 
@@ -90,6 +93,8 @@ export interface SomaRunProject {
   campaign_end?: string | null
   include_media?: boolean | null
   include_video_url?: string | null
+  /** The saved master doc link (the new-project form's "Master doc link"). */
+  auto_collect_url?: string | null
 }
 
 export interface SomaRunWorkspace {
@@ -219,6 +224,16 @@ export function splitCharge(
   const newUsed = used + fromMonthly
   const newPurchased = Math.max(0, purchased - fromPurchased)
   return { used: newUsed, purchased: newPurchased, balanceAfter: Math.max(0, monthly - newUsed) + newPurchased }
+}
+
+/** The text compared to decide whether a fetched doc changed: whitespace collapsed. */
+export function docFingerprint(text: string): string {
+  return text.replace(/\s+/g, ' ').trim()
+}
+
+/** True when there is no earlier version, or the new text differs beyond whitespace. */
+export function docChanged(previous: string | null | undefined, next: string): boolean {
+  return previous == null || docFingerprint(previous) !== docFingerprint(next)
 }
 
 export function parseGeminiJson(text: string): unknown {
@@ -378,15 +393,74 @@ export async function loadExistingSlots(
   return out
 }
 
+export type SavedDocResult =
+  | { status: 'none' }
+  | { status: 'unchanged' }
+  | { status: 'saved'; version: number }
+  | { status: 'failed'; error: string }
+
+/**
+ * Pulls the project's saved doc link and keeps it as a new master doc version
+ * when its text changed. No model call and no charge: reading the new version
+ * happens in latestInsights, only when a run has slots to fill.
+ */
+export async function collectSavedDoc(
+  admin: SupabaseClient, project: Pick<SomaRunProject, 'id' | 'workspace_id' | 'user_id' | 'auto_collect_url'>,
+): Promise<SavedDocResult> {
+  const url = project.auto_collect_url?.trim()
+  if (!url) return { status: 'none' }
+
+  const fetched = await fetchDocText(url)
+  if (!fetched.ok) return { status: 'failed', error: fetched.error }
+  if (fetched.text.length > MAX_DOC_CHARS) {
+    return { status: 'failed', error: `That page has ${fetched.text.length.toLocaleString('en-US')} characters of text; the most SOMA keeps is ${MAX_DOC_CHARS.toLocaleString('en-US')}.` }
+  }
+
+  const { data: latest, error: latestErr } = await admin
+    .from('soma_master_docs')
+    .select('version, content')
+    .eq('project_id', project.id)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  // Never save on a failed read: a guessed version number could collide with a
+  // real one, and an unknown "previous" would mark every pull as changed.
+  if (latestErr) return { status: 'failed', error: `Could not read the project's current doc: ${latestErr.message}` }
+  if (!docChanged(latest?.content, fetched.text)) return { status: 'unchanged' }
+
+  const version = (latest?.version ?? 0) + 1
+  const { error: saveErr } = await admin.from('soma_master_docs').insert({
+    project_id:   project.id,
+    workspace_id: project.workspace_id,
+    user_id:      project.user_id,
+    version,
+    content:      fetched.text,
+    filename:     null,
+    input_method: 'url',
+    source_url:   url,
+  })
+  if (saveErr) return { status: 'failed', error: `Could not save the new version: ${saveErr.message}` }
+  return { status: 'saved', version }
+}
+
+/**
+ * Where a scheduled run's insights came from: the latest ingestion as is, a
+ * fresh read of a newer doc, or the last ingestion because the newer doc could
+ * not be read (no credits for a read plus a run, or the model failed).
+ */
+export type InsightsSource = 'latest' | 'read' | 'none' | 'skipped_no_credits' | 'read_failed'
+
 /**
  * Insights for a scheduled run: the project's latest ingestion when it is at
  * least as new as its latest master doc, otherwise a fresh read of that doc,
- * saved as an ingestion with its memory notes. Null when the project has no doc
+ * saved as an ingestion with its memory notes. A fresh read costs INGEST_COST,
+ * the same as reading a doc by hand, and only happens when the workspace can
+ * also pay for the run it feeds. Null insights when the project has no doc
  * yet; the run then writes from the project description.
  */
 export async function latestInsights(
   admin: SupabaseClient, project: SomaRunProject, apiKey: string, now: Date = new Date(),
-): Promise<{ insights: SomaInsights | null; ingestionId: string | null }> {
+): Promise<{ insights: SomaInsights | null; ingestionId: string | null; source: InsightsSource }> {
   const [{ data: ingestion, error: ingErr }, { data: docs, error: docErr }] = await Promise.all([
     admin.from('soma_weekly_ingestion')
       .select('id, extracted_insights, created_at')
@@ -405,14 +479,32 @@ export async function latestInsights(
 
   const current = docs?.[0] ?? null
   const previous = docs?.[1] ?? null
-  if (ingestion && (!current || Date.parse(ingestion.created_at) >= Date.parse(current.created_at))) {
-    return { insights: (ingestion.extracted_insights ?? null) as SomaInsights | null, ingestionId: ingestion.id }
+  // What the run falls back to when a newer doc cannot be read.
+  const last = {
+    insights:    (ingestion?.extracted_insights ?? null) as SomaInsights | null,
+    ingestionId: (ingestion?.id ?? null) as string | null,
   }
-  if (!current) return { insights: null, ingestionId: null }
+  if (ingestion && (!current || Date.parse(ingestion.created_at) >= Date.parse(current.created_at))) {
+    return { ...last, source: 'latest' }
+  }
+  if (!current) return { insights: null, ingestionId: null, source: 'none' }
+
+  // Reading costs credits, and the run it feeds costs more. Spending the read
+  // and then not affording the run would charge for nothing, so both must fit.
+  const { data: balances, error: balErr } = await admin
+    .from('workspaces')
+    .select('soma_credits_monthly, soma_credits_used, soma_credits_purchased')
+    .eq('id', project.workspace_id)
+    .maybeSingle()
+  if (balErr) console.warn('[SOMA] credit lookup before reading the doc failed:', balErr.message)
+  const left = balances
+    ? Math.max(0, (balances.soma_credits_monthly ?? 0) - (balances.soma_credits_used ?? 0)) + (balances.soma_credits_purchased ?? 0)
+    : 0
+  if (left < INGEST_COST + GENERATE_COST) return { ...last, source: 'skipped_no_credits' }
 
   // A doc that was never read: read it now. A failure here is not fatal; the
-  // run still writes from the project description, and generation failing for
-  // the same reason (a dead key) throws on its own.
+  // run writes from the last ingestion (or the project description), and
+  // generation failing for the same reason (a dead key) throws on its own.
   const { data: memory } = await admin
     .from('soma_project_memory')
     .select('topics_covered, angles_used, running_summary')
@@ -432,7 +524,7 @@ export async function latestInsights(
     insights = parseGeminiJson((await model.generateContent(prompt)).response.text()) as SomaInsights
   } catch (err) {
     console.warn(`[SOMA] reading the master doc failed for project ${project.id}:`, errorMessage(err, 'unknown error'))
-    return { insights: null, ingestionId: null }
+    return { ...last, source: 'read_failed' }
   }
 
   const label = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
@@ -460,42 +552,88 @@ export async function latestInsights(
   }, { onConflict: 'project_id' })
   if (memErr) console.warn('[SOMA] could not update project memory:', memErr.message)
 
-  return { insights, ingestionId: saved?.id ?? null }
+  await chargeCredits(admin, {
+    workspaceId: project.workspace_id,
+    userId:      project.user_id,
+    cost:        INGEST_COST,
+    action:      'ingest_weekly',
+    metadata:    { project_id: project.id, auto: true, doc_version: current.version },
+  })
+
+  return { insights, ingestionId: saved?.id ?? null, source: 'read' }
 }
 
 // ── The run ─────────────────────────────────────────────────────────────────
 
-/** Takes one generation's credits (monthly first) and logs it. Returns what was charged. */
-async function chargeRun(
-  admin: SupabaseClient, workspaceId: string, userId: string, trigger: SomaTrigger, projectId: string, posts: number,
+/** Takes SOMA credits (monthly first, then purchased) and logs it. Returns what was charged. */
+async function chargeCredits(
+  admin: SupabaseClient,
+  c: { workspaceId: string; userId: string; cost: number; action: string; metadata: Record<string, unknown> },
 ): Promise<number> {
   const { data: balances, error: balErr } = await admin
     .from('workspaces')
     .select('soma_credits_monthly, soma_credits_used, soma_credits_purchased')
-    .eq('id', workspaceId)
+    .eq('id', c.workspaceId)
     .single()
   if (balErr || !balances) {
-    console.error('[SOMA] could not read credits to charge the run:', balErr?.message)
+    console.error(`[SOMA] could not read credits to charge ${c.action}:`, balErr?.message)
     return 0
   }
-  const after = splitCharge(balances, GENERATE_COST)
+  const after = splitCharge(balances, c.cost)
   const { error: chargeErr } = await admin.from('workspaces')
     .update({ soma_credits_used: after.used, soma_credits_purchased: after.purchased })
-    .eq('id', workspaceId)
+    .eq('id', c.workspaceId)
   if (chargeErr) {
-    console.error('[SOMA] charge failed:', chargeErr.message)
+    console.error(`[SOMA] ${c.action} charge failed:`, chargeErr.message)
     return 0
   }
   const { error: ledgerErr } = await admin.from('soma_credit_ledger').insert({
-    workspace_id:  workspaceId,
-    user_id:       userId,
-    action_type:   LEDGER_ACTION[trigger],
-    credits_used:  GENERATE_COST,
+    workspace_id:  c.workspaceId,
+    user_id:       c.userId,
+    action_type:   c.action,
+    credits_used:  c.cost,
     balance_after: after.balanceAfter,
-    metadata:      { project_id: projectId, trigger, posts },
+    metadata:      c.metadata,
   })
   if (ledgerErr) console.warn('[SOMA] ledger insert failed:', ledgerErr.message)
-  return GENERATE_COST
+  return c.cost
+}
+
+interface RunPlan {
+  mode: SomaMode
+  platforms: string[]
+  days: string[]
+  windowDays: number
+  open: PlannedSlot[]
+}
+
+/** The run's mode, window and open slots, from what the project already has. */
+async function planRun(
+  admin: SupabaseClient, project: SomaRunProject, workspace: SomaRunWorkspace, trigger: SomaTrigger, now: Date, startDate?: string | null,
+): Promise<RunPlan> {
+  const mode = effectiveSomaMode(project.mode, workspace)
+  const platforms = (project.platforms ?? []).filter(isSomaPlatform)
+  const { schedule } = capSchedule(platforms, project.platform_schedule, mode, project.posts_per_day ?? 1)
+  const { days, windowDays } = runWindow(project, mode, trigger, now, startDate)
+  if (!platforms.length || !days.length) return { mode, platforms, days, windowDays, open: [] }
+
+  const fromIso = `${days[0]}T00:00:00.000Z`
+  const toIso = new Date(Date.parse(`${days[days.length - 1]}T00:00:00Z`) + 86_400_000).toISOString()
+  const existing = await loadExistingSlots(admin, project, fromIso, toIso)
+  const projectOffsetMin = parseInt(String(project.id).replace(/[^0-9a-f]/gi, '').slice(0, 4) || '0', 16) % 9
+  const open = planGapSlots({ platforms, schedule, days, existing, now, extraOffsetMin: projectOffsetMin })
+  return { mode, platforms, days, windowDays, open }
+}
+
+/**
+ * How many slots a scheduled run would fill right now. The Monday and daily
+ * jobs check this first, so a run with nothing to fill reads no doc and
+ * spends nothing.
+ */
+export async function countOpenSlots(
+  admin: SupabaseClient, project: SomaRunProject, workspace: SomaRunWorkspace, trigger: SomaTrigger, now: Date = new Date(),
+): Promise<number> {
+  return (await planRun(admin, project, workspace, trigger, now)).open.length
 }
 
 export async function runSomaGeneration(opts: SomaRunOptions): Promise<SomaRunResult> {
@@ -506,23 +644,11 @@ export async function runSomaGeneration(opts: SomaRunOptions): Promise<SomaRunRe
   // plus the saves: about 55s, inside the 60s function limit.
   const budgetMs = opts.budgetMs ?? 30_000
 
-  const mode = effectiveSomaMode(project.mode, workspace)
-  const platforms = (project.platforms ?? []).filter(isSomaPlatform)
-  const { schedule } = capSchedule(platforms, project.platform_schedule, mode, project.posts_per_day ?? 1)
-  const { days, windowDays } = runWindow(project, mode, trigger, now, opts.startDate)
-
+  const { mode, platforms, days, windowDays, open } = await planRun(admin, project, workspace, trigger, now, opts.startDate)
   const result: SomaRunResult = {
     mode, platforms, windowDays, windowStart: days[0] ?? utcDayKey(now),
-    openSlots: 0, postsCreated: 0, postIds: [], platformCounts: {}, platformErrors: {}, unfilled: 0, charged: 0,
+    openSlots: open.length, postsCreated: 0, postIds: [], platformCounts: {}, platformErrors: {}, unfilled: 0, charged: 0,
   }
-  if (!platforms.length || !days.length) return result
-
-  const fromIso = `${days[0]}T00:00:00.000Z`
-  const toIso = new Date(Date.parse(`${days[days.length - 1]}T00:00:00Z`) + 86_400_000).toISOString()
-  const existing = await loadExistingSlots(admin, project, fromIso, toIso)
-  const projectOffsetMin = parseInt(String(project.id).replace(/[^0-9a-f]/gi, '').slice(0, 4) || '0', 16) % 9
-  const open = planGapSlots({ platforms, schedule, days, existing, now, extraOffsetMin: projectOffsetMin })
-  result.openSlots = open.length
   if (!open.length) return result
 
   // Context shared by every call.
@@ -676,7 +802,15 @@ Rules:
 
   // Charge once per run that wrote something, from fresh balances. A
   // continuation step belongs to a run that was already charged.
-  if (!opts.continuation) result.charged = await chargeRun(admin, workspace.id, opts.actorUserId, trigger, project.id, result.postsCreated)
+  if (!opts.continuation) {
+    result.charged = await chargeCredits(admin, {
+      workspaceId: workspace.id,
+      userId:      opts.actorUserId,
+      cost:        GENERATE_COST,
+      action:      LEDGER_ACTION[trigger],
+      metadata:    { project_id: project.id, trigger, posts: result.postsCreated },
+    })
+  }
 
   // Manual and Monday runs count against the mode's monthly runs. The daily run
   // does not ("12 runs a month, plus a daily run"); it touches neither column,

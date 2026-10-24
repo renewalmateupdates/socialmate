@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Globe, CircleDot, Rocket, Zap } from 'lucide-react'
 import { SOMA_MODE_LIMITS, SOMA_PLATFORMS, isSomaPlatform } from '@/lib/soma-mode'
+import { SOMA_COSTS } from '@/lib/soma-costs'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -469,7 +470,7 @@ export default function NewSomaProjectPage() {
             <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Master doc link (optional)</h2>
               <p className="text-xs text-gray-500 mt-1">
-                A public page SOMA reads when you run an ingestion, so you don&apos;t paste the doc each week. Works with web pages, Google Docs shared with &quot;Anyone with the link&quot;, and GitHub files.
+                A public page SOMA reads when you run an ingestion, so you don&apos;t paste the doc each week. On Autopilot and Full Send, SOMA also checks it every Monday and reads it again when it has changed ({SOMA_COSTS.ingest_weekly} SOMA credits). Works with web pages, Google Docs shared with &quot;Anyone with the link&quot;, and GitHub files.
               </p>
               <input
                 type="url"

@@ -18,6 +18,8 @@ import zlib from 'node:zlib'
 import type { Readable } from 'node:stream'
 
 const MAX_BYTES = 2_000_000
+/** The longest master doc SOMA keeps, pasted or fetched. */
+export const MAX_DOC_CHARS = 500_000
 const TIMEOUT_MS = 15_000
 const MAX_REDIRECTS = 3
 const MIN_TEXT_CHARS = 200

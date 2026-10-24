@@ -178,7 +178,7 @@ Landing page: https://socialmate.studio/soma
 ### How SOMA Works
 1. Identity Interview — 5-step onboarding to capture brand voice, tone, audience, and style
 2. Create a Project — define target platforms, posting frequency, and per-platform schedule
-3. Ingest Source Material — paste or upload documents, or link a Google Doc (shared with anyone with the link), a GitHub file or a public web page; up to 500,000 characters; SOMA performs Gemini-powered diff analysis against your master doc, storing versioned history
+3. Ingest Source Material — paste or upload documents, or link a Google Doc (shared with anyone with the link), a GitHub file or a public web page; up to 500,000 characters; on Autopilot and Full Send a saved link is checked every Monday and re-read (25 credits) when it has changed; SOMA performs Gemini-powered diff analysis against your master doc, storing versioned history
 4. Generate — SOMA generates platform-native posts per platform in chunked Gemini calls; in Safe mode they go to your drafts, on Autopilot and Full Send they are scheduled
 5. Review & Approve — review queue in Safe mode, or let Autopilot/Full Send schedule automatically
 

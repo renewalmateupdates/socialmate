@@ -946,7 +946,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                     placeholder="https://docs.google.com/document/d/..."
                     className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
                   />
-                  <p className="text-xs text-gray-500 mt-2">Works with public web pages, Google Docs shared with &quot;Anyone with the link&quot;, and GitHub files. Notion pages load their text with JavaScript, so paste those instead.</p>
+                  <p className="text-xs text-gray-500 mt-2">Works with public web pages, Google Docs shared with &quot;Anyone with the link&quot;, and GitHub files. Notion pages load their text with JavaScript, so paste those instead. On Autopilot and Full Send, SOMA checks a saved link every Monday and reads it again when it has changed.</p>
                 </div>
               )}
 
