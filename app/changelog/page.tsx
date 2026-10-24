@@ -21,6 +21,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'October 24, 2026',
+    version: 'SOMA Scheduling',
+    changes: [
+      { type: 'Fixed',    text: 'SOMA never puts more on a day than your schedule allows. Every run now fills only the open slots, so the Monday run and Full Send\'s daily run can no longer stack posts on the same day.' },
+      { type: 'Fixed',    text: 'SOMA\'s Monday run posts each post to its own platform at your scheduled times, instead of every post to every platform at 5 AM.' },
+      { type: 'Fixed',    text: 'Full Send\'s daily runs no longer use up the month\'s runs, so the Generate button and the Monday run keep working.' },
+      { type: 'New',      text: 'Save a link to your master doc and SOMA checks it every Monday on Autopilot and Full Send, reading the new version when it has changed.' },
+      { type: 'Improved', text: 'A SOMA run that finds every slot already filled tells you so and uses no credits.' },
+    ],
+  },
+  {
     date: 'October 23, 2026',
     version: 'Public TikTok Posting',
     changes: [

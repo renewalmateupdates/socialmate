@@ -9,10 +9,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
 import { requireAdmin } from '@/lib/admin-auth'
-import { fetchDocText } from '@/lib/soma-fetch-doc'
+import { MAX_DOC_CHARS as MAX_CHARS, fetchDocText } from '@/lib/soma-fetch-doc'
 
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
-const MAX_CHARS = 500_000
 
 // Ceiling on what actually reaches Gemini in one prompt.
 //

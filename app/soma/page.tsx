@@ -133,12 +133,12 @@ const FAQS = [
   },
   {
     q: 'What if I don\'t update my doc in a week?',
-    a: 'On Autopilot and Full Send, SOMA runs on schedule anyway, working from your latest master doc and its memory of what it already covered. In Safe Mode nothing runs until you start it.',
+    a: 'On Autopilot and Full Send, SOMA runs on schedule anyway, working from your latest master doc and its memory of what it already covered. If you saved a link to your doc, SOMA checks it every Monday and reads the new version when it has changed. In Safe Mode nothing runs until you start it.',
   },
 ]
 
 const CREDIT_ACTIONS = [
-  { action: 'Read your master doc', credits: SOMA_COSTS.ingest_weekly,   desc: 'Gemini reads the new version and pulls out what changed since the last one.', icon: Download },
+  { action: 'Read your master doc', credits: SOMA_COSTS.ingest_weekly,   desc: 'Gemini reads the new version and pulls out what changed since the last one. Also charged when the Monday run finds a saved link has changed.', icon: Download },
   { action: 'Generate a run',       credits: SOMA_COSTS.generate_week,   desc: `Posts for every platform in the project, ${L.safe.windowDays} to ${L.full_send.windowDays} days ahead depending on mode.`, icon: Zap },
   { action: 'Identity interview',   credits: SOMA_COSTS.identity_update, desc: 'Charged once, when you first finish it. Voice DNA updates after that are free.', icon: Mic },
 ]

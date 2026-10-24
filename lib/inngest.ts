@@ -27,7 +27,11 @@ import {
 } from '@/lib/enki/truth-mode'
 import { runCapReached, runCapForMode } from '@/lib/soma-runs'
 import { effectiveSomaMode } from '@/lib/soma-mode'
-import { GENERATE_COST as SOMA_GENERATE_COST, latestInsights, runSomaGeneration, type QueuedPost, type SomaRunResult } from '@/lib/soma-generate'
+import {
+  GENERATE_COST as SOMA_GENERATE_COST, INGEST_COST as SOMA_INGEST_COST,
+  collectSavedDoc, countOpenSlots, latestInsights, runSomaGeneration,
+  type InsightsSource, type QueuedPost, type SavedDocResult, type SomaRunResult,
+} from '@/lib/soma-generate'
 import { normalizePlan } from '@/lib/plan'
 import { REPLY_TO, sendMail } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
@@ -3691,15 +3695,35 @@ function somaApiKey(): string {
 const SOMA_MAX_FILL_STEPS = 6
 
 /**
- * One project's scheduled run, as Inngest steps: read the master doc, then fill
- * open slots, one step per batch so each fits the function's time limit. Only
- * the first fill step charges and counts as a run; the rest continue it.
+ * One project's scheduled run, as Inngest steps:
+ *   1. Monday only: pull the saved doc link and keep a new version if it
+ *      changed (free, no model call).
+ *   2. Count open slots. None open ends the run here: no doc read, no charge.
+ *   3. Insights: the latest ingestion, or a paid read of a newer doc.
+ *   4. Fill open slots, one step per batch so each fits the function's time
+ *      limit. Only the first fill step charges and counts as a run.
  */
 async function runScheduledSoma(step: any, project: any, trigger: 'weekly' | 'daily', apiKey: string, label: string) {
-  const { insights, ingestionId } = await step.run(`${label}-insights-${project.id}`, () =>
-    latestInsights(getSupabaseAdmin(), project, apiKey))
+  const total = {
+    postsCreated: 0, unfilled: 0, openSlots: 0, windowDays: 0,
+    mode: 'safe' as SomaRunResult['mode'],
+    platformCounts: {} as Record<string, number>,
+    doc: { status: 'none' } as SavedDocResult,
+    insightsSource: 'none' as InsightsSource,
+  }
 
-  const total = { postsCreated: 0, unfilled: 0, openSlots: 0, windowDays: 0, mode: 'safe' as SomaRunResult['mode'], platformCounts: {} as Record<string, number> }
+  if (trigger === 'weekly') {
+    total.doc = await step.run(`${label}-collect-${project.id}`, () => collectSavedDoc(getSupabaseAdmin(), project))
+  }
+
+  const open: number = await step.run(`${label}-plan-${project.id}`, () =>
+    countOpenSlots(getSupabaseAdmin(), project, project.workspaces, trigger))
+  if (open === 0) return total
+
+  const { insights, ingestionId, source } = await step.run(`${label}-insights-${project.id}`, () =>
+    latestInsights(getSupabaseAdmin(), project, apiKey))
+  total.insightsSource = source
+
   for (let batch = 0; batch < SOMA_MAX_FILL_STEPS; batch++) {
     let r: SomaRunResult
     try {
@@ -3731,15 +3755,28 @@ async function runScheduledSoma(step: any, project: any, trigger: 'weekly' | 'da
   return total
 }
 
-async function notifySomaWeeklyRun(project: any, result: Pick<SomaRunResult, 'mode' | 'postsCreated' | 'unfilled' | 'windowDays' | 'platformCounts'>) {
+/** One sentence on what happened to the project's doc this run, or '' when nothing worth saying. */
+function somaDocNote(doc: SavedDocResult, source: InsightsSource): string {
+  if (doc.status === 'failed') return `SOMA couldn't read your saved doc link: ${doc.error} It wrote from your last doc instead.`
+  if (source === 'read') return `SOMA read the new version of your doc (${SOMA_INGEST_COST} SOMA credits).`
+  if (source === 'skipped_no_credits') return `Your doc has a new version, but there weren't enough SOMA credits to read it and generate, so SOMA wrote from your last doc.`
+  if (source === 'read_failed') return `SOMA couldn't read the new version of your doc this week, so it wrote from your last doc.`
+  return ''
+}
+
+async function notifySomaWeeklyRun(
+  project: any,
+  result: Pick<SomaRunResult, 'mode' | 'postsCreated' | 'unfilled' | 'windowDays' | 'platformCounts'> & { doc: SavedDocResult; insightsSource: InsightsSource },
+) {
   const ownerId = project.workspaces?.owner_id ?? project.user_id
   const platforms = Object.keys(result.platformCounts).join(', ')
   const verb = result.mode === 'safe' ? 'drafted' : 'scheduled'
+  const docNote = somaDocNote(result.doc, result.insightsSource)
   try {
     await inngest.send({ name: 'notification/send', data: {
       user_id: ownerId, type: 'soma_autopilot',
       title: `"${project.name}" week is ready`,
-      body: `SOMA ${verb} ${result.postsCreated} posts. Review them in your queue.`,
+      body: `SOMA ${verb} ${result.postsCreated} posts. Review them in your queue.${docNote ? ` ${docNote}` : ''}`,
       link: `/soma/projects/${project.id}`,
     } })
     await sendPushNotification(ownerId, `"${project.name}" week is ready`, `SOMA ${verb} ${result.postsCreated} posts.`, `/soma/projects/${project.id}`, 'soma_autopilot')
@@ -3759,6 +3796,7 @@ async function notifySomaWeeklyRun(project: any, result: Pick<SomaRunResult, 'mo
         <p style="color:#f59e0b;font-size:18px;font-weight:900;margin:0 0 4px;">SOMA</p>
         <p style="color:#e5e5e5;font-size:16px;font-weight:700;margin:0 0 16px;">${modeLabel} ran: ${result.postsCreated} posts ${verb}</p>
         <p style="color:#888;font-size:13px;margin:0 0 20px;">Project: <strong style="color:#e5e5e5;">${project.name}</strong> · ${platforms} · the next ${result.windowDays} days</p>
+        ${docNote ? `<p style="color:#bbb;font-size:13px;margin:0 0 16px;">${docNote.replace(/</g, '&lt;')}</p>` : ''}
         ${result.unfilled > 0 ? `<p style="color:#888;font-size:12px;margin:0 0 16px;">${result.unfilled} open slots were not filled this run; the next run fills them.</p>` : ''}
         <a href="https://socialmate.studio/soma/projects/${project.id}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:12px 24px;border-radius:10px;text-decoration:none;margin-top:8px;">View schedule</a>
         <p style="color:#444;font-size:11px;margin-top:24px;">SocialMate by Gilgamesh Enterprise LLC · You're receiving this because SOMA ${modeLabel} is active.</p>
@@ -3802,6 +3840,15 @@ export const somaAutopilotRun = inngest.createFunction(
           await step.run(`autopilot-notify-${project.id}`, () => notifySomaWeeklyRun(project, result))
         } else {
           nothingOpen++
+          // A broken link is worth knowing about even in a week with nothing to fill.
+          if (result.doc.status === 'failed') {
+            await step.run(`autopilot-link-failed-${project.id}`, () => inngest.send({ name: 'notification/send', data: {
+              user_id: project.workspaces?.owner_id ?? project.user_id, type: 'soma_autopilot',
+              title: `SOMA couldn't read the doc link for "${project.name}"`,
+              body: somaDocNote(result.doc, result.insightsSource),
+              link: `/soma/projects/${project.id}`,
+            } }))
+          }
         }
       } catch (err: any) {
         console.error(`[SomaAutopilot] project ${project.id} failed:`, err?.message)
