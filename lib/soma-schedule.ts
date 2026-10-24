@@ -58,6 +58,27 @@ export function daySlots(dayKey: string, count: number, platformIndex = 0, extra
   return Array.from({ length: count }, (_, i) => new Date(winStart + i * step + step / 2 + offset))
 }
 
+/**
+ * When the next scheduled run fires: Mondays at 12:00 UTC for Autopilot and
+ * Full Send projects (lib/inngest.ts somaAutopilotRun), and every day at 13:00
+ * UTC for Full Send (somaFullSendDailyRun). Null when nothing is scheduled.
+ */
+export function nextScheduledRun(now: Date, opts: { weekly: boolean; daily: boolean }): Date | null {
+  const candidates: number[] = []
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  if (opts.daily) {
+    const at = today + 13 * 60 * MIN
+    candidates.push(at > now.getTime() ? at : at + DAY)
+  }
+  if (opts.weekly) {
+    const daysToMonday = (8 - now.getUTCDay()) % 7
+    let at = today + daysToMonday * DAY + 12 * 60 * MIN
+    if (at <= now.getTime()) at += 7 * DAY
+    candidates.push(at)
+  }
+  return candidates.length ? new Date(Math.min(...candidates)) : null
+}
+
 export interface GapPlanInput {
   /** In display order; the index staggers each platform's times. */
   platforms: string[]

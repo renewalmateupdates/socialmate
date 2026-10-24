@@ -41,15 +41,51 @@ export async function GET() {
 
     const { data: projects, error } = await admin
       .from('soma_projects')
-      .select('id, name, description, platforms, posts_per_day, content_window_days, mode, auto_collect_enabled, auto_collect_url, runs_this_month, last_generated_at, created_at')
+      .select('id, name, description, platforms, posts_per_day, content_window_days, mode, platform_schedule, paused, auto_collect_enabled, auto_collect_url, runs_this_month, last_generated_at, created_at')
       .eq('workspace_id', workspace.id)
       .order('created_at', { ascending: false })
 
     if (error) throw new Error(error.message)
 
+    // What the dashboard shows per project: its latest master doc, and how many
+    // posts it has in the next seven days (drafts included). Two batched reads.
+    const ids = (projects ?? []).map(p => p.id as string)
+    const lastDoc = new Map<string, { version: number; created_at: string }>()
+    const upcoming = new Map<string, number>()
+    if (ids.length) {
+      const now = new Date()
+      const [{ data: docs, error: docErr }, { data: soon, error: soonErr }] = await Promise.all([
+        admin.from('soma_master_docs')
+          .select('project_id, version, created_at')
+          .in('project_id', ids)
+          .order('version', { ascending: false }),
+        admin.from('posts')
+          .select('metadata')
+          .eq('workspace_id', workspace.id)
+          .in('status', ['draft', 'scheduled'])
+          .gte('scheduled_at', now.toISOString())
+          .lt('scheduled_at', new Date(now.getTime() + 7 * 86_400_000).toISOString())
+          .in('metadata->>soma_project_id', ids)
+          .limit(5000),
+      ])
+      if (docErr) console.warn('[SOMA Projects GET] doc lookup failed:', docErr.message)
+      if (soonErr) console.warn('[SOMA Projects GET] upcoming posts lookup failed:', soonErr.message)
+      for (const d of docs ?? []) {
+        if (!lastDoc.has(d.project_id)) lastDoc.set(d.project_id, { version: d.version, created_at: d.created_at })
+      }
+      for (const p of soon ?? []) {
+        const id = (p.metadata as { soma_project_id?: string } | null)?.soma_project_id
+        if (id) upcoming.set(id, (upcoming.get(id) ?? 0) + 1)
+      }
+    }
+
     const plan = await resolveWorkspacePlan(admin, user.id, workspace.id)
     return NextResponse.json({
-      projects: projects ?? [],
+      projects: (projects ?? []).map(p => ({
+        ...p,
+        last_doc:       lastDoc.get(p.id) ?? null,
+        upcoming_posts: upcoming.get(p.id) ?? 0,
+      })),
       limit: SOMA_PROJECT_LIMITS[plan],
       plan,
     })
