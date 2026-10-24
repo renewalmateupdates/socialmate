@@ -9,6 +9,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
 import { requireAdmin } from '@/lib/admin-auth'
+import { fetchDocText } from '@/lib/soma-fetch-doc'
 
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
 const MAX_CHARS = 500_000
@@ -87,16 +88,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id: projectId } = await params
 
     const body = await req.json()
-    const { content, input_method, filename, source_url } = body as {
+    const { content: submitted, input_method, filename, source_url } = body as {
       content: string
       input_method: 'text' | 'file' | 'url'
       filename?: string
       source_url?: string
     }
 
-    if (!content?.trim()) return NextResponse.json({ error: 'content is required' }, { status: 400 })
-    if (content.length > MAX_CHARS) return NextResponse.json({
-      error: `Document is too large (${content.length.toLocaleString()} chars). Maximum is ${MAX_CHARS.toLocaleString()} characters.`
+    if (input_method !== 'url' && !submitted?.trim()) return NextResponse.json({ error: 'content is required' }, { status: 400 })
+    if (input_method === 'url' && !source_url?.trim()) return NextResponse.json({ error: 'Enter a link to read.' }, { status: 400 })
+    if ((submitted?.length ?? 0) > MAX_CHARS) return NextResponse.json({
+      error: `Document is too large (${submitted.length.toLocaleString()} chars). Maximum is ${MAX_CHARS.toLocaleString()} characters.`
     }, { status: 400 })
 
     const admin = getSupabaseAdmin()
@@ -132,6 +134,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const remaining = Math.max(0, monthly - used) + purchased
 
     if (remaining < INGEST_COST) return NextResponse.json({ error: 'insufficient_soma_credits' }, { status: 402 })
+
+    // A link is read here, after ownership and credits are checked. The page
+    // used to send "Auto-collected from: <link>" as the document, and nothing
+    // ever fetched it, so every URL ingestion diffed that one line.
+    let content = submitted ?? ''
+    if (input_method === 'url') {
+      const fetched = await fetchDocText(source_url ?? '')
+      if (!fetched.ok) return NextResponse.json({ error: fetched.error }, { status: 400 })
+      if (fetched.text.length > MAX_CHARS) {
+        return NextResponse.json({ error: `That page has ${fetched.text.length.toLocaleString()} characters of text. The maximum is ${MAX_CHARS.toLocaleString()}.` }, { status: 400 })
+      }
+      content = fetched.text
+    }
 
     // Load SOMA's memory for this project
     const { data: memory } = await admin
@@ -292,6 +307,15 @@ Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celeb
       })
 
     if (docErr) return NextResponse.json({ error: 'Failed to save doc' }, { status: 500 })
+
+    // Remember the link, so the next ingestion starts with it filled in.
+    if (input_method === 'url') {
+      const { error: linkErr } = await admin
+        .from('soma_projects')
+        .update({ auto_collect_url: source_url!.trim() })
+        .eq('id', projectId)
+      if (linkErr) console.warn('[SOMA Project Ingest] could not save the doc link', linkErr)
+    }
 
     // Update SOMA's project memory with what was just ingested
     const newTopics = Array.from(new Set([
