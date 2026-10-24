@@ -1,136 +1,17 @@
 export const dynamic = 'force-dynamic'
-// This route had no maxDuration at all, so it inherited Vercel's 10s default
-// while doing one Gemini call per 14-post chunk, sequentially. A 3-platform,
-// 7-day project at 5/day is ~75 slots = 7 calls, which never finished. The
-// browser reported the killed function as "Network error. Please try again".
-// 60 is the Hobby ceiling; the chunk calls below are now parallel per platform
-// so the whole run fits inside it comfortably.
+// 60 is the Hobby ceiling. Generation stops starting new Gemini calls at 35s
+// (lib/soma-generate.ts) so the saves and the response fit inside it; whatever
+// it did not reach stays open for the next run.
 export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { SOMA_COSTS } from '@/lib/soma-costs'
 import { inngest } from '@/lib/inngest'
-import { Resend } from 'resend'
-import { runCapForMode, runCapReached, nextRunCount } from '@/lib/soma-runs'
-import { SOMA_MODE_LIMITS, effectiveSomaMode, isSomaPlatform } from '@/lib/soma-mode'
-import { REPLY_TO } from '@/lib/mail'
-
-const GENERATE_COST = SOMA_COSTS.generate_week // 75
-
-const PLATFORM_INSTRUCTIONS: Record<string, string> = {
-  twitter:   'Twitter/X: ≤280 chars. Punchy, direct, hook in first line. No hashtag overload — max 2.',
-  bluesky:   'Bluesky: ≤300 chars. Conversational, authentic tone. Community-friendly.',
-  linkedin:  'LinkedIn: 3-6 sentences. Professional but human. Start with a hook, end with a question or takeaway. Can use line breaks.',
-  mastodon:  'Mastodon: ≤500 chars. Community-native, no corporate tone. Open-source/indie friendly.',
-  instagram: 'Instagram: Caption style. 3-5 sentences + 5-8 relevant hashtags on a new line.',
-  discord:   'Discord: Casual announcement style. Can use **bold** for emphasis. Keep it concise.',
-  telegram:  'Telegram: Conversational, can be slightly longer. Friendly, direct tone. No hashtag spam.',
-}
-
-const CONTENT_TYPES = ['mindset', 'progress', 'insight', 'story', 'value', 'question', 'win', 'lesson']
-
-const STOP_WORDS = new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','to','of','in','for','on','with','at','by','from','as','it','its','this','that','and','or','but','if','you','we','your','our','my','not','just','so','up','out','down','what','how','when','where','who','why','all','can','get','let','its','than','then','been','was','one','more','some','here','there'])
-
-function extractKeyword(content: string): string {
-  const words = content.replace(/[#@\n]/g, ' ').replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(/\s+/)
-  const meaningful = words.filter(w => w.length > 3 && !STOP_WORDS.has(w))
-  return meaningful.slice(0, 3).join(' ') || 'creator social media'
-}
-
-/**
- * Run async work with a ceiling on how many are in flight.
- *
- * Generation used to call Gemini once per chunk, sequentially. That was slow
- * enough to blow the request timeout, but it was also — by accident — never
- * anywhere near Gemini's rate limit, because seven calls spread over two
- * minutes is about 3 requests/minute.
- *
- * Firing all seven at once fixed the timeout and immediately broke the other
- * end: free-tier Gemini allows roughly 15 requests/minute, and seven parallel
- * calls plus up to three retries each is 21 in a few seconds. Every 429 came
- * back as a short or empty chunk and was silently dropped, which is why a run
- * that reported success wrote 26 of ~75 posts.
- *
- * Neither extreme works. This runs a few at a time: quick enough to finish
- * inside the function budget, paced enough to stay under the quota, and it
- * does not require anyone to shrink their posting schedule to compensate.
- */
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results = new Array<R>(items.length)
-  let next = 0
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const i = next++
-      if (i >= items.length) return
-      results[i] = await fn(items[i])
-    }
-  })
-  await Promise.all(workers)
-  return results
-}
-
-interface UnsplashResult { url: string; attribution: string }
-
-// Fetch a unique Unsplash image. usedUrls tracks already-used photos within
-// this generation run so the same image never appears twice in one batch.
-// Uses urls.small (~400px) instead of urls.regular to stay under Bluesky's 1MB blob limit.
-async function fetchUnsplashImage(keyword: string, usedUrls: Set<string>): Promise<UnsplashResult | null> {
-  const key = process.env.UNSPLASH_ACCESS_KEY
-  if (!key) return null
-
-  // Try up to 3 times to get an image we haven't used yet
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      // Add a random seed on retries so Unsplash gives a different photo
-      const seed = attempt > 0 ? `&seed=${Date.now()}${attempt}` : ''
-      const res = await fetch(
-        `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${key}${seed}`,
-        { signal: AbortSignal.timeout(5000) }
-      )
-      if (!res.ok) return null
-      const data = await res.json() as {
-        urls?: { small?: string; regular?: string }
-        user?: { name?: string; links?: { html?: string } }
-        links?: { download_location?: string }
-      }
-      // Use small (400px, ~200-400KB) to stay under Bluesky's 1MB blob limit
-      const url = data?.urls?.small ?? data?.urls?.regular
-      if (!url) return null
-
-      // If this photo was already used in this batch, try again
-      if (usedUrls.has(url) && attempt < 2) continue
-
-      const photographerName = data?.user?.name ?? 'Unknown'
-      const photographerUrl  = data?.user?.links?.html ?? 'https://unsplash.com'
-      // Required by Unsplash API guidelines: trigger download tracking
-      const downloadLocation = data?.links?.download_location
-      if (downloadLocation) {
-        fetch(`${downloadLocation}?client_id=${key}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
-      }
-
-      const result: UnsplashResult = {
-        url,
-        attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
-      }
-      usedUrls.add(url)
-      return result
-    } catch {
-      return null
-    }
-  }
-  return null
-}
-
-function parseGeminiJson(text: string): any {
-  return JSON.parse(text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim())
-}
+import { sendMail } from '@/lib/mail'
+import { runCapForMode, runCapReached } from '@/lib/soma-runs'
+import { effectiveSomaMode } from '@/lib/soma-mode'
+import { GENERATE_COST, SomaRunError, runSomaGeneration, type SomaInsights } from '@/lib/soma-generate'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -148,40 +29,10 @@ async function getUser() {
   return user
 }
 
-// Evenly space N posts across a 1pm–11pm UTC window (9am–7pm EDT / 6am–4pm PDT).
-// slotIndex is 0-based (0 = first post of the day, N-1 = last).
-// startDate (YYYY-MM-DD) overrides today as the base date.
-function scheduledAt(dayOffset: number, slotIndex: number, postsPerDay: number, startDate?: string): string {
-  const base = startDate ? new Date(`${startDate}T12:00:00Z`) : new Date()
-  base.setUTCDate(base.getUTCDate() + dayOffset)
-  const startHour = 13  // 1pm UTC = 9am EDT / 6am PDT
-  const endHour   = 23  // 11pm UTC = 7pm EDT / 4pm PDT
-  const range     = endHour - startHour // 14 hours
-  const gapMins   = postsPerDay > 1
-    ? Math.round((range * 60) / (postsPerDay - 1))
-    : range * 30 // single post → 3pm UTC
-  const totalMins = postsPerDay > 1
-    ? slotIndex * gapMins
-    : range * 30
-  base.setUTCHours(startHour, 0, 0, 0)
-  base.setUTCMinutes(base.getUTCMinutes() + totalMins)
-  return base.toISOString()
-}
-
-// Returns day offsets (0..windowDays-1) that fall on active days of week for this platform.
-// startDate (YYYY-MM-DD) overrides today as the base date.
-function getActiveDayOffsets(windowDays: number, activeDows: number[], startDate?: string): number[] {
-  const offsets: number[] = []
-  const base = startDate ? new Date(`${startDate}T12:00:00Z`) : new Date()
-  for (let d = 0; d < windowDays; d++) {
-    const date = new Date(base)
-    date.setUTCDate(base.getUTCDate() + d)
-    if (activeDows.includes(date.getUTCDay())) offsets.push(d)
-  }
-  return offsets
-}
-
 // POST /api/soma/projects/[id]/generate
+// Fills the project's open slots from the ingestion the user just ran. The
+// generation itself lives in lib/soma-generate.ts, shared with the Monday run
+// and Full Send's daily run.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUser()
@@ -193,359 +44,124 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const admin = getSupabaseAdmin()
     // Prefer GEMINI_API_KEY (the key the rest of the app uses and known good);
-    // GOOGLE_AI_API_KEY is only a fallback. A stale GOOGLE_AI_API_KEY picked first
-    // here was being rejected by Google and breaking generation.
+    // GOOGLE_AI_API_KEY is only a fallback.
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'AI service not configured' }, { status: 500 })
 
-    // Fetch project including per-platform schedule
-    const { data: project } = await admin
+    const { data: project, error: projectErr } = await admin
       .from('soma_projects')
-      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end, include_media, include_video_url')
+      .select('*')
       .eq('id', projectId)
       .eq('user_id', user.id)
-      .single()
-
+      .maybeSingle()
+    if (projectErr) console.error('[SOMA Generate] project lookup failed:', projectErr.message)
     if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 
-    // Credits check
-    const { data: workspace } = await admin
+    const { data: workspace, error: wsErr } = await admin
       .from('workspaces')
       .select('id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled')
       .eq('id', project.workspace_id)
-      .single()
-
+      .maybeSingle()
+    if (wsErr) console.error('[SOMA Generate] workspace lookup failed:', wsErr.message)
     if (!workspace) return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
 
     // The mode the workspace pays for right now, not the one saved on the
-    // project. A cancelled add-on falls back to Safe: drafts that wait for
-    // approval instead of posts that go live on their own.
+    // project. A cancelled add-on falls back to Safe.
     const mode = effectiveSomaMode(project.mode, workspace)
-
-    const monthly   = workspace.soma_credits_monthly ?? 0
-    const used      = workspace.soma_credits_used ?? 0
-    const purchased = workspace.soma_credits_purchased ?? 0
-    const remaining = Math.max(0, monthly - used) + purchased
-
+    const remaining = Math.max(0, (workspace.soma_credits_monthly ?? 0) - (workspace.soma_credits_used ?? 0)) + (workspace.soma_credits_purchased ?? 0)
     if (remaining < GENERATE_COST) return NextResponse.json({ error: 'insufficient_soma_credits' }, { status: 402 })
 
-    // Run cap check. runCapReached reads the stored counter as zero when the
-    // last generation predates this month, which is what makes the monthly
-    // reset happen at all — nothing else in the system ever cleared it.
     const runCap = runCapForMode(mode)
     if (runCapReached(project, runCap)) {
       return NextResponse.json({ error: 'monthly_run_cap_reached', cap: runCap }, { status: 429 })
     }
 
-    // Fetch ingestion
-    const { data: ingestion } = await admin
+    const { data: ingestion, error: ingErr } = await admin
       .from('soma_weekly_ingestion')
-      .select('*')
+      .select('id, extracted_insights')
       .eq('id', ingestion_id)
       .eq('user_id', user.id)
-      .single()
-
+      .maybeSingle()
+    if (ingErr) console.error('[SOMA Generate] ingestion lookup failed:', ingErr.message)
     if (!ingestion) return NextResponse.json({ error: 'Ingestion not found' }, { status: 404 })
 
-    // Fetch voice profile
-    const { data: profile } = await admin
-      .from('soma_identity_profiles')
-      .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary, personality_tier')
-      .eq('workspace_id', project.workspace_id)
-      .maybeSingle()
-
-    const identityContext = profile?.personality_summary
-      ? `CREATOR VOICE DNA (${(profile.personality_tier as string ?? 'foundation').replace('_', ' ')} tier):
-${profile.personality_summary}
-
-ONBOARDING VOICE PROFILE:
-Tone: ${JSON.stringify(profile.tone_profile)}
-Style: ${JSON.stringify(profile.writing_style_rules)}
-Avoid: ${(profile.tone_profile as any)?.avoid ?? 'generic AI phrases'}
-Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}`
-      : profile
-      ? `CREATOR VOICE PROFILE:
-Tone: ${JSON.stringify(profile.tone_profile)}
-Style: ${JSON.stringify(profile.writing_style_rules)}
-Personality: ${JSON.stringify(profile.behavioral_traits)}
-Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}`
-      : 'No voice profile — use authentic, direct, human tone.'
-
-    const insights    = ingestion.extracted_insights as any
-    const platforms   = ((project.platforms ?? []) as string[]).filter(isSomaPlatform)
-    const windowDays  = Math.min(project.content_window_days ?? 7, SOMA_MODE_LIMITS[mode].windowDays)
-    const globalPpd   = project.posts_per_day ?? 2
-    const schedule    = (project.platform_schedule ?? {}) as Record<string, { posts_per_day: number; days: number[] }>
-    const maxPpd      = SOMA_MODE_LIMITS[mode].postsPerDay
-
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
-
-    const campaignTheme = (project as any).campaign_theme as string | null
-    const campaignStart = (project as any).campaign_start as string | null
-    const campaignEnd   = (project as any).campaign_end   as string | null
-    const campaignBlock = campaignTheme
-      ? `\n\nACTIVE CAMPAIGN: Focus ALL content heavily on "${campaignTheme}". ${campaignStart && campaignEnd ? `This campaign runs ${campaignStart} to ${campaignEnd}.` : ''} Make every post timely and specific to this campaign theme. Weave the campaign angle into every piece of content.`
-      : ''
-
-    const includeVideoUrl = (project as any).include_video_url as string | null
-    const videoBlock = includeVideoUrl
-      ? `\n\nVIDEO URL TO INCLUDE: ${includeVideoUrl}\nNaturally include this video URL in each post. You can append it at the end on its own line, or weave it in naturally with context like "Watch here:" or "Full clip:" — but always include it so followers can actually watch the video.`
-      : ''
-
-    const insightBlock = `THIS WEEK'S INSIGHTS (from master doc diff):
-Key themes: ${insights.key_themes?.join(', ') ?? 'none'}
-Wins: ${insights.wins?.join(', ') ?? 'none'}
-Challenges: ${insights.challenges?.join(', ') ?? 'none'}
-What changed: ${insights.diff_summary ?? 'New content week'}
-Content angles: ${insights.content_angles?.join(' | ') ?? 'none'}
-Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
-
-    // Generate posts platform by platform so each gets its own post count + scheduling.
-    // Gemini reliably handles ~14 posts per call — chunk larger batches to avoid truncated JSON.
-    const CHUNK_SIZE = 14
-    const allPostIds: string[] = []
-    const platformErrors: Record<string, string> = {}
-    const platformCounts: Record<string, number> = {}
-    // Track used Unsplash photo URLs across ALL platforms in this run to prevent duplicates
-    const usedImageUrls = new Set<string>()
-
-    // Build every Gemini call up front, then fire them all at once.
-    //
-    // This used to be a sequential loop over platforms, each awaiting its own
-    // chunk calls. #598 made a platform's chunks parallel but left the platforms
-    // themselves serialised, so a 3-platform project still cost three full call
-    // durations back to back -- roughly 75s against Vercel Hobby's hard 60s
-    // ceiling. The function was killed and the browser called it a network error.
-    //
-    // Nothing here actually depends on anything else: every slot is precomputed
-    // and every prompt carries its own slot list. So the whole run collapses to
-    // roughly the duration of the single slowest call.
-    type Job = { platform: string; ppd: number; instruction: string; chunk: { dayOffset: number; dayIdx: number; slotIdx: number }[] }
-    const jobs: Job[] = []
-
-    if (((project.platforms ?? []) as string[]).includes('tiktok')) {
-      platformErrors['tiktok'] = 'SOMA writes text, and TikTok takes video only, so TikTok was skipped. Post videos from TikTok Studio.'
-    }
-
-    for (const platform of platforms) {
-      const cfg        = schedule[platform] ?? { posts_per_day: globalPpd, days: [0,1,2,3,4,5,6] }
-      const ppd        = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPpd)
-      const activeDows = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
-      const dayOffsets = getActiveDayOffsets(windowDays, activeDows, start_date)
-      if (dayOffsets.length === 0 || ppd === 0) continue
-
-      const instruction = PLATFORM_INSTRUCTIONS[platform] ?? `${platform}: Keep it natural and platform-appropriate.`
-
-      type Slot = { dayOffset: number; dayIdx: number; slotIdx: number }
-      const allSlots: Slot[] = []
-      dayOffsets.forEach((dayOffset, dayIdx) => {
-        for (let slotIdx = 0; slotIdx < ppd; slotIdx++) allSlots.push({ dayOffset, dayIdx, slotIdx })
-      })
-
-      for (let i = 0; i < allSlots.length; i += CHUNK_SIZE) {
-        jobs.push({ platform, ppd, instruction, chunk: allSlots.slice(i, i + CHUNK_SIZE) })
-      }
-    }
-
-    console.log('[SOMA Generate] project:', projectId, '| platforms:', platforms.join(','), '| parallel gemini calls:', jobs.length)
-
-    // 3 at a time keeps peak load around 3 req/s worst case, well under the
-    // free-tier ceiling, while still finishing 7 chunks in 3 waves rather than 7.
-    const GEMINI_CONCURRENCY = 3
-    const jobResults = await mapWithConcurrency(jobs, GEMINI_CONCURRENCY, async (job) => {
-      const { platform, instruction, chunk } = job
-      const chunkDays = chunk.length
-      const prompt = `${identityContext}
-
-${insightBlock}${videoBlock}
-
-PLATFORM: ${platform.toUpperCase()}
-FORMAT RULES: ${instruction}
-
-Generate exactly ${chunkDays} posts for ${platform}.
-
-Return ONLY valid JSON:
-{
-  "posts": [
-    {
-      "day_index": 0,
-      "slot_index": 0,
-      "content": "the post content",
-      "content_type": "mindset"
-    }
-  ]
-}
-
-Required slots (day_index, slot_index) — generate one post for EACH:
-${chunk.map((s, i) => `${i}: day_index=${s.dayIdx} slot_index=${s.slotIdx}`).join('\n')}
-
-Rules:
-- content_type: vary across ${CONTENT_TYPES.join(', ')}
-- NEVER use: "In today's world", "Let's dive in", "game-changer", "synergy", "leverage"
-- Make content specific to THIS week's actual themes — not generic
-- Sound human, not AI-generated
-- Respect the character limit for ${platform}`
-
-      // Retry each chunk. There was no retry here at all, so a chunk that hit a
-      // rate limit, came back empty, or returned fewer posts than slots was
-      // simply lost -- which is how a run that reported success wrote 26 of the
-      // ~75 posts the schedule asks for. Firing every chunk at once makes a 429
-      // more likely rather than less, so the backoff matters.
-      let lastError = 'Unknown Gemini error'
-      let best: any[] = []
-      for (let attempt = 0; attempt < 3; attempt++) {
-        // Longer waits on a rate limit than on a malformed response: 429s are
-        // per-minute and clear on their own, so backing off is the whole fix.
-        if (attempt > 0) {
-          const isRateLimit = /429|quota|rate/i.test(lastError)
-          await new Promise(r => setTimeout(r, (isRateLimit ? 6000 : 1500) * attempt))
-        }
-        try {
-          const result = await model.generateContent(prompt)
-          const posts  = parseGeminiJson(result.response.text()).posts ?? []
-          if (posts.length >= chunkDays) return { job, posts, error: null as string | null }
-          // Short is not the same as failed. Hold the best partial and try again
-          // for a complete one rather than discarding what we got.
-          if (posts.length > best.length) best = posts
-          lastError = `Returned ${posts.length} of ${chunkDays} requested posts`
-          console.warn(`[SOMA Generate] ${platform} attempt ${attempt + 1}: ${lastError}`)
-        } catch (aiErr: any) {
-          lastError = aiErr?.message ?? 'Unknown Gemini error'
-          console.error(`[SOMA Generate] ${platform} attempt ${attempt + 1} error:`, lastError)
-        }
-      }
-      console.error(`[SOMA Generate] ${platform}: gave up after 3 attempts -- ${lastError}`)
-      return { job, posts: best, error: lastError }
-    })
-
-    // Inserts stay sequential: they share usedImageUrls for Unsplash dedup and
-    // their order drives scheduling. Only the model calls were parallelised.
-    for (const { job, posts: chunkPosts, error: chunkError } of jobResults) {
-      const { platform, ppd, chunk } = job
-      if (chunkError) platformErrors[platform] = chunkError
-      if (!chunkPosts.length) continue
-
-      // Clamp to the slot count. `chunk[i] ?? chunk[chunk.length - 1]` silently
-      // stacked every surplus post onto the final slot, which is how Telegram
-      // ended up with two posts at the same minute on five separate days.
-      const usable = Math.min(chunkPosts.length, chunk.length)
-      for (let i = 0; i < usable; i++) {
-        const post = chunkPosts[i]
-        const slot = chunk[i]
-
-        let mediaUrls: string[] | undefined
-        if (project.include_media) {
-          const keyword = extractKeyword(post.content ?? '')
-          const result  = await fetchUnsplashImage(keyword, usedImageUrls)
-          if (result) mediaUrls = [result.url, result.attribution]
-        }
-
-        const { data: inserted, error: postErr } = await admin
-          .from('posts')
-          .insert({
-            user_id:      user.id,
-            workspace_id: project.workspace_id,
-            content:      post.content,
-            platforms:    [platform],
-            status:       mode === 'safe' ? 'draft' : 'scheduled',
-            scheduled_at: scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date),
-            destinations: {},
-            ...(mediaUrls ? { media_urls: mediaUrls } : {}),
-          })
-          .select('id')
-          .single()
-
-        if (postErr) console.error(`[SOMA Generate] insert error (${platform}):`, postErr.message)
-        else if (inserted) {
-          allPostIds.push(inserted.id)
-          platformCounts[platform] = (platformCounts[platform] ?? 0) + 1
-          if (mode !== 'safe') {
-            const scheduledAtIso = scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date)
-            inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt: scheduledAtIso } }).catch(() => {})
-          }
-        }
-      }
-    }
-
-    const postsCreated = allPostIds.length
-
-    // Update ingestion + project
-    await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion_id)
-    await admin.from('soma_projects').update({
-      // nextRunCount rolls over to 1 on the first run of a new month rather
-      // than adding to last month's total, so the stored value converges.
-      runs_this_month: nextRunCount(project),
-      last_generated_at: new Date().toISOString(),
-    }).eq('id', projectId)
-
-    // Update SOMA memory — increment post count (non-fatal)
+    let result
     try {
-      const { data: mem } = await admin
-        .from('soma_project_memory')
-        .select('total_posts_generated')
-        .eq('project_id', projectId)
-        .maybeSingle()
-      if (mem) {
-        await admin.from('soma_project_memory')
-          .update({ total_posts_generated: (mem.total_posts_generated ?? 0) + postsCreated, updated_at: new Date().toISOString() })
-          .eq('project_id', projectId)
+      result = await runSomaGeneration({
+        admin,
+        project,
+        workspace,
+        trigger:     'manual',
+        insights:    (ingestion.extracted_insights ?? null) as SomaInsights | null,
+        ingestionId: ingestion.id,
+        actorUserId: user.id,
+        startDate:   start_date ?? null,
+        apiKey,
+        enqueue: async (posts) => {
+          await inngest.send(posts.map(p => ({ name: 'post/scheduled', data: p })))
+        },
+      })
+    } catch (err) {
+      if (err instanceof SomaRunError) {
+        console.error(`[SOMA Generate] ${err.code} for project ${projectId}:`, err.message)
+        return NextResponse.json({
+          error: err.code === 'generation_failed'
+            ? 'SOMA could not write posts right now. Nothing was charged. Try again in a few minutes.'
+            : 'SOMA could not check what is already scheduled, so it did not generate. Nothing was charged. Try again in a minute.',
+        }, { status: 502 })
       }
-    } catch { /* non-fatal */ }
+      throw err
+    }
 
-    // Deduct credits
-    const monthlyAvailable = Math.max(0, monthly - used)
-    const newUsed      = monthlyAvailable >= GENERATE_COST ? used + GENERATE_COST : monthly
-    const newPurchased = monthlyAvailable >= GENERATE_COST ? purchased : purchased - (GENERATE_COST - monthlyAvailable)
-    const balanceAfter = Math.max(0, monthly - newUsed) + newPurchased
+    if (result.openSlots === 0) {
+      return NextResponse.json({
+        success: true,
+        nothing_to_fill: true,
+        posts_created: 0,
+        post_ids: [],
+        mode: result.mode,
+        window_days: result.windowDays,
+        charged: 0,
+      })
+    }
 
-    await admin.from('workspaces').update({ soma_credits_used: newUsed, soma_credits_purchased: newPurchased }).eq('id', workspace.id)
-    await admin.from('soma_credit_ledger').insert({
-      workspace_id: workspace.id,
-      user_id:      user.id,
-      action_type:  'generate_week',
-      credits_used: GENERATE_COST,
-      balance_after: balanceAfter,
-    })
-
-    // Email notification — non-fatal
     if (user.email && process.env.RESEND_API_KEY) {
       try {
-        const resend      = new Resend(process.env.RESEND_API_KEY)
-        const isAutomated = mode !== 'safe'
-        const subject     = isAutomated
-          ? `SOMA scheduled ${postsCreated} posts across ${platforms.join(', ')}`
-          : `Your SOMA content queue is ready to review`
-
-        await resend.emails.send({
+        const automated = result.mode !== 'safe'
+        await sendMail({
           from:    'SOMA <soma@socialmate.studio>',
-          replyTo: REPLY_TO,
           to:      user.email,
-          subject,
+          subject: automated
+            ? `SOMA scheduled ${result.postsCreated} posts across ${Object.keys(result.platformCounts).join(', ')}`
+            : 'Your SOMA drafts are ready to review',
           html: `<p style="font-family:sans-serif;color:#e5e7eb;background:#0f0f0f;padding:32px;border-radius:8px;">
-            <strong style="color:#f59e0b;font-size:18px;">⚡ SOMA</strong><br/><br/>
-            ${isAutomated
-              ? `<strong>${postsCreated} posts scheduled</strong> across <strong>${platforms.join(', ')}</strong> for the next ${windowDays} days.`
-              : `<strong>${postsCreated} drafts</strong> are ready for your review.`}
+            <strong style="color:#f59e0b;font-size:18px;">SOMA</strong><br/><br/>
+            ${automated
+              ? `<strong>${result.postsCreated} posts scheduled</strong> across <strong>${Object.keys(result.platformCounts).join(', ')}</strong> for the next ${result.windowDays} days.`
+              : `<strong>${result.postsCreated} drafts</strong> are ready for your review.`}
             <br/><br/>
-            <a href="https://socialmate.studio/${mode === 'safe' ? 'soma/dashboard' : 'queue'}"
+            <a href="https://socialmate.studio/${automated ? 'queue' : 'soma/dashboard'}"
                style="background:#f59e0b;color:#000;font-weight:700;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px;">
-              ${mode === 'safe' ? 'Review Queue →' : 'View Schedule →'}
+              ${automated ? 'View schedule' : 'Review drafts'}
             </a>
           </p>`,
         })
       } catch (emailErr) {
-        console.error('[SOMA Generate] Email failed (non-fatal):', emailErr)
+        console.error('[SOMA Generate] email failed (non-fatal):', emailErr)
       }
     }
 
     return NextResponse.json({
-      success: true,
-      posts_created: postsCreated,
-      post_ids: allPostIds,
-      mode,
-      platform_counts: platformCounts,
-      platform_errors: Object.keys(platformErrors).length > 0 ? platformErrors : undefined,
+      success:         true,
+      posts_created:   result.postsCreated,
+      post_ids:        result.postIds,
+      mode:            result.mode,
+      window_days:     result.windowDays,
+      open_slots:      result.openSlots,
+      unfilled:        result.unfilled,
+      charged:         result.charged,
+      platform_counts: result.platformCounts,
+      platform_errors: Object.keys(result.platformErrors).length > 0 ? result.platformErrors : undefined,
     })
   } catch (err) {
     console.error('[SOMA Project Generate POST]', err)

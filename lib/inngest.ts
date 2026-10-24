@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { createDecipheriv } from 'crypto'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { SOMA_COSTS, SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
+import { SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
 import { buildIrisEmailHtml } from '@/lib/iris-email'
 import { lifecycleEmail, getActivationState } from '@/lib/lifecycle-emails'
 import {
@@ -25,11 +25,11 @@ import {
   truthCalcCorrelation,
   type TruthSignal, type TruthStrategy,
 } from '@/lib/enki/truth-mode'
-import { runCapReached, nextRunCount, runCapForMode } from '@/lib/soma-runs'
-import { SOMA_MODE_LIMITS, effectiveSomaMode, isSomaPlatform } from '@/lib/soma-mode'
-import { fullSendSlots } from '@/lib/soma-schedule'
+import { runCapReached, runCapForMode } from '@/lib/soma-runs'
+import { effectiveSomaMode } from '@/lib/soma-mode'
+import { GENERATE_COST as SOMA_GENERATE_COST, latestInsights, runSomaGeneration, type QueuedPost, type SomaRunResult } from '@/lib/soma-generate'
 import { normalizePlan } from '@/lib/plan'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, sendMail } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
@@ -3660,725 +3660,198 @@ export const streakNotifications = inngest.createFunction(
   }
 )
 
-function somaParseGeminiJson(text: string): any {
-  return JSON.parse(
-    text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
-  )
+// ─── SOMA scheduled runs ──────────────────────────────────────────────────────
+// Both jobs go through lib/soma-generate.ts, the same path as the Generate
+// button, and it fills only the open slots. That is what lets the Monday run
+// and Full Send's daily run coexist: the Monday run fills the mode's window,
+// and the daily run tops up today and tomorrow, which after a Monday fill is
+// usually nothing, so it costs nothing. They used to plan independently and a
+// Full Send platform could get 14 posts in a day against its cap of 7.
+//
+// A run that finds no open slot makes no model call, charges nothing and
+// counts no run, which also makes a retried step harmless.
+
+const SOMA_PROJECT_SELECT = '*, workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled)'
+
+function somaCreditsLeft(ws: any): number {
+  return Math.max(0, (ws?.soma_credits_monthly ?? 0) - (ws?.soma_credits_used ?? 0)) + (ws?.soma_credits_purchased ?? 0)
 }
 
-const SOMA_PLATFORM_INSTRUCTIONS: Record<string, string> = {
-  twitter:   'Twitter/X: ≤280 chars. Punchy, direct, hook in first line. Max 2 hashtags.',
-  bluesky:   'Bluesky: ≤300 chars. Conversational, authentic. Community-friendly.',
-  linkedin:  'LinkedIn: 3-6 sentences. Professional but human. Start with hook, end with question or takeaway.',
-  mastodon:  'Mastodon: ≤500 chars. Community-native, no corporate tone.',
-  instagram: 'Instagram: Caption style. 3-5 sentences + 5-8 relevant hashtags on new line.',
-  discord:   'Discord: Casual announcement style. Can use **bold** for emphasis. Concise.',
+async function queueSomaPosts(posts: QueuedPost[]) {
+  if (posts.length) await inngest.send(posts.map(p => ({ name: 'post/scheduled', data: p })))
+}
+
+function somaApiKey(): string {
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY
+  if (!key) throw new Error('Missing Gemini API key (GEMINI_API_KEY)')
+  return key
+}
+
+/** A scheduled run's fill steps stop after this many, whatever is still open. */
+const SOMA_MAX_FILL_STEPS = 6
+
+/**
+ * One project's scheduled run, as Inngest steps: read the master doc, then fill
+ * open slots, one step per batch so each fits the function's time limit. Only
+ * the first fill step charges and counts as a run; the rest continue it.
+ */
+async function runScheduledSoma(step: any, project: any, trigger: 'weekly' | 'daily', apiKey: string, label: string) {
+  const { insights, ingestionId } = await step.run(`${label}-insights-${project.id}`, () =>
+    latestInsights(getSupabaseAdmin(), project, apiKey))
+
+  const total = { postsCreated: 0, unfilled: 0, openSlots: 0, windowDays: 0, mode: 'safe' as SomaRunResult['mode'], platformCounts: {} as Record<string, number> }
+  for (let batch = 0; batch < SOMA_MAX_FILL_STEPS; batch++) {
+    let r: SomaRunResult
+    try {
+      r = await step.run(`${label}-fill-${project.id}-${batch}`, () => runSomaGeneration({
+        admin:        getSupabaseAdmin(),
+        project,
+        workspace:    project.workspaces,
+        trigger,
+        insights,
+        ingestionId,
+        actorUserId:  project.user_id,
+        apiKey,
+        enqueue:      queueSomaPosts,
+        continuation: batch > 0,
+      }))
+    } catch (err: any) {
+      // The first step failing fails the run. A later one failing leaves what
+      // the earlier steps wrote (and charged for) in place; the rest stays open.
+      if (batch === 0) throw err
+      console.warn(`[SOMA ${trigger}] project ${project.id} stopped after ${batch} fill steps:`, err?.message)
+      break
+    }
+    if (batch === 0) Object.assign(total, { openSlots: r.openSlots, windowDays: r.windowDays, mode: r.mode })
+    total.postsCreated += r.postsCreated
+    total.unfilled = r.unfilled
+    for (const [p, n] of Object.entries(r.platformCounts)) total.platformCounts[p] = (total.platformCounts[p] ?? 0) + n
+    if (r.openSlots === 0 || r.unfilled === 0) break
+  }
+  return total
+}
+
+async function notifySomaWeeklyRun(project: any, result: Pick<SomaRunResult, 'mode' | 'postsCreated' | 'unfilled' | 'windowDays' | 'platformCounts'>) {
+  const ownerId = project.workspaces?.owner_id ?? project.user_id
+  const platforms = Object.keys(result.platformCounts).join(', ')
+  const verb = result.mode === 'safe' ? 'drafted' : 'scheduled'
+  try {
+    await inngest.send({ name: 'notification/send', data: {
+      user_id: ownerId, type: 'soma_autopilot',
+      title: `"${project.name}" week is ready`,
+      body: `SOMA ${verb} ${result.postsCreated} posts. Review them in your queue.`,
+      link: `/soma/projects/${project.id}`,
+    } })
+    await sendPushNotification(ownerId, `"${project.name}" week is ready`, `SOMA ${verb} ${result.postsCreated} posts.`, `/soma/projects/${project.id}`, 'soma_autopilot')
+  } catch (err: any) {
+    console.error('[SomaAutopilot] notification failed:', err?.message)
+  }
+  try {
+    const { data: owner } = await getSupabaseAdmin().auth.admin.getUserById(ownerId)
+    const email = owner?.user?.email
+    if (!email || !process.env.RESEND_API_KEY) return
+    const modeLabel = result.mode === 'full_send' ? 'Full Send' : 'Autopilot'
+    await sendMail({
+      from:    'SOMA <soma@socialmate.studio>',
+      to:      email,
+      subject: `SOMA ${verb} ${result.postsCreated} posts for "${project.name}"`,
+      html: `<div style="background:#0f0f0f;font-family:sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
+        <p style="color:#f59e0b;font-size:18px;font-weight:900;margin:0 0 4px;">SOMA</p>
+        <p style="color:#e5e5e5;font-size:16px;font-weight:700;margin:0 0 16px;">${modeLabel} ran: ${result.postsCreated} posts ${verb}</p>
+        <p style="color:#888;font-size:13px;margin:0 0 20px;">Project: <strong style="color:#e5e5e5;">${project.name}</strong> · ${platforms} · the next ${result.windowDays} days</p>
+        ${result.unfilled > 0 ? `<p style="color:#888;font-size:12px;margin:0 0 16px;">${result.unfilled} open slots were not filled this run; the next run fills them.</p>` : ''}
+        <a href="https://socialmate.studio/soma/projects/${project.id}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:12px 24px;border-radius:10px;text-decoration:none;margin-top:8px;">View schedule</a>
+        <p style="color:#444;font-size:11px;margin-top:24px;">SocialMate by Gilgamesh Enterprise LLC · You're receiving this because SOMA ${modeLabel} is active.</p>
+      </div>`,
+    })
+  } catch (err: any) {
+    console.error('[SomaAutopilot] email failed:', err?.message)
+  }
 }
 
 export const somaAutopilotRun = inngest.createFunction(
   { id: 'soma-autopilot-run', name: 'SOMA Autopilot Run', retries: 1 },
   { cron: '0 12 * * 1' }, // Every Monday at noon UTC (~8 AM ET)
   async ({ step }) => {
-    const GENERATE_COST = SOMA_COSTS.generate_week // 75 credits
-    const now = new Date()
-    const weekLabel = `Auto — Week of ${now.toISOString().slice(0, 10)}`
-    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
-
-    // Find all autopilot/full_send projects whose workspaces have enough credits
     const eligibleProjects = await step.run('find-autopilot-projects', async () => {
-      const admin = getSupabaseAdmin()
-
-      const { data: projects, error } = await admin
+      const { data, error } = await getSupabaseAdmin()
         .from('soma_projects')
-        .select(`
-          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
-          workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled)
-        `)
+        .select(SOMA_PROJECT_SELECT)
         .in('mode', ['autopilot', 'full_send'])
-
-      if (error) {
-        console.error('[SomaAutopilot] Failed to query projects:', error.message)
-        return []
-      }
-
-      return (projects ?? []).filter((p: any) => {
-        const ws = p.workspaces
+      if (error) throw new Error(`[SomaAutopilot] project query failed: ${error.message}`)
+      return (data ?? []).filter((p: any) => {
         // The mode the workspace pays for: a Full Send project in an
         // Autopilot-only workspace runs on Autopilot's limits.
-        if (effectiveSomaMode(p.mode, ws) === 'safe') return false
-        // Skip paused projects
-        if (p.paused) return false
-        const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
-        // Run cap check — see lib/soma-runs.ts. The stored counter reads as
-        // zero once the month rolls over, which is the reset.
-        const runCap = runCapForMode(effectiveSomaMode(p.mode, ws))
-        if (runCapReached(p, runCap)) return false
-        return remaining >= GENERATE_COST
+        const mode = effectiveSomaMode(p.mode, p.workspaces)
+        if (mode === 'safe' || p.paused) return false
+        if (runCapReached(p, runCapForMode(mode))) return false
+        return somaCreditsLeft(p.workspaces) >= SOMA_GENERATE_COST
       })
     })
+    if (!eligibleProjects.length) return { processed: 0 }
 
-    if (!eligibleProjects.length) {
-      console.log('[SomaAutopilot] No eligible autopilot projects')
-      return { processed: 0 }
-    }
-
-    // Skip projects that already ran today (idempotency)
-    const projectIds = eligibleProjects.map((p: any) => p.id)
-    const alreadyRanProjectIds = await step.run('check-already-ran', async () => {
-      const { data } = await getSupabaseAdmin()
-        .from('soma_weekly_ingestion')
-        .select('metadata')
-        .gte('created_at', todayStart)
-      // ingestion records store project_id in metadata when auto-generated
-      const ran = (data ?? [])
-        .map((r: any) => r.metadata?.project_id)
-        .filter(Boolean)
-      return ran as string[]
-    })
-
-    const alreadyRanSet = new Set<string>(alreadyRanProjectIds)
-    const toProcess = eligibleProjects.filter((p: any) => !alreadyRanSet.has(p.id))
-
-    if (!toProcess.length) {
-      console.log('[SomaAutopilot] All eligible projects already ran today')
-      return { processed: 0, skipped: eligibleProjects.length }
-    }
-
-    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      console.error('[SomaAutopilot] Missing Gemini API key')
-      return { processed: 0, error: 'missing_api_key' }
-    }
-
+    const apiKey = somaApiKey()
     let processed = 0
+    let nothingOpen = 0
     let failed = 0
-
-    for (const project of toProcess) {
+    for (const project of eligibleProjects) {
       try {
-        await step.run(`autopilot-project-${project.id}`, async () => {
-          const admin = getSupabaseAdmin()
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
-          const ws = (project as any).workspaces
-
-          const paidMode = effectiveSomaMode(project.mode, (project as any).workspaces)
-          const platforms = ((project.platforms as string[]) ?? ['bluesky']).filter(isSomaPlatform)
-          const windowDays = Math.min(project.content_window_days ?? 7, SOMA_MODE_LIMITS[paidMode].windowDays)
-          const postsPerDay = Math.min(project.posts_per_day ?? 2, SOMA_MODE_LIMITS[paidMode].postsPerDay)
-
-          // Fetch latest master doc for this project as context
-          const { data: docs } = await admin
-            .from('soma_master_docs')
-            .select('id, version, content')
-            .eq('project_id', project.id)
-            .order('version', { ascending: false })
-            .limit(2)
-
-          const currentDoc = docs?.[0] ?? null
-          const prevDoc = docs?.[1] ?? null
-
-          let rawInput: string
-          if (currentDoc) {
-            rawInput = currentDoc.content
-          } else {
-            // No master doc — fall back to recent posts
-            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-            const { data: recentPosts } = await admin
-              .from('posts')
-              .select('content')
-              .eq('workspace_id', project.workspace_id)
-              .in('status', ['published', 'partial'])
-              .gte('published_at', sevenDaysAgo)
-              .limit(20)
-            const lines = (recentPosts ?? []).map(p => `- ${(p.content ?? '').slice(0, 200)}`).join('\n')
-            rawInput = lines || 'No prior content. Generate fresh content for a creator building their online presence.'
-          }
-
-          // Fetch voice profile.
-          //
-          // personality_summary added: it is the Voice DNA block written from
-          // the personality interview, and it is the single most specific thing
-          // we know about how this creator sounds. The structured jsonb below
-          // describes tone in the abstract; the summary is written as direct
-          // instruction. Autopilot was reading the former and ignoring the
-          // latter.
-          const { data: profile } = await admin
-            .from('soma_identity_profiles')
-            .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary')
-            .eq('workspace_id', project.workspace_id)
-            .maybeSingle()
-
-          const identityContext = profile
-            ? `CREATOR VOICE PROFILE:
-Tone: ${JSON.stringify(profile.tone_profile)}
-Style: ${JSON.stringify(profile.writing_style_rules)}
-Personality: ${JSON.stringify(profile.behavioral_traits)}
-Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}${
-  profile.personality_summary ? `\n\nCREATOR VOICE DNA:\n${profile.personality_summary}` : ''}`
-            : 'No voice profile — use authentic, direct tone.'
-
-          // Fetch project memory to avoid repeating topics/angles already
-          // covered. soma_project_memory was previously only read by Full
-          // Send's prompt — Autopilot had its own ingest step (below) but
-          // never checked memory before it, and never wrote back after.
-          const { data: autopilotMemory } = await admin
-            .from('soma_project_memory')
-            .select('topics_covered, angles_used, running_summary')
-            .eq('project_id', project.id)
-            .maybeSingle()
-
-          const autopilotMemoryBlock = autopilotMemory?.running_summary
-            ? `\n\nSOMA MEMORY — do NOT repeat these topics/angles:\n${autopilotMemory.running_summary}\nTopics already covered: ${Array.from(autopilotMemory.topics_covered ?? []).join(', ') || 'none yet'}\nAngles already used: ${Array.from(autopilotMemory.angles_used ?? []).join(', ') || 'none yet'}`
-            : ''
-
-          // Ingest: extract insights (diff if we have prev doc)
-          const ingestPrompt = prevDoc
-            ? `Compare these two weekly master docs. Extract what is NEW or CHANGED. Return ONLY valid JSON (no markdown):
-{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"One sentence: what changed most.","memory_update":"2-3 sentences summarizing what new ground this run covers, written as notes a social media manager would keep."}
-PREVIOUS: ${prevDoc.content.slice(0, 3000)}
-CURRENT: ${rawInput.slice(0, 3000)}${autopilotMemoryBlock}
-emotional_tone must be: high, reflective, grinding, or celebratory. The memory_update field is mandatory.`
-            : `Analyze this weekly master doc. Return ONLY valid JSON (no markdown):
-{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"First week baseline.","memory_update":"2-3 sentences summarizing what this first run covers, written as notes a social media manager would keep."}
-MASTER DOC: ${rawInput.slice(0, 4000)}${autopilotMemoryBlock}
-emotional_tone must be: high, reflective, grinding, or celebratory. The memory_update field is mandatory.`
-
-          const ingestResult = await model.generateContent(ingestPrompt)
-          const extracted_insights = somaParseGeminiJson(ingestResult.response.text())
-
-          // Insert ingestion record
-          const { data: ingestion, error: ingestionErr } = await admin
-            .from('soma_weekly_ingestion')
-            .insert({
-              workspace_id: project.workspace_id,
-              user_id: project.user_id,
-              week_label: weekLabel,
-              raw_input: rawInput,
-              extracted_insights,
-              generated_posts_count: 0,
-              metadata: { project_id: project.id, auto: true },
-            })
-            .select('id')
-            .single()
-
-          if (ingestionErr || !ingestion) throw new Error(`Ingestion insert failed: ${ingestionErr?.message}`)
-
-          // Generate platform-native posts
-          const platformInstructions = platforms
-            .map(p => SOMA_PLATFORM_INSTRUCTIONS[p] ?? `${p}: Keep it natural and platform-appropriate.`)
-            .join('\n')
-          const totalPosts = postsPerDay * windowDays
-
-          const genPrompt = `${identityContext}
-
-THIS WEEK'S INSIGHTS:
-Key themes: ${extracted_insights.key_themes?.join(', ')}
-Wins: ${extracted_insights.wins?.join(', ')}
-Challenges: ${extracted_insights.challenges?.join(', ')}
-What changed: ${extracted_insights.diff_summary ?? 'New content week'}
-Content angles: ${extracted_insights.content_angles?.join(' | ')}
-Emotional tone: ${extracted_insights.emotional_tone}
-
-PLATFORM-SPECIFIC FORMATTING RULES:
-${platformInstructions}
-
-Generate ${totalPosts} posts spread across ${windowDays} days, ${postsPerDay} per day.
-Assign each post to exactly one platform from: ${platforms.join(', ')}
-Distribute platforms roughly evenly.
-
-Return ONLY valid JSON:
-{"posts":[{"day":1,"slot":"morning","platform":"bluesky","content":"post text","content_type":"mindset"}]}
-
-Rules:
-- day 1 to ${windowDays}, slot: morning/afternoon/evening
-- morning: mindset/vision, afternoon: progress/updates, evening: reflection/lesson
-- NEVER use: "In today's world", "Let's dive in", "game-changer", "synergy", "leverage"
-- Format each post correctly for its platform
-- Sound human, not AI-generated`
-
-          const genResult = await model.generateContent(genPrompt)
-          const { posts: generatedPosts = [] } = somaParseGeminiJson(genResult.response.text())
-
-          // Unsplash image helpers (inline, non-fatal) — only used when include_media is true
-          interface AutopilotUnsplashResult { url: string; attribution: string }
-          // Track URLs used in this run so we never attach the same image twice
-          const autopilotUsedImageUrls = new Set<string>()
-          const autopilotStopWords = new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','to','of','in','for','on','with','at','by','from','as','it','its','this','that','and','or','but','if','you','we','your','our','my','not','just','so','up','out','down','what','how','when','where','who','why','all','can','get','let','than','then','one','more','some','here','there','i'])
-
-          function autopilotExtractKeyword(content: string): string {
-            const words = content.replace(/[#@\n]/g, ' ').replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(/\s+/)
-            const meaningful = words.filter(w => w.length > 3 && !autopilotStopWords.has(w))
-            return meaningful.slice(0, 3).join(' ') || 'creator social media'
-          }
-
-          async function autopilotFetchUnsplashImage(keyword: string): Promise<AutopilotUnsplashResult | null> {
-            const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
-            if (!unsplashKey) return null
-            // Try up to 3 times to get a unique image
-            for (let attempt = 0; attempt < 3; attempt++) {
-              try {
-                const res = await fetch(
-                  `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${unsplashKey}`,
-                  { signal: AbortSignal.timeout(5000) }
-                )
-                if (!res.ok) return null
-                const data = await res.json() as {
-                  id?: string
-                  urls?: { small?: string; regular?: string }
-                  user?: { name?: string; links?: { html?: string } }
-                  links?: { download_location?: string }
-                }
-                // Use small (~400px, <500KB) instead of regular (1-3MB) to stay under Bluesky's 1MB blob limit
-                const url = data?.urls?.small ?? data?.urls?.regular
-                if (!url) return null
-                // Skip if this exact image was already used in this generation run
-                if (autopilotUsedImageUrls.has(url)) continue
-                autopilotUsedImageUrls.add(url)
-                const photographerName = data?.user?.name ?? 'Unknown'
-                const photographerUrl = data?.user?.links?.html ?? 'https://unsplash.com'
-                const downloadLocation = data?.links?.download_location
-                if (downloadLocation) {
-                  fetch(`${downloadLocation}?client_id=${unsplashKey}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
-                }
-                return {
-                  url,
-                  attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
-                }
-              } catch { return null }
-            }
-            return null // all 3 attempts returned already-used images
-          }
-
-          // Filter TikTok — SOMA generates text posts only, TikTok requires video
-          const somaPublishPlatforms = platforms.filter((p: string) => p !== 'tiktok')
-
-          // Insert posts
-          let postsCreated = 0
-          const postStatus = project.mode === 'full_send' ? 'scheduled' : 'scheduled' // both auto modes schedule
-          for (const post of generatedPosts as any[]) {
-            const base = new Date()
-            base.setDate(base.getDate() + (post.day - 1))
-            const hours = post.slot === 'morning' ? 9 : post.slot === 'afternoon' ? 14 : 19
-            base.setHours(hours, 0, 0, 0)
-
-            // Fetch Unsplash image if media toggle is enabled (non-fatal)
-            let mediaUrls: string[] | undefined
-            if ((project as any).include_media) {
-              try {
-                const keyword = autopilotExtractKeyword(post.content ?? '')
-                const imgResult = await autopilotFetchUnsplashImage(keyword)
-                if (imgResult) mediaUrls = [imgResult.url, imgResult.attribution]
-              } catch { /* non-fatal — post still gets created without media */ }
-            }
-
-            const postPlatforms = somaPublishPlatforms.length > 0 ? somaPublishPlatforms : [post.platform ?? platforms[0]]
-
-            const { data: insertedPost, error: postErr } = await admin.from('posts').insert({
-              user_id: project.user_id,
-              workspace_id: project.workspace_id,
-              content: post.content,
-              platforms: postPlatforms,
-              status: postStatus,
-              scheduled_at: base.toISOString(),
-              metadata: { source: 'soma_autopilot', project_id: project.id, ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
-              ...(mediaUrls ? { media_urls: mediaUrls } : {}),
-            }).select('id').single()
-            if (!postErr && insertedPost) {
-              postsCreated++
-              inngest.send({ name: 'post/scheduled', data: { postId: insertedPost.id, scheduledAt: base.toISOString() } }).catch(() => {})
-            }
-          }
-
-          await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion.id)
-
-          // Write back to project memory — same upsert shape as the manual
-          // ingest route, so "what have we already said" stays current
-          // whether a project runs manually, via Autopilot, or via Full Send.
-          const autopilotNewTopics = Array.from(new Set([
-            ...(autopilotMemory?.topics_covered as string[] ?? []),
-            ...(extracted_insights.key_themes ?? []),
-          ]))
-          const autopilotNewAngles = Array.from(new Set([
-            ...(autopilotMemory?.angles_used as string[] ?? []),
-            ...(extracted_insights.content_angles ?? []),
-          ]))
-          const autopilotDateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-          const autopilotPrevSummary = autopilotMemory?.running_summary ?? ''
-          const autopilotNewSummary = autopilotPrevSummary
-            ? `${autopilotPrevSummary}\n\n[Autopilot — ${autopilotDateLabel}]: ${extracted_insights.memory_update ?? ''}`
-            : `[Autopilot — ${autopilotDateLabel}]: ${extracted_insights.memory_update ?? ''}`
-
-          await admin.from('soma_project_memory').upsert(
-            {
-              project_id:      project.id,
-              workspace_id:    project.workspace_id,
-              user_id:         project.user_id,
-              topics_covered:  autopilotNewTopics,
-              angles_used:     autopilotNewAngles,
-              running_summary: autopilotNewSummary,
-              updated_at:      new Date().toISOString(),
-            },
-            { onConflict: 'project_id' }
-          )
-
-          // Update project runs
-          await admin.from('soma_projects')
-            .update({ runs_this_month: nextRunCount(project), last_generated_at: now.toISOString() })
-            .eq('id', project.id)
-
-          // Deduct credits
-          const monthly = ws.soma_credits_monthly ?? 0
-          const used = ws.soma_credits_used ?? 0
-          const purchased = ws.soma_credits_purchased ?? 0
-          const monthlyAvailable = Math.max(0, monthly - used)
-          const newUsed = monthlyAvailable >= GENERATE_COST ? used + GENERATE_COST : monthly
-          const newPurchased = monthlyAvailable >= GENERATE_COST ? purchased : purchased - (GENERATE_COST - monthlyAvailable)
-          const balanceAfter = Math.max(0, monthly - newUsed) + newPurchased
-
-          await admin.from('workspaces').update({ soma_credits_used: newUsed, soma_credits_purchased: newPurchased }).eq('id', project.workspace_id)
-          await admin.from('soma_credit_ledger').insert({ workspace_id: project.workspace_id, user_id: project.user_id, action_type: 'autopilot_run', credits_used: GENERATE_COST, balance_after: balanceAfter })
-
-          // Notify user
-          const ownerId = ws.owner_id ?? project.user_id
-          await inngest.send({ name: 'notification/send', data: { user_id: ownerId, type: 'soma_autopilot', title: `"${project.name}" week is ready`, body: `SOMA generated ${postsCreated} posts. Review them in your queue.`, link: `/soma/projects/${project.id}` } })
-          await sendPushNotification(ownerId, `"${project.name}" week is ready!`, `SOMA generated ${postsCreated} posts. Review in your queue.`, `/soma/projects/${project.id}`, 'soma_autopilot')
-
-          // Email notification
-          try {
-            const { data: ownerData } = await admin.auth.admin.getUserById(ownerId)
-            const ownerEmail = ownerData?.user?.email
-            if (ownerEmail && process.env.RESEND_API_KEY) {
-              const modeLabel = project.mode === 'full_send' ? 'Full Send' : 'Autopilot'
-              const previewPosts = (generatedPosts as any[]).slice(0, 2)
-              const postCards = previewPosts.map((p: any) => `
-                <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:10px;">
-                  <div style="font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">${p.platform ?? ''} · Day ${p.day}</div>
-                  <div style="font-size:13px;color:#e5e5e5;line-height:1.5;">${(p.content ?? '').slice(0, 120)}${(p.content ?? '').length > 120 ? '…' : ''}</div>
-                </div>`).join('')
-              const extraCount = postsCreated - previewPosts.length
-              await getResend().emails.send({
-                from: 'SOMA <soma@socialmate.studio>',
-                replyTo: REPLY_TO,
-                to: ownerEmail,
-                subject: `⚡ SOMA scheduled ${postsCreated} posts for "${project.name}"`,
-                html: `<div style="background:#0f0f0f;font-family:sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
-                  <p style="color:#f59e0b;font-size:18px;font-weight:900;margin:0 0 4px;">⚡ SOMA</p>
-                  <p style="color:#e5e5e5;font-size:16px;font-weight:700;margin:0 0 16px;">${modeLabel} ran — ${postsCreated} posts scheduled</p>
-                  <p style="color:#888;font-size:13px;margin:0 0 20px;">Project: <strong style="color:#e5e5e5;">${project.name}</strong> · Week of ${weekLabel.replace('Auto — Week of ', '')}</p>
-                  ${postCards}
-                  ${extraCount > 0 ? `<p style="color:#666;font-size:12px;margin:8px 0 20px;">+ ${extraCount} more post${extraCount !== 1 ? 's' : ''} in your schedule</p>` : ''}
-                  <a href="https://socialmate.studio/soma/projects/${project.id}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:12px 24px;border-radius:10px;text-decoration:none;margin-top:8px;">View Schedule →</a>
-                  <p style="color:#444;font-size:11px;margin-top:24px;">SocialMate by Gilgamesh Enterprise LLC · You're receiving this because SOMA Autopilot is active.</p>
-                </div>`,
-              })
-            }
-          } catch (emailErr) {
-            console.error('[SomaAutopilot] Email send failed:', emailErr)
-          }
-
-          console.log(`[SomaAutopilot] project ${project.id} (${project.name}): ${postsCreated} posts`)
-        })
-        processed++
+        const result = await runScheduledSoma(step, project, 'weekly', apiKey, 'autopilot')
+        if (result.postsCreated > 0) {
+          processed++
+          await step.run(`autopilot-notify-${project.id}`, () => notifySomaWeeklyRun(project, result))
+        } else {
+          nothingOpen++
+        }
       } catch (err: any) {
         console.error(`[SomaAutopilot] project ${project.id} failed:`, err?.message)
         failed++
       }
     }
-
-    console.log(`[SomaAutopilot] processed: ${processed}, failed: ${failed}, skipped: ${alreadyRanSet.size}`)
-    return { processed, failed, skipped: alreadyRanSet.size }
+    console.log(`[SomaAutopilot] filled: ${processed}, nothing open: ${nothingOpen}, failed: ${failed}`)
+    return { processed, nothingOpen, failed }
   }
 )
 
 // ─── SOMA Full Send Daily Run ─────────────────────────────────────────────────
-// Runs every day at 1pm UTC (9am EDT) — only for Full Send workspaces.
-// Full Send users get a daily auto-run (vs Autopilot's weekly Monday run).
-// Max 7 posts/day per platform. Workspaces must have soma_full_send_enabled=true.
+// Every day at 1pm UTC (9am EDT), Full Send projects only: tops up today and
+// tomorrow to each platform's posts per day (7 at most). Daily runs do not use
+// the mode's monthly runs ("12 runs a month, plus a daily run"); each one that
+// writes posts costs a generation's credits, and one that finds nothing open
+// costs nothing.
 export const somaFullSendDailyRun = inngest.createFunction(
   { id: 'soma-full-send-daily-run', name: 'SOMA Full Send Daily Run', retries: 1 },
   { cron: '0 13 * * *' }, // Every day at 1pm UTC (9am EDT)
   async ({ step }) => {
-    const GENERATE_COST = SOMA_COSTS.generate_week // 75 credits
-    const now = new Date()
-    const weekLabel = `Full Send — ${now.toISOString().slice(0, 10)}`
-    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
-
-    // Find all full_send projects whose workspaces have Full Send enabled + enough credits
     const eligibleProjects = await step.run('find-full-send-projects', async () => {
-      const admin = getSupabaseAdmin()
-
-      const { data: projects, error } = await admin
+      const { data, error } = await getSupabaseAdmin()
         .from('soma_projects')
-        .select(`
-          id, workspace_id, user_id, name, description, campaign_theme, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
-          workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled)
-        `)
+        .select(SOMA_PROJECT_SELECT)
         .eq('mode', 'full_send')
-
-      if (error) {
-        console.error('[SomaFullSend] Failed to query projects:', error.message)
-        return []
-      }
-
-      return (projects ?? []).filter((p: any) => {
-        const ws = p.workspaces
-        // Must have Full Send enabled on the workspace
-        if (!ws?.soma_full_send_enabled) return false
-        if (p.paused) return false
-        const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
-        // Full Send run cap: 30 per month (daily = ~30/mo)
-        if (runCapReached(p, 30)) return false
-        return remaining >= GENERATE_COST
-      })
+      if (error) throw new Error(`[SomaFullSend] project query failed: ${error.message}`)
+      return (data ?? []).filter((p: any) =>
+        effectiveSomaMode(p.mode, p.workspaces) === 'full_send'
+        && !p.paused
+        && somaCreditsLeft(p.workspaces) >= SOMA_GENERATE_COST)
     })
+    if (!eligibleProjects.length) return { processed: 0 }
 
-    if (!eligibleProjects.length) {
-      console.log('[SomaFullSend] No eligible Full Send projects')
-      return { processed: 0 }
-    }
-
-    // Skip projects that already ran today (idempotency)
-    const alreadyRanProjectIds = await step.run('check-already-ran', async () => {
-      const { data } = await getSupabaseAdmin()
-        .from('soma_weekly_ingestion')
-        .select('metadata')
-        .gte('created_at', todayStart)
-      const ran = (data ?? [])
-        .map((r: any) => r.metadata?.project_id)
-        .filter(Boolean)
-      return ran as string[]
-    })
-
-    const alreadyRanSet = new Set<string>(alreadyRanProjectIds)
-    const toProcess = eligibleProjects.filter((p: any) => !alreadyRanSet.has(p.id))
-
-    if (!toProcess.length) {
-      console.log('[SomaFullSend] All eligible projects already ran today')
-      return { processed: 0, skipped: eligibleProjects.length }
-    }
-
-    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      console.error('[SomaFullSend] Missing Gemini API key')
-      return { processed: 0, error: 'missing_api_key' }
-    }
-
+    const apiKey = somaApiKey()
     let processed = 0
+    let nothingOpen = 0
     let failed = 0
-
-    for (const project of toProcess) {
+    for (const project of eligibleProjects) {
       try {
-        await step.run(`full-send-project-${project.id}`, async () => {
-          const admin = getSupabaseAdmin()
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
-
-          // Fetch project memory to avoid repetition
-          const { data: memory } = await admin
-            .from('soma_project_memory')
-            .select('running_summary, topics_covered, angles_used')
-            .eq('project_id', project.id)
-            .maybeSingle()
-
-          const memoryBlock = memory?.running_summary
-            ? `\n\nPROJECT MEMORY (do NOT repeat these topics/angles):\n${memory.running_summary}\nTopics covered: ${Array.from(memory.topics_covered ?? []).join(', ')}\nAngles used: ${Array.from(memory.angles_used ?? []).join(', ')}`
-            : ''
-
-          // Build platform list — Full Send cap is 7 posts/day per platform
-          const MAX_PPD = 7
-          const platforms: string[] = Array.from(project.platforms ?? [])
-          if (!platforms.length) return
-
-          // Fetch identity/voice for this user.
-          //
-          // This asked for brand_name, niche, target_audience and tone. None of
-          // those columns exist — the table stores structured jsonb. Four
-          // phantom names 400'd the whole select, so `identity` was null, and
-          // the four lines below silently fell back to hardcoded defaults
-          // ("SocialMate", "creator tools") for every project on Full Send.
-          //
-          // The expensive part of that: personality_summary, the only column in
-          // the list that is real, is the Voice DNA block built from the 40
-          // question interview. It was dragged down with the others, so Full
-          // Send has been generating with no voice profile at all.
-          //
-          // Same columns the Autopilot run reads, plus personality_summary,
-          // which Autopilot omits. Looked up by workspace_id, not user_id --
-          // soma_identity_profiles has a UNIQUE(workspace_id) constraint, and
-          // for an Agency workspace where a team member (not the owner who
-          // did the Voice DNA interview) created this project, project.user_id
-          // is the wrong identity to look up: it would find no profile and
-          // silently fall back to generic tone.
-          const { data: identity } = await admin
-            .from('soma_identity_profiles')
-            .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary')
-            .eq('workspace_id', project.workspace_id)
-            .maybeSingle()
-
-          const voiceBlock = identity?.personality_summary
-            ? `\n\nCREATOR VOICE DNA:\n${identity.personality_summary}`
-            : ''
-
-          // Brand and niche were never on the identity profile. The project
-          // itself is where that context actually lives.
-          const toneLine = identity?.tone_profile
-            ? JSON.stringify(identity.tone_profile)
-            : 'professional and motivational'
-          const styleBlock = [
-            identity?.writing_style_rules && `Style rules: ${JSON.stringify(identity.writing_style_rules)}`,
-            identity?.behavioral_traits   && `Personality: ${JSON.stringify(identity.behavioral_traits)}`,
-            Array.isArray(identity?.voice_examples) && identity.voice_examples.length
-              ? `Example posts: ${(identity.voice_examples as string[]).join(' | ')}`
-              : null,
-          ].filter(Boolean).join('\n')
-
-          const prompt = `You are a social media content strategist. Generate ${MAX_PPD} posts for each of these platforms: ${platforms.join(', ')}.
-
-Project: ${project.name}
-${project.description ? `About: ${project.description}` : ''}
-${project.campaign_theme ? `Campaign theme: ${project.campaign_theme}` : ''}
-Tone: ${toneLine}
-${styleBlock}
-${voiceBlock}
-${memoryBlock}
-
-Return ONLY valid JSON (no markdown), shaped exactly like this:
-{"posts":[{"platform":"bluesky","content":"post text"}],"topics_covered":["topic1"],"angles_used":["angle1"],"memory_update":"2-3 sentences summarizing what today's run covers, written as notes a social media manager would keep."}
-Today's date is ${now.toISOString().slice(0, 10)}. Do not put dates or times anywhere: publish times are assigned separately.
-Never state a price, plan limit or feature count unless it appears in the About text above. Example posts show voice only; do not copy their facts or numbers.
-Platform rules: Twitter/X max 280 chars, Bluesky max 300 chars, LinkedIn professional tone, Discord casual.
-Generate exactly ${MAX_PPD} posts per platform. The memory_update field is mandatory.`
-
-          let posts: any[] = []
-          let fullSendTopics: string[] = []
-          let fullSendAngles: string[] = []
-          let fullSendMemoryUpdate = ''
-          try {
-            const result = await model.generateContent(prompt)
-            const text = result.response.text().trim().replace(/```json\n?/g, '').replace(/```\n?/g, '')
-            const parsed = JSON.parse(text)
-            // Defensive: accept the old bare-array shape too, in case Gemini
-            // ever reverts to it despite the schema above.
-            posts = Array.isArray(parsed) ? parsed : (parsed.posts ?? [])
-            fullSendTopics = Array.isArray(parsed?.topics_covered) ? parsed.topics_covered : []
-            fullSendAngles = Array.isArray(parsed?.angles_used) ? parsed.angles_used : []
-            fullSendMemoryUpdate = parsed?.memory_update ?? ''
-          } catch (err: any) {
-            // This used to return quietly, so a dead API key or a malformed
-            // response looked like a run that succeeded and happened to produce
-            // nothing. The calendar then sat empty for three weeks with no
-            // signal. Throw, so the run reports the failure.
-            console.error(`[SomaFullSend] Gemini call or parse failed for project ${project.id}:`, err?.message)
-            throw err
-          }
-
-          // Insert posts into the approval queue (full_send = auto-schedule directly)
-          // Group by platform, cap each at MAX_PPD, and assign the times here.
-          // Whatever dates the model returned are ignored: it does not know what
-          // day it is (see lib/soma-schedule.ts).
-          const byPlatform = new Map<string, string[]>()
-          for (const post of posts) {
-            let platform = String(post?.platform ?? '').toLowerCase().trim()
-            if (platform === 'x') platform = 'twitter'
-            const content = typeof post?.content === 'string' ? post.content.trim() : ''
-            if (!content || !platforms.includes(platform)) continue
-            const list = byPlatform.get(platform) ?? []
-            if (list.length < MAX_PPD) list.push(content)
-            byPlatform.set(platform, list)
-          }
-
-          // Two projects on the same platform should not fire in the same minute.
-          const projectOffsetMin = parseInt(String(project.id).slice(0, 4), 16) % 9
-
-          let postsCreated = 0
-          for (let idx = 0; idx < platforms.length; idx++) {
-            const platform = platforms[idx]
-            const contents = byPlatform.get(platform) ?? []
-            const slots = fullSendSlots(now, contents.length, idx, projectOffsetMin)
-
-            for (let i = 0; i < contents.length; i++) {
-              const scheduledAt = slots[i].toISOString()
-              const { data: inserted, error: insertErr } = await admin.from('posts').insert({
-                user_id: project.user_id,
-                workspace_id: project.workspace_id,
-                content: contents[i],
-                platforms: [platform],
-                status: 'scheduled',
-                scheduled_at: scheduledAt,
-                metadata: { soma_project_id: project.id, soma_run: weekLabel, auto_source: 'full_send_daily' },
-              }).select('id').single()
-
-              if (insertErr || !inserted) {
-                console.error('[SomaFullSend] insert failed:', insertErr?.message)
-                continue
-              }
-              postsCreated++
-
-              // Hand the post to the primary scheduler, the same as Autopilot
-              // does. Without this event nothing publishes it at its time; it
-              // sits as 'scheduled' until a backstop sweeps it up, hours late.
-              try {
-                await inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt } })
-              } catch (err: any) {
-                console.error('[SomaFullSend] could not queue post', inserted.id, err?.message)
-              }
-            }
-          }
-
-          // Deduct credits
-          if (postsCreated > 0) {
-            await admin.from('workspaces').update({
-              soma_credits_used: (project.workspaces as any).soma_credits_used + GENERATE_COST,
-            }).eq('id', project.workspace_id)
-
-            // Update run counter
-            await admin.from('soma_projects').update({
-              runs_this_month: nextRunCount(project),
-              last_generated_at: new Date().toISOString(),
-            }).eq('id', project.id)
-
-            // Write memory back — this run read soma_project_memory above
-            // but never saved anything to it, so "do NOT repeat" never had
-            // new ground to stand on after the first day.
-            const fullSendNewTopics = Array.from(new Set([
-              ...(memory?.topics_covered as string[] ?? []),
-              ...fullSendTopics,
-            ]))
-            const fullSendNewAngles = Array.from(new Set([
-              ...(memory?.angles_used as string[] ?? []),
-              ...fullSendAngles,
-            ]))
-            const fullSendDateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            const fullSendPrevSummary = memory?.running_summary ?? ''
-            const fullSendNewSummary = fullSendPrevSummary
-              ? `${fullSendPrevSummary}\n\n[Full Send — ${fullSendDateLabel}]: ${fullSendMemoryUpdate}`
-              : `[Full Send — ${fullSendDateLabel}]: ${fullSendMemoryUpdate}`
-
-            await admin.from('soma_project_memory').upsert(
-              {
-                project_id:      project.id,
-                workspace_id:    project.workspace_id,
-                user_id:         project.user_id,
-                topics_covered:  fullSendNewTopics,
-                angles_used:     fullSendNewAngles,
-                running_summary: fullSendNewSummary,
-                updated_at:      new Date().toISOString(),
-              },
-              { onConflict: 'project_id' }
-            )
-          }
-
-          console.log(`[SomaFullSend] project ${project.id} (${project.name}): ${postsCreated} posts scheduled`)
-        })
-        processed++
+        const result = await runScheduledSoma(step, project, 'daily', apiKey, 'full-send')
+        if (result.postsCreated > 0) processed++
+        else nothingOpen++
       } catch (err: any) {
         console.error(`[SomaFullSend] project ${project.id} failed:`, err?.message)
         failed++
       }
     }
-
-    console.log(`[SomaFullSend] processed: ${processed}, failed: ${failed}, skipped: ${alreadyRanSet.size}`)
-    return { processed, failed, skipped: alreadyRanSet.size }
+    console.log(`[SomaFullSend] filled: ${processed}, nothing open: ${nothingOpen}, failed: ${failed}`)
+    return { processed, nothingOpen, failed }
   }
 )
 
