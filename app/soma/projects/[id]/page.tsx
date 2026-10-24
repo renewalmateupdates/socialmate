@@ -553,8 +553,8 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       }
       setGenerateResult(data)
       await load()
-      // Show voice feedback modal after successful generation
-      setShowFeedbackModal(true)
+      // Ask for voice feedback after a run that actually wrote posts
+      if (!data.nothing_to_fill) setShowFeedbackModal(true)
     } catch {
       setGenerateError('Network error. Please try again.')
     } finally {
@@ -1257,9 +1257,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
                       {generateResult ? (
                         <div className="rounded-xl bg-emerald-950/30 border border-emerald-700/40 px-4 py-3">
-                          <p className="text-sm font-bold text-emerald-400 text-center mb-2">
-                            {generateResult.posts_created} posts {project.mode === 'safe' ? 'drafted' : 'scheduled'}
-                          </p>
+                          {generateResult.nothing_to_fill ? (
+                            <>
+                              <p className="text-sm font-bold text-emerald-400 text-center mb-1">
+                                Every slot in the next {generateResult.window_days} days already has a post
+                              </p>
+                              <p className="text-xs text-gray-400 text-center mb-2">Nothing was generated and no credits were used.</p>
+                            </>
+                          ) : (
+                            <p className="text-sm font-bold text-emerald-400 text-center mb-2">
+                              {generateResult.posts_created} posts {generateResult.mode === 'safe' ? 'drafted' : 'scheduled'}
+                            </p>
+                          )}
+                          {generateResult.unfilled > 0 && (
+                            <p className="text-xs text-amber-300 text-center mb-2">
+                              {generateResult.unfilled} open {generateResult.unfilled === 1 ? 'slot was' : 'slots were'} not filled this run. The next run fills them.
+                            </p>
+                          )}
                           {generateResult.platform_counts && (
                             <div className="space-y-1 mb-3">
                               {Object.entries(generateResult.platform_counts as Record<string,number>).map(([p, n]) => (
@@ -1277,8 +1291,8 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                             </div>
                           )}
                           <div className="flex items-center justify-between mt-2">
-                            <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline">
-                              {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
+                            <Link href={(generateResult.mode ?? project.mode) === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline">
+                              {(generateResult.mode ?? project.mode) === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
                             </Link>
                             <button
                               onClick={() => setShowFeedbackModal(true)}

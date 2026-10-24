@@ -1,4 +1,8 @@
 export const dynamic = 'force-dynamic'
+// Every step runs as one call to this route. SOMA's fill steps stop starting
+// model calls at 30s (lib/soma-generate.ts) and need the rest of the minute to
+// finish; without this the route ran on Vercel's default, which can be 10s.
+export const maxDuration = 60
 import { serve } from 'inngest/next'
 import {
   inngest,
