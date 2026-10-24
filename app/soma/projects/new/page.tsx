@@ -5,28 +5,24 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Globe, CircleDot, Rocket, Zap } from 'lucide-react'
+import { SOMA_MODE_LIMITS, SOMA_PLATFORMS, isSomaPlatform } from '@/lib/soma-mode'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
   return <PlatformIcon name={id} size={size} className={className} />
 }
 
-// The 7 live platforms. This list previously omitted tiktok and included
-// instagram, which isn't live anywhere in the app. Since `platforms` state is
-// pre-selected directly from `/api/accounts/connected` (not filtered through
-// this list), a connected TikTok account was silently included in the
-// submitted project and its Schedule row — but with no pill here to show,
-// toggle, or remove it, it rendered as a bare lowercase "tiktok" with no icon
-// and no way to control it. Keep this in sync with the live platform list
-// elsewhere (e.g. onboarding's LIVE_PLATFORMS) when a new platform ships.
-const ALL_PLATFORMS = [
+// The platforms SOMA writes for (lib/soma-mode.ts). TikTok is left out on
+// purpose: SOMA writes text, TikTok takes video only, and the publish pipeline
+// refuses a text post to TikTok. A connected TikTok account used to be
+// preselected here with a "~5 posts/week" schedule that could only fail.
+const ALL_PLATFORMS: { id: (typeof SOMA_PLATFORMS)[number]; label: string }[] = [
   { id: 'bluesky',   label: 'Bluesky' },
   { id: 'twitter',   label: 'Twitter / X' },
   { id: 'mastodon',  label: 'Mastodon' },
   { id: 'discord',   label: 'Discord' },
   { id: 'telegram',  label: 'Telegram' },
   { id: 'linkedin',  label: 'LinkedIn' },
-  { id: 'tiktok',    label: 'TikTok' },
 ]
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -185,14 +181,18 @@ export default function NewSomaProjectPage() {
   const [mode, setMode]               = useState<'safe' | 'autopilot' | 'full_send'>('safe')
   const [autoCollect, setAutoCollect] = useState(false)
   const [autoUrl, setAutoUrl]         = useState('')
+  const [hasTiktok, setHasTiktok]     = useState(false)
 
-  const maxPostsPerDay = mode === 'full_send' ? 10 : mode === 'autopilot' ? 5 : 2
+  const maxPostsPerDay = SOMA_MODE_LIMITS[mode].postsPerDay
+  const maxWindowDays  = SOMA_MODE_LIMITS[mode].windowDays
 
   useEffect(() => {
     fetch('/api/accounts/connected')
       .then(r => r.json())
       .then(d => {
-        const connected: string[] = d.platforms ?? []
+        const all: string[] = d.platforms ?? []
+        setHasTiktok(all.includes('tiktok'))
+        const connected = all.filter(isSomaPlatform)
         setConnectedPlatforms(connected)
         setPlatforms(connected)
         const init: Record<string, PlatformSchedule> = {}
@@ -201,6 +201,11 @@ export default function NewSomaProjectPage() {
       })
       .catch(() => setConnectedPlatforms([]))
   }, [])
+
+  // When mode changes, cap the window to what the mode allows
+  useEffect(() => {
+    setWindowDays(w => Math.min(w, maxWindowDays))
+  }, [maxWindowDays])
 
   // When mode changes, cap existing schedule posts_per_day
   useEffect(() => {
@@ -331,6 +336,12 @@ export default function NewSomaProjectPage() {
             <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-6">
               <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-4">Platforms</h2>
               <p className="text-xs text-gray-500 mb-4">Select which platforms SOMA should post to.</p>
+              {hasTiktok && (
+                <p className="text-xs text-gray-500 -mt-2 mb-4">
+                  TikTok isn&apos;t listed because SOMA writes text and TikTok takes video. Post videos from{' '}
+                  <Link href="/tiktok/studio" className="text-amber-400 hover:text-amber-300">TikTok Studio</Link>.
+                </p>
+              )}
 
               {connectedPlatforms === null ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -392,10 +403,10 @@ export default function NewSomaProjectPage() {
               </div>
               <p className="text-xs text-gray-500">
                 {mode === 'safe'
-                  ? 'You approve each post before it goes live. Max 2 posts/day per platform.'
+                  ? `You approve each post before it goes live. Max ${SOMA_MODE_LIMITS.safe.postsPerDay} posts/day per platform.`
                   : mode === 'autopilot'
-                  ? 'Posts auto-schedule. You get a notification to review. Max 5 posts/day per platform.'
-                  : 'Fully automated. Posts go live with no review. Max 10 posts/day per platform.'}
+                  ? `Posts auto-schedule. You get a notification to review. Max ${SOMA_MODE_LIMITS.autopilot.postsPerDay} posts/day per platform.`
+                  : `Fully automated. Posts go live with no review. Max ${SOMA_MODE_LIMITS.full_send.postsPerDay} posts/day per platform.`}
               </p>
             </div>
 
@@ -433,7 +444,7 @@ export default function NewSomaProjectPage() {
                         key={d}
                         type="button"
                         onClick={() => setWindowDays(d)}
-                        disabled={(d === 14 || d === 30) && mode === 'safe'}
+                        disabled={d > maxWindowDays}
                         className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                           windowDays === d
                             ? 'bg-amber-500/15 border-amber-500/50 text-amber-300'
@@ -444,7 +455,11 @@ export default function NewSomaProjectPage() {
                       </button>
                     ))}
                   </div>
-                  {mode === 'safe' && <p className="text-xs text-gray-600 mt-1">14 and 30-day windows require Autopilot or Full Send.</p>}
+                  {mode !== 'full_send' && (
+                    <p className="text-xs text-gray-600 mt-1">
+                      {mode === 'safe' ? '14-day windows need Autopilot, and 30-day windows need Full Send.' : '30-day windows need Full Send.'}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

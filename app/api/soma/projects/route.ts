@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { SOMA_MODE_LIMITS, capSchedule, effectiveSomaMode, isSomaMode, isSomaPlatform } from '@/lib/soma-mode'
 
 const PLAN_PROJECT_LIMITS: Record<string, number> = {
   free:          0,
@@ -88,14 +89,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (!name?.trim()) return NextResponse.json({ error: 'name is required' }, { status: 400 })
-    if (!Array.isArray(platforms) || platforms.length === 0) return NextResponse.json({ error: 'platforms must be a non-empty array' }, { status: 400 })
-    if (!['safe', 'autopilot', 'full_send'].includes(mode)) return NextResponse.json({ error: 'invalid mode' }, { status: 400 })
+    if (!isSomaMode(mode)) return NextResponse.json({ error: 'invalid mode' }, { status: 400 })
+    // SOMA writes text. TikTok takes video only, so it is dropped here.
+    const somaPlatforms = Array.isArray(platforms) ? platforms.filter(isSomaPlatform) : []
+    if (somaPlatforms.length === 0) {
+      return NextResponse.json({ error: 'Pick at least one platform SOMA can write for: Bluesky, X, Mastodon, Discord, Telegram or LinkedIn.' }, { status: 400 })
+    }
 
     const admin = getSupabaseAdmin()
 
     const { data: workspace } = await admin
       .from('workspaces')
-      .select('id, plan, soma_autopilot_enabled')
+      .select('id, plan, soma_autopilot_enabled, soma_full_send_enabled')
       .eq('owner_id', user.id)
       .eq('is_personal', true)
       .maybeSingle()
@@ -113,30 +118,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'project_limit_reached', limit }, { status: 403 })
     }
 
-    // Gate autopilot/full_send on subscription
-    if ((mode === 'autopilot' || mode === 'full_send') && !workspace.soma_autopilot_enabled) {
-      return NextResponse.json({ error: 'autopilot_not_enabled' }, { status: 403 })
+    // Only a paid mode may be picked. Full Send needs its own add-on, not just
+    // Autopilot's: this route used to check the Autopilot flag for both.
+    if (effectiveSomaMode(mode, workspace) !== mode) {
+      return NextResponse.json({ error: mode === 'full_send' ? 'full_send_not_enabled' : 'autopilot_not_enabled' }, { status: 403 })
     }
 
-    // Cap posts_per_day to tier max
-    const maxPostsPerDay = mode === 'full_send' ? 10 : mode === 'autopilot' ? 5 : 2
-    const cappedWindow = mode === 'safe' ? Math.min(content_window_days ?? 7, 7) : Math.min(content_window_days ?? 14, 30)
-
-    // Build capped platform_schedule; derive global posts_per_day from max across platforms
-    let cappedSchedule: Record<string, { posts_per_day: number; days: number[] }> | null = null
-    let globalPostsPerDay = Math.min(posts_per_day ?? 2, maxPostsPerDay)
-
-    if (platform_schedule && Object.keys(platform_schedule).length > 0) {
-      cappedSchedule = {}
-      let maxAcrossPlatforms = 0
-      for (const [platform, cfg] of Object.entries(platform_schedule)) {
-        const capped = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPostsPerDay)
-        const days = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
-        cappedSchedule[platform] = { posts_per_day: capped, days }
-        if (capped > maxAcrossPlatforms) maxAcrossPlatforms = capped
-      }
-      globalPostsPerDay = maxAcrossPlatforms
-    }
+    const limits = SOMA_MODE_LIMITS[mode]
+    const cappedWindow = Math.min(Math.max(Number(content_window_days) || 7, 1), limits.windowDays)
+    const { schedule: cappedSchedule, postsPerDay: globalPostsPerDay } = capSchedule(
+      somaPlatforms, platform_schedule, mode, Number(posts_per_day) || 1,
+    )
 
     const { data: project, error } = await admin
       .from('soma_projects')
@@ -145,7 +137,7 @@ export async function POST(req: NextRequest) {
         user_id:              user.id,
         name:                 name.trim(),
         description:          description?.trim() ?? null,
-        platforms,
+        platforms:            somaPlatforms,
         posts_per_day:        globalPostsPerDay,
         content_window_days:  cappedWindow,
         mode,
