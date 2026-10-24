@@ -4,8 +4,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
+import { REPURPOSE_COST } from '@/lib/ai-tool-costs'
 
-const CREDIT_COST = 10
+const CREDIT_COST = REPURPOSE_COST
 
 const FORMAT_PROMPTS: Record<string, string> = {
   thread:        'Turn this into an engaging 5-7 tweet thread. Start with a hook. Number each tweet (1/, 2/, etc.).',
