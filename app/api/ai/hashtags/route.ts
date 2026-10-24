@@ -4,8 +4,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
+import { HASHTAGS_COST } from '@/lib/ai-tool-costs'
 
-const CREDIT_COST = 5
+const CREDIT_COST = HASHTAGS_COST
 
 export async function POST(req: NextRequest) {
   try {

@@ -15,6 +15,7 @@ import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { AlertTriangle, BadgePercent, Ban, BarChart3, Bookmark, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ClipboardList, Clock, Eye, Fish, FlaskConical, Film, Flame, Globe, Hash, Heart, HeartHandshake, HelpCircle, Image as ImageIcon, Lightbulb, ListOrdered, Lock, Mic, MessageCircle, MessagesSquare, Newspaper, Paperclip, PartyPopper, PenLine, Recycle, RefreshCw, Repeat, Repeat2, Reply, Rocket, Scissors, Sparkles, Star, TrendingUp, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { HASHTAGS_COST, REPURPOSE_COST } from '@/lib/ai-tool-costs'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -931,7 +932,7 @@ function ComposeInner() {
     setRepurposeError('')
     setRepurposeResult('')
     if (!content.trim()) { setRepurposeError('Write or paste content in the composer first.'); return }
-    if (credits < 5) { setRepurposeError('Not enough credits. You need 5 credits.'); return }
+    if (credits < REPURPOSE_COST) { setRepurposeError(`Not enough credits. You need ${REPURPOSE_COST} credits.`); return }
     setRepurposeLoading(true)
     try {
       const res = await fetch('/api/ai/repurpose', {
@@ -955,9 +956,9 @@ function ComposeInner() {
       } else if (typeof data.creditsRemaining === 'number') {
         setCredits(data.creditsRemaining)
       } else {
-        setCredits(credits - 5)
+        setCredits(credits - (data.creditsUsed ?? REPURPOSE_COST))
       }
-      showToast('Repurposed — 5 credits used', 'info')
+      showToast(`Repurposed — ${data.creditsUsed ?? REPURPOSE_COST} credits used`, 'info')
     } catch {
       setRepurposeError('Network error. Please try again.')
     } finally {
@@ -980,8 +981,8 @@ function ComposeInner() {
       setHashtagSuggestError('Write something first — the AI needs your content to suggest hashtags.')
       return
     }
-    if (credits < 1) {
-      setHashtagSuggestError('Not enough credits. This tool costs 1 credit.')
+    if (credits < HASHTAGS_COST) {
+      setHashtagSuggestError(`Not enough credits. This tool costs ${HASHTAGS_COST} credits.`)
       return
     }
     setHashtagSuggestLoading(true)
@@ -1007,9 +1008,9 @@ function ComposeInner() {
       } else if (typeof data.creditsRemaining === 'number') {
         setCredits(data.creditsRemaining)
       } else {
-        setCredits(credits - 1)
+        setCredits(credits - (data.creditsUsed ?? HASHTAGS_COST))
       }
-      showToast('Hashtags generated — 1 credit used', 'info')
+      showToast(`Hashtags generated — ${data.creditsUsed ?? HASHTAGS_COST} credits used`, 'info')
     } catch {
       setHashtagSuggestError('Network error. Please try again.')
     } finally {
@@ -2775,11 +2776,11 @@ function ComposeInner() {
 
                     <button
                       onClick={handleRepurpose}
-                      disabled={repurposeLoading || !content.trim() || !!rateLimitedUntil}
+                      disabled={repurposeLoading || !content.trim() || credits < REPURPOSE_COST || !!rateLimitedUntil}
                       className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
                       {repurposeLoading ? (
                         <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />Repurposing...</>
-                      ) : 'Repurpose → (5 credits)'}
+                      ) : `Repurpose → (${REPURPOSE_COST} credits)`}
                     </button>
 
                     {repurposeError && (
@@ -2855,16 +2856,16 @@ function ComposeInner() {
                     {hashtagPanelTab === 'ai' && (
                       <>
                         <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">
-                          AI picks 12 hashtags optimized for your selected platforms — 1 credit per run.
+                          AI picks 12 hashtags optimized for your selected platforms — {HASHTAGS_COST} credits per run.
                         </p>
 
                         <button
                           onClick={handleHashtagSuggest}
-                          disabled={hashtagSuggestLoading || !content.trim() || credits < 1 || !!rateLimitedUntil}
+                          disabled={hashtagSuggestLoading || !content.trim() || credits < HASHTAGS_COST || !!rateLimitedUntil}
                           className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
                           {hashtagSuggestLoading ? (
                             <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating hashtags...</>
-                          ) : 'Suggest Hashtags → (1 credit)'}
+                          ) : `Suggest Hashtags → (${HASHTAGS_COST} credits)`}
                         </button>
 
                         {hashtagSuggestError && (
