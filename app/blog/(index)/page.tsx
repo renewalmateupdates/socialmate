@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import BlogClientList from '@/components/BlogClientList'
 import BlogI18nStrings from '@/components/BlogI18nStrings'
 import { describePost } from '@/lib/blog/describe'
+import { POSTS } from '@/lib/blog/static-posts'
 
 // Cache blog index for 24h — fetches 500 posts from Supabase; without this it was SSR on every request.
 export const revalidate = 86400
@@ -154,9 +155,7 @@ const STATIC_POSTS = [
   { slug: 'soma-vs-buffer-hootsuite-ai-scheduling',        title: 'SOMA vs Buffer vs Hootsuite: Why AI-Driven Scheduling Is Different',             date: 'April 2026', category: 'Comparisons', excerpt: 'Traditional schedulers require you to write every post manually. SOMA generates them. Here\'s what that difference actually means for your workflow.', readTime: '5 min read', featured: false },
   { slug: 'ai-marketing-agents-social-media-2026',         title: 'How AI Marketing Agents Are Changing Social Media in 2026',                     date: 'April 2026', category: 'Industry',    excerpt: 'AI agents are moving from "write this caption" to "run this channel." Here\'s what the shift means for creators, marketers, and agencies.', readTime: '6 min read', featured: false },
   { slug: 'soma-safe-autopilot-full-send-explained',       title: 'Safe Mode vs Autopilot vs Full Send: Choosing Your Level of Automation',        date: 'April 2026', category: 'Tips',        excerpt: 'SOMA has three automation levels. Here\'s when each one makes sense — and why starting on Safe Mode is almost always the right move.', readTime: '4 min read', featured: false },
-  { slug: 'what-is-enki-ai-trading-bot',                   title: 'What Is Enki? The AI Trading Bot Built for Independent Traders',                 date: 'April 2026', category: 'Features',    excerpt: 'Enki is an AI-powered paper and live trading bot with real quant signals — RSI, MACD, ADX, Kelly sizing. Here\'s what it actually does.', readTime: '5 min read', featured: false },
   { slug: 'paper-trading-2026-practice-without-losing',    title: 'Paper Trading in 2026: How to Practice Without Losing Real Money',              date: 'April 2026', category: 'Guides',      excerpt: 'Paper trading lets you test strategies with fake money and real data. Here\'s how it works and why it matters before you go live.', readTime: '5 min read', featured: false },
-  { slug: 'enki-truth-mode-trading-signal-validation',     title: 'Enki Truth Mode: How We Validate Trading Signals Before Going Live',            date: 'April 2026', category: 'Features',    excerpt: 'Truth Mode is a controlled experiment: 50 paper trades per strategy, equity curve vs SPY, no bias. Here\'s how it works and why it matters.', readTime: '5 min read', featured: false },
   { slug: 'social-media-approval-workflow-teams',           title: 'How to Build a Social Media Approval Workflow for Your Team',                   date: 'April 2026', category: 'Teams',       excerpt: 'When multiple people post for a brand, approval workflows prevent mistakes. Here\'s how to set up a system that doesn\'t slow everyone down.', readTime: '5 min read', featured: false },
   { slug: 'link-shortener-social-media-why-it-matters',    title: 'Why Link Shorteners Matter for Social Media (And Which to Use)',                date: 'April 2026', category: 'Tips',        excerpt: 'Short links do more than save characters — they track clicks, look cleaner, and work better across platforms. Here\'s what to know in 2026.', readTime: '4 min read', featured: false },
   { slug: 'posting-streak-social-media-consistency',       title: 'How a Posting Streak Keeps You Consistent on Social Media',                     date: 'April 2026', category: 'Growth',      excerpt: 'Streaks work. Not because of gamification tricks, but because they create a daily commitment point. Here\'s how to use one to stay consistent.', readTime: '4 min read', featured: false },
@@ -181,10 +180,15 @@ const STATIC_POSTS = [
 
 export default async function Blog() {
   const dbPosts  = await getDbPosts()
-  const slugSet  = new Set(STATIC_POSTS.map(p => p.slug))
+  // STATIC_POSTS is kept by hand and drifted: 26 of its entries (the Apr 27
+  // batch) named posts that were never written, so their cards linked to 404s.
+  // Keep only entries whose post exists in code, the way app/sitemap.ts
+  // derives its list. A slug that lives in blog_posts comes in with dbPosts.
+  const staticPosts = STATIC_POSTS.filter(p => p.slug in POSTS)
+  const slugSet  = new Set(staticPosts.map(p => p.slug))
   // Merge: static first, then any DB posts not already in static list
   const allPosts = [
-    ...STATIC_POSTS,
+    ...staticPosts,
     ...dbPosts.filter(p => !slugSet.has(p.slug)),
   ]
 
