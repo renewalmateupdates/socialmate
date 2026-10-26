@@ -15,7 +15,6 @@ const COMPARISON = [
   { feature: 'Telegram scheduling',         canva: '❌',                          socialmate: '✅ Free'                     },
   { feature: 'AI writing tools',            canva: 'Magic Write (design-focused)', socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   canva: '❌',                          socialmate: '✅ (Autopilot/Full Send)'    },
-  { feature: 'Trading bot (Enki)',          canva: '❌',                          socialmate: '✅ Free paper trading'       },
   { feature: 'Bulk scheduling',             canva: '❌',                          socialmate: '✅ Free'                     },
   { feature: 'Analytics dashboard',         canva: 'Basic',                      socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Team approval workflows',     canva: '✅ (Pro)',                    socialmate: '✅ Free'                     },
@@ -117,7 +116,6 @@ export default function VsCanvaPage() {
               <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
               <li>✅ 20+ AI content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
-              <li>✅ Enki: autonomous trading bot</li>
               <li>✅ Full analytics, inbox, and link in bio</li>
               <li>✅ Free plan — no credit card required</li>
             </ul>
@@ -167,7 +165,7 @@ export default function VsCanvaPage() {
               {
                 n: '4',
                 title: 'SocialMate Pro is 3x cheaper than Canva Pro',
-                desc: "Canva Pro costs $15/month. SocialMate Pro costs $8/month — and includes features Canva does not have at any price: SOMA autonomous content, Enki trading bot, social inbox, posting streaks, and full analytics.",
+                desc: "Canva Pro costs $15/month. SocialMate Pro costs $8/month — and includes features Canva does not have at any price: SOMA autonomous content, social inbox, posting streaks, and full analytics.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge rounded-2xl hover:border-edge transition-all">

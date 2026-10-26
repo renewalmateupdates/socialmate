@@ -74,7 +74,7 @@ export default function PressPage() {
           </h2>
           <p className="text-gray-300 text-base leading-relaxed mb-6">
             That&apos;s the pitch. And it&apos;s real. SocialMate is a full-featured social media scheduler
-            with built-in AI tools, an autonomous content generation system (SOMA), a trading bot (Enki),
+            with built-in AI tools, an autonomous content generation system (SOMA),
             8 AI agents, and 7 live platforms — starting at $0.
           </p>
           <p className="text-gray-400 text-sm">
@@ -234,7 +234,7 @@ export default function PressPage() {
               <p>
                 The product launched March 26, 2026, reached Product Hunt in April 2026, and has since grown
                 to include 7 live social media platforms, 8 autonomous AI agents, an AI content generation
-                system (SOMA), an algorithmic trading bot (Enki), and over 480 published blog posts.
+                system (SOMA), and over 700 published blog posts.
               </p>
               <p>
                 Joshua built the entire product using Claude Code by Anthropic. He is a self-taught developer

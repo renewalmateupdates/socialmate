@@ -77,31 +77,6 @@ const sections = [
     ],
   },
   {
-    title: 'Enki — AI Trading Bot',
-    faqs: [
-      {
-        q: 'What is Enki?',
-        a: 'Enki is an AI-powered trading bot with quant-level logic: ADX trend filters, Kelly position sizing, trailing stops (ATR-based), partial exits at TP1/TP2, correlation guards, daily/portfolio drawdown limits, and a session filter (9:30–16:00 EST). It\'s designed to trade intelligently, not recklessly.',
-      },
-      {
-        q: 'What is Citizen tier?',
-        a: 'Citizen is the free tier — paper trading only. No real money. It\'s how you learn the system, test strategies, and build confidence before going live. Includes the 3-step citizen onboarding to get you set up.',
-      },
-      {
-        q: 'What is Truth Mode?',
-        a: 'Truth Mode is an experimental feature that runs Enki\'s momentum and mean reversion signals against live market data every 15 minutes. It tracks per-strategy stats (Sharpe, Sortino, win rate) with a 50-trade minimum before results are considered statistically valid. It\'s designed for transparency — no cherry-picked results, no vaporware dashboards.',
-      },
-      {
-        q: 'Is Enki financial advice?',
-        a: 'No. Enki is a software tool. Nothing in Enki or SocialMate constitutes financial advice. Trading carries risk. Never trade more than you can afford to lose. Enki is provided as-is, for educational and experimental purposes.',
-      },
-      {
-        q: 'What are the Enki tiers?',
-        a: 'Citizen is free (paper trading only). Commander is $15/month — live trading, full quant features. Emperor is $29/month — everything in Commander plus advanced position sizing and priority signals. Cloud Runner is $10/month for cloud-based strategy execution.',
-      },
-    ],
-  },
-  {
     title: 'Studio Stax',
     faqs: [
       {

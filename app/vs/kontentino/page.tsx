@@ -17,7 +17,6 @@ const COMPARISON = [
   { feature: 'Client approval workflows',   kontentino: '✅ Core feature',       socialmate: '✅ Built-in free'            },
   { feature: 'AI writing tools',            kontentino: 'Basic AI assist',       socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   kontentino: '❌',                    socialmate: '✅ (Autopilot/Full Send)'    },
-  { feature: 'Trading bot (Enki)',          kontentino: '❌',                    socialmate: '✅ Free paper trading'       },
   { feature: 'Bulk scheduling',             kontentino: '✅',                    socialmate: '✅ Free'                     },
   { feature: 'Analytics dashboard',         kontentino: '✅',                    socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Free plan available',         kontentino: '❌',                    socialmate: '✅ Full scheduling + AI'     },
@@ -152,7 +151,7 @@ export default function VsKontentinoPage() {
               {
                 n: '1',
                 title: "Kontentino costs 5x more than SocialMate Agency",
-                desc: "Kontentino starts at $99/month. SocialMate Agency is $29/month — that is $79/month saved, every month. Both include client approval workflows. SocialMate adds 7 platforms, 20+ AI tools, SOMA, and Enki that Kontentino does not have at any price.",
+                desc: "Kontentino starts at $99/month. SocialMate Agency is $29/month — that is $79/month saved, every month. Both include client approval workflows. SocialMate adds 7 platforms, 20+ AI tools and SOMA, which Kontentino does not have at any price.",
               },
               {
                 n: '2',

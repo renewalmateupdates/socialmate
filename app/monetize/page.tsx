@@ -302,10 +302,6 @@ export default function MonetizeLandingPage() {
             <Link href="/soma" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               SOMA AI Agent →
             </Link>
-            <span className="text-gray-300 dark:text-gray-700">|</span>
-            <Link href="/enki" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
-              Enki Trading →
-            </Link>
           </div>
         </section>
 

@@ -1037,7 +1037,7 @@ function SettingsInner() {
                   {pushSubscribed ? tSettings('app_settings.notifications_tab.active') : tSettings('app_settings.notifications_tab.off')}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Get notified when Enki makes a trade, your posts publish, or your X quota is running low.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Get notified when your posts publish or your X quota is running low.</p>
               {pushPermission === 'denied' ? (
                 <p className="text-xs text-gray-400 dark:text-gray-500">{tSettings('app_settings.notifications_tab.push_blocked')}</p>
               ) : (

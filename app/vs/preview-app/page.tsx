@@ -16,7 +16,6 @@ const COMPARISON = [
   { feature: 'X/Twitter scheduling',        preview: '❌',                         socialmate: '✅ (Pro+)'                          },
   { feature: 'AI writing tools',            preview: 'Basic caption suggestions', socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   preview: '❌',                         socialmate: '✅ (Autopilot/Full Send)'    },
-  { feature: 'Trading bot (Enki)',          preview: '❌',                         socialmate: '✅ Free paper trading'       },
   { feature: 'Bulk scheduling',             preview: '❌',                         socialmate: '✅ Free'                     },
   { feature: 'Analytics dashboard',         preview: '✅ Basic',                   socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Free plan available',         preview: '✅ Very limited',            socialmate: '✅ Full scheduling + AI'     },
@@ -117,7 +116,6 @@ export default function VsPreviewAppPage() {
               <li>✅ TikTok, Discord, Telegram, Bluesky, Mastodon, X, LinkedIn</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
-              <li>✅ Enki: autonomous trading bot</li>
               <li>✅ Full analytics + social inbox</li>
               <li>✅ Free forever — no credit card</li>
             </ul>

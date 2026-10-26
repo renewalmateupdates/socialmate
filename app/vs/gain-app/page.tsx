@@ -17,7 +17,6 @@ const COMPARISON = [
   { feature: 'Client approval workflows',   gain: '✅ Core feature',             socialmate: '✅ Built-in free'            },
   { feature: 'AI writing tools',            gain: '❌',                          socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   gain: '❌',                          socialmate: '✅ (Autopilot/Full Send)'    },
-  { feature: 'Trading bot (Enki)',          gain: '❌',                          socialmate: '✅ Free paper trading'       },
   { feature: 'Bulk scheduling',             gain: '✅',                          socialmate: '✅ Free'                     },
   { feature: 'Analytics dashboard',         gain: '✅',                          socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Free plan available',         gain: '❌',                          socialmate: '✅ Full scheduling + AI'     },
@@ -84,7 +83,7 @@ export default function VsGainAppPage() {
             SocialMate vs Gain
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $29/month — and includes approvals, 7 platforms, 20+ AI tools, SOMA, and Enki.
+            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $29/month — and includes approvals, 7 platforms, 20+ AI tools and SOMA.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">

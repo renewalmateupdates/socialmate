@@ -19,7 +19,6 @@ const CATEGORIES = [
 // Price labels for known Garrison listings — won't hit DB, just display
 const GARRISON_PRICE: Record<string, string> = {
   'RenewalMate': 'Free forever',
-  'Enki':        'Free to start',
 }
 
 function nameToSlug(name: string): string {

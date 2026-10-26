@@ -8,7 +8,7 @@ import {
   FolderOpen, Globe, Globe2, Hexagon, Image as ImageIcon, Keyboard,
   Landmark, Link2, Mail, Mailbox, Megaphone, Package, Palette, PenLine,
   Pin, Plane, Radio, RefreshCw, Repeat, Send, Share2, Shield, Smartphone,
-  Sprout, Swords, TrendingUp, Trophy, Wrench,
+  Sprout, Swords, Trophy, Wrench,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -511,7 +511,6 @@ const SOCIALMATE_WINS: { icon: LucideIcon; text: string }[] = [
   { icon: DollarSign,   text: 'Flat pricing — Pro $8/mo, Agency $29/mo. No per-brand fees' },
   { icon: Bot,          text: '20+ AI tools built in — no add-ons, no extra cost' },
   { icon: Brain,        text: 'SOMA: autonomous AI content system learns your brand voice' },
-  { icon: TrendingUp,   text: 'Enki: autonomous trading bot — unique to SocialMate' },
 ]
 
 export default function VsIndex() {
