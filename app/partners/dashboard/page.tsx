@@ -54,7 +54,7 @@ const TOUR_STEPS: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: Hand,
     title: 'Welcome to Partner HQ',
-    body: "You're in the right place. Earn 30%–40% recurring commission on every referral across SocialMate, Enki, and every product we launch. Let's show you around.",
+    body: "You're in the right place. Earn 30%–40% recurring commission on every referral across SocialMate and every product we launch. Let's show you around.",
   },
   {
     icon: BarChart3,

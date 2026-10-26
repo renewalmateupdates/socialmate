@@ -396,8 +396,6 @@ export default function HermesLandingPage() {
             <Link href="/pricing" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">SocialMate Plans</Link>
             <span className="text-gray-700">|</span>
             <Link href="/soma" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">SOMA — AI Content</Link>
-            <span className="text-gray-700">|</span>
-            <Link href="/enki" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">Enki — AI Trading</Link>
           </div>
         </section>
 

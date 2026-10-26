@@ -25,7 +25,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Activity, AlertTriangle, BarChart3, Beaker, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
@@ -98,7 +98,6 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   '/accounts/destinations': MapPin,
   'https://discord.gg/2se6FGrbRU': MessageCircle,
   '/discord': Gamepad2,
-  '/enki/dashboard': Beaker,
   '/evergreen': Recycle,
   '/rss-import': Rss,
   '/schedules': CalendarClock,
@@ -317,7 +316,6 @@ function SidebarContent({
     'Approvals':      t('app_sidebar.nav_approvals'),
     'Destinations':   t('app_sidebar.nav_destinations'),
     'Discord Hub':    t('app_sidebar.nav_discord_hub'),
-    'Enki':           'Enki',
     'Evergreen':      t('app_sidebar.nav_evergreen'),
     'RSS Import':     t('app_sidebar.nav_rss_import'),
     'Team':           t('app_sidebar.nav_team'),

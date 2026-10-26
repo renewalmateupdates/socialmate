@@ -16,7 +16,6 @@ const COMPARISON = [
   { feature: 'Mastodon support',            unum: '❌',                        socialmate: '✅ Free'                     },
   { feature: 'AI writing tools',            unum: 'Basic captions',           socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   unum: '❌',                        socialmate: '✅ (Autopilot/Full Send)'    },
-  { feature: 'Trading bot (Enki)',          unum: '❌',                        socialmate: '✅ Free paper trading'       },
   { feature: 'Bulk scheduling',             unum: '❌',                        socialmate: '✅ Free'                     },
   { feature: 'Analytics dashboard',         unum: '✅ Basic',                  socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Free plan available',         unum: '✅ Limited',                socialmate: '✅ Full scheduling + AI'     },
@@ -36,7 +35,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate more expensive than Unum?",
-    a: "No. SocialMate is free to start. Unum Pro starts at $8/month. SocialMate Pro is $8/month — cheaper than Unum — and includes more platforms, 20+ AI tools, autonomous content generation (SOMA), a trading bot (Enki), full analytics, and a social inbox. None of these are available in Unum.",
+    a: "No. SocialMate is free to start. Unum Pro starts at $8/month. SocialMate Pro is the same $8/month and includes more platforms, 20+ AI tools, autonomous content generation (SOMA), full analytics, and a social inbox. None of these are available in Unum.",
   },
   {
     q: "Can SocialMate plan Instagram visuals like Unum?",
@@ -117,7 +116,6 @@ export default function VsUnumPage() {
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok, LinkedIn</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
-              <li>✅ Enki: autonomous trading bot</li>
               <li>✅ Full analytics + social inbox</li>
               <li>✅ Free forever — Pro $8/month</li>
             </ul>
@@ -198,7 +196,7 @@ export default function VsUnumPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">More than an Instagram planner — free to start</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms, gives you 20+ AI tools, SOMA autonomous content, and Enki. All starting at $0 — cheaper than Unum Pro.
+            SocialMate covers 7 platforms, gives you 20+ AI tools, and SOMA autonomous content. All starting at $0 — cheaper than Unum Pro.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

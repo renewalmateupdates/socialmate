@@ -203,7 +203,6 @@ const jsonLd = {
     'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn',
     '15+ AI-powered content tools (caption, hashtags, hook, thread, repurpose, post score)',
     'SOMA — autonomous AI content OS with voice learning and project memory',
-    'Enki — AI quantitative trading bot with paper and live trading',
     '8 autonomous AI agents (newsletter, client reports, trend scout, inbox agent, and more)',
     'SIGIL Link in Bio page builder — free on all plans',
     'Team collaboration with role-based access and content approval workflows',

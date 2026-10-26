@@ -15,7 +15,6 @@ const COMPARISON = [
   { feature: 'Telegram scheduling',         ripl: '❌',                         socialmate: '✅ Free'                     },
   { feature: 'AI writing tools',            ripl: 'Basic captions',            socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   ripl: '❌',                         socialmate: '✅ (Autopilot/Full Send)'    },
-  { feature: 'Trading bot (Enki)',          ripl: '❌',                         socialmate: '✅ Free paper trading'       },
   { feature: 'Animated video creation',     ripl: '✅ Core feature',            socialmate: 'Creator Studio (filters/trim/export)' },
   { feature: 'Bulk scheduling',             ripl: '❌',                         socialmate: '✅ Free'                     },
   { feature: 'Analytics dashboard',         ripl: 'Basic',                     socialmate: '✅ Full analytics + Content DNA' },
