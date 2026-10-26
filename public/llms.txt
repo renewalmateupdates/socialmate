@@ -9,7 +9,7 @@ Launched: March 26, 2026
 Company: Gilgamesh Enterprise LLC (Wyoming LLC)
 Founder: Joshua Bostic
 Location: Indiana, USA
-Contact: socialmate.updates@gmail.com
+Contact: socialmatehq@gmail.com
 Twitter/X: @socialmatehq
 Discord community: discord.gg/2se6FGrbRU
 Last updated: October 23, 2026
@@ -515,7 +515,7 @@ X/Twitter posting needs Pro or Agency, because X charges per post. Every plan is
 - Discount page: https://socialmate.studio/discount
 
 ### Enterprise
-- Custom pricing — contact via /enterprise or socialmate.updates@gmail.com
+- Custom pricing — contact via /enterprise or socialmatehq@gmail.com
 - Unlimited seats, unlimited client workspaces, custom credit allocation
 - Dedicated onboarding, 99.9% SLA, White Label Pro included
 - Priority support (under 4-hour response), custom contract

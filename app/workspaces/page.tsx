@@ -1,4 +1,5 @@
 'use client'
+import { SUPPORT_MAILTO } from '@/lib/contact'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -262,7 +263,7 @@ export default function Workspaces() {
                   <p className="text-xs font-bold text-gray-700 dark:text-gray-300">You've reached your {limit} workspace limit on Agency.</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     Need more?{' '}
-                    <a href="mailto:support@socialmate.studio" className="text-black underline hover:no-underline">
+                    <a href={SUPPORT_MAILTO} className="text-black underline hover:no-underline">
                       Contact us
                     </a>{' '}
                     to discuss additional workspaces.

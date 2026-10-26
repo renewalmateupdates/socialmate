@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
@@ -258,9 +259,9 @@ export default function PressPage() {
             anything else media-related — reach out directly. Response time is
             typically within 24 hours.
           </p>
-          <a href="mailto:socialmatehq@gmail.com"
+          <a href={SUPPORT_MAILTO}
             className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all mb-4">
-            socialmatehq@gmail.com →
+            {SUPPORT_EMAIL} →
           </a>
           <p className="text-gray-400 text-sm">
             If you publish a piece about SocialMate, send us the link.

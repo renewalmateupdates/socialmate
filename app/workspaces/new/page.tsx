@@ -1,4 +1,5 @@
 'use client'
+import { SUPPORT_MAILTO } from '@/lib/contact'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -168,7 +169,7 @@ export default function NewWorkspace() {
                   ← Manage Workspaces
                 </Link>
                 <div>
-                  <a href="mailto:support@socialmate.studio"
+                  <a href={SUPPORT_MAILTO}
                     className="text-xs text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-all">
                     Contact us for more workspaces →
                   </a>

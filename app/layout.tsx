@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL } from '@/lib/contact'
 import type { Metadata, Viewport } from 'next'
 import { fontVars } from './fonts'
 import './globals.css'
@@ -110,7 +111,7 @@ const organizationLd = {
   },
   contactPoint: {
     '@type': 'ContactPoint',
-    email: 'socialmate.updates@gmail.com',
+    email: SUPPORT_EMAIL,
     contactType: 'customer support',
   },
   sameAs: [

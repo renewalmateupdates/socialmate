@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL } from '@/lib/contact'
 import { Resend } from 'resend'
 
 /**
@@ -23,7 +24,7 @@ import { Resend } from 'resend'
  * calling `resend.emails.send` directly; it applies the default while still
  * letting a caller override it (partner applications reply to the applicant).
  */
-export const REPLY_TO = process.env.REPLY_TO_EMAIL || 'socialmatehq@gmail.com'
+export const REPLY_TO = process.env.REPLY_TO_EMAIL || SUPPORT_EMAIL
 
 export const FROM_JOSHUA = 'Joshua @ SocialMate <joshua@socialmate.studio>'
 

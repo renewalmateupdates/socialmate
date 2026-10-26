@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL } from '@/lib/contact'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
@@ -948,7 +949,7 @@ export default function StartingABusinessGuidePage() {
                   <p className="mb-4 leading-relaxed text-gray-300">
                     Tell me how it goes. I&apos;m on social media everywhere as{' '}
                     <strong className="text-amber-400">@socialmatehq</strong>. Or email me at{' '}
-                    <strong className="text-amber-400">socialmatehq@gmail.com</strong>.
+                    <strong className="text-amber-400">{SUPPORT_EMAIL}</strong>.
                   </p>
                   <p className="leading-relaxed text-gray-300">
                     Keep building. The door is open.
