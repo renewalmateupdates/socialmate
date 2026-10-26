@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
@@ -22,7 +23,7 @@ export default function TermsOfService() {
           <img src="/logo.png" alt="SocialMate" className="w-24 h-24 rounded-3xl" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Terms of Service</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: October 16, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: October 26, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Please read these Terms carefully before using SocialMate. By accessing or using the Service, you agree to be bound by these Terms.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -53,7 +54,7 @@ export default function TermsOfService() {
               <li>You must provide accurate, current, and complete registration information and keep it updated.</li>
               <li>You may not register more than one free account per individual. Multiple accounts created to circumvent plan limits will be terminated.</li>
               <li>You are solely responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account.</li>
-              <li>You must immediately notify us of any unauthorized access to your account at <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a>.</li>
+              <li>You must immediately notify us of any unauthorized access to your account at <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a>.</li>
               <li>Accounts are non-transferable. You may not sell, trade, or assign your account to another party.</li>
             </ul>
           </section>
@@ -86,7 +87,7 @@ export default function TermsOfService() {
             <p className="mt-2"><span className="font-semibold">Content Standards:</span> You are solely and exclusively responsible for Your Content. You represent and warrant that: (a) you own or have all necessary rights to Your Content; (b) Your Content does not infringe any third-party intellectual property rights; (c) Your Content complies with all applicable laws; and (d) Your Content will not cause harm to any person or entity.</p>
             <p className="mt-2"><span className="font-semibold">No Pre-Screening:</span> We do not review, monitor, or pre-screen content before it is published. However, we reserve the right (but not the obligation) to review, edit, or remove any content that we determine, in our sole discretion, violates these Terms or is otherwise objectionable. Removal of content does not create any liability on our part.</p>
             <p className="mt-2"><span className="font-semibold">Prohibited Content:</span> The following content is strictly prohibited and will result in immediate account termination: child sexual abuse material (CSAM) or any content that exploits or endangers minors; content that incites, glorifies, or facilitates violence or terrorism; content that facilitates illegal activity; content that constitutes illegal discrimination based on protected characteristics.</p>
-            <p className="mt-2"><span className="font-semibold">Reporting:</span> To report content that violates these Terms, contact <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a>.</p>
+            <p className="mt-2"><span className="font-semibold">Reporting:</span> To report content that violates these Terms, contact <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a>.</p>
           </section>
 
           {/* ── 6. AI Features ── */}
@@ -129,7 +130,7 @@ export default function TermsOfService() {
             <p className="mt-2"><span className="font-semibold">Subscriptions:</span> Subscription payments are generally non-refundable. We may, at our sole discretion, issue a refund within <span className="font-semibold">7 days of the initial purchase</span> if the Service is not functioning as materially described and the issue cannot be resolved within a reasonable time. Refunds will not be issued for: dissatisfaction with AI-generated content quality; posts that fail to publish due to third-party platform API errors; downtime of connected third-party platforms; or change of mind after purchase.</p>
             <p className="mt-2"><span className="font-semibold">AI Credit Packs:</span> All AI credit pack purchases are <span className="font-semibold">final and non-refundable</span> once the order is confirmed, regardless of whether credits have been used.</p>
             <p className="mt-2"><span className="font-semibold">Annual Plans:</span> Annual subscription payments are non-refundable. You will retain access to the paid plan for the full annual term regardless of cancellation.</p>
-            <p className="mt-2">To request a refund consideration, contact <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with your account email and Stripe transaction ID. We will respond within 5 business days.</p>
+            <p className="mt-2">To request a refund consideration, contact <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a> with your account email and Stripe transaction ID. We will respond within 5 business days.</p>
           </section>
 
           {/* ── 9. SM-Give ── */}
@@ -199,7 +200,7 @@ export default function TermsOfService() {
             <p className="mt-3"><span className="font-semibold">DMCA Agent:</span><br />
             Gilgamesh Enterprise LLC<br />
             Attn: DMCA Agent<br />
-            Email: <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a></p>
+            Email: <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a></p>
             <p className="mt-3"><span className="font-semibold">Counter-Notices:</span> If you believe your content was wrongly removed, you may submit a counter-notice containing the required information under 17 U.S.C. § 512(g)(3). We will reinstate the content within 10-14 business days unless the original complainant files a court action.</p>
             <p className="mt-2"><span className="font-semibold">Repeat Infringers:</span> We maintain a policy of terminating the accounts of users who are determined to be repeat copyright infringers.</p>
           </section>
@@ -263,7 +264,7 @@ export default function TermsOfService() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">20. Binding Arbitration and Class Action Waiver</h2>
             <p className="font-semibold text-gray-900 dark:text-gray-100">PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT AND TO HAVE A JURY TRIAL.</p>
 
-            <p className="mt-3"><span className="font-semibold">Informal Resolution First:</span> Before initiating any arbitration or legal proceeding, you agree to give us at least <span className="font-semibold">60 days written notice</span> of your dispute by emailing <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with the subject line "Dispute Notice." We will attempt to resolve the dispute informally during this period.</p>
+            <p className="mt-3"><span className="font-semibold">Informal Resolution First:</span> Before initiating any arbitration or legal proceeding, you agree to give us at least <span className="font-semibold">60 days written notice</span> of your dispute by emailing <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a> with the subject line "Dispute Notice." We will attempt to resolve the dispute informally during this period.</p>
 
             <p className="mt-3"><span className="font-semibold">Agreement to Arbitrate:</span> If the dispute is not resolved informally, you and Gilgamesh Enterprise LLC agree that any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Service shall be resolved exclusively by final and binding arbitration administered by the American Arbitration Association ("AAA") under its Consumer Arbitration Rules, except as set forth below. The arbitration shall be conducted on an individual basis and shall not be consolidated with any other arbitration proceeding.</p>
 
@@ -277,7 +278,7 @@ export default function TermsOfService() {
 
             <p className="mt-3"><span className="font-semibold">Costs:</span> AAA filing fees will be governed by AAA's Consumer Arbitration Rules. We will pay AAA administrative fees for claims under $10,000 that are not frivolous.</p>
 
-            <p className="mt-3"><span className="font-semibold">Opt-Out Right:</span> You may opt out of this arbitration agreement by sending written notice to <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with the subject line "Arbitration Opt-Out" within <span className="font-semibold">30 days of first creating your account</span>. Opting out does not affect any other provisions of these Terms.</p>
+            <p className="mt-3"><span className="font-semibold">Opt-Out Right:</span> You may opt out of this arbitration agreement by sending written notice to <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a> with the subject line "Arbitration Opt-Out" within <span className="font-semibold">30 days of first creating your account</span>. Opting out does not affect any other provisions of these Terms.</p>
 
             <p className="mt-3"><span className="font-semibold">Severability:</span> If any portion of this arbitration agreement is found unenforceable, that portion shall be severed and the remainder shall continue in full force and effect.</p>
           </section>
@@ -313,7 +314,7 @@ export default function TermsOfService() {
               <li><span className="font-semibold">Assignment:</span> You may not assign these Terms or any rights hereunder without our prior written consent. We may assign these Terms without restriction in connection with a merger, acquisition, or sale of substantially all of our assets.</li>
               <li><span className="font-semibold">Force Majeure:</span> We shall not be liable for any failure or delay in performance due to causes beyond our reasonable control, including natural disasters, power outages, internet disruptions, or third-party platform failures.</li>
               <li><span className="font-semibold">Changes to Terms:</span> We may update these Terms at any time. Material changes will be communicated via email or prominent in-app notice at least 30 days before taking effect. Non-material changes may take effect immediately upon posting.</li>
-              <li><span className="font-semibold">Contact:</span> For questions about these Terms, contact <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a>. Gilgamesh Enterprise LLC · Wyoming, United States.</li>
+              <li><span className="font-semibold">Contact:</span> For questions about these Terms, contact <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a>. Gilgamesh Enterprise LLC · Wyoming, United States.</li>
             </ul>
           </section>
 

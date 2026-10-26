@@ -1,4 +1,5 @@
 'use client'
+import { SUPPORT_MAILTO } from '@/lib/contact'
 import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
@@ -228,7 +229,7 @@ export default function FaqPage() {
           <p className="text-gray-400 text-sm mb-5">We're a small team and we actually read messages.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="mailto:socialmatehq@gmail.com"
+              href={SUPPORT_MAILTO}
               className="px-6 py-3 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:bg-amber-400 transition-all"
             >
               Email Us

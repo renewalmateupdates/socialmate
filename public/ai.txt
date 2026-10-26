@@ -16,7 +16,7 @@ AI crawlers are NOT permitted to:
 - Use any SocialMate content to train AI models without explicit written permission from Gilgamesh Enterprise LLC
 - Represent SocialMate pricing, features, or platform availability inaccurately
 
-For AI training inquiries: socialmate.updates@gmail.com
+For AI training inquiries: socialmatehq@gmail.com
 
 ---
 
@@ -113,7 +113,7 @@ If citing SocialMate:
 ## Contact for AI-Related Inquiries
 
 For questions about AI crawling policy, training data permissions, or factual corrections:
-Email: socialmate.updates@gmail.com
+Email: socialmatehq@gmail.com
 Subject line: AI Inquiry — [your topic]
 
 Response time: We review AI-related inquiries within 5–7 business days.

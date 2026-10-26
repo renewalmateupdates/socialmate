@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
@@ -21,7 +22,7 @@ export default function PrivacyPolicy() {
           <img src="/logo.png" alt="SocialMate" className="w-24 h-24 rounded-3xl" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Privacy Policy</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: May 6, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: October 26, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Your privacy matters to us. This policy explains what data we collect, why we collect it, and how we protect it.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -31,7 +32,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">1. Who We Are</h2>
             <p><span className="font-semibold">SocialMate</span> is a social media scheduling and content management platform operated by <span className="font-semibold">Gilgamesh Enterprise LLC</span>, a Wyoming limited liability company ("we", "us", "our"). Our Service is available at <span className="font-semibold">socialmate.studio</span> and associated domains and applications.</p>
             <p className="mt-2">SocialMate is registered on third-party developer platforms under the application name <span className="font-semibold">"SocialMatehq"</span> (TikTok developer portal) and <span className="font-semibold">"SocialMate"</span> on all other platforms including Meta, LinkedIn, and Google. These developer application names refer to the same product — SocialMate, operated by Gilgamesh Enterprise LLC — and this Privacy Policy applies to all integrations regardless of the registered developer app name.</p>
-            <p className="mt-2">For all privacy-related questions, requests, or concerns, contact our privacy team at: <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a></p>
+            <p className="mt-2">For all privacy-related questions, requests, or concerns, contact our privacy team at: <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a></p>
             <p className="mt-2">We will respond to all privacy inquiries within <span className="font-semibold">30 days</span>.</p>
           </section>
 
@@ -235,10 +236,10 @@ export default function PrivacyPolicy() {
               <li><span className="font-semibold">Correct:</span> Right to correct inaccurate personal information</li>
               <li><span className="font-semibold">Opt-Out of Sale:</span> We do not sell personal information. You do not need to opt out.</li>
               <li><span className="font-semibold">Non-Discrimination:</span> We will not discriminate against you for exercising your CCPA rights</li>
-              <li>To submit a CCPA request, contact us at <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with "CCPA Request" in the subject line</li>
+              <li>To submit a CCPA request, contact us at <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a> with "CCPA Request" in the subject line</li>
             </ul>
 
-            <p className="mt-2">To exercise any of these rights, email <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with your request. We will respond within <span className="font-semibold">30 days</span>. We may need to verify your identity before processing certain requests. We will not charge a fee for reasonable requests.</p>
+            <p className="mt-2">To exercise any of these rights, email <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a> with your request. We will respond within <span className="font-semibold">30 days</span>. We may need to verify your identity before processing certain requests. We will not charge a fee for reasonable requests.</p>
           </section>
 
           {/* ── 13. Account Deletion ── */}
@@ -246,7 +247,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">13. Account Deletion and Data Removal</h2>
             <p>You can request deletion of your account and personal data at any time by:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
-              <li>Emailing <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with "Delete My Account" in the subject line, or</li>
+              <li>Emailing <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a> with "Delete My Account" in the subject line, or</li>
               <li>Using the account deletion option in your account settings (if available)</li>
             </ul>
             <p className="mt-3">Upon receiving a valid deletion request, we will:</p>
@@ -277,7 +278,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Children's Privacy</h2>
             <p>SocialMate is not directed at, designed for, or intended to be used by children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
             <p className="mt-2">Users between 13 and 17 years of age must have verifiable parental or legal guardian consent prior to using the Service. By using the Service, users in this age range represent that they have obtained such consent.</p>
-            <p className="mt-2">If you believe we have inadvertently collected personal information from a child under 13, please contact us immediately at <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a>. We will promptly delete such information.</p>
+            <p className="mt-2">If you believe we have inadvertently collected personal information from a child under 13, please contact us immediately at <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a>. We will promptly delete such information.</p>
           </section>
 
           {/* ── 16. Do Not Track ── */}
@@ -306,7 +307,7 @@ export default function PrivacyPolicy() {
             <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
               <p className="font-semibold text-gray-900 dark:text-gray-100">Gilgamesh Enterprise LLC</p>
               <p>Privacy Team</p>
-              <p>Email: <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a></p>
+              <p>Email: <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a></p>
               <p>Website: <span className="font-semibold">socialmate.studio</span></p>
               <p className="mt-1 text-xs text-gray-400">Wyoming, United States</p>
             </div>

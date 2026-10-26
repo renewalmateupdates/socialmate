@@ -1,3 +1,4 @@
+import { SUPPORT_MAILTO } from '@/lib/contact'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
@@ -151,7 +152,7 @@ const event = JSON.parse(raw)`}
             SocialMate Discord
           </a>
           {' '}or{' '}
-          <a href="mailto:support@socialmate.studio" className="text-amber-400 hover:text-amber-300">
+          <a href={SUPPORT_MAILTO} className="text-amber-400 hover:text-amber-300">
             email support
           </a>.
         </div>

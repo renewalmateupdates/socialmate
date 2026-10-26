@@ -1,4 +1,5 @@
 'use client'
+import { SUPPORT_MAILTO } from '@/lib/contact'
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
@@ -751,7 +752,7 @@ function SidebarContent({
                   </Link>
                 )}
                 {plan === 'agency' && atWsLimit && (
-                  <a href="mailto:support@socialmate.studio" onClick={() => setWsOpen(false)}
+                  <a href={SUPPORT_MAILTO} onClick={() => setWsOpen(false)}
                     className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:opacity-80 transition-all"
                     style={{ borderTop: '1px solid var(--border)', display: 'flex' }}>
                     <Mail className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} /> Contact us for more

@@ -1,4 +1,5 @@
 'use client'
+import { SUPPORT_EMAIL } from '@/lib/contact'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Bug, HeartHandshake, Lightbulb, MessageCircle, X as CloseIcon } from 'lucide-react'
@@ -160,7 +161,7 @@ export default function FeedbackWidget() {
 
                 {failed ? (
                   <p role="alert" className="text-xs text-red-500 text-center mt-2">
-                    That did not send. Your message is still here, so try again, or email socialmatehq@gmail.com.
+                    That did not send. Your message is still here, so try again, or email {SUPPORT_EMAIL}.
                   </p>
                 ) : (
                   <p className="text-xs text-gray-300 dark:text-gray-500 text-center mt-2">

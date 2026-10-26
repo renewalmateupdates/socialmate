@@ -1,5 +1,6 @@
 'use client'
 
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
@@ -135,13 +136,13 @@ export default function SupportPage() {
                 We typically respond within 24 hours. Joshua personally reads every message.
               </p>
               <a
-                href="mailto:support@socialmate.studio"
+                href={SUPPORT_MAILTO}
                 className="inline-flex items-center gap-2 font-bold text-white px-6 py-3 rounded-full transition-colors text-sm"
                 style={{ backgroundColor: '#7C3AED' }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#6d28d9')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#7C3AED')}
               >
-                support@socialmate.studio
+                {SUPPORT_EMAIL}
               </a>
             </div>
           </section>
