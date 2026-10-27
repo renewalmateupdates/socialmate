@@ -34,6 +34,7 @@ import { hermesFollowUpCron, hermesAutoDiscoverCron } from '@/lib/inngest-hermes
 import { stoppedPostingEmails } from '@/lib/inngest-lifecycle'
 import { tokenExpiryWarnings } from '@/lib/inngest-token-expiry'
 import { farEndDeliveryCheck } from '@/lib/inngest-delivery-check'
+import { campaignTopUp } from '@/lib/inngest-campaigns'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -76,5 +77,6 @@ export const { GET, POST, PUT } = serve({
     stoppedPostingEmails,
     tokenExpiryWarnings,
     farEndDeliveryCheck,
+    campaignTopUp,
   ],
 })

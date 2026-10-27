@@ -26,7 +26,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, Megaphone, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
@@ -58,6 +58,7 @@ const STRIPE_AGENCY_PRICE_ID = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
    entries are both labelled "Schedules". */
 const NAV_ICONS: Record<string, LucideIcon> = {
   '/bulk-scheduler': CalendarRange,
+  '/campaigns': Megaphone,
   '/calendar': CalendarDays,
   '/clips': Clapperboard,
   '/compose': PenLine,
@@ -116,6 +117,7 @@ const NAV_BASE = [
     items: [
       { label: 'Bulk Scheduler', href: '/bulk-scheduler' },
       { label: 'Calendar',       href: '/calendar'       },
+      { label: 'Campaigns',      href: '/campaigns'      },
       { label: 'Clips',          href: '/clips'          },
       { label: 'Compose',        href: '/compose'        },
       { label: 'Creator Studio', href: '/create'         },
@@ -281,6 +283,7 @@ function SidebarContent({
     'ZENITH':         'ZENITH',
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
+    'Campaigns':      'Campaigns',
     'Clips':          t('app_sidebar.nav_clips'),
     'Compose':        t('app_sidebar.nav_compose'),
     'Creator Studio': t('app_sidebar.nav_creator_studio'),
