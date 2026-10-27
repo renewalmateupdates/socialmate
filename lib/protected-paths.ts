@@ -11,6 +11,7 @@ export const PROTECTED_PATHS = [
   '/dashboard',
   '/analytics',
   '/compose',
+  '/campaigns',
   '/calendar',
   '/queue',
   '/drafts',
