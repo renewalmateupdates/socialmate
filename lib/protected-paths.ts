@@ -12,6 +12,7 @@ export const PROTECTED_PATHS = [
   '/analytics',
   '/compose',
   '/campaigns',
+  '/live-alerts',
   '/calendar',
   '/queue',
   '/drafts',
