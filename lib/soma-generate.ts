@@ -28,6 +28,7 @@ import { SOMA_COSTS } from './soma-costs'
 import { SOMA_MODE_LIMITS, capSchedule, effectiveSomaMode, isSomaPlatform, type SomaMode, type PlatformSchedule } from './soma-mode'
 import { nextRunCount } from './soma-runs'
 import { planGapSlots, utcDayKey, windowDayKeys, type PlannedSlot } from './soma-schedule'
+import { fetchUnsplashImage, usedPhotoKeys } from './soma-images'
 import { MAX_DOC_CHARS, fetchDocText } from './soma-fetch-doc'
 import { cleanExamples, houseRules } from './soma-voice'
 
@@ -340,39 +341,6 @@ function extractKeyword(content: string): string {
   return words.filter(w => w.length > 3 && !STOP_WORDS.has(w)).slice(0, 3).join(' ') || 'creator social media'
 }
 
-// urls.small (~400px) stays under Bluesky's 1MB blob limit. usedUrls keeps one
-// photo from appearing twice in a run. Unsplash requires the download ping.
-async function fetchUnsplashImage(keyword: string, usedUrls: Set<string>): Promise<string[] | null> {
-  const key = process.env.UNSPLASH_ACCESS_KEY
-  if (!key) return null
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const seed = attempt > 0 ? `&seed=${Date.now()}${attempt}` : ''
-      const res = await fetch(
-        `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${key}${seed}`,
-        { signal: AbortSignal.timeout(5000) },
-      )
-      if (!res.ok) return null
-      const data = await res.json() as {
-        urls?: { small?: string; regular?: string }
-        user?: { name?: string; links?: { html?: string } }
-        links?: { download_location?: string }
-      }
-      const url = data?.urls?.small ?? data?.urls?.regular
-      if (!url) return null
-      if (usedUrls.has(url) && attempt < 2) continue
-      usedUrls.add(url)
-      if (data?.links?.download_location) {
-        fetch(`${data.links.download_location}?client_id=${key}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
-      }
-      return [url, `Photo by ${data?.user?.name ?? 'Unknown'} on Unsplash | ${data?.user?.links?.html ?? 'https://unsplash.com'}`]
-    } catch {
-      return null
-    }
-  }
-  return null
-}
-
 async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>, shouldStop?: () => boolean): Promise<(R | undefined)[]> {
   const results = new Array<R | undefined>(items.length)
   let next = 0
@@ -675,7 +643,7 @@ export async function runSomaGeneration(opts: SomaRunOptions): Promise<SomaRunRe
   if (!open.length) return result
 
   // Context shared by every call.
-  const [{ data: profile, error: profileErr }, { data: memory, error: memoryErr }, { data: recent, error: recentErr }] = await Promise.all([
+  const [{ data: profile, error: profileErr }, { data: memory, error: memoryErr }, { data: recent, error: recentErr }, { data: pictured, error: picturedErr }] = await Promise.all([
     admin.from('soma_identity_profiles')
       .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary, personality_tier')
       .eq('workspace_id', project.workspace_id)
@@ -690,10 +658,20 @@ export async function runSomaGeneration(opts: SomaRunOptions): Promise<SomaRunRe
       .or(`metadata->>soma_project_id.eq.${project.id},metadata->>project_id.eq.${project.id}`)
       .order('scheduled_at', { ascending: false })
       .limit(15),
+    // Photos already on this workspace's posts, so a run never reuses one.
+    project.include_media
+      ? admin.from('posts')
+          .select('media_urls')
+          .eq('workspace_id', project.workspace_id)
+          .not('media_urls', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1000)
+      : Promise.resolve({ data: [] as { media_urls: string[] | null }[], error: null }),
   ])
   if (profileErr) console.warn('[SOMA] voice profile lookup failed:', profileErr.message)
   if (memoryErr) console.warn('[SOMA] memory lookup failed:', memoryErr.message)
   if (recentErr) console.warn('[SOMA] recent posts lookup failed:', recentErr.message)
+  if (picturedErr) console.warn('[SOMA] used photos lookup failed:', picturedErr.message)
 
   const memoryBlock = memory?.running_summary
     ? `\n\nSOMA MEMORY (do not repeat these topics or angles):\n${memory.running_summary}\nTopics covered: ${(memory.topics_covered ?? []).join(', ') || 'none'}\nAngles used: ${(memory.angles_used ?? []).join(', ') || 'none'}`
@@ -711,7 +689,7 @@ Never state a price, plan limit or feature count unless it appears in the insigh
   // One hung request must not eat the function's whole time limit.
   const model = new GoogleGenerativeAI(opts.apiKey).getGenerativeModel({ model: SOMA_MODEL }, { timeout: GEMINI_TIMEOUT_MS })
   const overBudget = () => Date.now() - started > budgetMs
-  const usedImages = new Set<string>()
+  const usedImages = usedPhotoKeys(pictured ?? [])
   const seen = new Set<string>()
 
   const chunks = chunkSlots(open)
@@ -762,7 +740,7 @@ Rules:
 
     let media: (string[] | null)[] = posts.map(() => null)
     if (project.include_media && posts.length) {
-      media = (await mapWithConcurrency(posts, UNSPLASH_CONCURRENCY, p => fetchUnsplashImage(extractKeyword(p.content), usedImages)))
+      media = (await mapWithConcurrency(posts, UNSPLASH_CONCURRENCY, p => fetchUnsplashImage(extractKeyword(p.content), usedImages, process.env.UNSPLASH_ACCESS_KEY)))
         .map(m => m ?? null)
     }
 
