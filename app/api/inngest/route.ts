@@ -35,6 +35,7 @@ import { stoppedPostingEmails } from '@/lib/inngest-lifecycle'
 import { tokenExpiryWarnings } from '@/lib/inngest-token-expiry'
 import { farEndDeliveryCheck } from '@/lib/inngest-delivery-check'
 import { campaignTopUp } from '@/lib/inngest-campaigns'
+import { liveAlertFire } from '@/lib/inngest-live-alerts'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -78,5 +79,6 @@ export const { GET, POST, PUT } = serve({
     tokenExpiryWarnings,
     farEndDeliveryCheck,
     campaignTopUp,
+    liveAlertFire,
   ],
 })

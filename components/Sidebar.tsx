@@ -26,7 +26,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, Megaphone, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, Megaphone, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Radio, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
@@ -59,6 +59,7 @@ const STRIPE_AGENCY_PRICE_ID = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
 const NAV_ICONS: Record<string, LucideIcon> = {
   '/bulk-scheduler': CalendarRange,
   '/campaigns': Megaphone,
+  '/live-alerts': Radio,
   '/calendar': CalendarDays,
   '/clips': Clapperboard,
   '/compose': PenLine,
@@ -123,6 +124,7 @@ const NAV_BASE = [
       { label: 'Creator Studio', href: '/create'         },
       { label: 'Dashboard',      href: '/dashboard'      },
       { label: 'Drafts',         href: '/drafts'         },
+      { label: 'Go-Live Alerts', href: '/live-alerts'    },
       { label: 'Hashtags',       href: '/hashtag-collections' },
       { label: 'SIGIL',          href: '/link-in-bio'    },
       { label: 'Link Shortener', href: '/links'          },
@@ -284,6 +286,7 @@ function SidebarContent({
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
     'Campaigns':      'Campaigns',
+    'Go-Live Alerts': 'Go-Live Alerts',
     'Clips':          t('app_sidebar.nav_clips'),
     'Compose':        t('app_sidebar.nav_compose'),
     'Creator Studio': t('app_sidebar.nav_creator_studio'),
