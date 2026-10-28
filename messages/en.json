@@ -2919,6 +2919,12 @@
       "cta_secondary": "See pricing",
       "no_card": "No card required · Free plan never expires"
     },
+    "shop_strip": {
+      "badge": "New",
+      "lead": "The Gilgamesh shop is open:",
+      "give": "25% of guide sales and merch profit goes to SM-Give.",
+      "cta": "Shop now"
+    },
     "platforms": {
       "eyebrow": "Platform support",
       "headline": "Seven live. Including the ones nobody else schedules.",

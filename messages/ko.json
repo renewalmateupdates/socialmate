@@ -2919,6 +2919,12 @@
       "cta_secondary": "요금 보기",
       "no_card": "카드 불필요 · 무료 플랜은 만료되지 않습니다"
     },
+    "shop_strip": {
+      "badge": "신규",
+      "lead": "Gilgamesh 숍이 문을 열었습니다:",
+      "give": "가이드 판매액과 굿즈 수익의 25%가 SM-Give로 갑니다.",
+      "cta": "숍 둘러보기"
+    },
     "platforms": {
       "eyebrow": "지원 플랫폼",
       "headline": "일곱 개 운영 중. 아무도 예약 발행을 지원하지 않는 것들까지.",

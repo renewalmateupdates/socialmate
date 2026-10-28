@@ -108,7 +108,7 @@ export function shopUrl(product: ShopProduct, guide: string, medium = 'guide'): 
 }
 
 /** The shop's home page, tagged with where on socialmate.studio the click came from. */
-export function shopHomeUrl(medium: 'nav' | 'footer' | 'guides_hub'): string {
+export function shopHomeUrl(medium: 'nav' | 'footer' | 'guides_hub' | 'landing'): string {
   const q = new URLSearchParams({ utm_source: 'socialmate', utm_medium: medium })
   return `${SHOP}/?${q}`
 }

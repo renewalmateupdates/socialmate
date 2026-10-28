@@ -2919,6 +2919,12 @@
       "cta_secondary": "查看价格",
       "no_card": "无需信用卡 · 免费版永不过期"
     },
+    "shop_strip": {
+      "badge": "新",
+      "lead": "Gilgamesh 商店现已开业：",
+      "give": "指南销售额和周边利润的 25% 将捐给 SM-Give。",
+      "cta": "去逛逛"
+    },
     "platforms": {
       "eyebrow": "支持的平台",
       "headline": "七个已上线，包括别人都不支持排程的那几个。",

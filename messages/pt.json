@@ -2919,6 +2919,12 @@
       "cta_secondary": "Ver preços",
       "no_card": "Sem cartão · O plano gratuito nunca expira"
     },
+    "shop_strip": {
+      "badge": "Novo",
+      "lead": "A loja Gilgamesh está aberta:",
+      "give": "25% das vendas de guias e do lucro dos produtos vão para o SM-Give.",
+      "cta": "Ver a loja"
+    },
     "platforms": {
       "eyebrow": "Plataformas suportadas",
       "headline": "Sete no ar. Incluindo as que mais ninguém agenda.",

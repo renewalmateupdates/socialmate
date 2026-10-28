@@ -8,6 +8,7 @@ import PlatformIcon from '@/components/landing/PlatformIcon'
 import HeroLoop from '@/components/landing/HeroLoop'
 import EmberField from '@/components/landing/EmberField'
 import Reveal from '@/components/landing/Reveal'
+import ShopStrip from '@/components/landing/ShopStrip'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import { PLAN_POST_LIMITS } from '@/lib/post-limits'
 import {
@@ -178,6 +179,12 @@ export default function Landing({
 
       <div className="relative z-10">
       {refCode && <ReferralBanner refCode={refCode} />}
+      <ShopStrip
+        badge={t('landing.shop_strip.badge')}
+        lead={t('landing.shop_strip.lead')}
+        give={t('landing.shop_strip.give')}
+        cta={t('landing.shop_strip.cta')}
+      />
 
       <PublicNav />
 
