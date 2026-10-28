@@ -2919,6 +2919,12 @@
       "cta_secondary": "Ver precios",
       "no_card": "Sin tarjeta · El plan gratuito nunca caduca"
     },
+    "shop_strip": {
+      "badge": "Nuevo",
+      "lead": "La tienda Gilgamesh ya está abierta:",
+      "give": "El 25% de las ventas de guías y de la ganancia del merch va a SM-Give.",
+      "cta": "Ver la tienda"
+    },
     "platforms": {
       "eyebrow": "Plataformas compatibles",
       "headline": "Siete activas. Incluidas las que nadie más programa.",

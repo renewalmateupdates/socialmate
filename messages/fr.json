@@ -2919,6 +2919,12 @@
       "cta_secondary": "Voir les tarifs",
       "no_card": "Sans carte · Le plan gratuit n’expire jamais"
     },
+    "shop_strip": {
+      "badge": "Nouveau",
+      "lead": "La boutique Gilgamesh est ouverte :",
+      "give": "25 % des ventes de guides et des bénéfices du merch vont à SM-Give.",
+      "cta": "Voir la boutique"
+    },
     "platforms": {
       "eyebrow": "Plateformes prises en charge",
       "headline": "Sept actives. Y compris celles que personne d’autre ne programme.",

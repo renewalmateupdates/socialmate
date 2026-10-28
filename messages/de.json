@@ -2919,6 +2919,12 @@
       "cta_secondary": "Preise ansehen",
       "no_card": "Keine Karte nötig · Der kostenlose Plan läuft nie ab"
     },
+    "shop_strip": {
+      "badge": "Neu",
+      "lead": "Der Gilgamesh-Shop ist eröffnet:",
+      "give": "25 % der Guide-Verkäufe und des Merch-Gewinns gehen an SM-Give.",
+      "cta": "Zum Shop"
+    },
     "platforms": {
       "eyebrow": "Unterstützte Plattformen",
       "headline": "Sieben live. Auch die, die sonst niemand plant.",
