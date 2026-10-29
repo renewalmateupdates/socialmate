@@ -154,7 +154,12 @@ export default function Destinations() {
             <div className="space-y-1.5">
               {[
                 { id: 'discord', text: 'Discord — create a webhook in your channel settings and paste the URL here. SocialMate will post to that channel directly.' },
-                { id: 'telegram', text: 'Telegram — add @SocialMateBot to your group or channel, then enter the group username or chat ID here.' },
+                // Posts go out through the bot the user made with @BotFather and
+                // connected on /accounts (lib/publish/telegram.ts uses its token).
+                // This used to say "add @SocialMateBot", a bot SocialMate does not
+                // run: following it gave a stranger's bot admin in the channel and
+                // every post failed.
+                { id: 'telegram', text: 'Telegram — add the bot you connected on the Accounts page to your group or channel as an admin, then enter the group username or chat ID here.' },
               ].map(item => (
                 <div key={item.id} className="flex items-start gap-2 text-xs text-blue-600">
                   <PlatformGlyph id={item.id} size={14} className="flex-shrink-0" />
