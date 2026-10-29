@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { isProtectedPath } from '@/lib/protected-paths'
 import { POSTS } from '@/lib/blog/static-posts'
+import { AUDIENCES } from '@/lib/audiences'
 
 // Blog posts live in two places: the static POSTS map (lib/blog/static-posts.ts)
 // and the `blog_posts` table. The sitemap lists exactly those two, the same merge
@@ -209,12 +210,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
+  // Audience pages served by app/for/[slug], straight from their data file.
+  const audiencePages: MetadataRoute.Sitemap = AUDIENCES.map(a => ({
+    url: `${base}/for/${a.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }))
+
   // Final guard: a duplicate <loc> is wasted crawl budget, and core/comparisons
   // are hand-maintained lists and can pick one up.
   // Sign-in-only pages are dropped too: eight of them were listed here, and a
   // search engine sent to one only ever gets a redirect to /login.
   const seen = new Set<string>()
-  return [...core, ...comparisons, ...blogPosts].filter(entry => {
+  return [...core, ...comparisons, ...audiencePages, ...blogPosts].filter(entry => {
     if (isProtectedPath(new URL(entry.url).pathname)) return false
     if (seen.has(entry.url)) return false
     seen.add(entry.url)
