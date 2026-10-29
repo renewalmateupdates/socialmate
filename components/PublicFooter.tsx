@@ -35,7 +35,6 @@ const FOOTER_COLUMNS: FooterColumn[] = [
     links: [
       { label: 'Our Story',   href: '/story'      },
       { label: 'Blog',        href: '/blog'       },
-      { label: 'Merch',       href: '/merch'      },
       { label: 'Gilgamesh Shop', href: shopHomeUrl('footer') },
       { label: 'Affiliates',  href: '/affiliates' },
       { label: 'Referral',    href: '/referral'   },
