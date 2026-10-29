@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'October 28, 2026',
+    version: 'Campaigns and Go-Live Alerts',
+    changes: [
+      { type: 'New',      text: 'Campaign mode at /campaigns. Write up to 20 messages once, pick the days and times, and SocialMate posts them in rotation until your end date, up to 26 weeks, to Bluesky, Mastodon, Discord, Telegram, LinkedIn and X (X needs Pro). Posts are made a week ahead, so you can see and edit them in your queue.' },
+      { type: 'New',      text: 'Turn on rewording and every message gets six AI versions, so a campaign never posts the same words twice in a row. It costs 2 AI credits per message, once, when you create the campaign.' },
+      { type: 'New',      text: 'Sell something on Shopify? Import your products into a campaign and each one becomes a message with its link and photo.' },
+      { type: 'New',      text: 'Go-live alerts at /live-alerts. When your Twitch stream starts, SocialMate posts your alert to the platforms you pick, using your own wording. Never twice for the same stream. One alert on Free, up to 5 on Pro and 10 on Agency.' },
+    ],
+  },
+  {
     date: 'October 24, 2026',
     version: 'SOMA Scheduling',
     changes: [

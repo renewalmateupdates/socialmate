@@ -160,6 +160,25 @@ SocialMate is a free social media scheduling platform that supports 7 live platf
 
 ---
 
+## Campaign Mode (/campaigns)
+
+Write a set of messages once and SocialMate posts them in rotation on the days and times you choose until an end date.
+- Up to 20 messages per campaign, up to 4 posting times, up to 26 weeks
+- Platforms: Bluesky, Mastodon, Discord, Telegram, LinkedIn, X (X requires Pro or Agency)
+- Optional AI rewording: 6 versions of each message so the same words never post twice in a row; 2 AI credits per message, charged once at creation
+- Shopify import: each product becomes a message with its link and photo
+- Posts are created a week ahead as ordinary scheduled posts you can see and edit
+- Times follow the campaign's own time zone, including daylight saving changes
+
+## Go-Live Alerts (/live-alerts)
+
+When a Twitch stream starts, SocialMate posts the creator's alert to the platforms they choose.
+- Posts to Bluesky, Mastodon, Discord, Telegram, LinkedIn or X (X requires Pro or Agency)
+- Custom wording with the stream title and link; never posts twice for the same stream
+- 1 alert on Free, up to 5 on Pro, up to 10 on Agency
+
+---
+
 ## Free Tools (no signup)
 
 Free browser tools at https://socialmate.studio/tools. They run entirely in the browser; nothing typed into them is sent anywhere.
