@@ -22,6 +22,8 @@ function formatMonth(ym: string): string {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
+  { date: '2026-10', title: 'Campaign mode', desc: 'Write a set of messages once, pick the days and times, and SocialMate posts them in rotation until your end date, optionally reworded by AI each time. Import Shopify products as messages.', status: 'shipped', category: 'Scheduling' },
+  { date: '2026-10', title: 'Go-live alerts for Twitch streamers', desc: 'When your Twitch stream starts, SocialMate posts your alert to Discord, Bluesky, Telegram, Mastodon, LinkedIn or X, once per stream.', status: 'shipped', category: 'Engagement' },
   { date: '2026-10', title: 'Public TikTok posting', desc: 'TikTok approved SocialMate for direct posting on October 23. Videos you post or schedule from TikTok Studio go straight to your profile, with the privacy you choose.', status: 'shipped', category: 'Platforms' },
   { date: '2026-10', title: 'Straight to TikTok Studio after connecting', desc: 'Connecting TikTok takes you right into TikTok Studio to post your first video, and onboarding shows TikTok first for creators who came from our TikTok pages.', status: 'shipped', category: 'Onboarding' },
   { date: '2026-10', title: 'Scheduled posts go out on time', desc: 'Every scheduled post queues its own send time, so posts set from the calendar, queue or onboarding no longer wait hours, and a post moved later never goes out at its old time.', status: 'shipped', category: 'Scheduling' },
