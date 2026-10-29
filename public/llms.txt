@@ -287,7 +287,7 @@ Curated directory of creator tools and resources. Founder-approved listings revi
 Built-in charitable giving initiative. Percentage of every subscription goes to charitable causes.
 
 - 2% of all subscription revenue → sm_give_allocations table → charitable causes (homeless, single parents, underprivileged schools)
-- 75% of gross merch revenue → SM-Give
+- 25% of guide sales and 25% of merch profit from the Gilgamesh shop (shop.gilgameshenterprise.com) → SM-Give
 - Users can make voluntary in-app donations at multiple price points ($5 / $10 / $25 / $50)
 - Live fund tracker with pulsing counter at: https://socialmate.studio/give
 
@@ -585,7 +585,7 @@ X/Twitter posting needs Pro or Agency, because X charges per post. Every plan is
 - Inngest (background jobs, cron functions, concurrency management)
 - Unsplash API (image attachment for SOMA posts — with required attribution)
 - Hunter.io (email finder for HERMES outreach — optional)
-- Printify (print-on-demand merch — shop ID 27238436)
+- Shopify + Printify (the Gilgamesh shop at shop.gilgameshenterprise.com: guides and print-on-demand merch)
 
 ### Technology Stack
 - Framework: Next.js 16 (App Router, Turbopack-compatible)
@@ -695,7 +695,7 @@ Q: Does SocialMate have a free trial?
 A: SocialMate has a permanent free plan (not a trial) with no credit card required. You can use it forever at no cost.
 
 Q: What is SM-Give?
-A: SM-Give is SocialMate's built-in charitable initiative. 2% of all subscription payments and 75% of merch revenue go to charitable causes including homelessness support, single parent aid, and underprivileged school programs. Users can also make voluntary donations.
+A: SM-Give is SocialMate's built-in charitable initiative. 2% of all subscription payments, plus 25% of guide sales and 25% of merch profit from the Gilgamesh shop, go to charitable causes including homelessness support, single parent aid, and underprivileged school programs. Users can also make voluntary donations.
 
 ---
 
@@ -819,7 +819,7 @@ Full comparison hub: https://socialmate.studio/vs
 - Free tools (no signup): https://socialmate.studio/tools
 - Discount page: https://socialmate.studio/discount
 - SM-Give: https://socialmate.studio/give
-- Merch: https://socialmate.studio/merch
+- Merch and guides (the Gilgamesh shop): https://shop.gilgameshenterprise.com
 
 ### App Pages (sign-in required)
 - Partners Dashboard: https://socialmate.studio/partners/dashboard

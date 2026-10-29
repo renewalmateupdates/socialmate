@@ -33,6 +33,13 @@ const nextConfig: NextConfig = {
         destination: 'https://socialmate.studio/:path',
         permanent: true,
       },
+      // The merch page sold an old Printify catalog through its own checkout.
+      // Merch lives in the Gilgamesh shop on Shopify now, so send it there.
+      {
+        source: '/merch',
+        destination: 'https://shop.gilgameshenterprise.com/?utm_source=socialmate&utm_medium=merch_redirect',
+        permanent: true,
+      },
       // Legacy route redirects
       {
         source: '/listings',

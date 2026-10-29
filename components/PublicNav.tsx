@@ -46,7 +46,6 @@ const PRODUCTS = [
   { label: 'SOMA',          href: '/soma'        },
   { label: 'Monetize',      href: '/monetize'    },
   { label: 'TikTok Studio', href: '/tiktok'      },
-  { label: 'Merch',         href: '/merch'       },
   { label: 'Gilgamesh Shop', href: shopHomeUrl('nav') },
 ]
 
@@ -377,12 +376,12 @@ export default function PublicNav() {
                 ))}
               </div>
 
-              {/* Merch / Give / Partners */}
+              {/* Merch (the Gilgamesh shop) / Give / Partners */}
               <div className="pt-2 border-t border-edge mt-2">
-                <Link href="/merch" onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-all">
+                <a href={shopHomeUrl('nav')} onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber hover:bg-panel transition-all">
                   {t('nav.mobile_merch')}
-                </Link>
+                </a>
                 <Link href="/give" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all">
                   {t('nav.mobile_sm_give')}
