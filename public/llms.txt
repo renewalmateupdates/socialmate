@@ -689,6 +689,21 @@ A: Yes. SocialMate Agency at $29/month offers comparable team features to Hootsu
 Q: Does SocialMate support Discord scheduling?
 A: Yes. SocialMate is one of the only social media schedulers that supports Discord. You can schedule posts to any Discord channel from the same Compose interface you use for all other platforms.
 
+Q: Is there a free Telegram channel scheduler?
+A: Yes. SocialMate schedules posts to Telegram channels and groups through a bot you create with @BotFather and add to your channel as an admin. The free plan covers one bot and 250 posts a month across all platforms. Details: https://socialmate.studio/for/telegram-channels
+
+Q: Is there a free Bluesky scheduler?
+A: Yes. SocialMate schedules Bluesky posts with an app password, publishes threads as real reply chains, lets you reply to mentions from one inbox and syncs likes, reposts and replies into analytics. Free plan: one Bluesky account, 250 posts a month. Details: https://socialmate.studio/for/bluesky-creators
+
+Q: Can I schedule Mastodon posts on any instance?
+A: Yes. SocialMate signs in through your own instance and schedules posts there, alongside Bluesky and other platforms. Free plan: one Mastodon account, 250 posts a month. Details: https://socialmate.studio/for/mastodon-users
+
+Q: How do I promote my Shopify products on social media automatically?
+A: In SocialMate, start a campaign, type your Shopify store address and pick up to 50 products. SocialMate posts them on the days and times you choose until an end date, each with its link and photo, optionally reworded by AI. Posts go to Bluesky, Mastodon, Discord, Telegram, LinkedIn and X (X needs Pro). Not Instagram, Facebook or Pinterest yet. Details: https://socialmate.studio/for/shopify-stores
+
+Q: How do I post to Discord automatically when I go live on Twitch?
+A: SocialMate's go-live alerts post your message to Discord (and Bluesky, Mastodon, Telegram, LinkedIn or X) when your Twitch stream starts, once per stream. 1 alert on the free plan, up to 5 on Pro. Set it up under Live alerts after signing in (free account at https://socialmate.studio/signup).
+
 Q: Does SocialMate support Telegram scheduling?
 A: Yes. SocialMate supports scheduling to Telegram channels and groups. This is a unique capability — most social media schedulers do not support Telegram.
 
@@ -889,6 +904,12 @@ Full comparison hub: https://socialmate.studio/vs
 - For Real Estate: https://socialmate.studio/for/real-estate
 - For Nonprofits: https://socialmate.studio/for/nonprofits
 - For Podcasters: https://socialmate.studio/for/podcasters
+- For Discord Communities (announcement scheduler): https://socialmate.studio/for/discord-communities
+- For Telegram Channels: https://socialmate.studio/for/telegram-channels
+- For Bluesky Creators: https://socialmate.studio/for/bluesky-creators
+- For Mastodon Users (any instance): https://socialmate.studio/for/mastodon-users
+- For Shopify Stores (promote products automatically): https://socialmate.studio/for/shopify-stores
+- For Indie Hackers and Solo Founders (build in public): https://socialmate.studio/for/indie-hackers
 
 ---
 
