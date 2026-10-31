@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Buffer (2026) — Full Comparison',
-  description: "Buffer's free plan limits you to 3 channels and 10 queued posts total. SocialMate's free plan includes bulk scheduling, no channel cap, and 15+ AI tools.",
+  title: 'SocialMate vs Buffer (2026): Pricing, Platforms, Free Plan',
+  description: "Buffer bills $6 a month per channel and doesn't post to Discord or Telegram. SocialMate Pro is $8 a month flat, and the free plan includes 250 posts a month and 15+ AI tools.",
   openGraph: {
     title:       'SocialMate vs Buffer (2026)',
-    description: "Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no channel cap, bulk scheduler included, 15+ AI tools.",
+    description: "Buffer bills per channel and skips Discord and Telegram. SocialMate Pro is $8 a month flat, with a free plan of 250 posts a month.",
     url:         'https://socialmate.studio/vs/buffer',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/buffer' },

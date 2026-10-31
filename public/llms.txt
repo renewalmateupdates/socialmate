@@ -544,12 +544,13 @@ X/Twitter posting needs Pro or Agency, because X charges per post. Every plan is
 
 ## Why SocialMate vs Competitors
 
-### vs Buffer ($6–$120/month)
-- SocialMate Free = $0 vs Buffer Free (3 channels only)
-- SocialMate Pro at $8/month beats Buffer Essentials at $6/month
-- SocialMate includes Discord and Telegram scheduling — Buffer does not
-- SocialMate includes 15+ AI tools at all tiers — Buffer charges extra for AI
-- SocialMate includes SOMA (autonomous AI content OS) — Buffer has no equivalent
+### vs Buffer ($6 per channel per month and up)
+- Buffer bills per channel: Essentials $6/channel/month ($5 billed yearly), Team $12 ($10 yearly). SocialMate Pro is $8/month flat for up to 5 accounts per platform, so it costs less from 2 accounts up
+- Buffer Free: 3 channels, 10 queued posts per channel. SocialMate Free: 1 account per platform, 250 posts a month
+- SocialMate includes Discord and Telegram scheduling; Buffer does not
+- Buffer includes Instagram, Facebook, Threads, Pinterest and YouTube Shorts; SocialMate does not
+- Both include AI writing help on every plan; SocialMate has 15+ AI tools with 50 credits a month free
+- SocialMate includes SOMA (autonomous AI content OS); Buffer has no equivalent
 - Comparison page: https://socialmate.studio/vs/buffer
 
 ### vs Hootsuite ($99–$739/month)
@@ -681,7 +682,7 @@ Q: How much does SocialMate cost?
 A: Free ($0), Pro ($8/month or $80/year), Agency ($29/month or $290/year), Enterprise (custom). No contracts, cancel anytime.
 
 Q: Is SocialMate a good Buffer alternative?
-A: Yes. SocialMate Pro at $8/month includes more platforms, more AI tools, and more features than Buffer's $6/month Essentials plan. SocialMate also supports Discord and Telegram, which Buffer does not.
+A: For creators on Discord, Telegram, Bluesky, Mastodon, LinkedIn or TikTok, yes. Buffer charges $6 a month per channel, while SocialMate Pro is $8 a month flat, and SocialMate supports Discord and Telegram, which Buffer does not. If you need Instagram, Facebook, Threads, Pinterest or YouTube, Buffer covers those and SocialMate does not.
 
 Q: Is SocialMate a good Hootsuite alternative?
 A: Yes. SocialMate Agency at $29/month offers comparable team features to Hootsuite's Professional plan at $99/month — at 80% less cost. SocialMate includes AI tools and autonomous content generation that Hootsuite charges extra for.

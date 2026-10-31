@@ -37,9 +37,9 @@ const COMPARISONS = [
     slug:        'buffer',
     name:        'Buffer',
     icon:       Package,
-    headline:    'Buffer free plan: 3 channels, 10 posts total',
-    angle:       "Buffer's free tier is so limited it's almost unusable for real posting. Bulk scheduling is locked behind paid plans.",
-    tag:         'Severely limited free',
+    headline:    'Buffer bills $6 a month for every account',
+    angle:       "Buffer prices each channel separately and doesn't post to Discord or Telegram. Its free plan holds 10 queued posts per channel on 3 channels.",
+    tag:         'Priced per channel',
     tagColor:    'bg-amber/10 text-amber',
   },
   {

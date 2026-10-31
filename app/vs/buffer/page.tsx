@@ -6,44 +6,55 @@ import { useI18n } from '@/contexts/I18nContext'
 
 
 
+// Buffer facts checked against buffer.com/pricing, buffer.com/pricing.md and
+// support.buffer.com "Supported channels" on Oct 31, 2026. "Not listed" means
+// Buffer's own plan pages do not mention it, not that we know it is missing.
+// SocialMate numbers come from lib/plan.ts, lib/post-limits.ts and the bulk
+// scheduler's PLAN_MAX_ROWS.
 const COMPARISON = [
-  { feature: 'Starting price',          buffer: '$6/month (Essentials)',     socialmate: '$0 — free forever'       },
-  { feature: 'Free plan channels',      buffer: '3 channels',                socialmate: 'No hard cap'             },
-  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: '250 posts / month'               },
-  { feature: 'Bulk scheduling',         buffer: '❌ Not available',           socialmate: '✅ Free'                  },
-  { feature: 'Analytics',              buffer: 'Paid add-on',               socialmate: '✅ Built-in free'         },
-  { feature: 'Engagement / Reply inbox', buffer: 'Paid add-on',             socialmate: '✅ Included'              },
-  { feature: 'Discord support',         buffer: '❌',                         socialmate: '✅'                      },
-  { feature: 'Telegram support',        buffer: '❌',                         socialmate: '✅'                      },
-  { feature: 'Mastodon support',        buffer: '❌',                         socialmate: '✅'                      },
-  { feature: 'Bluesky support',         buffer: '✅ (basic)',                 socialmate: '✅'                      },
-  { feature: 'AI writing tools',        buffer: 'AI assistant (paid)',       socialmate: '15+ tools included free'  },
-  { feature: 'AI credits free tier',    buffer: 'None on free plan',         socialmate: '50/month free'            },
-  { feature: 'Link in bio',             buffer: 'Start page (limited free)', socialmate: '✅ Free'                  },
-  { feature: 'Hashtag manager',         buffer: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'Competitor tracking',     buffer: '❌',                         socialmate: '✅ Free (3 accounts)'    },
-  { feature: 'RSS import',              buffer: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'Evergreen recycling',     buffer: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'Team seats (free)',        buffer: '1',                         socialmate: '2'                       },
-  { feature: 'Client workspaces',       buffer: 'Not available',             socialmate: 'Pro+: from $8/mo'        },
+  { feature: 'How you pay',                  buffer: 'Per channel',                            socialmate: 'One flat monthly price'                  },
+  { feature: 'Cheapest paid plan',           buffer: '$6/channel/mo ($5 billed yearly)',       socialmate: '$8/mo Pro ($80/yr)'                      },
+  { feature: '7 accounts, cheapest plan',    buffer: '$42/mo ($35 billed yearly)',             socialmate: '$8/mo (Pro)'                             },
+  { feature: 'Free plan accounts',           buffer: '3 channels',                             socialmate: '1 per platform (X needs Pro)'            },
+  { feature: 'Free plan posting limit',      buffer: '10 queued posts per channel',            socialmate: '250 posts/month, up to 2 weeks ahead'    },
+  { feature: 'Bulk scheduling',              buffer: 'Paid plans',                             socialmate: 'Free (10 per batch), Pro (50)'           },
+  { feature: 'Analytics',                    buffer: 'Basic free (30 days), full on paid',     socialmate: 'Included free'                           },
+  { feature: 'Comment / reply inbox',        buffer: 'All plans',                              socialmate: 'Free (Bluesky, Mastodon, Telegram, Discord)' },
+  { feature: 'AI writing tools',             buffer: 'AI Assistant on all plans',              socialmate: '15+ tools, 50 credits/month free'        },
+  { feature: 'Discord',                      buffer: '❌',                                      socialmate: '✅'                                       },
+  { feature: 'Telegram',                     buffer: '❌',                                      socialmate: '✅'                                       },
+  { feature: 'Bluesky',                      buffer: '✅',                                      socialmate: '✅'                                       },
+  { feature: 'Mastodon',                     buffer: '✅',                                      socialmate: '✅'                                       },
+  { feature: 'LinkedIn',                     buffer: '✅ Profiles and Pages',                   socialmate: '✅ Personal profiles'                     },
+  { feature: 'TikTok',                       buffer: 'Reminder to post in the app',            socialmate: '✅ Posts directly'                        },
+  { feature: 'X / Twitter',                  buffer: '✅',                                      socialmate: '✅ Pro and up'                            },
+  { feature: 'Instagram / Facebook / Threads', buffer: '✅',                                    socialmate: '❌'                                       },
+  { feature: 'Pinterest / YouTube Shorts',   buffer: '✅',                                      socialmate: '❌'                                       },
+  { feature: 'Hashtag manager',              buffer: 'Paid plans',                             socialmate: '✅ Free'                                  },
+  { feature: 'Link in bio',                  buffer: 'Start Page, all plans',                  socialmate: '✅ Free'                                  },
+  { feature: 'Competitor tracking',          buffer: 'Not listed',                             socialmate: '✅ Free (3 accounts)'                     },
+  { feature: 'RSS import',                   buffer: 'Not listed',                             socialmate: '✅ Free'                                  },
+  { feature: 'Evergreen recycling',          buffer: 'Not listed',                             socialmate: '✅ Free'                                  },
+  { feature: 'Team members',                 buffer: 'Free 1, Team plan unlimited',            socialmate: 'Free 2, Pro 5, Agency 15'                },
+  { feature: 'Client workspaces',            buffer: 'Not listed',                             socialmate: 'Agency: 5 workspaces, $29/mo'            },
 ]
 
 const FAQ = [
   {
-    q: "How limited is Buffer's free plan really?",
-    a: "Buffer free limits you to 3 connected channels and only 10 queued posts per channel at any given time. That means if you post daily, you can only schedule 10 days out. There is no bulk scheduling, no AI tools, and no analytics on the free plan. SocialMate's free plan has none of these caps.",
+    q: "How limited is Buffer's free plan?",
+    a: "Buffer's free plan connects up to 3 channels and holds 10 scheduled posts per channel at a time, refilling as they go out. It includes Buffer's AI Assistant, a comment inbox and 30 days of basic analytics. SocialMate's free plan allows 1 account on each platform (X needs Pro), 250 posts a month scheduled up to 2 weeks ahead, and 50 AI credits a month.",
   },
   {
-    q: 'Did Buffer remove their analytics and reply tools?',
-    a: 'Yes. Buffer separated their analytics (formerly Buffer Analyze) and engagement inbox (formerly Buffer Reply) into paid add-ons. If you want a complete tool in one product, you will pay extra — or choose SocialMate, where analytics and engagement are built in.',
+    q: 'How much does Buffer cost for several accounts?',
+    a: 'Buffer bills per channel. Essentials is $6 a month per channel billed monthly, or $5 billed yearly, and Team is $12 or $10. Rates drop past 10 channels. SocialMate Pro is $8 a month flat ($80 a year) for up to 5 accounts on each platform, and Agency is $29 a month for up to 10 per platform plus 5 client workspaces.',
   },
   {
-    q: 'Does SocialMate have a post queue like Buffer?',
-    a: "Yes. SocialMate has a full scheduling calendar and queue system. Unlike Buffer, there is no 10-post limit on the queue. You can schedule months of content at once using the bulk scheduler — free.",
+    q: 'Does SocialMate post to Instagram or Facebook?',
+    a: 'No. SocialMate posts to Bluesky, Discord, Telegram, Mastodon, LinkedIn, TikTok and X (X on Pro and up). Buffer supports Instagram, Facebook, Threads, Pinterest and YouTube Shorts, so if you need those, Buffer is the better fit.',
   },
   {
-    q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes 250 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required.',
+    q: 'Is SocialMate actually free?',
+    a: 'Yes. The free plan includes 250 posts a month, 50 AI credits a month, bulk scheduling (10 posts per batch), link in bio, a hashtag manager, competitor tracking for 3 accounts, RSS import and evergreen recycling. No credit card required.',
   },
 ]
 
@@ -82,13 +93,13 @@ export default function VsBufferPage() {
         {/* HERO */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-raised bg-raised border border-edge-lit border-edge-lit rounded-full px-4 py-1.5 text-xs font-bold text-ink-muted mb-4">
-            Updated April 2026
+            Updated October 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs Buffer
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: 250 posts/month, bulk scheduler, 15+ AI tools included.
+            Buffer bills per channel: $6 a month for each account, or $5 billed yearly. SocialMate Pro is $8 a month flat, and it posts to Discord and Telegram, which Buffer doesn&apos;t.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -104,26 +115,26 @@ export default function VsBufferPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
           <div className="bg-panel border-2 border-edge rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">Buffer</p>
-            <p className="font-extrabold text-lg mb-2 text-ink-high">Simple scheduler, fragmented feature set</p>
+            <p className="font-extrabold text-lg mb-2 text-ink-high">Polished scheduler, priced per channel</p>
             <ul className="space-y-1 text-xs text-ink-muted">
               <li>✅ Clean, simple UI</li>
-              <li>✅ Reliable posting queue</li>
-              <li>❌ Free plan capped at 3 channels + 10 posts</li>
-              <li>❌ No bulk scheduling on any plan</li>
-              <li>❌ Analytics and Reply tools are paid add-ons</li>
-              <li>❌ No Discord, Telegram, or Mastodon support</li>
+              <li>✅ Instagram, Facebook, Threads, Pinterest and YouTube Shorts</li>
+              <li>✅ AI Assistant and comment inbox on every plan</li>
+              <li>❌ Every account is billed as its own channel</li>
+              <li>❌ Free plan: 3 channels, 10 queued posts each</li>
+              <li>❌ No Discord or Telegram</li>
             </ul>
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Everything in one. No add-ons. 250 posts/month.</p>
+            <p className="font-extrabold text-lg mb-2">One flat price, plus Discord and Telegram</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ 250 posts / month, no per-channel cap</li>
-              <li>✅ Bulk scheduling free</li>
-              <li>✅ Analytics built in — no add-on</li>
-              <li>✅ 15+ AI tools on free tier</li>
-              <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ No credit card required</li>
+              <li>✅ $8/mo Pro, not billed per account</li>
+              <li>✅ 250 posts a month on the free plan</li>
+              <li>✅ Discord, Telegram, Mastodon, Bluesky, LinkedIn, TikTok</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
+              <li>✅ Analytics and bulk scheduling on the free plan</li>
+              <li>❌ No Instagram, Facebook, Pinterest or YouTube</li>
             </ul>
           </div>
         </div>
@@ -150,28 +161,28 @@ export default function VsBufferPage() {
 
         {/* WHY SWITCH */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">Why people switch from Buffer</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">Where SocialMate and Buffer differ</h2>
           <div className="space-y-4">
             {[
               {
                 n: '1',
-                title: 'The free plan queue limit is unusable for real content',
-                desc: 'Buffer lets you queue only 10 posts per channel on the free plan. That is less than two weeks of daily posting. Once you hit the limit you either pay or manually delete old posts to make room. SocialMate has no queue limit at all.',
+                title: 'Per-channel pricing adds up',
+                desc: 'Buffer Essentials is $6 a month per channel, or $5 billed yearly. Seven accounts comes to $42 a month, or $35 billed yearly. SocialMate Pro is $8 a month for up to 5 accounts on each platform.',
               },
               {
                 n: '2',
-                title: 'Buffer dropped bulk scheduling entirely',
-                desc: "Buffer has never had a true bulk scheduler. If you want to upload 30 posts at once from a CSV or spreadsheet, you cannot do it in Buffer on any plan. SocialMate's bulk scheduler is free and supports mass CSV uploads.",
+                title: 'Discord and Telegram',
+                desc: "Buffer doesn't publish to Discord or Telegram. If your community lives there, SocialMate schedules to both, on the free plan.",
               },
               {
                 n: '3',
-                title: 'Analytics and Reply are separate paid products now',
-                desc: 'Buffer spun off their analytics and engagement inbox into add-ons after years of being bundled. You now need to pay separately for features that used to be included. SocialMate keeps analytics and engagement built in at no extra cost.',
+                title: 'The free plans are shaped differently',
+                desc: "Buffer's free plan holds 10 queued posts per channel across 3 channels. SocialMate's free plan allows 250 posts a month scheduled up to 2 weeks ahead, 1 account on each platform, plus bulk scheduling and 50 AI credits a month.",
               },
               {
                 n: '4',
-                title: 'SocialMate covers platforms Buffer does not',
-                desc: 'Discord, Telegram, and Mastodon are not supported by Buffer. If your community exists on any of these platforms, Buffer simply cannot help you. SocialMate covers all three on the free plan.',
+                title: 'When Buffer is the better pick',
+                desc: "If you need Instagram, Facebook, Threads, Pinterest or YouTube Shorts, use Buffer. SocialMate doesn't post to those.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
@@ -200,9 +211,9 @@ export default function VsBufferPage() {
 
         {/* CTA */}
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done working around Buffer&apos;s limits?</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done paying per channel?</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate gives you 250 posts/month, bulk scheduling, 15+ AI tools, 7 platforms — completely free to start. No credit card required.
+            SocialMate&apos;s free plan gives you 250 posts a month, bulk scheduling and 15+ AI tools across 6 platforms, with X on Pro. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}
