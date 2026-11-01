@@ -13,6 +13,7 @@ import { resolveWorkspacePlan } from '@/lib/plan'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
+import { canCreatePosts, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
 
 
 export async function POST(request: NextRequest) {
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
 
     // Resolve workspace using admin client to bypass RLS
-    let resolvedWorkspaceId = workspaceId || null
+    let resolvedWorkspaceId = realWorkspaceId(workspaceId)
     if (!resolvedWorkspaceId) {
       const adminSupabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -95,43 +96,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No workspace found. Please contact support.' }, { status: 400 })
     }
 
-    // Determine account workspace: personal accounts have workspace_id = null in connected_accounts
-    const { data: wsInfo } = await getSupabaseAdmin()
-      .from('workspaces')
-      .select('is_personal, owner_id')
-      .eq('id', resolvedWorkspaceId)
-      .maybeSingle()
-    const accountWorkspaceId: string | null = wsInfo?.is_personal ? null : resolvedWorkspaceId
-
-    // Editor/Client roles must submit for approval, not publish or schedule
-    // directly -- and this route does both. Enforcement lived only in
-    // compose/page.tsx's client-side choice of which endpoint to call
-    // (handleSubmitForApproval vs handlePublish); anyone with a restricted
-    // role could call this endpoint directly and bypass Owner approval
-    // entirely. Checked here, server-side, regardless of what the client asks
-    // for -- immediate publish or scheduled.
-    if (wsInfo?.owner_id && wsInfo.owner_id !== user.id) {
-      const { data: membership } = await getSupabaseAdmin()
-        .from('team_members')
-        .select('role')
-        .eq('email', user.email!)
-        .eq('owner_id', wsInfo.owner_id)
-        .eq('status', 'active')
-        .maybeSingle()
-
-      // Also closes a second gap: this route accepted any client-supplied
-      // workspaceId with only user_id enforced on the row it writes, never
-      // verifying the caller has any relationship to that workspace at all.
-      if (!membership) {
-        return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
-      }
-      if (membership.role === 'editor' || membership.role === 'client') {
-        return NextResponse.json({
-          error: 'Your role requires posts to be submitted for approval, not published directly.',
-          requiresApproval: true,
-        }, { status: 403 })
-      }
+    // The caller's role here, and whose accounts this workspace posts to. In
+    // a workspace someone else owns, the accounts are the owner's: publishing
+    // with the caller's own id sent a team member's post looking for their own
+    // LinkedIn, which they never connected. See lib/team-workspaces.ts.
+    //
+    // This also closes the gap where this route accepted any client-supplied
+    // workspaceId and only enforced user_id on the row it writes.
+    const access = await resolveWorkspaceAccess(getSupabaseAdmin(), user, resolvedWorkspaceId)
+    if (!access) {
+      return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
     }
+    if (!canCreatePosts(access.role)) {
+      return NextResponse.json({ error: 'You have view-only access to this workspace.' }, { status: 403 })
+    }
+    const accountWorkspaceId = access.accountWorkspaceId
 
     // Get plan — resolved through the workspace this post is going into, not
     // the calling user's own user_settings. A team member posting into a
@@ -139,6 +118,16 @@ export async function POST(request: NextRequest) {
     // personal free-tier default; a bare select here is the exact bug class
     // that cost the first paying customer their first session (PR #579).
     const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, resolvedWorkspaceId)
+
+    // Editor/Client roles submit for approval instead of publishing, wherever
+    // the owner has an approval queue to review them in (paid plans). Checked
+    // here, server-side, so a direct call cannot skip it (PR #667).
+    if (requiresApproval(access.role, plan)) {
+      return NextResponse.json({
+        error: 'Your role requires posts to be submitted for approval, not published directly.',
+        requiresApproval: true,
+      }, { status: 403 })
+    }
 
     // Scheduling window enforcement
     if (scheduledAt) {
@@ -341,7 +330,7 @@ export async function POST(request: NextRequest) {
     // ── POST NOW PATH ───────────────────────────────────────────
     // Publish to platforms first, then insert with the correct final status.
     // This eliminates the "insert as draft → update to published" race condition.
-    const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId, selectedAccountIds || {}, mediaUrls || [])
+    const results    = await publishToAll(access.ownerId, platforms, content, destinations || {}, accountWorkspaceId, selectedAccountIds || {}, mediaUrls || [])
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'

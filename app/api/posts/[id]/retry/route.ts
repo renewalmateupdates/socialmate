@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
+import { accountScopeFor } from '@/lib/team-workspaces'
 
 export async function POST(
   _request: NextRequest,
@@ -45,22 +46,16 @@ export async function POST(
     return NextResponse.json({ error: 'No failed platforms to retry' }, { status: 400 })
   }
 
-  // Resolve workspace — personal accounts have workspace_id = null in connected_accounts
-  let accountWorkspaceId: string | null = null
-  if (post.workspace_id) {
-    const { data: wsInfo } = await getSupabaseAdmin()
-      .from('workspaces')
-      .select('is_personal')
-      .eq('id', post.workspace_id)
-      .maybeSingle()
-    accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
-  }
+  // The workspace owner's accounts, not necessarily the author's (see
+  // lib/team-workspaces.ts). Personal accounts have workspace_id = null.
+  const { ownerId: accountOwnerId, accountWorkspaceId } =
+    await accountScopeFor(getSupabaseAdmin(), post.workspace_id, user.id)
 
   const destinations: Record<string, string> = post.destinations ?? {}
 
   // Retry only the failed platforms
   const results = await publishToAll(
-    user.id,
+    accountOwnerId,
     failedPlatforms,
     post.content,
     destinations,

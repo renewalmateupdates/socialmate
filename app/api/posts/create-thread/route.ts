@@ -11,6 +11,7 @@ import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { publishToBluesky, type BlueskyPostRef } from '@/lib/publish/bluesky'
 import { publishToMastodon } from '@/lib/publish/mastodon'
 import { publishToTwitter } from '@/lib/publish/twitter'
+import { canCreatePosts, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
 
 // Real sequential thread publishing -- Post Now only. Thread Builder used to
 // submit each part as an independent scheduled post 30 seconds apart via
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     // Resolve workspace using admin client to bypass RLS -- same pattern as
     // /api/posts/create.
-    let resolvedWorkspaceId = workspaceId || null
+    let resolvedWorkspaceId = realWorkspaceId(workspaceId)
     if (!resolvedWorkspaceId) {
       const adminSupabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -118,37 +119,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No workspace found. Please contact support.' }, { status: 400 })
     }
 
-    const { data: wsInfo } = await getSupabaseAdmin()
-      .from('workspaces')
-      .select('is_personal, owner_id')
-      .eq('id', resolvedWorkspaceId)
-      .maybeSingle()
-    const accountWorkspaceId: string | null = wsInfo?.is_personal ? null : resolvedWorkspaceId
-
-    // Same approval-workflow + workspace-access check as /api/posts/create
-    // (PR #667) -- a thread publishes immediately just like Post Now, so an
-    // Editor/Client role must not be able to bypass approval by hitting this
-    // route directly either.
-    if (wsInfo?.owner_id && wsInfo.owner_id !== user.id) {
-      const { data: membership } = await getSupabaseAdmin()
-        .from('team_members')
-        .select('role')
-        .eq('email', user.email!)
-        .eq('owner_id', wsInfo.owner_id)
-        .eq('status', 'active')
-        .maybeSingle()
-      if (!membership) {
-        return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
-      }
-      if (membership.role === 'editor' || membership.role === 'client') {
-        return NextResponse.json({
-          error: 'Your role requires posts to be submitted for approval, not published directly. Threads always publish immediately, so this role cannot post one.',
-          requiresApproval: true,
-        }, { status: 403 })
-      }
+    // Role and account owner, as in /api/posts/create: a team member's thread
+    // goes to the workspace owner's accounts, not their own.
+    const access = await resolveWorkspaceAccess(getSupabaseAdmin(), user, resolvedWorkspaceId)
+    if (!access) {
+      return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
     }
+    if (!canCreatePosts(access.role)) {
+      return NextResponse.json({ error: 'You have view-only access to this workspace.' }, { status: 403 })
+    }
+    const accountWorkspaceId = access.accountWorkspaceId
+    const accountOwnerId     = access.ownerId
 
     const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, resolvedWorkspaceId)
+
+    // Same approval check as /api/posts/create (PR #667). A thread publishes
+    // immediately, so a role that needs approval cannot post one.
+    if (requiresApproval(access.role, plan)) {
+      return NextResponse.json({
+        error: 'Your role requires posts to be submitted for approval, not published directly. Threads always publish immediately, so this role cannot post one.',
+        requiresApproval: true,
+      }, { status: 403 })
+    }
 
     // Whole thread, all-or-nothing on quota: check upfront that every part
     // fits, rather than letting the old per-part independent-insert approach
@@ -176,7 +168,7 @@ export async function POST(request: NextRequest) {
         try {
           if (platform === 'bluesky') {
             const ref = await publishToBluesky(
-              user.id, content, accountWorkspaceId, selectedAccountIds?.['bluesky'],
+              accountOwnerId, content, accountWorkspaceId, selectedAccountIds?.['bluesky'],
               i === 0 ? mediaUrls : undefined,
               chain.blueskyParent ? { root: chain.blueskyRoot!, parent: chain.blueskyParent } : undefined,
             )
@@ -185,7 +177,7 @@ export async function POST(request: NextRequest) {
             platformPostIds.bluesky = ref.uri
           } else if (platform === 'mastodon') {
             const id = await publishToMastodon(
-              user.id, content, accountWorkspaceId, selectedAccountIds?.['mastodon'],
+              accountOwnerId, content, accountWorkspaceId, selectedAccountIds?.['mastodon'],
               i === 0 ? mediaUrls : undefined,
               chain.parentId,
             )
@@ -193,7 +185,7 @@ export async function POST(request: NextRequest) {
             platformPostIds.mastodon = id
           } else if (platform === 'twitter') {
             const id = await publishToTwitter(
-              user.id, content, accountWorkspaceId, selectedAccountIds?.['twitter'],
+              accountOwnerId, content, accountWorkspaceId, selectedAccountIds?.['twitter'],
               i === 0 ? mediaUrls : undefined,
               chain.parentId,
             )

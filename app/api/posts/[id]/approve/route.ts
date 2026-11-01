@@ -26,8 +26,10 @@ function getSupabase() {
  * PATCH /api/posts/[id]/approve
  * Approves a pending_approval post.
  * Caller must be the workspace owner.
- * - If post has scheduled_at: sets status = 'scheduled', fires Inngest post/scheduled
- * - If no scheduled_at: sets status = 'draft' (owner can publish manually)
+ * Sets status = 'scheduled' and fires Inngest post/scheduled. A post with no
+ * time goes out now: the submitter asked to post it, and the owner just said
+ * yes. (It used to become a 'draft' owned by the submitter, which the owner's
+ * /drafts never lists and the submitter's role cannot publish: a dead end.)
  * Sends in-app notification to post submitter.
  */
 export async function PATCH(
@@ -68,25 +70,26 @@ export async function PATCH(
     return NextResponse.json({ error: 'Forbidden — only workspace owners can approve posts' }, { status: 403 })
   }
 
-  // Determine new status
-  const newStatus = post.scheduled_at ? 'scheduled' : 'draft'
+  // A time that has already passed while the post waited for review is "now"
+  // too; the publish job sends anything due immediately.
+  const postNow     = !post.scheduled_at
+  const newStatus   = 'scheduled'
+  const scheduledAt = post.scheduled_at ?? new Date().toISOString()
 
   const { error: updateError } = await admin
     .from('posts')
-    .update({ status: newStatus, approval_status: 'approved' })
+    .update({ status: newStatus, approval_status: 'approved', scheduled_at: scheduledAt })
     .eq('id', id)
+    .eq('status', 'pending_approval')
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  // Fire Inngest if now scheduled
-  if (newStatus === 'scheduled' && post.scheduled_at) {
-    try {
-      await inngest.send({ name: 'post/scheduled', data: { postId: post.id, scheduledAt: post.scheduled_at } })
-    } catch (err) {
-      console.error('[approve] Failed to send post/scheduled event:', err)
-    }
+  try {
+    await inngest.send({ name: 'post/scheduled', data: { postId: post.id, scheduledAt } })
+  } catch (err) {
+    console.error('[approve] Failed to send post/scheduled event:', err)
   }
 
   // Notify the submitter in-app
@@ -97,9 +100,9 @@ export async function PATCH(
         user_id:    post.user_id,
         type:       'post_approved',
         title:      'Post approved ✓',
-        message:    `Your post was approved and ${newStatus === 'scheduled' ? 'scheduled' : 'moved to drafts'}: "${preview}"`,
+        message:    `Your post was approved and ${postNow ? 'is going out now' : 'scheduled'}: "${preview}"`,
         is_read:    false,
-        data:       { href: newStatus === 'scheduled' ? '/queue' : '/drafts', post_id: post.id },
+        data:       { href: '/queue', post_id: post.id },
         created_at: new Date().toISOString(),
       })
     } catch (err) {
@@ -117,5 +120,5 @@ export async function PATCH(
     metadata:     { platforms: post.platforms, new_status: newStatus },
   })
 
-  return NextResponse.json({ success: true, status: newStatus })
+  return NextResponse.json({ success: true, status: newStatus, postNow })
 }

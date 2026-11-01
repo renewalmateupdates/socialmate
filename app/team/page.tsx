@@ -24,8 +24,8 @@ type TeamMember = {
 const ROLE_META: Record<string, { label: string; color: string; description: string }> = {
   owner:  { label: 'Owner',  color: 'bg-black text-white dark:bg-white dark:text-black',                                              description: 'Full access to everything'                             },
   admin:  { label: 'Admin',  color: 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900',                                     description: 'Can manage team and settings'                          },
-  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700', description: 'Can create and schedule posts' },
-  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',                                  description: 'Can view posts and analytics'                          },
+  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700', description: 'Can create and schedule posts to your accounts. On Pro and Agency, their posts wait for your approval' },
+  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',                                  description: 'Can view posts and analytics. Cannot create posts'     },
   client: { label: 'Client', color: 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700', description: 'Limited access to assigned workspace only' },
 }
 

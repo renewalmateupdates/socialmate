@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { useWorkspace, PLAN_CONFIG, isOwnWorkspace, type Workspace } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
 import NotificationBell from '@/components/NotificationBell'
@@ -28,6 +28,14 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, Megaphone, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Radio, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+
+// "Alex's workspace" for a personal workspace shared with you; a shared client
+// workspace keeps its own name, with the owner after it.
+function sharedWorkspaceLabel(ws: Workspace): string {
+  const owner = ws.owner_label || 'Team'
+  if (ws.is_personal) return owner.includes('@') ? `${owner} (team)` : `${owner}'s workspace`
+  return `${ws.client_name || ws.name} · ${owner}`
+}
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
 const ORDER_KEY             = 'sidebar_section_order'
@@ -508,8 +516,15 @@ function SidebarContent({
     }
   }
 
-  const clientWorkspaces  = workspaces.filter((w: any) => !w.is_personal)
-  const personalWorkspace = workspaces.find((w: any) => w.is_personal)
+  // Own workspaces vs ones shared through /team. The shared list was folded
+  // into these two: the owner's personal workspace never showed (only the
+  // first personal one did, which is the member's own), and their client
+  // workspaces only showed if the MEMBER paid. So a free-plan editor had no
+  // way to open the workspace they were invited to.
+  const ownWorkspaces     = workspaces.filter(isOwnWorkspace)
+  const sharedWorkspaces  = workspaces.filter(w => !isOwnWorkspace(w))
+  const clientWorkspaces  = ownWorkspaces.filter(w => !w.is_personal)
+  const personalWorkspace = ownWorkspaces.find(w => w.is_personal)
   const wsLimit           = PLAN_CONFIG[plan]?.clientWorkspaces ?? 0
   const atWsLimit         = clientWorkspaces.length >= wsLimit
 
@@ -689,7 +704,11 @@ function SidebarContent({
                 {activeWorkspace?.is_personal
                   ? <Home className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
                   : <Building2 className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />}
-                <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
+                <span className="truncate">
+                  {activeWorkspace && !isOwnWorkspace(activeWorkspace)
+                    ? sharedWorkspaceLabel(activeWorkspace)
+                    : activeWorkspace?.name || 'My Workspace'}
+                </span>
               </div>
               <span className="flex-shrink-0 ml-1" style={{ color: 'var(--sidebar-faint)' }}>
                 {wsOpen ? <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}
@@ -711,6 +730,27 @@ function SidebarContent({
                     <span className="truncate">My Workspace</span>
                     {activeWorkspace?.id === personalWorkspace.id && <Check size={13} strokeWidth={2.5} className="ml-auto" style={{ color: 'var(--sidebar-fg)' }} />}
                   </button>
+                )}
+
+                {sharedWorkspaces.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest" style={{ borderTop: '1px solid var(--sidebar-border)', color: 'var(--sidebar-faint)' }}>
+                      Shared with you
+                    </div>
+                    {sharedWorkspaces.map(ws => (
+                      <button key={ws.id}
+                        onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left transition-all hover:opacity-80"
+                        style={{
+                          background: activeWorkspace?.id === ws.id ? 'var(--sidebar-border)' : 'transparent',
+                          color: activeWorkspace?.id === ws.id ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                        }}>
+                        <Users className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
+                        <span className="truncate">{sharedWorkspaceLabel(ws)}</span>
+                        {activeWorkspace?.id === ws.id && <Check size={13} strokeWidth={2.5} className="ml-auto" style={{ color: 'var(--sidebar-fg)' }} />}
+                      </button>
+                    ))}
+                  </>
                 )}
 
                 {(plan === 'pro' || plan === 'agency') && clientWorkspaces.length > 0 && (

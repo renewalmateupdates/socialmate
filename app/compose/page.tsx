@@ -192,6 +192,10 @@ function ComposeInner() {
 
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'editor' | 'viewer' | 'client' | null>(null)
+  // From /api/workspaces/accounts, which knows the workspace's plan. Approval
+  // only applies where the owner can open /approvals (a paid feature).
+  const [approvalRequired, setApprovalRequired] = useState(false)
+  const [canPost, setCanPost] = useState(true)
   const [showPostingDisclaimer, setShowPostingDisclaimer] = useState(false)
   // Starts empty and is filled from the user's real connections once they load.
   // This used to default to ['discord'] for everybody. Measured 2026-09-01: all
@@ -425,36 +429,25 @@ function ComposeInner() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
 
-      // Determine this user's role in the active workspace (editor/client must submit for approval)
-      fetch('/api/team/my-role')
-        .then(r => r.ok ? r.json() : null)
-        .then(d => { if (d?.role) setUserRole(d.role as typeof userRole) })
-        .catch(() => {})
+      // What this workspace can post to, and the caller's role in it. Server-
+      // side, because in a workspace someone else owns the accounts are the
+      // owner's: a browser query on `user_id = me` listed the team member's
+      // own accounts (usually none) and RLS hides the owner's rows anyway.
+      const scope: {
+        role?: string
+        canPost?: boolean
+        requiresApproval?: boolean
+        accounts?: ConnectedAccount[]
+        destinations?: Destination[]
+      } = await fetch(`/api/workspaces/accounts?workspaceId=${encodeURIComponent(wsId ?? '')}`)
+        .then(r => r.ok ? r.json() : {})
+        .catch(() => ({}))
 
-      // Load destinations scoped to this workspace
-      const destQuery = supabase
-        .from('post_destinations')
-        .select('id, platform, label')
-        .eq('user_id', data.user.id)
-        .order('created_at', { ascending: true })
+      setUserRole((scope.role as typeof userRole) ?? 'owner')
+      setCanPost(scope.canPost !== false)
+      setApprovalRequired(!!scope.requiresApproval)
 
-      const destsResult = activeWorkspace && !activeWorkspace.is_personal
-        ? await destQuery.eq('workspace_id', activeWorkspace.id)
-        : await destQuery.is('workspace_id', null)
-      const dests = destsResult.data
-
-      // For client workspaces: no fallback — they have their own isolated accounts
-      // For personal workspace: fallback to all user's personal destinations
-      const { data: allDests } = (!dests?.length && activeWorkspace?.is_personal)
-        ? await supabase
-            .from('post_destinations')
-            .select('id, platform, label')
-            .eq('user_id', data.user.id)
-            .is('workspace_id', null)
-            .order('created_at', { ascending: true })
-        : { data: null }
-
-      const destData = dests?.length ? dests : (allDests || [])
+      const destData: Destination[] = scope.destinations ?? []
 
       if (destData.length > 0) {
         const grouped = destData.reduce((acc: Record<string, Destination[]>, d: Destination) => {
@@ -470,23 +463,11 @@ function ComposeInner() {
         setSelectedDestinations(autoSelected)
       }
 
-      // Load connected accounts with full details — scoped to workspace
-      let accountsQuery = supabase
-        .from('connected_accounts')
-        .select('id, platform, account_name, platform_user_id')
-        .eq('user_id', data.user.id)
-
-      if (activeWorkspace && !activeWorkspace.is_personal) {
-        accountsQuery = accountsQuery.eq('workspace_id', activeWorkspace.id)
-      } else {
-        accountsQuery = accountsQuery.is('workspace_id', null)
-      }
-
-      const { data: accountsData } = await accountsQuery
+      const accountsData: ConnectedAccount[] = scope.accounts ?? []
 
       // Group accounts by platform
       const byPlatform: Record<string, ConnectedAccount[]> = {}
-      ;(accountsData || []).forEach((acc: ConnectedAccount) => {
+      accountsData.forEach((acc: ConnectedAccount) => {
         if (!byPlatform[acc.platform]) byPlatform[acc.platform] = []
         byPlatform[acc.platform].push(acc)
       })
@@ -1485,6 +1466,9 @@ function ComposeInner() {
           workspaceId: activeWorkspace?.id,
           status: 'pending_approval',
           scheduledAt,
+          // Attached images went nowhere: this body never carried them, so an
+          // approved post published without the picture the editor added.
+          mediaUrls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
         }),
       })
       const data = await res.json()
@@ -3303,7 +3287,11 @@ function ComposeInner() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
-                    {(userRole === 'editor' || userRole === 'client') ? (
+                    {!canPost ? (
+                      <p className="flex-1 text-xs text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3">
+                        You have view-only access to this workspace. Ask the owner to make you an Editor to create posts.
+                      </p>
+                    ) : approvalRequired ? (
                       <>
                         <button
                           onClick={handleSubmitForApproval}

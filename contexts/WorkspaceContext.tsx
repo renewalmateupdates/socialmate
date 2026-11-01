@@ -69,6 +69,13 @@ export type Workspace = {
   // role for the owner it belongs to (editor/viewer/client/admin). Absent on
   // older cached shapes -- treat missing as 'owner' for backward compat.
   role?: string
+  // Set on a workspace shared with this user: the owner's name or email.
+  owner_label?: string | null
+}
+
+// A workspace this user owns, as opposed to one shared with them.
+export function isOwnWorkspace(w: Workspace): boolean {
+  return (w.role ?? 'owner') === 'owner'
 }
 
 type WorkspaceContextType = {
@@ -167,7 +174,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           ? ws.find((w: Workspace) => w.id === cookieWorkspaceId)
           : null
 
-        const initial = savedWorkspace || ws.find((w: Workspace) => w.is_personal) || ws[0]
+        // Own personal workspace first: a team member's list also holds the
+        // owner's personal workspace, and landing there by default would put
+        // their posts into someone else's workspace without them choosing it.
+        const initial = savedWorkspace
+          || ws.find((w: Workspace) => w.is_personal && isOwnWorkspace(w))
+          || ws[0]
         setActiveWorkspaceState(initial)
         setWorkspaceName(initial.name || 'My Workspace')
         // Always keep cookie in sync
