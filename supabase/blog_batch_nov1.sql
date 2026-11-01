@@ -1,7 +1,7 @@
 -- Blog Batch, November 1, 2026
 -- Two posts backing /for/onlyfans-creators and /for/patreon-creators (PR #764)
 
-INSERT INTO blog_posts (slug, title, excerpt, content, category, author, published, created_at) VALUES
+INSERT INTO blog_posts (slug, title, excerpt, content, category, author, published_at) VALUES
 
 ('how-to-promote-onlyfans-without-posting-all-day',
  'How to Promote Your OnlyFans Without Posting All Day',
@@ -29,7 +29,7 @@ Every platform has its own rules about adult content, and breaking them can cost
 No tool can legitimately post to OnlyFans for you. OnlyFans has no official way for outside apps to post, and tools that log in as you break its rules and put your account at risk. SocialMate schedules the posts that send people to your page, and that is where it stops.
 
 The free plan covers 250 posts a month to Telegram, Bluesky, Mastodon and Discord, scheduled up to two weeks ahead. X needs Pro at $8 a month. More at socialmate.studio/for/onlyfans-creators.',
- 'Product', 'Joshua Bostic', true, now()),
+ 'Product', 'Joshua Bostic', now()),
 
 ('how-to-get-more-patreon-members-weekly-posting-plan',
  'How to Get More Patreon Members: A Weekly Posting Plan',
@@ -54,4 +54,4 @@ Your audience is spread across Bluesky, X, Mastodon, LinkedIn and Telegram. Writ
 SocialMate does not post to Patreon, read your Patreon stats or manage your members. It handles the public posts that bring people to your page.
 
 The free plan covers 250 posts a month to Bluesky, Discord, Telegram, Mastodon, LinkedIn and TikTok, scheduled up to two weeks ahead. X needs Pro at $8 a month. More at socialmate.studio/for/patreon-creators.',
- 'Product', 'Joshua Bostic', true, now());
+ 'Product', 'Joshua Bostic', now());
