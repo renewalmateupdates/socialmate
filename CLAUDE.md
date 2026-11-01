@@ -1398,8 +1398,36 @@ What shipped:
 - **A setting the UI saves is a promise.** SOMA's Auto-Collect toggle and the dashboard mode toggle both wrote values nothing read.
 - **A model may write the words, never the links or prices.** Campaign rewording keeps a version only if it has every link and price the message had.
 
+**October 30 to November 1, 2026: Buffer page corrected, OnlyFans and Patreon pages, and team members could not post (PRs #763–#767):**
+
+- **#763** rewrote `/vs/buffer` against Buffer's own pricing and channels pages after a Reddit commenter asked how SocialMate differs. The old page was wrong on both sides: Buffer does support Mastodon and Bluesky, and it includes analytics, an inbox and its AI assistant. SocialMate's free plan had been described as having "no queue limit". Same fixes went into the /vs hub card and `llms.txt`.
+- **#764** added `onlyfans-creators` and `patreon-creators` to `lib/audiences.ts`. Both pages say plainly that SocialMate does not post to OnlyFans or Patreon; it schedules the promo posts on the platforms it supports. The OnlyFans page leaves out TikTok and LinkedIn and asks creators to keep scheduled posts safe for work. **#765/#766**: two matching blog posts in `supabase/blog_batch_nov1.sql`. #766 fixed the column names (`blog_posts` has `published_at`). Confirm the SQL actually ran before quoting those posts.
+- **#767, team members.** Feedback on 1 Nov from a free-plan owner: her only team member, an Editor, could not schedule to her LinkedIn. It was broken in four places:
+  - the sidebar switcher never listed the owner's workspace;
+  - Compose listed the member's own accounts (a browser query on `user_id = me`);
+  - every publish path passed the **author's** id to publishers that look accounts up by `user_id`;
+  - Editor posts were forced into an approval queue that is paywalled on Free.
+
+  Now:
+  - `lib/team-workspaces.ts` (`accountScopeFor`, `resolveWorkspaceAccess`, `requiresApproval`, `canCreatePosts`) decides whose accounts a workspace posts to. Every publish path uses it.
+  - Compose reads `GET /api/workspaces/accounts`.
+  - The switcher has a "Shared with you" section.
+  - Approval applies only on Pro and Agency; on Free an Editor posts directly.
+  - Viewers cannot create posts.
+  - Approving a post with no time sends it now.
+
+  Same PR: `/api/workspaces/create` enforces `PLAN_CLIENT_WORKSPACES` (new in `lib/plan.ts`) on the server. Before, only the page checked it.
+
+**Rules that follow:**
+
+- **Accounts belong to the workspace owner, not to the author.** Never pass `post.user_id` to a publisher; pass `accountScopeFor(...).ownerId`. A post's `user_id` says who wrote it.
+- **A paid gate in front of a queue that a free feature fills is a dead end.** Free sells 2 seats and the Editor role. The approval queue was Pro-only, and everything an Editor sent went into it.
+- **Open:** Pro's client workspace count. `/pricing`, `lib/plan.ts` and the app say 1. The plan table in this file, `llms.txt` and `/vs/buffer` say 0. Joshua decides, then change it in `lib/plan.ts` and the copy.
+- **Open:** the owner's `/queue` and `/calendar` still list only posts they wrote themselves. A team member's scheduled posts publish correctly but don't appear there.
+
 ## Pending / In Progress
 
+- **Pick up here (Nov 1, 2026).** #767 (team members posting) is open. After it merges, check it with two real accounts: an owner on Free plus an Editor; the editor switches to the owner's workspace and schedules a LinkedIn post. Then reply to ellenharveyau@gmail.com from `/admin/feedback`. Still open from Oct 29 below. Not reachable from a cloud session: the Shopify promo images Joshua made (share the folder through Remote Control, or attach them in chat).
 - **Pick up here (Oct 29, 2026).** Everything through #761 and renewalmate#27 is merged and deployed, and the new pages went to IndexNow. Next, when Joshua says go: (1) the next batch of RenewalMate cancel guides, each read from the company's own page (good candidates: Nintendo Switch Online, Discord Nitro, Google One, Canva Pro, Dropbox, Peloton, Tidal; the New York Times blocks AI tools, so skip it); (2) watch whether the six new `/for` pages start landing ChatGPT signups (`/admin/funnel`, "Where signups came from"); (3) a shop marketing account in SocialMate plus socials, only when he says go; (4) HereNow's App Store build once Jacob sends his list; (5) campaign mode phase 2. Joshua's side: Search Console for renewalmate.com (a DNS TXT record at GoDaddy, then submit `sitemap.xml`), Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google & YouTube app, and one real Twitch go-live before announcing alerts.
 - **Open as of Oct 23, 2026 (Joshua's side):** run the SOMA removal SQL from Oct 23 if it hasn't run yet, and read replies to the TikTok-live email in socialmatehq@gmail.com. The public inbox question is settled (`socialmatehq@gmail.com`, PR #752). Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
 
