@@ -247,6 +247,79 @@ export const AUDIENCES: Audience[] = [
       { href: '/story', label: 'How SocialMate was built' },
     ],
   },
+  {
+    slug: 'onlyfans-creators',
+    title: 'Promote Your OnlyFans on X, Telegram and Bluesky',
+    description: 'Schedule the posts that send fans to your OnlyFans: previews, links and updates on X, Telegram, Bluesky, Mastodon and Discord. For chefs, trainers, musicians and every other creator.',
+    eyebrow: 'For OnlyFans creators',
+    h1: 'Schedule the posts that bring fans to your OnlyFans',
+    answer: 'SocialMate schedules the promo posts that point people to your OnlyFans, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to OnlyFans itself, because OnlyFans has no official way for outside apps to post. Chefs, trainers, musicians and coaches sell subscriptions there too, and the free plan covers 250 posts a month.',
+    features: [
+      { icon: 'calendar', title: 'Promo posts on a schedule', body: 'Write a week of previews and link posts in one sitting and pick the times. They go out while you are filming, training or cooking.' },
+      { icon: 'repeat', title: 'Rotate your offers', body: 'Campaign mode cycles up to 20 messages, like your subscription link, a new recipe drop or a trial offer, on the days and times you pick until an end date.' },
+      { icon: 'bot', title: 'A Telegram channel for fans', body: 'Run a free Telegram channel and post updates to it through a bot you own, so your fans hear from you even when an algorithm does not show them your posts.' },
+      { icon: 'sparkles', title: 'Captions and hooks', body: 'AI tools write captions and hooks from one sentence, paid for with AI credits. The free plan includes 50 a month.' },
+      { icon: 'send', title: 'One post, every platform', body: 'Send the same update to X, Telegram, Bluesky, Mastodon and Discord at once, instead of copying it five times.' },
+    ],
+    steps: [
+      'Create a free SocialMate account.',
+      'Connect the platforms where you promote, like Telegram, Bluesky or X.',
+      'Write a post with your OnlyFans link in Compose and pick a time, or set up a campaign that rotates several.',
+      'Check the Queue to see what goes out and when.',
+    ],
+    limits: [
+      'SocialMate does not post to OnlyFans, read your OnlyFans stats or message your fans. OnlyFans has no official way for outside apps to do that, and tools that log in as you break its rules and put your account at risk.',
+      'SocialMate does not add adult content labels on any platform, so keep what you schedule safe for work and within each platform\'s rules.',
+      'Instagram, Facebook and Reddit are not available. Posting to X needs the Pro plan.',
+    ],
+    faq: [
+      { q: 'Can SocialMate post to OnlyFans?', a: 'No. OnlyFans has no official way for outside apps to post. SocialMate schedules the posts on other platforms that send people to your OnlyFans page.' },
+      { q: 'Is there a free scheduler for promoting an OnlyFans?', a: 'Yes. SocialMate\'s free plan schedules up to 250 posts a month to Telegram, Bluesky, Mastodon and Discord, up to 2 weeks ahead. X needs Pro, $8 a month.' },
+      { q: 'Is OnlyFans only adult content?', a: 'No. Chefs, personal trainers, musicians, artists and coaches sell subscriptions there too. SocialMate works the same way for all of them.' },
+      { q: 'Can I repeat my promo every week?', a: 'Yes. Campaign mode rotates up to 20 messages until an end date, up to 26 weeks, and can reword them with AI so they do not read the same every time.' },
+    ],
+    related: [
+      { href: '/for/fitness-coaches', label: 'SocialMate for fitness coaches' },
+      { href: '/for/musicians', label: 'SocialMate for musicians' },
+      { href: '/for/telegram-channels', label: 'Telegram channel scheduler' },
+    ],
+  },
+  {
+    slug: 'patreon-creators',
+    title: 'Free Post Scheduler for Patreon Creators',
+    description: 'Schedule the posts that bring in new patrons: previews, launch posts and reminders on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. Free plan included.',
+    eyebrow: 'For Patreon creators',
+    h1: 'Schedule the posts that bring in new patrons',
+    answer: 'SocialMate schedules the public posts that send people to your Patreon, on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. It does not post to Patreon itself. Write your previews and reminders once and they go out on their own. The free plan covers 250 posts a month.',
+    features: [
+      { icon: 'calendar', title: 'Previews on a schedule', body: 'Queue a preview for every new episode, chapter or track, timed to go out when it drops.' },
+      { icon: 'repeat', title: 'Reminders that rotate', body: 'Campaign mode cycles your tier perks, goals and join link on the days and times you choose until an end date.' },
+      { icon: 'users', title: 'Announce in your patron Discord', body: 'Post announcements to your Discord server through the SocialMate bot, at the time you pick.' },
+      { icon: 'radio', title: 'Go-live alerts', body: 'If you stream on Twitch, SocialMate posts your alert when you go live, once per stream.' },
+      { icon: 'send', title: 'One post, every platform', body: 'Send the same update everywhere at once instead of copying it around.' },
+    ],
+    steps: [
+      'Create a free SocialMate account.',
+      'Connect the platforms where your audience is, like Bluesky, Discord or X.',
+      'Write a post with your Patreon link in Compose and pick a time, or set up a campaign that rotates several.',
+      'Check the Queue to see what goes out and when.',
+    ],
+    limits: [
+      'SocialMate does not post to Patreon, read your Patreon stats or manage your patrons.',
+      'It does not watch Patreon for new posts. Announcements go out at the time you schedule them.',
+      'Instagram, Facebook and YouTube are not available. Posting to X needs the Pro plan.',
+    ],
+    faq: [
+      { q: 'Can SocialMate post to Patreon?', a: 'No. SocialMate schedules the public posts on other platforms that send people to your Patreon page.' },
+      { q: 'Is there a free scheduler for Patreon creators?', a: 'Yes. SocialMate\'s free plan schedules up to 250 posts a month to Bluesky, Discord, Telegram, Mastodon, LinkedIn and TikTok, up to 2 weeks ahead. X needs Pro, $8 a month.' },
+      { q: 'Can it announce new Patreon posts in my Discord?', a: 'Yes, as a scheduled post. Write the announcement, choose Discord and pick the time. It does not detect new Patreon posts on its own.' },
+    ],
+    related: [
+      { href: '/for/podcasters', label: 'SocialMate for podcasters' },
+      { href: '/for/musicians', label: 'SocialMate for musicians' },
+      { href: '/for/discord-communities', label: 'Discord announcement scheduler' },
+    ],
+  },
 ]
 
 export function audienceFor(slug: string): Audience | undefined {
