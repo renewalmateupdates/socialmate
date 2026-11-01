@@ -20,6 +20,14 @@ type PendingPost = {
   rejection_reason: string | null
 }
 
+const APPROVED_STATUS_LABEL: Record<string, string> = {
+  scheduled: 'Approved · scheduled',
+  published: 'Approved · published',
+  partial:   'Approved · published to some platforms',
+  failed:    'Approved · failed to publish',
+  draft:     'Approved · saved as a draft',
+}
+
 export default function ApprovalsPage() {
   const router = useRouter()
   const { plan } = useWorkspace()
@@ -75,7 +83,7 @@ export default function ApprovalsPage() {
         return
       }
       setPosts(prev => prev.filter(p => p.id !== post.id))
-      showToast(data.status === 'scheduled' ? 'Post approved and scheduled ✓' : 'Post approved — moved to drafts ✓')
+      showToast(data.postNow ? 'Post approved, publishing now ✓' : 'Post approved and scheduled ✓')
     } catch {
       showToast('Network error', 'error')
     } finally {
@@ -229,9 +237,13 @@ export default function ApprovalsPage() {
                     </span>
                   </div>
 
-                  {post.scheduled_at && (
+                  {post.scheduled_at ? (
                     <p className="text-xs text-blue-500 dark:text-blue-400 mb-3 font-medium">
                       Scheduled for {new Date(post.scheduled_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    </p>
+                  ) : post.status === 'pending_approval' && (
+                    <p className="text-xs text-blue-500 dark:text-blue-400 mb-3 font-medium">
+                      No time set: posts as soon as you approve it
                     </p>
                   )}
 
@@ -286,11 +298,14 @@ export default function ApprovalsPage() {
                     </div>
                   )}
 
+                  {/* The owner's /queue and /drafts list only posts they wrote
+                      themselves, so a link there showed nothing for a team
+                      member's post. Say where it stands instead. */}
                   {post.approval_status === 'approved' && (
                     <div className="pt-3 border-t border-theme">
-                      <Link href={post.scheduled_at ? '/queue' : '/drafts'} className="text-xs font-bold text-black dark:text-white hover:underline">
-                        View in {post.scheduled_at ? 'queue' : 'drafts'} →
-                      </Link>
+                      <p className="text-xs font-bold text-gray-600 dark:text-gray-300">
+                        {APPROVED_STATUS_LABEL[post.status] ?? 'Approved'}
+                      </p>
                     </div>
                   )}
                 </div>

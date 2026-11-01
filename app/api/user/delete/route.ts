@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     // owner_id / email — it has no user_id or member_id column, so this
     // delete matched nothing and the user stayed on every team they had
     // joined. Every write to this table keys membership by email (see
-    // /api/team/accept, /api/team/my-role).
+    // /api/team/accept, lib/team-workspaces.ts).
     if (user.email) {
       await admin.from('team_members').delete().eq('email', user.email)
     }

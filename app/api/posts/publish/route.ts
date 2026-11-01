@@ -14,6 +14,7 @@ import { REPLY_TO } from '@/lib/mail'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 import { notDueYet } from '@/lib/publish/due'
+import { accountScopeFor } from '@/lib/team-workspaces'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -106,16 +107,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ status: repair.status, repaired: true })
     }
 
-    // Resolve account workspace: personal accounts have workspace_id = null in connected_accounts
-    let accountWorkspaceId: string | null = null
-    if (post.workspace_id) {
-      const { data: wsInfo } = await getSupabaseAdmin()
-        .from('workspaces')
-        .select('is_personal')
-        .eq('id', post.workspace_id)
-        .maybeSingle()
-      accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
-    }
+    // Whose accounts this goes to: the workspace owner's. A team member's
+    // post carries the team member's user_id, and publishing with that found
+    // none of the owner's accounts. Personal accounts have workspace_id = null.
+    const { ownerId: accountOwnerId, accountWorkspaceId } =
+      await accountScopeFor(getSupabaseAdmin(), post.workspace_id, userId)
 
     // Build media URLs — filter out attribution strings (Unsplash credit lines, not image URLs)
     const rawMediaUrls: string[] = Array.isArray(post.media_urls) ? post.media_urls : []
@@ -123,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     // Actually publish to platforms
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {}, imageMediaUrls)
+    const results = await publishToAll(accountOwnerId, post.platforms, post.content, destinations, accountWorkspaceId, {}, imageMediaUrls)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 
@@ -389,22 +385,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Already published' }, { status: 409 })
     }
 
-    // Resolve account workspace: personal accounts have workspace_id = null in connected_accounts
-    let accountWorkspaceId: string | null = null
-    if (post.workspace_id) {
-      const { data: wsInfo } = await getSupabaseAdmin()
-        .from('workspaces')
-        .select('is_personal')
-        .eq('id', post.workspace_id)
-        .maybeSingle()
-      accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
-    }
+    const { ownerId: accountOwnerId, accountWorkspaceId } =
+      await accountScopeFor(getSupabaseAdmin(), post.workspace_id, userId)
 
     const rawMediaUrls2: string[] = Array.isArray(post.media_urls) ? post.media_urls : []
     const imageMediaUrls2 = rawMediaUrls2.filter((u: string) => u.startsWith('http') && !u.startsWith('Photo by'))
 
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {}, imageMediaUrls2)
+    const results = await publishToAll(accountOwnerId, post.platforms, post.content, destinations, accountWorkspaceId, {}, imageMediaUrls2)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 

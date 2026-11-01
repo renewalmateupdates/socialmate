@@ -54,9 +54,31 @@ export async function GET() {
     memberWorkspaces = data ?? []
   }
 
+  // A shared workspace is usually the owner's own "Personal" one, so its name
+  // says nothing to the person it was shared with. Label it by its owner.
+  const ownerLabels = new Map<string, string>()
+  if (ownerIds.length > 0) {
+    const { data: settings, error: sErr } = await admin
+      .from('user_settings')
+      .select('user_id, display_name')
+      .in('user_id', ownerIds)
+    if (sErr) console.warn('[workspaces/accessible] owner name lookup failed:', sErr.message)
+    for (const row of settings ?? []) {
+      if (row.display_name) ownerLabels.set(row.user_id as string, row.display_name as string)
+    }
+    await Promise.all(ownerIds.filter(id => !ownerLabels.has(id)).map(async id => {
+      const { data } = await admin.auth.admin.getUserById(id)
+      if (data?.user?.email) ownerLabels.set(id, data.user.email)
+    }))
+  }
+
   const workspaces = [
     ...(ownWorkspaces ?? []).map(w => ({ ...w, role: 'owner' as const })),
-    ...memberWorkspaces.map(w => ({ ...w, role: roleByOwner.get(w.owner_id) ?? 'viewer' })),
+    ...memberWorkspaces.map(w => ({
+      ...w,
+      role:        roleByOwner.get(w.owner_id) ?? 'viewer',
+      owner_label: ownerLabels.get(w.owner_id) ?? null,
+    })),
   ]
 
   return NextResponse.json({ workspaces })

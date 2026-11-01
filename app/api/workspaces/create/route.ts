@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { resolveWorkspacePlan } from '@/lib/plan'
+import { PLAN_CLIENT_WORKSPACES, resolveWorkspacePlan } from '@/lib/plan'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +39,28 @@ export async function POST(request: NextRequest) {
     // directly would treat an Agency customer's client workspace as free — the
     // same drift that left the first paying subscriber on free-tier limits.
     const ownerPlan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, null)
+
+    // The limit lived only in /workspaces/new, so a direct call to this route
+    // could create client workspaces on any plan, free included.
+    const { count: clientCount, error: countError } = await getSupabaseAdmin()
+      .from('workspaces')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', user.id)
+      .eq('is_personal', false)
+    if (countError) {
+      console.error('[workspace-create] count failed:', countError.message)
+      return NextResponse.json({ error: 'Failed to create workspace' }, { status: 500 })
+    }
+    const limit = PLAN_CLIENT_WORKSPACES[ownerPlan]
+    if ((clientCount ?? 0) >= limit) {
+      return NextResponse.json({
+        error: limit === 0
+          ? 'Client workspaces need a Pro or Agency plan.'
+          : `Your plan includes ${limit} client workspace${limit === 1 ? '' : 's'}, and you are using ${limit === 1 ? 'it' : 'all of them'}.`,
+        upgrade: ownerPlan === 'agency' ? undefined : 'Upgrade for more client workspaces',
+        upgradeHref: '/pricing',
+      }, { status: 403 })
+    }
 
     // Use admin client to bypass RLS for workspace creation
     console.log('[WORKSPACE-CREATE] Attempting insert:', { owner_id: user.id, name: name.trim(), is_personal: false })

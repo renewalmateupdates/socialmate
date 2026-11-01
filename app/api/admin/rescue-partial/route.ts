@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
+import { accountScopeFor } from '@/lib/team-workspaces'
 
 const ADMIN_EMAIL = 'socialmatehq@gmail.com'
 
@@ -52,16 +53,12 @@ export async function POST(req: NextRequest) {
       continue
     }
 
-    // Resolve workspace: personal workspaces have workspace_id = null in connected_accounts
-    let accountWorkspaceId: string | null = null
-    if (post.workspace_id) {
-      const { data: wsInfo } = await getSupabaseAdmin()
-        .from('workspaces').select('is_personal').eq('id', post.workspace_id).maybeSingle()
-      accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
-    }
+    // The workspace owner's accounts (see lib/team-workspaces.ts).
+    const { ownerId: accountOwnerId, accountWorkspaceId } =
+      await accountScopeFor(getSupabaseAdmin(), post.workspace_id, post.user_id)
 
     const publishResults = await publishToAll(
-      post.user_id,
+      accountOwnerId,
       failedPlatforms,
       post.content,
       post.destinations || {},

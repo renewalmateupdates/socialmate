@@ -7,6 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { postLimitFor, postsUsedThisMonth, postLimitReachedBody, countsAgainstQuota } from '@/lib/post-limits'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import { recordFunnel } from '@/lib/usage'
+import { canCreatePosts, realWorkspaceId, resolveWorkspaceAccess } from '@/lib/team-workspaces'
 
 
 export async function POST(request: NextRequest) {
@@ -32,7 +33,9 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { content, platforms, postId, workspaceId, status: requestedStatus, scheduledAt, tags, poll_data } = body
+    const { content, platforms, postId, status: requestedStatus, scheduledAt, tags, poll_data, mediaUrls } = body
+    const workspaceId = realWorkspaceId(body.workspaceId)
+    const media: string[] = Array.isArray(mediaUrls) ? mediaUrls.filter((u: unknown) => typeof u === 'string') : []
 
     // Only allow 'draft' or 'pending_approval' as valid statuses via this route
     const allowedStatuses = ['draft', 'pending_approval']
@@ -52,6 +55,7 @@ export async function POST(request: NextRequest) {
         updateData.status = 'pending_approval'
         updateData.approval_status = 'pending'
         if (scheduledAt) updateData.scheduled_at = scheduledAt
+        if (media.length > 0) updateData.media_urls = media
       }
       const { error } = await supabase
         .from('posts')
@@ -145,22 +149,12 @@ export async function POST(request: NextRequest) {
     // This route accepted any client-supplied workspaceId with only user_id
     // enforced on the row it writes, never verifying the caller has any
     // relationship to that workspace at all. Same check as posts/create.
-    const { data: wsOwnerInfo } = await getSupabaseAdmin()
-      .from('workspaces')
-      .select('owner_id')
-      .eq('id', resolvedWorkspaceId)
-      .maybeSingle()
-    if (wsOwnerInfo?.owner_id && wsOwnerInfo.owner_id !== user.id) {
-      const { data: membership } = await getSupabaseAdmin()
-        .from('team_members')
-        .select('role')
-        .eq('email', user.email!)
-        .eq('owner_id', wsOwnerInfo.owner_id)
-        .eq('status', 'active')
-        .maybeSingle()
-      if (!membership) {
-        return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
-      }
+    const access = await resolveWorkspaceAccess(getSupabaseAdmin(), user, resolvedWorkspaceId)
+    if (!access) {
+      return NextResponse.json({ error: "You don't have access to this workspace." }, { status: 403 })
+    }
+    if (!canCreatePosts(access.role)) {
+      return NextResponse.json({ error: 'You have view-only access to this workspace.' }, { status: 403 })
     }
 
     // Resolved through the workspace this draft belongs to, not the calling
@@ -186,6 +180,7 @@ export async function POST(request: NextRequest) {
     if (insertStatus === 'pending_approval') {
       insertPayload.approval_status = 'pending'
       if (scheduledAt) insertPayload.scheduled_at = scheduledAt
+      if (media.length > 0) insertPayload.media_urls = media
     }
 
     const { data: post, error } = await supabase
