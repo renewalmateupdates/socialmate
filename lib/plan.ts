@@ -53,6 +53,16 @@ export const PLAN_POST_LIMITS: Record<PlanTier, number> = {
   agency: 5000,
 }
 
+// Client workspaces an owner may create. Matches /pricing and the in-app
+// limit on /workspaces/new. NOTE: CLAUDE.md's plan table, llms.txt and
+// /vs/buffer say Pro gets 0; /pricing sells 1. Joshua to decide; change it
+// here and nowhere else.
+export const PLAN_CLIENT_WORKSPACES: Record<PlanTier, number> = {
+  free:   0,
+  pro:    1,
+  agency: 5,
+}
+
 export function accountsPerPlatformFor(plan: string | null | undefined): number {
   return PLAN_ACCOUNTS_PER_PLATFORM[normalizePlan(plan)]
 }
