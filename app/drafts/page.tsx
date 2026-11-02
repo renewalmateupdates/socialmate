@@ -10,6 +10,7 @@ import { useI18n } from '@/contexts/I18nContext'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { AlertTriangle, CalendarDays, CheckCircle2, FolderOpen, Globe, Heart, MessageCircle, PenLine, Repeat, X as CloseIcon, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { deletePosts, editPost, loadWorkspacePosts } from '@/lib/workspace-posts'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -97,19 +98,14 @@ function DraftsInner() {
   const loadPosts = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    let query = supabase
-      .from('posts')
-      .select('*')
-      .eq('user_id', user.id)
-      .in('status', ['draft', 'scheduled', 'published', 'partial', 'failed'])
-      .order('created_at', { ascending: false })
-    // Only filter by workspace_id for client (non-personal) workspaces
-    // Personal workspace shows ALL user posts regardless of workspace_id
-    if (activeWorkspace && !activeWorkspace.is_personal) {
-      query = query.eq('workspace_id', activeWorkspace.id)
+    // Through the API so an owner sees their team's drafts too; RLS hides
+    // other authors' rows from a browser query (lib/workspace-posts.ts).
+    try {
+      setPosts(await loadWorkspacePosts('drafts', activeWorkspace?.id))
+    } catch (err) {
+      console.warn('[drafts] load failed:', err)
+      showToast('Could not load your posts. Refresh to try again.', 'error')
     }
-    const { data } = await query
-    setPosts(data || [])
     setLoading(false)
   }
 
@@ -211,18 +207,16 @@ function DraftsInner() {
     // Text and platforms only. The time used to be written here too, which did
     // two wrong things: a draft given a time stayed a draft and never went out,
     // and a scheduled post given a new time kept its old wake-up.
-    const { error } = await supabase
-      .from('posts')
-      .update({
-        content: es.content,
-        platforms: es.platforms,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', postId)
+    let error: Error | null = null
+    try {
+      await editPost(postId, es.content, es.platforms)
+    } catch (err) {
+      error = err as Error
+    }
 
     if (error) {
       console.warn('[drafts] save failed:', error.message)
-      showToast('Failed to save changes', 'error')
+      showToast(error.message || 'Failed to save changes', 'error')
       setEditMap(prev => ({ ...prev, [postId]: { ...prev[postId], saving: false } }))
       return
     }
@@ -253,10 +247,32 @@ function DraftsInner() {
     closeEdit(postId)
   }, [editMap, posts, closeEdit])
 
+  const [copying, setCopying] = useState<string | null>(null)
+  // A team member's draft becomes the viewer's own, which Compose can open and send.
+  const copyToMine = async (post: { id: string; content?: string; platforms?: string[]; workspace_id?: string | null }) => {
+    setCopying(post.id)
+    try {
+      const res = await fetch('/api/posts/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: post.content, platforms: post.platforms, workspaceId: post.workspace_id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.postId) throw new Error(data.error || 'Could not copy')
+      router.push(`/compose?draft=${data.postId}`)
+    } catch (err) {
+      showToast((err as Error).message || 'Could not copy', 'error')
+      setCopying(null)
+    }
+  }
+
   const handleDelete = async (id: string) => {
     setDeleting(id)
-    const { error } = await supabase.from('posts').delete().eq('id', id)
-    if (error) { showToast('Failed to delete', 'error'); setDeleting(null); return }
+    try {
+      await deletePosts([id])
+    } catch (err) {
+      showToast((err as Error).message || 'Failed to delete', 'error'); setDeleting(null); return
+    }
     setPosts(prev => prev.filter(d => d.id !== id))
     setConfirmDelete(null)
     showToast('Deleted successfully', 'success')
@@ -385,7 +401,7 @@ function DraftsInner() {
                 const isDeleting     = deleting === post.id
                 const resolvedStatus = effectiveStatus(post)
                 const status         = statusConfig[resolvedStatus] || statusConfig.draft
-                const isEditable     = ['draft', 'scheduled'].includes(resolvedStatus)
+                const isEditable     = ['draft', 'scheduled'].includes(resolvedStatus) && post.can_manage !== false
                 const isPublished    = ['published', 'partial'].includes(resolvedStatus)
                 const editState      = editMap[post.id]
                 const isEditing      = !!editState
@@ -489,11 +505,26 @@ function DraftsInner() {
                             {/* A draft never goes out on its own, and this page
                                 cannot send one. Compose can, with every check
                                 it carries, so the draft opens there. */}
-                            {resolvedStatus === 'draft' && (
+                            {post.mine === false && (
+                              <span title="Written by someone on your team" className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                                Team
+                              </span>
+                            )}
+                            {resolvedStatus === 'draft' && post.mine !== false && (
                               <Link href={`/compose?draft=${post.id}`}
                                 className="text-xs font-bold px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all whitespace-nowrap">
                                 Post or schedule →
                               </Link>
+                            )}
+                            {/* Compose opens only your own drafts, so a team member's
+                                draft is copied into yours first, then sent from there. */}
+                            {resolvedStatus === 'draft' && post.mine === false && (
+                              <button
+                                onClick={() => copyToMine(post)}
+                                disabled={copying === post.id}
+                                className="text-xs font-bold px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all whitespace-nowrap disabled:opacity-50">
+                                {copying === post.id ? 'Copying…' : 'Copy to my drafts'}
+                              </button>
                             )}
                             {isEditable && (
                               <button
@@ -502,10 +533,12 @@ function DraftsInner() {
                                 {t('app_common.edit')}
                               </button>
                             )}
-                            <button onClick={() => setConfirmDelete(post.id)}
-                              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                              {t('app_common.delete')}
-                            </button>
+                            {post.can_manage !== false && (
+                              <button onClick={() => setConfirmDelete(post.id)}
+                                className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                                {t('app_common.delete')}
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -612,10 +645,17 @@ function DraftsInner() {
                           </div>
                         ) : (
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Drafts don&apos;t go out on their own. To post or schedule this one,{' '}
-                            <Link href={`/compose?draft=${post.id}`} className="font-bold underline underline-offset-2">
-                              open it in Compose
-                            </Link>.
+                            Drafts don&apos;t go out on their own.{' '}
+                            {post.mine === false ? (
+                              <>To post or schedule this one, save your changes, then use Copy to my drafts.</>
+                            ) : (
+                              <>
+                                To post or schedule this one,{' '}
+                                <Link href={`/compose?draft=${post.id}`} className="font-bold underline underline-offset-2">
+                                  open it in Compose
+                                </Link>.
+                              </>
+                            )}
                           </p>
                         )}
 

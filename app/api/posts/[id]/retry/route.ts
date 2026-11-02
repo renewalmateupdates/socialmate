@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
-import { accountScopeFor } from '@/lib/team-workspaces'
+import { accountScopeFor, canManagePost } from '@/lib/team-workspaces'
 
 export async function POST(
   _request: NextRequest,
@@ -32,7 +32,8 @@ export async function POST(
   if (fetchError || !post) {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 })
   }
-  if (post.user_id !== user.id) {
+  // The author, or the workspace's owner or an admin, may retry it.
+  if (!(await canManagePost(getSupabaseAdmin(), user, post))) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

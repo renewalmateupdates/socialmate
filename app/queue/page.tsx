@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { setScheduledTime } from '@/lib/post-schedule'
+import { countWorkspaceDrafts, deletePosts, loadWorkspacePosts, unschedulePosts } from '@/lib/workspace-posts'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
@@ -234,10 +235,18 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 <span>Evergreen</span>
               </button>
             )}
-            <Link href={`/compose?draft=${post.id}`}
-              className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-              {t('app_common.edit')}
-            </Link>
+            {post.mine === false && (
+              <span title="Written by someone on your team" className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                Team
+              </span>
+            )}
+            {/* Compose opens only the viewer's own drafts; team posts are managed from here. */}
+            {post.mine !== false && (
+              <Link href={`/compose?draft=${post.id}`}
+                className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                {t('app_common.edit')}
+              </Link>
+            )}
             <button
               onClick={() => onDuplicate(post)}
               disabled={duplicating === post.id}
@@ -251,10 +260,12 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
               buttonLabel={<Camera size={13} strokeWidth={2} />}
               buttonClassName="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-amber-400 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             />
-            <button onClick={() => setConfirmCancel(post.id)}
-              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-              {t('app_queue.reschedule')}
-            </button>
+            {post.can_manage !== false && (
+              <button onClick={() => setConfirmCancel(post.id)}
+                className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                {t('app_queue.reschedule')}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -366,11 +377,7 @@ function QueueInner() {
           setPartialPosts(prev => prev.filter(p => p.id !== postId))
         } else {
           // Re-fetch updated post to show refreshed breakdown
-          const { data: updated } = await supabase
-            .from('posts')
-            .select('id, content, platforms, scheduled_at, published_at, status, platform_post_ids, created_at, media_urls')
-            .eq('id', postId)
-            .single()
+          const [updated] = await loadWorkspacePosts('one', activeWorkspace?.id, postId).catch(() => [])
           if (updated) {
             setPartialPosts(prev => prev.map(p => p.id === postId ? updated : p))
           }
@@ -474,38 +481,19 @@ function QueueInner() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      let queueQuery = supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'scheduled')
-        .gte('scheduled_at', new Date().toISOString())
-        .order('scheduled_at', { ascending: true })
-
-      // Only filter by workspace for client workspaces; personal shows all
-      if (!activeWorkspace.is_personal) {
-        queueQuery = queueQuery.eq('workspace_id', activeWorkspace.id)
+      // Through the API, so an owner sees what their team scheduled too
+      // (lib/workspace-posts.ts). RLS hides other authors' rows from the browser.
+      try {
+        const [queued, partial] = await Promise.all([
+          loadWorkspacePosts('queue', activeWorkspace.id),
+          loadWorkspacePosts('partial', activeWorkspace.id),
+        ])
+        setPosts(queued)
+        setPartialPosts(partial)
+      } catch (err) {
+        console.warn('[queue] load failed:', err)
+        showToast('Could not load your queue. Refresh to try again.', 'error')
       }
-
-      const { data } = await queueQuery
-      setPosts(data || [])
-
-      // Also fetch recent partial posts (last 30 days) so user can see what partially failed
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-      let partialQuery = supabase
-        .from('posts')
-        .select('id, content, platforms, scheduled_at, published_at, status, platform_post_ids, created_at')
-        .eq('user_id', user.id)
-        .eq('status', 'partial')
-        .gte('created_at', thirtyDaysAgo.toISOString())
-        .order('published_at', { ascending: false })
-        .limit(10)
-      if (!activeWorkspace.is_personal) {
-        partialQuery = partialQuery.eq('workspace_id', activeWorkspace.id)
-      }
-      const { data: partialData } = await partialQuery
-      setPartialPosts(partialData || [])
 
       // TikTok posts scheduled via TikTok Studio — separate table, separate
       // query, not merged into `posts` (see tiktokScheduled comment above).
@@ -522,16 +510,7 @@ function QueueInner() {
       setTiktokScheduled(tiktokData || [])
 
       // Fetch draft count for auto-schedule button
-      let draftQuery = supabase
-        .from('posts')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('status', 'draft')
-      if (!activeWorkspace.is_personal) {
-        draftQuery = draftQuery.eq('workspace_id', activeWorkspace.id)
-      }
-      const { count } = await draftQuery
-      setDraftCount(count ?? 0)
+      setDraftCount(await countWorkspaceDrafts(activeWorkspace.id).catch(() => 0))
 
       setLoading(false)
     }
@@ -568,11 +547,11 @@ function QueueInner() {
 
   const handleCancel = async (id: string) => {
     setCancelling(id)
-    const { error } = await supabase
-      .from('posts')
-      .update({ status: 'draft', scheduled_at: null })
-      .eq('id', id)
-    if (error) { showToast('Failed to unschedule', 'error'); setCancelling(null); return }
+    try {
+      await unschedulePosts([id])
+    } catch (err) {
+      showToast((err as Error).message || 'Failed to unschedule', 'error'); setCancelling(null); return
+    }
     setPosts(prev => prev.filter(p => p.id !== id))
     setConfirmCancel(null)
     showToast('Moved back to drafts', 'success')
@@ -604,15 +583,14 @@ function QueueInner() {
     if (!selectedIds.size) return
     setBulkWorking(true)
     const ids = Array.from(selectedIds)
-    const { error } = await supabase
-      .from('posts')
-      .update({ status: 'draft', scheduled_at: null })
-      .in('id', ids)
-    if (error) { showToast('Failed to unschedule some posts', 'error') }
-    else {
-      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)))
+    try {
+      const { updated, skipped } = await unschedulePosts(ids)
+      const done = new Set(updated)
+      setPosts(prev => prev.filter(p => !done.has(p.id)))
       setSelectedIds(new Set())
-      showToast(`${ids.length} post${ids.length !== 1 ? 's' : ''} moved to drafts`, 'success')
+      showToast(`${updated.length} post${updated.length !== 1 ? 's' : ''} moved to drafts${skipped ? ` (${skipped} you can't change)` : ''}`, 'success')
+    } catch (err) {
+      showToast((err as Error).message || 'Failed to unschedule some posts', 'error')
     }
     setBulkWorking(false)
   }
@@ -669,15 +647,14 @@ function QueueInner() {
     setShowDeleteConfirm(false)
     setBulkWorking(true)
     const ids = Array.from(selectedIds)
-    const { error } = await supabase
-      .from('posts')
-      .delete()
-      .in('id', ids)
-    if (error) { showToast('Failed to delete some posts', 'error') }
-    else {
-      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)))
+    try {
+      const { deleted, skipped } = await deletePosts(ids)
+      const done = new Set(deleted)
+      setPosts(prev => prev.filter(p => !done.has(p.id)))
       setSelectedIds(new Set())
-      showToast(`${ids.length} post${ids.length !== 1 ? 's' : ''} deleted`, 'success')
+      showToast(`${deleted.length} post${deleted.length !== 1 ? 's' : ''} deleted${skipped ? ` (${skipped} you can't change)` : ''}`, 'success')
+    } catch (err) {
+      showToast((err as Error).message || 'Failed to delete some posts', 'error')
     }
     setBulkWorking(false)
   }
@@ -706,21 +683,8 @@ function QueueInner() {
       setAutoScheduleResult({ scheduled: data.scheduled, days })
       setDraftCount(0)
       // Reload queue to show newly scheduled posts
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        let q = supabase
-          .from('posts')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'scheduled')
-          .gte('scheduled_at', new Date().toISOString())
-          .order('scheduled_at', { ascending: true })
-        if (activeWorkspace && !activeWorkspace.is_personal) {
-          q = q.eq('workspace_id', activeWorkspace.id)
-        }
-        const { data: refreshed } = await q
-        if (refreshed) setPosts(refreshed)
-      }
+      const refreshed = await loadWorkspacePosts('queue', activeWorkspace?.id).catch(() => null)
+      if (refreshed) setPosts(refreshed)
     } catch {
       showToast('Network error — try again', 'error')
     } finally {
