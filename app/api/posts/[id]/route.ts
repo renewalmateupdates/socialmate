@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { inngest } from '@/lib/inngest'
+import { canManagePost } from '@/lib/team-workspaces'
 
 export async function PATCH(
   request: NextRequest,
@@ -24,10 +25,10 @@ export async function PATCH(
   const { data: { user } } = await supabaseUser.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Verify ownership
+  // The author, or the workspace's owner or an admin (lib/team-workspaces.ts)
   const { data: post, error: lookupError } = await getSupabaseAdmin()
     .from('posts')
-    .select('id, user_id, status')
+    .select('id, user_id, status, workspace_id')
     .eq('id', id)
     .maybeSingle()
 
@@ -35,7 +36,7 @@ export async function PATCH(
     console.error('[posts/patch] lookup failed:', lookupError.message)
     return NextResponse.json({ error: 'Lookup failed' }, { status: 500 })
   }
-  if (!post || post.user_id !== user.id) {
+  if (!post || !(await canManagePost(getSupabaseAdmin(), user, post))) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

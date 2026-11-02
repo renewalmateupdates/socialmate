@@ -27,6 +27,7 @@ const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
 const {
   accountScopeFor, resolveWorkspaceAccess, requiresApproval, canCreatePosts, realWorkspaceId,
+  canManagePost, managesTeamPosts,
 } = mod.exports
 
 // A just-enough Supabase stand-in: from(table).select().eq()...maybeSingle()
@@ -59,6 +60,7 @@ const db = fakeDb({
     { owner_id: OWNER, email: 'editor@example.com', role: 'editor', status: 'active' },
     { owner_id: OWNER, email: 'gone@example.com',   role: 'editor', status: 'pending' },
     { owner_id: OWNER, email: 'look@example.com',   role: 'viewer', status: 'active' },
+    { owner_id: OWNER, email: 'boss@example.com',   role: 'admin',  status: 'active' },
   ],
 })
 
@@ -124,4 +126,39 @@ test('realWorkspaceId drops the sentinel and empties', () => {
   assert.equal(realWorkspaceId(''), null)
   assert.equal(realWorkspaceId(undefined), null)
   assert.equal(realWorkspaceId('abc'), 'abc')
+})
+
+// ─── Managing team posts (Queue, Calendar, Drafts) ──────────────────────────
+// The case: an owner's assistant scheduled posts that the owner could not see,
+// move, cancel or delete, because every query and write was "author only".
+
+const editorPost = { user_id: EDITOR, workspace_id: 'ws-owner-personal' }
+const ownerPost  = { user_id: OWNER,  workspace_id: 'ws-owner-personal' }
+
+test('authors can always manage their own posts', async () => {
+  assert.equal(await canManagePost(db, { id: EDITOR, email: 'editor@example.com' }, editorPost), true)
+  assert.equal(await canManagePost(db, { id: OWNER, email: 'owner@example.com' }, { user_id: OWNER, workspace_id: null }), true)
+})
+
+test("the owner and admins manage their team's posts", async () => {
+  assert.equal(await canManagePost(db, { id: OWNER, email: 'owner@example.com' }, editorPost), true)
+  assert.equal(await canManagePost(db, { id: 'admin-uuid', email: 'boss@example.com' }, editorPost), true)
+  assert.equal(await canManagePost(db, { id: OWNER, email: 'owner@example.com' }, { user_id: EDITOR, workspace_id: 'ws-owner-client' }), true)
+})
+
+test("editors and viewers cannot change someone else's post", async () => {
+  assert.equal(await canManagePost(db, { id: EDITOR, email: 'editor@example.com' }, ownerPost), false)
+  assert.equal(await canManagePost(db, { id: 'viewer-uuid', email: 'look@example.com' }, editorPost), false)
+})
+
+test('strangers, and posts with no workspace, belong to their author only', async () => {
+  assert.equal(await canManagePost(db, { id: 'y', email: 'nobody@example.com' }, editorPost), false)
+  assert.equal(await canManagePost(db, { id: OWNER, email: 'owner@example.com' }, { user_id: EDITOR, workspace_id: null }), false)
+  assert.equal(await canManagePost(db, { id: OWNER, email: 'owner@example.com' }, { user_id: EDITOR, workspace_id: 'personal' }), false)
+})
+
+test('only owners and admins manage team posts', () => {
+  assert.equal(managesTeamPosts('owner'), true)
+  assert.equal(managesTeamPosts('admin'), true)
+  for (const role of ['editor', 'viewer', 'client']) assert.equal(managesTeamPosts(role), false)
 })

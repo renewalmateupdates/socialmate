@@ -22,6 +22,7 @@ import {
 import UnsplashCredit from '@/components/UnsplashCredit'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { CalendarDays, ChevronDown, Clock, Globe, Sparkles, X as CloseIcon } from 'lucide-react'
+import { loadWorkspacePosts } from '@/lib/workspace-posts'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -363,13 +364,9 @@ export default function CalendarPage() {
       } else {
         setRetryToast({ message: data.status === 'published' ? 'All platforms published!' : 'Partially retried — check results', type: 'success' })
         // Refresh posts to reflect new status
-        const updated = await supabase
-          .from('posts')
-          .select('*')
-          .eq('id', postId)
-          .single()
-        if (updated.data) {
-          setPosts(prev => prev.map(p => p.id === postId ? (updated.data as Post) : p))
+        const [updated] = await loadWorkspacePosts<Post>('one', activeWorkspace?.id, postId).catch(() => [])
+        if (updated) {
+          setPosts(prev => prev.map(p => p.id === postId ? updated : p))
         }
       }
     } catch {
@@ -413,18 +410,14 @@ export default function CalendarPage() {
     // Order DESC so the limit keeps the NEWEST posts: with 1000+ published posts an ascending order
     // filled the 1000 cap with old months and dropped upcoming scheduled posts, which made the
     // current/next month look empty and forced an auto-jump back to the oldest month.
-    let query = supabase
-      .from('posts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('scheduled_at', { ascending: false, nullsFirst: false })
-      .limit(1000)
-    if (activeWorkspace && !activeWorkspace.is_personal) {
-      query = query.eq('workspace_id', activeWorkspace.id)
+    // Through the API so a team's posts show up for the owner too; RLS hides
+    // other authors' rows from a browser query (lib/workspace-posts.ts).
+    try {
+      setPosts(await loadWorkspacePosts<Post>('calendar', activeWorkspace?.id))
+    } catch (err) {
+      console.error('[Calendar] fetch error:', err)
+      setPosts([])
     }
-    const { data, error } = await query
-    if (error) console.error('[Calendar] fetch error:', error)
-    setPosts((data as Post[]) ?? [])
     setLoading(false)
   }, [activeWorkspace, router])
 

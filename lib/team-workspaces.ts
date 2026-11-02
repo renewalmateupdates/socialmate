@@ -144,3 +144,29 @@ export function canCreatePosts(role: TeamRole): boolean {
 export function requiresApproval(role: TeamRole, plan: PlanTier): boolean {
   return (role === 'editor' || role === 'client') && plan !== 'free'
 }
+
+// ─── Who may change a post ──────────────────────────────────────────────────
+//
+// A post's user_id is who wrote it. Its author may always change it. In a
+// workspace with a team, the owner and admins manage everyone's posts: an
+// owner whose assistant scheduled something wrong has to be able to move,
+// cancel or delete it. RLS on posts only lets authors touch their own rows, so
+// every route that lets someone else manage a post checks here and writes with
+// the service role.
+export type PostRef = { user_id: string; workspace_id: string | null }
+
+export function managesTeamPosts(role: TeamRole): boolean {
+  return role === 'owner' || role === 'admin'
+}
+
+export async function canManagePost(
+  admin: SupabaseClient,
+  user: { id: string; email?: string | null },
+  post: PostRef,
+): Promise<boolean> {
+  if (post.user_id === user.id) return true
+  const wsId = realWorkspaceId(post.workspace_id)
+  if (!wsId) return false
+  const access = await resolveWorkspaceAccess(admin, user, wsId)
+  return !!access && managesTeamPosts(access.role)
+}
