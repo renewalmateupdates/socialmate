@@ -38,6 +38,12 @@ Joshua handles the marketing, web, software and business side.
 
 ---
 
+## Freely Scripture (separate project)
+
+A free scripture app Joshua started Nov 1–2, 2026: the Bible, Catholic Bible, Tanakh, Quran (Arabic + English), Bhagavad Gita, Dhammapada, Tao Te Ching, Analects and Book of Mormon, all public domain, offline, no ads, no account. Motto: give away what costs nothing to run, charge only for what costs money, at cost. Code in `renewalmateupdates/freelybible` (its README and COSTS.md hold the details), live at freelybible.vercel.app. Not part of SocialMate: never put SocialMate code or claims in it, or the reverse.
+
+---
+
 ## What SocialMate Is
 
 A multi-platform social media scheduler and AI-powered Creator OS.
@@ -1423,10 +1429,11 @@ What shipped:
 - **Accounts belong to the workspace owner, not to the author.** Never pass `post.user_id` to a publisher; pass `accountScopeFor(...).ownerId`. A post's `user_id` says who wrote it.
 - **A paid gate in front of a queue that a free feature fills is a dead end.** Free sells 2 seats and the Editor role. The approval queue was Pro-only, and everything an Editor sent went into it.
 - **Open:** Pro's client workspace count. `/pricing`, `lib/plan.ts` and the app say 1. The plan table in this file, `llms.txt` and `/vs/buffer` say 0. Joshua decides, then change it in `lib/plan.ts` and the copy.
-- **Open:** the owner's `/queue` and `/calendar` still list only posts they wrote themselves. A team member's scheduled posts publish correctly but don't appear there.
+- **Fixed in #768 (Nov 2, open for review):** the owner's Queue, Calendar and Drafts listed only posts they wrote, and RLS stopped them moving, cancelling, retrying or deleting a team member's post. `/api/workspaces/posts` now serves a workspace's posts whoever wrote them, and `canManagePost()` in `lib/team-workspaces.ts` is the one check (author, or the workspace owner/admin). A team draft is copied into the owner's own drafts to send from Compose, which still opens only your own drafts.
 
 ## Pending / In Progress
 
+- **Pick up here (Nov 2, 2026).** #767 merged; Ellen (ellenharveyau@gmail.com) confirmed it works for her and her VA. #768 (team posts in Queue/Calendar/Drafts) is open: test it with an owner on Free plus an Editor before merging (steps in the PR). Ellen agreed to be quoted and offered a full testimonial; when it arrives, add it to `TESTIMONIALS` in `app/wall-of-love/page.tsx` with her name, company, title and a link to ellenharvey.com.au, and remove the page's noindex. Her email is the written permission. Funnel numbers were not checked: cloud sessions have no production keys, and Remote Control does not support Windows, so ask Joshua for screenshots of `/admin/funnel`, `/admin/overview` and `/admin/feedback`. Pro's client workspace count (1 or 0) is still Joshua's call.
 - **Pick up here (Nov 1, 2026).** #767 (team members posting) is open. After it merges, check it with two real accounts: an owner on Free plus an Editor; the editor switches to the owner's workspace and schedules a LinkedIn post. Then reply to ellenharveyau@gmail.com from `/admin/feedback`. Still open from Oct 29 below. Not reachable from a cloud session: the Shopify promo images Joshua made (share the folder through Remote Control, or attach them in chat).
 - **Pick up here (Oct 29, 2026).** Everything through #761 and renewalmate#27 is merged and deployed, and the new pages went to IndexNow. Next, when Joshua says go: (1) the next batch of RenewalMate cancel guides, each read from the company's own page (good candidates: Nintendo Switch Online, Discord Nitro, Google One, Canva Pro, Dropbox, Peloton, Tidal; the New York Times blocks AI tools, so skip it); (2) watch whether the six new `/for` pages start landing ChatGPT signups (`/admin/funnel`, "Where signups came from"); (3) a shop marketing account in SocialMate plus socials, only when he says go; (4) HereNow's App Store build once Jacob sends his list; (5) campaign mode phase 2. Joshua's side: Search Console for renewalmate.com (a DNS TXT record at GoDaddy, then submit `sitemap.xml`), Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google & YouTube app, and one real Twitch go-live before announcing alerts.
 - **Open as of Oct 23, 2026 (Joshua's side):** run the SOMA removal SQL from Oct 23 if it hasn't run yet, and read replies to the TikTok-live email in socialmatehq@gmail.com. The public inbox question is settled (`socialmatehq@gmail.com`, PR #752). Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
