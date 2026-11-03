@@ -53,6 +53,7 @@ export const FUNNEL_EVENTS = [
   // ── First value ──────────────────────────────────────────────────────────
   'compose_opened',
   'starter_built',        // { path, kind: 'sentence' | 'link', where } used the one-sentence helper; flags only, never the text
+  'starter_saved',        // { built, edited, kind: scheduled | draft, where } the onboarding starter post was saved; flags only
   'compose_left',       // { had_content, platforms_selected, connected_selectable, blocking_reason } flags only, never content
   'draft_created',        // server-side, only when a new draft row is inserted
   'post_attempted',       // clicked Post/Schedule and the client checks passed

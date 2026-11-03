@@ -31,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/tools`,               lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/tools/thread-splitter`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/tools/discord-timestamp`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/tools/linkedin-formatter`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/signup`,              lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/login`,               lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/story`,               lastModified: now, changeFrequency: 'monthly', priority: 0.7 },

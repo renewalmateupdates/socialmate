@@ -98,24 +98,33 @@ export default function RSSImport() {
     if (!selected.length || !userId) return
     setImporting(true)
 
+    // Check every insert: a discarded error used to report success and mark the
+    // item imported, so it could never be retried.
+    const saved: RSSPost[] = []
     for (const post of selected) {
       const content = `${post.title}\n\n${post.description}\n\n${post.link}`
-      await supabase.from('posts').insert({
+      const { error } = await supabase.from('posts').insert({
         user_id: userId,
         content,
         platforms: [],
         status: 'draft',
       })
+      if (error) console.warn('[rss-import] draft insert failed:', error.message)
+      else saved.push(post)
     }
 
     const newImported = new Set(importedLinks)
-    selected.forEach(p => newImported.add(p.link))
+    saved.forEach(p => newImported.add(p.link))
     setImportedLinks(newImported)
     saveImportedLinks(newImported)
 
     setImporting(false)
-    showToast(`${selected.length} post${selected.length !== 1 ? 's' : ''} imported as drafts`)
-    setPosts(prev => prev.map(p => p.selected ? { ...p, selected: false } : p))
+    const failed = selected.length - saved.length
+    showToast(failed
+      ? `${saved.length} imported, ${failed} failed. Try those again.`
+      : `${saved.length} post${saved.length !== 1 ? 's' : ''} imported as drafts`)
+    const savedLinks = new Set(saved.map(p => p.link))
+    setPosts(prev => prev.map(p => savedLinks.has(p.link) ? { ...p, selected: false } : p))
   }
 
   const selectedCount = posts.filter(p => p.selected && !importedLinks.has(p.link)).length

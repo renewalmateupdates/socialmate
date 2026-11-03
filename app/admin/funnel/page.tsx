@@ -317,7 +317,7 @@ export default function AdminFunnelPage() {
                     ))}
                     {/* Steps that only started being recorded recently. Before that date
                         the absence means "not measured", never "zero", so say so. */}
-                    {[...NEW_EVENTS, ...TIKTOK_EVENTS].filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
+                    {[...NEW_EVENTS, ...TIKTOK_EVENTS, ...STARTER_EVENTS].filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
                       <div key={name} className="flex items-center justify-between border-b border-edge px-5 py-2.5 last:border-b-0">
                         <span className="font-mono text-xs text-ink-body">{name}</span>
                         <span className="font-mono text-xs text-ink-muted">not recorded yet</span>
@@ -326,7 +326,8 @@ export default function AdminFunnelPage() {
                   </div>
                   <p className="border-t border-edge px-5 py-3 text-xs text-ink-muted">
                     Composer steps ({NEW_EVENTS.join(', ')}) are recorded from {NEW_EVENTS_SINCE} onward, and
-                    TikTok Studio steps ({TIKTOK_EVENTS.join(', ')}) from {TIKTOK_EVENTS_SINCE}.
+                    TikTok Studio steps ({TIKTOK_EVENTS.join(', ')}) from {TIKTOK_EVENTS_SINCE}, and the
+                    onboarding starter save ({STARTER_EVENTS.join(', ')}) from {STARTER_EVENTS_SINCE}.
                     Anything earlier was not measured, so read a missing number there as unknown, not zero.
                   </p>
                 </Panel>
@@ -349,3 +350,8 @@ const TIKTOK_EVENTS = [
   'tiktok_post_attempted', 'tiktok_post_done', 'tiktok_post_failed',
 ]
 const TIKTOK_EVENTS_SINCE = 'Oct 15, 2026'
+
+// Whether the onboarding starter post was used as written, edited, or built
+// from the one-sentence helper. Recorded only after the save succeeds.
+const STARTER_EVENTS = ['starter_saved']
+const STARTER_EVENTS_SINCE = 'Nov 3, 2026'

@@ -240,8 +240,8 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 Team
               </span>
             )}
-            {/* Compose opens only the viewer's own drafts; team posts are managed from here. */}
-            {post.mine !== false && (
+            {/* Compose opens the viewer's own posts, and a teammate's for the owner or an admin. */}
+            {post.can_manage !== false && (
               <Link href={`/compose?draft=${post.id}`}
                 className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                 {t('app_common.edit')}

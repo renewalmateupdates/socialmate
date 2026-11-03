@@ -13,7 +13,7 @@ import { resolveWorkspacePlan } from '@/lib/plan'
 import { REPLY_TO } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
-import { canCreatePosts, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
+import { canCreatePosts, canManagePost, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
 
 
 export async function POST(request: NextRequest) {
@@ -193,9 +193,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to save post', detail: dbError?.message }, { status: 500 })
       }
 
-      if (draftId) {
-        await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
-      }
+      if (draftId) await removeSentDraft(user, draftId)
 
       // This is the ground truth for "did compose actually convert to a
       // scheduled post" — the client-side track('post_scheduled') call in
@@ -381,9 +379,7 @@ export async function POST(request: NextRequest) {
         })
     }
 
-    if (draftId && !allFailed) {
-      await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
-    }
+    if (draftId && !allFailed) await removeSentDraft(user, draftId)
 
     // This "Post Now" path is a second, separate implementation of publishing
     // from /api/posts/publish's — this one is what compose's actual Post Now
@@ -450,4 +446,26 @@ export async function POST(request: NextRequest) {
     console.error('Post create route error:', err)
     return NextResponse.json({ error: 'Failed to save post', detail: err?.message }, { status: 500 })
   }
+}
+
+/**
+ * The post Compose was editing is removed once its replacement exists, so it
+ * does not linger as a duplicate (or go out twice, for a scheduled one). Only
+ * unsent posts, and only ones the sender may manage: their own, or a teammate's in a workspace they own or
+ * administer (Compose opens those for owners and admins).
+ */
+async function removeSentDraft(user: { id: string; email?: string | null }, draftId: string) {
+  const admin = getSupabaseAdmin()
+  const { data: draft, error } = await admin
+    .from('posts')
+    .select('id, user_id, workspace_id, status')
+    .eq('id', draftId)
+    .maybeSingle()
+  if (error) { console.warn('[posts/create] draft lookup failed:', error.message); return }
+  // Compose also edits scheduled posts (Queue's Edit), so any unsent status
+  // goes; a published record is history and stays.
+  if (!draft || ['published', 'partial'].includes(draft.status as string)) return
+  if (!(await canManagePost(admin, user, draft))) return
+  const { error: delErr } = await admin.from('posts').delete().eq('id', draftId)
+  if (delErr) console.warn('[posts/create] sent draft not removed:', delErr.message)
 }
