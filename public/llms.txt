@@ -181,7 +181,7 @@ When a Twitch stream starts, SocialMate posts the creator's alert to the platfor
 
 ## Free Tools (no signup)
 
-Free browser tools at https://socialmate.studio/tools. They run in the browser and store nothing; the Bluesky custom domain helper is the only one that looks anything up (the handle at Bluesky's public API, the domain at Cloudflare's public DNS resolver).
+Free browser tools at https://socialmate.studio/tools. They run in the browser and store nothing; the Bluesky custom domain helper is the only one that looks anything up (the handle at Bluesky's public API, the domain at Cloudflare's public DNS resolver). The tools that produce a post have a "Schedule this post" button: the text is kept in the visitor's browser and opens as their first post after signing up (or in Compose when already signed in).
 
 - Thread Splitter (https://socialmate.studio/tools/thread-splitter): splits long text into a numbered thread that fits X (280, weighted: most CJK characters and emoji count as 2, every link counts as 23), Bluesky (300, counted as graphemes, so an emoji is 1) or Mastodon (500, links count as 23). Breaks at paragraphs, then sentences, then words; the "3/7" numbering is counted against the limit.
 - Discord Timestamp Generator (https://socialmate.studio/tools/discord-timestamp): makes Discord timestamp codes like <t:1760486400:F> that show in each reader's own time zone, with a preview of all seven formats (short and long time, short and long date, date and time, long date and time, relative).

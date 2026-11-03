@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import MoreTools from '../MoreTools'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import DiscordTimestamp from './DiscordTimestampLoader'
 
@@ -99,6 +100,8 @@ export default function DiscordTimestampPage() {
           <Button href="/tools" variant="secondary">More free tools</Button>
         </div>
       </Section>
+
+      <MoreTools current="/tools/discord-timestamp" />
     </PublicLayout>
   )
 }

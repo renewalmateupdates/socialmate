@@ -60,6 +60,10 @@ function SignupForm() {
   const searchParams = useSearchParams()
 
   const redirectTo = searchParams.get('redirect') || ''
+  // Keep the destination when someone switches to sign in (a free tool's
+  // "Schedule this post" sends people here with redirect=/compose?from=tool).
+  const loginHref = redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'
+  const fromTool = searchParams.get('from') === 'tool'
   // Derived directly from the URL rather than mirrored into state via an
   // effect — useSearchParams() already resolves synchronously on the first
   // render (server and client agree, since both know the request URL), so
@@ -161,7 +165,7 @@ function SignupForm() {
       <AuthShell
         headline="Confirm your email"
         sub="One click and your account is live."
-        altHref="/login"
+        altHref={loginHref}
         altLabel="Sign in"
         asideNote={<SignupPerks />}
       >
@@ -204,7 +208,7 @@ function SignupForm() {
         </div>
 
         <button
-          onClick={() => router.push('/login')}
+          onClick={() => router.push(loginHref)}
           className="mt-6 text-small text-ink-muted transition-colors hover:text-ink-high"
         >
           Go to sign in
@@ -219,8 +223,10 @@ function SignupForm() {
   return (
     <AuthShell
       headline="Create your account"
-      sub="Free plan, no card, about a minute."
-      altHref="/login"
+      sub={fromTool
+        ? 'Your post is saved in this browser and opens as your first post. Free plan, no card, about a minute.'
+        : 'Free plan, no card, about a minute.'}
+      altHref={loginHref}
       altLabel="Sign in"
       asideNote={<SignupPerks />}
     >
@@ -385,7 +391,7 @@ function SignupForm() {
 
       <p className="mt-7 text-small text-ink-muted">
         Already have an account?{' '}
-        <Link href="/login" className="text-amber underline underline-offset-2 transition-colors hover:text-amber/80">
+        <Link href={loginHref} className="text-amber underline underline-offset-2 transition-colors hover:text-amber/80">
           Sign in
         </Link>
       </p>

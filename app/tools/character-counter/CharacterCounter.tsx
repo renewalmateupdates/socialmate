@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import { countAll, textStats } from '@/lib/tools/char-count'
 import CopyButton from '../CopyButton'
+import ScheduleThis from '../ScheduleThis'
 
 export default function CharacterCounter() {
   const [text, setText] = useState('')
@@ -34,8 +35,9 @@ export default function CharacterCounter() {
           ))}
         </dl>
         {text && (
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
             <CopyButton text={text} label="Copy text" />
+            <ScheduleThis text={text} tool="character-counter" />
           </div>
         )}
       </div>

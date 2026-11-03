@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic'
 import { track } from '@/lib/analytics'
 import { starterDraft, starterDraftCount, buildDraft, starterVariantCount, type StarterPath } from '@/lib/starter-post'
 import StarterDraftBuilder from '@/components/StarterDraftBuilder'
+import { clearToolDraft, readToolDraft, TOOL_LABELS, type ToolId } from '@/lib/tool-draft'
 import { markActivated } from '@/lib/activation'
 import {
   CalendarDays, Check, FileText, Globe, Hand, Lightbulb, Link2,
@@ -155,6 +156,14 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
   // The last draft the app wrote into the box, so the save can tell whether
   // the person edited it (starter_saved). Never sent anywhere itself.
   const lastGenerated = useRef('')
+  // Set when step 4 opened with a post written in a free tool (/tools).
+  const [toolDraftFrom, setToolDraftFrom] = useState<ToolId | null>(null)
+  // Quick Start and "Skip for now" pass step 4, so a tool's post can still be
+  // waiting at the end; the last step's button then opens it in Compose.
+  const [toolDraftWaiting, setToolDraftWaiting] = useState(false)
+  useEffect(() => {
+    if (step === 5) setToolDraftWaiting(readToolDraft() !== null)
+  }, [step])
   const [scheduleDate, setScheduleDate] = useState(defaultSchedule().date)
   const [scheduleTime, setScheduleTime] = useState(defaultSchedule().time)
   // What actually happened when we tried to save. Step 5 reads this instead of
@@ -189,6 +198,16 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
   // step change only, so clearing the box by hand is not undone mid-edit.
   useEffect(() => {
     if (step === 4 && !starterPost.trim()) {
+      // Someone who wrote a post in a free tool and pressed "Schedule this post"
+      // gets their own words here, not a starter we wrote.
+      const fromTool = readToolDraft()
+      if (fromTool) {
+        lastGenerated.current = fromTool.text
+        setStarterPost(fromTool.text)
+        setToolDraftFrom(fromTool.tool)
+        track('tool_draft_used', { tool: fromTool.tool, where: 'onboarding' })
+        return
+      }
       const draft = starterDraft(onboardingGoal, draftIndex)
       lastGenerated.current = draft
       setStarterPost(draft)
@@ -450,8 +469,10 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
         console.error('[onboarding] starter post insert failed:', postErr.message)
         setSaveResult({ kind: 'error', detail: postErr.message })
       } else {
+        if (toolDraftFrom) clearToolDraft()
         track('starter_saved', {
           built: Boolean(builtFrom),
+          from_tool: Boolean(toolDraftFrom),
           edited: content !== lastGenerated.current.trim(),
           kind: connected ? 'scheduled' : 'draft',
           where: 'onboarding',
@@ -853,7 +874,9 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
                 <PenLine className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
                 <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">Your first post is ready</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  We wrote a starter you can post as it is or change. Pick when it goes out.
+                  {toolDraftFrom
+                    ? `This is the post you wrote in our free ${TOOL_LABELS[toolDraftFrom]}. Change anything you like, then pick when it goes out.`
+                    : 'We wrote a starter you can post as it is or change. Pick when it goes out.'}
                 </p>
               </div>
 
@@ -1063,12 +1086,14 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
                 // platform is connected. /drafts could only list it.
                 <Link href={didSchedule ? '/calendar'
                   : didDraft ? (saveResult?.postId ? `/compose?draft=${saveResult.postId}` : '/drafts')
-                  : '/compose'}
+                  : toolDraftWaiting ? '/compose?from=tool' : '/compose'}
                   className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
                   {didSchedule
                     ? <><CalendarDays size={14} strokeWidth={2} /> View Your Scheduled Post →</>
                     : didDraft
                     ? <><FileText size={14} strokeWidth={2} /> Open Your Draft →</>
+                    : toolDraftWaiting
+                    ? <><PenLine size={14} strokeWidth={2} /> Schedule Your Post →</>
                     : <><PenLine size={14} strokeWidth={2} /> Write Your First Post →</>}
                 </Link>
               )}

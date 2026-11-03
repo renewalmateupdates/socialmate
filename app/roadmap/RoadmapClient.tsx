@@ -22,6 +22,7 @@ function formatMonth(ym: string): string {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
+  { date: '2026-11', title: 'Free tools hand off to your first post', desc: 'Write a post in the character counter, LinkedIn formatter, thread splitter, Discord timestamp generator or UTM builder, press "Schedule this post", and it opens as your first post after signing up.', status: 'shipped', category: 'Onboarding' },
   { date: '2026-11', title: 'Six free tools', desc: 'A character counter for every platform, a thread splitter, a UTM link builder, a LinkedIn text formatter, a Discord timestamp generator and a Bluesky custom domain helper, all at /tools, all free with no signup.', status: 'shipped', category: 'Tools' },
   { date: '2026-11', title: 'Blog RSS feed', desc: 'Follow the blog in any feed reader at /blog/feed.xml.', status: 'shipped', category: 'Growth' },
   { date: '2026-11', title: 'Free LinkedIn text formatter', desc: 'Bold, italic and lists for LinkedIn posts at /tools/linkedin-formatter, with a 3,000-character counter and a preview of where "see more" cuts in. Runs in your browser, no signup.', status: 'shipped', category: 'Tools' },

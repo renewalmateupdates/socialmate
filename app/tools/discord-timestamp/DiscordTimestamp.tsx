@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { DISCORD_STYLES, discordTag, previewDiscord, unixFromLocal } from '@/lib/tools/discord-timestamp'
 import CopyButton from '../CopyButton'
+import ScheduleThis from '../ScheduleThis'
 
 function pad(n: number) { return String(n).padStart(2, '0') }
 
@@ -93,6 +94,13 @@ export default function DiscordTimestamp() {
                   </p>
                 </div>
                 <CopyButton text={`${discordTag(unix, 'F')} (${discordTag(unix, 'R')})`} className="shrink-0" />
+              </div>
+              <div className="mt-4 flex justify-end">
+                <ScheduleThis
+                  text={`Starts ${discordTag(unix, 'F')} (${discordTag(unix, 'R')})`}
+                  tool="discord-timestamp"
+                  label="Schedule an announcement"
+                />
               </div>
             </article>
             {DISCORD_STYLES.map(({ style, label }) => (

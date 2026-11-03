@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { AtSign, Bold, Clock, Hash, Link2, MessagesSquare } from 'lucide-react'
+import { FREE_TOOLS } from '@/lib/tools/catalog'
 import PublicLayout from '@/components/PublicLayout'
 import { Section, Eyebrow, Display, Body } from '@/components/instrument/primitives'
 
@@ -17,44 +17,6 @@ export const metadata: Metadata = {
   alternates: { canonical: URL },
 }
 
-const TOOLS = [
-  {
-    href: '/tools/character-counter',
-    icon: Hash,
-    name: 'Character counter',
-    blurb: 'See at once whether a post fits X, Bluesky, Mastodon, LinkedIn, TikTok, Discord, Telegram, Threads and Instagram.',
-  },
-  {
-    href: '/tools/thread-splitter',
-    icon: MessagesSquare,
-    name: 'Thread splitter',
-    blurb: 'Turn long text into a numbered thread that fits X, Bluesky or Mastodon, counted the way each platform counts.',
-  },
-  {
-    href: '/tools/discord-timestamp',
-    icon: Clock,
-    name: 'Discord timestamp generator',
-    blurb: 'Make codes Discord shows in every reader’s own time zone, with a preview of each format.',
-  },
-  {
-    href: '/tools/linkedin-formatter',
-    icon: Bold,
-    name: 'LinkedIn text formatter',
-    blurb: 'Bold, italic and clean lists for LinkedIn posts, with a preview of where “see more” cuts in.',
-  },
-  {
-    href: '/tools/utm-builder',
-    icon: Link2,
-    name: 'UTM link builder',
-    blurb: 'Tag one link for every platform you post to, so your analytics show which post sent each visit.',
-  },
-  {
-    href: '/tools/bluesky-custom-domain',
-    icon: AtSign,
-    name: 'Bluesky custom domain helper',
-    blurb: 'Get the exact DNS record to use your own domain as your Bluesky handle, and check that it is live.',
-  },
-]
 
 export default function ToolsPage() {
   return (
@@ -70,7 +32,7 @@ export default function ToolsPage() {
           </Body>
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {TOOLS.map(({ href, icon: Icon, name, blurb }) => (
+          {FREE_TOOLS.map(({ href, icon: Icon, name, blurb }) => (
             <Link
               key={href}
               href={href}

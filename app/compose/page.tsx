@@ -17,6 +17,7 @@ import { AlertTriangle, BadgePercent, Ban, BarChart3, Bookmark, BookOpen, Buildi
 import type { LucideIcon } from 'lucide-react'
 import { HASHTAGS_COST, REPURPOSE_COST } from '@/lib/ai-tool-costs'
 import { loadWorkspacePosts } from '@/lib/workspace-posts'
+import { readToolDraft, TOOL_LABELS } from '@/lib/tool-draft'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -581,7 +582,16 @@ function ComposeInner() {
 
     if (draftId) return
 
-    if (starterTemplateId) {
+    // A post written in a free tool (/tools), carried here by its "Schedule
+    // this post" button through /start. Left in storage until it expires, so a
+    // reload or a second visit to the same link still finds it.
+    const toolDraft = searchParams.get('from') === 'tool' ? readToolDraft() : null
+
+    if (toolDraft) {
+      setContent(toolDraft.text)
+      setTemplateBanner(`Your post from the free ${TOOL_LABELS[toolDraft.tool]} is ready. Pick where it goes and when.`)
+      track('tool_draft_used', { tool: toolDraft.tool, where: 'compose' })
+    } else if (starterTemplateId) {
       const starter = STARTER_TEMPLATES.find(t => t.id === starterTemplateId)
       if (starter) {
         setContent(starter.content)

@@ -9,7 +9,7 @@ import { PROTECTED_PATHS } from '@/lib/protected-paths'
 // skip /affiliates, the public page that recruits partners. One list now, and
 // each path is written as an exact match plus its subpaths, which robots.txt
 // can express ("$" ends a rule) and which never catches a longer neighbour.
-const EXTRA = ['/admin', '/api', '/billing', '/invite', '/soma/projects']
+const EXTRA = ['/admin', '/api', '/billing', '/invite', '/soma/projects', '/start']
 
 function robotsDisallow(): string[] {
   const paths = Array.from(new Set([...PROTECTED_PATHS, ...EXTRA])).sort()

@@ -317,7 +317,7 @@ export default function AdminFunnelPage() {
                     ))}
                     {/* Steps that only started being recorded recently. Before that date
                         the absence means "not measured", never "zero", so say so. */}
-                    {[...NEW_EVENTS, ...TIKTOK_EVENTS, ...STARTER_EVENTS].filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
+                    {[...NEW_EVENTS, ...TIKTOK_EVENTS, ...STARTER_EVENTS, ...TOOL_EVENTS].filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
                       <div key={name} className="flex items-center justify-between border-b border-edge px-5 py-2.5 last:border-b-0">
                         <span className="font-mono text-xs text-ink-body">{name}</span>
                         <span className="font-mono text-xs text-ink-muted">not recorded yet</span>
@@ -327,7 +327,8 @@ export default function AdminFunnelPage() {
                   <p className="border-t border-edge px-5 py-3 text-xs text-ink-muted">
                     Composer steps ({NEW_EVENTS.join(', ')}) are recorded from {NEW_EVENTS_SINCE} onward, and
                     TikTok Studio steps ({TIKTOK_EVENTS.join(', ')}) from {TIKTOK_EVENTS_SINCE}, and the
-                    onboarding starter save ({STARTER_EVENTS.join(', ')}) from {STARTER_EVENTS_SINCE}.
+                    onboarding starter save ({STARTER_EVENTS.join(', ')}) from {STARTER_EVENTS_SINCE}, and
+                    free tool posts ({TOOL_EVENTS.join(', ')}) from {TOOL_EVENTS_SINCE}.
                     Anything earlier was not measured, so read a missing number there as unknown, not zero.
                   </p>
                 </Panel>
@@ -355,3 +356,9 @@ const TIKTOK_EVENTS_SINCE = 'Oct 15, 2026'
 // from the one-sentence helper. Recorded only after the save succeeds.
 const STARTER_EVENTS = ['starter_saved']
 const STARTER_EVENTS_SINCE = 'Nov 3, 2026'
+
+// A free tool's "Schedule this post": pressed, then opened as the visitor's
+// post in onboarding or Compose. /api/track only stores signed-in events, so
+// tool_draft_saved here counts signed-in presses; GA4 sees everyone's.
+const TOOL_EVENTS = ['tool_draft_saved', 'tool_draft_used']
+const TOOL_EVENTS_SINCE = 'Nov 4, 2026'

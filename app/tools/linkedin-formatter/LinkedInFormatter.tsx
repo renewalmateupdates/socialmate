@@ -6,6 +6,7 @@ import {
   type TextStyle, type ListKind,
 } from '@/lib/tools/linkedin-format'
 import CopyButton from '../CopyButton'
+import ScheduleThis from '../ScheduleThis'
 
 const SAMPLE = `I almost didn't post this.
 
@@ -143,6 +144,7 @@ export default function LinkedInFormatter() {
               </button>
             )}
             {text && <CopyButton text={text} label="Copy post" />}
+            {text && <ScheduleThis text={text} tool="linkedin-formatter" />}
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import { buildUtmUrl, linksPerPlatform, PLATFORM_SOURCES } from '@/lib/tools/utm'
 import CopyButton from '../CopyButton'
+import ScheduleThis from '../ScheduleThis'
 
 const input = 'mt-2 min-h-[44px] w-full rounded-xl border border-edge bg-void px-4 text-body text-ink-high placeholder:text-ink-faint transition-colors hover:border-edge-lit focus:border-amber focus:outline-none'
 const label = 'block font-mono text-eyebrow uppercase text-ink-muted'
@@ -142,8 +143,9 @@ export default function UtmBuilder() {
           <>
             <article className="rounded-2xl border border-edge bg-panel p-4">
               <p className="break-all font-mono text-small text-ink-high">{single.url}</p>
-              <div className="mt-3 flex justify-end">
+              <div className="mt-3 flex flex-wrap justify-end gap-2">
                 <CopyButton text={single.url} label="Copy link" />
+                <ScheduleThis text={single.url} tool="utm-builder" label="Post this link" />
               </div>
             </article>
             <Warnings items={single.warnings} />
