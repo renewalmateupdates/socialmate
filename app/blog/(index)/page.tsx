@@ -26,7 +26,10 @@ export const metadata: Metadata = {
     description: 'Guides, tips, and insights on social media scheduling, AI tools, and growing your audience.',
     images:      ['https://socialmate.studio/og-image.png'],
   },
-  alternates: { canonical: 'https://socialmate.studio/blog' },
+  alternates: {
+    canonical: 'https://socialmate.studio/blog',
+    types: { 'application/rss+xml': 'https://socialmate.studio/blog/feed.xml' },
+  },
 }
 
 // Rows were inserted over months with whatever spelling the batch used:

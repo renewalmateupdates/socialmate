@@ -28,11 +28,13 @@ const AUDIENCE_HREFS = [
   { key: 'audiences_items.coaches',          href: '/for/coaches'           },
   { key: 'audiences_items.content_creators', href: '/for/content-creators'  },
   { key: 'audiences_items.bloggers',         href: '/for/bloggers'          },
+  { key: 'audiences_items.all',              href: '/for'                   },
 ]
 
 const RESOURCE_HREFS = [
   { key: 'resources_items.blog',      href: '/blog'      },
   { key: 'resources_items.guides',    href: '/guides'    },
+  { key: 'resources_items.tools',     href: '/tools'     },
   { key: 'resources_items.grants',    href: '/grants'    },
   { key: 'resources_items.faq',       href: '/faq'       },
   { key: 'resources_items.changelog', href: '/changelog' },

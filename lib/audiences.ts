@@ -819,8 +819,152 @@ export const AUDIENCES: Audience[] = [
       { href: '/tools/thread-splitter', label: 'Free thread splitter' },
     ],
   },
+  {
+    slug: 'game-developers',
+    title: 'Free Social Media Scheduler for Indie Game Developers',
+    description: 'Schedule devlogs, screenshot-day posts and wishlist reminders to Bluesky, Mastodon, X, Discord and Telegram, and post gameplay clips to TikTok. Free plan included.',
+    eyebrow: 'For indie game developers',
+    h1: 'Schedule your devlogs and wishlist pushes, free',
+    answer: 'SocialMate schedules your devlogs, screenshots and wishlist reminders to Bluesky, Mastodon, X, Discord, Telegram and LinkedIn, and posts trailers and gameplay clips to TikTok. Write a week of posts after a build and get back to the game. The free plan covers 250 posts a month.',
+    features: [
+      { icon: 'image', title: 'Screenshot days, on time', body: 'Queue a screenshot for #screenshotsaturday and the other weekly tags the night before, so it goes out while you sleep.' },
+      { icon: 'thread', title: 'Devlogs as real threads', body: 'Post a devlog as a thread to Bluesky, Mastodon or X right away, each part replying to the one before.' },
+      { icon: 'users', title: 'Your Discord community', body: 'Post patch notes and playtest calls to your Discord server through the SocialMate bot, at the time you pick.' },
+      { icon: 'repeat', title: 'Wishlist reminders that rotate', body: 'Campaign mode rotates your store link, trailer and a new screenshot on the days you choose until launch day.' },
+      { icon: 'send', title: 'Gameplay clips to TikTok', body: 'Upload a clip and post it to TikTok publicly, or schedule it. The free plan includes 20 TikTok videos a month.' },
+    ],
+    steps: [
+      'Create a free SocialMate account.',
+      'Connect Bluesky, Mastodon, X or your Discord server.',
+      'Write a post with a screenshot and your store link, and pick a time.',
+      'Set up a campaign to keep wishlist reminders going until launch.',
+    ],
+    limits: [
+      'SocialMate does not post to Steam, itch.io, Reddit or YouTube.',
+      'Trailers and clips post to TikTok through TikTok Studio. Instagram is not available.',
+      'Posting to X needs the Pro plan.',
+    ],
+    faq: [
+      { q: 'Is there a free social media scheduler for indie game developers?', a: 'Yes. SocialMate\'s free plan schedules up to 250 posts a month to Bluesky, Mastodon, Discord, Telegram and LinkedIn, plus 20 TikTok videos. X needs Pro, $8 a month.' },
+      { q: 'Can I schedule #screenshotsaturday posts?', a: 'Yes. Write the post with your screenshot and the tag, pick Saturday and a time, and it goes out on its own.' },
+      { q: 'Does it post to game development Mastodon servers?', a: 'Yes. It posts to any Mastodon instance you have an account on.' },
+    ],
+    related: [
+      { href: '/for/indie-hackers', label: 'SocialMate for indie hackers' },
+      { href: '/for/discord-communities', label: 'Discord announcement scheduler' },
+      { href: '/tools/thread-splitter', label: 'Free thread splitter' },
+    ],
+  },
+  {
+    slug: 'youtubers',
+    title: 'Promote Your YouTube Videos on Bluesky, X, LinkedIn and Discord',
+    description: 'Share every new upload to Bluesky, X, LinkedIn, Mastodon, Discord and Telegram on a schedule, and post vertical clips to TikTok. Free plan included.',
+    eyebrow: 'For YouTubers',
+    h1: 'Share every upload everywhere your audience is',
+    answer: 'SocialMate lists your latest YouTube videos and turns one into a scheduled post with its link, for Bluesky, X, LinkedIn, Mastodon, Discord and Telegram. Vertical clips go to TikTok through TikTok Studio. It does not upload to YouTube itself. The free plan covers 250 posts a month.',
+    features: [
+      { icon: 'radio', title: 'Your uploads, one click from a post', body: 'Paste your channel address in Clips and your latest videos show up with thumbnails. Pick one and Compose opens with its title and link.' },
+      { icon: 'users', title: 'New-video posts in Discord', body: 'Announce each upload in your Discord server through the SocialMate bot, at the time you choose.' },
+      { icon: 'repeat', title: 'Keep older videos working', body: 'Campaign mode rotates links to your best videos on the days you pick until an end date.' },
+      { icon: 'clock', title: 'Premiere times in every zone', body: 'The free Discord timestamp generator makes start times that show in each viewer\'s own time zone.' },
+      { icon: 'send', title: 'Clips to TikTok', body: 'Upload a vertical clip and post it to TikTok publicly, or schedule it.' },
+    ],
+    steps: [
+      'Create a free SocialMate account.',
+      'Connect Bluesky, X, LinkedIn or your Discord server.',
+      'Open Clips, paste your YouTube channel address and pick a video.',
+      'Write the post, choose platforms and a time, then check the Queue.',
+    ],
+    limits: [
+      'SocialMate does not upload to YouTube or post Shorts. YouTube access is waiting on Google\'s review.',
+      'It does not post on its own when you upload; you pick each video.',
+      'Instagram and Reddit are not available. Posting to X needs the Pro plan.',
+    ],
+    faq: [
+      { q: 'How do I share my YouTube videos to Bluesky and LinkedIn?', a: 'Paste your channel address in SocialMate\'s Clips page, pick a video, choose Bluesky and LinkedIn and a time. You pick each video; it does not post on its own when you upload.' },
+      { q: 'Can SocialMate upload to YouTube?', a: 'Not yet. YouTube access is waiting on Google\'s review. SocialMate shares your videos on the platforms it does post to.' },
+      { q: 'Is it free?', a: 'Yes. The free plan schedules up to 250 posts a month to Bluesky, LinkedIn, Mastodon, Discord and Telegram, plus TikTok videos. X needs Pro, $8 a month.' },
+    ],
+    related: [
+      { href: '/for/video-creators', label: 'SocialMate for video creators' },
+      { href: '/for/streamers', label: 'SocialMate for streamers' },
+      { href: '/tools/discord-timestamp', label: 'Free Discord timestamp generator' },
+    ],
+  },
 ]
 
 export function audienceFor(slug: string): Audience | undefined {
   return AUDIENCES.find(a => a.slug === slug)
+}
+
+// ── The /for hub ─────────────────────────────────────────────────────────────
+// Every audience page in one place, grouped, so crawlers and people can reach
+// all of them from one link. The hand-built pages live in app/for/<slug>/;
+// scripts/test-audiences.mjs fails if a folder is missing from this list.
+
+export type AudienceGroup = 'Creators' | 'Streaming and video' | 'Writers' | 'Communities' | 'Businesses and teams' | 'Fan platforms'
+
+export const AUDIENCE_GROUP_ORDER: AudienceGroup[] = ['Creators', 'Streaming and video', 'Fan platforms', 'Writers', 'Communities', 'Businesses and teams']
+
+export const HANDBUILT_AUDIENCES: { slug: string; label: string; group: AudienceGroup }[] = [
+  { slug: 'content-creators',  label: 'Content creators',             group: 'Creators' },
+  { slug: 'musicians',         label: 'Musicians and artists',        group: 'Creators' },
+  { slug: 'podcasters',        label: 'Podcasters',                   group: 'Creators' },
+  { slug: 'fitness-coaches',   label: 'Fitness coaches',              group: 'Creators' },
+  { slug: 'linkedin-creators', label: 'LinkedIn creators',            group: 'Creators' },
+  { slug: 'tiktok-creators',   label: 'TikTok creators',              group: 'Streaming and video' },
+  { slug: 'streamers',         label: 'Streamers',                    group: 'Streaming and video' },
+  { slug: 'video-creators',    label: 'Video creators',               group: 'Streaming and video' },
+  { slug: 'bloggers',          label: 'Bloggers',                     group: 'Writers' },
+  { slug: 'nonprofits',        label: 'Nonprofits',                   group: 'Communities' },
+  { slug: 'agencies',          label: 'Agencies',                     group: 'Businesses and teams' },
+  { slug: 'small-business',    label: 'Small businesses',             group: 'Businesses and teams' },
+  { slug: 'coaches',           label: 'Coaches and consultants',      group: 'Businesses and teams' },
+  { slug: 'real-estate',       label: 'Real estate agents',           group: 'Businesses and teams' },
+  { slug: 'restaurants',       label: 'Restaurants',                  group: 'Businesses and teams' },
+]
+
+/** Group for each page in AUDIENCES. */
+export const AUDIENCE_GROUPS: Record<string, AudienceGroup> = {
+  'discord-communities': 'Communities',
+  'telegram-channels': 'Communities',
+  'bluesky-creators': 'Creators',
+  'mastodon-users': 'Communities',
+  'shopify-stores': 'Businesses and teams',
+  'indie-hackers': 'Businesses and teams',
+  'onlyfans-creators': 'Fan platforms',
+  'patreon-creators': 'Fan platforms',
+  'clippers': 'Streaming and video',
+  'vtubers': 'Streaming and video',
+  'fansly-creators': 'Fan platforms',
+  'fanvue-creators': 'Fan platforms',
+  'ko-fi-creators': 'Fan platforms',
+  'cosplayers': 'Creators',
+  'virtual-assistants': 'Businesses and teams',
+  'artists': 'Creators',
+  'authors': 'Writers',
+  'newsletter-writers': 'Writers',
+  'open-source-maintainers': 'Communities',
+  'educators': 'Communities',
+  'event-organizers': 'Communities',
+  'journalists': 'Writers',
+  'game-developers': 'Creators',
+  'youtubers': 'Streaming and video',
+}
+
+/** "For indie game developers" -> "Indie game developers". */
+export function audienceLabel(a: Audience): string {
+  const t = a.eyebrow.replace(/^For\s+/i, '')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
+export function audienceHub(): { group: AudienceGroup; pages: { href: string; label: string }[] }[] {
+  const all = [
+    ...HANDBUILT_AUDIENCES.map(h => ({ href: `/for/${h.slug}`, label: h.label, group: h.group })),
+    ...AUDIENCES.map(a => ({ href: `/for/${a.slug}`, label: audienceLabel(a), group: AUDIENCE_GROUPS[a.slug] ?? 'Creators' })),
+  ]
+  return AUDIENCE_GROUP_ORDER.map(group => ({
+    group,
+    pages: all.filter(p => p.group === group).map(({ href, label }) => ({ href, label })).sort((a, b) => a.label.localeCompare(b.label)),
+  })).filter(g => g.pages.length > 0)
 }

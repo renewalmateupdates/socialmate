@@ -19,7 +19,8 @@
       "podcasters": "🎙️ 播客主",
       "coaches": "🧑‍💼 教练",
       "content_creators": "✍️ 内容创作者",
-      "bloggers": "📝 博主"
+      "bloggers": "📝 博主",
+      "all": "👥 全部受众"
     },
     "resources_items": {
       "blog": "📰 博客",
@@ -28,7 +29,8 @@
       "faq": "❓ 常见问题",
       "changelog": "📋 更新日志",
       "about": "🏢 关于我们",
-      "press": "📣 媒体"
+      "press": "📣 媒体",
+      "tools": "🧰 免费工具"
     },
     "products": {
       "soma": "SOMA",

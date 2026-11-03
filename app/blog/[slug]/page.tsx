@@ -263,7 +263,10 @@ export async function generateMetadata(
       description: describePost(post),
       images:      ['/og-image.png'],
     },
-    alternates: { canonical: `https://socialmate.studio/blog/${slug}` },
+    alternates: {
+      canonical: `https://socialmate.studio/blog/${slug}`,
+      types: { 'application/rss+xml': 'https://socialmate.studio/blog/feed.xml' },
+    },
   }
 }
 
