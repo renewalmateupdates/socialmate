@@ -19,7 +19,8 @@
       "podcasters": "🎙️ Подкастеры",
       "coaches": "🧑‍💼 Коучи",
       "content_creators": "✍️ Контент-авторы",
-      "bloggers": "📝 Блогеры"
+      "bloggers": "📝 Блогеры",
+      "all": "👥 Все аудитории"
     },
     "resources_items": {
       "blog": "📰 Блог",
@@ -28,7 +29,8 @@
       "faq": "❓ FAQ",
       "changelog": "📋 Журнал изменений",
       "about": "🏢 О нас",
-      "press": "📣 Пресса"
+      "press": "📣 Пресса",
+      "tools": "🧰 Бесплатные инструменты"
     },
     "products": {
       "soma": "SOMA",

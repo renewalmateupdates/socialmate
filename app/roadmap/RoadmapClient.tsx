@@ -22,6 +22,8 @@ function formatMonth(ym: string): string {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
+  { date: '2026-11', title: 'Six free tools', desc: 'A character counter for every platform, a thread splitter, a UTM link builder, a LinkedIn text formatter, a Discord timestamp generator and a Bluesky custom domain helper, all at /tools, all free with no signup.', status: 'shipped', category: 'Tools' },
+  { date: '2026-11', title: 'Blog RSS feed', desc: 'Follow the blog in any feed reader at /blog/feed.xml.', status: 'shipped', category: 'Growth' },
   { date: '2026-11', title: 'Free LinkedIn text formatter', desc: 'Bold, italic and lists for LinkedIn posts at /tools/linkedin-formatter, with a 3,000-character counter and a preview of where "see more" cuts in. Runs in your browser, no signup.', status: 'shipped', category: 'Tools' },
   { date: '2026-11', title: 'Team members post to the owner\'s accounts', desc: 'An Editor schedules to the workspace owner\'s connected accounts from their own login, and the owner sees, moves, edits and deletes those posts from Queue, Calendar and Drafts. Owners can open a teammate\'s draft straight in Compose.', status: 'shipped', category: 'Teams' },
   { date: '2026-11', title: 'Pages for more creators', desc: 'Guides for clippers, VTubers, Fansly, Fanvue, OnlyFans, Patreon and Ko-fi creators, cosplayers, artists, authors, newsletter writers, open source maintainers, teachers, event organizers, journalists and virtual assistants, each saying plainly what SocialMate does and does not do.', status: 'shipped', category: 'Growth' },

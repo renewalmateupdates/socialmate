@@ -26,7 +26,8 @@
       "podcasters": "🎙️ ポッドキャスター",
       "coaches": "🧑‍💼 コーチ",
       "content_creators": "✍️ コンテンツクリエイター",
-      "bloggers": "📝 ブロガー"
+      "bloggers": "📝 ブロガー",
+      "all": "👥 すべての対象"
     },
     "resources_items": {
       "blog": "📰 ブログ",
@@ -35,7 +36,8 @@
       "faq": "❓ FAQ",
       "changelog": "📋 変更履歴",
       "about": "🏢 会社概要",
-      "press": "📣 プレス"
+      "press": "📣 プレス",
+      "tools": "🧰 無料ツール"
     },
     "products": {
       "soma": "SOMA",

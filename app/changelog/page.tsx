@@ -21,6 +21,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 4, 2026',
+    version: 'More Free Tools',
+    changes: [
+      { type: 'New',      text: 'Character counter at /tools/character-counter: paste a post and see at once whether it fits X, Bluesky, Mastodon, LinkedIn, TikTok, Discord, Telegram, Threads and Instagram, each counted the way that platform counts.' },
+      { type: 'New',      text: 'UTM link builder at /tools/utm-builder: tag a link for analytics, or make one tagged link per platform in a single step.' },
+      { type: 'New',      text: 'Bluesky custom domain helper at /tools/bluesky-custom-domain: get the exact DNS record to use your own domain as your Bluesky handle, then check that it is live before you press verify.' },
+      { type: 'New',      text: 'The blog has an RSS feed at /blog/feed.xml, so feed readers, and SocialMate\'s own RSS import, can follow it.' },
+      { type: 'New',      text: 'Every audience guide in one place at /for, plus new guides for indie game developers and YouTubers.' },
+      { type: 'Fixed',    text: 'Search engines were told to skip /affiliates, the public partner page, by an old rule meant for a private page with a similar name. There is now one list of private pages, shared with sign-in and the sitemap.' },
+      { type: 'Improved', text: 'Free tools and all audience guides are in the site menu.' },
+    ],
+  },
+  {
     date: 'November 3, 2026',
     version: 'LinkedIn Formatter and Teammates\' Drafts',
     changes: [

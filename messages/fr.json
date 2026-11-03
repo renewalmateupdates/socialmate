@@ -19,7 +19,8 @@
       "podcasters": "🎙️ Podcasteurs",
       "coaches": "🧑‍💼 Coachs",
       "content_creators": "✍️ Créateurs de contenu",
-      "bloggers": "📝 Blogueurs"
+      "bloggers": "📝 Blogueurs",
+      "all": "👥 Tous les profils"
     },
     "resources_items": {
       "blog": "📰 Blog",
@@ -28,7 +29,8 @@
       "faq": "❓ FAQ",
       "changelog": "📋 Journal des modifications",
       "about": "🏢 À propos",
-      "press": "📣 Presse"
+      "press": "📣 Presse",
+      "tools": "🧰 Outils gratuits"
     },
     "products": {
       "soma": "SOMA",
