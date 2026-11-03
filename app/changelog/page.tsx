@@ -21,6 +21,29 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 3, 2026',
+    version: 'LinkedIn Formatter and Teammates\' Drafts',
+    changes: [
+      { type: 'New',      text: 'A free LinkedIn text formatter at /tools/linkedin-formatter: bold, italic and bold italic, bullet, numbered, arrow and check lists, a 3,000-character counter, and a preview of roughly where LinkedIn adds "see more". No signup, and nothing you type leaves your browser.' },
+      { type: 'Improved', text: 'Workspace owners and admins open a teammate\'s draft or scheduled post straight in Compose from Drafts or the Queue, edit it and send it. No more copying it into your own drafts first.' },
+      { type: 'Fixed',    text: 'Saving changes to a post that was sent or scheduled in the meantime now says the change was not saved, instead of reporting success.' },
+      { type: 'Fixed',    text: 'RSS import only marks an item imported when its draft actually saved, and says how many failed, so a failed item can be imported again.' },
+      { type: 'Fixed',    text: 'Twitch clip lookups count against the plan you actually pay for. A paid plan that only reached your workspace used to be held to the free limit.' },
+      { type: 'Fixed',    text: 'Scheduling a clip from someone else\'s Twitch channel no longer starts the post with "my latest clip".' },
+      { type: 'Fixed',    text: 'Links in older blog posts show as links instead of raw [text](link) brackets.' },
+      { type: 'New',      text: 'New guides for clippers, VTubers, Fansly, Fanvue and Ko-fi creators, cosplayers, artists, authors, newsletter writers, open source maintainers, teachers, event organizers, journalists and virtual assistants, plus eight new blog posts.' },
+    ],
+  },
+  {
+    date: 'November 2, 2026',
+    version: 'Teams That Work',
+    changes: [
+      { type: 'Fixed',    text: 'A team member posting in the owner\'s workspace now posts to the owner\'s connected accounts. Compose used to list the member\'s own accounts, and the owner\'s workspace was missing from the member\'s switcher; it now appears under "Shared with you".' },
+      { type: 'Improved', text: 'On the free plan, an Editor\'s posts go straight to the queue. Approval before posting stays on Pro and Agency. Viewers can look but cannot create posts.' },
+      { type: 'Fixed',    text: 'The owner\'s Queue, Calendar and Drafts show posts their team wrote, and the owner or an admin can move, cancel, retry or delete them.' },
+    ],
+  },
+  {
     date: 'October 28, 2026',
     version: 'Campaigns and Go-Live Alerts',
     changes: [

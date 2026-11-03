@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Fragment } from 'react'
 import BlogInlineCTA from '@/components/BlogInlineCTA'
 import BlogToolCard from '@/components/BlogToolCard'
 import { relatedToolFor } from '@/lib/tools/related-tool'
@@ -288,7 +289,33 @@ const INTERNAL_LINKS: [RegExp, string][] = [
   [/\bsocialmate\.studio\b/i, '/'],
 ]
 
+// [label](/path) or [label](https://…). The renderer used to print these as
+// raw text: 34 static posts ended with a visible "[Start free](/signup)".
+const MD_LINK = /\[([^\]]+)\]\((\/[^)\s]*|https:\/\/[^)\s]+)\)/g
+
 function linkifyText(text: string): React.ReactNode {
+  if (!text.includes('](')) return autoLink(text)
+  const parts: React.ReactNode[] = []
+  let last = 0
+  let k = 0
+  for (const m of Array.from(text.matchAll(MD_LINK))) {
+    const at = m.index ?? 0
+    if (at > last) parts.push(<Fragment key={k++}>{autoLink(text.slice(last, at))}</Fragment>)
+    const external = m[2].startsWith('https://')
+    parts.push(
+      <a key={k++} href={m[2]} className="text-amber-400 hover:underline font-medium"
+        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+        {m[1]}
+      </a>
+    )
+    last = at + m[0].length
+  }
+  if (last === 0) return autoLink(text)
+  if (last < text.length) parts.push(<Fragment key={k++}>{autoLink(text.slice(last))}</Fragment>)
+  return <>{parts}</>
+}
+
+function autoLink(text: string): React.ReactNode {
   let remaining = text
   const parts: React.ReactNode[] = []
   let linkKey = 0

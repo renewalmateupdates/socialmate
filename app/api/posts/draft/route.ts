@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { postLimitFor, postsUsedThisMonth, postLimitReachedBody, countsAgainstQuota } from '@/lib/post-limits'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import { recordFunnel } from '@/lib/usage'
-import { canCreatePosts, realWorkspaceId, resolveWorkspaceAccess } from '@/lib/team-workspaces'
+import { canCreatePosts, canManagePost, realWorkspaceId, resolveWorkspaceAccess } from '@/lib/team-workspaces'
 
 
 export async function POST(request: NextRequest) {
@@ -57,15 +57,36 @@ export async function POST(request: NextRequest) {
         if (scheduledAt) updateData.scheduled_at = scheduledAt
         if (media.length > 0) updateData.media_urls = media
       }
-      const { error } = await supabase
+      // The author edits through RLS as before. The workspace owner or an admin
+      // may also save a teammate's draft (Compose opens those now); RLS only
+      // lets authors write their own rows, so that path checks canManagePost
+      // and writes with the service role.
+      const admin = getSupabaseAdmin()
+      const { data: existing, error: lookupErr } = await admin
+        .from('posts')
+        .select('id, user_id, workspace_id')
+        .eq('id', postId)
+        .maybeSingle()
+      if (lookupErr) console.warn('[draft] post lookup failed:', lookupErr.message)
+      if (!existing) return NextResponse.json({ error: 'That draft no longer exists.' }, { status: 404 })
+      const isAuthor = existing.user_id === user.id
+      if (!isAuthor && !(await canManagePost(admin, user, existing))) {
+        return NextResponse.json({ error: 'You can’t edit this draft.' }, { status: 403 })
+      }
+      const { data: updated, error } = await (isAuthor ? supabase : admin)
         .from('posts')
         .update(updateData)
         .eq('id', postId)
-        .eq('user_id', user.id)
         .in('status', ['draft', 'pending_approval'])
+        .select('id')
       if (error) {
         console.error('Draft update error:', error)
         return NextResponse.json({ error: 'Failed to update draft', detail: error.message }, { status: 500 })
+      }
+      // Zero rows means it was sent or scheduled in the meantime. Saying "saved"
+      // there would lose the edit without a word.
+      if (!updated?.length) {
+        return NextResponse.json({ error: 'This post is no longer a draft, so the change was not saved.' }, { status: 409 })
       }
 
       // Notify workspace owner when submitting an existing post for approval (non-fatal)

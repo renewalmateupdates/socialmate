@@ -452,7 +452,7 @@ export default function ClipsPage() {
 
           {publicClips.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {publicClips.map(clip => <ClipCard key={clip.id} clip={clip} />)}
+              {publicClips.map(clip => <ClipCard key={clip.id} clip={clip} own={false} />)}
             </div>
           )}
         </div>
@@ -531,9 +531,12 @@ export default function ClipsPage() {
   )
 }
 
-function ClipCard({ clip }: { clip: Clip }) {
+function ClipCard({ clip, own = true }: { clip: Clip; own?: boolean }) {
   const router = useRouter()
-  const scheduleContent = `Check out my latest clip: ${clip.title} ${clip.url}`
+  // A clip from someone else's channel is not "my latest clip".
+  const scheduleContent = own
+    ? `Check out my latest clip: ${clip.title} ${clip.url}`
+    : `${clip.title}\n\n${clip.url}`
 
   return (
     <div

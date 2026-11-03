@@ -16,6 +16,7 @@ import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon
 import { AlertTriangle, BadgePercent, Ban, BarChart3, Bookmark, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ClipboardList, Clock, Eye, Fish, FlaskConical, Film, Flame, Globe, Hash, Heart, HeartHandshake, HelpCircle, Image as ImageIcon, Lightbulb, ListOrdered, Lock, Mic, MessageCircle, MessagesSquare, Newspaper, Paperclip, PartyPopper, PenLine, Recycle, RefreshCw, Repeat, Repeat2, Reply, Rocket, Scissors, Sparkles, Star, TrendingUp, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { HASHTAGS_COST, REPURPOSE_COST } from '@/lib/ai-tool-costs'
+import { loadWorkspacePosts } from '@/lib/workspace-posts'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -518,13 +519,25 @@ function ComposeInner() {
 
       // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
       if (draftId) {
-        const { data: draft, error: draftErr } = await supabase
+        const { data: ownDraft, error: draftErr } = await supabase
           .from('posts')
           .select('*')
           .eq('id', draftId)
           .eq('user_id', data.user.id)
           .maybeSingle()
         if (draftErr) console.warn('[compose] draft lookup failed', draftErr)
+        // Not the viewer's own: a teammate's draft in this workspace, which the
+        // owner or an admin may send. RLS hides it from the query above, so it
+        // comes through the workspace posts API, which checks who may manage it.
+        let draft = ownDraft
+        if (!draft) {
+          try {
+            const [teamDraft] = await loadWorkspacePosts('one', activeWorkspace?.id, draftId)
+            if (teamDraft?.can_manage) draft = teamDraft as typeof ownDraft
+          } catch (err) {
+            console.warn('[compose] team draft lookup failed', err)
+          }
+        }
         if (draft) {
           setContent(draft.content || '')
           // A draft saved before anything was connected (onboarding's starter

@@ -4254,4 +4254,410 @@ SocialMate supports Bluesky, Mastodon, Discord, Telegram, and LinkedIn schedulin
 [Start building your decentralized social media presence today](/signup).
     `,
   },
+
+  'promote-onlyfans-fansly-safely': {
+    title:    'How to Promote an OnlyFans or Fansly Without Putting Your Accounts at Risk',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '6 min read',
+    excerpt:  'For most creators, new subscribers come from somewhere else. Here is how to promote on X, Bluesky, Telegram and Reddit without losing the accounts that bring them in.',
+    content: `
+## Your page does not find fans for you
+
+OnlyFans and Fansly do very little to put you in front of new people. For most creators, new subscribers arrive from a post somewhere else: X, Reddit, Bluesky, a Telegram channel, a TikTok that got shared. That makes the accounts you promote on the most valuable thing you have, and the easiest thing to lose.
+
+Chefs, personal trainers, musicians and cosplayers sell subscriptions on these sites too. The advice below works for all of them. It matters most for adult creators, because the rules are stricter for them.
+
+## Know each platform's rules before you post
+
+Rules change, so read the current version, but this is the shape of it in late 2026:
+
+- X allows consensual adult content if it is marked as sensitive media, but not in your profile photo or header.
+- Bluesky lets you put adult content labels on a post, and each person decides whether they see labeled posts.
+- Mastodon rules depend on the server you join. Many ask for a content warning on adult posts, and some do not allow them at all.
+- Reddit allows adult content in communities marked NSFW, and every community sets its own rules on self-promotion. Read them before you post.
+- Instagram, TikTok and Facebook remove sexual content and often limit links to adult sites. Many creators keep those accounts strictly safe for work, or skip them.
+- Telegram is a common direct line to fans. A channel you own cannot be buried by an algorithm.
+
+## The safe-for-work teaser does the heavy lifting
+
+The posts that bring people in are rarely the explicit ones. They are the ones that make someone curious about you:
+
+- Behind the scenes: setting up a shoot, a costume in progress, your workspace.
+- Your schedule: what is coming this week and when.
+- Personality: opinions, polls, questions, the things you would talk about anyway.
+- Your niche: the workout, the recipe, the cosplay, the music.
+- Announcements: a new set or a trial offer, described in words, with the link in your bio or the post.
+
+A feed of teasers like this is also safe on platforms that ban adult content, so the same post can go to more places.
+
+## Build a channel you own
+
+Followers on X or Bluesky are rented. A Telegram channel or a Discord server is a list of fans you can reach whenever you post, whatever the algorithm is doing that week. Put the link everywhere and give people a reason to join, like early announcements or a weekly preview.
+
+## Post every day without living on your phone
+
+Consistency is what grows an account, and it is also what burns creators out. Write a week of posts in one sitting and schedule them for the hours your fans are awake, including fans in other time zones.
+
+SocialMate schedules those posts to X, Telegram, Bluesky, Mastodon and Discord. Campaign mode rotates up to 20 messages, like your page link, a free trial and a new bundle, on the days and times you pick until an end date. SocialMate does not add adult content labels, so use it for the safe-for-work side of your promotion and keep every scheduled post within each platform's rules.
+
+## Never give your OnlyFans login to an app
+
+Some tools ask for your OnlyFans or Fansly password so they can automate messages or posts. Logging in as you through a third-party app can break the platform's terms and get the account you earn from suspended. Keep your creator login to yourself, and only connect tools to your promotion accounts.
+
+If you work with a manager or an assistant, give them their own login instead of your passwords. In SocialMate, invite them as an Editor and they schedule to your accounts from their own account.
+
+[Schedule your promo posts free with SocialMate](/for/onlyfans-creators)
+    `,
+  },
+
+  'twitch-clip-channel-workflow': {
+    title:    'How to Run a Twitch Clip Channel Without It Eating Your Day',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '5 min read',
+    excerpt:  'Find the moment, cut it for vertical, post the video where video lives and the link where links work. A weekly workflow for clippers.',
+    content: `
+## Start with permission
+
+Clip channels live on other people's streams. Many streamers love clippers, because clips are free promotion, and some even pay for them. Others do not want their streams reposted. Check the streamer's panels and Discord for their clip rules, and ask if you are not sure. A channel built on a streamer's blessing lasts; one built on copyright strikes does not.
+
+## Find the moments fast
+
+Twitch keeps every clip viewers make. The ones with the most views are usually the moments chat already decided were good, so start there.
+
+In SocialMate, open Clips and search any public Twitch channel to see its 20 most-viewed clips with thumbnails. The free plan includes 100 channel lookups a month and Pro 1,000. Pick one and Compose opens with the title and link filled in.
+
+## Cut it for vertical
+
+- Crop to 9:16 and keep the streamer's face and the action in frame.
+- Put captions on screen. A lot of people watch with the sound off.
+- Start on the moment, not the build-up. The first second decides whether anyone stays.
+- Keep it short. If it needs a long setup, it is probably not the clip.
+
+SocialMate's Creator Studio trims a video and adds a caption on top in the browser. Most clippers do the heavy editing in a dedicated app and use the scheduler for the posting.
+
+## Post the video where video lives
+
+TikTok, YouTube Shorts and Instagram Reels want the video file itself. SocialMate posts videos to TikTok through TikTok Studio, publicly or on a schedule, 20 a month on the free plan, 60 on Pro and 200 on Agency. Shorts and Reels are not available in SocialMate, so post those in their own apps.
+
+## Post the link where links work
+
+On X, Bluesky, Mastodon and in Discord, a link to the Twitch clip works well and sends views back to the streamer, which streamers notice. Discord shows a preview of Twitch clip links in the channel. Schedule the link post for the same day as the video.
+
+## Run more than one channel
+
+Many clippers run one channel per streamer or per game. The free plan connects 1 account per platform, Pro up to 5 and Agency up to 10, and one calendar shows them all.
+
+## A weekly rhythm
+
+- One session to find and download the clips worth cutting.
+- One session to edit them.
+- One session to schedule the whole week.
+
+Three sittings a week beats checking Twitch every hour.
+
+[See how SocialMate works for clippers](/for/clippers)
+    `,
+  },
+
+  'va-post-to-client-linkedin-without-password': {
+    title:    'How a Virtual Assistant Can Post to a Client\'s LinkedIn Without Their Password',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '4 min read',
+    excerpt:  'Sharing a LinkedIn password breaks LinkedIn\'s rules and gets accounts locked. Here is the setup where the client keeps the keys and the assistant still does the posting.',
+    content: `
+## Why the shared password goes wrong
+
+The usual way a VA posts for a client is the client's LinkedIn password in a shared note. It causes trouble every time:
+
+- LinkedIn's User Agreement asks members to keep their password confidential.
+- A login from a new device or another country can trigger a security check and lock the account, often on the day a post was due.
+- The two-step verification code goes to the client's phone, so every login becomes a text message to someone busy.
+- When the work ends, the client has to change the password and hope nothing else used it.
+
+## The setup that works
+
+The client connects LinkedIn to their own SocialMate account once. The assistant posts from their own login. Nobody shares a password.
+
+1. The client creates a free SocialMate account and connects LinkedIn, plus any of Bluesky, X, Discord, Telegram, Mastodon or TikTok.
+
+2. The client opens Team and invites the assistant as an Editor.
+
+3. The assistant accepts and picks the client's workspace under "Shared with you" in the sidebar.
+
+4. The assistant writes the post, chooses the client's LinkedIn and a time, and schedules it.
+
+The free plan has 2 seats, so one business owner and one assistant is free.
+
+## What the client sees
+
+Everything the assistant schedules shows up in the client's own Queue, Calendar and Drafts. The client can move a post to another day, edit it or delete it, without asking.
+
+On Pro and Agency, an Editor's posts wait for the owner's approval before they go out. On the free plan they go straight to the queue, and the owner can still change them before they publish.
+
+## Working for several clients
+
+Each client who invites you appears under "Shared with you", so one login covers all of them. If you would rather hold the accounts yourself, as an agency does, Agency includes 5 client workspaces and 15 seats.
+
+## Things to know
+
+- SocialMate posts to LinkedIn personal profiles. Company pages are not available yet.
+- LinkedIn's connection lasts 60 days. The client reconnects in a few clicks, and SocialMate warns them a week before it runs out.
+- A Viewer can see the calendar but cannot create posts, so give an assistant the Editor role.
+
+[See how SocialMate works for virtual assistants](/for/virtual-assistants)
+    `,
+  },
+
+  'twitch-go-live-alert-discord-bluesky-telegram': {
+    title:    'How to Post a Go-Live Alert to Discord, Bluesky and Telegram When Your Twitch Stream Starts',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '4 min read',
+    excerpt:  'Stop typing "live now" into four apps while your stream is starting. Here is how to make the alert post itself, once per stream.',
+    content: `
+## The alert you forget to post
+
+The moment you go live is the worst moment to be writing social posts. You are checking audio, greeting chat and fixing a scene. So the alert goes out late, or to one platform, or not at all, and the people who would have come never knew.
+
+## How automatic go-live alerts work
+
+Twitch can tell another service the moment a stream starts. SocialMate listens for that, and when your stream begins it posts your alert to the platforms you picked: Discord, Bluesky, Telegram, Mastodon, LinkedIn and X.
+
+- It posts once per stream, and waits at least 30 minutes between alerts, so a dropped connection does not spam your followers.
+- You write the message once. Fields fill in on their own: {name} for your channel, {title} for the stream title, {game} for the category and {url} for your link.
+- The free plan includes 1 alert, Pro up to 5 and Agency up to 10. Posting to X needs Pro.
+
+## Write an alert people click
+
+A good alert says what is happening right now and why it is worth showing up. The stream title usually does the second part, so put it in:
+
+- "{name} is live: {title} {url}"
+- "Going live with {game}. Tonight: {title}. Come hang out: {url}"
+- "Live now, and I am trying something new: {title} {url}"
+
+Keep the link on its own or at the end. On Discord and Bluesky it turns into a preview.
+
+## Set it up
+
+1. Create a free SocialMate account and connect your Discord server, Bluesky, Telegram or any of the others.
+
+2. Open Live alerts and enter your Twitch channel name.
+
+3. Write the message, pick the platforms and save.
+
+4. Next time you go live, check that the alert landed.
+
+## What it does not do
+
+- It works with Twitch only. YouTube and Kick streams are not detected.
+- It does not post when the stream ends.
+- For scheduled announcements, like your weekly schedule, use a normal scheduled post. The free Discord timestamp generator makes start times that show in each viewer's own time zone.
+
+[Set up go-live alerts free](/for/vtubers)
+    `,
+  },
+
+  'announce-github-releases-mastodon-bluesky': {
+    title:    'How to Announce GitHub Releases on Mastodon and Bluesky',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '4 min read',
+    excerpt:  'Every GitHub repository has a releases feed. Turn it into drafts and announce each release on Mastodon, Bluesky and Discord in a few minutes.',
+    content: `
+## Your releases already have a feed
+
+Every public GitHub repository publishes an Atom feed of its releases at github.com/OWNER/REPO/releases.atom. Swap in your account and repository name and you have a list of every release, with its notes and link, that any feed reader can use.
+
+## Turn releases into drafts
+
+In SocialMate, open RSS import, paste the releases feed and fetch it. Pick the new release and import it. It becomes a draft with the release title, the start of its notes and the link.
+
+Then rewrite it for people, not for the changelog.
+
+## Write the announcement
+
+Release notes are written for people already using the project. The announcement is for everyone else, so lead with what changed for them:
+
+- What is new, in one sentence a user would care about.
+- Anything they must do to upgrade, like a breaking change or a new minimum version.
+- The link to the release notes.
+
+On Mastodon, add a couple of relevant hashtags, like the language and the project name. Many Mastodon posts can only be found through hashtags, so they are how people discover you.
+
+## Post to Mastodon and Bluesky together
+
+Much of the open source crowd reads Mastodon and Bluesky now. SocialMate posts to any Mastodon instance and to Bluesky at once, and to your project's Discord channel through its bot. LinkedIn, Telegram and X are there too; X needs the Pro plan.
+
+## Threads for big releases
+
+A major release deserves more than one post. Write the highlights as a thread, and SocialMate posts each part as a reply to the one before on Mastodon, Bluesky and X when you post it right away. The free thread splitter breaks long notes into parts that fit each platform's limit.
+
+## Community calls
+
+If your project runs community calls, schedule the reminder a few days ahead and again an hour before. The free Discord timestamp generator makes a time that shows in every contributor's own time zone.
+
+[See how SocialMate works for open source maintainers](/for/open-source-maintainers)
+    `,
+  },
+
+  'book-launch-social-media-plan': {
+    title:    'A Book Launch Social Media Plan You Can Set Up in One Afternoon',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '5 min read',
+    excerpt:  'Twenty messages, three phases and one afternoon. Set up your launch posts once and let them run while you write the next book.',
+    content: `
+## Gather these first
+
+Before you write a single post, collect what the posts will point to and quote from:
+
+- Your buy links, and your preorder link if preorders are open.
+- Your newsletter signup link.
+- Three to five short review quotes or blurbs.
+- The cover image.
+- One sentence about the book that makes someone want to read it.
+
+## Write twenty messages in three phases
+
+A launch is not one post. It is the same few reasons to buy, said many ways over several weeks.
+
+**Before launch**
+
+- The cover reveal and the one-sentence pitch.
+- A short excerpt.
+- Why you wrote it.
+- The preorder link, with any preorder bonus.
+
+**Launch week**
+
+- It is out, with the buy link.
+- A review quote with the link.
+- A thank-you to early readers.
+
+**After launch**
+
+- More review quotes, one per post.
+- A question for readers about the book.
+- A reminder to leave a review.
+- Your newsletter link, for the next book.
+
+## Let a campaign post them
+
+SocialMate's campaign mode takes up to 20 messages and posts them in turn on the days and times you pick until an end date, for up to 26 weeks. It can reword each message with AI so the repeats do not read the same, and it keeps a reworded version only if every link and price in it is unchanged.
+
+Write the messages once, set the days and the end date, and the launch keeps running while you get back to writing.
+
+## Go where your readers are
+
+- Bluesky has an active book community, and Mastodon has readers on most servers.
+- LinkedIn works well for nonfiction and anything tied to your profession.
+- A Discord server or Telegram channel keeps your most loyal readers close.
+- TikTok's book community wants video. SocialMate posts videos to TikTok through TikTok Studio.
+
+SocialMate does not post to Goodreads, Amazon or Instagram. Posting to X needs the Pro plan.
+
+## Do not only sell
+
+If every post is a buy link, people stop reading them. Mix in the writing process, the research, the cut scenes and the questions readers ask you. The selling posts work better when they are a third of the feed, not all of it.
+
+[See how SocialMate works for authors](/for/authors)
+    `,
+  },
+
+  'how-to-bold-text-on-linkedin': {
+    title:    'How to Bold Text on LinkedIn (and When You Should Not)',
+    category: 'Tips',
+    date:     'Nov 3, 2026',
+    readTime: '4 min read',
+    excerpt:  'LinkedIn posts have no bold button. Here is how bold text in posts actually works, how to add it free, and why to use it sparingly.',
+    content: `
+## LinkedIn posts have no formatting
+
+LinkedIn articles and newsletters have a bold button. Regular posts do not: they are plain text. So how do people post bold and italic words?
+
+## How "bold" works in a LinkedIn post
+
+Unicode, the standard that defines every character your phone can show, includes sets of letters meant for math formulas: bold letters, italic letters, script letters and more. They look like styled text, but to a computer each one is a different character, the way "é" is different from "e".
+
+Paste those characters into a post and they look bold anywhere, because the style is in the characters themselves.
+
+## Add it in seconds
+
+The free LinkedIn text formatter at /tools/linkedin-formatter does the swap for you:
+
+1. Write or paste your post.
+
+2. Select the words you want to stand out and pick bold, italic or bold italic.
+
+3. Turn notes into a list with bullets, numbers, arrows or checks.
+
+4. Check the preview to see where LinkedIn will cut the post with "see more", then copy it.
+
+It runs in your browser and nothing you type is sent anywhere.
+
+## When not to use it
+
+- Screen readers may read styled letters one at a time, or skip them. A whole bold sentence can become noise for someone who cannot see it.
+- LinkedIn search may not match styled words, so a bold keyword can be harder to find.
+- Names, links and hashtags should stay plain so they keep working.
+
+Use it for a word or a short line that has to stand out. If the whole post is bold, nothing is.
+
+## Formatting that always works
+
+- Short paragraphs with a blank line between them.
+- Lists made with symbols at the start of each line.
+- A first two or three lines strong enough to earn the "see more" click.
+
+LinkedIn's limit is 3,000 characters. Styled letters can count as two characters each, so leave yourself some room.
+
+[Try the free LinkedIn text formatter](/tools/linkedin-formatter)
+    `,
+  },
+
+  'share-newsletter-issues-bluesky-linkedin-mastodon': {
+    title:    'How to Share Every Newsletter Issue on Bluesky, LinkedIn and Mastodon',
+    category: 'Guides',
+    date:     'Nov 3, 2026',
+    readTime: '4 min read',
+    excerpt:  'Your newsletter already has an RSS feed. Turn each issue into three social posts without copying and pasting between five apps.',
+    content: `
+## Find your feed
+
+Almost every newsletter platform publishes an RSS feed of your issues:
+
+- Substack: your publication address followed by /feed, like yourname.substack.com/feed.
+- Ghost: your site address followed by /rss/.
+- Beehiiv, Buttondown and most others: look for RSS in your publication settings.
+
+## Import the issue as a draft
+
+In SocialMate, open RSS import, paste the feed address and fetch it. Pick the latest issue and import it. It becomes a draft with the title, the start of the issue and the link.
+
+Then rewrite it. The opening of an issue is written for subscribers; the post is for people who have never heard of you.
+
+## Three posts per issue
+
+- The launch post, the day it goes out: the one idea from the issue that someone would forward, and the link.
+- A thread of the best lines, a day later. SocialMate posts each part as a reply to the one before on Bluesky, Mastodon and X when you post it right away.
+- A reminder two or three days later, with a different angle and the same link.
+
+## Write for each platform
+
+- LinkedIn: the first two or three lines show before "see more", so put the point there. Links are fine.
+- Bluesky: 300 characters, and the link turns into a preview card.
+- Mastodon: add a couple of hashtags, since many posts there can only be found through hashtags.
+
+## Keep the subscribe ask going
+
+Between issues, campaign mode rotates a few "why subscribe" posts on the days you pick until an end date, so the ask never goes quiet.
+
+SocialMate does not send your newsletter or manage your subscribers. It handles the social side, free for up to 250 posts a month to Bluesky, LinkedIn, Mastodon, Discord and Telegram. X needs the Pro plan.
+
+[See how SocialMate works for newsletter writers](/for/newsletter-writers)
+    `,
+  },
 }

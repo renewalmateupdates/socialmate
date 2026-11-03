@@ -510,15 +510,15 @@ function DraftsInner() {
                                 Team
                               </span>
                             )}
-                            {resolvedStatus === 'draft' && post.mine !== false && (
+                            {resolvedStatus === 'draft' && post.can_manage !== false && (
                               <Link href={`/compose?draft=${post.id}`}
                                 className="text-xs font-bold px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all whitespace-nowrap">
                                 Post or schedule →
                               </Link>
                             )}
-                            {/* Compose opens only your own drafts, so a team member's
-                                draft is copied into yours first, then sent from there. */}
-                            {resolvedStatus === 'draft' && post.mine === false && (
+                            {/* The owner or an admin opens a teammate's draft in Compose
+                                directly. Anyone else can copy it into their own drafts. */}
+                            {resolvedStatus === 'draft' && post.can_manage === false && (
                               <button
                                 onClick={() => copyToMine(post)}
                                 disabled={copying === post.id}
@@ -646,7 +646,7 @@ function DraftsInner() {
                         ) : (
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             Drafts don&apos;t go out on their own.{' '}
-                            {post.mine === false ? (
+                            {post.can_manage === false ? (
                               <>To post or schedule this one, save your changes, then use Copy to my drafts.</>
                             ) : (
                               <>

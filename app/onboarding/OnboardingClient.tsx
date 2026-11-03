@@ -152,6 +152,9 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
   // Set once the person has used the one-sentence helper, so "Another idea"
   // re-frames their own sentence instead of swapping it for a generic starter.
   const [builtFrom, setBuiltFrom] = useState<{ path: StarterPath; text: string } | null>(null)
+  // The last draft the app wrote into the box, so the save can tell whether
+  // the person edited it (starter_saved). Never sent anywhere itself.
+  const lastGenerated = useRef('')
   const [scheduleDate, setScheduleDate] = useState(defaultSchedule().date)
   const [scheduleTime, setScheduleTime] = useState(defaultSchedule().time)
   // What actually happened when we tried to save. Step 5 reads this instead of
@@ -186,7 +189,9 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
   // step change only, so clearing the box by hand is not undone mid-edit.
   useEffect(() => {
     if (step === 4 && !starterPost.trim()) {
-      setStarterPost(starterDraft(onboardingGoal, draftIndex))
+      const draft = starterDraft(onboardingGoal, draftIndex)
+      lastGenerated.current = draft
+      setStarterPost(draft)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step])
@@ -445,6 +450,12 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
         console.error('[onboarding] starter post insert failed:', postErr.message)
         setSaveResult({ kind: 'error', detail: postErr.message })
       } else {
+        track('starter_saved', {
+          built: Boolean(builtFrom),
+          edited: content !== lastGenerated.current.trim(),
+          kind: connected ? 'scheduled' : 'draft',
+          where: 'onboarding',
+        })
         setSaveResult({
           kind: connected ? 'scheduled' : 'draft',
           detail: connected && valid
@@ -851,6 +862,7 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
                 tone="onboarding"
                 buttonLabel="Write it"
                 onBuild={({ draft, path, text }) => {
+                  lastGenerated.current = draft
                   setStarterPost(draft)
                   setBuiltFrom({ path, text })
                   setDraftIndex(0)
@@ -918,12 +930,14 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
                     if (builtFrom) {
                       const next = (draftIndex + 1) % starterVariantCount()
                       setDraftIndex(next)
-                      setStarterPost(buildDraft(builtFrom.path, builtFrom.text, next))
+                      lastGenerated.current = buildDraft(builtFrom.path, builtFrom.text, next)
+                      setStarterPost(lastGenerated.current)
                       return
                     }
                     const next = (draftIndex + 1) % starterDraftCount(onboardingGoal)
                     setDraftIndex(next)
-                    setStarterPost(starterDraft(onboardingGoal, next))
+                    lastGenerated.current = starterDraft(onboardingGoal, next)
+                    setStarterPost(lastGenerated.current)
                   }}
                   className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   Another idea

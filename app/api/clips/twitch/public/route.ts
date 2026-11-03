@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { normalizePlan } from '@/lib/plan'
+import { resolveWorkspacePlan } from '@/lib/plan'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -56,12 +56,9 @@ export async function GET(request: NextRequest) {
   if (!channelName) return NextResponse.json({ error: 'channel param required' }, { status: 400 })
 
   // ── Quota check ────────────────────────────────────────────────────────────
-  const { data: settings } = await supabase
-    .from('user_settings')
-    .select('plan')
-    .eq('user_id', user.id)
-    .single()
-  const plan = normalizePlan(settings?.plan)
+  // Through the resolver, never a bare read of user_settings.plan (PR #579):
+  // a paying customer whose plan only reached workspaces was held to free.
+  const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id)
   const limit = QUOTA[plan]
 
   if (limit !== null) {

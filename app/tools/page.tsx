@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Clock, MessagesSquare } from 'lucide-react'
+import { Bold, Clock, MessagesSquare } from 'lucide-react'
 import PublicLayout from '@/components/PublicLayout'
 import { Section, Eyebrow, Display, Body } from '@/components/instrument/primitives'
 
@@ -8,10 +8,10 @@ const URL = 'https://socialmate.studio/tools'
 
 export const metadata: Metadata = {
   title: 'Free Social Media Tools',
-  description: 'Free tools for people who post: a thread splitter for X, Bluesky and Mastodon, and a Discord timestamp generator. No signup.',
+  description: 'Free tools for people who post: a thread splitter for X, Bluesky and Mastodon, a Discord timestamp generator and a LinkedIn text formatter. No signup.',
   openGraph: {
     title: 'Free Social Media Tools',
-    description: 'A thread splitter and a Discord timestamp generator. Free, no signup.',
+    description: 'A thread splitter, a Discord timestamp generator and a LinkedIn text formatter. Free, no signup.',
     url: URL,
   },
   alternates: { canonical: URL },
@@ -30,6 +30,12 @@ const TOOLS = [
     name: 'Discord timestamp generator',
     blurb: 'Make codes Discord shows in every reader’s own time zone, with a preview of each format.',
   },
+  {
+    href: '/tools/linkedin-formatter',
+    icon: Bold,
+    name: 'LinkedIn text formatter',
+    blurb: 'Bold, italic and clean lists for LinkedIn posts, with a preview of where “see more” cuts in.',
+  },
 ]
 
 export default function ToolsPage() {
@@ -44,7 +50,7 @@ export default function ToolsPage() {
             sent anywhere.
           </Body>
         </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {TOOLS.map(({ href, icon: Icon, name, blurb }) => (
             <Link
               key={href}
