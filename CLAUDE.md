@@ -44,6 +44,23 @@ A free scripture app Joshua started Nov 1–2, 2026: the Bible, Catholic Bible, 
 
 ---
 
+## HereNow (separate project)
+
+The IRL presence app ("check in, see who's here, We Met unlocks DMs"), built with
+Jacob. Code in `gilgameshenterprisellc-pixel/herenow`, which has its own CLAUDE.md;
+read that, not this file, for HereNow work. Expo SDK 54, Supabase + PostGIS, iOS
+builds through Codemagic, live on the App Store since Oct 16, 2026.
+
+- **Nov 12, 2026: nine-venue pilot sponsored by Monster.** The sponsor features
+  (#302–#309) are on main but not in the App Store app; 1.0.3 has to be in review
+  by about Nov 7.
+- **Pushing needs `gilgameshenterprisellc-pixel` access.** The Claude GitHub App
+  and the `renewalmateupdates` account reach the public repo read-only. Push and
+  PRs go through the `gilgameshenterprisellc-pixel` account.
+- Never put SocialMate code or claims in it, or the reverse.
+
+---
+
 ## What SocialMate Is
 
 A multi-platform social media scheduler and AI-powered Creator OS.
@@ -840,7 +857,7 @@ The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look o
 - **Premium landing overhaul (PR #514, Jul 17)** — Real brand icons (mono `PlatformIcon` marks + Lucide), an animated coded product mockup (`HeroLoop` — the "gif" on the hero), and motion. Emoji removed from the hero.
 - **Ambient background experiment (PRs #515–#516, Jul 17)** — Added then reworked a pulsing "aurora" background. Short-lived; replaced two days later by the ember field (see #517/#520).
 - **Warm instrument design system (PR #517, Jul 18)** — The core. New token layer in `app/globals.css` `@theme`: warm base `--color-void #0D0B0A`, `--color-panel`, `--color-raised`, `--color-edge(-lit)`, an AA-measured ink ramp (`ink-faint/muted/body/high`), and the three brand voices `amber` / `violet` / `jade`. Reusable primitives in `components/instrument/primitives.tsx` (`Section`, `Eyebrow`, `Display`, `Body`, `Mono`, `Button`, `Card`, `Readout`) so no page writes arbitrary values. Fonts: Clash Display (headlines) + Switzer (body). The #515 aurora blobs were deleted here (four `blur(80px)` gradients at 54vw — the loudest "AI-generated premium dark" tell).
-- **Auth carry-through + dead-code delete (PRs #518–#519, Jul 18)** — Login/signup/forgot/reset moved onto instrument; fixed a silent `bg-surface` token collision. Dead `src/app/signup/page.tsx` deleted (PR #518) — confirms the old `src/` tree is dead; `app/` is canonical.
+- **Auth carry-through + dead-code delete (PRs #518–#519, Jul 18)** — Login/signup/forgot/reset moved onto instrument; fixed a silent `bg-surface` token collision. Dead `src/app/signup/page.tsx` deleted (PR #518); `app/` is canonical. (`src/` was not entirely dead: see the next note.)
 - **Invisible-text fix + GE gold + Enki wind-down (PR #520, Jul 18)** — Three things: (1) **Systemic invisible-text bug** — `body { color: var(--text) }` resolves once in light scope, and public pages force dark via a `.dark` class on a wrapper *div* not `<html>`, so any uncolored element (e.g. a `text-base font-extrabold` heading) inherited near-black on near-black (~1:1 contrast). Fixed by re-declaring `color: var(--text)` inside the `.dark` rule — one line at the source. (2) Gold set to GE's exact values `--color-amber #D4A017` / `--color-amber-bright #EAC020` with a gold-gradient CTA. **EmberField** ported from the GE site (28 seeded-PRNG dots, 1.5–4px, 10–22% opacity, drifting up; renders nothing under reduced motion). `Section tone="base"` is transparent so embers show through; `tone="raised"` stays opaque. (3) **Enki wind-down** — pulled from the Products dropdown, footer, and sitemap; `/enki` stays live as its waitlist page (PR #503), reachable by direct link, nothing deleted. HERMES removed from public mobile nav (admin-only). Nav emoji stripped.
 - **/pricing onto instrument (PR #521, Jul 18)**.
 - **/features + 88 /vs + 15 /for onto instrument (PR #522, Jul 18)** — 8,683 palette utilities migrated to tokens via committed `scripts/migrate-palette.py` (13 unit tests; the mapping is shade-aware because `dark:text-gray-100` is a near-white headline, not muted — the first run silently greyed out every `/vs` `<h1>`). 37 emoji → Lucide. Plus a **content-accuracy sweep** the migration surfaced: `/vs` pages overstated the free tier four ways — corrected to **100 posts/mo free** (not unlimited), **50 AI credits/mo grant** (75 is the bank cap, not the grant), **7 live platforms** (not 16), and **Pro = 1,000 posts/mo** (not unlimited). ~98 corrections across ~70 files, all verified against `app/pricing/page.tsx`. Competitor pricing claims deliberately left intact.
@@ -850,7 +867,7 @@ The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look o
   - Color is a language: **amber** = queued/scheduled/primary brand, **violet** = AI/SOMA/credits, **jade** = live/published/included/free. No fourth color; don't reach for jade because a section "needed some green."
   - `.dark` lives on a wrapper div, not `<html>` — that's why `globals.css` re-declares `color: var(--text)` inside the `.dark` rule. Don't remove it.
   - `Section tone="base"` = transparent (embers show), `tone="raised"` = opaque. Public pages now favor `base` for the ember background.
-  - `src/` is dead — edit under `app/`.
+  - `src/` is gone (Nov 4, 2026). It was not dead: 67 files import `@/lib/supabase`, and with no `lib/supabase.ts` at the root the tsconfig alias fell through to `src/lib/supabase.ts`. Deleting `src/` on the strength of the old "dead" note would have broken the browser Supabase client app-wide. The file now lives at `lib/supabase.ts` and `@/*` maps only to `./*`. Edit under `app/` and `lib/`.
   - A script touching 100+ files must prove its mapping on examples first (see `scripts/migrate-palette.py` + its tests), not after.
 
 **June 23 – July 7, 2026 (PRs #505–#511):**
@@ -1431,7 +1448,7 @@ What shipped:
 - **Open:** Pro's client workspace count. `/pricing`, `lib/plan.ts` and the app say 1. The plan table in this file, `llms.txt` and `/vs/buffer` say 0. Joshua decides, then change it in `lib/plan.ts` and the copy.
 - **Fixed in #768 (merged Nov 2):** the owner's Queue, Calendar and Drafts listed only posts they wrote, and RLS stopped them moving, cancelling, retrying or deleting a team member's post. `/api/workspaces/posts` now serves a workspace's posts whoever wrote them, and `canManagePost()` in `lib/team-workspaces.ts` is the one check (author, or the workspace owner/admin). Since Nov 3, Compose opens a teammate's post directly for an owner or admin (see below).
 
-**November 3, 2026: LinkedIn formatter, 14 audience pages, 8 blog posts, teammates' posts in Compose (one PR from `claude/eloquent-gauss-f3rbg1`):**
+**November 2, 2026 (PR #769): LinkedIn formatter, 14 audience pages, 8 blog posts, teammates' posts in Compose:**
 
 - **Free LinkedIn text formatter** at `/tools/linkedin-formatter`. Pure logic in `lib/tools/linkedin-format.ts` (tested by `scripts/test-linkedin-format.mjs`, including a fuzz test that styling then clearing never changes text). Sans-serif Unicode bold, italic and bold italic, lists, a 3,000 counter that counts styled letters as two, and an approximate "see more" fold. Blog posts mentioning LinkedIn now show its card (`lib/tools/related-tool.ts`).
 - **14 audience pages** in `lib/audiences.ts`: clippers, vtubers, fansly-creators, fanvue-creators, ko-fi-creators, cosplayers, virtual-assistants, artists, authors, newsletter-writers, open-source-maintainers, educators, event-organizers, journalists. The fan-platform pages (OnlyFans, Fansly, Fanvue) never mention TikTok or LinkedIn, say SocialMate adds no adult labels, and keep scheduled posts safe for work. Listed in `llms.txt`.
@@ -1445,7 +1462,7 @@ What shipped:
 
 - **A markdown link only works if the renderer handles it.** The blog renderer understood headings, lists and bold lines, not links, so every `[Start free](/signup)` call to action shipped as visible brackets. Check how text is rendered before writing it in a new syntax.
 
-**November 4, 2026: three more free tools, a blog feed, an audience hub, and robots.txt stopped hiding /affiliates (one PR from `claude/eloquent-gauss-f3rbg1`, after #769 merged):**
+**November 3, 2026 (PR #770): three more free tools, a blog feed, an audience hub, and robots.txt stopped hiding /affiliates:**
 
 - **Three free tools**, each with pure logic in `lib/tools/` tested by `scripts/test-free-tools.mjs`:
   - `/tools/character-counter` (`char-count.ts`): one text against X, Bluesky, Mastodon (the thread splitter's counters), LinkedIn, TikTok captions (2,200, the API limit), Discord (2,000), Telegram (4,096; 1,024 captions), Threads and Instagram. Platforms that don't publish their rules are counted as UTF-16 so a green number always fits. Threads and Instagram are tagged "not in SocialMate yet".
@@ -1461,7 +1478,7 @@ What shipped:
 
 - **A robots.txt rule is a prefix.** `Disallow: /affiliate` blocks `/affiliates`. Write exact paths with `$`, and keep one robots source, derived from the same list as sign-in.
 
-**November 5, 2026: the free tools hand their post to the product (one PR from `claude/eloquent-gauss-f3rbg1`, after #770 merged):**
+**November 3, 2026 (PR #771): the free tools hand their post to the product:**
 
 - **"Schedule this post"** (`app/tools/ScheduleThis.tsx`) on the character counter, LinkedIn formatter, thread splitter, Discord timestamp generator (as "Starts <t:…:F> (<t:…:R>)") and UTM builder. It saves the text in `localStorage` through `lib/tool-draft.ts` (one week, 10,000 characters, tested by `scripts/test-tool-draft.mjs`) and goes to `/start?from=tool`.
 - **`/start`** (`app/start/route.ts`) checks the session only when clicked (public pages skip the auth round trip): signed in goes to `/compose?from=tool`, signed out to `/signup?redirect=/compose%3Ffrom%3Dtool&from=tool`, where the subtitle says the post is saved. New accounts always pass through onboarding, so step 4 opens with the tool's text instead of a generated starter, clears it once saved, and `starter_saved` carries `from_tool`. If Quick Start or Skip passes step 4, the last step's button reads "Schedule Your Post" and opens `/compose?from=tool`. Compose reads the draft only with `from=tool` and leaves it until it expires.
@@ -1475,93 +1492,94 @@ What shipped:
 
 ## Pending / In Progress
 
-- **Pick up here (Nov 5, 2026).** #770 merged. The Nov 5 PR (tools hand off to the first post, tool cross-links) is open. After deploy, test the whole path once: in a private window write a post in `/tools/character-counter`, press "Schedule this post", sign up with a fresh email, and check onboarding step 4 shows that text; then, signed in, press it again and check Compose opens with it. Still from Nov 4: try the Bluesky domain helper with a real handle, check `/robots.txt`, run IndexNow.
-- **Pick up here (Nov 4, 2026).** Merged as #770. The Nov 4 PR (three tools, blog feed, `/for` hub, robots fix) was open at the time. After deploy: try the Bluesky domain helper with a real handle (its two lookups could not be tested from the sandbox), check `https://socialmate.studio/robots.txt` no longer lists `/affiliate` as a bare prefix, and run `node scripts/indexnow-submit.mjs`. In Search Console, submit `/blog/feed.xml` as an extra sitemap if wanted (Google accepts RSS).
-- **Pick up here (Nov 3, 2026).** Merged as #769. The Nov 3 PR (formatter, audience pages, blog posts, teammates' posts in Compose) was open at the time. Before merging, test Compose with an owner on Free plus an Editor: the owner opens the Editor's draft from Drafts, edits, saves, then schedules it, and the original disappears from Drafts. After deploy, run `node scripts/indexnow-submit.mjs` for the 14 `/for` pages, `/tools/linkedin-formatter` and the 8 posts. Joshua's call: the fan-platform pages are safe-for-work promotion only, but Stripe restricts businesses that facilitate adult content, so do not market SocialMate as an adult-content tool.
-- **Pick up here (Nov 2, 2026).** #767 and #768 merged; Ellen (ellenharveyau@gmail.com) confirmed #767 works for her and her VA. Ellen agreed to be quoted and offered a full testimonial; when it arrives, add it to `TESTIMONIALS` in `app/wall-of-love/page.tsx` with her name, company, title and a link to ellenharvey.com.au, and remove the page's noindex. Her email is the written permission. Funnel numbers were not checked: cloud sessions have no production keys, and Remote Control does not support Windows, so ask Joshua for screenshots of `/admin/funnel`, `/admin/overview` and `/admin/feedback`. Pro's client workspace count (1 or 0) is still Joshua's call.
-- **Pick up here (Nov 1, 2026).** #767 (team members posting) is open. After it merges, check it with two real accounts: an owner on Free plus an Editor; the editor switches to the owner's workspace and schedules a LinkedIn post. Then reply to ellenharveyau@gmail.com from `/admin/feedback`. Still open from Oct 29 below. Not reachable from a cloud session: the Shopify promo images Joshua made (share the folder through Remote Control, or attach them in chat).
-- **Pick up here (Oct 29, 2026).** Everything through #761 and renewalmate#27 is merged and deployed, and the new pages went to IndexNow. Next, when Joshua says go: (1) the next batch of RenewalMate cancel guides, each read from the company's own page (good candidates: Nintendo Switch Online, Discord Nitro, Google One, Canva Pro, Dropbox, Peloton, Tidal; the New York Times blocks AI tools, so skip it); (2) watch whether the six new `/for` pages start landing ChatGPT signups (`/admin/funnel`, "Where signups came from"); (3) a shop marketing account in SocialMate plus socials, only when he says go; (4) HereNow's App Store build once Jacob sends his list; (5) campaign mode phase 2. Joshua's side: Search Console for renewalmate.com (a DNS TXT record at GoDaddy, then submit `sitemap.xml`), Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google & YouTube app, and one real Twitch go-live before announcing alerts.
-- **Open as of Oct 23, 2026 (Joshua's side):** run the SOMA removal SQL from Oct 23 if it hasn't run yet, and read replies to the TikTok-live email in socialmatehq@gmail.com. The public inbox question is settled (`socialmatehq@gmail.com`, PR #752). Also: triage any replies to the Sept 25 emails to the 38 and to the Oct 15 confirmation resends; check in the Supabase dashboard whether auth emails go through custom SMTP (Resend) or the built-in mailer, which delivers worse and caps low; one real live-mode Creator Hub tip before announcing it. AI is working in production again (no action). Claude side, only if asked: a `starter_saved {built, edited}` flag at the onboarding save button, the nightly random-sample delivery check (needs a new table), translating the `/tools` pages, and a third free tool.
+> **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
+> its own dated entry on top, and six of them piled up, half stale. Edit this list
+> in place: remove what is done, add what is new. What happened goes in the dated
+> entries above.
+
+**Pick up here (updated Nov 4, 2026).** #769, #770 and #771 are merged and
+deployed; nothing is open in this repo.
+
+*Claude, after a deploy or when asked:*
+- Test the free-tool path once (#771): in a private window write a post in
+  `/tools/character-counter`, press "Schedule this post", sign up with a fresh
+  email, check onboarding step 4 shows that text; then, signed in, press it again
+  and check Compose opens with it.
+- Test team posting with an owner on Free plus an Editor (#767–#769): the owner
+  opens the Editor's draft from Drafts, edits, saves, schedules it, and the
+  original leaves Drafts.
+- Try the Bluesky domain helper with a real handle (its two lookups could not be
+  reached from the sandbox), check `https://socialmate.studio/robots.txt` has no
+  bare `/affiliate` prefix, and run `node scripts/indexnow-submit.mjs` (covers the
+  14 new `/for` pages, the four tools and the 8 Nov 3 posts). Optional: submit
+  `/blog/feed.xml` in Search Console as an extra sitemap.
+- When Ellen (ellenharveyau@gmail.com) sends her testimonial, add it to
+  `TESTIMONIALS` in `app/wall-of-love/page.tsx` (name, company, title, link to
+  ellenharvey.com.au) and remove the page's noindex. Her email is the permission.
+- Only when Joshua says go: the next RenewalMate cancel guides (Nintendo Switch
+  Online, Discord Nitro, Google One, Canva Pro, Dropbox, Peloton, Tidal; skip the
+  New York Times, it blocks AI tools); a shop marketing account in SocialMate;
+  campaign mode phase 2; the nightly random-sample delivery check (needs a table).
+- Watch whether the `/for` pages keep landing ChatGPT signups (`/admin/funnel`,
+  "Where signups came from").
+
+*Joshua's decisions:*
+- **Pro client workspaces: 1 or 0.** `/pricing`, `lib/plan.ts` and the app say 1;
+  the plan table in this file, `llms.txt` and `/vs/buffer` say 0. Pick one, then
+  change `PLAN_CLIENT_WORKSPACES` in `lib/plan.ts` and the copy.
+- **`stripe.exe`** (31 MB, the Stripe CLI) is committed to this public repo. Removing
+  it also deletes the local copy on the next pull, so it waits for a yes.
+- Standing rule: the fan-platform pages are safe-for-work promotion only. Stripe
+  restricts adult-content businesses, so never market SocialMate as one.
+
+*Joshua's side:*
+- Screenshots of `/admin/funnel`, `/admin/overview` and `/admin/feedback` when
+  numbers are needed. Cloud sessions have no production keys, and Remote Control
+  does not support Windows.
+- Inbox (socialmatehq@gmail.com): replies to the TikTok-live email (Oct 23), the
+  Sept 25 emails to the 38, the Oct 15 confirmation resends. Replies to the Aug 30
+  reactivation send land in Resend's **Receiving** tab (Resend is under
+  `renewalmate.updates@gmail.com`).
+- Run the SOMA removal SQL from Oct 23 if it hasn't run.
+- Supabase dashboard: do auth emails go through custom SMTP (Resend) or the
+  built-in mailer, which delivers worse and caps low?
+- Before announcing: one real live-mode Creator Hub tip, one real Twitch go-live.
+- Search Console for renewalmate.com (DNS TXT at GoDaddy, then `sitemap.xml`),
+  Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google &
+  YouTube app, the Wyoming LLC annual report.
+- The Shopify promo images: attach them in chat.
+
+**Activation, latest (Oct 29).** 231 external accounts, 3 external publishers
+(Discord, Bluesky, LinkedIn), 1,657 published posts, no paying subscribers. None of
+the 48 TikTok users emailed Oct 23 had posted to TikTok. ChatGPT sent 12 of the 21
+signups since Oct 15. Earlier measurements (Aug 30, Oct 14, Oct 23) are in the
+dated entries; always exclude `lib/internal-accounts.ts`.
+
+**First paying customer.** `pixelkittehfurever@gmail.com`, Pro Annual, Aug 29,
+cancelled 68 minutes in after the plan bug (#579). Apology and 2,000 credits sent;
+their complaints are all fixed (Sept 11). Do not re-litigate the refund.
 
 - **Creator Hub payments: fee pass-through, $3 floor, Connect capability fix (Sept 24, merged in #683).** Decision (Joshua): SocialMate does not absorb Stripe's fee. Tip, unlock and subscription checkouts now carry an application fee equal to Stripe's fee (`application_fee_amount` for one-time payments, `transfer_data.amount_percent` for subscriptions, which cannot use `application_fee_percent`), so SocialMate keeps nothing and creators net what any Stripe merchant would. The landing page already says "Just Stripe (~2.9% + 30c)". `lib/creator-pricing.ts` holds the math; verified against real test-mode charges to the cent at $3/$5/$10/$25 for US cards. **Found while testing:** Connect accounts were created with no capabilities requested, so Stripe rejects every destination-charge checkout with "missing the required capabilities: transfers" and `charges_enabled` could never become true; Creator Hub could not have taken a payment. Accounts now request `transfers` only (5 onboarding requirements vs 13 with `card_payments`) and onboarding-complete means `transfers` is active. Payouts are set to weekly because Connect bills 0.25% + 25c per payout. One shared $3 minimum for tips, unlocks and subscriptions (server-enforced; tip presets now $3/$5/$10/$25). **Still true:** international cards cost 1.5% more and currency conversion 1%, absorbed by SocialMate (about 7c on a $5 tip); Stripe Billing adds 0.7% on subscriptions (included in the subscription fee); Connect charges $2 per active creator per month, covered by the creator's Pro plan. Zero creators exist, so nothing needs grandfathering. **Not verifiable in test mode** (Custom accounts need a Connect platform-profile setting): a full transfer with a real active account. Run one real live-mode tip end to end before announcing Creator Hub. #679's `on_behalf_of` attempt was wrong and reverted in #681.
 
-- **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
-
-- **LinkedIn Company Pages** — Personal profile OAuth is live. Company page support requires `r_organization_social` + `w_organization_social` permissions. Next step: LinkedIn Developer Portal → existing app → request org permissions. **Lower priority — personal profile covers 90% of use cases.**
-
-- **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
-
-- **Activation, Oct 29 update.** Still 3 outside publishers (Discord, Bluesky,
-  LinkedIn) out of 231 external accounts. None of the 48 TikTok users emailed
-  Oct 23 has posted to TikTok yet. ChatGPT sent 12 of the 21 signups since
-  Oct 15, which is why #760 added six more `/for` pages.
-
-- **Activation, Oct 23 update.** TikTok posts publicly now, the 48 outside
-  users with TikTok connected were emailed, and connecting TikTok lands in
-  TikTok Studio (#740). Three outside users have published (Discord, Bluesky,
-  LinkedIn). Signups run about 1.3 a day; 9 of the 12 since Oct 15 came from
-  ChatGPT, 7 of them landing on /for/tiktok-creators. Watch whether TikTok
-  connectors now post.
-
-- **Activation, Oct 14 update.** The first two outside users published in
-  October (Discord and Bluesky from Oct 2, LinkedIn on Oct 9): 199 external
-  accounts, 59 ever connected, 18 with any post row. Of people with a text
-  platform connected since Sept 24, 2 of 6 published; of the 16 who connected
-  only TikTok, none could. Signups fell to about 6 a week, so getting people in
-  the door (free tools, #703) now matters as much as activation. The history
-  below is kept for context.
-
-- **Activation is the whole problem.** Measured 30 Aug with **all four internal
-  accounts excluded**: 103 accounts, 18 connected a platform, **0 external users
-  have ever published**. The "1 publisher" quoted since March was Joshua's own
-  `gilgameshenterprisellc@gmail.com`. See [[lib/internal-accounts.ts]].
-  The reason is now known rather than guessed: onboarding's save was wired to a
-  button almost nobody pressed, so 98 of 103 accounts finished onboarding and
-  none of it was kept (#594). Fixed and verified with a real row on 30 Aug.
-  **Fired 30 Aug: 62 emails, all delivered, zero bounces.** One recipient clicked
-  through within five minutes and stopped at the platform picker. Those 62 went
-  out *before* the reply-to fix, so any reply lands in the Resend **Receiving**
-  tab rather than an inbox — check it daily this week. Resend is under
-  `renewalmate.updates@gmail.com`.
-  The funnel has recorded since 28 Aug; `/admin/funnel` will show whether those 82
-  click connect and fail or never click at all. Everything else here is smaller
-  than this.
-
-- **First paying customer, and the follow-up.** `pixelkittehfurever@gmail.com`,
-  Pro Annual, 29 Aug. Cancelled 68 minutes in after the plan bug (PR #579) left
-  them on free limits. Apology sent 29 Aug with 2,000 permanent credits. **Watch
-  socialmatehq@gmail.com for a reply** — that is the first real user interview
-  available, from the one person who cared enough to pay.
-
-- **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
-
-- **Wyoming LLC annual report** — File when budget allows.
-
-- **Enki Truth Mode** — 50-trade minimum per strategy. Check `/enki/truth` periodically.
-
-- **Wall of Love** — Live at `/wall-of-love`. Add entries to `TESTIMONIALS` array when real quotes come in.
-
-- **Birthday promo BDAY31** — ✅ ACTIVE NOW through Dec 15, 2026. Stripe coupon live (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`).
-
-- **SocialMatePR (girlfriend's video brand)** — Claude chat mentor prompt delivered May 16. First video to all platforms once profiles are ready.
-
-**Roadmap (next up):**
-- **Growth** — 7 platforms live. Focus: getting paying users. Product Hunt follow-up ("We've shipped 50+ features since launch"). Target: June 1.
-- **Wall of Love** — Collect first real testimonials. Add to TESTIMONIALS array in `app/wall-of-love/page.tsx`.
-- **LinkedIn Company Pages** — Personal profile live. Company page = next LinkedIn upgrade when there's demand.
-- **Discord community** — Server is live at discord.gg/2se6FGrbRU. Build it as a tester + feedback pool.
-- **Apple App Store** — Deferred 3–6 months.
-- **Google Play — closed testing** — 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
-- **Instagram / Facebook** — Meta App Review. 4–8 week timeline.
-- **Wyoming LLC annual report** — File when budget allows.
-- **Enki Truth Mode** — 50-trade minimum per strategy. Check `/enki/truth` periodically.
-- **Birthday promo BDAY31** — ✅ ACTIVE NOW through Dec 15, 2026.
-- **Product Hunt follow-up** — "We've shipped 50+ features since launch." Target: June 1, 2026.
+**Dormant or later (no action now):**
+- **Google Play closed testing.** v1.0.7 uploaded, 1 tester opted in, passive CTA
+  on the signup page. Needs 12 testers for 14 days before production.
+- **LinkedIn Company Pages.** Needs `r_organization_social` +
+  `w_organization_social`. Personal profiles cover most users.
+- **Instagram / Facebook / Threads.** Meta App Review, not started; plan 4–8 weeks.
+- **Apple App Store (SocialMate).** Deferred.
+- **Cofounder search.** Marketing cofounder, ~10% sweat equity over a 24-month
+  vest, 2-week trial, real contract.
+- **Birthday promo BDAY31.** Active through Dec 15, 2026
+  (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`).
+- **Discord community** at discord.gg/2se6FGrbRU, as a tester and feedback pool.
+- **SocialMatePR** (girlfriend's video brand): mentor prompt delivered May 16.
 
 ## Confirmed Done (stop asking about these)
 
-- ✅ **Nov 4 batch, #770, merged.** Character counter, UTM builder, Bluesky domain helper, blog RSS feed, `/for` hub with game-developers and youtubers, nav links, one robots source. See the Nov 4 entry above.
-- ✅ **Nov 3 batch, #769, merged.** LinkedIn formatter, 14 audience pages, 8 static blog posts, teammates' posts in Compose, `starter_saved`, blog markdown links. See the Nov 3 entry above.
+- ✅ **Free tools hand off to the first post, #771, merged.** "Schedule this post" on the tools, `/start`, the tool draft through signup and onboarding, `lib/tools/catalog.ts`. See the PR #771 entry above.
+- ✅ **Nov 3 batch, #770, merged.** Character counter, UTM builder, Bluesky domain helper, blog RSS feed, `/for` hub with game-developers and youtubers, nav links, one robots source. See the PR #770 entry above.
+- ✅ **Nov 2 batch, #769, merged.** LinkedIn formatter, 14 audience pages, 8 static blog posts, teammates' posts in Compose, `starter_saved`, blog markdown links. See the PR #769 entry above.
 - ✅ **Oct 24–29 batch, PRs #742–#761, merged and deployed.** SOMA rebuild (#744–#750), Compose AI prices (#743), Enki removed (#751), one support address (#752), blog index (#753), no repeat photos (#754), campaign mode (#755, SQL run, verified with test posts), go-live alerts (#756, SQL run), shop strip and `/merch` redirect (#757, #758), six audience pages (#760, sent to IndexNow), Telegram Destinations copy (#761). See the Oct 24–29 entry above; do not redo these.
 - ✅ **Oct 23 batch, PRs #737–#741, merged and deployed.** TikTok audit approved and verified with a public post, copy flipped, TikTok-live email sent to the 48 (never resend), 13 blog audit notes removed, disclosure recorded on Post Now rows, `/api/admin/revalidate`, TikTok-first connect and onboarding, the deli fixed everywhere, 11 blog posts corrected. See the Oct 23 entry above; do not redo these.
 - ✅ **Oct 16–22 batch, PRs #715–#736, merged and deployed.** Including the partner-table RLS SQL (verified Oct 23: the anon key reads 0 rows). See the Oct 16–22 entry above.
