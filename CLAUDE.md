@@ -51,12 +51,16 @@ Jacob. Code in `gilgameshenterprisellc-pixel/herenow`, which has its own CLAUDE.
 read that, not this file, for HereNow work. Expo SDK 54, Supabase + PostGIS, iOS
 builds through Codemagic, live on the App Store since Oct 16, 2026.
 
-- **Nov 12, 2026: nine-venue pilot sponsored by Monster.** The sponsor features
-  (#302–#309) are on main but not in the App Store app; 1.0.3 has to be in review
-  by about Nov 7.
-- **Pushing needs `gilgameshenterprisellc-pixel` access.** The Claude GitHub App
-  and the `renewalmateupdates` account reach the public repo read-only. Push and
-  PRs go through the `gilgameshenterprisellc-pixel` account.
+- **Pilot week (Nov 2026): about nine venues set up during the week.** Monster
+  was not confirmed as a sponsor. #311 (sponsor numbers) and #312 (geofencing,
+  venue and org fixes) are merged and their SQL ran Nov 4. Next is the 1.0.4
+  build (Codemagic, TestFlight device checks, App Review). HereNow's CLAUDE.md
+  "Pilot status (end of Nov 4)" is the pick-up list.
+- **Pushing needs the `gilgameshenterprisellc-pixel` account.** The Claude GitHub
+  App is not installed there, so cloud sessions can read the public repo but not
+  push; they hand work over as a patch file. On Joshua's PC, `gh` holds both
+  accounts: `gh auth switch --user gilgameshenterprisellc-pixel` to push and merge,
+  then switch back to `renewalmateupdates`. Supabase stays on the Free plan for now.
 - Never put SocialMate code or claims in it, or the reverse.
 
 ---
@@ -1490,6 +1494,32 @@ What shipped:
 
 - **Don't make someone redo work to sign up.** A visitor who wrote a post in a free tool had to start again after signing up. Carry what they made across the signup.
 
+**November 4, 2026 (PR #772): cleanup, the `src/` trap, and HereNow's pilot week:**
+
+- **#772.** `src/` was called dead, but 67 files imported `@/lib/supabase`, which
+  the tsconfig alias resolved to `src/lib/supabase.ts`. It now lives at
+  `lib/supabase.ts` and `@/*` maps only to `./*`. The six stacked "Pick up here"
+  entries became one list.
+- **Sessions.** The cloud sessions "Shopify store promotion images" (work merged)
+  and "CMO contract draft" (its HereNow work moved over) were archived; the CMO
+  agreement is still an artifact. Local desktop sessions can't be seen or archived
+  from a cloud session.
+- **Across the repos.** All ~80 SocialMate branches are already merged. RenewalMate
+  has two open PRs: #13 is superseded (its fixes went to master in June) and #6
+  (Vercel Speed Insights) was never merged.
+- **HereNow.** The Nov 12 pilot work (#311) and a full pilot-week sweep (#312:
+  pocketed phones stay in the room, one exit ring, fences venue owners can't move,
+  We Met enforced, orgs need venue consent) were merged by Joshua from patch files,
+  and both SQL files ran. Details in HereNow's CLAUDE.md.
+
+**Rules that follow:**
+
+- **"This code is dead" is a claim. Grep for imports, including path aliases,
+  before deleting anything.**
+- **A cloud session that can't push hands over a patch file.** `git format-patch`
+  in the cloud, `git am` on Joshua's PC, then `gh` to push, PR and merge. Prove
+  the patch applies to the current main before sending it.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -1497,8 +1527,8 @@ What shipped:
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 4, 2026).** #769, #770 and #771 are merged and
-deployed; nothing is open in this repo.
+**Pick up here (updated Nov 4, 2026).** #769 through #772 are merged and
+deployed; nothing is open in this repo. HereNow's own list is in its CLAUDE.md.
 
 *Claude, after a deploy or when asked:*
 - Test the free-tool path once (#771): in a private window write a post in
@@ -1529,6 +1559,11 @@ deployed; nothing is open in this repo.
   change `PLAN_CLIENT_WORKSPACES` in `lib/plan.ts` and the copy.
 - **`stripe.exe`** (31 MB, the Stripe CLI) is committed to this public repo. Removing
   it also deletes the local copy on the next pull, so it waits for a yes.
+- **The ~80 merged SocialMate branches:** delete them? Everything on them is in main.
+- **RenewalMate PRs:** close #13 (superseded); keep or close #6 (Speed Insights).
+- **Install the Claude GitHub App on `gilgameshenterprisellc-pixel`** (herenow,
+  renewalmate) if cloud sessions should push there directly instead of handing
+  over patch files: https://github.com/apps/claude/installations/select_target
 - Standing rule: the fan-platform pages are safe-for-work promotion only. Stripe
   restricts adult-content businesses, so never market SocialMate as one.
 
@@ -1577,6 +1612,7 @@ their complaints are all fixed (Sept 11). Do not re-litigate the refund.
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Nov 4 cleanup, #772, merged.** Supabase browser client moved out of `src/`, one pick-up list, two finished cloud sessions archived. See the PR #772 entry above.
 - ✅ **Free tools hand off to the first post, #771, merged.** "Schedule this post" on the tools, `/start`, the tool draft through signup and onboarding, `lib/tools/catalog.ts`. See the PR #771 entry above.
 - ✅ **Nov 3 batch, #770, merged.** Character counter, UTM builder, Bluesky domain helper, blog RSS feed, `/for` hub with game-developers and youtubers, nav links, one robots source. See the PR #770 entry above.
 - ✅ **Nov 2 batch, #769, merged.** LinkedIn formatter, 14 audience pages, 8 static blog posts, teammates' posts in Compose, `starter_saved`, blog markdown links. See the PR #769 entry above.
