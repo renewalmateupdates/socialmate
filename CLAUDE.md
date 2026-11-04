@@ -54,14 +54,14 @@ builds through Codemagic, live on the App Store since Oct 16, 2026.
 - **Pilot week (Nov 2026): about nine venues set up during the week.** Monster
   was not confirmed as a sponsor. #311 (sponsor numbers) and #312 (geofencing,
   venue and org fixes) are merged and their SQL ran Nov 4.
-- **Late Nov 4: a hardening sweep was handed over as a patch** (5 commits,
-  `fix/pilot-hardening-nov4`): private check-ins were readable by any account,
-  a We Met sender could confirm their own request, owners could move their
-  fence, the venue dashboard only counted people in the room at that moment,
-  and the exit ring now follows the building outline. Order: run
-  `supabase/pilot_hardening_nov2026.sql` first, then push, then the 1.0.4 build
-  (Codemagic, TestFlight device checks, App Review). Until the patch is merged,
-  the pick-up list is in the patch's CLAUDE.md, "Next (updated late Nov 4)".
+- **Late Nov 4: hardening sweep merged (HereNow #314) and its SQL ran**
+  (`supabase/pilot_hardening_nov2026.sql`, 3:51 PM): private check-ins were
+  readable by any account, a We Met sender could confirm their own request,
+  owners could move their fence, the venue dashboard only counted people in the
+  room at that moment, and the exit ring now follows the building outline.
+  Next is the 1.0.4 build (Codemagic, TestFlight device checks, App Review).
+  HereNow's CLAUDE.md "Next (updated late Nov 4)" is the pick-up list; its step
+  1 (run the SQL) is done.
 - **Pushing needs the `gilgameshenterprisellc-pixel` account.** The Claude GitHub
   App is not installed there, so cloud sessions can read the public repo but not
   push; they hand work over as a patch file. On Joshua's PC, `gh` holds both
