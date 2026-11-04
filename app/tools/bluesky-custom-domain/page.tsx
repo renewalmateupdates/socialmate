@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import MoreTools from '../MoreTools'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import BlueskyDomain from './BlueskyDomain'
 
@@ -103,6 +104,8 @@ export default function BlueskyCustomDomainPage() {
           <Button href="/for/bluesky-creators" variant="secondary">SocialMate for Bluesky</Button>
         </div>
       </Section>
+
+      <MoreTools current="/tools/bluesky-custom-domain" />
     </PublicLayout>
   )
 }

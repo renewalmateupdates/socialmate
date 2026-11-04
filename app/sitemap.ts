@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { isProtectedPath } from '@/lib/protected-paths'
 import { POSTS } from '@/lib/blog/static-posts'
 import { AUDIENCES } from '@/lib/audiences'
+import { FREE_TOOLS } from '@/lib/tools/catalog'
 
 // Blog posts live in two places: the static POSTS map (lib/blog/static-posts.ts)
 // and the `blog_posts` table. The sitemap lists exactly those two, the same merge
@@ -29,12 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/give`,                lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/discount`,            lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/tools`,               lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/tools/thread-splitter`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/tools/discord-timestamp`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/tools/linkedin-formatter`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/tools/character-counter`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/tools/utm-builder`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/tools/bluesky-custom-domain`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    // Every free tool, from the same list as the /tools index.
+    ...FREE_TOOLS.map(t => ({ url: `${base}${t.href}`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.7 })),
     { url: `${base}/for`,                         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/signup`,              lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/login`,               lastModified: now, changeFrequency: 'monthly', priority: 0.5 },

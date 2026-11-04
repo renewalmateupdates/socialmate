@@ -54,6 +54,8 @@ export const FUNNEL_EVENTS = [
   'compose_opened',
   'starter_built',        // { path, kind: 'sentence' | 'link', where } used the one-sentence helper; flags only, never the text
   'starter_saved',        // { built, edited, kind: scheduled | draft, where } the onboarding starter post was saved; flags only
+  'tool_draft_saved',     // { tool, saved } a free tool's "Schedule this post" was pressed; the text stays in the browser. Signed-out presses reach GA4 only
+  'tool_draft_used',      // { tool, where: onboarding | compose } that text opened as the visitor's post
   'compose_left',       // { had_content, platforms_selected, connected_selectable, blocking_reason } flags only, never content
   'draft_created',        // server-side, only when a new draft row is inserted
   'post_attempted',       // clicked Post/Schedule and the client checks passed

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import MoreTools from '../MoreTools'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import LinkedInFormatter from './LinkedInFormatter'
 
@@ -103,6 +104,8 @@ export default function LinkedInFormatterPage() {
           <Button href="/tools" variant="secondary">More free tools</Button>
         </div>
       </Section>
+
+      <MoreTools current="/tools/linkedin-formatter" />
     </PublicLayout>
   )
 }

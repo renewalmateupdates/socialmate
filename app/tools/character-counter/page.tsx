@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import MoreTools from '../MoreTools'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import CharacterCounter from './CharacterCounter'
 
@@ -99,6 +100,8 @@ export default function CharacterCounterPage() {
           <Button href="/tools/thread-splitter" variant="secondary">Thread splitter</Button>
         </div>
       </Section>
+
+      <MoreTools current="/tools/character-counter" />
     </PublicLayout>
   )
 }

@@ -21,6 +21,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 5, 2026',
+    version: 'From Free Tool to First Post',
+    changes: [
+      { type: 'New',      text: 'Every free tool that makes a post now has a "Schedule this post" button. Your text is kept in your browser: sign up and it opens as your first post in onboarding, or, if you are already signed in, straight in Compose.' },
+      { type: 'Improved', text: 'Each free tool page links to the others.' },
+      { type: 'Fixed',    text: 'Switching from sign up to sign in no longer forgets where you were headed.' },
+    ],
+  },
+  {
     date: 'November 4, 2026',
     version: 'More Free Tools',
     changes: [

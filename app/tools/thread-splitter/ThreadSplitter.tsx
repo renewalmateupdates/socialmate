@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import { splitThread, measure, THREAD_PLATFORMS, type Numbering, type ThreadPlatform } from '@/lib/tools/thread-splitter'
 import CopyButton from '../CopyButton'
+import ScheduleThis from '../ScheduleThis'
 
 const NUMBERING: { value: Numbering; label: string }[] = [
   { value: 'suffix', label: '1/5 at the end' },
@@ -100,7 +101,10 @@ export default function ThreadSplitter() {
               <p className="font-mono text-eyebrow uppercase text-ink-muted">
                 {parts.length} {parts.length === 1 ? 'post' : 'posts'} for {THREAD_PLATFORMS[platform].label}
               </p>
-              {parts.length > 1 && <CopyButton text={parts.map(p => p.text).join('\n\n')} label="Copy all" />}
+              <div className="flex flex-wrap items-center gap-2">
+                {parts.length > 1 && <CopyButton text={parts.map(p => p.text).join('\n\n')} label="Copy all" />}
+                <ScheduleThis text={text} tool="thread-splitter" label="Schedule this thread" />
+              </div>
             </div>
             {parts.map((part, i) => (
               <article key={i} className="rounded-2xl border border-edge bg-panel p-5">
