@@ -465,17 +465,7 @@ deployed; nothing is open in this repo. HereNow's own list is in its CLAUDE.md.
 - Watch whether the `/for` pages keep landing ChatGPT signups (`/admin/funnel`,
   "Where signups came from").
 
-*Joshua's decisions:*
-- **Pro client workspaces: 1 or 0.** `/pricing`, `lib/plan.ts` and the app say 1;
-  the plan table in this file, `llms.txt` and `/vs/buffer` say 0. Pick one, then
-  change `PLAN_CLIENT_WORKSPACES` in `lib/plan.ts` and the copy.
-- **`stripe.exe`** (31 MB, the Stripe CLI) is committed to this public repo. Removing
-  it also deletes the local copy on the next pull, so it waits for a yes.
-- **The ~80 merged SocialMate branches:** delete them? Everything on them is in main.
-- **RenewalMate PRs:** close #13 (superseded); keep or close #6 (Speed Insights).
-- **Install the Claude GitHub App on `gilgameshenterprisellc-pixel`** (herenow,
-  renewalmate) if cloud sessions should push there directly instead of handing
-  over patch files: https://github.com/apps/claude/installations/select_target
+*Joshua's decisions:* in `TODO.md` (one list, kept current there).
 - Standing rule: the fan-platform pages are safe-for-work promotion only. Stripe
   restricts adult-content businesses, so never market SocialMate as one.
 
