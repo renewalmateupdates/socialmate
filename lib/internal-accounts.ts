@@ -21,8 +21,8 @@ export const INTERNAL_EMAILS: string[] = [
   'gilgameshenterprisellc@gmail.com', // Mate Suite ops account
   'renewalmate.updates@gmail.com',    // Mate Suite ops account
   'googlereview@socialmate.studio',   // created for store review
-  // Deliberately NOT here: nichole_bostic@yahoo.com. Confirmed Aug 30 to be
-  // the founder's mother, who signed up when he showed her the product. A real
+  // Deliberately NOT here: one account confirmed on Aug 30 to belong to the
+  // founder's mother, who signed up when he showed her the product. A real
   // person on someone else's account is not an internal account, and listing
   // her here would hide a genuine signup. She counts as external, and her
   // record is a fair data point: 0 logins, onboarding never completed, nothing
