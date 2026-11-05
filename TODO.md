@@ -4,52 +4,60 @@ Things a session should not guess at. Each needs a product or business call;
 once made, the change itself is small. Delete an item when it's decided and
 done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
 
-## SocialMate
+## Needs Joshua (a click or a query, not a decision)
 
-- **Pro client workspaces: 1 or 0.** `/pricing`, `lib/plan.ts` and the app say 1;
-  the plan table in CLAUDE.md, `public/llms.txt` and `/vs/buffer` say 0. Pick
-  one, then change `PLAN_CLIENT_WORKSPACES` in `lib/plan.ts` and the copy that
-  disagrees.
-- **Creator Hub go-live.** The fee pass-through is built and tested in Stripe test
-  mode, but no real live-mode tip has ever gone through. Run one real tip before
-  announcing Creator Hub, or keep it unannounced.
-- **Twitch go-live alerts.** Built and wired, never seen firing on a real stream.
-  Watch one real stream before announcing it.
-- **Reset or delete the former growth partner's login.** Its temporary password
-  was written into the public CLAUDE.md in April. It was redacted on Nov 5, but it
-  is still in git history, so anyone can read it. In Supabase Auth, reset that
-  user's password or delete the user (the affiliate has been inactive since May).
-- **Enki code still lives here.** Enki left SocialMate's UI on Oct 26 (#751) and
-  its Inngest jobs are unregistered, but `app/enki/` (13 files), `app/api/enki/`
-  (16), `lib/enki/` (9) and the Enki functions in `lib/inngest.ts` remain, and
-  `/enki` still serves the waitlist by direct link. Delete them once the
-  standalone Enki has what it needs (git history keeps them), or keep them.
-- **Customer and partner emails in the public history log.**
-  `docs/history/claude-log-2026.md` is the old CLAUDE.md word for word, so it
-  names customers and partners by email. Redact them, or accept it (they are
-  already in this public repo's history either way).
+1. **Ban the former growth partner's two logins.** A temporary password for one
+   of them sat in the public CLAUDE.md from April to Nov 5 and is still in git
+   history. Both logins have been unused since Apr 21. Joshua said "get rid of"
+   on Nov 5, but sessions are not allowed to change production auth, so: in
+   Supabase, Authentication, Users, open each account and choose Ban user (or
+   Delete user to remove it for good). The account ids are in the Nov 5 handoff
+   and local memory, not here, because this repo is public.
+2. **Fix the one live blog post with a wrong contact address.** The
+   `cofounder-search-sweat-equity-startup` post tells readers to email
+   `socialmate.updates@gmail.com`, which is not a SocialMate address. The repo's
+   SQL file is fixed; the live row needs this in the Supabase SQL editor, then
+   `POST /api/admin/revalidate` for `/blog/cofounder-search-sweat-equity-startup`:
 
-## Elsewhere (noted here because it came up in SocialMate sessions)
+   ```sql
+   UPDATE blog_posts
+   SET content = replace(content, 'socialmate.updates@gmail.com', 'socialmatehq@gmail.com')
+   WHERE slug = 'cofounder-search-sweat-equity-startup';
+   ```
 
-- **RenewalMate PRs:** close #13 (superseded); keep or close #6 (Speed Insights).
+## Waiting on a decision
 
-## Decided (Nov 5, 2026 consolidation)
+1. **RenewalMate PRs** (in `gilgameshenterprisellc-pixel/renewalmate`, which
+   `renewalmateupdates/renewalmate` now redirects to). #13 (Jun 19, waitlist data
+   loss and sitemap fixes) is superseded: master already has both fixes, and the
+   PR conflicts. Recommendation: close it. #6 (Jun 12, from Vercel's bot) adds
+   Vercel Speed Insights, three files and free on the Hobby plan. Recommendation:
+   merge it after a fresh build, or close it if speed scores for renewalmate.com
+   don't matter.
 
-- `stripe.exe` (the 31 MB Stripe CLI binary) is no longer tracked and `*.exe` is
-  ignored. If you ran it from the repo folder, reinstall the Stripe CLI
-  (https://docs.stripe.com/stripe-cli). The old copy is in git history and in the
-  backup tags.
-- Merged branches get deleted (local and remote) once the backup tags exist.
-  Unmerged branches stay; the consolidation report lists them.
-- Cloud sessions are retired; work happens in local sessions on Joshua's PC, so
-  installing the Claude GitHub App on `gilgameshenterprisellc-pixel` is no longer
-  needed.
-- `npm run lint` is a gate: 0 errors. Style-only rules are off and `any` plus the
-  React Compiler advisories are warnings (see `eslint.config.mjs`).
+## Decided (Nov 5, 2026)
 
-## Needs you (one command, not a decision)
-
-- The old worktree `.claude/worktrees/confident-austin-ce0947` holds 1.3 GB of
-  build cache; its commit is already on main. The Nov 5 session was not allowed
-  to delete it. From `C:\Users\jbost\socialmate`:
-  `git worktree remove --force .claude/worktrees/confident-austin-ce0947`
+1. **Pro includes 1 client workspace.** `lib/plan.ts`, `/pricing`, the CLAUDE.md
+   plan table, `llms.txt`, `ai.txt`, `/vs/buffer` and `/vs/hootsuite` all agree.
+   (The home page also said Agency includes 10; it's 5, fixed in all nine
+   languages.)
+2. **Creator Hub tips and Twitch go-live alerts stay unannounced.** Next step is
+   to onboard one streamer to use them for real (an alert on a real stream, a real
+   tip), and announce after that works.
+3. **Enki code gets deleted from SocialMate later**, when Joshua says go:
+   `app/enki/` (13 files), `app/api/enki/` (16), `lib/enki/` (9) and the Enki
+   functions in `lib/inngest.ts`. `/enki` still serves the waitlist until then.
+4. **No one is identified in this public repo.** Customer, partner, contractor,
+   family and commenter details were redacted from the docs, the roadmap page and
+   a code comment on Nov 5. Git history still has the old text.
+5. `stripe.exe` (the 31 MB Stripe CLI binary) is no longer tracked and `*.exe` is
+   ignored. If you ran it from the repo folder, reinstall the Stripe CLI
+   (https://docs.stripe.com/stripe-cli). The old copy is in git history and in the
+   backup tags.
+6. Merged branches get deleted (local and remote) once the backup tags exist.
+   Unmerged branches stay.
+7. Cloud sessions are retired; work happens in local sessions on Joshua's PC, so
+   installing the Claude GitHub App on `gilgameshenterprisellc-pixel` is no longer
+   needed.
+8. `npm run lint` is a gate: 0 errors. Style-only rules are off and `any` plus the
+   React Compiler advisories are warnings (see `eslint.config.mjs`).

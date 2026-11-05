@@ -500,7 +500,10 @@ CLAUDE.md.
 - Run the SOMA removal SQL from Oct 23 if it hasn't run.
 - Supabase dashboard: do auth emails go through custom SMTP (Resend) or the
   built-in mailer, which delivers worse and caps low?
-- Before announcing: one real live-mode Creator Hub tip, one real Twitch go-live.
+- Creator Hub tips and Twitch go-live alerts stay unannounced until a streamer
+  uses them for real (Joshua's plan, Nov 5: onboard one streamer to try both).
+- Ban the former growth partner's two Supabase logins and fix one live blog row
+  (both in `TODO.md`, "Needs Joshua"; sessions can't change production auth).
 - Search Console for renewalmate.com (DNS TXT at GoDaddy, then `sitemap.xml`),
   Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google &
   YouTube app, the Wyoming LLC annual report.
