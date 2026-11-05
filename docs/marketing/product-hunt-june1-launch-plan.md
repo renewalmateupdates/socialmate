@@ -156,7 +156,7 @@ By July 1 the story should include:
 - First paying users / MRR milestone (even if small, it's real)
 - Google Play production (if 12 testers + 14 days are hit)
 - Any new platform connections (Pinterest, YouTube, Reddit progress)
-- Any cofounder / CMO partnership if Zaira or someone else locked in
+- Any cofounder / CMO partnership if a marketing hire or someone else locked in
 
 Start drafting the July 1 post in mid-June once the Q3 feature list is clearer.
 File to create: `product-hunt-july1-draft.md`

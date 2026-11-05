@@ -531,7 +531,7 @@ their complaints are all fixed (Sept 11). Do not re-litigate the refund.
 - **Birthday promo BDAY31.** Active through Dec 15, 2026
   (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`).
 - **Discord community** at discord.gg/2se6FGrbRU, as a tester and feedback pool.
-- **SocialMatePR** (girlfriend's video brand): mentor prompt delivered May 16.
+- **SocialMatePR** (a video content brand Joshua is helping launch): mentor prompt delivered May 16.
 
 Everything finished before November 2026 ("Confirmed Done, stop asking about
 these") is in `docs/history/claude-log-2026.md`. Check it before rebuilding
