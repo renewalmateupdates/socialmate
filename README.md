@@ -38,7 +38,7 @@ At minimum the app needs the three Supabase variables.
 | Script tests (no network, no keys) | `npm test` |
 | Audit script's own tests | `python scripts/test-audit-schema-drift.py` |
 | Type check | `npx tsc --noEmit` |
-| Lint | `npm run lint` |
+| Lint (0 errors expected; warnings are backlog) | `npm run lint` |
 | Columns the code names vs the live schema | `python scripts/audit-schema-drift.py` (needs production keys) |
 | Upsert targets vs real unique indexes | `python scripts/audit-dead-features.py` (needs production keys) |
 

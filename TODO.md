@@ -15,6 +15,19 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
   announcing Creator Hub, or keep it unannounced.
 - **Twitch go-live alerts.** Built and wired, never seen firing on a real stream.
   Watch one real stream before announcing it.
+- **Reset or delete the former growth partner's login.** Its temporary password
+  was written into the public CLAUDE.md in April. It was redacted on Nov 5, but it
+  is still in git history, so anyone can read it. In Supabase Auth, reset that
+  user's password or delete the user (the affiliate has been inactive since May).
+- **Enki code still lives here.** Enki left SocialMate's UI on Oct 26 (#751) and
+  its Inngest jobs are unregistered, but `app/enki/` (13 files), `app/api/enki/`
+  (16), `lib/enki/` (9) and the Enki functions in `lib/inngest.ts` remain, and
+  `/enki` still serves the waitlist by direct link. Delete them once the
+  standalone Enki has what it needs (git history keeps them), or keep them.
+- **Customer and partner emails in the public history log.**
+  `docs/history/claude-log-2026.md` is the old CLAUDE.md word for word, so it
+  names customers and partners by email. Redact them, or accept it (they are
+  already in this public repo's history either way).
 
 ## Elsewhere (noted here because it came up in SocialMate sessions)
 
@@ -31,3 +44,12 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
 - Cloud sessions are retired; work happens in local sessions on Joshua's PC, so
   installing the Claude GitHub App on `gilgameshenterprisellc-pixel` is no longer
   needed.
+- `npm run lint` is a gate: 0 errors. Style-only rules are off and `any` plus the
+  React Compiler advisories are warnings (see `eslint.config.mjs`).
+
+## Needs you (one command, not a decision)
+
+- The old worktree `.claude/worktrees/confident-austin-ce0947` holds 1.3 GB of
+  build cache; its commit is already on main. The Nov 5 session was not allowed
+  to delete it. From `C:\Users\jbost\socialmate`:
+  `git worktree remove --force .claude/worktrees/confident-austin-ce0947`
