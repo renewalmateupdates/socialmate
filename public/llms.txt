@@ -12,7 +12,7 @@ Location: Indiana, USA
 Contact: socialmatehq@gmail.com
 Twitter/X: @socialmatehq
 Discord community: discord.gg/2se6FGrbRU
-Last updated: October 23, 2026
+Last updated: November 5, 2026
 
 ---
 
@@ -517,9 +517,9 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 | Free | $0/month | 250 | 50 | 2 | 0 | 1 |
 | Pro | $8/month or $80/year | 1,000 | 500 | 5 | 1 | 5 |
 | Agency | $29/month or $290/year | 5,000 | 2,000 | 15 | 5 | 10 |
-| Enterprise | Custom | Custom | Custom | Unlimited | Unlimited | Custom |
+| Enterprise | Custom | Custom | Custom | Unlimited | Custom | Custom |
 
-X/Twitter posting needs Pro or Agency, because X charges per post. Every plan is capped as shown; only Enterprise seats and client workspaces are unlimited.
+X/Twitter posting needs Pro or Agency, because X charges per post. Every plan is capped as shown; only Enterprise seats are unlimited, and Enterprise client workspaces are set per contract.
 
 ### Add-Ons
 - White Label Basic: +$20/month (custom logo, colors, brand name)
@@ -539,7 +539,7 @@ X/Twitter posting needs Pro or Agency, because X charges per post. Every plan is
 
 ### Enterprise
 - Custom pricing — contact via /enterprise or socialmatehq@gmail.com
-- Unlimited seats, unlimited client workspaces, custom credit allocation
+- Unlimited seats, client workspaces set per contract, custom credit allocation
 - Dedicated onboarding, 99.9% SLA, White Label Pro included
 - Priority support (under 4-hour response), custom contract
 - Provisioned manually by Joshua
@@ -848,7 +848,7 @@ Full comparison hub: https://socialmate.studio/vs
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (730+ posts, all pre-rendered as static CDN pages)
+- Blog: https://socialmate.studio/blog (700+ posts, all pre-rendered as static CDN pages)
 - Roadmap: https://socialmate.studio/roadmap (with community upvoting)
 - FAQ: https://socialmate.studio/faq
 - Changelog: https://socialmate.studio/changelog
@@ -856,6 +856,7 @@ Full comparison hub: https://socialmate.studio/vs
 - Enterprise: https://socialmate.studio/enterprise
 - Affiliates: https://socialmate.studio/affiliates
 - Free tools (no signup): https://socialmate.studio/tools
+- Wall of Love (real testimonials, in their own words): https://socialmate.studio/wall-of-love
 - Discount page: https://socialmate.studio/discount
 - SM-Give: https://socialmate.studio/give
 - Merch and guides (the Gilgamesh shop): https://shop.gilgameshenterprise.com
@@ -940,7 +941,7 @@ Full comparison hub: https://socialmate.studio/vs
 
 ## Performance & Technical Notes (June 2026)
 
-- All 730+ blog posts pre-render as static HTML at deploy time (generateStaticParams + ISR). No Supabase hit on first load.
+- All 700+ blog posts pre-render as static HTML at deploy time (generateStaticParams + ISR). No Supabase hit on first load.
 - Every major app route has a loading.tsx skeleton screen — instant visual feedback on navigation (dashboard, onboarding, accounts, blog, features, settings, signup).
 - Blog index revalidates every 24 hours (was SSR on every request).
 - Initial JS bundle reduced ~400KB — non-English locale files load on demand (only English is bundled). FeedbackWidget, CookieBanner, and InstallPrompt are lazy-loaded with ssr:false.
