@@ -5,6 +5,24 @@
 > `docs/history/claude-log-2026.md`, verbatim. Open decisions are in `TODO.md`.
 > How to run, build and test: `README.md`.
 
+## Start here (local sessions)
+
+Work happens in local sessions on Joshua's PC, in `C:\Users\jbost\socialmate`.
+Cloud sessions were retired on Nov 5, 2026.
+
+1. `git status` and `git pull` on `main` first. One branch and one PR per fix;
+   Joshua merges PRs unless he says otherwise.
+2. `gh auth status`: pushes and PRs here need the `renewalmateupdates` account
+   (`gh auth switch --hostname github.com --user renewalmateupdates`). HereNow
+   needs `gilgameshenterprisellc-pixel`; the active one drifts between sessions.
+3. Before pushing: `npx tsc --noEmit`, `npm test`, and `npm run build` for
+   anything that renders or routes. Run the two Python audits before shipping
+   database work (see "THE failure mode" below).
+4. `.env.local` holds the real keys (gitignored); `.env.example` lists the names.
+   Never print, commit or delete env files, `socialmate-release.jks` or the
+   private files listed in `.git/info/exclude`. **This repo is public**: keep
+   customer details and personal notes out of committed files.
+
 ---
 
 ## Who I Am
@@ -62,13 +80,11 @@ builds through Codemagic, live on the App Store since Oct 16, 2026.
   owners could move their fence, the venue dashboard only counted people in the
   room at that moment, and the exit ring now follows the building outline.
   Next is the 1.0.4 build (Codemagic, TestFlight device checks, App Review).
-  HereNow's CLAUDE.md "Next (updated late Nov 4)" is the pick-up list; its step
-  1 (run the SQL) is done.
-- **Pushing needs the `gilgameshenterprisellc-pixel` account.** The Claude GitHub
-  App is not installed there, so cloud sessions can read the public repo but not
-  push; they hand work over as a patch file. On Joshua's PC, `gh` holds both
-  accounts: `gh auth switch --user gilgameshenterprisellc-pixel` to push and merge,
-  then switch back to `renewalmateupdates`. Supabase stays on the Free plan for now.
+  HereNow's CLAUDE.md "Current state and pick-up list" is the list.
+- **Pushing needs the `gilgameshenterprisellc-pixel` account.** The clone is
+  `C:\Users\jbost\herenow`. `gh auth switch --hostname github.com --user
+  gilgameshenterprisellc-pixel` to push there, then back to `renewalmateupdates`
+  for this repo. Supabase stays on the Free plan for now.
 - Never put SocialMate code or claims in it, or the reverse.
 
 ---
@@ -88,7 +104,7 @@ GitHub: github.com/renewalmateupdates/socialmate
 
 | Layer | Tech |
 |---|---|
-| Framework | Next.js 15/16 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
 | UI | React 19 + Tailwind CSS v4 |
 | Database | Supabase (PostgreSQL + RLS) |
@@ -181,7 +197,7 @@ claiming otherwise. Enterprise seats are the single exception.
 - **RLS on all tables** — users only access their own data.
 - **Feature flags table** in Supabase — admin-only write, for kill switches.
 - **Inngest cron `'0 6 * * *'`** — evergreen recycling runs daily.
-- **Enki Truth Mode scan** — Inngest cron `'*/15 * * * *'`, per-user isolation, Yahoo Finance OHLCV.
+- **Enki's Inngest jobs are not registered** (wound down Oct 2026; see the note in `app/api/inngest/route.ts`). Don't re-register them in SocialMate.
 - If a feature could have API costs, gate it like AI credits. Build for free-tier sustainability first.
 
 ---
@@ -193,9 +209,9 @@ claiming otherwise. Enterprise seats are the single exception.
 | Install | `npm install` |
 | Dev server | `npm run dev` (http://localhost:3000) |
 | Production build | `npm run build` |
-| Lint | `npm run lint` |
+| Lint | `npm run lint` (must report 0 errors; the ~680 warnings are a backlog to shrink as files are touched) |
 | Type check | `npx tsc --noEmit` |
-| Script tests | `node scripts/test-*.mjs` (each runs alone, no network) |
+| Script tests | `npm test` (runs every `scripts/test-*.mjs`, no network); `python scripts/test-audit-schema-drift.py` for the audit script |
 | Schema drift audit | `python scripts/audit-schema-drift.py` (needs production read keys in `.env.local`) |
 | Upsert target audit | `python scripts/audit-dead-features.py` |
 | Submit URLs to IndexNow | `node scripts/indexnow-submit.mjs` |
@@ -439,8 +455,11 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 4, 2026).** #769 through #772 are merged and
-deployed; nothing is open in this repo. HereNow's own list is in its CLAUDE.md.
+**Pick up here (updated Nov 5, 2026).** #769 through #773 and the cloud session's
+consolidation branch are merged; nothing is open in this repo. On Nov 5 the
+merged branches were deleted (every one is tagged `backup/<branch>-2026-11-05`
+on GitHub) and lint became a gate (0 errors). HereNow's own list is in its
+CLAUDE.md.
 
 *Claude, after a deploy or when asked:*
 - Test the free-tool path once (#771): in a private window write a post in
@@ -455,9 +474,10 @@ deployed; nothing is open in this repo. HereNow's own list is in its CLAUDE.md.
   bare `/affiliate` prefix, and run `node scripts/indexnow-submit.mjs` (covers the
   14 new `/for` pages, the four tools and the 8 Nov 3 posts). Optional: submit
   `/blog/feed.xml` in Search Console as an extra sitemap.
-- When Ellen (ellenharveyau@gmail.com) sends her testimonial, add it to
-  `TESTIMONIALS` in `app/wall-of-love/page.tsx` (name, company, title, link to
-  ellenharvey.com.au) and remove the page's noindex. Her email is the permission.
+- When Ellen (the Nov 1 team-posting feedback in `/admin/feedback`) sends her
+  testimonial, add it to `TESTIMONIALS` in `app/wall-of-love/page.tsx` (name,
+  company, title, link to her site) and remove the page's noindex. Her email is
+  the permission.
 - Only when Joshua says go: the next RenewalMate cancel guides (Nintendo Switch
   Online, Discord Nitro, Google One, Canva Pro, Dropbox, Peloton, Tidal; skip the
   New York Times, it blocks AI tools); a shop marketing account in SocialMate;
@@ -470,9 +490,9 @@ deployed; nothing is open in this repo. HereNow's own list is in its CLAUDE.md.
   restricts adult-content businesses, so never market SocialMate as one.
 
 *Joshua's side:*
-- Screenshots of `/admin/funnel`, `/admin/overview` and `/admin/feedback` when
-  numbers are needed. Cloud sessions have no production keys, and Remote Control
-  does not support Windows.
+- Numbers: local sessions can read production with the keys in `.env.local`
+  (read-only queries only; any production write needs Joshua's yes). Screenshots
+  of `/admin/funnel`, `/admin/overview` and `/admin/feedback` also work.
 - Inbox (socialmatehq@gmail.com): replies to the TikTok-live email (Oct 23), the
   Sept 25 emails to the 38, the Oct 15 confirmation resends. Replies to the Aug 30
   reactivation send land in Resend's **Receiving** tab (Resend is under
@@ -492,7 +512,8 @@ the 48 TikTok users emailed Oct 23 had posted to TikTok. ChatGPT sent 12 of the 
 signups since Oct 15. Earlier measurements (Aug 30, Oct 14, Oct 23) are in the
 dated entries; always exclude `lib/internal-accounts.ts`.
 
-**First paying customer.** `pixelkittehfurever@gmail.com`, Pro Annual, Aug 29,
+**First paying customer.** A Pro Annual subscriber (identity in local memory and
+the Aug 28–30 entry of the history log), Aug 29,
 cancelled 68 minutes in after the plan bug (#579). Apology and 2,000 credits sent;
 their complaints are all fixed (Sept 11). Do not re-litigate the refund.
 
