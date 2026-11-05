@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { SUPPORT_MAILTO } from '@/lib/contact'
 import { Briefcase, Heart, Laptop, Mic2, Palette, Rocket, Star } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -103,7 +104,7 @@ export default function WallOfLove() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href="mailto:hey@socialmate.studio?subject=SocialMate%20testimonial&body=Hi%20Joshua%2C%0A%0AHere%27s%20my%20honest%20take%20on%20SocialMate%3A%0A%0A"
+              href={`${SUPPORT_MAILTO}?subject=SocialMate%20testimonial&body=Hi%20Joshua%2C%0A%0AHere%27s%20my%20honest%20take%20on%20SocialMate%3A%0A%0A`}
               className="px-6 py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all">
               {t('wall_of_love.send_testimonial_cta')}
             </a>

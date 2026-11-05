@@ -4,6 +4,7 @@ import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 import { GraduationCap, Handshake, Mail } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -134,9 +135,9 @@ export default function DiscountPage() {
           <p className="text-xl font-extrabold mb-2">{t('discount.unsure_title')}</p>
           <p className="text-gray-400 text-sm mb-5">{t('discount.unsure_desc')}</p>
           <a
-            href="mailto:hi@socialmate.studio"
+            href={SUPPORT_MAILTO}
             className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all">
-            <Mail size={16} strokeWidth={2} /> hi@socialmate.studio
+            <Mail size={16} strokeWidth={2} /> {SUPPORT_EMAIL}
           </a>
         </div>
 
