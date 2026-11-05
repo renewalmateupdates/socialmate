@@ -1,10 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendMail } from '@/lib/mail'
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,9 +31,8 @@ export async function POST(req: NextRequest) {
 
     // Send notification email to Joshua
     try {
-      await resend.emails.send({
+      const { error: mailError } = await sendMail({
         from: 'SocialMate <noreply@socialmate.studio>',
-        replyTo: REPLY_TO,
         to: 'socialmatehq@gmail.com',
         subject: `Enterprise Inquiry — ${company || name}`,
         html: `
@@ -76,6 +72,7 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       })
+      if (mailError) console.error('Failed to send enterprise inquiry email:', mailError)
     } catch (emailErr) {
       // Non-fatal — inquiry is saved to DB regardless
       console.error('Failed to send enterprise inquiry email:', emailErr)

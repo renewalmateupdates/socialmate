@@ -1,0 +1,1485 @@
+# SocialMate session log, 2026
+
+Every dated entry that used to live in CLAUDE.md, verbatim and in its original
+order, plus the "What's been built" inventory, the April audit and the
+"Confirmed Done" list. CLAUDE.md keeps the current rules and the pick-up list.
+
+---
+
+## What's Been Built (as of August 13, 2026)
+
+**Core:**
+- Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
+- Multi-account per platform (Bluesky, Mastodon verified)
+- 12 AI tools (Google Gemini): Caption, Rewrite, Hook, Thread + 8 more
+- Three-pool credit system with real-time sidebar updates
+- Workspace isolation (personal + client, cookie-scoped)
+- 5-step onboarding tour + SM-Give card on final step
+- 29 sidebar color themes
+- Referral system (+25 credits per paying referral, milestone bonuses)
+
+**Platforms:**
+- Bluesky, Discord, Telegram, Mastodon — live
+- X/Twitter — live (pay-per-use, quota enforced)
+- Twitch clips — OAuth connect/disconnect, clip browser, thumbnail grid, one-click schedule
+- YouTube clips — RSS-based (no API key needed), video grid
+
+**Coupon & Partner Attribution System (April 2026):**
+- `coupons` table: code, discount_type (percent/fixed/trial_extension), affiliate link, Stripe promo auto-creation
+- `coupon_redemptions` table: per-user idempotency guard, no double-dipping
+- `increment_coupon_redemptions` SQL function: atomic counter
+- `/api/admin/coupons` — GET/POST/PATCH (admin only, Stripe SDK v20 compatible)
+- `/api/coupons/validate` — public validation endpoint
+- `/api/stripe/checkout` — accepts `coupon_code`, applies discount or trial days
+- Stripe webhook extended: coupon `affiliate_id` in metadata → inserts `affiliate_conversions`, updates affiliate earnings
+- Coupon input on `/pricing`, onboarding step 2, and `/settings` plan tab
+- Admin UI at `/admin/coupons` — full table + create form with affiliate dropdown
+
+**Partner/Affiliate System:**
+- `/partners/dashboard` — referral link, promo codes, earnings, conversions, payouts, leaderboard, milestone badges
+- `/affiliates` — public-facing landing page: commission rates, how it works, FAQ, apply CTA
+- Footer "Affiliate" link updated to `/affiliates`
+
+**Enki — AI Trading Bot:**
+> ⚠️ **Status (July 2026): wound down as a public SocialMate product.** Enki was pulled from the Products dropdown, footer, and sitemap (PR #520). `/enki` is now a waitlist signup page (PR #503), and Enki is moving to its own standalone product off SocialMate. **Do NOT generate SocialMate marketing content that presents Enki as a current in-app feature.** The technical detail below is retained as build history only. **Oct 26, 2026 (PR #751): Enki is out of SocialMate entirely**; the last links and mentions were removed, per the roadmap answers.
+- Full system live: dashboard, doctrines, trades ledger, settings, leaderboard
+- Tiers: Citizen (paper), Commander ($15/mo), Emperor ($29/mo), Cloud Runner ($10/mo)
+- Quant engine: ADX filter, TP Ladder (TP1/TP2 partial exits), Kelly position sizing, Correlation Guard (Pearson > 0.85 blocks), DCA averaging, Sharpe/Sortino tracking
+- Trailing stops: ATR-based, tightens after TP hits
+- Session filter (9:30–16:00 EST), re-entry cooldown, daily 3% + portfolio 12% drawdown limits
+- Guardian mode (Fortress Guard) + approval mode
+- **Truth Mode (experiment, April 2026):**
+  - `enki_truth_trades` + `enki_truth_strategy_stats` tables with RLS
+  - `truth_mode_enabled` toggle in settings — locks Risk Profile + Position Size when ON
+  - 15-min Inngest scan: momentum + mean reversion signals, same-day dedup, correlation guard
+  - `/enki/truth` dashboard: sanity warnings, equity curve with SPY overlay, progress bars (target: 50 trades/strategy), per-strategy stats, CSV export
+  - "Truth Mode" link in Enki dashboard navbar
+  - Supabase migrations: `20260417000002_enki_truth_mode.sql`, `20260417000003_enki_truth_mode_enabled.sql`
+
+**Pages/Features:**
+- `/clips` — Twitch/YouTube tab switcher, connected/not-connected state, "Search Any Channel" with quota counter
+- `/admin/users` — searchable user table
+- `/admin/affiliates` — payout management
+- `/admin/coupons` — coupon create/manage UI (new)
+- `/admin/studio-stax` — listing approval/suspend
+- `/admin/feedback` — unified feedback inbox
+- `/admin/platform-stats` — per-platform success rates
+- Studio Stax lister portal
+- Link in Bio builder (free on all plans)
+- Competitor tracking (3 accounts on free)
+- Evergreen recycling
+- RSS/blog import
+- FeedbackButton component (floating bottom-left pill)
+- Mobile hamburger fixed (iPhone 14 notch, `env(safe-area-inset-top)`, 44×44px touch target)
+
+**Growth (April 19, 2026):**
+- Growth partner onboarded: Abdus Sohag — `affiliates` + `affiliate_profiles` records created, referral link `?ref=SOHAG` active. 1-week trial at 10% commission.
+- 140 content posts written (Apr 20–26) — saved to `content-posts-apr20-apr26.md`, ready to bulk schedule
+- SM-Give webhook: 2% of new subscription payments + 100% of donations recorded to `sm_give_allocations`
+- Sitemap updated: `/merch` + `/affiliates` added, stale `/affiliate` removed
+- Growth partner contract template: `contracts/growth-partner-agreement.html`
+
+**SM-Give & Merch (April 18–19, 2026):**
+- `/give` — SM-Give live fund tracker with pulsing counter, fetches `/api/give/stats`
+- `/merch` — fully live with Printify POD integration. First shirt showing. Stripe checkout confirmed working.
+- SM-Give merch allocation: **75% of gross** revenue from every merch order → `sm_give_allocations`
+- `sm_give_allocations` table — tracks give amounts by source (subscription/donation/affiliate_unclaimed/merch)
+- `merch_waitlist` table — email capture for merch launch
+- Printify real shop ID: `27238436` (was hardcoded as `1` everywhere — now reads `PRINTIFY_SHOP_ID` env var)
+- `PRINTIFY_SHOP_ID=27238436` set in Vercel env vars
+- Variant image switching: `MerchProductCard` matches selected variant ID against Printify's `variant_ids` array on each image to show correct color mockup
+- Webhook auto-fulfills merch orders via Printify Orders API on `checkout.session.completed` with `metadata.type === 'merch'`
+
+**SEO:**
+- 28+ `/vs/` comparison pages
+- 61+ blog posts
+- `sitemap.ts` updated (includes /merch, /affiliates, /enki/truth)
+- `public/llms.txt` updated
+
+**X Booster & Quota Restructure (April 20, 2026):**
+- X quota updated: Free 28/mo · Pro 150/mo · Agency 400/mo (down from 50/200/500)
+- X Booster one-time add-on tiers: Spark (50 posts/$1.99) · Boost (120/$4.99) · Surge (250/$9.99) · Storm (500/$19.99)
+- Booster credits stack and roll over month-to-month (never expire)
+- `platform_account_registry` table tracks connected/disconnected Twitter accounts with 45-day global cooldown on disconnect (anti-abuse jail)
+- Stripe price IDs live for all 4 Booster tiers (see price table below)
+
+**Enki UX Fixes (April 20, 2026):**
+- Guardian (Fortress Guard) toggle now lives directly on the Enki dashboard — no settings page required
+- Pending approvals banner on Enki dashboard shows count + quick-approve link when approval mode is ON
+- 24-hour auto-expiry on pending trades — stale approvals auto-decline so queue never jams
+- Leaderboard nav fixed: Enki leaderboard now shows the Enki sidebar nav instead of the public SocialMate nav
+
+**April 21, 2026 — Morning:**
+- Admin platform jail UI at `/admin/platform-jail` — review/manage Twitter accounts in cooldown
+- X Booster purchase UI in Settings plan tab with booster balance display
+- X Booster quota warning in compose — shown when user is near/at X quota
+- Partial post retry button in calendar/queue — lets users retry failed platforms on a partial post
+- Partial post UX: per-platform breakdown shown in calendar, queue, and drafts (e.g. "Bluesky ✓ · X ✗ (quota)")
+- Enki citizen onboarding flow (3-step) — guides new Citizen tier users through paper trading setup
+- Enki Truth Mode: explicit Start/Stop controls on `/enki/truth` dashboard
+- Studio Stax: per-lister detail page at `/studio-stax/[slug]`
+- Studio Stax: criteria checklist on apply page so applicants know what's required
+- Pricing page: X Boosters section + Studio Stax "Get Listed" section
+- Gilgamesh's Guide: `/gils-guide` landing page, email capture → `gils_guide_subscribers` table, Resend delivery, donation section
+- Discord management hub: word filter, automations API, Manage Server link
+- Abdus Sohag: `affiliate_profiles` row created + `affiliates.status = 'active'`, workspace upgraded to Pro
+
+**April 22, 2026 — Morning (PRs #195–#201):**
+- **Repurpose cost** — bumped from 1 → 5 credits across route, AI features page, compose UI
+- **Booster "Popular" badge dark mode** — fixed black badge/border invisible in dark mode; now amber across pricing, settings, onboarding
+- **Team dark mode** — fixed all text/input/select/badge contrast across team page for dark mode
+- **Client role** — new purple "Client" role added (Owner/Admin/Editor/Viewer/Client); "limited workspace access" permissions; validated in invite API
+- **Dashboard plan card** — now shows connected platforms with ✓/dim indicators + seat roster (initials bubbles)
+- **Dashboard drag & drop** — 4 stat cards (Scheduled/Drafts/Published/This Week) are now drag-and-drop reorderable; order persists to localStorage; 6-dot grip handle on hover
+- **10 new compose templates** — Milestone Announcement, Hot Take, Storytime, Value Drop, Question/Poll, Behind the Numbers, Day in My Life, Lesson Learned, Appreciation Post, Promotion/Offer (total 15)
+- **Best Times heatmap fix** — fixed cell sizing, dark mode empty cell visibility, alignment with labels
+- **Analytics platform transparency** — "Platform Analytics Status" card shows per-platform data availability (Bluesky ✅, Mastodon ✅, Discord ⚠️, Telegram ⚠️, X 🔒, LinkedIn 🔒); Bluesky sync button; chart labels clarified
+- **Inngest concurrency fix** — `publishScheduledPost` concurrency lowered from 10 → 5 (free plan limit); was silently failing since March 17
+- **Collapsible sidebar** — desktop hamburger toggle (w-14 collapsed / w-56 expanded), persists via localStorage, icon-only mode with tooltips
+- **Enki sidebar nav** — Enki leaderboard now shows Enki nav, not public nav; auto-refresh on dashboard
+- **Social inbox** — unified `/inbox` for Bluesky, Mastodon, Telegram, Discord; X tab shows "coming soon"
+- **Creator Studio video editor** — `/create`: trim, 8 CSS filters, caption overlay, export via MediaRecorder+canvas, thumbnail capture, platform dimensions
+
+**April 22, 2026 — Evening:**
+- **Dashboard crash fix** — `WorkspaceContext` crashed for `pro_annual`/`agency_annual` users because `PLAN_CONFIG['pro_annual']` = undefined. Fixed with `normalizePlan()` helper.
+- **SOMA foundation** (PR #202) — `soma_identity_profiles`, `soma_weekly_ingestion`, `soma_credit_ledger` tables; SOMA columns on workspaces; `resetSomaCredits` Inngest cron (`0 0 1 * *`); identity interview onboarding at `/soma/onboarding` (5-step dark UI); credit API at `/api/soma/credits`; identity API at `/api/soma/identity`
+- **SOMA dashboard** (PR #203) — `/soma` mission control: credits card, identity status, content queue (approve/edit/skip), mode toggle (Safe/Autopilot); `/soma/upgrade` gate for free users; `/api/soma/mode` PATCH; SOMA nav link in sidebar
+- **SOMA weekly generation** (PR #204) — `/api/soma/ingest` (form + file upload), `/api/soma/ingest/upload`, `/api/soma/generate` (7-day content generation via Gemini); `/soma/weekly` page
+- **Gilgamesh's Guide update** — Added "The AI Advantage: Building with No Permission" chapter preview (4 vibe-coding points); redesigned donation section into two-card layout ("Support Joshua" + "Pay It Forward")
+- **lib/soma-costs.ts** — `SOMA_COSTS`: generate_post=5, generate_daily=12, generate_week=75, ingest_weekly=25, identity_update=15, autopilot_run=50
+
+**April 21, 2026 — Evening (PR #190):**
+- **AI Brand Voice** — `user_settings.brand_voice` JSONB column; Settings → Brand Voice tab (Pro+); tone/style/vocabulary/example fields; Gemini prompt injection via `=== BRAND VOICE INSTRUCTIONS ===` block; Compose badge showing active voice
+- **Content Repurposing** — `/api/ai/repurpose` (6 formats: thread/email/caption/long_form/short_hook/linkedin_post, 1 credit each); new card in `/ai-features`; inline panel in Compose with Replace/Copy
+- **Smart Queue** — `/api/posts/auto-schedule` (Pro+ only; fills 14-day/30-day window at platform-optimal ET hours; 1-hour collision avoidance); `⚡ Auto-schedule Drafts` button in Queue (free users see upgrade prompt); `✨ Use best time` link in Compose datetime picker
+- **X-style Analytics Dashboard** — full rewrite of `/analytics`; SVG area chart (no libraries); platform breakdown bars; Bluesky engagement sync via `/api/analytics/bluesky-sync` (public ATP API); best-times heatmap; `bluesky_stats` JSONB column on `posts` table
+- **Browser Push Notifications** — `push_subscriptions` table; `/public/sw.js` service worker; VAPID subscribe/unsubscribe/send API routes; `usePushNotifications` hook; Settings → Notifications toggle; Inngest triggers for post published + Enki trade signals. **Needs Vercel env vars:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` (generate with `npx web-push generate-vapid-keys`)
+- **Studio Stax Renewal Emails** — `studioStaxRenewalEmails` Inngest cron (`0 9 * * *`); 30/14/7-day Resend drip to `studio_stax_slots`; timestamped idempotency (`renewal_email_*_sent_at`); STAX20 discount code; RenewalMate teaser in 30-day email
+- **Roadmap page updated** — new shipped items added, Creator Monetization Hub + Content DNA + Unified Inbox added to coming-soon
+
+**April 22, 2026:**
+- **PublicNav redesign** — "Audiences ▾" dropdown (Streamers, Agencies, Small Biz); "Resources ▾" dropdown (Blog, Gil's Guide); SOMA added as standalone nav item alongside Studio Stax + Enki; mobile drawer updated with collapsible Audiences/Resources sections + Products section
+- **SOMA Autopilot checkout** — `AutopilotModal` now calls `/api/stripe/checkout` with `price_1TP8rU7OMwDowUuUYLBNAVux`; replaced settings redirect with real Stripe subscription checkout
+- **Studio Stax price IDs** — Founding (`price_1TP8wi7OMwDowUuUNQW7ER95`) + Standard (`price_1TP8xG7OMwDowUuUO05Vh1Kq`) added to checkout metadata; constants defined in checkout route for future subscription migration
+- **WorkspaceContext annual-plan crash fix** — `normalizePlan()` added to map `pro_annual`/`agency_annual` before `PLAN_CONFIG` lookup; prevents crash for annual subscribers
+
+**April 23, 2026:**
+- **Dashboard crash fix (React #310)** — `useSensors`/`useSensor` from `@dnd-kit` were declared after `if (loading) return` early return in `DashboardInner`. Moved declarations before early return. Dashboard fully stable.
+- **TikTok Developer App submitted** — App name: SocialMatehq. Content Posting API (Direct Post enabled) + Login Kit. Scopes: `user.info.basic`, `video.publish`, `video.upload`. Redirect URI: `https://socialmate.studio/api/tiktok/callback`. Status: **In review** (2–4 week queue). Sandbox environment auto-created (SocialMatehq2) — ignore until Production is approved.
+- **LinkedIn Company Page** — setup started at linkedin.com/company/setup/new. Must complete + publish before applying for LinkedIn API.
+- **LinkedIn posts drafted** — two long-form SEO/AEO posts written: Post 1 (Apr 23 tonight): TikTok API submission story. Post 2 (Apr 24 morning): bootstrapped builder narrative + feature roundup.
+
+**April 24, 2026:**
+- **Streak notifications** (Inngest cron `0 22 * * *`) — alerts users with 3+ day streaks who haven't posted today. Idempotent via notifications table. Push + in-app notification.
+- **SOMA autopilot Inngest cron** (`0 12 * * 1`) — Monday weekly run. Rewrote to iterate `soma_projects` (not workspaces): uses per-project platforms, posts/day, window, run caps. Diffs master docs when available. Notifications link to specific project page.
+- **SOMA Phase 2** (PR #208) — Named projects system: `/soma/projects/new`, `/soma/projects/[id]` (doc upload, diff results, generate button, doc history, delete modal), all project CRUD APIs, ingest API (Gemini diff analysis, saves versioned master docs, 25 credits), generate API (platform-native single-call generation, run caps, 75 credits). SQL: `soma_projects` + `soma_master_docs` tables with RLS applied.
+- **FAQ page** — `/faq` with 6 sections: General, SOMA, Enki, Studio Stax, Billing, Privacy. Added to Resources dropdown in PublicNav and sitemap.
+- **Home page nav unified** — `LandingHeader` replaced with `PublicNav` on `/` — now matches all other public pages.
+- **Footer** — SOMA + Enki added to Product column in `PublicFooter`.
+- **SOMA landing page platforms** — corrected to show live (Twitter, Bluesky, Mastodon, Discord, Telegram) vs coming soon (LinkedIn, Instagram, TikTok). Coming-soon platforms still generate content for manual posting, auto-queues when platform connects.
+- **LinkedIn posts** — SOMA-focused long-form post written for LinkedIn distribution.
+- **Inngest version** — pinned to `3.54.0` (security-patched 3.x, compatible with 3-arg `createFunction` API used throughout codebase).
+
+**April 25, 2026:**
+- **SOMA upgrade gate fix** (PR #213) — Dashboard gate changed from `c.monthly === 0` to `plan !== 'free'`. Pro/Agency users always reach dashboard; credits auto-provision on first load. Credits API now returns `plan` field.
+- **SOMA landing pricing cards redesign** (PR #213) — Cards now match SocialMate main pricing page: light bg + colored border per tier (emerald/amber/purple), ✓ bullets, consistent field names.
+- **SOMA Full Send mode toggle** (PR #214) — Dashboard now shows all 3 mode buttons (🟢 Safe / ⚡ Autopilot / 🚀 Full Send). Types extended to include `'full_send'` throughout. Full Send shows upgrade modal if not purchased.
+- **SOMA email notifications** (PR #214) — Generate route sends Resend email after every run: Safe mode = "queue ready to review", Autopilot/Full Send = "posts scheduled". Non-fatal try/catch.
+- **Roadmap updated** (PR #214) — SOMA credit counts corrected (500/2000), FAQ added as shipped, SOMA description updated with Projects/Full Send.
+- **Media library bucket fix** (PR #215) — Upload route corrected from `'post-media'` → `'media'` bucket. `media_items` table SQL confirmed applied. `media` bucket confirmed exists (public, 50MB).
+- **Admin workspace SQL** — `socialmatehq@gmail.com` workspace set to `plan='agency'`, `soma_credits_monthly=2000`, `soma_autopilot_enabled=true` directly in Supabase (SQL only, not in code — paying customers still see upgrade modal).
+
+**April 27, 2026 (PRs #227–#229):**
+- **SOMA Full Send modal fix** (PR #227) — `AutopilotModal` now takes `autopilotEnabled` + `fullSendEnabled` props; already-purchased tiers show "Already Active ✓" instead of a buy button; "Stay on Autopilot" cancel text when Autopilot is active. Added `soma_full_send_enabled` BOOLEAN column to `workspaces`. Credits API + mode API updated. Migration: `20260426000003_soma_full_send_enabled.sql`. Full Send `$20` badge correctly hidden when `full_send_enabled=true`. Mode API now accepts `'full_send'` mode.
+- **SOMA connected-platform filter** (PR #228) — New project form fetches `/api/accounts/connected` on mount; only shows platforms the user has actually connected; pre-selects all; skeleton loader + empty state with Settings link. New API route: `GET /api/accounts/connected`.
+- **SOMA per-platform schedule** (PR #229) — Each platform gets its own schedule row: posts/day picker (1–N, capped by mode tier) + day presets (Every day / Mon–Fri / Weekends / Custom) + S M T W T F S custom picker. Live summary per platform. Migration: `soma_projects.platform_schedule JSONB`. Projects API accepts + caps `platform_schedule`, derives global `posts_per_day` as max across platforms.
+- **Blog batch** — 27 new posts added to STATIC_POSTS covering SOMA, Enki, team approval workflows, link shortener, posting streaks, content DNA, brand voice AI, smart queue, recurring posts, A/B testing, link in bio, competitor tracking, per-platform scheduling, Studio Stax, and the bootstrapped founder story.
+- **Roadmap updated** — SOMA per-platform schedule + connected-platform filter added as shipped; schedule templates UI + workspace activity logging added as in-progress.
+
+**April 26–27, 2026 (PRs #221–#224):**
+- **Link in Bio click analytics + QR code** (PR #221) — per-link click tracking with `bio_link_clicks` table; QR code displayed in analytics tab using qrserver.com; Download QR button
+- **Post performance alerts** (PR #221) — `postPerformanceAlerts` Inngest cron (`0 */6 * * *`); fires push + in-app notification when a post gets unusual engagement (2× avg); Settings toggle for opt-in
+- **Team approval workflow** (PR #221) — Editor/Client roles submit posts as `pending_approval`; Owner sees pending count badge on Approvals nav; approve/reject with reason; approved posts auto-schedule
+- **A/B post variant testing** (PR #221) — Pro+; two variants created simultaneously, published 24h apart; engagement comparison after publish; winner declared automatically
+- **Inngest Map/Set fix** (PR #222) — replaced spread on `Map.values()` / `Set` iterators with `Array.from()` in `step.run` returns — fixes TypeScript build error
+- **Link Shortener** (PR #223) — `/links` page; create/copy/delete short links at `socialmate.studio/go/[slug]`; click counter; `/go/[slug]` redirect route; SQL: `short_links` table with RLS
+- **Notification count endpoint** (PR #223) — `GET /api/notifications/count` returns `{unread: N}` (0 not 401 for logged-out)
+- **Workspace activity feed** (PR #223) — `GET /api/workspace/activity` last 50 events; SQL: `workspace_activity` table with RLS
+- **Schedule templates API** (PR #223) — `GET/POST /api/schedule-templates`; SQL: `schedule_templates` table with RLS
+- **Unread notification badge** (PR #224) — 🔔 sidebar bell polls `/api/notifications/count` every 60s; red badge capped at 99+; refreshes on pathname change
+- **Workspace activity page** (PR #224) — `/activity` page: last 50 events with actor, icon, relative timestamps; sidebar nav item under Manage
+- **Posting streak heatmap** (PR #224) — `/streak` page: GitHub-style 365-day contribution graph, hover tooltips, today indicator, legend; stats: current streak / longest / total posts / active days; motivational footer; `/api/streak` route
+- **Approval submission notifications** (PR #224) — owners get instant in-app notification when Editor/Client submits a post for approval (both new inserts and existing draft updates); non-fatal
+
+**April 28, 2026:**
+- **60 blog posts added** — SQL INSERT into `blog_posts` table. Categories: SocialMate (18), SOMA (15), Enki (10), Studio Stax (10), RenewalMate (4), Founder Story (3). All live at `/blog/[slug]` immediately, no deploy needed.
+- **SOMA chunked generation fix** — Gemini large-batch failure root cause: >14 posts in one call → truncated JSON → silent skip. Fix: `CHUNK_SIZE = 14`, loop generates each chunk separately. All platforms now generate correctly.
+- **SOMA ingestion project_id fix** — `soma_weekly_ingestion` was missing `project_id` and `is_diff` columns. SQL migration applied. Generate button now appears after page reload. SQL: `ALTER TABLE soma_weekly_ingestion ADD COLUMN IF NOT EXISTS project_id UUID REFERENCES soma_projects(id) ON DELETE CASCADE; ALTER TABLE soma_weekly_ingestion ADD COLUMN IF NOT EXISTS is_diff BOOLEAN DEFAULT FALSE;`
+- **SOMA post times fixed** — `startHour` changed from 8 UTC (4am EDT) → 13 UTC (9am EDT). Posts now schedule 9am–7pm Eastern.
+- **Queue bulk select** — Gmail-style checkboxes on every post card. Master "Select all" toggle. Per-day "Select day" checkboxes. Sticky bottom action bar: "Move to drafts" | "Delete" | dismiss. Amber highlight on selected cards.
+- **Queue mobile safe-area fix** — Bulk action bar and toast now use `env(safe-area-inset-bottom)` so they don't overlap iPhone home indicator.
+- **App Store strategy decided** — PWA first (manifest + sw, 1-day build), then Google Play via Capacitor wrapper. Don't wait for LinkedIn/TikTok/Meta APIs. Apple App Store deferred 3-6 months.
+- **Toast safe-area audit** — 25+ pages use `fixed bottom-6 right-6` for toasts. Right-corner toasts don't overlap home indicator (centered). Long-term fix: shared `<Toast>` component with safe-area built in.
+
+**April 26, 2026 — Late Night (PR #220):**
+- **Recurring posts** — 🔁 Repeat toggle in compose (Daily/Weekly/Bi-weekly/Monthly + optional end date). Auto-reschedules next occurrence after publish via Inngest `computeNextOccurrence`. Queue shows 🔁 badge with rule label. SQL: 4 new columns on posts table.
+- **Post as image** — 📸 Canvas PNG export (1200×630, no npm deps) in compose action bar + queue cards. Branded SocialMate card with amber header, word-wrapped content, platform badge.
+- **Hashtag suggestions** — #️⃣ Gemini-powered panel in compose. 12 hashtags as clickable chips (append to content, no dupes), Copy all button. 1 credit. Dedicated `/api/ai/hashtags` route.
+- **Roadmap + sitemap updated** — New shipped items, /refer + /analytics/dna + /monetize added to sitemap.
+
+**April 26, 2026 — Evening (PR #219):**
+- **Referral landing page** — `/refer/[code]` server component. Looks up affiliate by referral_code, shows personalized "invited by" landing with benefits + pricing + CTA to `/signup?ref=[code]`. Sets `ref_code` cookie (7-day) via client component fallback.
+- **Weekly digest email** — `weeklyDigest` Inngest cron (`0 8 * * 0`, Sunday 8am UTC). Posts this week, streak, scheduled count, top post preview. Dark amber Resend email → `/analytics`. Skips users with no posts.
+- **Enki trade history** — `/enki/trades` page with summary bar (win rate, P&L), filter tabs All/Open/Closed, FIFO P&L calculation, 25/page pagination. `enkiWeeklySummary` cron emails Monday 9am UTC.
+- **Upgrade nudges** — `UpgradeNudge` component (dismissible 7 days via localStorage). Sidebar (0 or ≤10 credits), Compose (≤10 credits on free), Settings plan tab (always on free).
+- **Competitor post alerts** — `competitorAlerts` Inngest cron (`0 */4 * * *`). Fires push + in-app notification when tracked competitor has new posts in `competitor_posts`.
+
+**April 26, 2026:**
+- **Content DNA** (PR #216) — `/analytics/dna` engagement fingerprint dashboard. Best day/time/length/format charts, top 5 posts, platform breakdown. "Sync Bluesky" and "Sync Mastodon" buttons. Requires ≥10 posts with engagement data.
+- **Mastodon engagement sync** (PR #216) — `POST /api/analytics/mastodon-sync` pulls favourites/reblogs/replies from each connected Mastodon instance into `mastodon_stats` JSONB column.
+- **Creator Monetize landing** (PR #216) — `/monetize` landing page with Tip Jar / Fan Subscriptions / Paywalled Posts preview + waitlist capture → `monetize_waitlist` table. Added to PublicNav + PublicFooter.
+- **Admin God Mode overview** (PR #216) — `/admin/overview` server component: total users, new signups 7d, pro/agency counts, SOMA activity, churn signals (paid users 30d+ with no post in 14d), recent signups, quick links.
+- **Inbox replies** (PR #217) — `POST /api/inbox/reply` handles Bluesky (full CID chain) and Mastodon (`in_reply_to_id`). Inline reply composer on mention/reply items in `/inbox`. Char counter, spinner, "✓ Replied" on success.
+- **Compose thread builder** (PR #217) — 🧵 Thread toggle in compose. Numbered part cards with individual char counters, auto-split by platform limit, add/remove parts, submits as sequential posts 30s apart.
+- **Compose save-as-template** (PR #217) — "Save as template" inline section in compose. Title + category, inserts to `post_templates`, auto-collapses on success.
+- **SOMA onboarding skip/resume** (PR #218) — Skip button per step, "Save & continue later" saves to localStorage + partial identity POST. Resumes from saved step on return.
+- **Compose per-platform preview** (PR #218) — 👁 Preview button opens modal with native-style mock cards for each selected platform (Bluesky, Mastodon, X, Discord, Telegram). Thread mode shows `1/N` indicator.
+- **Enki paper trading bug fix** — Removed non-existent `total` column from `enki_trades` inserts (lines 1922 + 1994 in `lib/inngest.ts`). **This was a critical bug — ALL paper trades were silently failing since launch.** Now fixed.
+- **SQL run in Supabase (Apr 26):**
+  ```sql
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS mastodon_stats JSONB DEFAULT NULL;
+  CREATE TABLE IF NOT EXISTS monetize_waitlist (id uuid default gen_random_uuid() primary key, email text unique not null, created_at timestamptz default now());
+  ALTER TABLE monetize_waitlist ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Anyone can join waitlist" ON monetize_waitlist FOR INSERT WITH CHECK (true);
+  ```
+
+**April 29, 2026 (PRs #255–#260):**
+- **Agents Hub** (PR #255) — `/agents` hub page with Live Now / Coming Soon sections. Launched with Email Outreach Agent (5 credits/email, Gemini-powered subject+body, draft history) and Growth Scout (free Pro+, reads competitor_posts + own posts, cadence chart, top competitor posts, insights).
+- **Phase 2 roadmap features** (PR #256) — Schedule Templates UI at `/schedules` (full CRUD, day/time slot picker); SOMA Credit Packs component + `/api/soma/credits/purchase` Stripe checkout (3 pack sizes, lazy Stripe init); Workspace activity logging wired into `/api/posts/publish`; PWA Install Prompt (`components/InstallPrompt.tsx`, `beforeinstallprompt`, 7-day dismiss).
+- **Newsletter Agent** (PR #257) — Sunday 9am UTC cron. Draft mode: generates newsletter from week's posts via Gemini, emails owner to review. Auto mode: sends to full subscriber list via Resend. Settings at `/agents/newsletter`. Tables: `newsletter_settings`, `newsletter_sends`.
+- **Client Report Agent** (PR #257) — Monday 9am UTC cron. Agency-only. Generates HTML email report (posts published, scheduled ahead, active platforms) sent to owner + CC list. Settings at `/agents/client-report`. Table: `client_report_settings`.
+- **Repurpose Agent** (PR #258) — Wednesday 9am UTC cron. Pro+. Picks best recent post, repurposes to selected formats (Thread/Caption/LinkedIn/Email/Short Hook) via Gemini, creates drafts. No per-run credits. Settings at `/agents/repurpose`. Table: `repurpose_settings`.
+- **Caption Agent** (PR #259) — Daily 11am UTC cron. Agency-only. Watches configured RSS feeds, finds new articles since last run, generates social post drafts via Gemini (custom `parseRSSFeed()` regex parser, no npm deps). Max-per-day cap, tone guidance, draft/auto mode. Settings at `/agents/caption-agent`. Table: `caption_agent_settings`.
+- **Trend Scout** (PR #260) — Daily 7am UTC cron. Pro+. Analyzes competitor posts from last 48h + user's own recent posts via Gemini. Returns 5 trending content angles (topic/why_now/angle/sample_caption). Each has a "Draft Post" button that pre-fills Compose. Falls back to evergreen angles if no competitor data. Table: `trend_scout_settings` + `trend_scout_results`.
+- **Inbox Agent** (PR #260) — Every 2h cron. Pro+. Refreshes Bluesky tokens from `connected_accounts`, fetches unread mentions, generates suggested replies via Gemini with tone guidance. Stores in `inbox_reply_drafts` with full Bluesky threading metadata (parent_uri/cid, root_uri/cid). Settings page at `/agents/inbox-agent` shows pending drafts with Send/Edit/Dismiss controls that call existing `/api/inbox/reply`. Tables: `inbox_agent_settings`, `inbox_reply_drafts`.
+- **All 8 agents now live** — agents hub has zero coming-soon slots. Roadmap page updated.
+- **SQL run after each PR** — all 8 new DB tables confirmed applied.
+- **Inngest functions to resync after PRs #257–260 merge**: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`
+
+**April 30, 2026 (PR #261):**
+- **Toast safe-area fix** — `components/Toast.tsx` shared component added with `env(safe-area-inset-bottom)`. Replaced `fixed bottom-6 right-6` with safe-area style across all 35 pages/components — zero remaining occurrences codebase-wide.
+- **Creator Monetization Hub** — full build. Stripe Connect Express onboarding (`/api/monetize/connect` + callback). Settings API (Pro+ gate): page handle/title/bio, tip jar (min/max/enable), fan subscription (price/name/desc/enable). `/monetize/hub` dashboard: connect Stripe, earnings cards (total tips + active subscribers), recent tips + fan list. `/creator/[handle]` public page: tip presets ($1/$3/$5/$10), custom amount, name/message, fan sub card, "Powered by SocialMate". 0% platform cut — all payments via Stripe Connect `transfer_data.destination`. Stripe webhook: `creator_tip` (mark paid), `creator_subscription` (record fan), `customer.subscription.deleted` (mark cancelled). Sidebar: 💸 Creator Hub. Landing page updated to "Now Live — Pro+". SQL: `creator_monetization`, `creator_tips`, `creator_fan_subscriptions` tables with RLS.
+
+---
+
+## Audit Findings (April 19–20, 2026) — resolved
+
+- ✅ Broken `/affiliate` links in `/give` and `/referral` — now correctly point to `/affiliates` (PR #160)
+- ✅ Exposed debug route `/api/merch/debug` — deleted (PR #160)
+- ✅ Missing try/catch in `/api/feature-requests` POST — added (PR #160)
+- ✅ `posts_status_check` DB constraint missing `failed` and `partial` values — migration added (PR #173). **Must run SQL in Supabase if not auto-applied:** `ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_status_check; ALTER TABLE posts ADD CONSTRAINT posts_status_check CHECK (status IN ('draft', 'scheduled', 'published', 'failed', 'partial', 'pending_approval'));`
+- ✅ Twitter quota plan lookup bug — personal workspace defaulted to 'free' plan (50 limit) because `workspaceId=null` caused empty DB lookup. Fixed to query by `owner_id + is_personal=true` (PR #175)
+- ✅ Admin email (`socialmatehq@gmail.com`) now bypasses X quota entirely (PR #175)
+
+---
+
+**May 1, 2026 (PR #270):**
+- **TikTok live on /accounts** — TikTok moved from Coming Soon → Live Integrations. Connect button hits `/api/tiktok/auth`, OAuth flow works via sandbox credentials. Lands on `/tiktok/studio` after auth.
+- **X free quota: 28 → 5 tweets/month** — Free users get 5 tweets/month to taste X. Compose already shows "Buy X Booster →" nudge when exhausted. Booster packs monetize heavier free-tier X usage.
+- **TikTok API confirmed free** — No per-post charges from TikTok. Indirect costs only: Supabase storage + egress (~$1-2/100 active users/month). Legitimate competitive edge — most competitors charge $18+/mo for TikTok scheduling.
+- **Abdus Sohag cut** — `affiliates.status = 'inactive'`, workspace downgraded to free. SQL run directly in Supabase.
+
+**May 5, 2026:**
+- **TikTok FILE_UPLOAD posting working** ✅ — Full end-to-end flow confirmed. `init-upload` → client PUT to TikTok upload URL → `confirm-upload`. Unaudited app restriction: account must be in Private mode until Production API approved. Sandbox banner shown in TikTok Studio.
+- **TikTok demo submitted** ✅ — Loom demo video recorded and uploaded to TikTok developer portal. App resubmitted for Production API review. Support ticket `ad7714530aa61ad4` open. No action needed until approved.
+- **Gilgamesh's Guides launched** — Free long-form guide series at `/guides`. Vol. 1 "Starting a Business From Scratch" live (PR #278). Vol. 2 "Marketing on Zero Budget" (PR #281). Hub + Guides CTA added to landing page (PR #279). Guides linked in PublicNav Resources dropdown.
+- **Landing page polish** (PR #279) — Beta milestone bar removed, founder credibility card added, Guides CTA section replaced empty testimonials placeholder, hero headline tightened. Merged.
+- **TikTok status corrected** (PR #280) — Reverted to 'soon' on landing page (was prematurely set to 'live'); platform count back to 5. Will flip to 'live' when Production API approved.
+- **Google Play CI/CD** (PR #281) — `.github/workflows/android-release.yml` builds signed AAB on GitHub Actions (ubuntu-latest, no Android Studio needed). Triggers on `git tag v*`. `GOOGLE_PLAY_SETUP.md` rewritten with full GitHub Actions instructions.
+
+**May 6, 2026 (PRs #285–#291):**
+- **`public/logo.png` added** (PR #288) — Canonical three-circle grayscale gradient SocialMate icon, copied from `public/image-1778082573747.png`. All nav/footer/page logo references now use `/logo.png`.
+- **PublicNav logo** (PR #287) — Bumped from `w-8 h-8` → `w-10 h-10`, pointing to `/logo.png`.
+- **PublicFooter logo** (PR #289) — Replaced hardcoded "S" lettermark div with `<img src="/logo.png" className="w-8 h-8 rounded-xl" />`.
+- **Privacy + Terms overhaul** (PR #290) — Large logo (`w-24 h-24 rounded-3xl`) added before h1 on both pages. "Last updated" bumped to May 6, 2026. Privacy policy: full TikTok per-scope documentation for developer review (`user.info.basic`, `video.upload`, `video.publish`), paragraph reconciling "SocialMatehq" developer portal name with "SocialMate" brand, "TikTok (planned)" → "TikTok (live)". TikTok app resubmitted May 2026.
+- **20 blog posts inserted via SQL** — Business credit, tax strategy, founder story, platform guides, content systems. All high-search-volume personal finance + creator business queries. Full slug list in memory.
+- **Sitemap updated** (PR #291) — 20 new blog slugs added to `app/sitemap.ts` `BLOG_SLUGS` array. Merged.
+- **Social posts content file** — `content-posts-may6-guides-batch.md` created locally at `C:\Users\jbost\socialmate\`. Use SOMA to generate content from updated CLAUDE.md master doc — do NOT manually schedule posts.
+
+**May 6, 2026 (continued — PRs #292–#297):**
+- **Gilgamesh's Guides Vol. 3** (PR #292) — `/guides/business-credit-legal` live. 7 chapters: DUNS, PAYDEX, Licenses, Tax Deductions, LLC vs S-Corp, Banking, Insurance. Merged.
+- **Gilgamesh's Guides Vol. 4** (PR #293) — `/guides/vibe-coding-with-ai` live. 7 chapters: What Vibe Coding Is, The Stack, The Workflow, Prompting, Debugging, Going Live, The Mindset. Written in Joshua's voice. Merged.
+- **10 vibe coding blog posts + sitemap** (PR #294) — Slugs: vibe-coding-what-it-is-how-to-start, build-saas-no-cs-degree-ai-2026, claude-code-review-solo-founder, best-ai-coding-tools-solo-founders-2026, nextjs-supabase-starter-stack-2026, how-to-prompt-ai-for-coding-beginners, ship-software-faster-with-ai-workflow, building-saas-working-full-time-job, free-stack-build-saas-zero-cost-2026, solo-founder-tech-stack-no-team-2026. Merged.
+- **Landing page always-dark** (PR #295) — Root div changed from `bg-white dark:bg-gray-950` to `dark min-h-screen bg-gray-950`. Forces dark background regardless of system preference. Merged.
+- **Changelog May 6 entry** (PR #296) — Covers guides complete, Google Play CI/CD, TikTok, blog posts, logo fix, privacy overhaul, dark landing. Merged.
+- **Landing page guides fix** (PR #297) — Fixed Vol. 3 (was wrongly showing Vibe Coding), added Vol. 4. Grid changed to 2×2. All 4 guides now live with correct hrefs. Merged.
+- **Google Play Console account created** — Developer name: SocialMate. Account ID: 8266379090016264889. Personal account under socialmatehq@gmail.com. AAB built successfully via GitHub Actions (v1.0.4, Android Release Build #5). Device verification: ✅ complete. Identity verification: **submitted May 6, 2026 — awaiting Google review (1–3 days)**. Once approved, phone verification auto-clears, then: create app in console → upload AAB → internal testing.
+
+**May 6, 2026 (end of session — PRs #298–#301):**
+- **CLAUDE.md master doc updated** (PR #298, #299, #301) — Full session recap committed. Roadmap cleaned up. Ready to submit to SOMA.
+- **SOMA diff fix** (PR #300) — Two bugs fixed: (1) standalone `/api/soma/ingest` now fetches previous raw_input from DB and passes both old+new to Gemini with explicit "extract only what changed" instructions. (2) Project ingest `/api/soma/projects/[id]/ingest` had 4000-char content truncation — bumped to 30000 so full CLAUDE.md gets analyzed. SOMA now generates posts about what's actually new, not full history.
+- **SOMA posting schedule editable** (PR #300) — Project page schedule section now has Edit/Save/Cancel controls. Posts/day can be adjusted with +/− buttons. Day toggles work inline. Saves via PATCH to project API.
+
+**May 6, 2026 (continued — PRs #302–#303):**
+- **SOMA project ingest 30k + editable schedule** (PR #302) — Cherry-picked missed commit from PR #300: project ingest content truncation bumped 4k→30k chars, editable posting schedule on project page (Edit/Save/Cancel buttons). Both live.
+- **SOMA Voice DNA Builder** (PR #303) — Full adaptive personality system:
+  - `/soma/voice` page: 40-question personality interview in 3 configurable tiers. Foundation (10q, ~5min): niche, audience, tone, slang, your story, what you solve, what you'd never sound like. Deep Dive (25q): endless topic, niche misconceptions, vulnerability stance, differentiator, contrarian belief, audience frustration, success vision. Advanced (40q): campaign style, hot take ratio, promo ratio, seasonal relevance, anything else.
+  - Gemini reads all answers and writes a **Voice DNA summary** (150-200 word instruction block) injected into every future SOMA content prompt. SOMA stops guessing and starts sounding like you.
+  - **Post-publish feedback modal**: pops up automatically after every content run. 3 rotating questions from a pool of 8 (voice match rating, more-of requests, what missed the mark, what's happening in your world, tone check). Every response is saved to `soma_voice_feedback` and Gemini rebuilds the Voice DNA from the last 20 feedback items. SOMA gets smarter every single run.
+  - Both generate routes now inject `personality_summary` as `CREATOR VOICE DNA` block when available.
+  - SOMA dashboard: Voice DNA Builder quick action (purple, prominent). SOMA project page: banner CTA if no profile, tier indicator if active.
+  - SQL applied: 3 columns added to `soma_identity_profiles` (`personality_tier`, `personality_answers`, `personality_summary`). New `soma_voice_feedback` table with RLS.
+
+**May 7, 2026 (PRs #304–#308):**
+- **SOMA Voice DNA 404 fix** (PR #305) — Done screen "Go to Projects" linked to /soma/projects (doesn't exist). Fixed to /soma/dashboard.
+- **SOMA Voice DNA dashboard indicator** (PR #306) — Identity Status card on SOMA dashboard now shows "🧬 Voice DNA: Advanced tier active" + tier badge when completed. Quick action shows "✓ Advanced tier saved" (purple) vs generic CTA.
+- **SOMA Project Memory system** (PR #308) — Full persistent content memory per project:
+  - `soma_project_memory` table: `running_summary` (rolling manager notes), `topics_covered` (string array), `angles_used` (string array), `total_posts_generated` (int).
+  - Ingest route reads memory before Gemini prompt and tells it what NOT to repeat. Gemini returns a mandatory `memory_update` field (2-3 sentence manager notes) appended with timestamp to `running_summary`.
+  - Project page SOMA Memory panel: shows running manager notes, topics covered pills, angles used pills, total posts generated, and a "🗑 Clear memory" button for fresh start.
+  - **500k character cap** on project ingest (up from 30k). Full document sent — no slicing, no truncation. Documents larger than 500k chars get a 400 error.
+  - `/api/soma/projects/[id]/memory` route: GET (read memory) + DELETE (clear/reset).
+  - SQL applied: `soma_project_memory` table with RLS.
+- **Feedback modal made on-demand** (PR #308) — Removed auto-popup after generate run (was firing before user could review posts). Now shown via "🎙️ Give feedback" button in generate result section. User-initiated only.
+- **Voice DNA interview completed by Joshua** — Full Advanced tier (40 questions) answered. Voice DNA summary active in SOMA. SOMA now knows: solo founder building in public, tree service worker (quit deli June 2026), hip-hop + LoL + space culture, authentic hustle tone, "cooked/fire/slay" vocab, specific angles around bootstrapped building, creator tools, and inspiring others to start from nothing. Note: if you submit updated CLAUDE.md to SOMA, it will regenerate the Voice DNA context.
+- **Google Play identity verified** — Google Play Console identity review approved (screenshot confirmed May 7). Next step when ready: play.google.com/console → Create app → Upload AAB v1.0.4 (GitHub Actions run #5 artifact) → Internal testing.
+- **LinkedIn post written** — Long-form SEO/GEO/AIO LinkedIn post about SOMA, Voice DNA, and the bootstrapped builder grind. Includes Marcus Aurelius quote opener. Ready to publish manually.
+
+**May 8, 2026:**
+- **Google Play closed testing confirmed active** — App is in console. Internal testing: Active. Closed testing: Active (1 track, closed test release published). **Blocker to production: 12 opted-in testers + 14-day run.** Currently 0 opted in.
+- **Reddit posts written for tester recruitment** — Two posts drafted May 8:
+  - **r/cofounderhunt** — Updated cofounder search post. Title: `[Looking for Cofounder | Sweat Equity Only | Startup Ready] Solo founder, live SaaS, 12 Google Play testers away from production — need someone who can grow this`. Lists all shipped features + equity offer (~10%).
+  - **r/buildinpublic** — Build-in-public progress post. Title: `6 weeks solo, bootstrapped, working a deli job — I'm 12 beta testers away from Google Play production. Here's what I actually built.` Shares journey + lessons + naturally asks for closed test opt-ins. Follows r/buildinpublic rules (no pure promo, share progress/lessons).
+
+**May 9, 2026:**
+- **Android Developer Verification confirmed** — `studio.socialmate.app` package shows as Registered in Google Play Console (screenshot confirmed May 9). 1 key. Last updated May 7, 2026. Ahead of Google's September 2026 mandatory registration deadline — no action needed.
+- **Tester recruitment campaign expanded** — LinkedIn post drafted (updates + inspirational quote + tester CTA). Reddit posts drafted and posted across 6 subreddits:
+  - **r/ShowMeYourApps** — Mobile-only, no AI content (Rule 3). Focused on Android closed test ask.
+  - **r/alphaandbetausers** — No rules, full feature list including AI tools. Direct tester ask with DM CTA.
+  - **r/SideProject** — Story-led showcase with tester ask. DM CTA for closed test invite.
+  - **r/sideprojects** — Full detail post (problem, tech stack, what shipped). No funnelling — link included directly. Flair: vibecoded showcase.
+  - **r/buildinpublic** — Journey + lessons, callout to commenter advice about 1-2 core workflows. Tester ask woven in naturally.
+  - **r/saasbuild** — SaaS Journey flair. Story-led, no links in post. Tester ask via comments.
+- **Reddit/DM community engagement** — Replied to comments on recruitment posts. Notable feedback received:
+  - OptimalYear2147: advised single success path onboarding ("pick channel → load 5 starter posts → auto-schedule with one tap") and 1-2 tight personas instead of chasing all users. Also volunteered as Android tester — DM sent.
+  - newtophillyfromkc: volunteered as Android tester — DM sent.
+  - Aggravating-Cheek318: Google Play tester requirement surprised them too, relatable moment.
+  - New_Sense2690 (Top 1%): validated deli job + ship grind, echoed "ship less, talk to users earlier" lesson.
+- **llms.txt updated (PR #313)** — AI discoverability file brought current: added Agents Hub (8 agents), Gilgamesh's Guides Vol 1-4, SOMA Voice DNA Builder, SOMA Project Memory, Creator Monetization Hub marked live, TikTok sandbox status, blog count bumped to 175+, all missing key pages added. This file is scanned by ChatGPT, Perplexity, Claude, Gemini when answering "what's a Hootsuite alternative" type queries.
+
+**May 11–12, 2026 (PRs #323–#327):**
+- **Android Google OAuth deep link fix** (PR #323) — `AndroidManifest.xml` added intent filter for `studio.socialmate.app://` custom scheme. `MainActivity.java` rewritten to intercept OAuth callback, translate custom scheme back to HTTPS, and load in Capacitor WebView. `app/login/page.tsx` detects Android user agent and uses custom scheme as OAuth redirect. Supabase redirect URL `studio.socialmate.app://auth/callback` added to allowed list.
+- **Android build fixes** (PRs #324, #325) — Fixed `onResume()` access modifier (must be `public` to match `BridgeActivity`). Bumped `versionCode` 2→3, `versionName` 1.0.5→1.0.7. v1.0.7 (versionCode 3) built via GitHub Actions and uploaded to Play Console closed testing track. 1 tester opted in.
+- **Enki mode toggle fix** (PR #326) — Nav "Approval Mode" badge converted from static `<span>` to clickable `<button>`. New `toggleApprovalMode()` function cycles approval↔autonomous. Guardian Pause/Resume now activates in autonomous mode by default.
+- **Audit bug fixes** (PR #327) — 7 bugs fixed across 10 files:
+  - Duplicate welcome email removed from `auth/callback/route.ts` (Inngest sequence handles it)
+  - Enki `total` column removed from all `enki_trades` inserts in `lib/inngest.ts` (column doesn't exist — was silently failing all trades)
+  - Dashboard Recent Trades `$NaN` fixed — replaced `t.total.toFixed(2)` with `((t.qty ?? 0) * (t.price ?? 0)).toFixed(2)`
+  - HERMES API routes now return 403 for non-admin users (all 5 route files)
+  - SOMA `skipPost` status changed from `'failed'` to `'draft'`
+  - SOMA `approvePost` now falls back to `now + 10 min` if `scheduled_at` is null
+  - Trend Scout dead always-true condition fixed
+
+**May 12, 2026 — Growth & Marketing:**
+- **AlternativeTo** — SocialMate submitted, pending 24hr approval. Alternatives added: Buffer, Hootsuite, Later, SocialBee, Publer.
+- **Reddit** — u/CaptainNo3491 suspended (appeal submitted). New account: u/InterestingRun7594 (display: SocialMate). Pinned post written. r/cofounderhunt post written. Karma building in progress.
+- **Competitor research** — Full pricing audit of 20 competitors completed. Key gaps: Instagram/Facebook/LinkedIn (blocked on API). Key edges: Discord/Telegram scheduling (unique), SOMA Voice DNA, Enki, 8 agents at $8/mo, SM-Give, creator monetization.
+- **LinkedIn** — Multiple posts written including build-in-public update, cofounder search angle.
+- **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. Offering ~10% sweat equity over 24-month vest, 2-week trial, real contract.
+
+**May 13–14, 2026 (PRs #329–#334):**
+- **62 new blog posts + sitemap update** (PR #329) — 3 batches of SQL INSERTs covering Platform Schedulers, Competitor Alternatives, How-To Guides, AI Tools, Creator Guides, Founder Story. 60 new slugs added to sitemap (2 skipped as duplicates).
+- **IRIS Dispatch newsletter** (PR #330) — Biweekly build-in-public newsletter named after the Greek goddess of the rainbow + divine messenger (fits deity pantheon: HERMES/ENKI/SOMA/IRIS). Admin compose UI at `/admin/iris` with live preview (iframe), recipient count, confirmation modal, send history. Settings opt-in toggle in onboarding step 1 + Settings → Notifications. IRIS card added to Admin Hub.
+- **IRIS unsubscribe** (PR #331) — One-click unsubscribe via `GET /api/unsubscribe/iris?email=xxx`. Sets `iris_opt_in=false`. Confirmation page at `/unsubscribe/iris` with success/error states. CAN-SPAM compliant. Per-recipient HTML generation with unique unsubscribe URLs in every email batch.
+- **Admin God Mode fixes** (PR #332) — All workspace queries now exclude admin's own account (`owner_id != adminUserId`). Pro count, Agency count, MRR, SOMA autopilot, churn signals, and recent signups all reflect real users only.
+- **Admin God Mode + clickable stats + platform distribution** (PR #333) — Stat cards are now clickable links (Pro → `/admin/users?plan=pro`). Platform Distribution section shows connected account counts per platform. Admin users page reads `?plan=` from URL on mount (Suspense boundary added for Next.js 15 build fix).
+- **Badge + OG metadata** (PR #333) — Link-in-bio badge upgraded from 40%-opacity text to amber-S pill. Creator page badge same design. `app/[username]/layout.tsx` + `app/creator/[handle]/layout.tsx` added with `generateMetadata` for per-page OG tags. Blog posts now include `og:image` + Twitter card.
+- **Changelog updated** — May 9 + May 14 entries added. Changelog linked in PublicNav Resources dropdown.
+- **Monthly credits reset email** — Inngest cron `0 10 1 * *` (1st of each month, 10am UTC). Sends personalized Resend email to every user with their refreshed credit count. Free users get a soft Pro upgrade nudge. Registered in `/api/inngest/route.ts`.
+- **Signup social proof** — "30+ creators already scheduling with SocialMate" with emoji avatars added to signup page left panel.
+- **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
+- **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
+
+**May 19, 2026 (PR #382):**
+- **Bluesky token rotation race condition fixed** — Root cause: Inngest runs up to 5 posts concurrently. When two Bluesky posts fire at the same time, both read the same refresh token from the DB. The first one rotates it via `refreshSession`; the second gets a 400 error and was falling through with the now-stale access token, causing `createRecord` to fail with 401. Fix: on non-401 refresh failure, immediately re-read the `connected_accounts` row from DB to get the freshest token before attempting `createRecord`.
+- **SOMA post time jitter** — `calculateScheduledAt` in `/api/soma/generate` was scheduling all morning posts at exactly `09:00:00`, afternoon at `14:00:00`, evening at `19:00:00`. Added 0–44 min random jitter so same-slot posts spread out and don't all land in the same Inngest concurrency window.
+- **`platform_errors` JSONB column added to `posts`** — Publish errors per platform are now persisted to the DB (both Inngest and direct-publish paths). Previously errors were only in memory during the publish run and couldn't be diagnosed after the fact.
+- **Calendar error visibility** — Failed/partial posts in the calendar now show the actual error message on hover (e.g. "Bluesky failed: session expired and could not be refreshed"). Also fixed: `PlatformBreakdown` was only rendered for `partial` posts — now also renders for fully `failed` posts.
+- **SQL applied:** `ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform_errors JSONB DEFAULT NULL;`
+
+**May 18, 2026 (PRs #371–#372):**
+- **TikTok Script Generator** (PR #371) — `/api/ai/tiktok-script` route (three-pool credit deduction, same pattern as hashtags). Accepts `{ topic, duration, tone }`, returns `{ hook, body[], cta }`. Dedicated page at `/ai-features/tiktok-script` with result cards + copy buttons. 5 credits. Gemini model `gemini-2.5-flash`.
+- **GIF Export in Creator Studio** (PR #371) — `gifenc` installed. `exportGif()` added to `app/create/CreatePageClient.tsx`. Frame-by-frame canvas render loop: CSS filter + caption overlay baked in, 10fps, capped at 5s, 480px wide. "Export GIF" button + "max 5s" label in action bar. `types/gifenc.d.ts` module declaration added.
+- **AI Features page** (PR #371) — `VIDEO_TOOLS` array added (TikTok Script Generator, Creator Studio & GIF Export, Clips Studio). New "Video & TikTok Tools" section. TikTok live banner (dark gradient, emerald badge, "Connect TikTok →" CTA) inserted before AI Tools section.
+- **Blog batch 10** (PR #372) — 30 posts: TikTok scheduling (6), Twitch/YouTube clips (5), video content strategy (5), GIFs for social media (4), creator tool stacks (5), TikTok growth (5). `supabase/blog_batch_10.sql`. Sitemap updated with all 30 slugs. `llms.txt` blog count bumped to 270+.
+- **Streamers page fix** — TikTok moved from `COMING_PLATFORMS` to `LIVE_PLATFORMS` in `app/for/streamers/page.tsx`.
+
+**May 18, 2026 (session 2 — nav fix + bug sweep):**
+- **TikTok Studio in public nav** — Added `/tiktok/studio` as flat link in desktop header (alongside Studio Stax / SOMA / Enki / Monetize). Added to mobile Products section. TikTok is Production-approved and live — it belongs in the nav.
+- **Audience pages added to nav** — `/for/tiktok-creators` and `/for/video-creators` added to the Audiences dropdown in `PublicNav.tsx`. Both pages already existed; they were just not linked.
+- **Calendar `pending_approval` status** — Bug: `Post` interface was missing `'pending_approval'` from status union type. `STATUS_DOT` and `STATUS_BADGE` maps also lacked an entry, so approval-queue posts would render with no dot/badge. Fixed with purple styling.
+- **blog_batch_11.sql INTERVAL syntax** — Doubled single-quotes (`''3 days''`) in 19 places caused SQL error when run in Supabase. Fixed in worktree copy (was already fixed on main via direct commit).
+- **Social media glossary** (PR #378) — `/glossary` page with 62 A-Z social media terms, client-side search, JSON-LD schema. PRs from background agents merged.
+- **vs/ hub + 8 new comparison pages** (PR #379) — Canva, Plann, Social Champ, Ripl, Preview App, Gain, Kontentino, Unum added. Sitemap + llms.txt updated.
+- **35 blog posts** (PR #380, batch 11) — SEO-targeted posts across platforms/scheduling/AI tools.
+- **TikTok Studio UX polish** (PR #379) — Mobile fix: settings panel extracted to `PostSettingsPanel` component, rendered in both desktop panel + Post tab. Audio tab explains API limitation. Filter tab with color swatches. TikTok brand color `#fe2c55`. Pill-style tabs + backdrop-blur header.
+
+**May 18, 2026:**
+- **TikTok Production API approved** — Live since May 17, 2026 9:50 PM. Production credentials updated in Vercel. Platform count updated to 6 everywhere. Sandbox banner removed. TikTok now fully live for all users at /accounts and /tiktok/studio.
+
+**May 17, 2026 (PRs #361–#363):**
+- **Calendar definitive fix** (PR #361) — Root cause: `.select('id, content, ..., tags')` explicit column list fails silently if `tags` column doesn't exist (Supabase returns `error + null`, not empty array). Fix: changed to `select('*')` everywhere in calendar page. Also added `wsLoading` guard so fetch only runs after WorkspaceContext resolves, auto-navigate effect to jump to the month with first scheduled post when current month is empty, limit bumped to 1000. **Never add explicit column lists or date filters to the calendar query — both cause silent failures.**
+- **Full-app i18n — core pages wired** (PR #362) — All 12 core app pages now use `useI18n()` and `t()`: Dashboard, Queue, Calendar, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media Library. New namespaces added: `app_streak`, `app_links`, `app_activity`, `app_media` — in all 7 locale JSON files (en + zh with real translations, es/de/fr/pt/ru use English fallback). TypeScript enforces all locale files match `typeof enMessages` — **rule: any new key added to en.json must be added to ALL 6 other locale files in the same commit or build fails.**
+- **Full-app i18n — remaining pages wired** (PR #363) — Compose, AI Features, Agents hub, SOMA landing, Enki landing all wired with `t()`. New namespaces: `app_ai_features`, `app_agents`, `app_soma_landing`, `app_enki_landing`. All 7 locale files in sync — validated clean.
+- **Language switcher on landing page fixed** (PR #363) — `PublicNav.setLocale()` now calls `router.push()` to the locale URL when on a public landing page (`/`, `/es`, `/de`, etc.). Previously it only wrote to localStorage which has no effect on server-rendered pages.
+- **Birthday promo BDAY31 activated** (PR #363) — Start date moved from 2026-06-15 to 2026-05-17. Active now through Dec 15, 2026. Amber banner + BDAY31 apply button live on /pricing.
+
+**May 17, 2026 (continued — PRs #366–#367):**
+- **Settings + Bio page i18n** (PR #366) — White Label tab, Brand Voice tab, Appearance tab, and `app/[username]/page.tsx` all wired with `useI18n()`. All 7 locale files validated clean.
+- **40 blog posts — batch 9** (PR #367, SQL: `supabase/blog_batch_9.sql`) — SM-Give/charity (6), creator monetization (6), Guide Vol. 5 promos (3), BDAY31 promo (3), building in public/founder (4), i18n/multi-language (3), SOMA (4), Enki (3), Studio Stax (3), creator economy (5). All 40 live in DB. Sitemap updated with all 40 slugs.
+- **Changelog** — May 16 + May 17 entries added. Blog count in llms.txt bumped to 240+.
+
+**May 17, 2026 (continued — PRs #364–#365):**
+- **i18n — inner app pages** (PR #364) — SOMA dashboard (`app_soma_dashboard`), SOMA voice (`app_soma_voice`), Enki dashboard (`app_enki_dashboard`), Creator Hub (`app_creator_hub`), creator public page (`app_creator_public`) all wired with `useI18n()`. Fixed variable shadowing bug in Enki dashboard where `.map((t) => ...)` shadowed the `t()` i18n function — was a correctness bug. All 7 locale files validated in sync. **i18n inner pages are now fully complete across all major app sections.**
+- **Gilgamesh's Guide Vol. 5 — Creator Monetization** (PR #365) — `/guides/creator-monetization` live. 8 chapters: Why Creators Stay Broke, The Monetization Stack, Tip Jars, Fan Subscriptions, Digital Products & Courses, Brand Deals, Affiliate Marketing, Stacking to $5K/month. Added to guides hub + sitemap.
+- **Build fix** (PR #365) — `zh.json` missing `app_creator_public.loading` key caused Vercel TypeScript build failure. Fixed + validated all 7 locale files clean.
+
+**May 16, 2026 (PRs #350–#355):**
+- **next-intl / Turbopack build error resolved** (PRs #350, #352) — `createNextIntlPlugin` injects a webpack alias that Turbopack silently ignores, causing "Couldn't find next-intl config file" at runtime. Fix: removed the plugin wrapper from `next.config.ts`, rewrote `LocalizedLanding.tsx` with direct JSON imports + `createT()` helper, deleted `i18n/routing.ts` + `i18n/request.ts` + all `/app/{locale}/layout.tsx` files, cleaned `proxy.ts` of all next-intl imports.
+- **i18n scope clarified** — Only public landing pages (`/es/`, `/de/`, `/fr/`, `/pt/`, `/ru/`, `/zh/`) are localized. The full app interior (Dashboard, SOMA, Enki, Compose, Analytics, Settings, etc.) is English-only. Full-app i18n added to roadmap as a major planned feature.
+- **Calendar bug fix** (PRs #351–#355) — Multiple PRs chasing a query issue. Root cause: `created_at` column may have no DB default, so SOMA-generated posts have `created_at = NULL`. Any `gte('created_at', start)` filter silently excludes them. Fix: removed all date filters from the calendar query. Fetch all user posts (`limit 500`) ordered by `scheduled_at`. `getPostDateKey()` uses `scheduled_at || created_at` for cell placement — correct for all post types.
+- **Girlfriend's SocialMatePR prompt** — Claude chat mentor prompt written for video content brand setup across TikTok, YouTube, Instagram Reels, Pinterest, Snapchat, Facebook Reels. Includes Phase 1 (account setup), Phase 2 (content strategy + schedule), Phase 3 (Video Launch Pack template per-platform for every video).
+- **r/cofounderhunt post updated** — New post written with updated stats (80+ scheduled posts, SOMA Voice DNA active, IRIS newsletter sent, all 8 agents live). Posted to r/cofounderhunt via u/InterestingRun7594.
+
+**May 14, 2026 (PR #335):**
+- **Onboarding Quick Start** — New "Quick Start" path on Step 1 skips name entry + post generation; jumps straight to platform select → connect → done. Full flow unchanged for users who want it.
+- **Auto-schedule starter posts** — Step 4 now saves posts as `status='scheduled'` with staggered times (2h from now, +30min each) instead of drafts. Users land on dashboard with posts already on calendar — first win moment.
+- **Referral detection** — Reads `ref_code` cookie on onboarding mount; shows personalized "You were invited by a friend" banner on Step 1.
+- **Simplified Step 1** — Removed "Here's what you'll do" info box. IRIS opt-in compacted to single checkbox row. Quick Start link added as secondary CTA.
+- **Signup page Google Play beta CTA** — "Android App — Join Beta" card on desktop panel and mobile hero, links to `play.google.com/apps/testing/studio.socialmate.app`. Passively recruits testers 24/7 from organic signup traffic.
+- **Pricing page updates** — "Join 30+ creators" social proof in header. Birthday promo banner: teaser before 6/15/2026, active 6/15–12/15 (code `BDAY31`, 31% off, Joshua turns 31). Secure checkout trust strip below plan cards (Stripe badge, cancel anytime, no CC for free).
+- **Stripe coupon BDAY31 created** — Promo ID: `promo_1TX2Ay7OMwDowUuUiLXH4Fe3`. 31% off, Once, expires Dec 15 2026.
+- **Wall of Love page** — `/wall-of-love` live. Empty state with social proof + mailto testimonial CTA. Add entries to `TESTIMONIALS` array in `app/wall-of-love/page.tsx` as quotes come in. In sitemap + PublicFooter.
+- **Email capture on all 4 Gilgamesh Guides** — `GuideEmailCapture` component added to end of all 4 guides. Uses existing `/api/gils-guide/subscribe` endpoint + `gils_guide_subscribers` table.
+- **Admin data fix** — `googlereview@socialmate.studio` workspace downgraded from pro → free in both `workspaces` and `user_settings` tables. Admin God Mode now shows 0 paid users (accurate).
+- **LinkedIn origin story saved** — Real founding story documented: RenewalMate marketing struggle → ProductHunt Claude Code crossover → built SocialMate with Claude. Use for all marketing copy.
+- **LinkedIn post style documented** — Memory saved: body + hashtags + quote, first comment has socialmate link. Always output both blocks.
+
+**May 14–18, 2026 — HERMES Cold Outreach System (PRs #318–#327):**
+- **HERMES** — Full cold outreach system for Joshua (admin-only at `/hermes`). Campaigns with goal, persona, channel selection (email/Bluesky/Mastodon), 4-step sequence (Intro/Follow-up 1/Follow-up 2/Break-up), draft + auto modes.
+- **Campaign management** — `/hermes/campaigns/new` creates campaigns. `/hermes/campaigns/[id]` shows prospects + messages tab.
+- **Prospect management** — Add prospects manually with Hunter.io email finder (enter domain + name → gets email + confidence score). `HUNTER_API_KEY` required in env.
+- **Auto-discover** — `lib/hermes-discover.ts` scrapes Substack leaderboard, GitHub user search, dev.to articles, and Hashnode GraphQL for prospects. Extracts emails from profile pages. No paid API required. Rate: ~5 prospects per source per run. Stores discover config in `apollo_query` JSONB column for weekly auto-runs.
+- **Message generation** — Gemini-2.5-flash writes personalized Intro email per prospect. Context-aware by source (newsletter writer vs developer blogger). Falls back to safe default on parse failure.
+- **Send** — Email via Resend. Bluesky DM via `chat.bsky.convo` XRPC. Mastodon DM via `/api/v1/statuses` with `visibility: 'direct'`.
+- **Sequence follow-ups** — `hermesFollowUpCron` Inngest function fires daily, checks `next_contact_at` per prospect, generates next step message and sends or drafts.
+- **Tables:** `hermes_campaigns`, `hermes_prospects`, `hermes_messages` — all with RLS.
+- **SM Pulse** (`/sm-pulse`) — 20-credit niche trend scan. Calls `tool: 'pulse'` on `/api/ai`. Returns ranked trending topics in user's niche. Blurred preview state when no result.
+- **SM Radar** (`/sm-radar`) — 20-credit content intelligence report. Calls `tool: 'radar'`. Returns content gaps, competitor weak spots, best formats, hook styles, timing signals, and one concrete opportunity for this week.
+
+**May 19, 2026 (PRs #385–#388):**
+- **Activation funnel** — First-use tracking: onboarding completion %, platform connected, first post published. Dashboard shows activation progress for new users. GA4 events fire on key milestones.
+- **GA4 integration** — ⚠️ **This entry was wrong for three months.** The component was
+  mounted and sent page views; none of the five named events ever existed in the
+  codebase, and the component reads `NEXT_PUBLIC_GA_MEASUREMENT_ID`, not the
+  `NEXT_PUBLIC_GA4_ID` documented here — so if Vercel was set from these docs, GA was
+  off entirely. Corrected Aug 23; see the funnel instrumentation entry below.
+- **Calendar retry button** — Failed posts in calendar now have a "Retry" button that re-fires the Inngest publish job for failed platforms only.
+- **Comeback emails** — `comebackEmails` Inngest cron fires weekly for users who haven't posted in 7+ days. Personalized Resend email with their last post + streak. Non-fatal.
+- **IRIS auto-draft cron** — Inngest function that generates a weekly IRIS Dispatch draft automatically (admin-only). Admin reviews before sending.
+- **Admin health alert** — Inngest daily cron checks for stuck scheduled posts (past due + still `status='scheduled'`). Sends admin email if count > 0.
+- **Roadmap voting** — Users can upvote roadmap items. Votes stored to DB, displayed on `/roadmap`.
+- **Post Score** (Pro+, 5 credits) — AI-powered 0–100 quality score for any draft. Rates hook, clarity, and engagement potential. Shown inline in Compose.
+- **Scheduling window + DND** — Settings → Scheduling tab. Set posting hours (e.g. 9am–9pm) and a Do-Not-Disturb window. Smart Queue respects window. Stored on `user_settings`.
+- **Goal-based onboarding** — Step 1 now asks primary goal (schedule content / grow audience / manage clients). Saved to `user_settings.onboarding_goal`.
+- **Loyalty achievement system** — `achievementCheckerCron` Inngest function fires daily. Awards credits for: first post, 10/50/100/500 posts, 7/30/100-day streaks, 3/6/12-month tenure, 3+ platforms connected, bio page created. Credits awarded via earned pool. `user_achievements` table with RLS.
+- **Monthly-reset upgrade nudges** — `UpgradeNudge` dismiss now resets monthly (was 7 days). Free users see nudge again at the start of each calendar month.
+
+**May 20, 2026 (PRs #389–#391):**
+- **SIGIL** — Link in Bio renamed to SIGIL across all UI, nav, sidebar, and copy. Consistent with SocialMate deity naming system (HERMES/ENKI/SOMA/IRIS/HESTIA/SIGIL/ZENITH).
+- **HESTIA** — Community tab at `/community` (was AGORA, renamed to HESTIA). Post wins, questions, tips, feedback, intros. Emoji reactions (🔥💯👏🚀❤️🤔), threaded replies, connected-account gate to keep it real. Categories: All / Wins / Questions / Tips / Feedback / Intros. Tables: `community_posts`, `community_replies`, `community_reactions`.
+- **Guides PDF download** — "Download as PDF" button on all 5 Gilgamesh Guides. Opens native print dialog with a faint SocialMate watermark baked into background via `@media print` CSS. No external services.
+- **Achievements page** — `/achievements` — 13 badges across Posts / Streaks / Tenure / Account. Unlocking awards earned credits. Progress bars for locked badges. Linked in sidebar Grow section.
+- **30-Day Creator Challenge** — `/challenge` — Post every day for 30 consecutive days, earn 50 bonus credits. Daily progress heatmap, day counter, streak display.
+- **ZENITH creator card** — `/zenith` — Shareable presence card showing platform connections, post count, streak, achievements, top post. Social share buttons.
+- **Badge embed** — Embeddable SVG badge at `/badge.svg`. Copy embed code from Settings → Profile to show "Built with SocialMate" on your site.
+- **Discount page** — `/discount` — `NONPROFIT50` (50% off Pro, honor system) and `STUDENT25` (25% off Pro, .edu email, honor system). No verification required.
+- **HERMES → Gemini 2.5-flash** — Message generation upgraded from 1.5-flash to 2.5-flash. Smarter, faster outreach copy.
+- **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
+- **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
+
+**June 8, 2026:**
+- **rjstreecare.com — Zoho Mail migration confirmed live** — `api/contact.js` migrated from Gmail SMTP to Zoho SMTP (`smtp.zoho.com:465`) for `info@rjstreecare.com`. Deployed and live-tested by Joshua — confirmed via screenshot that a real form submission landed correctly in the Zoho inbox with proper formatting and Reply-To wiring. Fully done, end to end.
+- **rjstreecare.com — info@rjstreecare.com rolled out site-wide** — Replaced the old placeholder `rjstreecare@gmail.com` (was only in index.html footer) and added a new ✉️ email contact line to the footers of all 18 other pages that previously showed no email. All 19 HTML files verified containing `info@rjstreecare.com`, zero remaining old-address references. Deployed to production (`dpl_8GoqjLnZhmLAaWPyDt1SZaZazESD`), live on rjstreecare.com.
+- **Ron mailbox/domain access plan** — If Ron wants mailbox access: give him the Zoho Mail mobile app + current credentials. If Ron ever wants the domain: have him create his own free Porkbun account, Joshua does an account-to-account push transfer (no registrar fees/wait) so Ron legally owns it while Joshua can still help with DNS. Decided against handing over Joshua's own Porkbun login (it also manages socialmate.studio + other projects).
+- **Local business website pricing reference established** — Used rjstreecare.com as the benchmark to set real numbers for the local-business-website side service: baseline build $2,800–$3,500 (multi-page, blog/SEO content, schema markup, working contact pipeline, galleries, conversion design); by vertical — Doctor/Dentist $3,500–$7,000+, Plumber/Electrician/Welder/Mechanic/Tree service $1,800–$3,500, Baker/small retail/restaurant $1,500–$3,000; recurring maintenance/hosting/content add-on $50–$150/mo. Saved to memory for future client conversations.
+- **Reddit cofounder/hire posts — 3 posted** — Drafted and posted under u/InterestingRun7594: r/developers_hire (FOR HIRE — portfolio/contract pitch), r/cofoundermatch (Equity Only — technical cofounder seeking CMO), r/cofounderhunt (Cofounder Available). All three rewritten with "ball out energy" — chasing financial freedom not to hoard it but to build more and spread the wealth, tied to "Power to the people. Build the door." Compliant with each subreddit's posting rules (cofoundermatch's 6-point disclosure format, cofounderhunt's flair requirements).
+- **Design concern raised — emoji-heavy UI reads as "AI built"** — Joshua flagged that heavy emoji use on landing pages (both rjstreecare.com and SocialMate) signals vibe-coded/AI-built rather than custom-designed, even though it functionally works. Considering a pass to swap emojis for a real icon set (Lucide/Heroicons/Phosphor — free, MIT-licensed, SVG-based, already common in the stack) on public-facing landing pages to read more premium and custom. Not yet started — flagged for future design pass.
+
+**June 16, 2026 — Hearthforge Social + Shop Setup:**
+- **Hearthforge socials created** — Accounts live across 10 platforms: Instagram, TikTok, Pinterest, X/Twitter, YouTube, Reddit, Bluesky, Mastodon, Discord, LinkedIn (personal). Primary handle: `@hearthforgehq`. Fallback where taken: `@hearthforgepr` (used on X/Twitter). PFPs set to padded H+flame logo (circle-safe version generated in `Hearthforge PFP/` folder in socialmate repo).
+- **Hearthforge shop profiles started** — MakerWorld, Printables, Cults3D, MyMiniFactory (digital STL marketplaces), Gumroad, Etsy, Ko-fi (direct sales), TikTok Shop and Facebook/Instagram Shop in setup (require separate seller registration beyond having the social accounts).
+- **Hearthforge positioning broadened (agreed with Butch)** — No longer positioning as "streamers/gaming only." Brand is "modular systems for any space" — desk rail for streamers is the launch product, not the ceiling. Future verticals: home office, workshop/garage, kitchen, craft rooms, van life, small business. llms.txt updated on hearthforge-web and gilgameshenterprise to reflect this.
+- **Bambu model corrected everywhere** — Butch's printer is a Bambu Lab H2C (not X1 Carbon). Fixed in CLAUDE.md, hearthforge-web/llms.txt, gilgameshenterprise/llms.txt, and memory files.
+
+**June 19, 2026 — Full portfolio bug sweep (PRs #492, rjstreecare #6, GE #8, RenewalMate direct-to-master):**
+- **SocialMate security fix (PR #492)** — `POST /api/posts/fail` had zero authentication — any caller with a valid postId could mark posts failed and spam notification emails to all users. Fixed: added `x-internal-key: CRON_SECRET` gate at top of route (matching pattern used by all other internal routes). `lib/inngest.ts` updated to send the header on every call.
+- **SocialMate .maybeSingle() fixes (PR #492)** — `app/api/affiliate/check-code/route.ts` and `app/api/coupons/validate/route.ts` were using `.single()` on optional lookups, which returns PGRST116 error for 0 rows. Changed to `.maybeSingle()` on all 3 queries. Stripe webhook and checkout routes NOT touched (off-limits without asking per CLAUDE.md rule).
+- **SocialMate sitemap + llms.txt (PR #492)** — Added 7 missing public pages: `/soma`, `/agents`, `/ai-features`, `/enki/truth`, `/enki/doctrines`, `/monetize/hub`, `/tiktok/studio`. llms.txt blog count updated 500+ → 570+.
+- **RenewalMate — critical data loss fixed (direct to master)** — `app/api/waitlist/route.ts` was `console.log(email) + return { success: true }`. Every waitlist signup since launch was silently dropped. Fixed: wired Resend to email `renewalmate.updates@gmail.com` on every signup. Form error state fixed (was calling `setSubmitted(true)` in the catch block, showing success on failure). Sitemap: removed `'resubscribe'` from `VS_PAGES` (page doesn't exist). Note: `RESEND_API_KEY` must be set in Vercel for RenewalMate project. RenewalMate landing page was already updated (remote had "Create Free Account →" CTA pointing to `/signup` — app is live). Waitlist email form demoted to secondary "product updates" opt-in.
+- **rjstreecare — booking button fix (PR #6)** — `contact.html:102` "Schedule Online" button had `onclick="alert('Booking integration — Calendly or Acuity link goes here')"` showing a dev placeholder to real customers. Changed to `href="#contact-form"` scrolling to the contact form.
+- **GilgameshEnterprise — factual fixes (PR #8)** — Bambu Lab X1 Carbon → H2C (Butch's actual printer). RenewalMate URL standardized to `www.renewalmate.com`. `public/llms.txt` Storefront Studio description updated from "Upcoming service" to "Live service."
+- **3D printing venture name change pending** — Joshua considering a name change away from "Hearthforge." Do not use the name in public-facing posts or marketing until a new name is confirmed. Refer to as "3D printing side project" or "co-founded 3D printing venture with Butch" in the meantime.
+- **Analytics snapshot (June 19, 2026):** 1,126 visitors (+101%), 2,199 page views (+7%), 80% bounce rate (+12%). Top referrers: Bing (92), DDG (39), Vercel (29), Google (20), ChatGPT (17), t.co (15). Countries: USA 27%, Singapore 21%, China 18%, India 6%. 40 users, 850+ posts published, $0 MRR. ChatGPT appearing as referral source for first time — llms.txt/AI discoverability work paying off.
+- **Reddit posts drafted** — New posts for r/buildinpublic, r/micro_saas, r/saasbuild (5 days since last posts). Angle: code audit week, zero-auth endpoint found + fixed, silent data loss bug found + fixed, ChatGPT referral traffic, 40 users / $0 MRR / still solo.
+
+**August 12–13, 2026 — Repricing, and the week we found out half the product never ran (PRs #554–#565):**
+
+The single biggest correctness sweep in the project's history. Twelve PRs. The
+theme: a large share of what SocialMate advertises had **never executed once**,
+because a query named a column that did not exist, the error was discarded, and
+the feature returned a plausible-looking empty result instead of failing loudly.
+
+**Pricing rollout (#555–#557).** Pro $5 → $8, Agency $20 → $29, annual to two
+months free, free cap 100 → 250 posts. New Stripe prices created against the
+existing products so reporting stays continuous; old IDs retired from checkout
+but kept in the webhook map forever. Compare-flip pricing cards: each tier flips
+to show what it unlocks over the tier below. Public copy migrated by
+`scripts/migrate-pricing-copy.py` — adjacency-based with 51 test cases, because
+`$5` and `$20` are also White Label, SOMA Full Send, credit packs, donations and
+competitor prices, and a blind replace corrupts all of them. Blog rows in
+Supabase migrated by the same tested transform, with derived arithmetic
+("$5/month is $60/year", the whole BDAY31 table) recomputed by hand.
+
+**Features that had never worked, now fixed:**
+
+| Feature | Why it never ran |
+|---|---|
+| Day-1 activation email | `profiles.user_id` — the table is keyed `id` |
+| All in-app notifications | Phantom columns **and** a CHECK allowing 3 of 18 `type` values |
+| Email Outreach agent | Read credits off `workspaces`; returned 404 to every request ever |
+| Growth Scout | `competitor_accounts.username` (it is `handle`) + a `workspace_id` filter on a table with no such column |
+| Evergreen recycling | `is_evergreen`; the column is `evergreen`. Daily cron a no-op since written |
+| Push notifications | `auth` vs `auth_key` |
+| Save-as-template | `title` vs `name`, plus a phantom `workspace_id` |
+| SOMA Voice DNA | 1,160 chars of interview output never reached the prompt; Full Send ran on hardcoded defaults |
+| `POST /api/posts/create` | `tags` / `poll_data` rejected the row |
+| Account deletion | Four steps silently skipped, including affiliate tax forms holding legal name + tax id |
+| Referrer 10-credit bonus | `referred_by` read from the wrong table; never paid to anyone |
+| Admin feedback push | Selected a `subscription` column; the row *is* the subscription |
+| Enki trade export | Selected `enki_trades.pnl`; P&L is computed FIFO at read time |
+
+**`scripts/audit-schema-drift.py` (#560).** Compares every column named anywhere
+in the code against the live PostgREST schema. Found 44; 16 were its own false
+positives from descending into nested jsonb, fixed in #565 by making key
+extraction depth-aware. **Run it before shipping DB work.**
+
+**Onboarding connect step (#558).** The poll gave up after 90 seconds — shorter
+than the task takes, since connecting means leaving for another tab and, for
+Bluesky, generating an app password on a different service. People came back
+having genuinely connected, to a tab that had stopped listening and whose widest
+button was "Skip for now". Window widened, refocus re-checks immediately, manual
+check added.
+
+**Activation reality, measured:** 74 non-admin accounts. 62 never connected a
+platform. 11 connected but never posted. **One has ever published.** 1,038
+published posts, 0 active subscriptions, $0 MRR. Nobody is declining to pay $8 —
+almost nobody gets far enough to have an opinion about the price.
+
+**July 26, 2026 — Admin/stats + credit + webhook audit sweep (PRs #533–#535):**
+Full code-level sweep of SocialMate. Trigger: admin "Posts Today" read 0 while posts were publishing. Found and fixed four things; verified AI models, cron registration, publish pipeline, and route auth are all healthy.
+- **Admin "Posts Today" undercount (PR #533)** — `api/admin/stats` and `api/admin/platform-stats` counted published posts by `created_at` instead of `published_at`. Scheduled/SOMA posts are created days before they publish, so they never showed. Both now filter on `published_at` (matches the Overview 24h panel). `published_at` is stamped on every publish path.
+- **`posts.created_at` NULL — ROOT CAUSE FIXED (PR #534)** — the `posts` table was missing `DEFAULT now()` on `created_at` (every other table had it); SOMA inserts omit the column, so those rows were NULL and any `.gte('created_at', …)` filter silently dropped them. Migration `20260726000001_posts_created_at_default.sql`: `ALTER TABLE posts ALTER COLUMN created_at SET DEFAULT now();` + backfill `COALESCE(scheduled_at, published_at, now())` for existing NULLs. **This resolves the long-standing "created_at may be NULL for SOMA posts" gotcha at the DB layer** — the monthly post-limit quota, dashboard "This Week", and streaks no longer undercount. SQL run in Supabase + confirmed.
+- **Atomic AI credit deduction (PR #535)** — all 7 AI routes did a read-modify-write on credits (SELECT balances → compute split → UPDATE), which could double-spend under concurrent requests. Replaced with a shared `lib/ai-credits.ts` helper backed by row-locked Postgres RPCs `deduct_ai_credits` / `refund_ai_credits` (migration `20260726000002_atomic_ai_credits.sql`, SECURITY INVOKER so RLS scopes to the caller). The RPC mirrors the exact three-pool preference logic it replaced; also de-duped ~600 lines of copy-pasted deduction across the 7 routes. SQL run in Supabase + confirmed.
+- **Webhook Enki dead-path (PR #535)** — the Enki `customer.subscription.updated` handler was unreachable: the main-plan block above did `if (!plan) return`, and Enki subs have `plan = null`. Wrapped the plan work in `if (plan) { … }` so non-plan subs fall through. Plan/white-label behavior unchanged. (Low impact — Enki is wound down — but no longer dead code.)
+- **Verified healthy, no changes needed:** all 29 Gemini call sites on `gemini-3.6-flash`; all Inngest crons registered (27 core + 6 agents + 2 HERMES); publish pipeline idempotency (`platform_post_ids` written before status, retried status writes, `publishedOk` semantics); route auth (the 21 unguarded mutation routes are all public by design); webhook idempotency (`processed_events`); `tsc --noEmit` clean.
+- **Left alone (external):** X/Twitter 403 in the failure log is X rejecting the write at the account/app level (access tier / `tweet.write` scope), not a code bug — the publisher already surfaces the real error. Ignore per Joshua.
+
+**July 13–21, 2026 — Warm "instrument" design-system rebuild (PRs #513–#524):**
+The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look onto a single warm design system. Biggest visual change since launch. For SOMA, the story is "we rebuilt the whole front end this week into a premium, hand-designed system" — build-in-public gold.
+- **Mobile /login blank-HTML fix (PR #513, Jul 17)** — `/login` was shipping blank HTML on mobile. Added skeleton fallbacks + a `loading.tsx` sweep, capped admin INP.
+- **Premium landing overhaul (PR #514, Jul 17)** — Real brand icons (mono `PlatformIcon` marks + Lucide), an animated coded product mockup (`HeroLoop` — the "gif" on the hero), and motion. Emoji removed from the hero.
+- **Ambient background experiment (PRs #515–#516, Jul 17)** — Added then reworked a pulsing "aurora" background. Short-lived; replaced two days later by the ember field (see #517/#520).
+- **Warm instrument design system (PR #517, Jul 18)** — The core. New token layer in `app/globals.css` `@theme`: warm base `--color-void #0D0B0A`, `--color-panel`, `--color-raised`, `--color-edge(-lit)`, an AA-measured ink ramp (`ink-faint/muted/body/high`), and the three brand voices `amber` / `violet` / `jade`. Reusable primitives in `components/instrument/primitives.tsx` (`Section`, `Eyebrow`, `Display`, `Body`, `Mono`, `Button`, `Card`, `Readout`) so no page writes arbitrary values. Fonts: Clash Display (headlines) + Switzer (body). The #515 aurora blobs were deleted here (four `blur(80px)` gradients at 54vw — the loudest "AI-generated premium dark" tell).
+- **Auth carry-through + dead-code delete (PRs #518–#519, Jul 18)** — Login/signup/forgot/reset moved onto instrument; fixed a silent `bg-surface` token collision. Dead `src/app/signup/page.tsx` deleted (PR #518); `app/` is canonical. (`src/` was not entirely dead: see the next note.)
+- **Invisible-text fix + GE gold + Enki wind-down (PR #520, Jul 18)** — Three things: (1) **Systemic invisible-text bug** — `body { color: var(--text) }` resolves once in light scope, and public pages force dark via a `.dark` class on a wrapper *div* not `<html>`, so any uncolored element (e.g. a `text-base font-extrabold` heading) inherited near-black on near-black (~1:1 contrast). Fixed by re-declaring `color: var(--text)` inside the `.dark` rule — one line at the source. (2) Gold set to GE's exact values `--color-amber #D4A017` / `--color-amber-bright #EAC020` with a gold-gradient CTA. **EmberField** ported from the GE site (28 seeded-PRNG dots, 1.5–4px, 10–22% opacity, drifting up; renders nothing under reduced motion). `Section tone="base"` is transparent so embers show through; `tone="raised"` stays opaque. (3) **Enki wind-down** — pulled from the Products dropdown, footer, and sitemap; `/enki` stays live as its waitlist page (PR #503), reachable by direct link, nothing deleted. HERMES removed from public mobile nav (admin-only). Nav emoji stripped.
+- **/pricing onto instrument (PR #521, Jul 18)**.
+- **/features + 88 /vs + 15 /for onto instrument (PR #522, Jul 18)** — 8,683 palette utilities migrated to tokens via committed `scripts/migrate-palette.py` (13 unit tests; the mapping is shade-aware because `dark:text-gray-100` is a near-white headline, not muted — the first run silently greyed out every `/vs` `<h1>`). 37 emoji → Lucide. Plus a **content-accuracy sweep** the migration surfaced: `/vs` pages overstated the free tier four ways — corrected to **100 posts/mo free** (not unlimited), **50 AI credits/mo grant** (75 is the bank cap, not the grant), **7 live platforms** (not 16), and **Pro = 1,000 posts/mo** (not unlimited). ~98 corrections across ~70 files, all verified against `app/pricing/page.tsx`. Competitor pricing claims deliberately left intact.
+- **Amber ember unification (PR #524, Jul 20)** — `PublicLayout` now renders `EmberField` on `bg-void`, so all ~57 pages that use it inherit the amber background from one change. The landing's three `tone="raised"` grey sections went transparent. Brand accents unified to amber (TikTok pink `#fe2c55`, Enterprise blue, SOMA/Monetize violet, `/for` gradients) while keeping jade for live/included. Fixed migration scars: black `/pricing` CTA, invisible `/features` filter active state, low-contrast badges, `bg-void`-on-`bg-void` invisible cards, no-op hovers, and duplicate conflicting classes (`bg-void bg-panel`, `text-ink-high text-ink-high`). 55 files.
+- **Design-system rules going forward (public surfaces):**
+  - Tokens only — never raw hex or `gray-*`/`bg-white` on public pages. Everything comes from `@theme` in `globals.css` (`bg-void`, `bg-panel`, `text-ink-*`, `text-amber/violet/jade`, `py-section`, `text-display-*`). If a token is missing, add it — don't inline a value.
+  - Color is a language: **amber** = queued/scheduled/primary brand, **violet** = AI/SOMA/credits, **jade** = live/published/included/free. No fourth color; don't reach for jade because a section "needed some green."
+  - `.dark` lives on a wrapper div, not `<html>` — that's why `globals.css` re-declares `color: var(--text)` inside the `.dark` rule. Don't remove it.
+  - `Section tone="base"` = transparent (embers show), `tone="raised"` = opaque. Public pages now favor `base` for the ember background.
+  - `src/` is gone (Nov 4, 2026). It was not dead: 67 files import `@/lib/supabase`, and with no `lib/supabase.ts` at the root the tsconfig alias fell through to `src/lib/supabase.ts`. Deleting `src/` on the strength of the old "dead" note would have broken the browser Supabase client app-wide. The file now lives at `lib/supabase.ts` and `@/*` maps only to `./*`. Edit under `app/` and `lib/`.
+  - A script touching 100+ files must prove its mapping on examples first (see `scripts/migrate-palette.py` + its tests), not after.
+
+**June 23 – July 7, 2026 (PRs #505–#511):**
+- **Vol. 11 guide build fix (PR #505, June 23)** — `/guides/local-business-website` was missing the required `title` prop on `<GuidePDFDownload />`, failing `next build`. Hotfixed same day.
+- **Crawler files refresh (PR #506, June 28)** — `llms.txt`, `humans.txt`, `ai.txt` updated with June 2026 stats.
+- **Twitter 403 error detail (PR #507, July 2)** — X publish failures now surface the actual API error message in 403 responses instead of a generic error, so partial-post breakdowns show the real reason.
+- **Gilgamesh's Guides Vols 12–14 (PR #508, July 2)** — Email List Building, SEO for Normal People, Reddit Marketing. 14 guides total, all in sitemap.
+- **User behavior tracking (PRs #509–#510, July 2–7)** — Login tracking: `login_count` + `last_active` on `user_settings`, incremented on every sign-in in `auth/callback` via `increment_login_count` RPC with direct-upsert fallback. **BehaviorSurvey modal** on dashboard: asks "What keeps you coming back?" (6 preset reasons) + optional "what would make you recommend us" — shows on 3rd login session and every 10th after, 45s delay, once ever after submit/dismiss (localStorage). `POST /api/survey` (user-authed) + `GET` (admin) → `user_survey_responses` table. **Power Users section** on `/admin/overview`: top 10 by login count with posts, last active, and a one-click mailto offering 6 months Pro for a 15-min feedback call. PR #510 fixed 4 bugs found in a sweep of the branch.
+- **July 7 sweep (PR #511)** — Three missing `/vs/` pages committed: `vs/creatorstudio`, `vs/discord-bots`, `vs/tiktok-scheduler` were referenced in the deployed sitemap + llms.txt but their page files were never committed — all three were 404ing in production (creatorstudio had only its layout.tsx tracked). Bare `/refer` removed from sitemap (only `/refer/[code]` exists). Login tracking fallback fixed: supabase `.rpc()` returns errors instead of throwing, so the catch-based fallback could never fire — now checks the returned error. Full sitemap audit: all 175 static routes verified to have pages.
+- **SQL to verify in Supabase (behavior tracking — no migration file in repo):** `user_settings.login_count INTEGER DEFAULT 0` + `user_settings.last_active TIMESTAMPTZ`, `user_survey_responses` table (id, user_id, question_key, answer, created_at + RLS), and `increment_login_count(p_user_id UUID)` RPC (atomic upsert). The auth-callback fallback works without the RPC, but the RPC is atomic.
+
+**June 22–23, 2026 (PRs #499–#504):**
+- **Admin user post stats (PR #499)** — `/admin/users` posts column now shows "N pub · N ✗ · N ⏳" breakdown + per-platform tags with failure counts. `/api/admin/users` fetches all posts (limit 10000) and builds `postStatsMap` + `platformStatsMap` per user.
+- **Feedback reply-to fix (PR #501)** — `app/api/feedback/reply/route.ts` fixed `reply_to` → `replyTo` camelCase to match Resend SDK. Was causing TypeScript build error.
+- **Onboarding unconnected platform fix (PR #502)** — `app/onboarding/page.tsx` starter posts now only get `platforms` assigned when `connectionDetected` is true (OAuth polling confirmed). Previously posts were scheduled to platforms the user selected but never completed OAuth for, causing silent publish failures for those users.
+- **Enki signup page (PR #503)** — `/enki` public landing page replaced with a clean waitlist signup form. Existing users reach dashboard via "Already a member?" link. Uses existing `/api/enki/waitlist` endpoint. Enki is moving to its own standalone product.
+- **Guides + blog batch (PR #504)** — Gilgamesh's Guides Vol. 11 "Local Business Websites" live at `/guides/local-business-website`. Sitemap fixed: Vols 6-10 were missing (only Vols 1-5 were in sitemap). All 11 guides now in sitemap. 12 new blog posts via `supabase/blog_batch_june23.sql`. Both `public/llms.txt` and GE `llms.txt` updated. GE guides page and GE blog posts updated.
+
+**June 20, 2026:**
+- **SocialMate favicon + scaffold cleanup (PR #495, merged)** — Replaced default Next.js favicon with SocialMate logo (`/logo.png`) in the browser tab bar. Removed unused Next.js scaffold SVGs (`public/file.svg`, `public/globe.svg`, `public/next.svg`, `public/vercel.svg`, `public/window.svg`). Merged via `fix/speed-insights-perf` branch.
+- **Gilgamesh's Guides Vol. 2 — Chapter 10 added (PR #495)** — New chapter "Google Search Console — Tell Google You Exist" added to `/guides/marketing-zero-budget/page.tsx`. Covers: what GSC is, why it matters, 6-step verification walkthrough (property → Domain → DNS TXT record → verify → sitemap submit), common mistake callout (full sitemap URL vs. just `sitemap.xml`), and what to watch after (Coverage report, Performance report, crawl errors). Audience: "normal people who don't know about this" — written plain and actionable.
+- **Agent worktree cleanup** — 25 locked agent worktrees in `.claude/worktrees/agent-*/` cleaned up with `git worktree remove --force --force`. All were confirmed merged (checked via `gh pr list --state all`). Also removed `C:/Users/jbost/ge-mobile-sweep` worktree (was on `fix/mobile-bug-sweep-june11`, confirmed merged as PR #481 on GE repo). Claude Code sidebar is now clean.
+- **Hearthforge rebrand pause** — Decided to stop all hearthforge-web / hearth-forge.com work until a new name and domain is confirmed with Butch. PR #32 (sitemap.ts) was the last thing merged. Memory and CLAUDE.md updated to reflect this. Refer to the venture only as "co-founded 3D printing venture with Butch" in any public content.
+- **Google Search Console verified — all sites** — DNS TXT record verification completed for `socialmate.studio`, `gilgameshenterprise.com`, and `rjstreecare.com`. Sitemaps submitted for all three. Rule: when submitting a sitemap in GSC, enter only the path (e.g. `sitemap.xml`) not the full URL — common mistake.
+- **Hearthforge sitemap (PR #32, merged)** — Added `app/sitemap.ts` to `renewalmateupdates/hearthforge-web` repo covering all 9 pages (`/`, `/about`, `/products`, `/portfolio`, `/testimonials`, `/faq`, `/blog`, `/contact`, `/admin`). Last commit to that repo before rebrand pause.
+- **Google Business Profile — Ron's Tree Care** — Set up GBP listing for RJ's Tree Care (rjstreecare.com) under Joshua's Google account. Business type: service area business (no storefront). Category: Tree service. Service area: 11 cities in Indiana (Dillsboro, Versailles, Batesville, Milan, Sunman, Osgood, Lawrenceburg, Aurora, Rising Sun, Moores Hill, Guilford + surrounding area). Phone: (765) 570-3398. Website: rjstreecare.com. **Pending verification via USPS postcard** to 9588 Akes Hill Rd, Dillsboro, IN 47018 — estimated 5 days. Once Ron gets the postcard, give Joshua the PIN to complete verification. After verification: add info@rjstreecare.com as GBP manager and upload real job site photos (bucket truck, crane, stump removal, after shots — all in the RJ's Tree Care folder on Joshua's desktop).
+- **RJ's Tree Care logos created** — Two professional PNG logos generated from Claude Design mockup and saved to `C:\Users\jbost\OneDrive\Desktop\RJ's Tree Care\`:
+  - `rjs-tree-care-badge.png` — 1200×1200 circular badge. Dark green outer ring, cream inner circle, arched "RJ'S TREE CARE" text, two illustrated trees, serif "RJ'S" with outline effect, "TREE CARE" with letter spacing. Ideal for GBP profile photo, social media avatar.
+  - `rjs-tree-care-horizontal.png` — 1200×400 horizontal lockup. Tree circle icon on left, divider, "RJ'S" serif + "TREE CARE" tracking on right. Ideal for email headers, invoices, banners.
+  - Generated programmatically via Python PIL (`generate_logos.py` saved to same folder). Sign inspiration: Ron's physical truck sign reads "RJ'S TREE CARE | Removals & Trim | Stump Removal | 22 YEARS EXPERIENCE | INSURED."
+
+**June 8, 2026 (session 2 — PRs #470–#472):**
+- **Signup UTM + referrer attribution (PR #470)** — `signup/page.tsx` reads `utm_source/medium/campaign` from search params + `document.referrer`, sets `sm_utm_*` cookies (7-day, SameSite=Lax) before OAuth redirect. `auth/callback/route.ts` reads cookies on first sign-in (isNewAccount), upserts `signup_source/medium/campaign/referrer` to `user_settings`, deletes cookies. Works for both email + Google OAuth. SQL: 4 columns added to `user_settings`.
+- **Bug sweep (PR #471)** — Toast safe-area: `admin/white-label` and `hermes/campaigns/[id]` now use shared `<Toast>` component (last two from the known issues list — all toasts are safe-area compliant). Streak fix: `api/streak` now includes `scheduled` status + `scheduled_at` as date anchor so SOMA users who bulk-schedule get streak credit immediately. Admin overview: new Signup Attribution section (UTM sources + referrer domains with bar charts).
+- **Dark mode spinner sweep (PR #472)** — Added `dark:border-amber-500` to all 20 pages with invisible spinners: `ab-tests`, `accounts`, `achievements`, `ai-features`, `approvals`, `compose` (×2), `competitor-tracking`, `content-gap`, `drafts`, `evergreen`, `invite` (×3), `link-in-bio`, `onboarding`, `queue`, `reset-password`, `rss-import`, `settings` (×3), `sm-pulse`, `sm-radar`, `workspaces/new`. **All known bugs from CLAUDE.md now resolved.**
+- **Storefront Studio demo sites** — `renewalmateupdates/dentist-demo` and `renewalmateupdates/bakery-demo` pushed to GitHub with `vercel.json` (cleanUrls: true). Static HTML, no build step. Joshua needs to import both at vercel.com/new to get live URLs, then Storefront Studio page at `app/storefront-studio/page.tsx` needs the demo card URLs added.
+- **GE + RenewalMate Vercel Analytics (PRs #2, #1)** — `@vercel/analytics` installed and `<Analytics />` wired into root layouts for both `gilgameshenterprise.com` and `renewalmate.com`.
+
+**June 7, 2026:**
+- **gilgameshenterprise.com — blog filtering + FAQ** — Blog page now has client-side category filter tabs (All / Business / Founder Story / Tech / etc.). FAQ page added at `/faq` — accordion layout, 3 sections: About GE, The Ventures, Philosophy. Nav updated to include FAQ link. Sitemap updated. Pushed to `renewalmateupdates/gilgameshenterprise`.
+- **renewalmate.com — blog filtering + FAQ + nav polish** — Blog page now has category filter tabs (All / Alternatives / Personal Finance / Tips / Privacy). FAQ page added at `/faq` — 4 sections: About RenewalMate, Features, vs. Competitors (RocketMoney / Monarch / Mint / YNAB), Privacy. Footer updated with FAQ + Blog links. Sitemap now includes all blog slugs. Pushed to `renewalmateupdates/renewalmate`.
+- **Hearthforge logo integrated** — Butch Chiappinelli's H+flame logo (PNG, black/white) saved to `public/logo.png` in `hearthforge-web` repo. Replaced Flame icon from lucide-react in PublicNav, PublicFooter, and AdminSidebar. `invert` CSS class renders it white on dark backgrounds. Merged `feat/full-polish` → `master`. Live on hearth-forge.com.
+- **Gilgamesh Enterprise — Hearthforge co-founder language** — Hearthforge venture card now explicitly states "Co-founded with Butch Chiappinelli" and lists role split (Joshua: web/business, Butch: manufacturing/CAD). Tag updated to "3D Products — Partnership". Badge changed from "Coming Soon" to "Live" with correct URL `hearth-forge.com`.
+- **GE logo saved locally** — Squarespace CDN URL for GCE logo replaced with locally-saved `/public/logo.png` — prevents image breaking when Squarespace hosting expires June 10.
+- **Hearthforge SEO files** — `public/llms.txt`, `public/robots.txt`, `public/humans.txt` added to hearthforge-web repo. Merged to master.
+- **Joshua's job updated** — Quit Walmart deli as of June 2026. Now works tree cutting/service with Ron (the same client he built a demo site for). CLAUDE.md "Who I Am" section updated.
+- **Mate series — 3 live sites** — gilgameshenterprise.com (dark/gold holding company), renewalmate.com (green fintech landing), hearth-forge.com (3D printing — partnership with Butch). All on Vercel free tier. Combined with socialmate.studio = 4 active domains in the Gilgamesh portfolio.
+- **Reddit posts drafted** — r/developers_hire update post (FOR HIRE, 3 new sites added to portfolio) and r/micro_saas update post (image bug root cause, 3 sites launched, MRR question). Both ready to post under u/InterestingRun7594.
+
+**June 6, 2026 (PRs #467–#468):**
+- **Gilgamesh Enterprise LLC website** — `gilgameshenterprise.com` migrated off Squarespace ($25/mo cancelled before June 10 charge). Rebuilt as Next.js on Vercel (free). Dark/gold design, professional holding company hub. Ventures listed: SocialMate, RenewalMate, Hearthforge (partnership noted), Gilgamesh's Guides. Logo pulled from Squarespace CDN and saved locally as `/public/logo.png`. GitHub: `renewalmateupdates/gilgameshenterprise`.
+- **RenewalMate website** — `renewalmate.com` rebuilt from scratch. CTO's NS1 nameservers replaced with GoDaddy defaults (taking back domain DNS control). New landing page: green rebrand, "Stop Bleeding Money on Bills You Forgot About" hero, waitlist email capture, mission section, feature grid, comparison to RocketMoney/Monarch. Backend app (`app.renewalmate.com`) was down — CTO appears to have abandoned it. GitHub: `renewalmateupdates/renewalmate`.
+- **Hearthforge website** — `hearth-forge.com` already live on Vercel. Butch's new logo (H+flame, black/white) integrated into nav, footer, and admin sidebar across all 3 component files. `llms.txt`, `robots.txt`, `humans.txt` added for SEO discoverability. GitHub: `renewalmateupdates/hearthforge-web`. Logo at `public/logo.png`.
+- **SOMA image bugs fixed (PR #468):**
+  1. Images were showing in queue but NOT posting to social profiles — root cause: `urls.regular` Unsplash images (1-3MB) exceed Bluesky's 1MB blob limit; uploads silently failed. Fixed by using `urls.small` (~400px, <500KB).
+  2. Same image repeated across a week's posts — root cause: module-level `imageCache` returned same photo for same keyword. Fixed: removed module-level cache; each run now passes a `usedUrls: Set<string>` and retries up to 3x with random seed to get unique photos.
+  3. TikTok failing through SOMA — root cause: no `case 'tiktok'` in `publishToAll`, hits `default` = instant fail. SOMA generates text posts; TikTok requires video. Fixed: skip TikTok in generate loop when no `include_video_url` on the project, with clear error message.
+- **SOMA platform editing** — project page now has Edit button on Platforms card. Opens checkboxes for connected platforms (fetches from `/api/accounts/connected`). Saving updates both `platforms` and `platform_schedule` (adds new platforms with defaults, removes deselected ones).
+
+**June 5, 2026 (PR #466):**
+- **FCP loading skeletons — extended sweep** — Added `loading.tsx` skeleton screens to 5 more high-traffic pages: `/accounts`, `/blog`, `/features`, `/settings`, `/signup`. Combined with PR #459 (dashboard + onboarding), every major app route now has an instant skeleton on navigation. Preconnect hints added to `app/layout.tsx` for CDN and Supabase domains — shaves 100–200ms from first resource fetch on cold loads.
+- **Build fix: invalid `revalidate` on `/features`** — `export const revalidate = 86400` was added to `app/features/page.tsx` which has `'use client'` — Next.js 15 treats `revalidate` exports on client components as a function reference, causing a prerender crash. Removed the export. Rule: `export const revalidate` only works in Server Components, never in `'use client'` files.
+
+**June 1, 2026 (PRs #461–#464):**
+- **Full public site i18n — all pages wired (PR #461)** — Every public-facing page now uses `useI18n()` and `t()`. Pages wired: `/pricing`, `/faq`, `/glossary`, `/features`, all 15 `/for/*` audience pages, all 75 `/vs/*` comparison pages (`vs_shared` namespace), `/affiliates`, `/give`, `/enterprise`, `/community`, `/zenith`, `/discount`, `/challenge`, `/achievements`, `/wall-of-love`, `/tiktok`, `/monetize`, `/blog`, `/guides`, `/about`. 74 namespaces total across 9 locales. `translate()` now supports `{param}` interpolation. **i18n is now 100% complete across the entire public site.**
+- **Fix: vs/ metadata moved to layout.tsx (PR #462)** — i18n agent added `'use client'` to all 76 `/vs/` pages but left `export const metadata` in the same file — Next.js 15 doesn't allow both. Script `scripts/fix-vs-metadata.js` extracted metadata from each `page.tsx`, created a `layout.tsx` per route, and removed it from the page file. 76 layout files created. Build passing.
+- **SEO/AI discovery overhaul (PR #463)** — `public/llms.txt` massively expanded (580+ lines): Preferred AI Summary block, deep per-system docs for SOMA/Enki/HERMES/IRIS, competitor comparisons, 14 Q&A pairs for AI queries, all 7 platforms with technical details. `public/humans.txt` added — team, stack, mission. `public/ai.txt` added — AI crawler policy, canonical facts, preferred summary. `public/.well-known/ai-plugin.json` added — ChatGPT plugin manifest. `app/layout.tsx`: 3 JSON-LD schemas added (SoftwareApplication expanded, new Organization schema, new WebSite schema with SearchAction). New vs/ pages: `vs/brandwatch`, `vs/klaviyo`, `vs/linktree`, `vs/beehiiv`, `vs/convertkit`, `vs/notionhq`, `vs/creatorstudio` — each with `layout.tsx` + `page.tsx`, i18n wired.
+- **3 new vs/ pages + blog batch 18 (PR #464)** — `vs/mailchimp` (email-first, no Discord/TikTok/Bluesky scheduling), `vs/tiktok-native` (TikTok Studio is TikTok-only, we cross-post to 7 platforms), `vs/substack` (newsletter vs social layer, RSS import use case, 0% creator cut vs Substack's 10%). 20 new blog slugs added to sitemap (batch 18, June 2026).
+
+**May 31, 2026 (PR #459):**
+- **FCP performance sweep** — Vercel Speed Insights audit done. Dashboard (67 RES, 3.23s FCP) and Onboarding (70 RES, 4.28s FCP) had no `loading.tsx` anywhere in the app — client pages painted nothing visible while JS bundle loaded. Added `app/dashboard/loading.tsx` and `app/onboarding/loading.tsx` (animated skeletons). Dashboard loading spinner was `border-black` — invisible on dark mode backgrounds (anti-flash script sets dark class before hydration), causing browser to measure 3s+ FCP on painted-but-invisible content. Fixed to `border-amber-500`. Blog `[slug]` revalidate bumped 3600→86400 — hourly ISR cache expiry caused international CDN nodes (China 5.98s, Argentina 4.02s, France 3.59s) to hit US East origin. Blog index `revalidate = 86400` added — was SSR on every request (500-row Supabase query per page load). PR merged.
+
+**May 26, 2026 (PRs #431–#432):**
+- **Bug sweep — `.maybeSingle()` fixes (PR #431)** — Switched `.single()` → `.maybeSingle()` on upsert lookups in Bluesky connect, Telegram connect, and admin coupons routes. `.single()` returns a PGRST116 error for 0 rows; `.maybeSingle()` returns `{ data: null, error: null }` as intended. Metadata updated: title "7 Platforms Live", OG/Twitter descriptions list all 7 platforms.
+- **Performance — initial JS bundle cut ~400KB (PR #432)** — Five targeted fixes to push desktop Real Experience Score from 88 → 90+:
+  - `lib/i18n.ts` + `I18nContext.tsx`: Only English (~62KB) is statically bundled. The 8 other locale files (es/de/fr/pt/ru/zh/ja/ko) now load on demand via `dynamic import()` when a user switches language. Previously all locales were eagerly bundled into every page's JS.
+  - `app/layout.tsx` + `components/LazyClientComponents.tsx`: FeedbackWidget, CookieBanner, InstallPrompt moved to a `'use client'` wrapper loaded with `next/dynamic + ssr:false`. `ssr:false` can't live in a Server Component — requires the client wrapper.
+  - `app/page.tsx`: Removed dead server-side `supabase.auth.getUser()` call (result was computed but never used in JSX) and removed `PHLaunchBanner` (launch window was April 1–2, always returns null).
+  - `app/blog/[slug]/page.tsx`: Added `export const revalidate = 3600` (ISR) + `generateStaticParams` for hardcoded slugs — blog posts now pre-build at deploy time instead of hitting Supabase on every request.
+- **`/tiktok` public landing page** — SEO landing page at `/tiktok` targeting "TikTok scheduler" search queries. Added to sitemap.
+- **PublicNav desktop consolidation** — Products dropdown on desktop nav, cleaner right side.
+
+**May 28, 2026 (PRs #442–#446 + hotfix):**
+- **SOMA video URL attachment (PR #442)** — `include_video_url TEXT DEFAULT NULL` column added to `soma_projects` (migration `20260527000002_soma_video_url.sql`). Text input on project page for a video URL. PATCH to project API saves it. Generate route reads `include_video_url` and injects a `VIDEO URL TO INCLUDE:` instruction block into Gemini prompt. Clear button removes saved URL. Cyan input + green "✓ Saved" pill with Remove button.
+- **Enterprise tier (PR #443)** — `/enterprise` landing page (dark-forced, contact form with name/email/company/team size/message). Enterprise plan card added as 4th column on `/pricing` (custom pricing, unlimited seats, SLA, White Label Pro included, dedicated onboarding, priority support, custom contract). `POST /api/enterprise/inquiry` saves to `enterprise_inquiries` table + sends Resend HTML email to `socialmatehq@gmail.com`. "Enterprise" link in PublicNav desktop + mobile. Sitemap + llms.txt updated. SQL: `enterprise_inquiries` table (no RLS — admin-only). No Stripe — provisioned manually by Joshua.
+- **White Label improvements (PR #444)** — 4 missing state vars added to Settings white label panel (`wlRemoveBranding`, `wlSaving`, `wlLogoUploading`, `wlLogoError`). Full UI: file upload button (calls `/api/white-label/logo-upload` to Supabase media bucket), inline logo preview, color swatch, remove-branding Pro-only toggle, custom domain locked state for Basic users. Default accent color corrected from `#000000` → `#f59e0b` (amber). SQL: `ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS white_label_remove_branding BOOLEAN DEFAULT FALSE;`
+- **SOMA Full Send expansion (PR #445)** — `somaFullSendDailyRun` Inngest function: cron `'0 13 * * *'` (daily 1pm UTC / 9am EDT), only Full Send workspaces (`soma_full_send_enabled = true`), max 7 posts/day per platform, 30 runs/month cap. Registered in `app/api/inngest/route.ts`. Project page shows 🚀 Full Send badge when active. Mode-aware max shown in schedule editor. Full Send daily cron runs separately from Autopilot's weekly Monday run — both coexist. **Resync `soma-full-send-daily-run` in Inngest after deploy.**
+- **i18n remaining pages (PR #446)** — Settings Scheduling tab (title, description, start/end time labels, DND block), SOMA Weekly page (all JSX strings, error messages, button states), SOMA Upgrade page (feature list, CTA, footer). 54 new keys across 3 namespaces: `app_settings_scheduling_tab` (11), `app_soma_weekly` (34), `app_soma_upgrade` (9). All 7 locale files validated in sync. Full-app translation coverage now complete.
+- **Build error hotfix (direct to main)** — `somaFullSendDailyRun` was imported in `route.ts` by the agent but never written to `lib/inngest.ts`. Full 180-line function added manually. Vercel deploy unblocked. Build passing.
+- **Reddit posts live** — r/alphaandbetausers: updated tester recruitment post (2/12 opted in, feature update, Android CTA). r/buildinpublic: build-in-public update — "I said no new features then shipped 10 more things" — honest state, tech decisions, "what moved you from user to paying customer?" question.
+- **Merge conflict resolved (PR #444)** — `llms.txt` conflict between white-label branch and main resolved — kept 570+ blog count from main.
+
+**May 27, 2026 (PRs #433–#440):**
+- **SOMA media toggle (PR #433)** — `include_media` BOOLEAN column added to `soma_projects` (migration `20260527000001_soma_include_media.sql`). Unsplash API integration in manual generate route: keyword extraction (strips stop words, returns first meaningful term from post content), `fetchUnsplashImage()` calls Unsplash random photo endpoint, fires required download-location tracking ping (API compliance), caches per-keyword within run. Attribution stored as `media_urls[1] = "Photo by X on Unsplash | profile_url"`. Non-fatal — posts still create if Unsplash unavailable. Toggle UI on project page (amber pill switch). `UNSPLASH_ACCESS_KEY` env var required.
+- **Enki i18n (PR #434)** — 207 translation keys across 3 new namespaces: `app_enki_truth` (77 keys for TruthClient.tsx), `app_enki_trades` (38 keys, alias `tk` to avoid shadowing trade loop variable), `app_enki_doctrines` (92 keys, alias `td`). All 7 locale files (en/es/de/fr/pt/ru/zh) updated and validated in sync. Server component `page.tsx` files left unchanged — only client components wired.
+- **Unsplash attribution compliance (PR #435)** — Cherry-picked compliance fix for generate route ensuring photographer credit format and download tracking are always triggered correctly.
+- **UnsplashCredit component (PR #436)** — `components/UnsplashCredit.tsx` renders Unsplash thumbnail + "📷 Photo by [Name] on Unsplash" attribution link with `utm_source=socialmate&utm_medium=referral` UTM params. `size` prop: `'sm'` (queue cards, h-20) / `'md'` (calendar panel, h-28). Wired into `app/queue/page.tsx` (sm) and `app/calendar/page.tsx` (md). Both queries updated to include `media_urls` in select.
+- **Landing page visual overhaul + signup cleanup (PR #437)**:
+  - Hero headline: "Social media management without the $99/month price tag." → **"Post everywhere. All at once."** with amber→orange gradient on second line
+  - Added radial depth glows behind hero (amber/purple/blue at low opacity, `blur-[100px+]`) — removes flat look
+  - 7 live platform pills rendered directly in hero using `live` PLATFORMS array
+  - Green pill badge → amber/white (`bg-amber-500/15 border-amber-500/30 text-white`)
+  - CTA button → `bg-amber-500 hover:bg-amber-400` with `shadow-amber-500/25`
+  - Stats numbers: explicit `text-white` added
+  - Founder card condensed and moved below stats
+  - Signup: removed `ageConfirmed` state + all guards → replaced with required `tosAccepted` ToS/Privacy checkbox (amber border/fill, inline links to /terms and /privacy)
+  - Newsletter opt-in updated to reference **IRIS Dispatch** specifically (optional checkbox)
+  - Removed redundant "By signing up you agree to our Terms" text at bottom
+- **Blog FCP fix (PR #438)** — `generateStaticParams` in `app/blog/[slug]/page.tsx` now queries Supabase `blog_posts` table for all slugs at build time, merges with hardcoded list using `Array.from(new Set([...]))`. All 500+ DB-inserted blog posts now pre-render as static HTML at deploy time. FCP dropped from 3.72s Poor → CDN-edge fast. `revalidate = 3600` stays for ISR on posts between deploys.
+- **Compose media preview (PR #439)** — `app/compose/page.tsx` now shows `<UnsplashCredit mediaUrls={draftMediaUrls} size="md" />` in the media attachments section when editing a SOMA-generated post with `media_urls`. State: `draftMediaUrls` set when draft loads. Label: "Attached image (from SOMA)".
+- **Autopilot cron media toggle (PR #440)** — `somaAutopilotRun` in `lib/inngest.ts` now fetches `include_media` from each `soma_projects` row. If true, extracts keyword from post content, calls `autopilotFetchUnsplashImage()` (same pattern as manual route, scoped to step to avoid cross-run state leak), attaches `media_urls` to post insert. Non-fatal. **Remember to resync `soma-autopilot-run` in Inngest dashboard after deploy.**
+- **Zaira Angelique E. Canuto onboarded** — Marketing team member. DocuSign sent. Welcome email sent. SocialMate media outline/guide created including platform access policy, suggested account names, brand voice + creative freedom guidelines.
+- **Analytics snapshot (May 27)** — 794 visitors (+61%), 2,127 page views, 74% bounce rate. Top pages: / (300), /blog/discord-community-management-guide (93), /login (88). Top referrers: bing.com (98), duckduckgo.com (36), google.com (33), t.co (23). 33% USA, 21% Singapore, 9% China. 80% desktop, 19% mobile. RES jumped 94 → **96** after all merges. / page at **99**. Blog still at 65 (Needs Improvement — static params will help future visits).
+- **Reddit + LinkedIn posts** — r/saasbuild post live: "Deli worker turned SaaS founder. 400 PRs, 7 platforms, 2 months. AMA, open to collabs." LinkedIn post live with landing page screenshot, Leo Burnett quote, 2 engagement questions.
+
+**May 24, 2026 (PRs #426):**
+- **Full public site sweep — dark mode, mobile, accuracy** — Three-phase sweep across every public-facing page. PR #426 on branch `fix/dark-mode-accuracy-sweep`.
+  - **Phase 1 (dark mode):** All `for/`, `blog/`, `guides/`, `vs/`, and misc public pages audited for dark mode consistency. `PublicLayout` adds `dark` class forcing all `dark:` variants active regardless of system preference.
+  - **Phase 2 (accuracy):** Every stat in the codebase updated to reflect current reality — 15+ AI tools (was 12), 7 live platforms (was 5 or 6). Files touched: `app/page.tsx`, `app/features/page.tsx`, `app/features/layout.tsx`, `app/for/agencies/page.tsx`, `app/for/small-business/page.tsx`, `app/for/streamers/page.tsx`, `app/for/tiktok-creators/page.tsx`, `app/for/linkedin-creators/page.tsx`, `app/faq/page.tsx`, `app/blog/[slug]/page.tsx`, `app/dashboard/page.tsx`, `app/roadmap/RoadmapClient.tsx`, `lib/inngest.ts` (email templates). All 75 vs/ pages: "12 AI tools" → "15+ AI tools". vs/canva, flick, kontentino, planly, plann, preview-app, ripl, sked-social, social-champ, unum: "6 platforms" → "7 platforms" + LinkedIn added to platform lists. vs/postcron "16 (free)" typo fixed → "7 live (free)".
+  - **Phase 3 (mobile + logo consistency):** All 75 vs/ comparison tables wrapped with `overflow-x-auto` + `min-w-[480px]` for horizontal scroll on 375px screens. All 75 pages verified JSX-balanced programmatically. S lettermark (`<div>S</div>`) replaced with `<img src="/logo.png">` everywhere it appeared outside `LandingHeader.tsx` (dead code): `app/login/page.tsx` (3), `app/signup/page.tsx` (2), `app/forgot-password/page.tsx`, `app/reset-password/page.tsx`, `app/error.tsx`, `app/not-found.tsx`, `app/invite/page.tsx`, `app/page.tsx` footer, `src/app/signup/page.tsx`.
+- **Rule confirmed:** `LandingHeader.tsx` is dead code (replaced by `PublicNav` on `/` in April 2026) — do not import or touch it.
+
+**May 22, 2026 (PR #401):**
+- **IRIS AI auto-generate** — Admin UI at `/admin/iris` now has a violet "Generate draft with AI" button. `POST /api/admin/iris/generate` calls Gemini 2.5-flash with Joshua's tone rules + baked-in recent ship context. Returns complete newsletter draft (subject, intro, whatShipped, realNumbers, whatsNext, closing). Passes previous subject lines to avoid repeated angles. Fields pre-fill on success with inline confirmation banner. Admin-only gate.
+- **Docs update rule established** — Whenever llms.txt is updated, CLAUDE.md + changelog + roadmap must all update in the same flow. Never update llms.txt alone.
+
+**May 21, 2026 — LinkedIn Launch (PRs #394–#399):**
+- **LinkedIn OAuth live** — Full end-to-end OAuth 2.0 flow with OpenID Connect. Connect at `/accounts` → OAuth authorize → callback upserts to `connected_accounts` (platform: `'linkedin'`) → disconnect button deletes the row. Route: `/api/accounts/linkedin/connect` + `/api/linkedin/callback` + `/api/accounts/linkedin/disconnect`.
+- **LinkedIn posting live** — `/api/publish/linkedin` uses UGC Posts API (`/v2/ugcPosts`) with `w_member_social` scope. 60-day access tokens (no refresh — re-auth on expiry). Confirmed working with a live post immediately after connecting.
+- **7 platforms** — LinkedIn joins Discord, Bluesky, Telegram, Mastodon, X/Twitter, and TikTok. Platform count updated to 7 across all pages: `app/page.tsx`, `app/features/page.tsx`, `app/accounts/page.tsx`, `app/compose/page.tsx`, `components/pages/LocalizedLanding.tsx`, `app/clips/page.tsx`, `app/ai-features/page.tsx`, `app/for/small-business/page.tsx`, `app/changelog/page.tsx`, `public/llms.txt`.
+- **`/for/linkedin-creators` audience page** (PR #398) — Full SEO landing page targeting "free LinkedIn scheduler", "schedule LinkedIn posts", "LinkedIn post scheduler". Hero, pain points, 8 features, 7-platform grid (LinkedIn highlighted), comparison table vs Hootsuite/Buffer/Later/Publer, pricing, FAQ with JSON-LD. Added to PublicNav Audiences dropdown + sitemap.
+- **vs/taplio** (PR #399) — New comparison page. Taplio = $39/mo LinkedIn-only. We = free + 7 platforms.
+- **vs/shield-app** (PR #399) — New comparison page. Shield App = analytics-only, no scheduling. We = schedule + analyze in one, free.
+- **19 LinkedIn blog posts** (PR #399) — `supabase/blog_batch_linkedin.sql`. SEO content covering LinkedIn scheduling, algorithm, content strategy, cross-posting, personal branding, hooks. Run SQL in Supabase.
+- **sitemap + llms.txt updated** — 19 new LinkedIn blog slugs, vs/taplio, vs/shield-app, /for/linkedin-creators all added.
+- **LinkedIn SOMA support** — SOMA project form updated so LinkedIn shows as a live platform option (generates content for personal profile; auto-queues on connect for users who haven't connected yet).
+- **Bluesky grapheme fix** — `lib/publish/bluesky.ts` now counts graphemes via `Intl.Segmenter` (not UTF-16 code units). Posts with emojis that Bluesky accepts were being pre-rejected. Now truncates to 300 graphemes + "…" gracefully.
+- **Enki pending trades fix** — Pending trades are now bulk-cancelled when switching to autonomous mode. Pending approvals banner hidden in autonomous mode.
+- **SocialMate Discord community server** — Launched at discord.gg/2se6FGrbRU. Linked in sidebar under Community.
+
+**May 21, 2026 — Bluesky Bug Investigation:**
+- **Bluesky posting failures root-caused** — Two consecutive days of Bluesky failures diagnosed. Two bugs found:
+  1. **Refresh token expiry** — Bluesky AT Protocol sessions expire after extended periods (or when logged in from another client). When `refreshSession` returns 401, code throws immediately and post fails. Fix: go to `/accounts` → disconnect Bluesky → reconnect with app password → hit Retry on failed calendar posts.
+  2. **Character limit check bug (code fix pending)** — `lib/publish/bluesky.ts` uses `content.length` (UTF-16 code units) to enforce the 300-char limit, but Bluesky's actual limit is 300 *graphemes*. Every emoji is 2 UTF-16 code units but 1 grapheme. Posts with emojis that Bluesky would accept are being thrown out by our pre-flight check. Twitter's code truncates gracefully; Bluesky's code throws an error. Fix: use `Intl.Segmenter` for grapheme counting and truncate to 300 graphemes (+ "…") instead of throwing.
+
+---
+
+**August 23, 2026 — Funnel instrumentation, and the pricing the August sweep missed (PRs #567–#569):**
+
+The theme of the day: two things had been recorded as done and were not.
+
+- **Nothing was counting (PR #569).** Ten separate questions about activation had
+  the answer "no way to tell" because GA4 had five documented events and zero real
+  ones. Now instrumented end to end: `lib/analytics.ts` (`track` / `trackOnce`)
+  writes to **both** GA4 and a first-party sink at `POST /api/track`, because a
+  third of this audience blocks analytics and the numbers that matter have to join
+  against our own tables. Server-side steps go through `recordFunnel()` in
+  `lib/usage.ts`. Storage reuses `usage_events` — right shape already, no migration.
+  Steps: signup viewed/started/completed · onboarding started/step/skipped/completed ·
+  **connect screen viewed / clicked / succeeded / failed** · compose opened ·
+  post scheduled/published · upgrade viewed/clicked · checkout started · blog CTA.
+  The eight OAuth callbacks are instrumented at a single point — they all redirect
+  to `/accounts` with `?success=<platform>_connected` or `?error=<platform>_<reason>`.
+- **`/admin/funnel`** — the payoff. Ground truth (accounts → connected → published →
+  paying, computed from the tables, true back to March) sits above recorded steps
+  (from `usage_events`, only from today). Shows connect intent vs outcome per
+  platform, failure reasons, and onboarding drop-off by step.
+- **Blog CTA (PR #569).** The blog is the front door — 2,623 visitors, 215 of whom
+  reached the homepage and 43 the signup page — and its only CTA sat below ~1,500
+  words and 26 competitor links at an 88% bounce. `BlogInlineCTA` now splices a
+  tracked CTA a third of the way in, snapped to the nearest heading. The footer CTA
+  is attributed too, so inline vs footer is measurable.
+- **The August repricing was half-finished (PR #568).** `scripts/migrate-pricing-copy.py`
+  ran over English source only. The landing page still opened with **$5**; 105 values
+  across all eight non-English locales still said Pro $5 / Agency $20; press and
+  `/for/agencies` metadata still quoted the old price. Worse, nine blog rows had
+  their labels updated but not the arithmetic derived from them — the affiliate posts
+  were computing `100 Agency subscribers ($29/mo): 100 × $20 × 40%`, understating
+  affiliate earnings by 30–45% for eleven days. All corrected; originals backed up.
+- **About page.** Claimed "thousands of people are using" (it is ~90), "480+ blog
+  posts" (674), and listed Enki as live. Rewritten in all nine locales around a claim
+  that is both true and stronger: over 1,000 posts published.
+
+**Rules that follow:**
+
+- **A funnel step that is not in `FUNNEL_EVENTS` is not recorded.** `/api/track`
+  validates against the same list and logs a warning on anything else, so a typo
+  fails loudly instead of writing a step nobody will query.
+- **Never trust a "shipped" line in this file without grepping for it.** Two entries
+  in this document were false today. That is the second time; the August sweep found
+  nine.
+- **Derived arithmetic moves with the number it was derived from.** "One-twentieth of
+  the going rate", "$80/year = $4.58/month", `100 × $20 × 40%` — every one of these
+  survived a price migration that updated the price beside it.
+
+**August 28–30, 2026 — The first paying customer, and the week the audits grew teeth (PRs #573–#582):**
+
+The funnel shipped on Aug 23 recorded its first real data, and the first thing it
+showed was a person paying and then being refused what they paid for.
+
+**SocialMate has a paying customer.** `pixelkittehfurever@gmail.com`, Pro Annual,
+$55.20 with BDAY31, subscription `sub_1U9e3p7OMwDowUuUiVdlYIMK`, 29 Aug. First
+revenue since launch.
+
+**And the app enforced them as free for their entire first session.** The plan is
+stored twice: the Stripe webhook writes `user_settings.plan`, while ~20
+enforcement sites read `workspaces.plan`, which was NULL for 83 of 86 rows and had
+only ever been set by hand in SQL. Forty minutes after paying they hit the free
+tier's one-account-per-platform cap four times trying to add a second Mastodon
+account, bounced between /compose and /accounts for another forty minutes,
+scheduled one post, and cancelled 68 minutes after paying. Apology letter sent
+29 Aug from `joshua@socialmate.studio` with 2,000 permanent credits attached;
+replies go to socialmatehq@gmail.com.
+
+| PR | What was broken |
+|---|---|
+| #573 | No control anywhere could remove an active affiliate. Also: dead "Mark paid" button, and `app/api/partners/*` admin guards that failed **open** when `ADMIN_EMAIL` was unset, including the Stripe payout route |
+| #574 | The per-platform account cap existed only in the accounts-page click handler. A free workspace had two TikTok accounts. TikTok's callback also bypassed the funnel entirely |
+| #575 | A transient X failure permanently killed a post. Ten posts dropped in five days to "credits depleted", which is X's app-level budget, not the user's quota |
+| #576 | `/es /de /fr /pt /ru /zh /ja /ko` still served the pre-July design. Two landing pages existed; the July rebuild only touched one |
+| #577 | Four tables the code writes to did not exist. Guide email capture 500'd since May, Clips Studio never worked, the funnel recorded nothing, `/api/admin/reactivate` could not see who it had already emailed |
+| #578 | `/tiktok/studio` had no `loading.tsx` and awaits auth server-side |
+| #579 | **The paid plan never reached the code that enforces limits** |
+| #580 | A workspace created *after* subscribing was still born on free |
+| #581 | Activity feed read `workspace_members`, which nothing writes |
+| #582 | Two upserts that could never succeed: push notifications and competitor tracking |
+
+**Nobody has ever received a push notification from SocialMate.** `push_subscriptions`
+upserts on `endpoint` with no unique index on it, so every subscribe has raised
+42P10 since April. Same shape for `competitor_posts`, which is why Growth Scout,
+Trend Scout and `competitorAlerts` have always had an empty table to read.
+
+**Activation, measured 29 Aug (admin excluded):** 99 accounts, 17 connected a
+platform, 7 created a post, 1 has ever published. 82 never connected anything.
+
+> ⚠️ **That "1 publisher" was wrong.** It excluded the admin account but not the
+> other three internal ones, and the publisher was
+> `gilgameshenterprisellc@gmail.com` — Joshua's own. Corrected 30 Aug: **no
+> external user has ever published.** See the Aug 30 entry below and
+> `lib/internal-accounts.ts`. Do not quote the numbers in this paragraph.
+
+**Performance:** RES 95 desktop and mobile, CLS 0. Investigated and *rejected*
+deferring `PostImageExporter`/`PageTour` — measured at 3–5 kB against a 950 kB
+baseline. The one real lever left is that `messages/en.json` (138 kB) ships on
+every page including `/login`; `app_*` is 41% of it and public pages never touch
+it. Not done: splitting it means a missed key renders as a raw key path, and some
+call sites build keys dynamically.
+
+**Rules that follow:**
+
+- **Verify a "shipped" feature by exercising it, not by reading the changelog.**
+  Five separate never-ran discoveries in three days. Every one had the same cause:
+  nobody had performed the action.
+- **A guard with a blind spot is worse than no guard**, because it is trusted.
+  `audit-schema-drift.py` silently skipped tables it could not resolve, and had two
+  false positives from an apostrophe inside a `//` comment. Both fixed; it now has
+  tests.
+
+**August 30, 2026 — The day the onboarding turned out to save nothing (PRs #585–#595):**
+
+Eleven PRs. The theme, again, is that a large share of what SocialMate advertises
+had **never executed once**. Four of the five findings below were surfaced by
+walking the product, not by reading it.
+
+**The measurement itself was wrong.** `/admin/funnel` excluded only the admin
+account, but there are **four** internal accounts. The "1 user has ever
+published" figure quoted since March was `gilgameshenterprisellc@gmail.com` —
+Joshua's own Mate Suite account, 7 Bluesky posts over 4 days in March, then
+nothing. **No external user has ever published a post.** Zero, not one. That is a
+different problem, and it should drive what gets built.
+`lib/internal-accounts.ts` is now the single list, used by the funnel ground
+truth, the reactivation audience and an "internal" badge on `/admin/users`.
+`nichole_bostic@yahoo.com` is deliberately **not** on it — confirmed to be
+Joshua's mother, a real external signup.
+
+| PR | What had never run |
+|---|---|
+| #585 | TikTok's `user/info` call requested `username`, a `user.info.profile` field the app has never held. TikTok 400s the whole request when one field is out of scope, so **every** TikTok account in production is named the literal placeholder "TikTok Account" |
+| #586 | `connect_screen_viewed` fired twice per visit from inside an effect keyed on `activeWorkspace`; onboarding step tallies counted fires, not people |
+| #587 | Onboarding never offered TikTok or LinkedIn — the only two platforms that connect in pure two-click OAuth — while Bluesky, which needs an app password from another website, was badged "Easiest to start". Step 3 also shipped people to `/accounts` in a new tab with no memory of the platform they had just picked |
+| #591, #593 | **Every reply anyone has ever sent went nowhere.** `socialmate.studio` has no mailbox (MX → Resend inbound, no handler). 53 send sites, two of which set `replyTo`. `lib/mail.ts` is now the one sender; 62 `replyTo` added across 33 files |
+| #594 | **`handleFinish` was wired to the button nobody presses.** It is the only thing that writes the profile name, `onboarding_completed`, the goal, the +50 credits, the starter post and the funnel event — and the primary CTA above it is a plain `<Link>`. Measured: `onboarding_completed` true for **5 of 103**, `onboarding_goal` set on **2** |
+| #595 | The 50 completion credits went to `ai_credits_remaining`, a legacy fallback the RPC only reads when `monthly_credits_remaining` is NULL. Every new signup has it set, so the bonus was never displayed and never spendable |
+
+**The reactivation send finally fired.** 62 people who signed up and never
+connected, median account age 79 days, all 62 delivered with zero bounces. The
+copy had to be rewritten first (#589): it apologised for the 90-second connect
+poll, which the funnel had since disproved, and told people to connect Bluesky,
+Mastodon, Discord or Telegram "in about thirty seconds" — the four hardest.
+#590 added `maxDuration` and a 400ms throttle, because 61 sequential Resend
+calls do not fit in Vercel's 10s default and the send would have truncated
+silently.
+
+**`/admin/users/[id]`** now exists — plan resolved through `resolveWorkspacePlan`
+with both raw values beside it, attribution, credits, posts by status and
+platform, publish failures with their real error, and the full funnel timeline
+for one person. Diagnosing an account used to mean running Python against
+production by hand.
+
+**Credit backfill run.** 94 accounts that reached the end of onboarding before
+#594 were each granted the 50 they were owed, into `earned_credits`, guarded by
+an `onboarding_bonus_backfill` marker in `usage_events` so a re-run is a no-op.
+
+**Rules that follow:**
+
+- **A dead code path hides every bug downstream of it.** #595 was completely
+  inert while `handleFinish` never ran; #594 made it live within the hour.
+  Fixing a path that never executed does not just restore it, it activates
+  everything behind it. Re-test after un-breaking something.
+- **Walk the flow. Then query the database.** #592 fixed the starter-post insert
+  correctly and the post still did not save, because the insert lived inside a
+  function nothing called. Two full walkthroughs and a production query found
+  what the diff could not.
+- **Never quote an activation number that counts our own accounts.** Four of
+  them exist. Use `lib/internal-accounts.ts`.
+
+**September 9-10, 2026 — The posting pipeline had never been audited, and neither had the marketing copy describing it (PRs #632-#638):**
+
+Two days of Claude-driven audit work, prompted by "is everything across the app and landing pages actually accurate." It wasn't, in two completely different places.
+
+**The posting pipeline (PR #632).** LinkedIn and Telegram publishing used an unscoped `.single()` lookup with no account filter — the moment a user connected a *second* account on either platform (Pro sells 5 per platform, Agency 10), every future post to it failed with "No account connected." Wired both through the same accountId-selection pattern Bluesky/Mastodon/Twitter already had; compose's per-platform account picker was already rendering the choice, just silently discarding it before it reached the publisher. Also found: a Bluesky inbox route with the identical bug returning a silently-empty inbox instead of an error (dead code, fixed anyway); a Mastodon analytics query with no `user_id` filter at all — `userId` was typed on `event.data` but never destructured, so it read `connected_accounts` for *any* user on `platform='mastodon'` globally; and the first-post/referral credit bonus writing to `ai_credits_remaining`, the same dead legacy column PR #595 found for the onboarding bonus.
+
+**TikTok (PRs #633-#634 + audit submission).** The consent declaration TikTok requires before every direct post ("agree to TikTok's Music Usage Confirmation") only rendered when Disclose Content was toggled on — the default, most common post showed no declaration at all. Separately, connecting TikTok silently skipped the OAuth consent screen for a browser already logged into TikTok (missing `disable_auto_auth=1`), which is also a multi-account correctness bug, not just a demo-recording inconvenience. Both fixed and merged same day, then the actual content sharing audit (the review that lifts the private-account-only posting restriction) was filed with TikTok — 2-4 week turnaround, see Pending below.
+
+**The funnel was measuring the wrong thing (PR #635).** `compose_opened: 33 → post_scheduled: 1` looked like a 97% drop-off worse than the well-known connect-screen wall. It wasn't real: `track('post_scheduled')` fired as the first line of `handlePublish`, before the guard clause and before the API call, so it counted "clicked the button" rather than "a post was created" — and the thread/A/B compose paths never called it at all. Worse: `/api/posts/create` turned out to be a *second*, undocumented implementation of "publish now," separate from `/api/posts/publish`, which had never called `handleFirstPostCredits` or `updateStreak` — meaning the most common way to publish on this app (Compose's actual Post Now button) never granted the first-post bonus or updated the streak, ever. Extracted both into `lib/post-activation.ts`, called from both routes. **The true compose-to-publish conversion rate is still unknown — this only fixed the ability to measure it.**
+
+**The marketing copy had the exact same disease (PRs #636-#638).** `llms.txt` told AI crawlers Free gets 5 tweets/month; the real number is 0 (Pro+ required). A live blog post claimed the free plan includes 16 platforms — Snapchat, Lemon8, and BeReal among them — none of which exist anywhere in this codebase or the roadmap. The August 12 repricing, recorded as fully migrated across every `/vs` and `/for` page, wasn't: a literal grep for `$5/month` found 8 remaining instances of SocialMate's own price stated as $5, six months after Pro became $8 — one of them live inside the app itself (`/queue`'s Smart Queue upgrade prompt). `app/templates/page.tsx` had a real functional bug, not copy: its platform picker's `LIVE_PLATFORM_IDS` was missing X/Twitter, TikTok, and LinkedIn entirely, with LinkedIn actively rendered disabled under a "Soon" badge — a user could not tag a template for three of the seven live platforms. FAQ and the Support page both still listed LinkedIn (live since May 21) as "coming soon," alongside a "Tumblr" platform that has never existed anywhere in this product. And the big one: 25 separate instances across 11 files claimed the free plan has "no post cap" / "no post limit" — the actual never-say-unlimited violation this project has been burned by before, just without using the literal word "unlimited." Several sat one bullet below a correct "250 posts/month" headline in the *same component*.
+
+**Rules that follow:**
+
+- **A tracking call placed before the code that can fail measures attempts, not outcomes.** If an analytics event fires at the top of a handler instead of after the thing it's counting actually succeeds, it will look like a real number and be worthless. Put funnel events at the API layer, after the write succeeds — not in the client handler, and not scattered across every button that can reach that handler.
+- **Two implementations of the same action will drift, silently, forever.** `/api/posts/create`'s Post Now and `/api/posts/publish`'s direct path did the same thing for months with different side effects, and nothing ever compared them. If a feature can be triggered two ways, it should be one function called twice, not two functions that happen to agree today.
+- **"Marked done" in this file means grep it, not trust it.** The August repricing sweep, the LinkedIn launch, and the never-say-unlimited rule were all previously logged as complete and all had live violations months later. A changelog entry is a claim about the day it was written, not a live guarantee — re-verify with the literal string before quoting a "done" line from this file to a customer or an AI crawler.
+- **"Never say unlimited" doesn't require the word "unlimited."** "No post cap," "no caps," "no post limits ever" are the identical claim and just as wrong. Grep the meaning, not the token.
+
+**September 10-11, 2026 — HERMES becomes a real paid feature, and the day the pricing page finally meant what it said (PRs #647-#652):**
+
+The product-audit sweep that opened this session covered Creator Hub billing-state gating (tip jar/subscriptions pause automatically on downgrade, resume on resubscribe), Zenith's share link (was pointing at a static broken `/zenith`, now `/z/[code]`), `/community` and Creator Studio redesigns, SM-Pulse/SM-Radar scan history, sidebar decluttering (Community and Enki removed from the Manage section), evergreen recycling now sorted by real merged engagement, a `/schedules` layout fix, `/analytics` merging manual-sync and auto-fetched engagement into one real number, a `/notifications` dark-mode fix, and a professional rewrite of `/story` (PR #647). Building HERMES's billing surfaced the identical "checkout works, webhook never activates" bug in SOMA Autopilot/Full Send that HERMES itself had (PR #649) — same fix, adapted for workspace-scoping instead of user-scoping, since SOMA runs per-workspace while HERMES is per-user.
+
+**HERMES is now a real, priced, enforced feature** (PRs #648, #650, #651) — not an admin tool with a payment page bolted on:
+- Real Stripe prices wired into the webhook: Starter $12/mo, Pro $25/mo (see Stripe Live Price IDs below). Sidebar entry is no longer admin-gated.
+- Two of the numbers already on `/hermes`'s pricing page — "75/400 prospects/month" and "1 auto-discover run/month (Starter) vs weekly cron (Pro)" — had zero backing enforcement, on either the manual endpoints or the weekly Inngest cron. Fixed: `HERMES_LIMITS` (`lib/hermes-access.ts`) now gates prospect adds and discover runs before they happen, and the weekly cron filters to active Pro/admin accounts only — which also closed a real cost leak, since a cancelled Starter subscriber with an old campaign left `auto_discover_enabled` was getting free weekly Gemini runs forever.
+- Hunter.io email-finder (`/api/hermes/find-email`) had zero rate limiting despite billing against one account-wide quota shared by every HERMES user on this app — a single customer could exhaust a whole month's Hunter credits by themselves and silently break lookups for everyone else. Capped at 30/mo Starter, 100/mo Pro.
+- New `hermes_discover_runs` table logs every discover invocation (manual, cron, and Hunter lookup, tagged by `source`) so the monthly counters have real rows to count instead of being inferred.
+
+**Mobile performance: onboarding and signup were the worst-performing pages, and they're structurally the only two pages that are always a cold-cache load** (PR #652). Mobile RES was 72, dragged down almost entirely by `/onboarding` (RES 26, FCP 4.7s, LCP 5.77s, CLS 0.33) and `/signup` (RES 49, CLS 0.34) while every other route (`/`, `/settings`, `/accounts`, `/compose`, `/dashboard`) was green. Root cause on both, same pattern: a referral banner whose value was read inside a `useEffect` firing after mount, so it popped in after first paint and pushed the page down — likely inflating LCP too, since a layout shift above the LCP candidate re-paints it at its new position. Signup's fix was a one-line simplification (`useSearchParams()` already resolves synchronously and identically on server and client, no reason it was ever routed through state). Onboarding's `document.cookie` has no such guarantee server-side, so the real fix there was splitting `page.tsx` into a Server Component that reads the `ref_code` cookie via `cookies()` and a new `OnboardingClient.tsx` taking it as a prop — server and client now agree from the first render, no hydration mismatch, no post-mount shift. Also dynamically imported the three connect-form modals (Bluesky/Telegram/Mastodon), previously eager-loaded into every cold visit even though most sessions on step 1 never reach them.
+
+**Required SQL run in Supabase this session:**
+```sql
+ALTER TABLE workspaces ADD COLUMN IF NOT EXISTS soma_addon_subscription_id TEXT;
+
+CREATE TABLE IF NOT EXISTS hermes_discover_runs (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  campaign_id uuid REFERENCES hermes_campaigns(id) ON DELETE CASCADE,
+  source text NOT NULL DEFAULT 'manual',
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE hermes_discover_runs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own discover runs" ON hermes_discover_runs FOR SELECT USING (auth.uid() = user_id);
+```
+
+**Rules that follow:**
+
+- **A pricing-page number with no backing code is a promise nobody is keeping — and it's not an all-or-nothing failure.** HERMES's `sendsPerDay` and `campaigns` caps were real and enforced from day one; `prospectsPerMonth` and `discoverRunsPerMonth` sat right next to them as pure copy for months. Half-enforced reads as trustworthy, which makes it more dangerous than a page that's obviously all talk.
+- **A quota shared across every customer needs a per-customer cap even when the vendor doesn't require one.** Nothing about Hunter.io's billing forces SocialMate to limit any single user — the vendor is happy to let one account burn the whole month's pool. The cap has to be imposed on this side, or one customer's usage becomes every other customer's outage.
+- **Onboarding and signup carry a performance tax no other route does: they are structurally always cold.** A returning user's fifth trip to `/dashboard` benefits from a warm cache and previously-downloaded JS; nobody's fifth trip to `/signup` exists. Bundle-size and layout-shift fixes on these two specific pages are worth disproportionately more than the identical fix anywhere else in the app, because every single visitor experiences them cold.
+
+**September 11, 2026 — Admin dashboards finally agree with each other, and the first paying customer's complaints turned out to already be fixed (PRs #654-#656):**
+
+- **Onboarding premium visual pass** (PR #654) — Pure visual polish, zero copy/handler/analytics changes. Headlines now use the Clash Display font already loaded for public pages (`font-display`, weight 600 to match its intended display weight, not the generic extrabold Tailwind default). Step cards get `shadow-2xl` (matching the pattern already on the dashboard's own card). Switching steps now has a small mount-triggered fade/slide (`.animate-step-in` in `app/globals.css`) instead of an abrupt DOM swap. Progress bar fill is an amber gradient instead of flat black. Primary buttons get `active:scale-[0.98]` tactile press feedback. The onboarding flow's *shape* was already single-path and well-tuned from prior fixes (goal-based step 1, two-click-vs-needs-setup platform grouping, the long connect poll, one-post-not-five) — this only changed how it looks.
+- **Admin metrics stopped contradicting each other** (PR #655) — Three separate causes, found while investigating why Joshua couldn't reconcile numbers across `/admin/funnel`, `/admin/overview`, and `/admin/feedback`:
+  1. `/admin/funnel` contradicted *itself*: Ground Truth excludes internal accounts, but that same page's "Recorded steps" panel (from `usage_events`) did not — so it showed "Published a post: 0" directly above "post_published: 1 users · 143 fires" for the same 30-day window. The 143 was Joshua's own account testing Compose, not a customer.
+  2. That same unfiltered query made `/admin/funnel`'s "connected accounts by platform" disagree with `/admin/overview`'s near-identical panel, since overview's `platformDist` already excluded internal accounts and funnel's `platformCounts` didn't. Fix #1 (apply the same `internalIds` filter to funnel's recorded-steps section) resolved both.
+  3. `estimatedMRR` on `/admin/overview` was still computing Pro at $5/mo and Agency at $20/mo — the pre-August-12-repricing prices (current: $8/$29, PRs #555-557). Had been silently understating MRR by roughly 45% for a month.
+  Deliberately did **not** remove internal-account exclusion from revenue/plan-count numbers (MRR, proCount, agencyCount, churn) — that exclusion is the correct, hard-won fix from PR #332/#588. Removing it would count Joshua's own test Agency workspace as paying revenue, the same class of bug in the opposite direction. Also cleaned up the "Signal sources" panel: a caption reading "X of Y signups carry attribution data" sat under the referrer-domain panel (`signup_referrer`, populated automatically) but was actually counting a different, essentially-unused field (`signup_source`, a UTM tag nobody's using), so a panel with real nonzero referrer numbers read "0 of 119" directly beneath it. Caption now sits under the panel it actually describes.
+  - **Rule that follows:** an exclusion filter has to be applied everywhere the same fact is queried, or consistently nowhere — applying it in one place and not another doesn't just risk being wrong, it guarantees two pages will eventually show two different numbers for the same question. This is the same "one fact, one place" lesson as the `affiliates.status`/`user_settings.plan`/`team_members` incidents, just with a filter instead of a column.
+- **First paying customer's feedback re-examined, all three complaints already resolved** (see `[[project_first_paying_customer]]` in memory) — `pixelkittehfurever@gmail.com`'s Aug 29 message ("can't add more than one account per platform," "templates don't appear to work in a useful way," "scheduling is too basic," refund request) was checked against current code. The account-cap complaint is the exact incident `lib/account-limits.ts` was built to fix (PR #574/#579) — its own comment cites this customer by description. The templates complaint matches the Sept 10 `LIVE_PLATFORM_IDS` bug (PR #636-638), also fixed. "Scheduling is too basic" is an opinion, not a bug. Chose credits over a refund again, consistent with the original Aug 29 decision — do not re-litigate.
+- **`bio_pages` defensive fix** (PR #656) — Routine re-run of `scripts/audit-schema-drift.py` and `scripts/audit-dead-features.py` came back fully clean (0 phantom columns across 878 files, all 35 upsert targets indexed). Spot-checked the most surprising entry in the "zero rows ever" list — `bio_pages` (SIGIL / Link in Bio), free on every plan since basically launch. The save path was already correct (both insert and update surface errors via toast); the initial load used `.single()` to check for an existing page, which errors on zero rows — true for every first-time visitor by definition. Harmless today only because the error was never destructured and the null-fallback happened to be the right UX anyway. Changed to `.maybeSingle()`. `bio_pages` having zero rows appears to just mean nobody has used the feature yet, not a broken save path.
+- **SocialMate admin account (`socialmatehq@gmail.com`) is now a god account for HERMES and SOMA** — HERMES was already unlimited automatically (`lib/hermes-access.ts` checks the admin email first, before any subscription lookup). SOMA has no code-level admin bypass, so this needed direct SQL: workspace `plan='agency'`, `soma_credits_monthly=999999`, `soma_autopilot_enabled=true`, `soma_full_send_enabled=true`, plus `user_settings.plan` synced to `'agency'`. Purpose: a possible HERMES cold-outreach campaign against a streamer/creator ICP (not agencies — agencies expect Instagram/Facebook, which doesn't exist here; streamers match what's actually live: Discord/Telegram scheduling, Twitch/YouTube clips, TikTok, Bluesky, X). HERMES's own auto-discover sources (Substack/GitHub/dev.to/Hashnode) are all writer/developer-skewed and won't surface streamers — that list needs prospects added manually, business emails are usually public on a streamer's Twitch/YouTube "About" page. **Status: parked, not started.** Joshua doesn't want to do the manual prospect-building right now. Don't treat this as urgent or bring it up unprompted.
+
+**September 11-12, 2026 — Three more small drifts, and the media library's "zero rows since April" finally has a reason (PRs #658-#660):**
+
+- **SOMA new-project platform list missing TikTok, listing dead Instagram** (PR #658) — `ALL_PLATFORMS` in `app/soma/projects/new/page.tsx` hardcoded the wrong 7: it had Instagram (never live anywhere in this app) instead of TikTok. The `platforms` state that actually gets submitted comes straight from `/api/accounts/connected`, not filtered through this list, so a connected TikTok account was silently included in the created project and its schedule row anyway — it just rendered as a bare lowercase "tiktok" with no icon and no pill to toggle or remove it. Same class of bug as onboarding's `LIVE_PLATFORMS` and templates' `LIVE_PLATFORM_IDS` from the Sept 9-10 sweep: a hardcoded platform list drifting out of sync with what's actually live. The project *detail* page has no equivalent list — it reads platforms straight off the connected-accounts API — so this was scoped to project creation only.
+- **AI routes stopped leaking raw provider errors to users** (PR #659) — found while diagnosing the Sept 11-12 Gemini outage (see `[[project_gemini_api_ops]]` — **that outage's root cause, a project-level `403 PERMISSION_DENIED` on the Gemini key, was not confirmed fixed as of this writing; don't assume any AI feature works without checking**). Eight AI routes (`admin/iris/generate`, `ai/bio-writer`, `ai/content-calendar`, `ai/hashtags`, `ai/profile-optimizer`, `ai/repurpose`, `ai/route`, `ai/tiktok-script`) shared a catch-all that returned `detail: String(err)` straight to the client — any unexpected failure put stack traces and provider internals in front of the user. Removed `detail` from all eight; `console.error` still logs the full error server-side. Separately, SOMA's project-ingest route deliberately surfaces the raw Gemini error on-screen (PR #527, for exactly this kind of on-screen diagnosis) — but SOMA Projects is an Agency customer feature, not admin-only, so every paying customer hitting a Gemini failure saw the same raw `[GoogleGenerativeAI Error]: ... 403 Forbidden ...` text. Now gated on `requireAdmin()`: admins keep the full detail, everyone else gets a clean retry message.
+- **Media library's silent zero-rows bug, most likely found** (PR #660) — both the `media_items` load and the post-upload insert in `app/media/page.tsx` destructured only `data`, discarding `error` entirely. Effect: a file lands fine in Storage, the DB insert fails, no error toast fires (only the storage-upload path had error handling), no success toast either since `successCount` never increments — the library just shows nothing, forever. `media_items` has had zero rows since the feature shipped in April despite being logged "confirmed applied" at the time — this is very likely why, though the exact underlying cause (missing table vs. something else) isn't confirmed without a production query. The next real upload will now surface the actual error instead of failing invisibly.
+
+**Rule that follows:** this is the fourth time in this project's history a table read "zero rows ever" and the reason turned out to be a discarded error on the write path (`bio_pages` on Sept 11, `notifications` on Aug 13, plus the nine-feature August sweep). "Confirmed applied" in this file has only ever meant the migration ran — it has never once meant the write path was verified. Treat a "zero rows" finding as an active bug report, not a shrug.
+
+**September 23, 2026 — TikTok real scheduling, then the first full Creator OS audit (PRs #661-680):**
+
+Prompted by a TikTok Content Posting API audit rejection screenshot and "I'm getting users but no new posts counting up" — which turned into TikTok scheduling actually working, then a full-codebase audit request: ~150 real users now, stability matters as much as new features, audit first, fix user-impact things first, no band-aids, flag pricing where SocialMate is losing or overcharging, never touch the Stripe webhook handler or RLS, update this file when done.
+
+**TikTok real scheduling (#661-664).** The Schedule button in TikTok Studio only ever did FILE_UPLOAD (immediate post) — there was no code path that actually delayed a TikTok post to a future time. Wired the already-built-but-disconnected PULL_FROM_URL flow into a real Inngest-driven schedule: the client PUTs the export to Supabase storage, `POST /api/tiktok/post` stages it, `publishScheduledTiktokPosts` fires it at the scheduled time. `lib/tiktok-post-sync.ts` mirrors a successful TikTok publish into the main `posts` table so it counts toward the funnel, credits, and streaks like every other platform — previously a published TikTok post was invisible to all three. Queue now shows scheduled TikTok posts with a Cancel button (`DELETE /api/tiktok/scheduled/[id]`, refunds quota, cleans up storage). Also fixed while in there: `disableDuet/disableComment/disableStitch` defaulted to `false` (should be opt-in `true` per TikTok's guidelines), and `/admin/stats` + `/admin/platform-stats` undercounted by excluding `partial`-status posts from their published-post counts.
+
+**Tier 1 — user-impact correctness fixes, approved and shipped first (#665-669).** `app/api/posts/create` and `app/api/posts/draft` read `user_settings.plan` directly instead of `resolveWorkspacePlan()` — the exact PR #579 bug class, reintroduced in the two routes that matter most (#665). Studio Stax admin/public pages treated `'live'` as an unrecognized status because the Stripe webhook (untouchable) writes `'live'`, not `'active'` (#666). Editor/Client team roles could still publish directly, bypassing the approval workflow entirely — merge-conflicted against #665's fix, resolved by combining both: approval check first, then plan resolution (#667). Two independent schedulers (Smart Queue's own loop and the Inngest cron) could both claim and publish the same overdue post — unified on Inngest, added a `posts.publish_claimed_at` atomic claim with a 3-minute staleness window instead of the non-atomic `if (post.published_at) return 409` (#668). Client Workspaces — a sold Agency feature — was unusable for invited team members: `WorkspaceContext` only ever queried `owner_id = user.id`, so an invited member's dashboard showed zero workspaces. New `GET /api/workspaces/accessible` (own workspaces + any owner's workspaces where the caller is an active `team_members` row) now backs the workspace switcher (#669).
+
+**Tier 2 — approved after Tier 1 review (#670-673).** LinkedIn posts with images silently dropped the images — `publishToLinkedIn` had no media path at all; added `uploadLinkedInImage()` (register → PUT → asset URN) (#670). Two compose entry points dropped their payload on arrival: Creator Studio's "Schedule this video" button routed to `/compose` with the video already discarded, and `?content=`/`?media=` query params from other flows were never read — both now land fully populated in Compose (#671). Thread Builder had never posted a real thread — it published every "part" as an unrelated standalone post with no reply chain. Scoped to Post Now only (not scheduled, per your call over the full Inngest-chaining rebuild): new `POST /api/posts/create-thread` walks each platform's actual reply semantics (Bluesky needs root+parent refs via `Intl`-safe strong refs, Mastodon/Twitter just need the immediate parent ID) (#672). Affiliate payout balance had two tables for one fact: commissions credited to `affiliates.unpaid_earnings`, but the payout request/approval flow checked and decremented `affiliate_profiles.available_balance_cents` — a column nothing had ever written to, so every affiliate's payout balance read $0 regardless of real earnings. New `lib/affiliate-balance.ts` reads/writes the table commissions actually land in (#673).
+
+**Tier 3 — the smaller items from the original audit list, worked through after "all merged; next" (#674-680).** SOMA Full Send's voice-profile lookup used `project.user_id` where Autopilot correctly used `project.workspace_id` — wrong key for a team member's project in an Agency workspace, silently falling back to generic tone. Autopilot had its own ingest step but never read or wrote `soma_project_memory`; Full Send read memory but never wrote it back, so "don't repeat this" had nothing new to stand on after day one. Both now read-then-write memory the same way the manual ingest route does. Also caught in the same file: achievement-unlock notifications have inserted `read: false` since the loyalty system shipped (PR #388) — the real column is `is_read`, so no user has ever gotten a notification for unlocking a badge (#674). `/admin/iris`'s manual "Send" button was the one sender missed by the Aug 30 reply-to sweep (#675). Competitor tracking's 3-account cap was enforced only in a click handler before a direct client-side Supabase insert — bypassable via devtools or a stale tab; new `POST /api/competitors` checks server-side first (#676). Deleted `app/[username]`, a fully dead legacy bio route reading `link_in_bio`, a table nothing has ever written to — the SIGIL builder only ever writes `bio_pages` and only ever shows users the real `/l/[slug]` URL, so this route has shown "not found" to every visitor since it shipped; while there, fixed `/l/[slug]`'s own raw `user_settings.plan` read (same PR #579 bug class — could leave a paying customer seeing "Powered by SocialMate") (#677). Two blog posts and `/templates` still said "4 live platforms," "75 AI credits/month free," and "unlimited scheduled posts" — missed by the Sept 9-10 sweep in this one file; corrected to 7 platforms, 50 credits, 250 posts/month (#678). Creator Hub's three payment routes (tip, subscribe, unlock) create Stripe Connect destination charges, so Stripe's processing fee is debited from SocialMate's own platform balance on every transaction — undocumented cost on a feature promised as 0% platform cut. **#679 tried to fix this with `on_behalf_of` and was wrong**: Stripe's destination-charges docs say the platform balance is debited for fees regardless, and `on_behalf_of` only changes statement descriptor, settlement currency, branding and which country's fee schedule applies. Reverted (see the Sept 24 correction below). Creator Hub has zero real transactions (`creator_tips` is empty), so nothing was ever actually lost. `/schedules` has claimed "apply to SOMA projects" since it shipped with zero code that ever read a saved template back — added an "Apply template" control to a project's Posting Schedule editor; since SOMA has no clock-time field, what carries over is which days are used and the busiest day's slot count, capped at the project's mode ceiling (#680).
+
+**Explicitly not touched.** AI text-tool credit pricing prices out well above actual Gemini cost per credit — raised as a possible "loosen it" fix, declined: the real constraint is Joshua's own Gemini API billing budget, not SocialMate's margin math, so this isn't a code change to make right now. Don't re-raise it unprompted; it's a cash question, not a bug.
+
+**Rules that follow:**
+
+- **Two competing implementations of the same duty will eventually both be wrong in different ways.** The scheduler race (#668) and the affiliate balance split (#673) were both "two things independently trying to be the one source of truth" — a second scheduler and a second balance column — and both had silently drifted from the real one. When two code paths do the same job, that is itself the bug, before either path's logic is even checked.
+- **A feature's own UI copy is a claim, and claims go stale exactly like code does.** `/schedules`' "apply to SOMA projects" sat there as a promise with no backing code for months (#680) — nobody file-searched for the thing the button was supposed to do because the copy sounded finished. Read a feature's stated capability as a test to run, not a description to trust.
+- **Read the vendor's docs before shipping money-movement code, not after.** #679 asserted from memory that `on_behalf_of` moves Stripe's fee to the connected account. It does not; the destination-charges page says the platform balance is debited for fees, refunds and chargebacks. The bug it targeted was real (a "0% cut" feature where SocialMate pays ~2.9% + 30 cents per payment, which is about 33% of a $1 tip) and invisible by construction, since nothing errors. The fix was wrong and merged anyway. Payment semantics get verified against the docs page, quoted in the PR, or they do not ship.
+
+Required SQL, run and confirmed this session:
+```sql
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS thread_index  INTEGER;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS thread_length INTEGER;
+```
+
+**September 24–26, 2026 — Turning user comments into fixes, and the week Discord turned out to be broken for everyone (PRs #681–#687):**
+
+Every Reddit comment Joshua screenshots now gets four steps: reply, verify against live data and code, log it (memory `project_user_feedback_log`), propose what to build. That loop found most of what follows.
+
+- **The 38.** External accounts that connected a platform and have zero post rows of any kind: 23 TikTok-only, 15 everyone else. Joshua emailed both groups on Sept 25 (TikTok-only got their own wording, since public TikTok posting is gated). Awaiting replies; send them to Claude to triage. Same-window cohort (39 signups Aug 28–Sep 16, each watched 7 days): 14 connected, 12 of those had no destination the composer can post to (10 TikTok-only, 2 identify-only Discord accounts), 12 of 39 opened the composer, 0 created a post.
+- **First post (#682, #685, #686).** Onboarding step 4 opens on a ready draft instead of asking for a topic; the Accounts post-connect card opens Compose with one; a TikTok-only starter is saved as a draft, never scheduled to TikTok; Compose explains the dead end for TikTok-only and X-on-free accounts; onboarding leads with LinkedIn and warns before TikTok/X. #686 adds `components/StarterDraftBuilder.tsx` + `buildDraft()` in `lib/starter-post.ts`: pick update/promote/teach, give one sentence or a link, get an editable draft, no AI call. New funnel events `draft_created`, `post_attempted`, `post_failed`, `compose_left`, `starter_built` (flags only, never text). Not yet click-tested as a signed-in free account beyond Joshua's own admin session.
+- **Creator Hub (#683, #681).** #679's `on_behalf_of` fix was wrong (reverted). Real fix: Stripe's fee is passed through to the creator via the application fee, one shared $3 minimum (tip presets $3/$5/$10/$25), Connect accounts now request the `transfers` capability (they had none, so no payment could ever complete), weekly payouts. Zero creators and zero tips exist; a real live-mode tip has NOT been run (Joshua declined).
+- **Platform status copy (#684).** YouTube awaiting Google review; Instagram/Facebook/Threads need Meta app review (not started); Pinterest and Reddit have not approved our API applications; Snapchat/Lemon8/BeReal have no public posting API. Reddit has no connect or publish code at all.
+- **Discord (Sept 25–26).** Connect Discord had been failing for every new user since Sept 3 (commit f2d21963 switched /accounts and onboarding to the bot invite flow that had never produced a production row). Discord showed "Invalid OAuth2 redirect_uri" before ever calling us back, so the funnel recorded clicks and no failures. Cause: there are **two Discord apps**. Vercel's `DISCORD_CLIENT_ID`/`SECRET` still pointed at the March 13 app (`1481871523105996810`, identify-only login); the `bot-callback` redirect and the bot are on the April 11 app (`1492662834012885163`). Joshua switched both env vars to the April app and redeployed; a full connect, channel pick and Compose post to #general was verified live. The 7 older external Discord accounts are identify-only and can never post; they must reconnect. Bot permissions still include Manage Roles, which posting does not need.
+- **SOMA Full Send (#687).** On Sept 26 the 13:00 UTC run created 28 posts dated March 30–31, 2026: the prompt never gave Gemini today's date, the code trusted the `scheduled_date` it returned, and the run never sent `post/scheduled`. They were filed under March and published in one burst about two hours later (probably the GitHub Actions backstop, `.github/workflows/publish-scheduled.yml`, which asks for every 5 minutes but in practice runs every 3 to 5 hours). 21 published, 7 LinkedIn failed on an expired token, and 4 published posts said "$5/mo" (from `soma_identity_profiles.voice_examples`, fixed with SQL). The Gemini catch block used to `return` quietly, so nothing was generated Sept 3–25 and nothing said so. Fix: `lib/soma-schedule.ts` assigns every time in code (7 per platform, 9:30 AM–7:30 PM Eastern), the prompt states the date and forbids unsourced prices, each post sends `post/scheduled`, Gemini failures throw. **Both SOMA projects were then deleted by Joshua; start a new one in Safe mode with the current CLAUDE.md, and watch the first Full Send run before trusting it.**
+- **Docs and blogs.** llms.txt, changelog and roadmap updated for the above. Nine blog posts corrected in Supabase (Discord connect steps rewritten for the bot flow, stale "coming soon" for LinkedIn/Pinterest/Instagram/Facebook, Full Send "posts per day" is per platform); originals backed up in the session scratchpad (`blog-backup-sept26.json`). On Sept 27 Joshua approved adding an "Update, September 2026" note to the 13 TikTok scheduling posts (private visibility or drafts until TikTok's content sharing audit clears); done, backups extended (22 posts total). **Remove those 13 notes (search the blog for "content sharing audit") when the audit is approved.**
+- **Gemini.** Joshua reports the AI tools were down for lack of funds; real use was about 7 SOMA actions a month, so cost is not the problem. Flash pricing doubles Jan 1, 2027; Flash-Lite is the lever. The pricing page did not list `gemini-3.6-flash` (the model the code uses): confirm it still exists with `models.list` on the production key.
+
+**Rules that follow:**
+
+- **Never let a model decide anything the system already knows.** The date, the schedule and the price belong to code. The model writes the words.
+- **A job that swallows its failures looks exactly like a job that had nothing to do.** Throw, so the run reports it. Three weeks of empty calendar had no signal.
+- **A flow that is "already in the repo" but has never produced a production row has never been tested.** Before pointing users at it, check the external configuration (here: which Discord app, which redirect URIs, which token) and do one real end-to-end run. Same lesson as #679.
+- **A secret pasted into chat is burned; rotate it.** Never ask for one. Client IDs are public and fine to share.
+- **Keep Reddit replies to 2–4 sentences.** Detail goes in chat and in the feedback log, not the reply.
+
+**September 27 to October 13, 2026: Discord and LinkedIn delivery, and a first post that kept re-sending (PRs #690–#694):**
+
+- **#690.** Seven outside users still had Discord connections from the login-only flow replaced on Sept 3. Those can never post, and each held the free plan's single Discord slot, so "reconnect" walked them into an Upgrade wall. `lib/discord-accounts.ts` `isLegacyDiscordAccount()`; adding the bot now upgrades the old row in place, and old rows no longer count toward the cap. The TikTok card says "videos only, to your drafts until TikTok approves public posting" before anyone connects.
+- **#691.** The bot invite permissions (268503040) claimed View Channel and did not include it (bit 10), so restricted channels returned 403, and Attach Files was missing too. Now 268536832, keeping Manage Roles for the auto-role feature. Already-connected servers keep the old permissions until the bot is re-invited or given the channel role. Post Now saves `platform_errors` like the scheduled path, and the 403 message says which channel permission to change (50001 cannot see, 50013 cannot send).
+- **#692.** LinkedIn tokens last 60 days with no refresh. New daily cron `token-expiry-warnings` (16:00 UTC) sends one in-app notice and one email per connection, from 7 days before expiry to 3 after. `/admin/funnel` gained "Why posts failed" (from `platform_errors`), and its ground-truth posts query is paged (PostgREST caps at 1,000 rows and there are 1,600+ published).
+- **#693.** An outside user's first scheduled LinkedIn post went out, stayed `scheduled`, and was re-sent by the GitHub Actions backstop on every pass. Cause: the March trigger `on_first_post_published` selected `referral_conversions.referrer_user_id`, a column that does not exist, so every first publish through an UPDATE raised 42703; and `/api/posts/publish`, which the backstop calls, never checked `platform_post_ids`. `lib/publish/repair-sent.ts` is now the one repair, used by both paths, and a post that already has ids is repaired instead of re-sent. The trigger is gone.
+- **#694.** About 200 pages declared the home page as their canonical URL (the root layout set `alternates.canonical` and every page inherited it). Blog index paged (it stopped at 500 of 674 rows) and categories normalized. Stale copy fixed: annual "up to 13%", `/for/streamers` calling TikTok "coming soon", the founder bio's present-tense deli job. The feedback widget said "Thanks" when the send failed.
+
+**October 14–15, 2026: The first outside publishers, and fixing what the data pointed at (PRs #695–#703):**
+
+Read-only pull of the funnel, Sept 24 to Oct 14, all internal accounts excluded:
+
+- **Two outside users have published, the first ever.** A Discord and Bluesky user (signed up Oct 2, several posts, scheduled ones firing on their own) and a LinkedIn user (Oct 9, used the one-sentence starter from `/accounts`). 199 external accounts, 59 ever connected, 18 with any post row.
+- **TikTok is the wall.** Of 22 people who connected anything since Sept 24, 16 connected only TikTok and none can post publicly until the content sharing audit clears. With a text platform connected, 2 of 6 published.
+- **Signups are falling:** 24 and 25 a week in mid-September, then 15, 7, 6.
+- **AI works in production again:** an Oct 9 call kept its credits (a failed call refunds them). The 8 repurpose calls of Sept 24–29 were mostly refunded, so it was down then. The Gemini key in local `.env.local` is dead, so AI does not run in local dev.
+- **Both audits clean** (no phantom columns across 901 files, all 35 upsert targets indexed). The 49 zero-row tables checked so far are unused features, not broken writes (guide capture is on all 14 guides and wired correctly).
+
+What shipped:
+
+- **#695** repo hygiene: three i18n checkers kept (`scripts/check-i18n-keys.js`, `check-translations.js`, `check-placeholders.js`), `supabase/blog_batch_18.sql`, `.claude/launch.json`. The repo is public: the memoir, signed CMO contracts, backups and store assets in its root are excluded locally in `.git/info/exclude`, never in `.gitignore`.
+- **#696** TikTok: a scheduled video TikTok refuses only because of the audit (`unaudited_client_can_only_post_to_private_accounts`, or `privacy_level_option_mismatch`) now goes to the creator's TikTok drafts at the scheduled time through the inbox endpoint, instead of failing with TikTok's raw text. Logic in `lib/tiktok-scheduled.ts`, pure and tested. The job also stopped hand-rolling token refresh (it skipped NULL expiries and used the sandbox key), claims each row before sending, never throws mid-send, stops counting a scheduled video twice against the quota, refunds a failed one, and notifies the creator. TikTok Studio offers one tap, "Send to TikTok drafts instead", after a refused Post Now. A real user's video scheduled for Nov 25 is the first live test.
+- **#697** signup: 5 of 22 email signups since Sept 24 never confirmed (Google: 21 of 21), one at `gmaip.com`. `lib/email-help.ts` suggests a fix for lookalike domains and holds submit once; the confirmation screen has an inbox button, "Send it again" with Supabase's 60-second limit counted down, and "Change it"; login recognizes `email_not_confirmed` and offers the same resend.
+- **#698** auth: "new account" meant `created_at` under 60 seconds, but an email account is created at form submit and the callback runs at the confirmation click. **All 7 email signups since Aug 1 that took over a minute got no `signup_completed`, no welcome sequence and no saved newsletter choice.** `lib/new-account.ts` `isFirstSignIn()` also accepts an email confirmed in the last 15 minutes; the welcome flag is upserted and `user/signup` carries an idempotency id. Signup source was captured only on `/signup`, so 85 of 125 signups from Aug 17 had none: `components/AttributionCapture` (mounted in `LazyClientComponents`) now records referrer, UTM and landing page on the first page a visitor loads, the signup form copies it into the account metadata, and `signup_completed` carries `landing`, `referrer_host` and `utm_source`. Of the sources that survived before this: Google 18, ChatGPT 16.
+- **#699** daily cron `cleanup-staged-tiktok-videos` (07:30 UTC) deletes our copy of a scheduled video a day after it is sent, a week after it fails. Only cancelling did before. A read-only dry run said the first run (07:30 UTC Oct 15) frees 99.3 MB.
+- **#700** `/admin/funnel` opens its recorded section with "Where signups came from": source and first landing page, from Oct 15 00:45 UTC on. Earlier signups are counted apart, never shown as "no source".
+- **#701** TikTok Studio funnel: `tiktok_studio_opened`, `tiktok_video_rejected`, `tiktok_video_added`, `tiktok_post_attempted`, `tiktok_post_done`, `tiktok_post_failed` (with `stage` and TikTok's `code`), plus the scheduled job's real outcome. Also fixed: the video-length check used the default 10 minutes forever (a `useCallback` with no dependencies), never the creator's real limit.
+- **#702** compose: the scheduling-window 403 sent `upgrade: true` while every other plan wall sends copy, so the toast read "true". It now says why and what Pro allows ("Upgrade to Pro to schedule up to 1 month ahead"), and the server admits the whole last day the date picker offers. The active Discord user hit this twice: the first outside user to touch a paid limit.
+- **#703** free tools at `/tools`: a thread splitter (X weighted 280, Bluesky 300 graphemes, Mastodon 500, links counted the way each platform counts) and a Discord timestamp generator. No AI, everything in the browser, a "Start free" CTA with no UTM so the real source survives. English only. Fuzzed: 200 messy inputs per platform, every part fits, no text lost.
+- **Confirmation email resent once** (Joshua approved, Oct 15) to the 9 unconfirmed email signups since Aug 15, one per hour so a low Supabase email cap could not block a real signup; the `gmaip.com` typo was skipped. Do not resend to this cohort.
+
+**Rules that follow:**
+
+- **"Created in the last minute" is not "new account".** Email signups confirm minutes later. Use `isFirstSignIn()`.
+- **Capture where a visit starts, not where the form is.** Almost nobody lands on `/signup`.
+- **A response field has one type everywhere.** If the UI reads `upgrade` as copy, no route may send a boolean. Grep the consumers before changing a response shape.
+- **Fuzz anything that rewrites user text.** The splitter's first sentence regex silently dropped whatever it could not match, and only random input showed it.
+- **A `useCallback` with no dependencies freezes what it read on the first render.** Treat that lint warning as a bug report.
+
+**October 15, 2026 (evening): the TikTok audit went back in, and what the first logged-out crawl found (PRs #704–#714):**
+
+- **TikTok content sharing audit resubmitted** (reference `20261015204558`, 2–4 week review). Claude recorded the new demo on Joshua's computer with his permission: connect, TikTok Studio's posting screen, a real post, and TikTok's own UI showing it live (kept private on @socialmatehq). Before recording, **#706** matched the posting screen to TikTok's guidelines word for word: "Allow" switches for comments, Duets and Stitch, all off by default; privacy as a dropdown with no default; branded content cannot be private; TikTok's exact disclosure and processing notices; the account name above the button. **#708** fixed the switch knobs, which sat on the wrong side when off.
+- **#704** synced the docs that morning. **#705** links blog posts about Discord and threads to the matching free tool (`lib/tools/related-tool.ts`, `components/BlogToolCard.tsx`, recorded as `blog_cta_clicked` with position `tool`).
+- **#707** the 45-day account lock blocked owners from reconnecting their own accounts. `reconnectVerdict()` in `lib/platform-jail.ts` now decides reconnects for all six platforms: the owner can always reconnect, and a different SocialMate account is refused while the account is active or cooling. Every refused connect explains itself on `/accounts`.
+- **#709** a repeated TikTok callback (double tap, reload) showed a false failure because the one-time state cookie was already spent. `lib/oauth-state.ts` splits `state_missing` from `state_mismatch`, and a callback that finds a connection written in the last 2 minutes reports success. `www.socialmate.studio` now 308s to the apex; it used to serve the whole app.
+- **#710** `/affiliates` was behind login. Protected paths now live in `lib/protected-paths.ts` (segment matching), shared by `proxy.ts` and the sitemap. IndexNow is set up (`node scripts/indexnow-submit.mjs`). The referral cookie went from 30 to 60 days to match what `/affiliates` promised.
+- **#711** the sitemap's hand-kept blog list had 38 slugs with no post, each a "coming soon" page served with a 200. The sitemap is now derived from `lib/blog/static-posts.ts` plus `blog_posts`.
+- **#712** 12 public pages got their own titles and descriptions; 6 app screens moved behind sign-in; `/wall-of-love` is noindex until it has testimonials.
+- **#713** unknown blog slugs still returned 200 in production: `app/blog/loading.tsx` streamed the page before `notFound()` ran. The index and its loading file moved into `app/blog/(index)/`. Verified live: all 38 return 404, all 730 real posts return 200.
+- **#714** 56 `blog_posts` rows had an empty excerpt and shipped with no meta description. `lib/blog/describe.ts` falls back to the post's opening sentence, for the meta tags and the index cards.
+- **Blog accuracy sweep (production data, approved by Joshua).** 126 `blog_posts` rows and 36 lines of `lib/blog/static-posts.ts` corrected: 23 database posts and 3 static lines said SocialMate posts to Instagram, Reels, Facebook or Pinterest, or soon would; 26 posts gave the free plan as 50 posts a month (it is 250); 12 posts and 8 static lines put X on the free plan; 28 posts said "12 AI tools" (now "15+"); BDAY31's "~$3.45/month", left over from the $5 price, became "first month ~$5.52"; SocialMate's own platform lists gained LinkedIn. Originals are in the git-excluded `blog_price_backup_oct15_accuracy.json` at the repo root.
+- **Crawler files.** `llms.txt`, `ai.txt`, `humans.txt` and `.well-known/ai-plugin.json` now give every plan's post cap, X on Pro only, 730+ blog posts, SOMA as Pro and Agency only (it has its own credit pool, not the AI credits), honest status for platforms not available yet, Next.js 16 and `gemini-3.6-flash`, and no login-walled page in their reading lists.
+- **IndexNow sends:** the 930 sitemap URLs, the 20 pages #711/#712 changed, the 38 removed posts, the 56 described posts, and the corrected posts once this sync deploys.
+
+**Rules that follow:**
+
+- **Never put a `loading.tsx` above a route that calls `notFound()`.** The stream starts with a 200 before the 404 is known.
+- **Derive lists of what exists; never hand-maintain them.** 38 phantom posts came from one hand-kept slug list.
+- **A lock against abuse must not lock out the person it protects.**
+- **Blog posts are claims, and they drift faster than code.** The Sept 10 sweep fixed the site; this one still found Instagram claims and a free cap five times too low in the pages AI crawlers read most. Re-scan the blog after any pricing or platform change.
+- **GitHub can report a false conflict when one PR moves a file another edits.** `git merge-tree` shows whether it is real; merging main into the branch clears it.
+
+**October 16–22, 2026: partners, the HQ page, and posts that went out late or not at all (PRs #715–#736):**
+
+- **#715** synced the docs and crawler files to Oct 15 and shipped the blog accuracy sweep. **#716** shows "All sales are final" at Stripe Checkout, on /pricing and in the Terms (the Terms already said so; checkout didn't). **#717** is a nightly delivery check (09:30 UTC) that asks each platform, with free reads only, whether posts published 1 to 48 hours earlier are actually live. **#718** offers the one-sentence starter in Compose to anyone with zero posts.
+- **#719** made the TikTok pages honest while the audit was open (superseded by #737 once it cleared). **#720** built the one-shot "TikTok public posting is live" email, locked behind a confirm phrase. **#721/#722**: every free guide ends with a card for its matching shop product, and the shop is in the nav, footer and /guides hub, all with UTMs.
+- **#723** locked down the partner and Studio Stax tables: the public anon key could read invite tokens (enough to claim a partner account), applicant emails and webhook idempotency rows. The SQL ran; verified Oct 23 that the anon key now reads 0 rows from all six tables. **#724** joined the two half-programs (`affiliates` held applications and earnings, `affiliate_profiles` the portal and payouts; every entry path created only one). **#725** fixed Studio Stax: unpaid listings were public, paid ones never expired, renewal emails ran twice. **#726** pays commission on every paid invoice (30%, 40% past 100 active payments, excluding tax) from `invoice.payment_succeeded`, once per invoice; a partner's code records the buyer as a referral. The live webhook endpoint now listens to `invoice.payment_succeeded` (API version 2026-02-25.clover, so code reads both payload shapes). Not handled yet: refund clawback, the 60-day payout hold. **#728** fixed /admin/coupons, which listed nothing (it embedded a nonexistent `affiliates.email`) and had an empty partner dropdown. Vouchrs is the first outside partner.
+- **#727** cut about 16,500 idle Inngest runs a month (TikTok scheduled publishing is event-driven with an hourly backstop, Enki's four jobs are unregistered, the Discord welcome poller is hourly). Hobby allows 50,000 executions a month and every step counts.
+- **#729–#731**: `/admin/hq` shows real Stripe revenue, MRR, what is waiting on Joshua, failed payments, webhook misses, failed posts, feedback and SM-Give owed, across SocialMate, the Gilgamesh shop and RenewalMate. Shopify feeds it through order webhooks (`/api/shopify/orders-webhook` into `shop_orders`). HereNow, RJ's Tree Care and Raid Ready Labs are left out on purpose. RenewalMate's database had no table GRANTs at all; Joshua's SQL fixed it Oct 22.
+- **#732**: a post moved later published at its old time, because its wake-up sleeps until the time it was queued with. **#733**: a saved draft had no way to be sent. **#734**: HQ counted 13 "problems" and none needed action (a Stripe Radar fraud block, internal accounts' old failures). **#735**: every scheduled post now queues its own wake-up (`lib/post-schedule.ts` `setScheduledTime()`); the GitHub Actions sweep asks for every 5 minutes but GitHub runs it every 3 to 5 hours, so posts that pages scheduled directly were hours late. **#736**: Compose's Post button was never on screen on desktop; two LinkedIn users wrote a post with nothing blocking and left without pressing Post.
+
+**Rules that follow:**
+
+- **Every path that makes a post scheduled queues a `post/scheduled` event.** The GitHub sweep is a 3 to 5 hour backstop, not a schedule. Don't fix lateness with a sub-hourly cron; the Inngest budget can't take it.
+- **The same fact in two tables, again.** The partner program was two programs that never met. Check for a second table before trusting the first.
+
+**October 23, 2026: TikTok approves public posting (PRs #737–#741):**
+
+- **TikTok approved the Content Posting API Direct Post audit** (email 6:06 AM Eastern). It was resubmitted Oct 15 (reference `20261015204558`) after the Sept 15 rejection. Production access since May 17 had only allowed private, "Only me" direct posts.
+- **Verified live before telling anyone:** @socialmatehq was switched to public, and a Post Now from TikTok Studio with privacy Everyone published at 18:53 UTC (`tiktok.com/@socialmatehq/video/7699938242325499150`). TikTok's oEmbed returns the same stub for public and private videos, so it can't check visibility.
+- **#737** flipped every "drafts until TikTok approves" line: the /accounts card, the onboarding caveat, TikTok Studio, /for/tiktok-creators, /for/streamers, the roadmap, the changelog, two strings in all nine locales, `llms.txt` and `ai.txt`. The drafts fallback in `lib/tiktok-scheduled.ts` stays, because it also covers `privacy_level_option_mismatch`.
+- **The TikTok-live email (#720) went to all 48 outside users with TikTok connected** (45 had connected nothing else), 0 failed, after a test copy was read in socialmatehq@gmail.com. Recorded in `usage_events` as `tiktok_live_email`, so it can never re-send. The 13 blog "Update, September 2026" notes were removed and sent to IndexNow.
+- **#738**: confirm-upload never stored the commercial-disclosure flags, so every Post Now row said "not disclosed". TikTok itself always received them.
+- **#739**: `POST /api/admin/revalidate` with `{"paths": [...]}` (admin only) refreshes ISR pages after a database edit, instead of waiting out the 24-hour blog cache or a deploy. Verified on production: the next visit comes back `REVALIDATED`.
+- **#740**: connecting TikTok lands in TikTok Studio. The callback still returns to /accounts, which records `connect_succeeded` and marks the account activated, then forwards with `?connected=1` (a toast, plus `via: 'connect'` on `tiktok_studio_opened`). Onboarding lists TikTok first for accounts whose first page was about TikTok (`landedOnTiktok()` in `lib/attribution.ts`; `auth/callback` sets `sm_onboard_lead`). Why: from Oct 15 to 23, 8 outside accounts connected TikTok and 4 never opened Studio.
+- **#741**: the deli is past everywhere it read as current (this file, the about-page bio in 9 locales including laptop to desktop, the guides tagline, two guide pages, `llms.txt`).
+- **11 blog posts corrected in the database**, refreshed and sent to IndexNow: present-tense deli lines, "laptop", "No upsell" (the guides end with a shop card now), BDAY31 sold as "permanent" (it is one payment; the annual price renews at $80), and TikTok missing from what Pro includes. Originals in the git-excluded `blog_price_backup_oct23_deli.json`.
+- **Joshua's own SOMA setup removed at his request** (voice profile, 9 uploads, 42 ledger rows, 29 feedback answers, the admin workspace's SOMA flags). Backed up first to the git-excluded `soma_setup_backup_oct23.json`; Joshua runs the delete SQL himself. Nothing from SOMA was queued.
+- **Third outside publisher:** the Oct 22 ChatGPT signup's Bluesky starter went out at 07:00 UTC. Outside publishers: Discord (7 posts), Bluesky (1), LinkedIn (1). 1,654 published posts in total.
+
+**Rules that follow:**
+
+- **An approval email is not proof.** Make one real public post before telling 48 people it works.
+- **When one request sends a value and another writes the row, both need it.** #738 was the disclosure reaching TikTok in init-upload and never reaching confirm-upload.
+- **A database edit to a cached page isn't live until it's refreshed.** Edit, call `/api/admin/revalidate`, confirm with curl, then IndexNow.
+
+**October 24–29, 2026: SOMA rebuilt, campaigns and go-live alerts, and pages for what people ask AI (PRs #742–#761):**
+
+- **Roadmap answers (Oct 26)** set the order: SocialMate first, then HereNow, then the Gilgamesh shop. $0 growth spend, no user calls, Enki out of SocialMate, streamers first and clippers next. Several open choices were left to Claude, including the public inbox (#752).
+- **#742** synced these docs to Oct 23 and renamed the Hearthforge section to Raid Ready Labs. **#743**: Compose told people hashtags cost 1 credit and repurpose 5 while the server charged 5 and 10 (since May 1). Both prices now live in `lib/ai-tool-costs.ts`, read by the routes and Compose.
+- **SOMA rebuild (#744–#750, Oct 24).** #744 closed three ways around SOMA pricing: the project edit route wrote the request body straight into the row, a Full Send project needed only the Autopilot flag, and runs trusted the saved mode (now `effectiveSomaMode` at run time). #745: ingesting a master doc from a URL never fetched it and still charged 25 credits; `lib/soma-fetch-doc.ts` now reads Google Docs, GitHub and web pages, public addresses only (checked again inside the DNS lookup). #746 made `/soma` match the code (Full Send is 7 a day per platform, no "unlimited" tier, SOMA has its own credit pool). #747 replaced three drifting copies of generation with one core that fills only open slots. #748: the Monday run re-reads the saved doc link and charges only when the doc changed and there are open slots. #749 rebuilt the dashboard around one next step; its old mode toggle wrote a column nothing read. #750 retired the legacy weekly flow (−2,215 lines; `/soma/weekly` redirects) and merged the identity interview into Voice DNA. Credits stay 500 Pro / 2,000 Agency. Not yet tested on a real run.
+- **#751** took Enki out of SocialMate: the last footer links, the FAQ section, a settings toggle, structured data, `/press`, the `/vs` rows and the About page in all nine languages. **#752**: one public support address, `socialmatehq@gmail.com`, in `lib/contact.ts` (`SUPPORT_EMAIL`, `SUPPORT_MAILTO`), also the `REPLY_TO` default. `support@socialmate.studio` had no mailbox, so every email sent there was lost. **#753**: the blog index listed 28 posts that were never written; it now shows a hand-listed entry only if the post exists. 25 Enki blog rows were unpublished, with a local backup. **#754**: SOMA never reuses an Unsplash photo across a workspace; when every option is used, the post goes out without one (`lib/soma-images.ts`).
+- **Campaign mode (#755, `/campaigns`).** 1 to 20 messages take turns on chosen days and times (up to 4 a day, up to 26 weeks) until an end date. It can start from a Shopify store's public `products.json` (newest 50). Optional AI rewording writes 6 versions per message for 2 credits each, keeping only versions that preserve every link and price. The daily `campaign-top-up` job (06:20 UTC) adds the day entering the scheduling window. Posts count toward the monthly cap, X needs Pro, and only owners and admins can create campaigns. Verified Oct 29: test posts published on time. Phase 2 (link tracking and more) is not built.
+- **Go-live alerts (#756, `/live-alerts`).** When a Twitch channel goes live, SocialMate posts to Discord, Bluesky, Telegram, Mastodon, LinkedIn, and X on Pro. Twitch EventSub `stream.online` goes to `/api/twitch/eventsub` (HMAC checked), then `live-alert-fire`, which never posts twice for one stream and waits 30 minutes between alerts. Alerts per workspace: 1 Free, 5 Pro, 10 Agency. Both tables exist in production. Watch one real stream fire before announcing it.
+- **#757** added a strip above the landing nav linking the Gilgamesh shop, with the SM-Give hook, in all nine languages. **#758**: `/merch` now permanently redirects to shop.gilgameshenterprise.com; the old merch pages and API were deleted, and the nav and footer link the shop. **#759** put campaigns and go-live alerts on the changelog, roadmap and `llms.txt`.
+- **#760, six audience pages.** From Oct 15 to 29, ChatGPT sent 12 of 21 signups, and 9 of those 12 landed on `/for/tiktok-creators`. AI search cites the `/for/*` pages, so `lib/audiences.ts` + `app/for/[slug]` now add discord-communities, telegram-channels, bluesky-creators, mastodon-users, shopify-stores and indie-hackers. Each page answers first, lists what SocialMate does not do, reads plan numbers from `lib/plan.ts` and `lib/post-limits.ts`, and has FAQPage JSON-LD. The sitemap and `llms.txt` derive from the same list. Sent to IndexNow Oct 29.
+- **#761**: Destinations told Telegram users to add "@SocialMateBot", a bot SocialMate does not run. Posts go through each user's own BotFather bot.
+- **Elsewhere in the portfolio (not this repo):** the shop added a canvas print, a tote and a journal (32 products, 0 orders as of Oct 29). HereNow #297–#300 (geofence outlines on the map, bio "Read more", venue social links, admin approve fix) are merged with SQL run, waiting for Jacob's list before one bigger App Store build. RenewalMate has 21 cancel guides at renewalmate.com/cancel (renewalmate#25, #27) and IndexNow (#26).
+- **Numbers, Oct 29:** 231 external accounts, 3 external publishers, 1,657 published posts, no paying subscribers. None of the 48 TikTok users emailed Oct 23 has posted to TikTok.
+
+**Rules that follow:**
+
+- **Find out what people ask AI, then give them a page that answers it.** The `/for/*` pages are where ChatGPT signups land. Add an audience as an entry in `lib/audiences.ts`, never as a new folder (a folder wins over the dynamic route).
+- **One price, one constant.** #743 was a label and a charge that drifted for six months. The route and the UI import the same number.
+- **A setting the UI saves is a promise.** SOMA's Auto-Collect toggle and the dashboard mode toggle both wrote values nothing read.
+- **A model may write the words, never the links or prices.** Campaign rewording keeps a version only if it has every link and price the message had.
+
+**October 30 to November 1, 2026: Buffer page corrected, OnlyFans and Patreon pages, and team members could not post (PRs #763–#767):**
+
+- **#763** rewrote `/vs/buffer` against Buffer's own pricing and channels pages after a Reddit commenter asked how SocialMate differs. The old page was wrong on both sides: Buffer does support Mastodon and Bluesky, and it includes analytics, an inbox and its AI assistant. SocialMate's free plan had been described as having "no queue limit". Same fixes went into the /vs hub card and `llms.txt`.
+- **#764** added `onlyfans-creators` and `patreon-creators` to `lib/audiences.ts`. Both pages say plainly that SocialMate does not post to OnlyFans or Patreon; it schedules the promo posts on the platforms it supports. The OnlyFans page leaves out TikTok and LinkedIn and asks creators to keep scheduled posts safe for work. **#765/#766**: two matching blog posts in `supabase/blog_batch_nov1.sql`. #766 fixed the column names (`blog_posts` has `published_at`). Confirm the SQL actually ran before quoting those posts.
+- **#767, team members.** Feedback on 1 Nov from a free-plan owner: her only team member, an Editor, could not schedule to her LinkedIn. It was broken in four places:
+  - the sidebar switcher never listed the owner's workspace;
+  - Compose listed the member's own accounts (a browser query on `user_id = me`);
+  - every publish path passed the **author's** id to publishers that look accounts up by `user_id`;
+  - Editor posts were forced into an approval queue that is paywalled on Free.
+
+  Now:
+  - `lib/team-workspaces.ts` (`accountScopeFor`, `resolveWorkspaceAccess`, `requiresApproval`, `canCreatePosts`) decides whose accounts a workspace posts to. Every publish path uses it.
+  - Compose reads `GET /api/workspaces/accounts`.
+  - The switcher has a "Shared with you" section.
+  - Approval applies only on Pro and Agency; on Free an Editor posts directly.
+  - Viewers cannot create posts.
+  - Approving a post with no time sends it now.
+
+  Same PR: `/api/workspaces/create` enforces `PLAN_CLIENT_WORKSPACES` (new in `lib/plan.ts`) on the server. Before, only the page checked it.
+
+**Rules that follow:**
+
+- **Accounts belong to the workspace owner, not to the author.** Never pass `post.user_id` to a publisher; pass `accountScopeFor(...).ownerId`. A post's `user_id` says who wrote it.
+- **A paid gate in front of a queue that a free feature fills is a dead end.** Free sells 2 seats and the Editor role. The approval queue was Pro-only, and everything an Editor sent went into it.
+- **Open:** Pro's client workspace count. `/pricing`, `lib/plan.ts` and the app say 1. The plan table in this file, `llms.txt` and `/vs/buffer` say 0. Joshua decides, then change it in `lib/plan.ts` and the copy.
+- **Fixed in #768 (merged Nov 2):** the owner's Queue, Calendar and Drafts listed only posts they wrote, and RLS stopped them moving, cancelling, retrying or deleting a team member's post. `/api/workspaces/posts` now serves a workspace's posts whoever wrote them, and `canManagePost()` in `lib/team-workspaces.ts` is the one check (author, or the workspace owner/admin). Since Nov 3, Compose opens a teammate's post directly for an owner or admin (see below).
+
+**November 2, 2026 (PR #769): LinkedIn formatter, 14 audience pages, 8 blog posts, teammates' posts in Compose:**
+
+- **Free LinkedIn text formatter** at `/tools/linkedin-formatter`. Pure logic in `lib/tools/linkedin-format.ts` (tested by `scripts/test-linkedin-format.mjs`, including a fuzz test that styling then clearing never changes text). Sans-serif Unicode bold, italic and bold italic, lists, a 3,000 counter that counts styled letters as two, and an approximate "see more" fold. Blog posts mentioning LinkedIn now show its card (`lib/tools/related-tool.ts`).
+- **14 audience pages** in `lib/audiences.ts`: clippers, vtubers, fansly-creators, fanvue-creators, ko-fi-creators, cosplayers, virtual-assistants, artists, authors, newsletter-writers, open-source-maintainers, educators, event-organizers, journalists. The fan-platform pages (OnlyFans, Fansly, Fanvue) never mention TikTok or LinkedIn, say SocialMate adds no adult labels, and keep scheduled posts safe for work. Listed in `llms.txt`.
+- **8 static blog posts** (`lib/blog/static-posts.ts`, on the index through `STATIC_POSTS`): promoting an OnlyFans or Fansly safely, a clip channel workflow, a VA posting to a client's LinkedIn, Twitch go-live alerts, GitHub releases to Mastodon and Bluesky, a book launch plan, bold text on LinkedIn, sharing newsletter issues.
+- **Compose opens a teammate's post** for an owner or admin: it falls back to `loadWorkspacePosts('one')` when the post is not the viewer's own. `/api/posts/draft` lets a manager save a teammate's draft (service role after `canManagePost`) and returns 409 when the post stopped being a draft instead of a silent "saved". `/api/posts/create` removes the post Compose was editing through `removeSentDraft()`, for the author or a manager, never a published one. Queue's Edit and Drafts' "Post or schedule" show for anyone who can manage the post; "Copy to my drafts" remains for people who cannot.
+- **`starter_saved {built, edited, kind, where}`** fires after the onboarding starter post saves; `/admin/funnel` lists it from Nov 3.
+- **Small fixes found on the way:** blog posts rendered `[text](/path)` as raw text (34 static posts ended with one; `linkifyText` now renders them); RSS import discarded insert errors and marked failed items imported; `/api/clips/twitch/public` read `user_settings.plan` directly (now `resolveWorkspacePlan`); a public channel's clip opened Compose as "my latest clip"; two stale Sprout Social lines in `llms.txt` (a "40x" price claim and "trading signals").
+- **Not done, on purpose:** translating `/tools`. The tool pages render in English on the server and public i18n switches language in the browser, so search engines would only ever see English; eight languages of FAQ text would cost a lot for almost no reach.
+
+**Rule that follows:**
+
+- **A markdown link only works if the renderer handles it.** The blog renderer understood headings, lists and bold lines, not links, so every `[Start free](/signup)` call to action shipped as visible brackets. Check how text is rendered before writing it in a new syntax.
+
+**November 3, 2026 (PR #770): three more free tools, a blog feed, an audience hub, and robots.txt stopped hiding /affiliates:**
+
+- **Three free tools**, each with pure logic in `lib/tools/` tested by `scripts/test-free-tools.mjs`:
+  - `/tools/character-counter` (`char-count.ts`): one text against X, Bluesky, Mastodon (the thread splitter's counters), LinkedIn, TikTok captions (2,200, the API limit), Discord (2,000), Telegram (4,096; 1,024 captions), Threads and Instagram. Platforms that don't publish their rules are counted as UTF-16 so a green number always fits. Threads and Instagram are tagged "not in SocialMate yet".
+  - `/tools/utm-builder` (`utm.ts`): keeps existing parameters and the fragment, replaces old utm_* values, lowercases by default, and makes one link per platform.
+  - `/tools/bluesky-custom-domain` (`bluesky-domain.ts`): looks up the DID at `public.api.bsky.app`, shows the `_atproto` TXT record (or the `.well-known/atproto-did` file), and checks it through Cloudflare DNS-over-HTTPS. **Not verified live:** the sandbox has no outbound access to either host, so the lookup and the check were only seen failing gracefully (manual DID field, clear error). Try both once in production.
+  - Blog posts about character limits, UTM/analytics and Bluesky handles now show the matching tool card (`lib/tools/related-tool.ts`).
+- **Blog RSS feed** at `/blog/feed.xml` (`lib/blog/feed.ts`, tested by `scripts/test-blog-feed.mjs`): newest 50 posts from code and `blog_posts`, linked from the blog's `<head>`.
+- **Audience hub** at `/for`, grouped, built from `audienceHub()` in `lib/audiences.ts`. Hand-built pages are listed in `HANDBUILT_AUDIENCES`; `scripts/test-audiences.mjs` fails if a folder in `app/for/` is missing from it, a related link is broken, or a page says "unlimited" or an old price. New entries: `game-developers`, `youtubers`.
+- **Nav:** "Free tools" under Resources and "All audiences" under Audiences, in all nine locales.
+- **robots.txt:** the repo had two (`public/robots.txt` and `app/robots.ts`). The public one's `Disallow: /affiliate` is a prefix rule that also covered `/affiliates`. `public/robots.txt` is deleted; `app/robots.ts` now derives from `lib/protected-paths.ts` and writes each path as `path$` plus `path/`, so a rule never catches a longer neighbour.
+
+**Rule that follows:**
+
+- **A robots.txt rule is a prefix.** `Disallow: /affiliate` blocks `/affiliates`. Write exact paths with `$`, and keep one robots source, derived from the same list as sign-in.
+
+**November 3, 2026 (PR #771): the free tools hand their post to the product:**
+
+- **"Schedule this post"** (`app/tools/ScheduleThis.tsx`) on the character counter, LinkedIn formatter, thread splitter, Discord timestamp generator (as "Starts <t:…:F> (<t:…:R>)") and UTM builder. It saves the text in `localStorage` through `lib/tool-draft.ts` (one week, 10,000 characters, tested by `scripts/test-tool-draft.mjs`) and goes to `/start?from=tool`.
+- **`/start`** (`app/start/route.ts`) checks the session only when clicked (public pages skip the auth round trip): signed in goes to `/compose?from=tool`, signed out to `/signup?redirect=/compose%3Ffrom%3Dtool&from=tool`, where the subtitle says the post is saved. New accounts always pass through onboarding, so step 4 opens with the tool's text instead of a generated starter, clears it once saved, and `starter_saved` carries `from_tool`. If Quick Start or Skip passes step 4, the last step's button reads "Schedule Your Post" and opens `/compose?from=tool`. Compose reads the draft only with `from=tool` and leaves it until it expires.
+- **Signup's sign-in links keep `?redirect=`** (they all went to bare `/login`).
+- **Funnel:** `tool_draft_saved {tool, saved}` and `tool_draft_used {tool, where}`, listed on `/admin/funnel` from Nov 4. `/api/track` stores signed-in events only, so signed-out presses show in GA4, not `usage_events`.
+- **One tool list:** `lib/tools/catalog.ts` feeds `/tools`, the sitemap and a "More free tools" strip on every tool page (`app/tools/MoreTools.tsx`). `scripts/test-tool-catalog.mjs` fails if a tool page is missing from it or lacks the strip.
+
+**Rule that follows:**
+
+- **Don't make someone redo work to sign up.** A visitor who wrote a post in a free tool had to start again after signing up. Carry what they made across the signup.
+
+**November 4, 2026 (PR #772): cleanup, the `src/` trap, and HereNow's pilot week:**
+
+- **#772.** `src/` was called dead, but 67 files imported `@/lib/supabase`, which
+  the tsconfig alias resolved to `src/lib/supabase.ts`. It now lives at
+  `lib/supabase.ts` and `@/*` maps only to `./*`. The six stacked "Pick up here"
+  entries became one list.
+- **Sessions.** The cloud sessions "Shopify store promotion images" (work merged)
+  and "CMO contract draft" (its HereNow work moved over) were archived; the CMO
+  agreement is still an artifact. Local desktop sessions can't be seen or archived
+  from a cloud session.
+- **Across the repos.** All ~80 SocialMate branches are already merged. RenewalMate
+  has two open PRs: #13 is superseded (its fixes went to master in June) and #6
+  (Vercel Speed Insights) was never merged.
+- **HereNow.** The Nov 12 pilot work (#311) and a full pilot-week sweep (#312:
+  pocketed phones stay in the room, one exit ring, fences venue owners can't move,
+  We Met enforced, orgs need venue consent) were merged by Joshua from patch files,
+  and both SQL files ran. Details in HereNow's CLAUDE.md.
+
+**Rules that follow:**
+
+- **"This code is dead" is a claim. Grep for imports, including path aliases,
+  before deleting anything.**
+- **A cloud session that can't push hands over a patch file.** `git format-patch`
+  in the cloud, `git am` on Joshua's PC, then `gh` to push, PR and merge. Prove
+  the patch applies to the current main before sending it.
+
+## Confirmed Done (stop asking about these)
+
+- ✅ **Nov 4 cleanup, #772, merged.** Supabase browser client moved out of `src/`, one pick-up list, two finished cloud sessions archived. See the PR #772 entry above.
+- ✅ **Free tools hand off to the first post, #771, merged.** "Schedule this post" on the tools, `/start`, the tool draft through signup and onboarding, `lib/tools/catalog.ts`. See the PR #771 entry above.
+- ✅ **Nov 3 batch, #770, merged.** Character counter, UTM builder, Bluesky domain helper, blog RSS feed, `/for` hub with game-developers and youtubers, nav links, one robots source. See the PR #770 entry above.
+- ✅ **Nov 2 batch, #769, merged.** LinkedIn formatter, 14 audience pages, 8 static blog posts, teammates' posts in Compose, `starter_saved`, blog markdown links. See the PR #769 entry above.
+- ✅ **Oct 24–29 batch, PRs #742–#761, merged and deployed.** SOMA rebuild (#744–#750), Compose AI prices (#743), Enki removed (#751), one support address (#752), blog index (#753), no repeat photos (#754), campaign mode (#755, SQL run, verified with test posts), go-live alerts (#756, SQL run), shop strip and `/merch` redirect (#757, #758), six audience pages (#760, sent to IndexNow), Telegram Destinations copy (#761). See the Oct 24–29 entry above; do not redo these.
+- ✅ **Oct 23 batch, PRs #737–#741, merged and deployed.** TikTok audit approved and verified with a public post, copy flipped, TikTok-live email sent to the 48 (never resend), 13 blog audit notes removed, disclosure recorded on Post Now rows, `/api/admin/revalidate`, TikTok-first connect and onboarding, the deli fixed everywhere, 11 blog posts corrected. See the Oct 23 entry above; do not redo these.
+- ✅ **Oct 16–22 batch, PRs #715–#736, merged and deployed.** Including the partner-table RLS SQL (verified Oct 23: the anon key reads 0 rows). See the Oct 16–22 entry above.
+- ✅ **Oct 15 (evening) batch, PRs #704–#714, merged and deployed.** Reconnect your own account any time, clearer refused-connect messages, TikTok repeat-callback fix, www redirect, `/affiliates` public, IndexNow, 60-day referral cookie, derived sitemap, real 404s for unwritten posts, page titles, blog meta descriptions, blog-to-tool cards, TikTok Studio matched to TikTok's guidelines. See the Oct 15 (evening) entry above; do not redo these.
+- ✅ **TikTok audit resubmitted (Oct 15)**, reference `20261015204558`. Do not resubmit again while it is in review.
+- ✅ **Blog accuracy sweep (Oct 15)**: 126 database posts and the static posts corrected. Never re-run it from scratch; re-scan only after a pricing or platform change.
+- ✅ **Oct 14–15 batch, PRs #695–#703, all merged and deployed.** TikTok scheduled videos fall back to drafts, staged video cleanup, TikTok Studio funnel, signup typo check and resend, late-confirmer new-account fix, first-touch signup attribution and its `/admin/funnel` panel, the scheduling-window toast and boundary, free tools at `/tools`, repo hygiene. Inngest resynced by Joshua after #699 and #701. See the Oct 14–15 entry above; do not redo any of these.
+- ✅ **Confirmation email resend (Oct 15)**: once, to the 9 unconfirmed email signups since Aug 15. Never resend to that cohort.
+- ✅ **Sept 27 to Oct 13 batch, PRs #690–#694.** Legacy Discord upgrade, bot permissions and actionable 403s, LinkedIn expiry warnings, the re-sent first post and its trigger, canonical URLs and the blog index.
+
+- ✅ **Discord connect fixed and verified end to end (Sept 26, 2026)** — `DISCORD_CLIENT_ID`/`DISCORD_CLIENT_SECRET` in Vercel now point at the April app (`1492662834012885163`), which owns the `bot-callback` redirect and the bot. A real connect, channel pick and Compose post landed in the community server. Never re-diagnose "Invalid OAuth2 redirect_uri" as a code bug; check which Discord app the env vars point to.
+- ✅ **SOMA Full Send scheduling fix (Sept 26, PR #687)** — times assigned in code (`lib/soma-schedule.ts`), `post/scheduled` sent per post, Gemini failures throw, stale price removed from the voice profile. Not verified against a real run (both projects were deleted afterward). Never trust model-returned dates again.
+- ✅ **One-sentence first post (Sept 25, PR #686)** and **onboarding/platform honesty (PRs #682, #684, #685)** — see the Sept 24–26 entry. Not re-doing these.
+- ✅ **Docs and blogs synced to Sept 26** — llms.txt, changelog, roadmap, CLAUDE.md, nine blog rows, plus a private-until-audit note on 13 TikTok scheduling posts (remove it when TikTok approves public posting).
+
+- ✅ **TikTok real scheduling + first full Creator OS audit — 20 PRs, #661-680 (Sept 23, 2026)** — TikTok's Schedule button now actually delays a post (PULL_FROM_URL wired up, Queue shows scheduled TikTok posts with Cancel, published TikTok posts now sync into the main `posts` table so they count toward funnel/credits/streaks). Full-codebase audit fixed, by tier: **Tier 1** — plan-resolution bypasses in posts/create+draft, Studio Stax `'live'` status alias, approval-workflow bypass by Editor/Client roles, the dual-scheduler race condition (unified on Inngest, atomic `publish_claimed_at` claim), Client Workspaces unusable for invited members (`/api/workspaces/accessible`). **Tier 2** — LinkedIn images were silently dropped on publish, two compose entry points (Creator Studio video, external `?content=`/`?media=` links) discarded their payload, Thread Builder never posted a real thread (real reply chains now, Post Now only), affiliate payout balance read a column nothing ever wrote to (`lib/affiliate-balance.ts` now reads the table commissions actually land in). **Tier 3** — SOMA Full Send's voice lookup used the wrong ID, Autopilot/Full Send never touched `soma_project_memory`, achievement notifications have silently failed to insert since PR #388 (wrong column name), IRIS manual send was missing reply-to, competitor-tracking's cap was client-side only, a fully dead legacy bio route deleted (`app/[username]`) plus a real plan-read bug fixed on the live one, stale "4 platforms/75 credits/unlimited posts" claims corrected in two blog posts, `/schedules`' "apply to SOMA projects" claim finally has real code behind it. Creator Hub's Stripe fee problem was **found but not fixed** (see Pending; #679's `on_behalf_of` attempt was wrong and reverted). Full writeup with all 20 PR numbers is the Sept 23, 2026 entry above — read that before re-touching any of this. AI credit pricing was raised and explicitly **not** changed — Joshua's own Gemini billing budget is the constraint, not a code fix; don't re-raise it unprompted. Never re-run this audit from scratch — these are fixed; treat any *new* finding on its own merits.
+- ✅ **SOMA new-project platform list fixed + AI error leaking stopped + media library error handling fixed (Sept 11-12, PRs #658, #659, #660)** — SOMA's new-project platform picker now lists TikTok instead of dead Instagram (`app/soma/projects/new/page.tsx`); a connected TikTok account was already being included in submitted projects either way, this only fixed the picker UI. Eight AI routes no longer return raw `String(err)` provider errors to the client; SOMA's project-ingest route still surfaces full Gemini error detail, but only to admins now. `app/media/page.tsx` now checks the `error` half of both its `media_items` load and insert instead of discarding it — likely explains why `media_items` has sat at zero rows since April despite being logged as shipped. Never re-audit these three specific bugs. DO treat any other table logged as "confirmed applied" with zero real usage as a live bug report, not a coincidence — this is the fourth time that exact pattern has been the cause.
+- ✅ **Admin metrics reconciled + onboarding visual polish + bio_pages fix (Sept 11, PRs #654, #655, #656)** — `/admin/funnel`'s Ground Truth and Recorded Steps panels no longer contradict each other (both exclude internal accounts now), `/admin/funnel` and `/admin/overview` now agree on connected-accounts-by-platform, and `estimatedMRR` on `/admin/overview` uses current $8/$29 pricing instead of the pre-repricing $5/$20 it had silently kept using for a month. Revenue/plan-count exclusions (MRR, proCount, agencyCount, churn) were deliberately left excluding internal accounts — that's correct, not the bug. Onboarding got a visual-only pass (Clash Display headlines, card shadows, step-transition animation, amber progress bar, tactile button press) with zero logic changes. `bio_pages`'s first-load query switched from `.single()` to `.maybeSingle()`. Never re-run the routine audit scripts expecting to find these same issues again; DO re-run `scripts/audit-schema-drift.py` + `scripts/audit-dead-features.py` periodically for new drift, they're clean as of this date.
+- ✅ **First paying customer's Aug 29 complaints confirmed already fixed (Sept 11)** — all three points in `pixelkittehfurever@gmail.com`'s feedback (account cap, templates, "scheduling is basic") checked against current code. Account cap = the exact PR #574/#579 incident. Templates = the Sept 10 `LIVE_PLATFORM_IDS` bug (PR #636-638). "Scheduling is basic" is an opinion. Never re-investigate this specific feedback thread.
+- ✅ **Multi-account posting for LinkedIn/Telegram + funnel measurement fix (Sept 9-10, PRs #632, #635)** — LinkedIn/Telegram publishing now accepts an accountId like Bluesky/Mastodon/Twitter already did; a second connected account on either no longer breaks all future posts. `post_scheduled`/`post_published` funnel events moved server-side into `/api/posts/create`, firing only after a post is actually saved — the old client-side call fired before validation and undercounted thread/A-B posts to zero. First-post credit bonus + streak update now also fire on Compose's actual Post Now path (`lib/post-activation.ts`, shared by both publish routes). Never re-audit these specific bugs; DO re-run the funnel numbers periodically since the true conversion rate is still unmeasured post-fix.
+- ✅ **Onboarding + signup mobile CLS/bundle fix (Sept 10-11, PR #652)** — Both pages' referral banners now read their value synchronously on first render instead of via a post-mount `useEffect`, eliminating the layout shift that was driving mobile CLS to 0.33/0.34 ("Poor") and likely inflating LCP. `app/onboarding/page.tsx` is now a Server Component reading the `ref_code` cookie via `cookies()`, passing it to a new `app/onboarding/OnboardingClient.tsx`. The three connect-form modals (Bluesky/Telegram/Mastodon) are now `next/dynamic` instead of eager-imported. Verified via a full `next build`; the authenticated flow itself wasn't manually clicked through post-merge — do that once, then never redo this specific fix.
+- ✅ **HERMES is a real paid feature now, with real quota enforcement (Sept 10-11, PRs #648, #650, #651)** — Live Stripe prices ($12/$25, see Stripe Live Price IDs below), not admin-gated in the sidebar or on the dashboard. `HERMES_LIMITS` in `lib/hermes-access.ts` now actually enforces `prospectsPerMonth` (75/400) and `discoverRunsPerMonth` (1/4, manual-only) — both were pure marketing copy before this. The weekly auto-discover cron (`lib/inngest-hermes.ts`) now filters to active Pro/admin accounts only, closing a real cost leak (a cancelled Starter subscriber's old campaign was drawing free weekly Gemini runs forever). Hunter.io email-finder capped at 30/100 lookups per month per tier — it shares one account-wide Hunter quota across every HERMES user and had zero limiting before this. New `hermes_discover_runs` table. Never re-describe HERMES as admin-only again.
+- ✅ **SOMA Autopilot/Full Send billing bug fixed (Sept 10, PR #649)** — Same "checkout completes, webhook never activates" bug HERMES had, adapted for workspace-scoping (`workspaces.soma_autopilot_enabled`/`soma_full_send_enabled`) instead of user-scoping, keyed by new `workspaces.soma_addon_subscription_id`. SQL run. Never re-audit this specific bug; nobody has purchased since the fix to confirm end-to-end, so if a SOMA addon purchase looks broken, check here first.
+- ✅ **Product audit sweep — Creator Hub, Zenith, /community, Creator Studio, sidebar (Sept 10, PR #647)** — Creator monetization (tip jar/subscriptions) now re-checks the owner's plan via `resolveWorkspacePlan()` on every access, pausing on downgrade and resuming on resubscribe automatically. Zenith's share link fixed (`/z/[code]`, was pointing at a broken static `/zenith`). `/community` and Creator Studio (`app/create/CreatePageClient.tsx`) both had the same fixed-sidebar layout bug (missing `md:ml-56`) also found and fixed on Achievements/Analytics/Content DNA — that was the actual "unpolished" complaint, not a design problem. Community and Enki removed from the sidebar's Manage section. Evergreen, main Analytics, and SOMA dashboard now all merge `bluesky_stats`/`mastodon_stats` with the auto-fetched `analytics` JSONB fallback, the same pattern, three places. Roadmap is now collapsible and grouped by real month (from `git blame`, not guessed). Never re-run this specific sweep.
+- ✅ **TikTok Studio compliance fixes filed (Sept 9, PRs #633, #634)** — Consent declaration now shows on every direct post, not only disclosed ones. `disable_auto_auth=1` added so reconnecting always shows TikTok's real consent screen. Both fixes stand regardless of audit outcome. The content-sharing audit these fixes accompanied was **rejected Sept 15** — see Pending above, this is not the same as the fixes themselves being wrong. Don't redo these two fixes.
+- ✅ **llms.txt + blog + /vs + /for content accuracy sweep (Sept 10, PRs #636, #637, #638)** — Fixed: wrong X quota in llms.txt (was "5/month," is 0), three-way inconsistent blog post counts, a blog post + a `/vs` page both claiming "16 platforms" (fabricated), 8 `/vs` pages + 1 in-app upgrade prompt still quoting the pre-August $5/month price, LinkedIn/TikTok mislabeled "coming soon" on FAQ/Support, a real functional bug in `app/templates/page.tsx`'s platform picker (LinkedIn/X/TikTok couldn't be selected), and 25 separate "no post cap" claims across 11 files violating never-say-unlimited without using that word. Full findings in `[[project_content_accuracy_sweep_sept10]]` memory. This was a one-time sweep, not a standing fix — re-grep periodically per the rule above, don't assume it stays clean.
+- ✅ **Onboarding actually saves now (Aug 30, PRs #592, #594, #595)** — `handleFinish`
+  runs on arrival at step 5 instead of on one button; the starter post is a single
+  post with a real date/time picker and saves as a draft when nothing is connected;
+  the 50 bonus lands in `earned_credits`. Verified end to end with a real scheduled
+  row in production. Never wire a write to a single non-primary button again.
+- ✅ **Reply-to on every sender (Aug 30, PRs #591, #593)** — `lib/mail.ts` is the one
+  sender, `REPLY_TO` defaults to a mailbox that is read, 62 sites migrated. Never
+  call `resend.emails.send` directly. `socialmate.studio` has **no mailbox**.
+- ✅ **Internal accounts excluded from metrics (Aug 30, PR #588)** — four of them,
+  in `lib/internal-accounts.ts`. `nichole_bostic@yahoo.com` is a real external
+  signup (Joshua's mother), deliberately not on the list. Never add her back.
+- ✅ **Reactivation email sent (Aug 30)** — 62 recipients, all delivered. One-shot,
+  idempotent via `usage_events`. Do not re-fire for that cohort.
+- ✅ **Onboarding bonus backfill (Aug 30)** — 94 accounts granted the 50 they were
+  owed, guarded by an `onboarding_bonus_backfill` marker. Re-running is a no-op.
+- ✅ **TikTok account names (Aug 30, PR #585)** — only `user.info.basic` fields are
+  requested now. Existing rows keep the old placeholder until reconnected.
+- ✅ **Aug 2026 repricing (Aug 12, PRs #555–#557)** — Pro $8, Agency $29, annual two months free, free cap 250 posts. New Stripe prices live, legacy IDs kept in the webhook. Compare-flip cards shipped. Public copy, all `/vs` and `/for` pages, and 32 Supabase blog rows migrated. Never quote $5 or $20 for a plan again.
+- ✅ **Schema drift sweep (Aug 12–13, PRs #560–#565)** — 44 findings triaged to 23 real, all fixed. `scripts/audit-schema-drift.py` is clean. Never re-run this from scratch; run the script instead.
+- ✅ **"Unlimited" claims corrected (Aug 13)** — Free is 250 posts/mo, Agency is 15 seats and 5 client workspaces. Four blog posts said "unlimited team members" / "unlimited scheduled posts" / "10 client workspaces"; all corrected in file and DB. The old "unlimited profiles on /vs" open question is closed: the real numbers are 1 / 5 / 10 connected accounts per platform, they are on the pricing page, and nothing is unlimited except Enterprise seats.
+- ✅ **Notifications table (Aug 13, PR #561)** — Columns fixed, `notifications_type_check` dropped, `lib/notify.ts` is the one writer. Table has rows for the first time. Never hand-roll a notification insert again.
+- ✅ **Blog pricing rewrite (Aug 13)** — 32 Supabase rows updated across three passes, including titles and derived arithmetic on the BDAY31 and "$X/month is $Y/year" posts. Backups in the session scratchpad. Never re-run the blog price sweep.
+- ✅ **gilgameshenterprise.com blog + FAQ (June 7)** — Category filter tabs on blog (client-side). FAQ page at /faq with accordion. Nav updated with FAQ link. Sitemap updated. Never ask to add blog filtering or FAQ to GE site again.
+- ✅ **renewalmate.com blog + FAQ (June 7)** — Category filter tabs on blog. FAQ page at /faq (4 sections including vs. competitors). Nav updated. Sitemap includes all blog slugs. Never ask to add blog filtering or FAQ to RenewalMate again.
+- ✅ **Hearthforge co-founder language on GE site (June 7)** — GilgameshEnterprise venture card for Hearthforge now says "Co-founded with Butch Chiappinelli", lists role split, URL points to hearth-forge.com, badge is Live. Never misrepresent Hearthforge as Joshua's solo venture.
+- ✅ **Gilgamesh Enterprise website live (June 6)** — gilgameshenterprise.com on Vercel, dark/gold, Squarespace cancelled. Never rebuild from scratch again.
+- ✅ **RenewalMate website live (June 6)** — renewalmate.com on Vercel, green rebrand, waitlist capture, DNS back under GoDaddy control. Never rebuild from scratch again.
+- ✅ **Hearthforge logo integrated (June 6)** — Butch's H+flame logo in nav/footer/admin. public/logo.png. Never rebuild logo integration.
+- ✅ **SOMA image dedup + size fix (June 6, PR #468)** — urls.small for Bluesky blob limit, usedUrls Set for dedup, TikTok skipped without video URL. Never ask to fix these image issues again.
+- ✅ **Loading skeletons — full sweep complete (June 5, PR #466)** — `loading.tsx` now exists on every major route: dashboard, onboarding (PR #459) + accounts, blog, features, settings, signup (PR #466). Preconnect hints in `layout.tsx`. All skeleton screens are done. Never ask to add more loading skeletons.
+- ✅ **Full public site i18n complete (June 1, PRs #461–#462)** — Every public page wired with `useI18n()`. 74 namespaces, 9 locales, `{param}` interpolation added. vs/ metadata moved to `layout.tsx` (76 files). i18n is 100% done — public site and app interior both complete. Never ask about unwired public pages.
+- ✅ **SEO/AI discovery overhaul (June 1, PR #463)** — llms.txt 580+ lines, humans.txt, ai.txt, ai-plugin.json, 3 JSON-LD schemas in layout.tsx. 7 new vs/ pages. Never ask to build this again.
+- ✅ **vs/mailchimp, vs/tiktok-native, vs/substack + blog batch 18 (June 1, PR #464)** — 3 new comparison pages live. 20 blog slugs in sitemap. Never ask to add these again.
+- ✅ **FCP performance sweep (May 31, PR #459)** — `loading.tsx` added to dashboard + onboarding. Dashboard spinner fixed (border-black → border-amber-500, was invisible on dark mode). Blog revalidate 3600→86400. Blog index revalidate added. Merged. Never ask to add loading skeletons or fix blog revalidate again.
+
+- ✅ **SOMA video URL attachment (May 28, PR #442)** — `include_video_url TEXT` on `soma_projects`. Text input on project page, PATCH saves it, generate route injects video URL block into Gemini prompt. Clear button. Never ask to build this again.
+- ✅ **Enterprise tier (May 28, PR #443)** — `/enterprise` landing + contact form. Enterprise card on `/pricing`. `enterprise_inquiries` table. Resend email to admin on inquiry. "Enterprise" in PublicNav. No Stripe — manual provisioning. Never ask to build again.
+- ✅ **White Label improvements (May 28, PR #444)** — Full Settings white label UI: logo upload, brand name, color picker, remove-branding toggle, custom domain gated to Pro. `/api/white-label/logo-upload` to Supabase. `white_label_remove_branding` column on user_settings. Never ask to improve white label UI again.
+- ✅ **SOMA Full Send daily cron (May 28, PR #445)** — `somaFullSendDailyRun` function in `lib/inngest.ts`. Daily 1pm UTC, Full Send workspaces only, 7 posts/day cap, 30 runs/month cap. Dashboard badge. Coexists with Autopilot Monday cron. Resync `soma-full-send-daily-run` in Inngest. Never ask to build again.
+- ✅ **i18n remaining pages complete (May 28, PR #446)** — Settings Scheduling tab, SOMA Weekly, SOMA Upgrade wired with useI18n(). 54 keys, all 7 locales in sync. Full-app i18n is now complete. Never ask about unwired pages again.
+- ✅ **i18n full parity sweep (May 29, PR #456)** — Japanese (ja) and Korean (ko) added as full locales with complete landing page translations. SM-Pulse/SM-Radar card descriptions in `LocalizedLanding.tsx` switched from hardcoded English to `t()`. Mobile nav labels (Menu, Language, Merch, SM-Give) in `PublicNav.tsx` switched to `t()`. Critical English placeholder values backfilled for es/de/fr/pt/ru/zh. All 9 locale files validated — 1,530 keys, zero drift. `scripts/i18n-sweep.py` committed for future updates. Never ask to sweep locales again.
+- ✅ **SOMA media toggle + Unsplash attribution display (May 27, PRs #433–#436)** — `include_media` on `soma_projects`. Unsplash API integration in generate route (keyword extraction, image fetch, attribution, download tracking). `UnsplashCredit` component in queue (sm) and calendar (md). Compliance cherry-pick PR #435. Never ask to build SOMA media toggle again.
+- ✅ **Enki i18n (May 27, PR #434)** — 207 keys, 3 namespaces (app_enki_truth/trades/doctrines), all 7 locales validated. TruthClient, trades page, doctrines page all wired. Aliases `tk`/`td` to avoid loop variable shadowing. Never re-wire these files.
+- ✅ **Landing page visual overhaul + signup cleanup (May 27, PR #437)** — "Post everywhere. All at once." headline, amber gradient, radial glows, platform pills in hero, amber CTA, white stats. Signup: age gate removed, ToS/Privacy required checkbox added, IRIS newsletter opt-in updated. Never revert these changes.
+- ✅ **Blog FCP fix (May 27, PR #438)** — `generateStaticParams` queries all `blog_posts` slugs from Supabase at build time. All 500+ posts now static CDN-served. FCP dropped from 3.72s Poor. Never revert to hardcoded-only list.
+- ✅ **Compose media preview (May 27, PR #439)** — `draftMediaUrls` state + `UnsplashCredit` in compose media section for SOMA posts with images. Never ask to add this again.
+- ✅ **Autopilot cron media toggle (May 27, PR #440)** — `somaAutopilotRun` respects `include_media` per project. Images attached on Monday auto-runs. Never ask to add this again.
+- ✅ **Performance bundle cut + bug sweep (May 26, PRs #431–#432)** — `.maybeSingle()` on all upsert lookups. i18n lazy loading (−394KB from every page). LazyClientComponents wrapper for `ssr:false` dynamic imports. Dead landing page auth call removed. PHLaunchBanner removed. Blog ISR + generateStaticParams. `/tiktok` landing page + nav consolidation all merged. Never redo these.
+- ✅ **Full site sweep — dark mode + mobile + accuracy (May 24, PR #426)** — All public pages: dark mode consistent, comparison tables mobile-scrollable (overflow-x-auto), all stats updated to 15+ AI tools / 7 platforms, logo.png replaces S lettermark everywhere. All 75 vs/ pages JSX-balanced. Never ask to do this sweep again — it's done.
+- ✅ **IRIS AI auto-generate (May 22, PR #401)** — Admin `/admin/iris` compose page has "Generate draft with AI" button. Gemini 2.5-flash writes subject + full body draft. Never ask to build this again.
+- ✅ **HERMES cold outreach system (May 14–18, PRs #318–#327)** — Full campaign system at `/hermes`. Prospect discovery (free: Substack/GitHub/dev.to/Hashnode), Hunter.io email finder, Gemini-powered message generation, Resend email + Bluesky/Mastodon DM send, 4-step sequence, follow-up cron. Never ask to build HERMES again. **Admin-only was accurate here — it stopped being true Sept 10-11, 2026 (PRs #648/#650/#651); see that entry for current pricing/access/enforcement.**
+- ✅ **SM Pulse + SM Radar** — `/sm-pulse` (trend scan, 20 credits) and `/sm-radar` (content intelligence report, 20 credits) both live. Never ask to build these.
+- ✅ **ZENITH creator card (May 20)** — `/zenith` live. Shareable presence card. In sitemap. Never build again.
+- ✅ **Achievements + 30-Day Challenge (May 19–20)** — `/achievements` (13 badges, credit rewards, progress bars) + `/challenge` (30-day heatmap, 50cr reward) both live. `user_achievements` table. Daily `achievementCheckerCron`. Never build again.
+- ✅ **HESTIA community tab (May 20)** — `/community` live (was AGORA). Emoji reactions, threads, connected-account gate. Tables: community_posts/replies/reactions. Never build again.
+- ✅ **SIGIL rename (May 20)** — Link in Bio is now SIGIL everywhere. Never revert to "Link in Bio".
+- ✅ **Discount page (May 20)** — `/discount` live. NONPROFIT50 (50% off Pro) + STUDENT25 (25% off Pro). Honor system. Never build again.
+- ✅ **Post Score (May 19)** — Pro+, 5 credits. AI 0–100 quality scorer inline in Compose. Never build again.
+- ✅ **Scheduling Window + DND (May 19)** — Settings → Scheduling tab. Smart Queue respects window. Never build again.
+- ✅ **Goal-based onboarding (May 19)** — Step 1 asks primary goal. Saved to user_settings.onboarding_goal. Never build again.
+- ✅ **Loyalty achievement system (May 19)** — `achievementCheckerCron` Inngest daily. Credits for milestones. Never build again.
+- ❌ **GA4 integration (May 19)** — *Was never true.* No `gtag('event')` call existed
+  anywhere. Superseded by the funnel instrumentation of Aug 23. Left here as a
+  correction rather than deleted, because "marked done, never ran" is this project's
+  most expensive recurring failure and this is a clean example of it.
+- ✅ **Roadmap voting (May 19)** — Users can upvote roadmap items on /roadmap. Never build again.
+- ✅ **Comeback emails (May 19)** — Weekly cron for users inactive 7+ days. Never build again.
+- ✅ **Blog batch 12 — 55 posts (May 20)** — creator growth, platform strategy, community. SQL: blog_batch_12.sql. Never ask to write these again.
+- ✅ **Guides PDF download (May 20)** — All 5 Gilgamesh Guides have "Download as PDF" with watermark. No external services. Never build again.
+- ✅ **Badge embed (May 20)** — `/badge.svg` + Settings → Profile embed code. Never build again.
+- ✅ **AI rate limiting (May 20)** — 10 req/min/user. 429 + retry-after header. Never build again.
+- ✅ **LinkedIn OAuth + posting live (May 21, PRs #394–#399)** — Personal profile connect, OAuth flow, UGC Posts API publishing. Confirmed with a live post. Platform count = 7. Never say LinkedIn is coming soon or pending again.
+- ✅ **Bluesky grapheme fix (May 21)** — `Intl.Segmenter` for grapheme counting in `lib/publish/bluesky.ts`. Truncates to 300 graphemes gracefully. Never revert to `content.length`.
+- ✅ **`/for/linkedin-creators` page (May 21, PR #398)** — Full SEO audience landing page. In PublicNav Audiences dropdown. Never ask to build it again.
+- ✅ **vs/taplio + vs/shield-app (May 21, PR #399)** — Both comparison pages live. In vs/ hub. In sitemap and llms.txt. Never ask to build them again.
+- ✅ **LinkedIn blog batch — 19 posts (May 21, PR #399)** — `supabase/blog_batch_linkedin.sql`. Run in Supabase. Never ask to write these again.
+- ✅ **Calendar query fix (May 16, PR #355)** — Removed all date filters. Fetch all user posts (limit 500) with no `created_at`/`scheduled_at` range. SOMA posts may have null `created_at`; date filters silently excluded them. Never add a date filter to the calendar query again.
+- ✅ **next-intl removed (May 16, PRs #350, #352)** — `createNextIntlPlugin` incompatible with Turbopack. Removed from `next.config.ts`. `LocalizedLanding.tsx` uses direct JSON imports. `i18n/routing.ts`, `i18n/request.ts`, and all locale layout files deleted. `proxy.ts` cleaned of all next-intl imports. Build is clean. Never re-introduce `next-intl` or `createNextIntlPlugin`.
+- ✅ **Full-app i18n — all major pages complete (May 17, PRs #362–365)** — Core pages (Dashboard, Queue, Calendar, Compose, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media, AI Features, Agents hub, SOMA landing, Enki landing) + inner pages (SOMA dashboard, SOMA voice, Enki dashboard, Creator Hub, creator public page). **i18n build rule: any new key in `en.json` must be added to ALL 8 other locale files (es/de/fr/pt/ru/zh/ja/ko) in the same commit — TypeScript enforces `typeof enMessages` shape parity across all 9 locales.** All major pages are fully wired. Use `scripts/i18n-sweep.py` or run the node validation script before committing.
+- ✅ **Gilgamesh's Guide Vol. 5 (May 17, PR #365)** — Creator Monetization live at `/guides/creator-monetization`. Email capture included. Never ask to build it again.
+- ✅ **Calendar select('*') fix (May 17, PR #361)** — Explicit column lists on calendar fetch caused silent null returns if any column (e.g. `tags`) didn't exist. Now uses `select('*')` + wsLoading guard. Never revert to explicit column list on calendar query.
+- ✅ **Landing page language switcher fix (May 17, PR #362)** — `PublicNav.setLocale()` now calls `router.push('/${code}')` when on a public locale path. Don't revert to localStorage-only.
+- ✅ **i18n locale validation pattern** — Run `node -e "const en=require('./messages/en.json'); ..."` before every i18n commit to catch missing keys across all 9 files before Vercel does. Or use `scripts/i18n-sweep.py` for bulk key additions.
+- ✅ **Onboarding Quick Start + auto-schedule + referral detection (May 14, PR #335)** — Quick Start path live. Starter posts now schedule to calendar (not drafts). Referral cookie banner. Never revert posts to draft status.
+- ✅ **Pricing birthday promo + social proof + secure checkout (May 14, PR #335)** — BDAY31 coupon live in Stripe. Banner date-gated in UI. Trust strip below plan cards.
+- ✅ **Wall of Love page (May 14, PR #335)** — `/wall-of-love` live. Add testimonials to TESTIMONIALS array when collected.
+- ✅ **Guide email capture (May 14, PR #335)** — GuideEmailCapture component on all 4 Gilgamesh Guides. Never ask to add email capture to guides again.
+- ✅ **Admin data fix (May 14)** — googlereview@socialmate.studio downgraded to free. Admin God Mode shows accurate 0 paid users.
+- ✅ **Bluesky token race condition + SOMA jitter + error visibility (May 19, PR #382)** — `platform_errors` JSONB column live. Calendar hover shows actual error. Token re-read on concurrent refresh failure. SOMA posts now staggered 0–44 min per slot. SQL applied.
+- ✅ **TikTok Script Generator (May 18, PR #371)** — Live at `/ai-features/tiktok-script`. 5 credits. Never ask to build again.
+- ✅ **GIF Export in Creator Studio (May 18, PR #371)** — gifenc installed, exportGif() live. Never ask to build again.
+- ✅ **Blog batch 10 (May 18, PR #372)** — 30 video/TikTok/creator posts. SQL in blog_batch_10.sql. Never ask to write these again.
+- ✅ **TikTok Studio in public nav (May 18)** — Added to desktop header + mobile Products section. `/for/tiktok-creators` + `/for/video-creators` added to Audiences dropdown. Never say TikTok Studio is missing from nav again.
+- ✅ **Social media glossary (May 18, PR #378)** — `/glossary` live with 62 terms, A-Z nav, search, JSON-LD. Never ask to build again.
+- ✅ **vs/ hub + 8 new pages (May 18, PR #379)** — Canva, Plann, Social Champ, Ripl, Preview App, Gain, Kontentino, Unum. Never ask to add these again.
+- ✅ **Blog batch 11 (May 18, PR #380)** — 35 posts. SQL in blog_batch_11.sql. Never ask to write these again.
+- ✅ **TikTok Production API approved (May 17, 2026)** — Production API approved by TikTok. Platform flipped to 'live' on landing page + LocalizedLanding. Platform count updated 5→6. Sandbox banner removed from /tiktok/studio. Roadmap entry moved to 'shipped'. llms.txt updated. CLAUDE.md Platforms section updated. Never list TikTok as coming soon or pending again.
+- ✅ **AlternativeTo listing approved (May 14)** — Live. 9 alternatives listed. Never ask to submit again.
+- ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.
+- ✅ **Admin God Mode exclusion fix (PR #332)** — Admin's own account excluded from all stats. Pro=0, Agency=0, MRR=$0 accurately reflects real users.
+- ✅ **Clickable admin stats + platform distribution (PR #333)** — Cards link to filtered users. Platform distribution section live. Suspense fix deployed.
+- ✅ **Badge + OG metadata (PR #333)** — Amber-S pill badge on bio + creator pages. Per-page OG tags for [username], creator/[handle], and blog posts.
+- ✅ **Monthly credits reset email** — Inngest cron live. Sends 1st of every month. Registered in route.ts.
+- ✅ **Changelog updated + linked in nav** — May 9 + May 14 entries. Changelog in PublicNav Resources.
+- ✅ **Signup social proof** — "30+ creators" social proof added to signup page left panel.
+- ✅ **Voice DNA Builder completed (May 7)** — Joshua completed full Advanced tier (40 questions). Voice DNA summary active and injected into every SOMA generate prompt. Never ask Joshua to complete the interview again.
+- ✅ **SOMA Project Memory (PR #308, May 7)** — `soma_project_memory` table live. Ingest reads/writes memory. 500k char cap. Full doc no truncation. Project page shows memory panel + Clear button. `/api/soma/projects/[id]/memory` GET + DELETE live.
+- ✅ **Feedback modal on-demand (PR #308, May 7)** — Auto-popup removed. Manual "🎙️ Give feedback" button in generate result. User controls when to answer.
+- ✅ **Voice DNA 404 fix (PR #305, May 7)** — Done screen links to /soma/dashboard. Merged.
+- ✅ **Voice DNA dashboard indicator (PR #306, May 7)** — Tier badge + "✓ saved" state on SOMA dashboard. Merged.
+- ✅ **Google Play identity approved (May 7)** — Confirmed via screenshot. Console ready for app creation.
+- ✅ **Google Play app created + closed testing active (May 8)** — App in console. Internal testing: Active. Closed testing: Active (1 track). Still need 12 opted-in testers + 14 days to apply for production.
+- ✅ **SOMA Credit Packs fully live (Apr 30, PR #263)** — Stripe products created (Starter $4.99/75cr, Growth $12.99/225cr, Pro $24.99/500cr). Price IDs hardcoded. Labels updated. Webhook wired from PR #256.
+- ✅ **Capacitor Android wrapper + Link in Bio monetize blocks (Apr 30, PR #262)** — `capacitor.config.json`, Capacitor deps, `GOOGLE_PLAY_SETUP.md`, Link in Bio tip/subscribe quick-add, Creator Hub share section (QR + copy links).
+- ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
+- ✅ **Creator Monetization Hub (Apr 30, PR #261)** — Tip jar + fan subscriptions live. Stripe Connect Express. `/monetize/hub` dashboard. `/creator/[handle]` public page. Webhook handlers for tip/sub/cancel. SQL: 3 tables applied.
+- ✅ **Agents Hub complete (Apr 29)** — All 8 agents live: Email Outreach, Growth Scout, Newsletter, Client Report, Repurpose, Caption, Trend Scout, Inbox Agent. PRs #255–260 all merged. SQL for all 8 tables applied.
+- ✅ **Schedule Templates UI (PR #256)** — `/schedules` page built. Full CRUD.
+- ✅ **SOMA Credit Packs UI+API (PR #256)** — Component + checkout route built. Stripe products created Apr 30.
+- ✅ **Workspace activity logging (PR #256)** — Wired into post publish route.
+- ✅ **PWA Install Prompt (PR #256)** — `InstallPrompt` component added to layout.
+
+- ✅ **PR #229** — SOMA per-platform schedule (posts/day + day picker per platform). Migration: soma_projects.platform_schedule. Merged.
+- ✅ **PR #228** — SOMA new project only shows connected platforms (GET /api/accounts/connected). Merged.
+- ✅ **PR #227** — SOMA Full Send modal fix + soma_full_send_enabled column. Modal hides purchased tiers. Merged.
+- ✅ **PR #221 batch** — Bio click analytics, post performance alerts, team approval workflow, A/B variant testing. Merged.
+- ✅ **PR #222** — Inngest Map/Set spread fix (TypeScript build error). Merged.
+- ✅ **PR #223 batch** — Link shortener (/links + /go/[slug]), notification count endpoint, workspace activity API, schedule templates API. SQL: short_links + schedule_templates + workspace_activity. Merged.
+- ✅ **PR #224 batch** — Unread notification badge in sidebar, /activity page, /streak heatmap, approval submission notifications. Merged.
+
+- ✅ **PR #220 batch (Apr 26 late night)** — Recurring posts, post-as-image, hashtag suggestions, roadmap+sitemap update. Merged.
+- ✅ **PR #219 batch (Apr 26 evening)** — Referral landing /refer/[code], weekly digest email, Enki trade history + weekly P&L email, upgrade nudges, competitor alerts. Merged.
+- ✅ **Twitch env vars** — `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` set in Vercel. Callback: `https://socialmate.studio/api/clips/twitch/callback`. DONE.
+- ✅ **Supabase migrations** — `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured`, `enki_truth_trades`, `enki_truth_strategy_stats`, `coupons`, `coupon_redemptions` all confirmed ran.
+- ✅ **Login redirect** — all Enki pages use `?redirect=` not `?next=`. Fixed.
+- ✅ **Stripe SDK v20 promo code params** — `promotion: { type: 'coupon', coupon: id }` format confirmed and in use.
+- ✅ **enkiTruthModeScan** — registered in `app/api/inngest/route.ts`. Running every 15 min.
+- ✅ **Growth partner affiliate account** — Abdus Sohag (thez1shann@gmail.com) created in Supabase Auth + linked in `affiliates` table. UUID: `1ac0b2ca-fc44-4a87-8781-67f9b81d4fbe`. Commission rate: 10% (trial). Temp password: SocialMate2026!
+- ✅ **SM-Give renewal tracking** — `invoice.payment_succeeded` now records 2% to `sm_give_allocations` with source `subscription_renewal`. Only fires on `billing_reason = subscription_cycle`. PR #164.
+- ✅ **SM-Give webhook integration** — `sm_give_allocations` writes added to Stripe webhook: 2% of subscription checkouts, 100% of donation checkouts. Both non-fatal. PR #148 merged.
+- ✅ **Supabase migrations (Apr 18)** — `sm_give_allocations`, `merch_waitlist` confirmed ran.
+- ✅ **Supabase email confirmation** — "Confirm email" toggle is ON (verified Apr 19). Users must confirm before first sign-in.
+- ✅ **Merch Printify shop ID** — Real shop ID `27238436` found via debug endpoint. `PRINTIFY_SHOP_ID` env var added to Vercel. Fixed in `merch/page.tsx`, `merch/checkout/route.ts`, and `stripe/webhook/route.ts`. PR #157 merged.
+- ✅ **Merch variant image** — `MerchProductCard` now updates image when user selects a different color/size. PR #158 merged.
+- ✅ **SM-Give merch allocation** — Corrected from 30% to 75% of gross in webhook handler. PR #159 merged.
+- ✅ **Content posts rewrite** — All 140 posts rewritten to ≤280 chars including hashtags. Organized by day + platform. `content-posts-apr20-apr26.md` ready to bulk schedule. PR #155 merged.
+- ✅ **Audit fixes (Apr 19)** — Broken `/affiliate` links fixed, debug route deleted, feature-requests error handling added. PR #160 open.
+- ✅ **X quota restructure (Apr 20)** — New limits: Free 28 · Pro 150 · Agency 400. X Booster one-time add-on tiers live in Stripe (Spark/Boost/Surge/Storm). Booster credits stack and roll over.
+- ✅ **Platform account jail (Apr 20)** — `platform_account_registry` table tracks Twitter accounts with 45-day global cooldown on disconnect. Anti-abuse: disconnecting and reconnecting to reset quota is blocked.
+- ✅ **Enki Guardian toggle on dashboard (Apr 20)** — Fortress Guard toggle now on the dashboard page directly. Pending approvals banner + 24-hr auto-expiry on stale trades.
+- ✅ **Enki leaderboard nav fix (Apr 20)** — Leaderboard now renders Enki nav, not public SocialMate nav.
+- ✅ **Partial post UX (Apr 21)** — Per-platform breakdown shown in calendar/queue/drafts. Retry button for failed platforms. Done.
+- ✅ **Admin platform jail UI (Apr 21)** — `/admin/platform-jail` lists Twitter accounts in 45-day cooldown. Done.
+- ✅ **X Booster Settings UI (Apr 21)** — Purchase UI + balance display on Settings plan tab. Quota warning in compose. Done.
+- ✅ **Enki citizen onboarding (Apr 21)** — 3-step onboarding flow for new Citizen tier users. Done.
+- ✅ **Enki Truth Mode Start/Stop (Apr 21)** — Explicit Start/Stop controls on `/enki/truth`. Done.
+- ✅ **Studio Stax detail page (Apr 21)** — Per-lister page at `/studio-stax/[slug]`. Criteria checklist on apply page. Done.
+- ✅ **Pricing page Studio Stax section (Apr 21)** — "Get Listed" section with Founding Member + Standard cards. Done.
+- ✅ **Gilgamesh's Guide (Apr 21)** — `/gils-guide` landing page live. Email capture → `gils_guide_subscribers`. Resend delivery. Done.
+- ✅ **Discord management hub (Apr 21)** — Word filter + automations API + Manage Server link live. Done.
+- ✅ **Abdus partner access (Apr 21)** — `affiliate_profiles` row created, `affiliates.status = 'active'`, workspace upgraded to Pro. Dashboard accessible.
+- ✅ **AI Brand Voice (Apr 21)** — Settings tab (Pro+), Gemini injection, Compose badge. Migration: `brand_voice` JSONB on `user_settings`. Done.
+- ✅ **Content Repurposing (Apr 21)** — `/api/ai/repurpose`, ai-features card, Compose inline panel. 6 formats, 1 credit. Done.
+- ✅ **Smart Queue / Auto-schedule (Apr 21)** — Pro+ only. Queue page button + Compose best-time picker. Done.
+- ✅ **Analytics overhaul (Apr 21)** — X-style dark dashboard. SVG area chart, heatmap, Bluesky engagement sync. Done.
+- ✅ **Push notifications (Apr 21)** — Service worker, VAPID routes, Settings toggle, Inngest triggers. Needs VAPID env vars in Vercel.
+- ✅ **Studio Stax renewal emails (Apr 21)** — Inngest cron 9am daily, 30/14/7-day Resend drip, STAX20 code. Needs SQL migration run.
+- ✅ **PublicNav dropdowns (Apr 22)** — Audiences ▾ + Resources ▾ dropdowns, SOMA standalone. Done.
+- ✅ **SOMA Autopilot Stripe checkout (Apr 22)** — Real Stripe subscription checkout wired. price_1TP8rU7OMwDowUuUYLBNAVux. Done.
+- ✅ **Studio Stax Stripe price IDs (Apr 22)** — Constants + metadata added to checkout route. Founding: price_1TP8wi7OMwDowUuUNQW7ER95 / Standard: price_1TP8xG7OMwDowUuUO05Vh1Kq. Done.
+- ✅ **Annual plan crash fix (Apr 22)** — normalizePlan() in WorkspaceContext. Done.
+- ✅ **Dashboard React #310 crash fix (Apr 23)** — dnd-kit hooks moved before early return in DashboardInner. Dashboard fully stable.
+- ✅ **TikTok API submitted (Apr 23)** — SocialMatehq app submitted for review. Content Posting API + Direct Post + Login Kit. Status: In review.
+- ✅ **Dashboard React #310 fix (Apr 22)** — useSensors/useSensor (dnd-kit) declared after early return, violating Rules of Hooks. Moved before `if (loading) return`. Pushed directly to main. Done.
+- ✅ **SOMA upgrade gate (Apr 25)** — Gate now checks `plan !== 'free'` instead of `c.monthly === 0`. Admin workspace manually set to agency via SQL. Done (PR #213).
+- ✅ **SOMA Full Send toggle (Apr 25)** — All 3 mode buttons live in dashboard. Full Send type added throughout. Done (PR #214).
+- ✅ **SOMA email notifications (Apr 25)** — Generate route sends Resend email on every run. Done (PR #214).
+- ✅ **Media Library (Apr 25)** — `/media` page live, `media_items` table confirmed applied, `media` bucket confirmed public. Bucket name fix merged (PR #215).
+- ✅ **Roadmap updated (Apr 25)** — SOMA credit counts fixed, FAQ shipped, media library shipped. Done (PR #214).
+- ✅ **Content DNA (Apr 26)** — `/analytics/dna` engagement fingerprint dashboard + Mastodon sync + DNA API. PR #216 merged.
+- ✅ **Admin God Mode (Apr 26)** — `/admin/overview` server component with users/revenue/SOMA/churn signals. PR #216 merged.
+- ✅ **Creator Monetize landing (Apr 26)** — `/monetize` landing + waitlist table. PR #216 merged.
+- ✅ **Inbox replies (Apr 26)** — Bluesky + Mastodon inline reply from `/inbox`. PR #217 merged.
+- ✅ **Compose thread builder + save-as-template (Apr 26)** — PR #217 merged.
+- ✅ **SOMA onboarding skip/resume (Apr 26)** — PR #218 merged.
+- ✅ **Compose per-platform preview (Apr 26)** — PR #218 merged.
+- ✅ **Enki paper trading fix (Apr 26)** — Removed `total` column from `enki_trades` inserts (was silently failing since launch). Fixed in current PR.
+- ✅ **SOMA autopilot cron email (Apr 26)** — Confirmed live in `somaAutopilotRun` at line 3675 of `lib/inngest.ts`. Sends Resend email after every Monday cron run.
+- ✅ **TikTok Developer App setup (Apr 22)** — App: SocialMatehq. Content Posting API added, Direct Post ON, scopes: video.publish + video.upload, socialmate.studio domain verified, TIKTOK_CLIENT_KEY + TIKTOK_CLIENT_SECRET in Vercel. Pending: record demo video (Win+G) + submit for review.
+
+---
