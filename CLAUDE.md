@@ -502,8 +502,8 @@ CLAUDE.md.
   built-in mailer, which delivers worse and caps low?
 - Creator Hub tips and Twitch go-live alerts stay unannounced until a streamer
   uses them for real (Joshua's plan, Nov 5: onboard one streamer to try both).
-- Ban the former growth partner's two Supabase logins and fix one live blog row
-  (both in `TODO.md`, "Needs Joshua"; sessions can't change production auth).
+- Run `supabase/blog_accuracy_nov5.sql` (blog accuracy pass, in `TODO.md`).
+  Sessions don't write production data; Joshua runs SQL by hand.
 - Search Console for renewalmate.com (DNS TXT at GoDaddy, then `sitemap.xml`),
   Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google &
   YouTube app, the Wyoming LLC annual report.
