@@ -87,6 +87,7 @@ function SettingsInner() {
   )
 
   const [savedTab, setSavedTab]                   = useState<string | null>(null)
+  const [saveError, setSaveError]                 = useState<string | null>(null)
   const [checkoutLoading, setCheckoutLoading]     = useState(false)
   const [couponInput, setCouponInput]     = useState('')
   const [couponValidating, setCouponValidating] = useState(false)
@@ -391,20 +392,44 @@ function SettingsInner() {
   const handleSave = async (tab: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+    setSaveError(null)
+    // Only say "Saved" when the write succeeded. Every branch here used to
+    // discard the result, so a failed save showed the same green check.
+    let failed: string | null = null
     if (tab === 'Profile') {
-      await supabase.from('profiles').update({ display_name: displayName, username, bio }).eq('id', user.id)
+      // Server route: writes the name to profiles and user_settings (the
+      // workspace label teammates see reads the latter), stores a blank handle
+      // as null, and returns the real outcome.
+      const res = await fetch('/api/user/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName, username, bio }),
+      }).catch(() => null)
+      const data = res ? await res.json().catch(() => ({})) : {}
+      if (!res || !res.ok) {
+        failed = data?.error === 'username_taken'
+          ? tSettings('app_settings.profile_tab.username_taken')
+          : tSettings('app_settings.profile_tab.save_failed')
+      } else {
+        setDisplayName(data.displayName ?? displayName)
+        setUsername(data.username ?? '')
+        setBio(data.bio ?? '')
+      }
     }
     if (tab === 'Notifications') {
-      await supabase.from('user_settings').update({ notification_prefs: notifications }).eq('user_id', user.id)
+      const { error } = await supabase.from('user_settings').update({ notification_prefs: notifications }).eq('user_id', user.id)
+      if (error) { console.warn('[settings] notifications save failed:', error.message); failed = tSettings('app_settings.profile_tab.save_failed') }
     }
     if (tab === 'WhiteLabel') {
-      await supabase.from('user_settings').update({
+      const { error } = await supabase.from('user_settings').update({
         white_label_brand_name:    wlBrandName,
         white_label_logo_url:      wlLogoUrl,
         white_label_custom_domain: wlDomain,
         white_label_brand_color:   wlColor,
       }).eq('user_id', user.id)
+      if (error) { console.warn('[settings] white label save failed:', error.message); failed = tSettings('app_settings.profile_tab.save_failed') }
     }
+    if (failed) { setSaveError(failed); return }
     setSavedTab(tab)
     setTimeout(() => setSavedTab(null), 2000)
   }
@@ -648,6 +673,7 @@ function SettingsInner() {
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Profile' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                 {savedTab === 'Profile' ? tSettings('app_settings.profile_tab.saved') : tSettings('app_settings.profile_tab.save_profile')}
               </button>
+              {saveError && <p role="alert" className="text-xs text-red-500 mt-2">{saveError}</p>}
 
               {/* Built with SocialMate badge */}
               <div className="border-t border-theme pt-5 mt-2">
@@ -1610,6 +1636,7 @@ function SettingsInner() {
                       {wlSaving && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                       {savedTab === 'WhiteLabel' ? tSettings('app_settings.white_label_tab.saved') : tSettings('app_settings.white_label_tab.save_branding')}
                     </button>
+                    {saveError && <p role="alert" className="text-xs text-red-500 mt-2">{saveError}</p>}
                   </div>
 
                   {wlLogoUrl && (

@@ -888,7 +888,9 @@
       "bio_placeholder": "Tell your audience about yourself...",
       "avatar": "Avatar",
       "save_profile": "Save Changes",
-      "saved": "✓ Saved!"
+      "saved": "✓ Saved!",
+      "save_failed": "Échec de l'enregistrement. Vérifiez votre connexion et réessayez.",
+      "username_taken": "Ce nom d'utilisateur est déjà pris. Essayez-en un autre."
     },
     "plan_tab": {
       "title": "Current Plan",

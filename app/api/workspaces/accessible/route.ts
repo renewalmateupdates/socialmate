@@ -58,13 +58,21 @@ export async function GET() {
   // says nothing to the person it was shared with. Label it by its owner.
   const ownerLabels = new Map<string, string>()
   if (ownerIds.length > 0) {
-    const { data: settings, error: sErr } = await admin
-      .from('user_settings')
-      .select('user_id, display_name')
-      .in('user_id', ownerIds)
+    // profiles.display_name is the name the owner edits in Settings and sees on
+    // their dashboard; user_settings.display_name is the older copy (kept in
+    // sync by /api/user/profile since Nov 5). Prefer the former.
+    const [{ data: profiles, error: pErr }, { data: settings, error: sErr }] = await Promise.all([
+      admin.from('profiles').select('id, display_name').in('id', ownerIds),
+      admin.from('user_settings').select('user_id, display_name').in('user_id', ownerIds),
+    ])
+    if (pErr) console.warn('[workspaces/accessible] owner profile lookup failed:', pErr.message)
     if (sErr) console.warn('[workspaces/accessible] owner name lookup failed:', sErr.message)
+    for (const row of profiles ?? []) {
+      const name = typeof row.display_name === 'string' ? row.display_name.trim() : ''
+      if (name) ownerLabels.set(row.id as string, name)
+    }
     for (const row of settings ?? []) {
-      if (row.display_name) ownerLabels.set(row.user_id as string, row.display_name as string)
+      if (!ownerLabels.has(row.user_id as string) && row.display_name) ownerLabels.set(row.user_id as string, row.display_name as string)
     }
     await Promise.all(ownerIds.filter(id => !ownerLabels.has(id)).map(async id => {
       const { data } = await admin.auth.admin.getUserById(id)

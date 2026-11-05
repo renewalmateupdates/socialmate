@@ -888,7 +888,9 @@
       "bio_placeholder": "Tell your audience about yourself...",
       "avatar": "Avatar",
       "save_profile": "Save Changes",
-      "saved": "✓ Saved!"
+      "saved": "✓ Saved!",
+      "save_failed": "Couldn't save. Check your connection and try again.",
+      "username_taken": "That username is taken. Try another one."
     },
     "plan_tab": {
       "title": "Current Plan",

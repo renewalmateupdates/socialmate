@@ -888,7 +888,9 @@
       "bio_placeholder": "向您的受众介绍自己...",
       "avatar": "头像",
       "save_profile": "保存更改",
-      "saved": "✓ 已保存！"
+      "saved": "✓ 已保存！",
+      "save_failed": "保存失败。请检查网络连接后重试。",
+      "username_taken": "该用户名已被占用，请换一个试试。"
     },
     "plan_tab": {
       "title": "当前套餐",
