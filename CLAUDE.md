@@ -148,9 +148,9 @@ That window closes permanently the day someone subscribes.
 | Plan | Price | Posts/mo | Credits/mo | Seats | Client Workspaces | Accounts per platform |
 |---|---|---|---|---|---|---|
 | Free | $0 | 250 | 50 | 2 | 0 | 1 |
-| Pro | $8/mo | 1,000 | 500 | 5 | 0 | 5 |
+| Pro | $8/mo | 1,000 | 500 | 5 | 1 | 5 |
 | Agency | $29/mo | 5,000 | 2,000 | 15 | 5 | 10 |
-| Pro Annual | $80/yr | 1,000 | 500 | 5 | 0 | 5 |
+| Pro Annual | $80/yr | 1,000 | 500 | 5 | 1 | 5 |
 | Agency Annual | $290/yr | 5,000 | 2,000 | 15 | 5 | 10 |
 | Enterprise | custom | — | — | unlimited | — | — |
 
@@ -425,7 +425,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 
 - **Accounts belong to the workspace owner, not to the author.** Never pass `post.user_id` to a publisher; pass `accountScopeFor(...).ownerId`. A post's `user_id` says who wrote it.
 - **A paid gate in front of a queue that a free feature fills is a dead end.** Free sells 2 seats and the Editor role. The approval queue was Pro-only, and everything an Editor sent went into it.
-- **Open:** Pro's client workspace count. `/pricing`, `lib/plan.ts` and the app say 1. The plan table in this file, `llms.txt` and `/vs/buffer` say 0. Joshua decides, then change it in `lib/plan.ts` and the copy.
+- **Decided Nov 5:** Pro includes 1 client workspace (`PLAN_CLIENT_WORKSPACES` in `lib/plan.ts`). The plan table here, `llms.txt`, `ai.txt`, `/vs/buffer` and `/vs/hootsuite` now say so too.
 - **Fixed in #768 (merged Nov 2):** the owner's Queue, Calendar and Drafts listed only posts they wrote, and RLS stopped them moving, cancelling, retrying or deleting a team member's post. `/api/workspaces/posts` now serves a workspace's posts whoever wrote them, and `canManagePost()` in `lib/team-workspaces.ts` is the one check (author, or the workspace owner/admin). Since Nov 3, Compose opens a teammate's post directly for an owner or admin (see below).
 
 **From: November 2, 2026 (PR #769): LinkedIn formatter, 14 audience pages, 8 blog posts, teammates' posts in Compose**

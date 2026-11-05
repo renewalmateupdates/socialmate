@@ -36,7 +36,7 @@ const COMPARISON = [
   { feature: 'RSS import',                   buffer: 'Not listed',                             socialmate: '✅ Free'                                  },
   { feature: 'Evergreen recycling',          buffer: 'Not listed',                             socialmate: '✅ Free'                                  },
   { feature: 'Team members',                 buffer: 'Free 1, Team plan unlimited',            socialmate: 'Free 2, Pro 5, Agency 15'                },
-  { feature: 'Client workspaces',            buffer: 'Not listed',                             socialmate: 'Agency: 5 workspaces, $29/mo'            },
+  { feature: 'Client workspaces',            buffer: 'Not listed',                             socialmate: 'Pro: 1 ($8/mo), Agency: 5 ($29/mo)'      },
 ]
 
 const FAQ = [
@@ -46,7 +46,7 @@ const FAQ = [
   },
   {
     q: 'How much does Buffer cost for several accounts?',
-    a: 'Buffer bills per channel. Essentials is $6 a month per channel billed monthly, or $5 billed yearly, and Team is $12 or $10. Rates drop past 10 channels. SocialMate Pro is $8 a month flat ($80 a year) for up to 5 accounts on each platform, and Agency is $29 a month for up to 10 per platform plus 5 client workspaces.',
+    a: 'Buffer bills per channel. Essentials is $6 a month per channel billed monthly, or $5 billed yearly, and Team is $12 or $10. Rates drop past 10 channels. SocialMate Pro is $8 a month flat ($80 a year) for up to 5 accounts on each platform plus 1 client workspace, and Agency is $29 a month for up to 10 per platform plus 5 client workspaces.',
   },
   {
     q: 'Does SocialMate post to Instagram or Facebook?',

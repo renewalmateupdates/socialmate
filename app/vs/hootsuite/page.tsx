@@ -38,7 +38,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate really handle team workflows?',
-    a: 'Yes. SocialMate includes content approval workflows, team roles, client workspaces, and team seats on every plan. The free plan includes 2 seats. Pro includes 5. Agency includes 15.',
+    a: 'Yes. Every plan has team seats and roles: the free plan includes 2 seats, Pro includes 5 seats plus approval workflows and 1 client workspace, and Agency includes 15 seats, approval workflows and 5 client workspaces.',
   },
   {
     q: 'Why is SocialMate so much cheaper?',

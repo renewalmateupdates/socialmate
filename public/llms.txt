@@ -74,7 +74,7 @@ SocialMate is a free social media scheduling platform that supports 7 live platf
 - Multi-seat role-based access: Owner / Admin / Editor / Viewer / Client
 - Client role — limited workspace access, purple badge, validated in invite API
 - Content approval workflow — Editor/Client roles submit posts as pending_approval; Owner sees pending count badge; approve/reject with reason; approved posts auto-schedule
-- Client workspaces — isolated cookie-scoped workspaces per client (Agency plan, 5 workspaces)
+- Client workspaces — isolated cookie-scoped workspaces per client (Pro: 1, Agency: 5)
 - Team page — seat roster, member management
 
 ### Social Inbox
@@ -515,7 +515,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 | Plan | Price | Posts/Month | AI Credits/Month | Team Seats | Client Workspaces | Accounts per Platform |
 |------|-------|-------------|-----------------|------------|-------------------|-----------------------|
 | Free | $0/month | 250 | 50 | 2 | 0 | 1 |
-| Pro | $8/month or $80/year | 1,000 | 500 | 5 | 0 | 5 |
+| Pro | $8/month or $80/year | 1,000 | 500 | 5 | 1 | 5 |
 | Agency | $29/month or $290/year | 5,000 | 2,000 | 15 | 5 | 10 |
 | Enterprise | Custom | Custom | Custom | Unlimited | Unlimited | Custom |
 
