@@ -551,7 +551,7 @@ Moved to `docs/soma-content.md`.
 - **Use prebuilt/existing patterns** — don't reinvent. Reuse existing auth, RLS, Inngest, Stripe patterns already in the codebase
 - **Token efficiency matters** — run focused, targeted tasks. Use plan mode (Shift+Tab) for complex multi-file work before writing code
 - **Mobile first** — always check iPhone notch, touch targets (44×44px min), safe area insets
-- **No hardcoded wrong numbers** — check actual Stripe price IDs in Appendix B before touching payment code
+- **No hardcoded wrong numbers** — check the Stripe price IDs in the "Stripe Live Price IDs" table below before touching payment code
 - **Don't break what works** — UI/UX must flow cleanly. If unsure, ask before touching working flows
 - **Commit frequently** with descriptive messages
 - **One branch + one PR per fix** — never accumulate changes from multiple fixes onto one branch
