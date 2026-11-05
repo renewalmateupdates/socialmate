@@ -1429,7 +1429,7 @@ What shipped:
 - ✅ **Login redirect** — all Enki pages use `?redirect=` not `?next=`. Fixed.
 - ✅ **Stripe SDK v20 promo code params** — `promotion: { type: 'coupon', coupon: id }` format confirmed and in use.
 - ✅ **enkiTruthModeScan** — registered in `app/api/inngest/route.ts`. Running every 15 min.
-- ✅ **Growth partner affiliate account** — Abdus Sohag (thez1shann@gmail.com) created in Supabase Auth + linked in `affiliates` table. UUID: `1ac0b2ca-fc44-4a87-8781-67f9b81d4fbe`. Commission rate: 10% (trial). Temp password: SocialMate2026!
+- ✅ **Growth partner affiliate account** — Abdus Sohag (thez1shann@gmail.com) created in Supabase Auth + linked in `affiliates` table. UUID: `1ac0b2ca-fc44-4a87-8781-67f9b81d4fbe`. Commission rate: 10% (trial). Temp password: redacted on Nov 5, 2026 (it sat in this public repo; reset or delete that account).
 - ✅ **SM-Give renewal tracking** — `invoice.payment_succeeded` now records 2% to `sm_give_allocations` with source `subscription_renewal`. Only fires on `billing_reason = subscription_cycle`. PR #164.
 - ✅ **SM-Give webhook integration** — `sm_give_allocations` writes added to Stripe webhook: 2% of subscription checkouts, 100% of donation checkouts. Both non-fatal. PR #148 merged.
 - ✅ **Supabase migrations (Apr 18)** — `sm_give_allocations`, `merch_waitlist` confirmed ran.
