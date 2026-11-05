@@ -34,7 +34,7 @@ At minimum the app needs the three Supabase variables.
 
 | What | Command |
 |---|---|
-| Production build | `npm run build`, then `npm start` |
+| Production build | `npm run build`, then `npm start` (needs the Supabase keys in `.env.local`: the blog pages and feed are generated from the database at build time) |
 | Script tests (no network, no keys) | `npm test` |
 | Audit script's own tests | `python scripts/test-audit-schema-drift.py` |
 | Type check | `npx tsc --noEmit` |
