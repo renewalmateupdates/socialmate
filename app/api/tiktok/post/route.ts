@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle()
 
   let videosThisMonth  = ws?.tiktok_videos_this_month ?? 0
-  let boosterCredits   = ws?.tiktok_booster_credits ?? 0
+  const boosterCredits   = ws?.tiktok_booster_credits ?? 0
 
   // Reset monthly counter if needed
   const resetAt = ws?.tiktok_quota_reset_at

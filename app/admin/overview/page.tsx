@@ -80,7 +80,7 @@ export default async function AdminOverviewPage() {
   //
   // Counted from profiles rather than the auth API, which has no way to filter.
   const totalAccounts = (allProfiles ?? []).length
-  let totalUsers = (allProfiles ?? []).filter(r => !internalIds.has(r.id)).length
+  const totalUsers = (allProfiles ?? []).filter(r => !internalIds.has(r.id)).length
   let newUsers7d = 0
   let proCount = 0
   let agencyCount = 0

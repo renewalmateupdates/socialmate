@@ -31,7 +31,7 @@ for (const ns of namespaces) {
   for (const loc of locales) {
     const msgs = JSON.parse(fs.readFileSync('./messages/' + loc + '.json', 'utf8'))
     let sameAsEn = 0
-    let total = nsKeys.length
+    const total = nsKeys.length
     for (const key of nsKeys) {
       const enVal = getVal(en, key)
       const locVal = getVal(msgs, key)

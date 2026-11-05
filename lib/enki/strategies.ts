@@ -56,8 +56,8 @@ export function scoreMomentum(
   const macdBull  = macd !== null && macd.hist > 0 && macd.macd > macd.signal
   const macdBear  = macd !== null && macd.hist < 0 && macd.macd < macd.signal
 
-  let buySignals: string[]  = []
-  let sellSignals: string[] = []
+  const buySignals: string[]  = []
+  const sellSignals: string[] = []
 
   if (emaGolden) buySignals.push('EMA9>EMA21 momentum')
   if (emaDeath)  sellSignals.push('EMA9<EMA21 downtrend')

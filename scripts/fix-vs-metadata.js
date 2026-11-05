@@ -18,7 +18,7 @@ entries.forEach(entry => {
 
   if (!fs.existsSync(pageFile)) return;
 
-  let content = fs.readFileSync(pageFile, 'utf8');
+  const content = fs.readFileSync(pageFile, 'utf8');
 
   // Only process files that have BOTH 'use client' AND export const metadata
   const hasClient = content.includes("'use client'");
