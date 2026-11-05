@@ -106,7 +106,7 @@ Anything less than that is a trial with a free label on it.
 
 SocialMate's free plan includes:
 
-- 7 live platforms now: Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn (YouTube, Pinterest, Instagram, Facebook, and Threads on the roadmap)
+- 7 live platforms now: Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn (YouTube is waiting on Google's review; Instagram, Facebook, Threads and Pinterest aren't available yet)
 - 250 scheduled posts per month
 - 2 team seats
 - 50 AI credits per month (caption generation, hashtag sets, post scoring, and more — credits reset monthly)
@@ -666,7 +666,7 @@ SocialMate includes a Caption Generator, Viral Hook Generator, Hashtag Suggester
 
 Here's the workflow: Take a photo or describe what you want to post. Run it through the Caption Generator. Get 3 options. Edit the best one to sound like you. Done.
 
-At 50 free AI credits per month, that's 50 posts created with AI assistance — enough to post more than once a day.
+At 50 free AI credits per month, that's 10 caption runs (5 credits each, three options per run), enough for two or three AI-assisted posts a week.
 
 ## Getting Started
 
@@ -2346,7 +2346,7 @@ The limitation: you can only schedule one platform at a time, and the queue isn'
 
 **Buffer** supports Pinterest on its free tier (3 channels, 10 posts each). If you're already using Buffer for other platforms, adding Pinterest makes sense. The interface is clean and straightforward.
 
-**SocialMate** focuses on newer platforms — Bluesky, Mastodon, Discord, Telegram, LinkedIn — alongside traditional social networks. If your primary need is cross-platform scheduling that includes the platforms legacy tools ignore, SocialMate is worth comparing against Pinterest-specific options.
+**SocialMate** focuses on newer platforms — Bluesky, Mastodon, Discord, Telegram, LinkedIn — alongside traditional social networks. If your primary need is cross-platform scheduling for the platforms legacy tools ignore, SocialMate is worth a look, but it doesn't post to Pinterest yet (Pinterest hasn't approved its API application), so pair it with a Pinterest-specific tool.
 
 ## The Right Tool Depends on Your Pinterest Strategy
 
@@ -2365,7 +2365,7 @@ A sustainable system:
 
 This takes about 2-3 hours per month and produces a steady stream of content that compounds over time.
 
-For a broader content scheduling system that includes Pinterest alongside your other platforms, [explore SocialMate's free plan](/signup) to see if it fits your workflow.
+SocialMate doesn't post to Pinterest yet. For your other platforms (Bluesky, Discord, Telegram, Mastodon, LinkedIn, TikTok, and X on Pro), [explore SocialMate's free plan](/signup) to see if it fits your workflow.
     `,
   },
 
@@ -3044,7 +3044,7 @@ A handful of tools have found ways to make X scheduling work without the API:
 
 **Browser extension-based schedulers** bypass the API cost issue entirely by operating through the browser rather than direct API calls. They work by essentially automating the native X interface.
 
-**SocialMate** supports X scheduling as part of its free plan. You can schedule posts to X alongside Bluesky, Mastodon, Discord, Telegram, and LinkedIn from the same interface — no credit card required. For creators who want to maintain a presence on X while also building on other platforms, SocialMate's multi-platform approach means you're not paying separately for each network.
+**SocialMate** supports X scheduling on its Pro plan ($8/month), because X charges per post. You can schedule posts to X alongside Bluesky, Mastodon, Discord, Telegram, LinkedIn and TikTok from the same interface, and every platform except X is on the free plan, no credit card required. For creators who want to maintain a presence on X while also building on other platforms, SocialMate's multi-platform approach means you're not paying separately for each network.
 
 ## The Case for Dual-Platform Posting
 
@@ -3267,7 +3267,7 @@ Start with a scheduler if you don't have either. The ability to post consistentl
 
 Add a Discord bot later when your server grows to the point where moderation and interactive features become necessary — typically 100+ active members.
 
-SocialMate's free plan includes Discord scheduling alongside Bluesky, Mastodon, Telegram, and X. No credit card required. [Start here](/signup).
+SocialMate's free plan includes Discord scheduling alongside Bluesky, Mastodon, Telegram, LinkedIn and TikTok (X needs Pro). No credit card required. [Start here](/signup).
     `,
   },
 
@@ -3634,7 +3634,7 @@ None of these are relevant to a solo creator or a small team managing their own 
 
 ## The Honest Recommendation
 
-If you're a solo creator or small team (1-3 people) managing your own social media on Bluesky, Mastodon, Discord, Telegram, and X: start with SocialMate's free plan and stay there until you have a specific need that requires upgrading.
+If you're a solo creator or small team (1-3 people) managing your own social media on Bluesky, Mastodon, Discord, Telegram, LinkedIn or TikTok: start with SocialMate's free plan (X needs Pro) and stay there until you have a specific need that requires upgrading.
 
 The free plan is not a crippled version. It's a functional tool that covers the core scheduling workflow.
 
