@@ -3,31 +3,14 @@ import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORT_MAILTO } from '@/lib/contact'
-import { Briefcase, Heart, Laptop, Mic2, Palette, Rocket, Star } from 'lucide-react'
+import { Briefcase, Heart, Laptop, Mic2, Palette, Rocket } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { TESTIMONIALS, initials, siteLabel } from '@/lib/testimonials'
 
 const CREATOR_AVATARS: LucideIcon[] = [Laptop, Palette, Mic2, Briefcase, Rocket]
 
-// Add real testimonials here as they come in. Each entry:
-// { name, handle, platform, quote, avatar (emoji or initials) }
-const TESTIMONIALS: {
-  name: string
-  handle?: string
-  platform?: string
-  quote: string
-  avatar: string
-  role?: string
-}[] = [
-  // Placeholder — replace with real quotes when collected
-  // {
-  //   name: 'Jane Doe',
-  //   handle: '@janedoe',
-  //   platform: 'Bluesky',
-  //   quote: 'SocialMate cut my posting time in half. Finally a scheduler that doesn\'t cost more than my rent.',
-  //   avatar: '👩‍💻',
-  //   role: 'Creator & Coach',
-  // },
-]
+// Testimonials live in lib/testimonials.ts (the landing page shows them too).
+// No star ratings: nobody gave one, so the page doesn't invent one.
 
 export default function WallOfLove() {
   const { t } = useI18n()
@@ -49,28 +32,26 @@ export default function WallOfLove() {
         </div>
 
         {hasTestimonials ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16">
-            {TESTIMONIALS.map((testimonial, i) => (
-              <div key={i} className="bg-panel border border-edge rounded-2xl p-6 flex flex-col gap-4">
+          <div className={`grid grid-cols-1 gap-5 mb-16 ${TESTIMONIALS.length > 1 ? 'md:grid-cols-2' : 'max-w-2xl mx-auto'}`}>
+            {TESTIMONIALS.map((testimonial) => (
+              <figure key={testimonial.name} className="bg-panel border border-edge rounded-2xl p-6 flex flex-col gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
-                    {testimonial.avatar}
+                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm font-bold flex-shrink-0" aria-hidden="true">
+                    {initials(testimonial.name)}
                   </div>
-                  <div>
+                  <figcaption>
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{testimonial.name}</p>
-                    {testimonial.role && <p className="text-xs text-gray-400 dark:text-gray-500">{testimonial.role}</p>}
-                    {testimonial.handle && (
-                      <p className="text-xs text-gray-400 dark:text-gray-500">{testimonial.handle} · {testimonial.platform}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{testimonial.role}, {testimonial.company}</p>
+                    {testimonial.website && (
+                      <a href={testimonial.website} target="_blank" rel="noopener noreferrer"
+                        className="text-xs text-gray-400 dark:text-gray-500 underline underline-offset-2 hover:text-gray-700 dark:hover:text-gray-300">
+                        {siteLabel(testimonial.website)}
+                      </a>
                     )}
-                  </div>
+                  </figcaption>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
-                <div className="flex items-center gap-0.5 text-amber-400">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <Star key={s} size={14} strokeWidth={2} fill="currentColor" />
-                  ))}
-                </div>
-              </div>
+                <blockquote className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</blockquote>
+              </figure>
             ))}
           </div>
         ) : (

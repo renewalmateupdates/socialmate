@@ -9,6 +9,7 @@ import HeroLoop from '@/components/landing/HeroLoop'
 import EmberField from '@/components/landing/EmberField'
 import Reveal from '@/components/landing/Reveal'
 import ShopStrip from '@/components/landing/ShopStrip'
+import TestimonialRail from '@/components/landing/TestimonialRail'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import { PLAN_POST_LIMITS } from '@/lib/post-limits'
 import {
@@ -260,6 +261,15 @@ export default function Landing({
       <div className="mx-auto w-full max-w-7xl px-gutter pb-section">
         <LazyUserStatsCounter />
       </div>
+
+      {/* ══ TESTIMONIALS ═══════════════════════════════════════════════════
+          Real quotes only, from lib/testimonials.ts. One quote is a single
+          card; from two on it slides. Neutral ink: a quote is not a state, so
+          it takes none of the three state colors. */}
+      <TestimonialRail
+        eyebrow={t('landing.testimonials.eyebrow')}
+        moreLabel={t('landing.testimonials.more')}
+      />
 
       {/* ══ PLATFORMS ══════════════════════════════════════════════════════ */}
       <Section id="platforms" divide>

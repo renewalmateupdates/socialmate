@@ -2923,6 +2923,10 @@
       "cta_secondary": "查看价格",
       "no_card": "无需信用卡 · 免费版永不过期"
     },
+    "testimonials": {
+      "eyebrow": "来自用户的声音",
+      "more": "在 Wall of Love 查看更多"
+    },
     "shop_strip": {
       "badge": "新",
       "lead": "Gilgamesh 商店现已开业：",

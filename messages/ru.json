@@ -2923,6 +2923,10 @@
       "cta_secondary": "Посмотреть тарифы",
       "no_card": "Без карты · Бесплатный план не истекает"
     },
+    "testimonials": {
+      "eyebrow": "Отзывы тех, кто пользуется",
+      "more": "Больше на Wall of Love"
+    },
     "shop_strip": {
       "badge": "Новое",
       "lead": "Магазин Gilgamesh открыт:",

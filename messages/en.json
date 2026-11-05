@@ -2923,6 +2923,10 @@
       "cta_secondary": "See pricing",
       "no_card": "No card required · Free plan never expires"
     },
+    "testimonials": {
+      "eyebrow": "From the people using it",
+      "more": "More on the Wall of Love"
+    },
     "shop_strip": {
       "badge": "New",
       "lead": "The Gilgamesh shop is open:",

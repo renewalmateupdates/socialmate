@@ -2923,6 +2923,10 @@
       "cta_secondary": "Ver precios",
       "no_card": "Sin tarjeta · El plan gratuito nunca caduca"
     },
+    "testimonials": {
+      "eyebrow": "De quienes lo usan",
+      "more": "Más en el Muro de Amor"
+    },
     "shop_strip": {
       "badge": "Nuevo",
       "lead": "La tienda Gilgamesh ya está abierta:",
