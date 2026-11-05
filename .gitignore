@@ -64,3 +64,6 @@ __pycache__/
 # Local tool binaries (the Stripe CLI was committed here once; install it
 # separately: https://docs.stripe.com/stripe-cli)
 *.exe
+
+# Claude Code per-machine settings (permission approvals); never shared
+.claude/settings.local.json
