@@ -32,10 +32,11 @@ type HQ = {
   renewalmate: { users: number; newUsers: number; paying: number; plans: { plan: string; count: number }[] } | null
   renewalmateRevenue: { cents: number; mrrCents: number } | null
   socialmate: {
-    waiting: { label: string; count: number; href: string | null }[]
-    feedback: { open: number; recent: { type: string; message: string; email: string | null; at: string }[] }
+    waiting: { label: string; count: number; href: string | null; note?: string }[]
+    feedback: { open: number; older: number; recent: { type: string; message: string; email: string | null; at: string }[] }
     publishFailures: { failed: number; partial: number; ours: number; topErrors: { platform: string; reason: string; posts: number; lastAt: string }[] }
     newSignups: number
+    totalUsers: number
     smGiveCents: number
   } | null
   smGive: { recordedCents: number; shopifyOwedCents: number }
@@ -83,15 +84,20 @@ function NotConnected({ text }: { text: string }) {
 export default function AdminHQPage() {
   const [data, setData]   = useState<HQ | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [days, setDays]   = useState(30)
+  // Opens on the past week, the view Joshua checks most.
+  const [days, setDays]   = useState(7)
   const [nonce, setNonce] = useState(0)
 
   useEffect(() => {
+    // Only the newest request may write. Without this, a slow 30-day load that
+    // finishes after a click on 7d replaced the week with the month.
+    let current = true
     setData(null); setError(null)
-    fetch(`/api/admin/hq?days=${days}`)
+    fetch(`/api/admin/hq?days=${days}`, { cache: 'no-store' })
       .then(async r => (r.ok ? r.json() : Promise.reject(new Error((await r.json().catch(() => ({}))).error ?? r.statusText))))
-      .then(setData)
-      .catch((e: Error) => setError(e.message))
+      .then((d: HQ) => { if (current) setData(d) })
+      .catch((e: Error) => { if (current) setError(e.message) })
+    return () => { current = false }
   }, [days, nonce])
 
   const s = data?.stripe
@@ -104,6 +110,22 @@ export default function AdminHQPage() {
     realFailedPayments + (s?.webhookFailures.total ?? 0) +
     (sm?.publishFailures.failed ?? 0) + (sm?.feedback.open ?? 0)
   const waitingTotal = sm?.waiting.reduce((n, w) => n + w.count, 0) ?? 0
+
+  // The Mates: one row per Mate product. LifeMate gets a row (and a source in
+  // lib/hq) once it has users; until then it shows as planned.
+  const mates: { name: string; newUsers: number | null; users: number | null; extra?: string }[] = [
+    { name: 'SocialMate', newUsers: sm?.newSignups ?? null, users: sm?.totalUsers ?? null },
+    {
+      name: 'RenewalMate',
+      newUsers: data?.renewalmate?.newUsers ?? null,
+      users: data?.renewalmate?.users ?? null,
+      extra: data?.renewalmate
+        ? `${data.renewalmate.paying} paying${data.renewalmateRevenue ? ` · ${usd(data.renewalmateRevenue.mrrCents)} MRR` : ''}`
+        : undefined,
+    },
+  ]
+  const PLANNED_MATES = ['LifeMate']
+  const newUsersTotal = mates.reduce((n, m) => n + (m.newUsers ?? 0), 0)
 
   return (
     <div className="min-h-dvh bg-void px-4 py-10 sm:px-6">
@@ -118,7 +140,7 @@ export default function AdminHQPage() {
             <Label>Command center</Label>
             <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink-high">HQ</h1>
             <p className="mt-2 max-w-xl text-sm text-ink-muted">
-              Money, problems and what&apos;s waiting on you, across SocialMate, the Gilgamesh shop and RenewalMate.
+              Money, new users, problems and what&apos;s waiting on you, across SocialMate, the Gilgamesh shop and RenewalMate.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -155,11 +177,18 @@ export default function AdminHQPage() {
           <div className="flex flex-col gap-5">
 
             {/* ── Headline ─────────────────────────────────────────────── */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Panel className="p-5">
                 <Label>Came in, last {data.days} days</Label>
                 <div className="mt-2 font-mono text-3xl font-semibold tabular-nums text-jade">{usd(data.totalCents)}</div>
                 <div className="mt-1 text-xs text-ink-muted">After refunds, before tax. Stripe (SocialMate and RenewalMate) plus the shop.</div>
+              </Panel>
+              <Panel className="p-5">
+                <Label>New users, last {data.days} days</Label>
+                <div className={`mt-2 font-mono text-3xl font-semibold tabular-nums ${newUsersTotal ? 'text-jade' : 'text-ink-high'}`}>{newUsersTotal}</div>
+                <div className="mt-1 text-xs text-ink-muted">
+                  {mates.map(m => `${m.name} ${m.newUsers ?? 'n/a'}`).join(' · ')}. Our own accounts left out.
+                </div>
               </Panel>
               <Panel className="p-5">
                 <Label>Waiting on you</Label>
@@ -182,7 +211,7 @@ export default function AdminHQPage() {
                     <>
                       <Stat label="Net" value={usd(s.netCents)} sub={s.refundedCents ? `${usd(s.refundedCents)} refunded` : undefined} />
                       <Stat
-                        label="MRR"
+                        label="MRR now"
                         value={usd(s.mrrCents)}
                         sub={`${s.activeSubscriptions} renewing${s.endingSubscriptions.count
                           ? ` · ${s.endingSubscriptions.count} paid up, ends ${s.endingSubscriptions.nextEndsAt ? fullDay(s.endingSubscriptions.nextEndsAt) : 'soon'}`
@@ -204,19 +233,31 @@ export default function AdminHQPage() {
                 </div>
               </Panel>
               <Panel>
-                <PanelHead icon={Users} title="RenewalMate" />
-                <div className="grid grid-cols-2 gap-4 p-5">
-                  {data.renewalmate ? (
-                    <>
-                      <Stat label="Users" value={String(data.renewalmate.users)} sub={`${data.renewalmate.newUsers} new`} />
-                      <Stat
-                        label="Paying"
-                        value={String(data.renewalmate.paying)}
-                        sub={data.renewalmateRevenue ? `${usd(data.renewalmateRevenue.cents)} in · ${usd(data.renewalmateRevenue.mrrCents)} MRR` : undefined}
-                      />
-                    </>
-                  ) : <div className="col-span-2"><NotConnected text="Not connected yet. Needs RenewalMate's Supabase keys (see Sources)." /></div>}
-                </div>
+                <PanelHead icon={Users} title="The Mates" right={<span className="text-xs text-ink-faint">new in {data.days}d · total</span>} />
+                <ul className="divide-y divide-edge">
+                  {mates.map(m => (
+                    <li key={m.name} className="flex items-center justify-between gap-3 px-5 py-3">
+                      <div className="min-w-0">
+                        <div className="text-sm text-ink-high">{m.name}</div>
+                        {m.extra && <div className="truncate text-[11px] text-ink-faint">{m.extra}</div>}
+                      </div>
+                      {m.users === null ? (
+                        <span className="text-xs text-ink-faint">Not connected</span>
+                      ) : (
+                        <span className="flex items-baseline gap-2 font-mono tabular-nums">
+                          <span className={`text-sm ${m.newUsers ? 'text-jade' : 'text-ink-muted'}`}>+{m.newUsers ?? 0}</span>
+                          <span className="text-xs text-ink-faint">{m.users}</span>
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                  {PLANNED_MATES.map(name => (
+                    <li key={name} className="flex items-center justify-between gap-3 px-5 py-3">
+                      <span className="text-sm text-ink-faint">{name}</span>
+                      <span className="text-xs text-ink-faint">Not built yet</span>
+                    </li>
+                  ))}
+                </ul>
               </Panel>
             </div>
 
@@ -277,13 +318,14 @@ export default function AdminHQPage() {
             {/* ── Waiting on you ──────────────────────────────────────── */}
             {sm && (
               <Panel>
-                <PanelHead icon={Inbox} title="Waiting on you" right={<span className="text-xs text-ink-faint">{sm.newSignups} new SocialMate signups</span>} />
+                <PanelHead icon={Inbox} title="Waiting on you" right={<span className="text-xs text-ink-faint">Requests show at any age</span>} />
                 <ul className="divide-y divide-edge">
                   {sm.waiting.map(w => {
                     const row = (
                       <div className="flex items-center justify-between gap-3 px-5 py-3">
                         <span className={`text-sm ${w.count ? 'text-ink-high' : 'text-ink-muted'}`}>{w.label}</span>
                         <span className="flex items-center gap-2">
+                          {w.note && <span className="text-[11px] text-ink-faint">{w.note}</span>}
                           <span className={`font-mono text-sm tabular-nums ${w.count ? 'text-amber' : 'text-ink-faint'}`}>{w.count}</span>
                           {w.href && <ArrowRight className="h-3.5 w-3.5 text-ink-faint" />}
                         </span>
@@ -371,7 +413,11 @@ export default function AdminHQPage() {
 
               {sm && (
                 <Panel>
-                  <PanelHead icon={MessageSquare} title="Unanswered feedback" right={<span className="font-mono text-xs text-ink-faint">{sm.feedback.open}</span>} />
+                  <PanelHead
+                    icon={MessageSquare}
+                    title="Unanswered feedback"
+                    right={<span className="font-mono text-xs text-ink-faint">{sm.feedback.open}{sm.feedback.older ? ` (+${sm.feedback.older} older)` : ''}</span>}
+                  />
                   {!sm.feedback.recent.length ? (
                     <p className="px-5 py-4 text-xs text-ink-faint">Nothing waiting for a reply.</p>
                   ) : (
