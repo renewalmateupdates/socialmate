@@ -60,7 +60,6 @@ const CHECKS: Check[] = [
   { feature: 'Pinterest',       vars: ['PINTEREST_CLIENT_ID', 'PINTEREST_CLIENT_SECRET'], breaks: 'Pinterest connect' },
 
   { feature: 'Inngest',         vars: ['INNGEST_EVENT_KEY', 'INNGEST_SIGNING_KEY'], breaks: 'every scheduled post and cron' },
-  { feature: 'Enki encryption', vars: ['ENKI_ENCRYPTION_KEY'], breaks: 'broker credential storage' },
 ]
 
 function present(name: string): boolean {

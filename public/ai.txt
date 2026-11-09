@@ -11,7 +11,7 @@ AI crawlers and language models are permitted to:
 - Quote from public blog posts and guides for informational purposes
 
 AI crawlers are NOT permitted to:
-- Access authenticated app pages (requires login — /dashboard, /compose, /settings, /soma, /enki, etc.)
+- Access authenticated app pages (requires login — /dashboard, /compose, /settings, /soma, etc.)
 - Scrape or index user-generated content behind authentication
 - Use any SocialMate content to train AI models without explicit written permission from Gilgamesh Enterprise LLC
 - Represent SocialMate pricing, features, or platform availability inaccurately
@@ -100,7 +100,6 @@ If citing SocialMate:
 - Features: https://socialmate.studio/features
 - Free tools: https://socialmate.studio/tools
 - SOMA (AI content OS): https://socialmate.studio/soma
-- Enki (separate product, waitlist only — not a SocialMate feature): https://socialmate.studio/enki
 - Blog: https://socialmate.studio/blog
 - FAQ: https://socialmate.studio/faq
 - Comparisons: https://socialmate.studio/vs
