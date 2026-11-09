@@ -35,7 +35,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   'Studio Stax':  Store,
   'SocialMate':   Sparkles,
   'SOMA':         Bot,
-  'Enki':         TrendingUp,
   'RenewalMate':  Package,
   'Founder Story': Heart,
 }
@@ -62,7 +61,6 @@ const CATEGORY_PRIORITY = [
   'Studio Stax',
   'SocialMate',
   'SOMA',
-  'Enki',
   'RenewalMate',
   'Founder Story',
 ]

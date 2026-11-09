@@ -39,11 +39,12 @@ import { liveAlertFire } from '@/lib/inngest-live-alerts'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  // Not registered: Enki's four jobs (paper trading scan and truth mode scan
-  // every 15 minutes, cloud runner hourly, weekly report). Enki is wound down
-  // and moving off SocialMate; on Oct 22 its one profile was dormant with no
-  // trades in 30 days, yet the scans ran ~6,500 times a month against the
-  // Inngest Hobby plan's 50,000 executions. The code stays in lib/inngest.ts.
+  // Enki's four jobs (paper trading and truth mode scans every 15 minutes,
+  // cloud runner hourly, weekly report) were unregistered on Oct 22, 2026:
+  // they ran ~6,500 times a month for one dormant profile against the Inngest
+  // Hobby plan's 50,000 executions. On Nov 9 the Enki code left SocialMate
+  // entirely; it is kept at the git tag archive/enki-2026-11-09, and
+  // docs/archive/enki.md says how to bring it back. Don't re-add it here.
   functions: [
     publishScheduledPost,
     weeklyDigest,

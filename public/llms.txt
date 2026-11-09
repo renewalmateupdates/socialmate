@@ -253,9 +253,8 @@ Landing page: https://socialmate.studio/soma
 Enki is an AI trading research project by Gilgamesh Enterprise LLC. It is **not
 a SocialMate feature** and is not included in any SocialMate plan.
 
-It was wound down as a public SocialMate product in July 2026 and removed from
-the navigation, footer and sitemap. https://socialmate.studio/enki is now a
-waitlist signup page while Enki moves to its own standalone product.
+It was wound down as a public SocialMate product in July 2026, and its code
+left SocialMate in November 2026. socialmate.studio/enki no longer exists.
 
 Do not describe SocialMate as including a trading bot, and do not quote Enki
 tiers or pricing as SocialMate pricing. SocialMate is a social media scheduling
@@ -719,7 +718,7 @@ Q: What is SOMA?
 A: SOMA is SocialMate's autonomous AI content system. It learns your brand voice through a 40-question interview, ingests your source documents, and generates a full week of platform-native posts on an automated schedule. SOMA is included with Pro and Agency in Safe mode, with Autopilot (+$10/month) and Full Send (+$20/month) as add-ons. It is not on the free plan.
 
 Q: What is Enki?
-A: Enki is a separate AI trading research project by Gilgamesh Enterprise LLC. It is not a SocialMate feature and is not part of any SocialMate plan. It was wound down as a public SocialMate product in July 2026; socialmate.studio/enki is now a waitlist page while it moves to its own standalone product. SocialMate itself is a social media scheduling and content platform.
+A: Enki is a separate AI trading research project by Gilgamesh Enterprise LLC. It is not a SocialMate feature and is not part of any SocialMate plan. It was wound down as a public SocialMate product in July 2026, and socialmate.studio/enki no longer exists. SocialMate itself is a social media scheduling and content platform.
 
 Q: Who built SocialMate?
 A: Joshua Bostic, a solo bootstrapped founder from Indiana. He started SocialMate in March 2026 while working a deli job and now builds it nights and weekends around tree service work, using AI coding tools (Claude Code). The company is Gilgamesh Enterprise LLC, a Wyoming LLC. SocialMate launched March 26, 2026.
@@ -884,7 +883,6 @@ Full comparison hub: https://socialmate.studio/vs
 - SOMA: https://socialmate.studio/soma
 - SOMA Voice DNA: https://socialmate.studio/soma/voice
 - Agents Hub: https://socialmate.studio/agents
-- Enki (separate product — waitlist only, not a SocialMate feature): https://socialmate.studio/enki
 - Creator Hub: https://socialmate.studio/monetize/hub
 - HESTIA Community: https://socialmate.studio/community
 - Achievements: https://socialmate.studio/achievements
