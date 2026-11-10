@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { track } from '@/lib/analytics'
+import { tiktokChunkRanges } from '@/lib/tiktok-chunks'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -1242,22 +1243,28 @@ export default function TikTokStudioClient() {
         throw new Error(initData.error || 'Failed to initialize TikTok upload')
       }
       const { upload_url, publish_id, open_id, full_caption } = initData
+      // The pieces init-upload told TikTok to expect (lib/tiktok-chunks.ts).
+      const plan = {
+        chunk_size:        Number(initData.chunk_size) || uploadBlob.size,
+        total_chunk_count: Number(initData.total_chunk_count) || 1,
+      }
 
-      // Step 2: PUT original file directly to TikTok's upload URL
+      // Step 2: PUT the file to TikTok's upload URL, piece by piece, in order.
       stage = 'upload'
-      const end = uploadBlob.size - 1
-      const tikPutRes = await fetch(upload_url, {
-        method:  'PUT',
-        body:    uploadBlob,
-        headers: {
-          'Content-Type':   mimeType,
-          'Content-Range':  `bytes 0-${end}/${uploadBlob.size}`,
-          'Content-Length': String(uploadBlob.size),
-        },
-      })
-      if (!tikPutRes.ok) {
-        const errText = await tikPutRes.text().catch(() => '')
-        throw new Error(`TikTok upload failed (${tikPutRes.status})${errText ? ': ' + errText.slice(0, 200) : ''}`)
+      for (const { start, end } of tiktokChunkRanges(uploadBlob.size, plan)) {
+        const tikPutRes = await fetch(upload_url, {
+          method:  'PUT',
+          body:    uploadBlob.slice(start, end + 1),
+          headers: {
+            'Content-Type':   mimeType,
+            'Content-Range':  `bytes ${start}-${end}/${uploadBlob.size}`,
+            'Content-Length': String(end - start + 1),
+          },
+        })
+        if (!tikPutRes.ok) {
+          const errText = await tikPutRes.text().catch(() => '')
+          throw new Error(`TikTok upload failed (${tikPutRes.status})${errText ? ': ' + errText.slice(0, 200) : ''}`)
+        }
       }
 
       setUploading(false)
@@ -1340,7 +1347,9 @@ export default function TikTokStudioClient() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
       setPostError(msg)
-      track('tiktok_post_failed', { mode, stage, ...(tiktokCode && { code: tiktokCode }) })
+      // The message too: on Nov 9 a new user failed at init and then at upload,
+      // and the funnel could only say which step, never why.
+      track('tiktok_post_failed', { mode, stage, detail: msg.slice(0, 140), ...(tiktokCode && { code: tiktokCode }) })
     } finally {
       setExporting(false)
       setUploading(false)
