@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
 import { buildIrisEmailHtml as buildHtml } from '@/lib/iris-email'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
@@ -48,15 +49,25 @@ export async function POST(req: Request) {
   // Fetch all opted-in user IDs. Opted in BY DEFAULT: include true AND null —
   // .eq('iris_opt_in', true) silently drops legacy rows whose flag was never set.
   // Only an explicit false opts out.
-  const { data: optins } = await admin
-    .from('user_settings')
-    .select('user_id')
-    .or('iris_opt_in.eq.true,iris_opt_in.is.null')
+  //
+  // Both reads page (lib/admin-metrics.ts). One request returns at most 1,000
+  // rows, so an unpaged read would quietly stop mailing everyone past that.
+  let optins: { user_id: string }[]
+  let authUsers: Awaited<ReturnType<typeof listAllAuthUsers>>
+  try {
+    ;[optins, authUsers] = await Promise.all([
+      selectAll<{ user_id: string }>('user_settings', () => oldestFirst(admin
+        .from('user_settings')
+        .select('user_id')
+        .or('iris_opt_in.eq.true,iris_opt_in.is.null'))),
+      listAllAuthUsers(admin),
+    ])
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+  }
 
-  const optedInIds = new Set((optins ?? []).map((r: { user_id: string }) => r.user_id))
+  const optedInIds = new Set(optins.map(r => r.user_id))
 
-  // Fetch emails from auth
-  const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
   const emails = authUsers
     .filter(u => u.email && optedInIds.has(u.id))
     .map(u => u.email!)

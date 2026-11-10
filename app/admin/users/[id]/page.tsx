@@ -21,6 +21,7 @@ type Detail = {
   workspaces: { id: string; name: string; plan: string | null; is_personal: boolean }[]
   posts: {
     total: number; truncated: boolean
+    published?: number; publishedEvents?: number
     byStatus: Record<string, number>
     byPlatform: Record<string, { published: number; failed: number; scheduled: number }>
     recent: { id: string; status: string; platforms: string[] | null; excerpt: string; scheduled_at: string | null; published_at: string | null; created_at: string }[]
@@ -95,7 +96,8 @@ export default function AdminUserDetail({ params }: { params: Promise<{ id: stri
   )
 
   const { user, plan, activity, attribution, credits, accounts, workspaces, posts, funnel, survey, warnings } = data
-  const published = posts.byStatus.published ?? 0
+  // Every post that reached a platform, partial included (lib/admin-metrics.ts).
+  const published = posts.published ?? (posts.byStatus.published ?? 0) + (posts.byStatus.partial ?? 0)
 
   return (
     <div className="min-h-dvh bg-theme p-6 md:p-8">
@@ -219,6 +221,11 @@ export default function AdminUserDetail({ params }: { params: Promise<{ id: stri
                 {Object.entries(posts.byPlatform).map(([p, st]) => (
                   <Row key={p} label={p} value={`${st.published} pub · ${st.failed} fail · ${st.scheduled} sched`} />
                 ))}
+                {(posts.publishedEvents ?? 0) > published && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    {posts.publishedEvents} publishes recorded, so {(posts.publishedEvents ?? 0) - published} published post{(posts.publishedEvents ?? 0) - published === 1 ? ' was' : 's were'} deleted later.
+                  </p>
+                )}
               </>
             )}
           </Card>

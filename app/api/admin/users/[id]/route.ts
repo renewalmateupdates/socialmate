@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
-import { resolveWorkspacePlan } from '@/lib/plan'
+import { normalizePlan, resolveWorkspacePlan } from '@/lib/plan'
+import { PUBLISHED_EVENT, oldestFirst, platformOutcome, postWentOut, selectAll } from '@/lib/admin-metrics'
 
 /**
  * Everything known about one user, in one response.
@@ -20,7 +21,17 @@ import { resolveWorkspacePlan } from '@/lib/plan'
  * Every query destructures `error` and reports it rather than rendering a zero.
  * A silent empty result on an admin diagnostic page is worse than no page, in
  * that it actively argues the user did nothing.
+ *
+ * Posts and events are read in full (lib/admin-metrics.ts). They used to ask
+ * for 2,000 rows, get at most 1,000, and flag truncation only at 2,000, so
+ * the busiest account showed 1,000 of its 1,735 posts with no warning.
  */
+
+type PostRow = {
+  id: string; status: string | null; platforms: string[] | null; platform_post_ids: Record<string, unknown> | null
+  platform_errors: Record<string, unknown> | null; scheduled_at: string | null; published_at: string | null; created_at: string | null
+}
+type EventRow = { event_type: string; metadata: Record<string, unknown> | null; created_at: string }
 
 type Warned = { table: string; message: string }
 
@@ -46,7 +57,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   }
   const u = authUser.user
 
-  const [settingsRes, profileRes, accountsRes, postsRes, eventsRes, workspacesRes, surveyRes] =
+  // Read in full, or reported. A failed read here becomes a warning on the
+  // page and an empty list, never a silent zero.
+  const all = async <T,>(table: string, read: () => Promise<T[]>): Promise<T[]> => {
+    try { return await read() } catch (e) {
+      note(table, { message: e instanceof Error ? e.message : String(e) })
+      return []
+    }
+  }
+
+  const [settingsRes, profileRes, accountsRes, posts, events, recentRes, workspacesRes, surveyRes] =
     await Promise.all([
       // One string literal, deliberately. Supabase parses the select list at
       // the type level, and a `+`-concatenated expression is not a literal
@@ -56,12 +76,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       db.from('connected_accounts')
         .select('id, platform, account_name, workspace_id, is_active, created_at')
         .eq('user_id', id).order('created_at', { ascending: false }),
-      db.from('posts')
-        .select('id, status, platforms, content, scheduled_at, published_at, created_at, platform_errors')
-        .eq('user_id', id).order('created_at', { ascending: false }).limit(2000),
-      db.from('usage_events')
+      all('posts', () => selectAll<PostRow>('posts', () => oldestFirst(db.from('posts')
+        .select('id, status, platforms, platform_post_ids, platform_errors, scheduled_at, published_at, created_at')
+        .eq('user_id', id)))),
+      all('usage_events', () => selectAll<EventRow>('usage_events', () => oldestFirst(db.from('usage_events')
         .select('event_type, metadata, created_at')
-        .eq('user_id', id).order('created_at', { ascending: true }).limit(2000),
+        .eq('user_id', id)))),
+      // Only the newest few need their text.
+      db.from('posts')
+        .select('id, status, platforms, content, scheduled_at, published_at, created_at')
+        .eq('user_id', id).order('created_at', { ascending: false }).limit(15),
       db.from('workspaces')
         .select('id, name, plan, is_personal, created_at').eq('owner_id', id),
       db.from('user_survey_responses')
@@ -71,16 +95,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   note('user_settings', settingsRes.error)
   note('profiles', profileRes.error)
   note('connected_accounts', accountsRes.error)
-  note('posts', postsRes.error)
-  note('usage_events', eventsRes.error)
+  note('posts (recent)', recentRes.error)
   note('workspaces', workspacesRes.error)
   note('user_survey_responses', surveyRes.error)
 
   const settings   = settingsRes.data
   const profile    = profileRes.data
   const accounts   = accountsRes.data ?? []
-  const posts      = postsRes.data ?? []
-  const events     = eventsRes.data ?? []
+  const recent     = recentRes.data ?? []
   const workspaces = workspacesRes.data ?? []
 
   // The plan as the app itself enforces it. Reading either table directly is
@@ -95,19 +117,22 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   for (const p of posts) {
     const s = String(p.status ?? 'unknown')
     byStatus[s] = (byStatus[s] ?? 0) + 1
-    const platforms = Array.isArray(p.platforms) ? (p.platforms as string[]) : []
+    const platforms = Array.isArray(p.platforms) ? p.platforms : []
     for (const plat of platforms) {
       byPlatform[plat] ??= { published: 0, failed: 0, scheduled: 0 }
-      if (s === 'published') byPlatform[plat].published++
-      else if (s === 'failed' || s === 'partial') byPlatform[plat].failed++
+      // A partial post reached only the platforms it has a post id for.
+      const outcome = platformOutcome(p, plat)
+      if (outcome === 'published') byPlatform[plat].published++
+      else if (outcome === 'failed') byPlatform[plat].failed++
       else if (s === 'scheduled') byPlatform[plat].scheduled++
     }
   }
 
   // Failures with their real reason attached, so "they never published" can be
-  // told apart from "publishing failed for them every time".
+  // told apart from "publishing failed for them every time". Newest first.
   const failures = posts
     .filter(p => (p.status === 'failed' || p.status === 'partial') && p.platform_errors)
+    .reverse()
     .slice(0, 25)
     .map(p => ({
       id: p.id,
@@ -133,7 +158,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       personal_workspace_plan: personal?.plan ?? null,
       // Two tables holding the same fact is the bug class that has cost this
       // project three separate outages. Say so loudly rather than picking one.
-      disagrees: !!settings?.plan && !!personal?.plan && settings.plan !== personal.plan,
+      disagrees: !!settings?.plan && !!personal?.plan && normalizePlan(settings.plan) !== normalizePlan(personal.plan),
       stripe_customer_id: settings?.stripe_customer_id ?? null,
       stripe_subscription_id: settings?.stripe_subscription_id ?? null,
     },
@@ -167,12 +192,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     workspaces,
     posts: {
       total: posts.length,
-      // The select caps at 2000. Say so rather than letting a prolific account
-      // silently report a smaller number than it has.
-      truncated: posts.length >= 2000,
+      // Read in full now; kept so the page's type does not change.
+      truncated: false,
+      // Every post that reached at least one platform, partial included, plus
+      // publishes recorded for posts deleted since (lib/admin-metrics.ts).
+      published: posts.filter(postWentOut).length,
+      publishedEvents: events.filter(e => e.event_type === PUBLISHED_EVENT).length,
       byStatus,
       byPlatform,
-      recent: posts.slice(0, 15).map(p => ({
+      recent: recent.map(p => ({
         id: p.id,
         status: p.status,
         platforms: p.platforms,
@@ -185,7 +213,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     },
     funnel: {
       total: events.length,
-      truncated: events.length >= 2000,
+      truncated: false,
       // Chronological, with the funnel_ prefix stripped. This is the view that
       // makes a stuck session legible: 1 -> 2 -> 3 -> back to 2 -> gone.
       timeline: events.map(e => ({

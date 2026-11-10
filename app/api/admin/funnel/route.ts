@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { internalIdsFrom } from '@/lib/internal-accounts'
+import { loadAccountFacts, oldestFirst, selectAll } from '@/lib/admin-metrics'
 
 /**
  * The funnel, counted.
@@ -21,27 +21,11 @@ import { internalIdsFrom } from '@/lib/internal-accounts'
  */
 
 /**
- * PostgREST silently caps any response at 1000 rows. posts passed that long ago
- * (1,600+ published alone), so an unpaged `select` returned an arbitrary 1000
- * and "who has published" depended on which 1000 the database happened to pick.
- * The first external publisher's post could simply be missing. Page through.
+ * PostgREST silently caps any response at 1000 rows. Every read below goes
+ * through lib/admin-metrics.ts, which pages. Until Nov 10, 2026 the recorded
+ * steps did not: the 30-day window held 1,014 funnel events and the 90-day
+ * one 2,500, and the page showed the newest 1,000 of either.
  */
-async function fetchAllPosts(db: ReturnType<typeof getSupabaseAdmin>) {
-  const PAGE = 1000
-  const rows: { user_id: string; status: string; published_at: string | null }[] = []
-  for (let from = 0; from < 100_000; from += PAGE) {
-    const { data, error } = await db
-      .from('posts')
-      .select('user_id, status, published_at')
-      .order('created_at', { ascending: true, nullsFirst: true })
-      .order('id', { ascending: true })
-      .range(from, from + PAGE - 1)
-    if (error) return { data: null, error }
-    rows.push(...(data ?? []))
-    if ((data?.length ?? 0) < PAGE) break
-  }
-  return { data: rows, error: null }
-}
 
 type Row = { user_id: string; event_type: string; metadata: Record<string, unknown> | null; created_at: string }
 
@@ -54,69 +38,60 @@ export async function GET(req: NextRequest) {
   const db = getSupabaseAdmin()
 
   // ── Ground truth ─────────────────────────────────────────────────────────
-  const [profilesRes, accountsRes, postsRes, workspacesRes] = await Promise.all([
-    db.from('profiles').select('id, created_at, email'),
-    db.from('connected_accounts').select('user_id, platform'),
-    fetchAllPosts(db),
-    db.from('workspaces').select('owner_id, plan').neq('plan', 'free'),
-  ])
-
-  for (const [name, res] of Object.entries({
-    profiles: profilesRes, connected_accounts: accountsRes, posts: postsRes, workspaces: workspacesRes,
-  })) {
-    // Never discard a Supabase error. A query naming a column that does not
-    // exist returns null data, and the whole page would just read zero.
-    if (res.error) {
-      console.error(`[admin/funnel] ${name} query failed:`, res.error.message)
-      return NextResponse.json({ error: `${name}: ${res.error.message}` }, { status: 500 })
-    }
-  }
-
-  // Exclude every account of ours, not just the admin one.
   //
-  // This previously filtered only `admin.id`, which left four other internal
-  // accounts in the numbers — including the one that made "1 user has ever
-  // published" true. With all five out, no external user has ever published.
-  const allProfiles = profilesRes.data ?? []
-  const internalIds = internalIdsFrom(allProfiles)
+  // Accounts come from auth, not profiles: two real accounts have no profile
+  // row, so this page said 255 customers while /admin/users said 257.
+  // "Connected" and "published" mean ever, from the rows and the events that
+  // outlive them, the same as /admin/users and /admin/overview.
+  type AccountRow = { user_id: string; platform: string }
+  const loaded = await Promise.all([
+    loadAccountFacts(db),
+    selectAll<AccountRow>('connected_accounts', () => oldestFirst(db.from('connected_accounts').select('user_id, platform'))),
+    selectAll<{ owner_id: string }>('workspaces', () => oldestFirst(db.from('workspaces').select('owner_id').neq('plan', 'free'))),
+  ]).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
+  if (loaded instanceof Error) {
+    // Never render a failed read as zero. A query naming a column that does
+    // not exist returns null data, and the whole page would just read zero.
+    console.error('[admin/funnel] ground truth failed:', loaded.message)
+    return NextResponse.json({ error: loaded.message }, { status: 500 })
+  }
+  const [facts, accounts, paidWorkspaces] = loaded
+
+  // Exclude every account of ours, not just the admin one
+  // (lib/internal-accounts.ts).
+  const internalIds = new Set(facts.internalIds)
   internalIds.add(admin.id)
-  const profiles = allProfiles.filter(p => !internalIds.has(p.id))
-  const accounts = accountsRes.data ?? []
-  const posts    = postsRes.data ?? []
+  const customers = facts.users.filter(u => !internalIds.has(u.id))
+  const payingOwners = new Set(paidWorkspaces.map(w => w.owner_id))
 
-  const connectedUsers = new Set(accounts.map(a => a.user_id))
-  const publishedUsers = new Set(
-    posts.filter(p => p.status === 'published' || p.published_at).map(p => p.user_id)
-  )
-  const payingOwners = new Set((workspacesRes.data ?? []).map(w => w.owner_id))
+  const totalAccounts = customers.length
+  const connected     = customers.filter(u => facts.connected.has(u.id)).length
+  const published     = customers.filter(u => facts.published.has(u.id)).length
+  const paying        = customers.filter(u => payingOwners.has(u.id)).length
+  // Counted apart so the page can say where those people came from.
+  const connectedEarlier = customers.filter(u => facts.connectedEarlier.has(u.id)).length
+  const publishedDeleted = customers.filter(u => facts.publishedDeleted.has(u.id)).length
 
-  const totalAccounts = profiles.length
-  const connected     = profiles.filter(p => connectedUsers.has(p.id)).length
-  const published     = profiles.filter(p => publishedUsers.has(p.id)).length
-  const paying        = profiles.filter(p => payingOwners.has(p.id)).length
-
-  // Platform popularity among people who actually got through. Ground truth
-  // above already excludes internal ids from `profiles`, but `accounts` itself
-  // was never filtered, so this used to count every connection any of our own
-  // accounts made too — disagreeing with /admin/overview's platformDist, which
-  // does exclude them, for the same conceptual "connected accounts by
-  // platform" number on a different page.
+  // Platform popularity among people who actually got through. `accounts` is
+  // every connection, ours included, so filter it the same way: this used to
+  // count our own connections too and disagreed with /admin/overview's
+  // platformDist for the same "connected accounts by platform" number.
   const externalAccounts = accounts.filter(a => !internalIds.has(a.user_id))
   const platformCounts: Record<string, number> = {}
   for (const a of externalAccounts) platformCounts[a.platform] = (platformCounts[a.platform] ?? 0) + 1
 
   // ── Recorded steps ───────────────────────────────────────────────────────
-  const { data: eventRows, error: eventErr } = await db
-    .from('usage_events')
-    .select('user_id, event_type, metadata, created_at')
-    .like('event_type', 'funnel_%')
-    .gte('created_at', since)
-    .order('created_at', { ascending: false })
-    .limit(20000)
-
-  if (eventErr) {
-    console.error('[admin/funnel] usage_events query failed:', eventErr.message)
-    return NextResponse.json({ error: eventErr.message }, { status: 500 })
+  let eventRows: Row[]
+  try {
+    eventRows = await selectAll<Row>('usage_events', () => oldestFirst(db
+      .from('usage_events')
+      .select('user_id, event_type, metadata, created_at')
+      .like('event_type', 'funnel_%')
+      .gte('created_at', since)))
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.error('[admin/funnel] usage_events query failed:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 
   // Same exclusion as everything above. Without it, our own testing shows up
@@ -124,7 +99,7 @@ export async function GET(req: NextRequest) {
   // repeatedly while testing a feature was recording as "1 user published,
   // 143 times" in the last 30 days on this exact page, directly under a Ground
   // Truth panel reading "Published a post: 0" for the same window.
-  const events = (eventRows ?? []).filter(e => !internalIds.has(e.user_id)) as Row[]
+  const events = eventRows.filter(e => !internalIds.has(e.user_id))
 
   // Distinct users per step, not raw fires. "How many people" is the question;
   // raw counts just reward whoever refreshed the most.
@@ -203,16 +178,26 @@ export async function GET(req: NextRequest) {
   // Why posts are failing, per platform, in plain words. A Discord permission
   // problem sat unseen until one user emailed because nothing aggregated
   // platform_errors. Numbers and ids are stripped so the same reason groups.
-  const { data: failedRows, error: failedErr } = await db
-    .from('posts')
-    .select('user_id, platforms, platform_errors, created_at')
-    .in('status', ['failed', 'partial'])
-    .gte('created_at', since)
-    .limit(5000)
-  if (failedErr) console.warn('[admin/funnel] failed-posts query failed (non-fatal):', failedErr.message)
+  //
+  // Windowed on updated_at, when the post failed, like /admin/hq and the
+  // failure log. created_at missed a post scheduled weeks ahead that failed
+  // today.
+  type FailedRow = { user_id: string; platforms: string[] | null; platform_errors: Record<string, unknown> | null; status: string }
+  let failedRows: FailedRow[] = []
+  let publishFailuresError: string | null = null
+  try {
+    failedRows = await selectAll<FailedRow>('posts (failed)', () => oldestFirst(db
+      .from('posts')
+      .select('user_id, status, platforms, platform_errors')
+      .in('status', ['failed', 'partial'])
+      .gte('updated_at', since)))
+  } catch (e) {
+    publishFailuresError = e instanceof Error ? e.message : String(e)
+    console.warn('[admin/funnel] failed-posts query failed (non-fatal):', publishFailuresError)
+  }
 
   const failureGroups: Record<string, { platform: string; reason: string; posts: number; users: Set<string> }> = {}
-  for (const row of failedRows ?? []) {
+  for (const row of failedRows) {
     if (internalIds.has(row.user_id)) continue
     const errs = (row.platform_errors ?? {}) as Record<string, unknown>
     // Rows written before failures were saved on Post Now have no reason.
@@ -234,6 +219,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     publishFailures,
+    publishFailuresError,
     signupSources:  ranked(sourceUsers),
     signupLandings: ranked(landingUsers),
     signupsBeforeSourceTracking,
@@ -247,7 +233,12 @@ export async function GET(req: NextRequest) {
       published,
       paying,
       neverConnected: totalAccounts - connected,
-      connectedNeverPublished: connected - published,
+      // People who published without a connection today are still published,
+      // so count the connected ones who did not publish, never a subtraction
+      // that can go negative.
+      connectedNeverPublished: customers.filter(u => facts.connected.has(u.id) && !facts.published.has(u.id)).length,
+      connectedEarlier,
+      publishedDeleted,
       // Stated explicitly so nobody re-derives an activation rate that quietly
       // counts our own accounts as customers.
       internalExcluded: internalIds.size,

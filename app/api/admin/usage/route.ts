@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
+import { internalIdsOf, listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
 
 // Which AI tools and agents people actually use.
 //
@@ -12,10 +13,16 @@ import { requireAdmin } from '@/lib/admin-auth'
 //
 // Reads with the service-role client on purpose: usage_events RLS scopes SELECT
 // to the row's own user, which is right for users and useless for an admin view.
+//
+// Customers only, like every other admin page; our own runs are counted apart.
+// Until Nov 10, 2026 failed posts were windowed on published_at, which a post
+// that failed everywhere never gets, so the count only ever held partial posts.
 
 const WINDOW_DAYS = 30
 
 type ToolRow = { tool: string; runs: number; credits: number; users: number }
+type EventRow = { user_id: string; metadata: Record<string, unknown> | null }
+type FailedRow = { user_id: string; platform_errors: Record<string, string> | null; status: string }
 
 export async function GET() {
   const user = await requireAdmin()
@@ -24,37 +31,44 @@ export async function GET() {
   const db = getSupabaseAdmin()
   const since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString()
 
-  const [aiRes, agentRes, failRes, feedbackRes] = await Promise.allSettled([
-    db.from('usage_events')
-      .select('user_id, metadata, created_at')
+  const loaded = await Promise.all([
+    listAllAuthUsers(db),
+    selectAll<EventRow>('usage_events (ai_credit)', () => oldestFirst(db.from('usage_events')
+      .select('user_id, metadata')
       .eq('event_type', 'ai_credit')
-      .gte('created_at', since)
-      .limit(10000),
-    db.from('usage_events')
-      .select('user_id, metadata, created_at')
+      .gte('created_at', since))),
+    selectAll<EventRow>('usage_events (agent_run)', () => oldestFirst(db.from('usage_events')
+      .select('user_id, metadata')
       .eq('event_type', 'agent_run')
-      .gte('created_at', since)
-      .limit(10000),
-    db.from('posts')
-      .select('id, platform_errors, status, published_at')
+      .gte('created_at', since))),
+    // When the post failed, not when it published: a failed post has no
+    // published_at at all.
+    selectAll<FailedRow>('posts (failed)', () => oldestFirst(db.from('posts')
+      .select('user_id, platform_errors, status')
       .in('status', ['failed', 'partial'])
-      .gte('published_at', since)
-      .limit(2000),
+      .gte('updated_at', since))),
     db.from('feedback')
-      .select('id, created_at')
+      .select('id', { count: 'exact', head: true })
       .gte('created_at', since)
-      .limit(2000),
-  ])
+      .then(({ count, error }) => {
+        if (error) throw new Error(`feedback: ${error.message}`)
+        return count ?? 0
+      }),
+  ]).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
+  if (loaded instanceof Error) {
+    console.error('[admin/usage]', loaded.message)
+    return NextResponse.json({ error: loaded.message }, { status: 500 })
+  }
+  const [users, allAi, allAgents, allFailed, feedback] = loaded
 
-  const rows = <T,>(r: PromiseSettledResult<{ data: T[] | null }>): T[] =>
-    r.status === 'fulfilled' ? (r.value.data ?? []) : []
+  const internalIds = internalIdsOf(users)
+  internalIds.add(user.id)
+  const ours = <T extends { user_id: string }>(rows: T[]) => rows.filter(r => internalIds.has(r.user_id))
+  const theirs = <T extends { user_id: string }>(rows: T[]) => rows.filter(r => !internalIds.has(r.user_id))
 
   // Aggregate in JS rather than SQL: the volume is small, and it keeps this
   // endpoint working without adding a view or an RPC that has to be migrated.
-  const tally = (
-    events: { user_id: string; metadata: Record<string, unknown> | null }[],
-    key: string,
-  ): ToolRow[] => {
+  const tally = (events: EventRow[], key: string): ToolRow[] => {
     const map = new Map<string, { runs: number; credits: number; users: Set<string> }>()
     for (const e of events) {
       const name = String(e.metadata?.[key] ?? 'unknown')
@@ -69,10 +83,14 @@ export async function GET() {
       .map(([tool, v]) => ({ tool, runs: v.runs, credits: v.credits, users: v.users.size }))
       .sort((a, b) => b.runs - a.runs)
   }
+  const credits = (events: EventRow[]) => events.reduce((s, e) => {
+    const cost = Number(e.metadata?.cost ?? 0)
+    return s + (Number.isFinite(cost) ? cost : 0)
+  }, 0)
 
-  const aiEvents    = rows<{ user_id: string; metadata: Record<string, unknown> | null }>(aiRes as never)
-  const agentEvents = rows<{ user_id: string; metadata: Record<string, unknown> | null }>(agentRes as never)
-  const failed      = rows<{ id: string; platform_errors: Record<string, string> | null; status: string }>(failRes as never)
+  const aiEvents    = theirs(allAi)
+  const agentEvents = theirs(allAgents)
+  const failed      = theirs(allFailed)
 
   // Group failures by the error text platforms actually returned, so the top
   // row is the thing worth fixing rather than a count of sad posts.
@@ -94,10 +112,16 @@ export async function GET() {
     agents:     tally(agentEvents, 'agent'),
     totals: {
       aiRuns:      aiEvents.length,
-      aiCredits:   aiEvents.reduce((s, e) => s + Number(e.metadata?.cost ?? 0), 0),
+      aiCredits:   credits(aiEvents),
       agentRuns:   agentEvents.length,
       failedPosts: failed.length,
-      feedback:    rows<{ id: string }>(feedbackRes as never).length,
+      feedback,
+    },
+    // Our own accounts' activity in the same window, never mixed in above.
+    ours: {
+      aiRuns:      ours(allAi).length,
+      agentRuns:   ours(allAgents).length,
+      failedPosts: ours(allFailed).length,
     },
     topErrors: Array.from(errorMap.values()).sort((a, b) => b.count - a.count).slice(0, 15),
   })

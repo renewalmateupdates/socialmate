@@ -2,7 +2,14 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
-import { internalIdsFrom } from '@/lib/internal-accounts'
+import {
+  internalIdsOf, listAllAuthUsers, oldestFirst, platformOutcome, postWentOut, postWentOutSince, selectAll,
+} from '@/lib/admin-metrics'
+
+type PostRow = {
+  user_id: string; platforms: string[] | null; status: string | null
+  published_at: string | null; platform_post_ids: Record<string, unknown> | null
+}
 
 export async function GET() {
   const admin = await requireAdmin()
@@ -10,93 +17,65 @@ export async function GET() {
 
   const db = getSupabaseAdmin()
 
-  const now = new Date()
-  const todayStart = new Date(now); todayStart.setUTCHours(0, 0, 0, 0)
-  const weekStart  = new Date(now); weekStart.setUTCDate(now.getUTCDate() - 7); weekStart.setUTCHours(0, 0, 0, 0)
-  const monthStart = new Date(now); monthStart.setUTCDate(1); monthStart.setUTCHours(0, 0, 0, 0)
+  // Customers only: our own automation volume is not user activity. Every
+  // post is read, 1,000 at a time (lib/admin-metrics.ts); this used to ask for
+  // 5,000 and silently get the first 1,000.
+  const loaded = await (async () => {
+    const users = await listAllAuthUsers(db)
+    const internalIds = internalIdsOf(users)
+    internalIds.add(admin.id)
+    const notInternal = `(${Array.from(internalIds).join(',')})`
+    const posts = await selectAll<PostRow>('posts', () => oldestFirst(db
+      .from('posts')
+      .select('user_id, platforms, status, published_at, platform_post_ids')
+      .in('status', ['published', 'partial', 'failed'])
+      .not('user_id', 'in', notInternal)))
+    return { users, posts }
+  })().catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
+  if (loaded instanceof Error) {
+    console.error('[admin/platform-stats]', loaded.message)
+    return NextResponse.json({ error: loaded.message }, { status: 500 })
+  }
+  const { users, posts } = loaded
 
-  // Unlike every other admin dashboard, this route had no internal-account
-  // exclusion at all — socialmatehq's own SOMA/HERMES automation volume was
-  // counted as real user activity in every number below.
-  const { data: allProfiles, error: profilesError } = await db.from('profiles').select('id, email')
-  if (profilesError) console.warn('[admin/platform-stats] profiles lookup failed:', profilesError.message)
-  const internalIds = internalIdsFrom(allProfiles ?? [])
-  internalIds.add(admin.id)
-  const notInternal = `(${Array.from(internalIds).join(',')})`
-
-  // Fetch all published/partial/failed posts with platforms, user_id, and
-  // published_at. Time-range counts key off published_at (when it went live),
-  // not created_at: scheduled/SOMA posts are created days earlier and would
-  // undercount otherwise. 'partial' (published to some but not all selected
-  // platforms) used to be excluded from this fetch entirely — not just from a
-  // derived count — so a post that succeeded on 2 of 3 platforms vanished from
-  // every number here, platform breakdown included, even for the platforms it
-  // actually reached.
-  const { data: posts, error } = await db
-    .from('posts')
-    .select('user_id, platforms, status, created_at, published_at')
-    .in('status', ['published', 'partial', 'failed'])
-    .not('user_id', 'in', notInternal)
-    .order('created_at', { ascending: false })
-    .limit(5000)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  const allPosts = posts ?? []
-
-  // Per-platform aggregation
+  // Per platform. A partial post reached only the platforms it has a post id
+  // for: it used to count as a success on every platform it named.
   const platformStats: Record<string, { total: number; failed: number }> = {}
-  for (const post of allPosts) {
-    const platforms: string[] = Array.isArray(post.platforms) ? post.platforms : []
-    for (const p of platforms) {
-      if (!platformStats[p]) platformStats[p] = { total: 0, failed: 0 }
+  for (const post of posts) {
+    for (const p of Array.isArray(post.platforms) ? post.platforms : []) {
+      const outcome = platformOutcome(post, p)
+      if (outcome === 'other') continue
+      platformStats[p] ??= { total: 0, failed: 0 }
       platformStats[p].total++
-      if (post.status === 'failed') platformStats[p].failed++
+      if (outcome === 'failed') platformStats[p].failed++
     }
   }
 
-  // Time-range counts, keyed off published_at. Includes 'partial' — a post
-  // that reached some but not all selected platforms is still a real publish,
-  // not a no-op, and used to be invisible here entirely (see the fetch above).
-  const published = allPosts.filter(p => p.status === 'published' || p.status === 'partial')
-  const publishedOn = (p: { published_at: string | null }, since: Date) =>
-    !!p.published_at && new Date(p.published_at) >= since
-  const postsToday = published.filter(p => publishedOn(p, todayStart)).length
-  const postsWeek  = published.filter(p => publishedOn(p, weekStart)).length
-  const postsMonth = published.filter(p => publishedOn(p, monthStart)).length
+  // Rolling windows, keyed off published_at (when it went live, not when it
+  // was written). Calendar "today" and "this month" were UTC, which starts
+  // the day at 7 or 8 PM the evening before in Indiana.
+  const ago = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString()
+  const published = posts.filter(postWentOut)
+  const posts24h = published.filter(p => postWentOutSince(p, ago(1))).length
+  const posts7d  = published.filter(p => postWentOutSince(p, ago(7))).length
+  const posts30d = published.filter(p => postWentOutSince(p, ago(30))).length
 
-  // Top posting users
+  // Top posting customers.
   const userCount: Record<string, number> = {}
-  for (const p of published) {
-    userCount[p.user_id] = (userCount[p.user_id] || 0) + 1
-  }
-  const topUserIds = Object.entries(userCount)
+  for (const p of published) userCount[p.user_id] = (userCount[p.user_id] || 0) + 1
+  const emailMap = new Map(users.map(u => [u.id, u.email ?? '']))
+  const topUsers = Object.entries(userCount)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
-    .map(e => e[0])
-
-  // Fetch emails for top users from auth.users
-  const emailMap: Record<string, string> = {}
-  if (topUserIds.length > 0) {
-    const { data: authData } = await db.auth.admin.listUsers({ perPage: 1000 })
-    for (const u of authData?.users ?? []) {
-      if (topUserIds.includes(u.id) && u.email) emailMap[u.id] = u.email
-    }
-  }
-
-  const topUsers = topUserIds.map(uid => ({
-    user_id: uid,
-    email: emailMap[uid] || uid,
-    post_count: userCount[uid],
-  }))
+    .map(([uid, count]) => ({ user_id: uid, email: emailMap.get(uid) || uid, post_count: count }))
 
   return NextResponse.json({
-    platform_stats: platformStats,
-    posts_today: postsToday,
-    posts_week:  postsWeek,
-    posts_month: postsMonth,
-    top_users:   topUsers,
+    platform_stats:  platformStats,
+    posts_24h:       posts24h,
+    posts_7d:        posts7d,
+    posts_30d:       posts30d,
+    top_users:       topUsers,
     total_published: published.length,
-    total_failed:    allPosts.filter(p => p.status === 'failed').length,
+    total_failed:    posts.filter(p => p.status === 'failed').length,
   })
 }

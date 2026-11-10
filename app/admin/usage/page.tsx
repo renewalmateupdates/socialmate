@@ -10,6 +10,8 @@ interface UsageData {
   aiTools: ToolRow[]
   agents: ToolRow[]
   totals: { aiRuns: number; aiCredits: number; agentRuns: number; failedPosts: number; feedback: number }
+  // Our own accounts, counted apart from the customer numbers above.
+  ours?: { aiRuns: number; agentRuns: number; failedPosts: number }
   topErrors: ErrorRow[]
 }
 
@@ -92,7 +94,7 @@ export default function AdminUsagePage() {
         <div className="mb-10 flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber mb-2">
-              Last {data?.windowDays ?? 30} days
+              Last {data?.windowDays ?? 30} days · customers only
             </p>
             <h1 className="font-display text-4xl md:text-5xl font-semibold text-ink-high tracking-tight">
               Usage &amp; Errors
@@ -114,14 +116,15 @@ export default function AdminUsagePage() {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { label: 'AI runs',      value: t!.aiRuns,      tone: 'text-violet'   },
-                { label: 'Credits spent', value: t!.aiCredits,  tone: 'text-violet'   },
-                { label: 'Agent runs',   value: t!.agentRuns,   tone: 'text-amber'    },
-                { label: 'Failed posts', value: t!.failedPosts, tone: t!.failedPosts > 0 ? 'text-red-400' : 'text-jade' },
+                { label: 'AI runs',      value: t!.aiRuns,      tone: 'text-violet', ours: data.ours?.aiRuns },
+                { label: 'Credits spent', value: t!.aiCredits,  tone: 'text-violet', ours: undefined },
+                { label: 'Agent runs',   value: t!.agentRuns,   tone: 'text-amber',  ours: data.ours?.agentRuns },
+                { label: 'Failed posts', value: t!.failedPosts, tone: t!.failedPosts > 0 ? 'text-red-400' : 'text-jade', ours: data.ours?.failedPosts },
               ].map(c => (
                 <div key={c.label} className="rounded-2xl border border-edge bg-panel p-5">
                   <div className={`font-display text-4xl font-semibold tracking-tight mb-1 ${c.tone}`}>{c.value}</div>
                   <div className="text-sm font-medium text-ink-body">{c.label}</div>
+                  {!!c.ours && <div className="text-xs text-ink-faint mt-0.5">+{c.ours} ours, not counted</div>}
                 </div>
               ))}
             </div>
