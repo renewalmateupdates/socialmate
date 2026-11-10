@@ -12,7 +12,10 @@ function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: n
 interface PostFailure {
   id: string
   status: 'partial' | 'failed'
-  scheduled_at: string
+  // When it failed. Post Now failures have no scheduled_at.
+  failed_at: string
+  scheduled_at: string | null
+  internal?: boolean
   platforms: string[]
   succeeded: string
   failed: string
@@ -22,7 +25,9 @@ interface PostFailure {
 
 interface DiagnosticsResponse {
   since: string
+  // Every failure in the window; `posts` lists the newest of them.
   count: number
+  ours?: number
   error_summary: Record<string, Record<string, number>>
   posts: PostFailure[]
 }
@@ -113,7 +118,7 @@ export default function FailureLogPage() {
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition-all ${
                   days === d ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
                 }`}>
-                {d === 1 ? 'Today' : `${d}d`}
+                {d === 1 ? '24h' : `${d}d`}
               </button>
             ))}
           </div>
@@ -129,7 +134,7 @@ export default function FailureLogPage() {
         ) : !data || data.count === 0 ? (
           <div className="text-center py-24 bg-surface border border-theme rounded-2xl">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-emerald-500" strokeWidth={1.5} />
-            <p className="text-base font-bold text-gray-700 dark:text-gray-300 mb-2">No failures in the last {days} day{days !== 1 ? 's' : ''}</p>
+            <p className="text-base font-bold text-gray-700 dark:text-gray-300 mb-2">No failures in the last {days === 1 ? '24 hours' : `${days} days`}</p>
             <p className="text-sm text-gray-400">All posts published successfully.</p>
           </div>
         ) : (
@@ -182,7 +187,10 @@ export default function FailureLogPage() {
 
             {/* Post list */}
             <div className="text-xs text-gray-400 mb-3">
-              {filtered.length} failure{filtered.length !== 1 ? 's' : ''} (partial + full) — newest first
+              {data.count} failure{data.count !== 1 ? 's' : ''} in this window (partial + full)
+              {(data.ours ?? 0) > 0 && `, ${data.ours} on our own accounts`}
+              {data.posts.length < data.count && ` · listing the newest ${data.posts.length}`}
+              {platformFilter !== 'all' && ` · ${filtered.length} on ${platformFilter}`}
             </div>
             <div className="space-y-2">
               {filtered.map(post => (
@@ -195,6 +203,12 @@ export default function FailureLogPage() {
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[post.status]}`}>
                           {post.status}
                         </span>
+                        {post.internal && (
+                          <span title="One of our own accounts, not a customer"
+                            className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full font-semibold">
+                            ours
+                          </span>
+                        )}
                         {Object.keys(post.errors).map(pl => (
                           <span key={pl} className="text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
                             <PlatformGlyph id={pl} size={11} /> {pl} failed
@@ -211,8 +225,8 @@ export default function FailureLogPage() {
                       </p>
                     </div>
                     <div className="text-xs text-gray-400 dark:text-gray-500 text-right shrink-0">
-                      <div>{relativeTime(post.scheduled_at)}</div>
-                      <div>{new Date(post.scheduled_at).toLocaleDateString()}</div>
+                      <div>{relativeTime(post.failed_at)}</div>
+                      <div>{new Date(post.failed_at).toLocaleDateString()}</div>
                     </div>
                   </div>
 
@@ -233,7 +247,8 @@ export default function FailureLogPage() {
                       <div className="text-xs text-gray-400 mt-2">
                         Post ID: <span className="font-mono">{post.id}</span>
                         {' · '}
-                        Scheduled: {new Date(post.scheduled_at).toLocaleString()}
+                        {post.scheduled_at ? `Scheduled: ${new Date(post.scheduled_at).toLocaleString()} · ` : 'Post Now · '}
+                        Failed: {new Date(post.failed_at).toLocaleString()}
                       </div>
                     </div>
                   )}

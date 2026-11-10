@@ -2,7 +2,9 @@ import type Stripe from 'stripe'
 import { CREATOR_HUB_TYPES, priceInfo, sessionInfo, type RevenueGroup } from '@/lib/stripe-catalog'
 
 // Money for /admin/hq, read straight from Stripe rather than estimated from
-// plan counts (which is what /admin/overview does).
+// plan counts. /admin/overview reads its MRR from here too (fetchSubscriptionMrr)
+// since Nov 10, 2026; until then it guessed from workspace plans and counted a
+// cancelled annual plan as $8 a month.
 //
 // Subscriptions are counted from paid invoices (first payment, renewals,
 // upgrades). One-time purchases are counted from completed Checkout Sessions in
@@ -55,6 +57,59 @@ function monthlyCents(price: any, quantity: number): number {
     case 'day':   return (amount * 365) / 12 / every
     default:      return amount / every
   }
+}
+
+export interface SubscriptionMrr {
+  mrrCents: number
+  mrrByGroup: { group: RevenueGroup; cents: number }[]
+  activeSubscriptions: number
+  endingSubscriptions: { count: number; mrrCents: number; nextEndsAt: string | null }
+}
+
+/** What renews each month, from a list of Stripe subscriptions. */
+export function subscriptionMrr(subs: any[]): SubscriptionMrr {
+  let mrr = 0
+  let activeSubscriptions = 0
+  const mrrGroups = new Map<RevenueGroup, number>()
+  const ending = { count: 0, mrr: 0, ends: [] as number[] }
+  for (const sub of subs) {
+    if (sub.status !== 'active' && sub.status !== 'past_due') continue
+    if (CREATOR_HUB_TYPES.has(sub.metadata?.type)) continue
+    const subCents = (sub.items?.data ?? []).reduce((s: number, item: any) => s + monthlyCents(item.price, item.quantity), 0)
+    // The first paying customer cancelled in August and kept their paid year,
+    // so Stripe still lists them as active until Aug 2027. Counting that as
+    // MRR showed $6.67 a month that will never renew.
+    if (sub.cancel_at_period_end || sub.cancel_at) {
+      ending.count += 1
+      ending.mrr += subCents
+      const endsAt = sub.cancel_at ?? sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end
+      if (endsAt) ending.ends.push(endsAt)
+      continue
+    }
+    activeSubscriptions += 1
+    for (const item of sub.items?.data ?? []) {
+      const cents = monthlyCents(item.price, item.quantity)
+      const group = priceInfo(item.price?.id, item.price?.product)?.group ?? 'Other'
+      mrr += cents
+      mrrGroups.set(group, (mrrGroups.get(group) ?? 0) + cents)
+    }
+  }
+  return {
+    mrrCents: Math.round(mrr),
+    mrrByGroup: Array.from(mrrGroups.entries()).map(([group, cents]) => ({ group, cents: Math.round(cents) })),
+    activeSubscriptions,
+    endingSubscriptions: {
+      count: ending.count,
+      mrrCents: Math.round(ending.mrr),
+      nextEndsAt: ending.ends.length ? iso(Math.min(...ending.ends)) : null,
+    },
+  }
+}
+
+/** Subscription MRR alone, without the rest of the HQ summary's Stripe reads. */
+export async function fetchSubscriptionMrr(stripe: Stripe): Promise<SubscriptionMrr & { truncated: boolean }> {
+  const subs = await collect(stripe.subscriptions.list({ status: 'all', limit: 100 }))
+  return { ...subscriptionMrr(subs.items), truncated: subs.truncated }
 }
 
 export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<StripeSummary> {
@@ -110,32 +165,7 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
   const grossCents    = payments.reduce((s, p) => s + p.cents, 0)
   const refundedCents = (refunds.items as any[]).filter(r => r.status === 'succeeded').reduce((s, r) => s + (r.amount ?? 0), 0)
 
-  let mrr = 0
-  let activeSubscriptions = 0
-  const mrrGroups = new Map<RevenueGroup, number>()
-  const ending = { count: 0, mrr: 0, ends: [] as number[] }
-  for (const sub of subs.items as any[]) {
-    if (sub.status !== 'active' && sub.status !== 'past_due') continue
-    if (CREATOR_HUB_TYPES.has(sub.metadata?.type)) continue
-    const subCents = (sub.items?.data ?? []).reduce((s: number, item: any) => s + monthlyCents(item.price, item.quantity), 0)
-    // The first paying customer cancelled in August and kept their paid year,
-    // so Stripe still lists them as active until Aug 2027. Counting that as
-    // MRR showed $6.67 a month that will never renew.
-    if (sub.cancel_at_period_end || sub.cancel_at) {
-      ending.count += 1
-      ending.mrr += subCents
-      const endsAt = sub.cancel_at ?? sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end
-      if (endsAt) ending.ends.push(endsAt)
-      continue
-    }
-    activeSubscriptions += 1
-    for (const item of sub.items?.data ?? []) {
-      const cents = monthlyCents(item.price, item.quantity)
-      const group = priceInfo(item.price?.id, item.price?.product)?.group ?? 'Other'
-      mrr += cents
-      mrrGroups.set(group, (mrrGroups.get(group) ?? 0) + cents)
-    }
-  }
+  const mrr = subscriptionMrr(subs.items as any[])
 
   // Radar blocks show the customer a generic "card was declined", and that is
   // also what failure_message says. outcome.type is what tells them apart.
@@ -161,14 +191,10 @@ export async function stripeSummary(stripe: Stripe, sinceSec: number): Promise<S
     refundedCents,
     netCents: grossCents - refundedCents,
     byGroup: Array.from(groups.entries()).map(([group, v]) => ({ group, ...v })).sort((a, b) => b.cents - a.cents),
-    mrrCents: Math.round(mrr),
-    mrrByGroup: Array.from(mrrGroups.entries()).map(([group, cents]) => ({ group, cents: Math.round(cents) })),
-    activeSubscriptions,
-    endingSubscriptions: {
-      count: ending.count,
-      mrrCents: Math.round(ending.mrr),
-      nextEndsAt: ending.ends.length ? iso(Math.min(...ending.ends)) : null,
-    },
+    mrrCents: mrr.mrrCents,
+    mrrByGroup: mrr.mrrByGroup,
+    activeSubscriptions: mrr.activeSubscriptions,
+    endingSubscriptions: mrr.endingSubscriptions,
     recent: payments.slice(0, 12),
     failedPayments: failedPayments.slice(0, 10),
     webhookFailures: {

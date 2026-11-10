@@ -5,12 +5,14 @@ import {
   Activity, AlertTriangle, ArrowLeft, BarChart3, Crown, Filter, Flag, Gauge, HandCoins, Lock, MessageSquare, Radar, Send, Share2, Store, Tag, Ticket, Users, type LucideIcon,
 } from 'lucide-react'
 
+// null means that count failed to load; it shows as "—", never as 0.
 interface HubStats {
   total_users: number
-  posts_today: number
-  posts_today_internal: number
-  active_affiliates: number
-  stax_listings: number
+  customers: number
+  posts_24h: number | null
+  posts_24h_internal: number | null
+  active_affiliates: number | null
+  stax_listings: number | null
 }
 
 // Emoji were the loudest "built by an AI in an afternoon" tell on this screen,
@@ -56,15 +58,16 @@ export default function AdminHubClient() {
   // anything money-shaped, jade is live activity. Nothing gets a colour just to
   // look varied.
   const STAT_CARDS = [
-    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',        sub: 'all accounts, ours included' },
-    // Our own SOMA output is shown beside this, never inside it. Every post
+    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',
+      sub: stats ? `${stats.customers} customers + ${stats.total_users - stats.customers} ours` : 'all accounts, ours included' },
+    // Our own output is shown beside this, never inside it. Every post
     // published in the week to 3 September was ours; folded into one number it
     // read as product usage.
-    { label: 'Posts Today',       value: stats?.posts_today       ?? '—', tone: 'text-jade',
-      sub: stats && stats.posts_today_internal > 0
-        ? `by users · ${stats.posts_today_internal} ours`
-        : 'published by users' },
-    { label: 'Active Affiliates', value: stats?.active_affiliates ?? '—', tone: 'text-amber',        sub: 'earning commissions' },
+    { label: 'Posts · 24h',       value: stats?.posts_24h         ?? '—', tone: 'text-jade',
+      sub: stats && (stats.posts_24h_internal ?? 0) > 0
+        ? `by customers · ${stats.posts_24h_internal} ours`
+        : 'published by customers' },
+    { label: 'Active Partners',   value: stats?.active_affiliates ?? '—', tone: 'text-amber',        sub: 'customers in the program' },
     { label: 'Stax Listings',     value: stats?.stax_listings     ?? '—', tone: 'text-ink-high',     sub: 'live in directory'   },
   ]
 

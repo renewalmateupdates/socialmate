@@ -4,7 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Ban, Clock, DollarSign, Lock, Store, Timer } from 'lucide-react'
 
-interface PostStats { published: number; failed: number; partial: number; scheduled: number }
+// `published` counts every post that went out, partial included (it reached
+// some platforms). `partial` is broken out so it can still be flagged.
+interface PostStats { published: number; failed: number; partial: number; scheduled: number; drafts?: number }
 interface PlatformStat { published: number; failed: number }
 
 interface AdminUser {
@@ -16,7 +18,6 @@ interface AdminUser {
   display_name: string | null
   is_admin: boolean | null
   connected_platforms: string[]
-  posts_count: number
   post_stats: PostStats
   platform_stats: Record<string, PlatformStat>
   affiliate_status: string | null
@@ -25,9 +26,15 @@ interface AdminUser {
   is_internal?: boolean
   login_count?: number
   onboarding_completed?: boolean
+  // Connected at some point, including people whose connection is gone.
+  ever_connected?: boolean
+  // Published at some point, including people who deleted the post after.
+  ever_published?: boolean
+  published_events?: number
 }
 
-type Meta = { postsTruncated: boolean; authTruncated: boolean; settingsTruncated: boolean }
+// Reads that failed without taking the page down. Shown, never swallowed.
+type Meta = { warnings?: string[] }
 
 // Sorting newest-first hid the only users worth looking at. 82 of 104 accounts
 // have never connected anything, so the newest 15 rows are reliably all zeros
@@ -40,14 +47,18 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'logins',    label: 'Most logins' },
 ]
 
-type Segment = 'all' | 'external' | 'connected' | 'published' | 'never_connected'
+// "Ever" on purpose: a removed connection or a deleted post still happened, so
+// these match /admin/funnel's ground truth (lib/admin-metrics.ts).
+type Segment = 'all' | 'connected' | 'published' | 'never_connected'
 const SEGMENTS: { key: Segment; label: string }[] = [
   { key: 'all',             label: 'Everyone' },
-  { key: 'external',        label: 'External only' },
   { key: 'connected',       label: 'Connected a platform' },
   { key: 'published',       label: 'Ever published' },
   { key: 'never_connected', label: 'Never connected' },
 ]
+
+const everConnected = (u: AdminUser) => u.ever_connected ?? u.connected_platforms.length > 0
+const everPublished = (u: AdminUser) => u.ever_published ?? (u.post_stats?.published ?? 0) > 0
 
 const PLAN_BADGE: Record<string, string> = {
   free:   'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
@@ -77,6 +88,11 @@ function AdminUsersInner() {
   const [selected, setSelected] = useState<AdminUser | null>(null)
   const [sortKey, setSortKey] = useState<SortKey>('joined')
   const [segment, setSegment] = useState<Segment>('all')
+  // Customers only by default. "Ever published" read 4 on Nov 10 and two of
+  // those were our own accounts; the number on a chip should be customers.
+  // A search shows every match, ours included, so an email lookup never
+  // comes back empty because of this switch.
+  const [customersOnly, setCustomersOnly] = useState(true)
   const [meta, setMeta] = useState<Meta | null>(null)
 
   const load = useCallback(async () => {
@@ -101,22 +117,24 @@ function AdminUsersInner() {
   useEffect(() => { load() }, [load])
 
   // Segment then sort, client-side. The route already returns every user, and
-  // at ~100 accounts this is free; it also keeps the counts on the segment
-  // chips honest because they are computed from the same array being rendered.
+  // at a few hundred accounts this is free; it also keeps the counts on the
+  // segment chips honest because they are computed from the same array being
+  // rendered.
+  const hidingOurs = customersOnly && !search
+  const pool = hidingOurs ? users.filter(u => !u.is_internal) : users
+  const oursCount = users.filter(u => u.is_internal).length
   const segmentCounts: Record<Segment, number> = {
-    all:             users.length,
-    external:        users.filter(u => !u.is_internal).length,
-    connected:       users.filter(u => u.connected_platforms.length > 0).length,
-    published:       users.filter(u => (u.post_stats?.published ?? 0) > 0).length,
-    never_connected: users.filter(u => u.connected_platforms.length === 0).length,
+    all:             pool.length,
+    connected:       pool.filter(everConnected).length,
+    published:       pool.filter(everPublished).length,
+    never_connected: pool.filter(u => !everConnected(u)).length,
   }
 
-  const visible = users
+  const visible = pool
     .filter(u => {
-      if (segment === 'external')        return !u.is_internal
-      if (segment === 'connected')       return u.connected_platforms.length > 0
-      if (segment === 'published')       return (u.post_stats?.published ?? 0) > 0
-      if (segment === 'never_connected') return u.connected_platforms.length === 0
+      if (segment === 'connected')       return everConnected(u)
+      if (segment === 'published')       return everPublished(u)
+      if (segment === 'never_connected') return !everConnected(u)
       return true
     })
     .slice()
@@ -152,7 +170,7 @@ function AdminUsersInner() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
-              {loading ? 'Loading…' : `${visible.length} of ${users.length} users`}
+              {loading ? 'Loading…' : `${visible.length} of ${pool.length} ${hidingOurs ? 'customers' : 'accounts'}`}
             </p>
           </div>
           <button onClick={() => router.push('/admin')}
@@ -200,6 +218,15 @@ function AdminUsersInner() {
               </button>
             ))}
           </div>
+          <button onClick={() => { setCustomersOnly(v => !v); setRowLimit(150) }}
+            title={search ? 'A search shows every match, ours included' : 'Our own accounts are listed in lib/internal-accounts.ts'}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+              hidingOurs
+                ? 'border-amber-400 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-surface hover:border-gray-400'
+            }`}>
+            {hidingOurs ? `Customers only · ${oursCount} of ours hidden` : `Including our ${oursCount} accounts`}
+          </button>
           <div className="flex gap-1 flex-wrap ml-auto">
             <span className="text-xs text-gray-400 self-center mr-1">Sort</span>
             {SORTS.map(s => (
@@ -215,14 +242,17 @@ function AdminUsersInner() {
           </div>
         </div>
 
-        {/* A hit ceiling understates every number on this page, so it says so. */}
-        {meta && (meta.postsTruncated || meta.authTruncated || meta.settingsTruncated) && (
+        <p className="text-xs text-gray-400 mb-4">
+          Published counts every post that reached at least one platform. &ldquo;Ever&rdquo; includes people who
+          later deleted the post or removed the connection. Last active is the latest of a sign-in or anything
+          they did in the app.
+        </p>
+
+        {/* A read that failed would otherwise show as zeros, so it says so. */}
+        {meta?.warnings && meta.warnings.length > 0 && (
           <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800">
             <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-              Row limit reached{' '}
-              {[meta.authTruncated && 'users', meta.postsTruncated && 'posts', meta.settingsTruncated && 'settings']
-                .filter(Boolean).join(', ')}
-              . Counts below are understated.
+              Some data did not load, so parts of this page are incomplete: {meta.warnings.join('; ')}
             </p>
           </div>
         )}
@@ -310,12 +340,22 @@ function AdminUsersInner() {
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="text-gray-700 dark:text-gray-300 font-medium">
-                            {u.post_stats?.published ?? u.posts_count} pub
+                          <span className="text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">
+                            {u.post_stats?.published ?? 0} pub
                           </span>
-                          {(u.post_stats?.failed ?? 0) + (u.post_stats?.partial ?? 0) > 0 && (
-                            <span className="text-red-500 font-medium">
-                              · {(u.post_stats.failed) + (u.post_stats.partial)} ✗
+                          {(u.post_stats?.failed ?? 0) > 0 && (
+                            <span className="text-red-500 font-medium whitespace-nowrap" title="Failed on every platform">
+                              · {u.post_stats.failed} ✗
+                            </span>
+                          )}
+                          {(u.post_stats?.partial ?? 0) > 0 && (
+                            <span className="text-orange-500 font-medium whitespace-nowrap" title="Reached some platforms, not all">
+                              · {u.post_stats.partial} partial
+                            </span>
+                          )}
+                          {(u.post_stats?.published ?? 0) === 0 && (u.published_events ?? 0) > 0 && (
+                            <span className="text-gray-400 whitespace-nowrap" title="Published, then the post was deleted">
+                              · {u.published_events} sent, deleted
                             </span>
                           )}
                           {(u.post_stats?.scheduled ?? 0) > 0 && (
@@ -328,7 +368,7 @@ function AdminUsersInner() {
                       <td className="px-5 py-3">
                         <div className="flex flex-wrap gap-1">
                           {u.connected_platforms.length === 0
-                            ? <span className="text-gray-400 text-xs">none</span>
+                            ? <span className="text-gray-400 text-xs">{u.ever_connected ? 'none now (was connected)' : 'none'}</span>
                             : u.connected_platforms.map(p => {
                                 const ps = u.platform_stats?.[p]
                                 return (
@@ -412,9 +452,12 @@ function AdminUsersInner() {
                 </Row>
                 <Row label="Posts">
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="text-gray-700 dark:text-gray-300">{selected.post_stats?.published ?? selected.posts_count} published</span>
+                    <span className="text-gray-700 dark:text-gray-300">{selected.post_stats?.published ?? 0} published</span>
+                    {(selected.post_stats?.partial ?? 0) > 0 && <span className="text-orange-500">({selected.post_stats.partial} of them partial)</span>}
                     {(selected.post_stats?.failed ?? 0) > 0 && <span className="text-red-500">{selected.post_stats.failed} failed</span>}
-                    {(selected.post_stats?.partial ?? 0) > 0 && <span className="text-orange-500">{selected.post_stats.partial} partial</span>}
+                    {(selected.published_events ?? 0) > (selected.post_stats?.published ?? 0) && (
+                      <span className="text-gray-400">{selected.published_events} publishes recorded, some since deleted</span>
+                    )}
                     {(selected.post_stats?.scheduled ?? 0) > 0 && <span className="text-amber-500">{selected.post_stats.scheduled} scheduled</span>}
                   </div>
                 </Row>

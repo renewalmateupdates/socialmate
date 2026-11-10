@@ -20,12 +20,16 @@ type Funnel = {
   groundTruth: {
     accounts: number; connected: number; published: number; paying: number
     neverConnected: number; connectedNeverPublished: number
+    // Of connected / published: people whose connection or post is gone now.
+    connectedEarlier?: number; publishedDeleted?: number
+    internalExcluded?: number
   }
   platformCounts: { platform: string; count: number }[]
   steps: { step: string; users: number; fires: number }[]
   connectByPlatform: { platform: string; clicked: number; succeeded: number }[]
   failures: { reason: string; count: number }[]
   publishFailures: { platform: string; reason: string; posts: number; users: number }[]
+  publishFailuresError?: string | null
   onboardingSteps: { step: string; fires: number }[]
   signupSources: { label: string; users: number }[]
   signupLandings: { label: string; users: number }[]
@@ -145,6 +149,13 @@ export default function AdminFunnelPage() {
               <Rung icon={Plug}            label="Connected a platform"   value={g.connected} total={g.accounts} prev={g.accounts}  tone={g.connected / Math.max(g.accounts, 1) < 0.3 ? 'bad' : 'neutral'} />
               <Rung icon={CheckCircle2}    label="Published a post"       value={g.published} total={g.accounts} prev={g.connected} tone={g.published < 5 ? 'bad' : 'good'} />
               <Rung icon={CircleDollarSign} label="Paying"                value={g.paying}    total={g.accounts} prev={g.published} tone={g.paying > 0 ? 'good' : 'neutral'} />
+              <p className="px-5 py-3 text-[11px] text-ink-faint">
+                Customers only: our {g.internalExcluded ?? 4} accounts are left out. &ldquo;Connected&rdquo; and
+                &ldquo;published&rdquo; mean ever
+                {(g.connectedEarlier ?? 0) > 0 && <>, including {g.connectedEarlier} who connected and later lost or removed every connection</>}
+                {(g.publishedDeleted ?? 0) > 0 && <>, and {g.publishedDeleted} who published and later deleted the post</>}
+                . A post counts as published when it reached at least one platform. Paying means a plan other than free, including a paid year that was cancelled and is running out.
+              </p>
             </Panel>
 
             <div className="grid gap-5 sm:grid-cols-2">
@@ -180,7 +191,9 @@ export default function AdminFunnelPage() {
               <div className="border-b border-edge px-5 py-3.5">
                 <Label>Why posts failed · last {data.windowDays} days · external users</Label>
               </div>
-              {data.publishFailures.length === 0 ? (
+              {data.publishFailuresError ? (
+                <p className="px-5 py-4 text-xs text-alert">Could not load failed posts: {data.publishFailuresError}</p>
+              ) : data.publishFailures.length === 0 ? (
                 <p className="px-5 py-4 text-xs text-ink-faint">No failed posts in this window.</p>
               ) : (
                 <div className="flex flex-col">
@@ -317,10 +330,16 @@ export default function AdminFunnelPage() {
                     ))}
                     {/* Steps that only started being recorded recently. Before that date
                         the absence means "not measured", never "zero", so say so. */}
-                    {[...NEW_EVENTS, ...TIKTOK_EVENTS, ...STARTER_EVENTS, ...TOOL_EVENTS].filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
+                    {/* Zero in the window is a real zero once the step was being
+                        recorded for the whole window; before that it is unknown. */}
+                    {Object.keys(RECORDED_FROM).filter(name => !data.steps.some(s => s.step === name || s.step === `funnel_${name}`)).map(name => (
                       <div key={name} className="flex items-center justify-between border-b border-edge px-5 py-2.5 last:border-b-0">
                         <span className="font-mono text-xs text-ink-body">{name}</span>
-                        <span className="font-mono text-xs text-ink-muted">not recorded yet</span>
+                        <span className="font-mono text-xs text-ink-muted">
+                          {Date.now() - data.windowDays * 86_400_000 < Date.parse(RECORDED_FROM[name])
+                            ? `0 · recorded from ${RECORDED_FROM[name]}`
+                            : '0 in this window'}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -362,3 +381,11 @@ const STARTER_EVENTS_SINCE = 'Nov 3, 2026'
 // tool_draft_saved here counts signed-in presses; GA4 sees everyone's.
 const TOOL_EVENTS = ['tool_draft_saved', 'tool_draft_used']
 const TOOL_EVENTS_SINCE = 'Nov 4, 2026'
+
+// The day each later step started being recorded.
+const RECORDED_FROM: Record<string, string> = Object.fromEntries([
+  ...NEW_EVENTS.map(e => [e, NEW_EVENTS_SINCE]),
+  ...TIKTOK_EVENTS.map(e => [e, TIKTOK_EVENTS_SINCE]),
+  ...STARTER_EVENTS.map(e => [e, STARTER_EVENTS_SINCE]),
+  ...TOOL_EVENTS.map(e => [e, TOOL_EVENTS_SINCE]),
+])

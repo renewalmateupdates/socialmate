@@ -4,8 +4,29 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 import { normalizePlan } from '@/lib/plan'
 import { isInternalEmail } from '@/lib/internal-accounts'
+import {
+  CONNECTED_EVENT, PUBLISHED_EVENT, isPersonActivity, latestIso, listAllAuthUsers, oldestFirst,
+  platformOutcome, postWentOut, selectAll,
+} from '@/lib/admin-metrics'
 
-const POSTS_CAP = 20000
+// Every account with what it has done.
+//
+// Until Nov 10, 2026 this read posts with `.limit(20000)`. The database returns
+// at most 1,000 rows per request whatever the limit says, posts had 1,817, and
+// every user whose posts sat past row 1,000 showed "0 pub": the page listed 2
+// customers as ever having published when 5 had. Everything is now read in
+// full through lib/admin-metrics.ts, and counted with the same definitions
+// /admin/funnel and /admin/overview use.
+
+type SettingsRow = {
+  user_id: string; plan: string | null; last_active: string | null; display_name: string | null
+  is_admin: boolean | null; login_count: number | null; onboarding_completed: boolean | null
+}
+type PostRow = {
+  user_id: string; status: string | null; published_at: string | null
+  platforms: string[] | null; platform_post_ids: Record<string, unknown> | null
+}
+type EventRow = { user_id: string; event_type: string; created_at: string }
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin()
@@ -16,183 +37,161 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search') || ''
   const plan   = searchParams.get('plan')   || ''
 
-  // Primary source: auth.admin.listUsers — has email + created_at for everyone
-  const { data: authData, error: authErr } = await db.auth.admin.listUsers({ perPage: 1000 })
-  if (authErr) return NextResponse.json({ error: authErr.message }, { status: 500 })
+  // Secondary reads (badges and activity) do not take the page down when they
+  // fail, but they are reported on it rather than rendering as a quiet zero.
+  const warnings: string[] = []
+  const soft = <T,>(p: Promise<T[]>): Promise<T[]> => p.catch((e: unknown) => {
+    const message = e instanceof Error ? e.message : String(e)
+    console.warn('[admin/users]', message)
+    warnings.push(message)
+    return []
+  })
 
-  const authUsers = authData?.users ?? []
+  const loaded = await Promise.all([
+    listAllAuthUsers(db),
+    selectAll<SettingsRow>('user_settings', () => oldestFirst(db.from('user_settings')
+      .select('user_id, plan, last_active, display_name, is_admin, login_count, onboarding_completed'))),
+    selectAll<{ owner_id: string; plan: string | null; is_personal: boolean | null }>('workspaces', () =>
+      oldestFirst(db.from('workspaces').select('owner_id, plan, is_personal'))),
+    selectAll<{ user_id: string; platform: string }>('connected_accounts', () =>
+      oldestFirst(db.from('connected_accounts').select('user_id, platform'))),
+    selectAll<PostRow>('posts', () =>
+      oldestFirst(db.from('posts').select('user_id, status, published_at, platforms, platform_post_ids'))),
+    soft(selectAll<EventRow>('usage_events', () =>
+      oldestFirst(db.from('usage_events').select('user_id, event_type, created_at').like('event_type', 'funnel_%')))),
+    soft(selectAll<{ user_id: string; status: string | null }>('affiliate_profiles', () =>
+      oldestFirst(db.from('affiliate_profiles').select('user_id, status')))),
+    // curated_listings has no user_id: applications are matched by the email
+    // the applicant typed.
+    soft(selectAll<{ applicant_email: string | null; status: string | null }>('curated_listings', () =>
+      oldestFirst(db.from('curated_listings').select('applicant_email, status')))),
+  ]).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
+  if (loaded instanceof Error) {
+    console.error('[admin/users]', loaded.message)
+    return NextResponse.json({ error: loaded.message }, { status: 500 })
+  }
+  const [authUsers, settings, workspaces, accounts, posts, events, affiliates, listings] = loaded
 
-  // Secondary: user_settings for plan/display_name/is_admin
-  const { data: settings, error: settingsErr } = await db
-    .from('user_settings')
-    .select('user_id, plan, last_active, display_name, is_admin, login_count, onboarding_completed')
-    .limit(2000)
-  if (settingsErr) console.warn('[admin/users] user_settings:', settingsErr.message)
+  const settingsMap = new Map(settings.map(s => [s.user_id, s]))
 
-  const settingsMap: Record<string, typeof settings extends (infer T)[] | null ? T : never> = {}
-  for (const s of settings ?? []) {
-    settingsMap[s.user_id] = s
+  // The plan the app actually enforces. user_settings.plan alone is the split
+  // that left the first paying customer on free limits for their whole
+  // session. resolveWorkspacePlan() is one query per user, so apply the same
+  // precedence in memory: the personal workspace's plan, then user_settings.
+  const wsPlanMap = new Map<string, string>()
+  for (const w of workspaces) {
+    if (w.is_personal && w.plan) wsPlanMap.set(w.owner_id, w.plan)
   }
 
-  // The plan the app actually enforces.
-  //
-  // This used to read user_settings.plan alone. That is the exact split that
-  // left the first paying customer on free limits for their whole session: the
-  // Stripe webhook writes user_settings.plan, while ~20 enforcement sites read
-  // workspaces.plan. resolveWorkspacePlan() is the correct reader but it is one
-  // query per user, which is 100+ round trips for a list. So fetch every
-  // workspace once and apply the same precedence in memory: a personal
-  // workspace's own plan wins, then user_settings, then free.
-  const { data: allWorkspaces, error: wsErr } = await db
-    .from('workspaces')
-    .select('owner_id, plan, is_personal')
-    .limit(5000)
-  if (wsErr) console.warn('[admin/users] workspaces:', wsErr.message)
-
-  const wsPlanMap: Record<string, string> = {}
-  for (const w of allWorkspaces ?? []) {
-    if (!w.is_personal || !w.plan) continue
-    wsPlanMap[w.owner_id] = w.plan
+  const accountMap = new Map<string, string[]>()
+  for (const a of accounts) {
+    const list = accountMap.get(a.user_id) ?? []
+    if (!list.includes(a.platform)) list.push(a.platform)
+    accountMap.set(a.user_id, list)
   }
 
-  // Merge — auth is the source of truth for identity
-  let merged = authUsers.map(u => {
-    const settingsPlan = settingsMap[u.id]?.plan ?? null
-    const wsPlan       = wsPlanMap[u.id] ?? null
+  // `published` counts every post that went out, partial included (it reached
+  // some platforms). `partial` is broken out so the page can still flag them.
+  type PostStats = { published: number; partial: number; failed: number; scheduled: number; drafts: number }
+  type PlatformStats = Record<string, { published: number; failed: number }>
+  const postStats = new Map<string, PostStats>()
+  const platformStats = new Map<string, PlatformStats>()
+  for (const p of posts) {
+    const s = postStats.get(p.user_id) ?? { published: 0, partial: 0, failed: 0, scheduled: 0, drafts: 0 }
+    postStats.set(p.user_id, s)
+    if (postWentOut(p)) s.published++
+    if (p.status === 'partial') s.partial++
+    else if (p.status === 'failed') s.failed++
+    else if (p.status === 'scheduled') s.scheduled++
+    else if (p.status === 'draft') s.drafts++
+
+    const ps = platformStats.get(p.user_id) ?? {}
+    platformStats.set(p.user_id, ps)
+    for (const platform of Array.isArray(p.platforms) ? p.platforms : []) {
+      const outcome = platformOutcome(p, platform)
+      if (outcome === 'other') continue
+      ps[platform] ??= { published: 0, failed: 0 }
+      ps[platform][outcome]++
+    }
+  }
+
+  // Events outlive rows: a deleted post or a removed connection still happened.
+  const publishEvents = new Map<string, number>()
+  const connectedEver = new Set<string>()
+  const lastSeen = new Map<string, string>()
+  for (const e of events) {
+    if (e.event_type === PUBLISHED_EVENT) publishEvents.set(e.user_id, (publishEvents.get(e.user_id) ?? 0) + 1)
+    if (e.event_type === CONNECTED_EVENT) connectedEver.add(e.user_id)
+    if (isPersonActivity(e.event_type)) {
+      const cur = lastSeen.get(e.user_id)
+      if (!cur || Date.parse(e.created_at) > Date.parse(cur)) lastSeen.set(e.user_id, e.created_at)
+    }
+  }
+
+  const affiliateMap = new Map<string, string>()
+  for (const a of affiliates) affiliateMap.set(a.user_id, a.status ?? 'active')
+
+  // Only live listings. The webhook writes the literal 'live', not 'active';
+  // see isLiveListing() in app/admin/studio-stax/page.tsx.
+  const staxSet = new Set<string>()
+  for (const l of listings) {
+    if (l.applicant_email && (l.status === 'approved' || l.status === 'active' || l.status === 'live')) {
+      staxSet.add(l.applicant_email.toLowerCase())
+    }
+  }
+
+  let users = authUsers.map(u => {
+    const s = settingsMap.get(u.id)
+    const settingsPlan = s?.plan ?? null
+    const wsPlan = wsPlanMap.get(u.id) ?? null
+    const stats = postStats.get(u.id) ?? { published: 0, partial: 0, failed: 0, scheduled: 0, drafts: 0 }
+    const connected = accountMap.get(u.id) ?? []
+    const published_events = publishEvents.get(u.id) ?? 0
     return {
       user_id:      u.id,
       email:        u.email ?? '',
       created_at:   u.created_at,
       plan:         normalizePlan(wsPlan ?? settingsPlan),
-      // Surfaced so the one bug class that has cost this project three outages
-      // is visible in the list rather than only after someone complains.
+      // The bug class that has cost this project three outages, visible in the
+      // list rather than only after someone complains.
       plan_disagrees: !!settingsPlan && !!wsPlan && normalizePlan(settingsPlan) !== normalizePlan(wsPlan),
-      last_active:  settingsMap[u.id]?.last_active ?? null,
-      display_name: settingsMap[u.id]?.display_name ?? null,
-      is_admin:     settingsMap[u.id]?.is_admin ?? false,
-      // Ours, not a customer. Five of these were being counted in every
-      // activation number this project has quoted since March.
+      // user_settings.last_active is only written when someone uses the login
+      // page, and sessions persist, so on Nov 10 it was older than the
+      // person's real activity for 71 of 257 customers. Take the latest of
+      // that, the last sign-in, and the last thing they did in the app.
+      last_active:  latestIso(s?.last_active, u.last_sign_in_at, lastSeen.get(u.id)),
+      display_name: s?.display_name ?? null,
+      is_admin:     s?.is_admin ?? false,
+      // Ours, not a customer (lib/internal-accounts.ts).
       is_internal:  isInternalEmail(u.email),
-      login_count:  settingsMap[u.id]?.login_count ?? 0,
-      onboarding_completed: settingsMap[u.id]?.onboarding_completed ?? false,
+      login_count:  s?.login_count ?? 0,
+      onboarding_completed: s?.onboarding_completed ?? false,
+      connected_platforms: connected,
+      // Connected at some point, including people whose connection is gone.
+      ever_connected: connected.length > 0 || connectedEver.has(u.id),
+      post_stats:     stats,
+      platform_stats: platformStats.get(u.id) ?? {},
+      // Publishes recorded as they happened, so a post deleted later still counts.
+      published_events,
+      ever_published: stats.published > 0 || published_events > 0,
+      affiliate_status: affiliateMap.get(u.id) ?? null,
+      is_stax:          !!u.email && staxSet.has(u.email.toLowerCase()),
     }
   })
 
-  // Apply filters
   if (search) {
     const lower = search.toLowerCase()
-    merged = merged.filter(u => u.email.toLowerCase().includes(lower))
+    users = users.filter(u => u.email.toLowerCase().includes(lower))
   }
-  if (plan) merged = merged.filter(u => u.plan === plan)
-
-  // Sort newest first
-  merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-
-  const userIds = merged.map(u => u.user_id)
-  const emails  = merged.map(u => u.email).filter(Boolean)
-
-  // Connected accounts, post counts, affiliate profiles, stax listings — all in parallel
-  const [accountsRes, postsRes, affiliateRes, staxRes] = await Promise.allSettled([
-    db.from('connected_accounts')
-      .select('user_id, platform')
-      .in('user_id', userIds.length ? userIds : ['none']),
-    // POSTS_CAP is a real ceiling, not a page size. At 1,636 rows today there
-    // is headroom, but one admin account generates ~30/day, so this will be
-    // reached. Crossing it silently would understate every user's post count
-    // with no indication anything was dropped, which is precisely the failure
-    // shape this codebase keeps paying for — so the response says when it hits.
-    db.from('posts')
-      .select('user_id, status, platforms')
-      .in('user_id', userIds.length ? userIds : ['none'])
-      .limit(POSTS_CAP),
-    db.from('affiliate_profiles')
-      .select('user_id, status')
-      .in('user_id', userIds.length ? userIds : ['none']),
-    // curated_listings has no user_id — applications are matched by the email
-    // the applicant typed. Selecting user_id 400'd, so the listings column on
-    // /admin/users has always been empty.
-    db.from('curated_listings')
-      .select('applicant_email, status')
-      .in('applicant_email', emails.length ? emails : ['none']),
-  ])
-
-  const accountMap: Record<string, string[]> = {}
-  if (accountsRes.status === 'fulfilled') {
-    for (const acc of accountsRes.value.data ?? []) {
-      if (!accountMap[acc.user_id]) accountMap[acc.user_id] = []
-      accountMap[acc.user_id].push(acc.platform)
-    }
-  }
-
-  type PostStats = { published: number; failed: number; partial: number; scheduled: number }
-  type PlatformStats = Record<string, { published: number; failed: number }>
-
-  const postStatsMap: Record<string, PostStats> = {}
-  const platformStatsMap: Record<string, PlatformStats> = {}
-  const postCountMap: Record<string, number> = {} // kept for backwards compat
-
-  if (postsRes.status === 'fulfilled') {
-    for (const p of postsRes.value.data ?? []) {
-      const uid = p.user_id
-      if (!postStatsMap[uid]) postStatsMap[uid] = { published: 0, failed: 0, partial: 0, scheduled: 0 }
-      if (!platformStatsMap[uid]) platformStatsMap[uid] = {}
-
-      const s = p.status as string
-      if (s === 'published') { postStatsMap[uid].published++; postCountMap[uid] = (postCountMap[uid] || 0) + 1 }
-      else if (s === 'failed') postStatsMap[uid].failed++
-      else if (s === 'partial') postStatsMap[uid].partial++
-      else if (s === 'scheduled') postStatsMap[uid].scheduled++
-
-      const platforms = p.platforms as string[] | null
-      if (Array.isArray(platforms)) {
-        for (const platform of platforms) {
-          if (!platformStatsMap[uid][platform]) platformStatsMap[uid][platform] = { published: 0, failed: 0 }
-          if (s === 'published') platformStatsMap[uid][platform].published++
-          else if (s === 'failed' || s === 'partial') platformStatsMap[uid][platform].failed++
-        }
-      }
-    }
-  }
-
-  // affiliate: any row = they're in the program; capture status
-  const affiliateMap: Record<string, string> = {}
-  if (affiliateRes.status === 'fulfilled') {
-    for (const a of affiliateRes.value.data ?? []) {
-      affiliateMap[a.user_id] = a.status ?? 'active'
-    }
-  }
-
-  // stax: only count live listings. 'active'/'live' are the paid-and-
-  // confirmed states; the webhook writes the literal 'live', not 'active' --
-  // see app/admin/studio-stax/page.tsx's isLiveListing() comment.
-  const staxSet = new Set<string>()
-  if (staxRes.status === 'fulfilled') {
-    for (const s of staxRes.value.data ?? []) {
-      if (s.status === 'approved' || s.status === 'active' || s.status === 'live') staxSet.add(s.applicant_email)
-    }
-  }
-
-  const enriched = merged.map(u => ({
-    ...u,
-    connected_platforms: accountMap[u.user_id] ?? [],
-    posts_count:         postCountMap[u.user_id] ?? 0,
-    post_stats:          postStatsMap[u.user_id] ?? { published: 0, failed: 0, partial: 0, scheduled: 0 },
-    platform_stats:      platformStatsMap[u.user_id] ?? {},
-    affiliate_status:    affiliateMap[u.user_id] ?? null,
-    is_stax:             staxSet.has(u.email),
-  }))
-
-  const postRowsRead = postsRes.status === 'fulfilled' ? (postsRes.value.data?.length ?? 0) : 0
+  if (plan) users = users.filter(u => u.plan === plan)
+  users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return NextResponse.json({
-    users: enriched,
+    users,
     meta: {
-      // Every hard ceiling in this route, reported rather than hidden. If any
-      // of these flips true the numbers above are understated.
-      postsTruncated: postRowsRead >= POSTS_CAP,
-      authTruncated:  authUsers.length >= 1000,
-      settingsTruncated: (settings?.length ?? 0) >= 2000,
-      postRowsRead,
+      warnings,
+      postRowsRead: posts.length,
+      accountsRead: authUsers.length,
     },
   })
 }

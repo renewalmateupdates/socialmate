@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
 import { sendMail, REPLY_TO } from '@/lib/mail'
 import { isInternalEmail } from '@/lib/internal-accounts'
+import { loadAccountFacts, oldestFirst, selectAll } from '@/lib/admin-metrics'
 
 // One-shot reactivation for accounts that signed up and never connected a
 // platform.
@@ -81,25 +82,32 @@ function reactivationHtml(name: string): string {
   })
 }
 
+// Throws if any read fails. This decides who gets an email that says "you never
+// got a platform connected", so a failed read must stop the send, not shrink the
+// exclusion lists to nothing and mail everyone. Until Nov 10, 2026 it read posts
+// unpaged (the first 1,000 of 1,817) and ignored every error.
+//
+// "Connected" and "published" mean ever (lib/admin-metrics.ts): on Nov 10 eight
+// customers had connected a platform and no longer had the account row, and
+// the email would have told each of them they never connected.
 async function audience(): Promise<{ targets: Target[]; alreadySent: number; tooNew: number }> {
   const admin = getSupabaseAdmin()
 
-  const [{ data: authData }, connected, published, sent] = await Promise.all([
-    admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from('connected_accounts').select('user_id'),
-    admin.from('posts').select('user_id').eq('status', 'published'),
-    admin.from('usage_events').select('user_id').eq('event_type', EVENT),
+  const [facts, sent] = await Promise.all([
+    loadAccountFacts(admin),
+    selectAll<{ user_id: string }>('usage_events', () =>
+      oldestFirst(admin.from('usage_events').select('user_id').eq('event_type', EVENT))),
   ])
 
-  const hasConnected = new Set((connected.data ?? []).map(r => r.user_id))
-  const hasPublished = new Set((published.data ?? []).map(r => r.user_id))
-  const hasBeenSent  = new Set((sent.data ?? []).map(r => r.user_id))
+  const hasConnected = facts.connected
+  const hasPublished = facts.published
+  const hasBeenSent  = new Set(sent.map(r => r.user_id))
 
   const now = Date.now()
   const targets: Target[] = []
   let alreadySent = 0, tooNew = 0
 
-  for (const u of authData?.users ?? []) {
+  for (const u of facts.users) {
     // All five of our own accounts, not just the admin one. Three of them have
     // never connected a platform, so filtering on ADMIN_EMAIL alone meant this
     // one-shot send would have gone to Joshua three times.
@@ -126,7 +134,13 @@ async function audience(): Promise<{ targets: Target[]; alreadySent: number; too
 
 export async function GET() {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  const { targets, alreadySent, tooNew } = await audience()
+  let result
+  try {
+    result = await audience()
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+  }
+  const { targets, alreadySent, tooNew } = result
   return NextResponse.json({
     wouldSend:  targets.length,
     alreadySent,
@@ -156,7 +170,13 @@ export async function POST(req: Request) {
     }
   }
 
-  const { targets } = await audience()
+  let targets: Target[]
+  try {
+    ;({ targets } = await audience())
+  } catch (e) {
+    // Nothing is sent when the audience can't be worked out exactly.
+    return NextResponse.json({ sent: 0, error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+  }
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
   const admin = getSupabaseAdmin()

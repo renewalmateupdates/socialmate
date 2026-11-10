@@ -4,7 +4,13 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { redirect } from 'next/navigation'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { internalIdsFrom } from '@/lib/internal-accounts'
+import { getStripe } from '@/lib/stripe'
+import { normalizePlan } from '@/lib/plan'
+import { fetchSubscriptionMrr } from '@/lib/hq/stripe'
+import {
+  SYSTEM_FUNNEL_EVENTS, latestIso, loadAccountFacts, oldestFirst, postWentOut, selectAll,
+  type AccountFacts,
+} from '@/lib/admin-metrics'
 import Link from 'next/link'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -19,7 +25,8 @@ function fmtDate(d: string | null | undefined): string {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function fmtMRR(n: number): string {
+function fmtMRR(n: number | null): string {
+  if (n == null) return '—'
   return n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`
 }
 
@@ -47,252 +54,184 @@ export default async function AdminOverviewPage() {
   const minus24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
   const minus14d = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()
   const minus30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  // Exclude every account of ours, not just the one signed in.
-  //
-  // This page filtered on `adminUserId` alone, which left the other three
-  // internal accounts in every number on it — including the seven posts
-  // gilgameshenterprisellc@gmail.com published in March. That is what kept
-  // "1 user has ever published" reading as true here long after /admin/funnel
-  // was corrected in #588, and it is why the signup count read 108 when 104
-  // real people had signed up.
-  //
-  // `.neq` can only exclude one value, so the filter below is a `not.in` list.
-  const adminUserId = user.id
-  const { data: allProfiles } = await admin.from('profiles').select('id, email')
-  const internalIds = internalIdsFrom(allProfiles ?? [])
-  internalIds.add(adminUserId)
+  // Every number below that fails to load is listed at the top of the page and
+  // shows as "—", never as a zero. Until Nov 10, 2026 each block here swallowed
+  // its error and rendered 0.
+  const warnings: string[] = []
+  const warn = (label: string, e: unknown) => {
+    const message = e instanceof Error ? e.message : typeof e === 'object' && e && 'message' in e ? String((e as { message: unknown }).message) : String(e)
+    console.warn(`[admin/overview] ${label}:`, message)
+    warnings.push(`${label}: ${message}`)
+  }
+  const headCount = async (label: string, q: PromiseLike<{ count: number | null; error: { message: string } | null }>): Promise<number | null> => {
+    const { count, error } = await q
+    if (error) { warn(label, error); return null }
+    return count ?? 0
+  }
+
+  // Accounts, connections and publishes, read and counted by
+  // lib/admin-metrics.ts, the same as /admin/funnel and /admin/users. Until
+  // Nov 10, 2026 this page counted accounts from profiles (two real accounts
+  // have no profile), new signups from personal workspaces (59 accounts have
+  // none, so the week to Nov 10 read 11 when 15 people signed up), and read
+  // posts unpaged.
+  let facts: AccountFacts
+  try {
+    facts = await loadAccountFacts(admin)
+  } catch (e) {
+    return (
+      <div style={{ minHeight: '100dvh', background: '#060607', color: '#E6E2DA', padding: 40, fontFamily: 'ui-monospace, monospace' }}>
+        <p>Could not load account data: {e instanceof Error ? e.message : String(e)}</p>
+        <p style={{ marginTop: 12 }}><Link href="/admin" style={{ color: '#D4A017' }}>Admin hub</Link></p>
+      </div>
+    )
+  }
+
+  // Exclude every account of ours, not just the one signed in
+  // (lib/internal-accounts.ts). `.neq` can only exclude one value, so the
+  // database filters below use a `not.in` list.
+  const internalIds = new Set(facts.internalIds)
+  internalIds.add(user.id)
   const notInternal = `(${Array.from(internalIds).join(',')})`
+  const customers = facts.users.filter(u => !internalIds.has(u.id))
+  const emailMap = new Map(facts.users.map(u => [u.id, u.email ?? '']))
+  const since = (iso: string, from: string) => Date.parse(iso) >= Date.parse(from)
 
   // ── 1. Growth snapshot ────────────────────────────────────────────────
-  // Two different numbers, because this page asks two different questions and
-  // was using one variable for both.
-  //
-  //   totalAccounts — how many accounts exist. Ours included, because they do
-  //                   exist, and because this is the figure the public counter
-  //                   and the admin hub both show. Those three disagreeing was
-  //                   the actual defect.
-  //   totalUsers    — the denominator for every activation ratio below. Ours
-  //                   excluded, because a numerator like funnelPublished counts
-  //                   only real people, and mixing the two is exactly what kept
-  //                   "1 user has ever published" alive for five months.
-  //
-  // Counted from profiles rather than the auth API, which has no way to filter.
-  const totalAccounts = (allProfiles ?? []).length
-  const totalUsers = (allProfiles ?? []).filter(r => !internalIds.has(r.id)).length
-  let newUsers7d = 0
-  let proCount = 0
-  let agencyCount = 0
+  //   totalAccounts — every account, ours included: the figure the public
+  //                   counter and the admin hub show.
+  //   totalUsers    — customers, the denominator for every activation ratio.
+  const totalAccounts = facts.users.length
+  const totalUsers = customers.length
+  const newUsers7d = customers.filter(u => since(u.created_at, minus7d)).length
 
+  const proCount = await headCount('Pro workspaces', admin
+    .from('workspaces')
+    .select('id', { count: 'exact', head: true })
+    .in('plan', ['pro', 'pro_annual'])
+    .eq('is_personal', true)
+    .not('owner_id', 'in', notInternal))
+
+  const agencyCount = await headCount('Agency workspaces', admin
+    .from('workspaces')
+    .select('id', { count: 'exact', head: true })
+    .in('plan', ['agency', 'agency_annual'])
+    .eq('is_personal', true)
+    .not('owner_id', 'in', notInternal))
+
+  // ── 2. Revenue ────────────────────────────────────────────────────────
+  // From Stripe, the same calculation /admin/hq uses (lib/hq/stripe.ts).
+  // This used to be plan counts times list price, which counted the August
+  // customer's cancelled annual plan as $8 a month until it runs out in 2027,
+  // and could not see add-ons, discounts or legacy prices at all.
+  const activePaidCount = await headCount('Paid workspaces', admin
+    .from('workspaces')
+    .select('id', { count: 'exact', head: true })
+    .neq('plan', 'free')
+    .eq('is_personal', true)
+    .not('owner_id', 'in', notInternal))
+
+  let estimatedMRR: number | null = null
+  let endingSubs = 0
   try {
-    // New users last 7d — count from workspaces created (personal workspaces proxy for new users)
-    const { count } = await admin
-      .from('workspaces')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_personal', true)
-      .not('owner_id', 'in', notInternal)
-      .gte('created_at', minus7d)
-    newUsers7d = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { count } = await admin
-      .from('workspaces')
-      .select('id', { count: 'exact', head: true })
-      .in('plan', ['pro', 'pro_annual'])
-      .eq('is_personal', true)
-      .not('owner_id', 'in', notInternal)
-    proCount = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { count } = await admin
-      .from('workspaces')
-      .select('id', { count: 'exact', head: true })
-      .in('plan', ['agency', 'agency_annual'])
-      .eq('is_personal', true)
-      .not('owner_id', 'in', notInternal)
-    agencyCount = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  // ── 2. Revenue signals ────────────────────────────────────────────────
-  let activePaidCount = 0
-  let autopilotCount = 0
-
-  try {
-    const { count } = await admin
-      .from('workspaces')
-      .select('id', { count: 'exact', head: true })
-      .neq('plan', 'free')
-      .eq('is_personal', true)
-      .not('owner_id', 'in', notInternal)
-    activePaidCount = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { count } = await admin
-      .from('workspaces')
-      .select('id', { count: 'exact', head: true })
-      .eq('soma_autopilot_enabled', true)
-      .not('owner_id', 'in', notInternal)
-    autopilotCount = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  // $8/$29 per the Aug 12, 2026 repricing (PRs #555-557). This silently kept
-  // quoting the pre-repricing $5/$20 for a month, understating MRR by roughly
-  // 45% the whole time. Legacy subscribers on the old $5/$20 price still exist
-  // (their Stripe price ID is grandfathered), so this is an approximation in
-  // either direction, not exact — but it should use the current price, not a
-  // retired one.
-  const estimatedMRR = (proCount * 8) + (agencyCount * 29) + (autopilotCount * 10)
+    const m = await fetchSubscriptionMrr(getStripe())
+    // RenewalMate and Enki bill through the same Stripe account.
+    const cents = m.mrrByGroup
+      .filter(g => g.group !== 'RenewalMate' && g.group !== 'Enki')
+      .reduce((s, g) => s + g.cents, 0)
+    estimatedMRR = Math.round(cents / 100)
+    endingSubs = m.endingSubscriptions.count
+    if (m.truncated) warnings.push('Stripe: more than 500 subscriptions, MRR is understated')
+  } catch (e) { warn('Stripe MRR', e) }
 
   // ── 3. Platform health (last 24h) ─────────────────────────────────────
-  let published24h = 0
-  let failed24h = 0
-  let partial24h = 0
+  // Customers only: our own automation volume is not a live activity gauge.
+  const published24h = await headCount('Published 24h', admin
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'published')
+    .gte('published_at', minus24h)
+    .not('user_id', 'in', notInternal))
 
-  // Unlike every other block on this page, these three had no internal-account
-  // exclusion — socialmatehq's own SOMA automation volume was blending into
-  // what reads as a live activity gauge, the same self-contradiction #611/#655
-  // fixed elsewhere, just missed here.
-  try {
-    const { count } = await admin
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'published')
-      .gte('published_at', minus24h)
-      .not('user_id', 'in', notInternal)
-    published24h = count ?? 0
-  } catch { /* graceful fallback */ }
+  const failed24h = await headCount('Failed 24h', admin
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'failed')
+    .gte('updated_at', minus24h)
+    .not('user_id', 'in', notInternal))
 
-  try {
-    const { count } = await admin
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'failed')
-      .gte('updated_at', minus24h)
-      .not('user_id', 'in', notInternal)
-    failed24h = count ?? 0
-  } catch { /* graceful fallback */ }
+  const partial24h = await headCount('Partial 24h', admin
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'partial')
+    .gte('updated_at', minus24h)
+    .not('user_id', 'in', notInternal))
 
-  try {
-    const { count } = await admin
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'partial')
-      .gte('updated_at', minus24h)
-      .not('user_id', 'in', notInternal)
-    partial24h = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  const totalAttempted24h = published24h + failed24h + partial24h
-  const successRate = totalAttempted24h > 0
-    ? Math.round((published24h / totalAttempted24h) * 100)
-    : 100
+  const totalAttempted24h = (published24h ?? 0) + (failed24h ?? 0) + (partial24h ?? 0)
+  // No attempts is no signal, not a 100% success rate.
+  const successRate: number | null = totalAttempted24h > 0
+    ? Math.round(((published24h ?? 0) / totalAttempted24h) * 100)
+    : null
 
   // ── 4. SOMA activity ──────────────────────────────────────────────────
-  let somaProjects = 0
-  let somaActiveProjects = 0
-  let somaCreditsMTD = 0
-  let lastAutopilotRun: string | null = null
+  const somaProjects = await headCount('SOMA projects', admin
+    .from('soma_projects')
+    .select('id', { count: 'exact', head: true }))
 
-  try {
-    const { count } = await admin
-      .from('soma_projects')
-      .select('id', { count: 'exact', head: true })
-    somaProjects = count ?? 0
-  } catch { /* soma_projects may not exist yet */ }
+  const somaActiveProjects = await headCount('SOMA active projects', admin
+    .from('soma_projects')
+    .select('id', { count: 'exact', head: true })
+    .in('mode', ['autopilot', 'full_send']))
 
+  let somaCreditsMTD: number | null = null
   try {
-    const { count } = await admin
-      .from('soma_projects')
-      .select('id', { count: 'exact', head: true })
-      .in('mode', ['autopilot', 'full_send'])
-    somaActiveProjects = count ?? 0
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { data: creditRows } = await admin
-      .from('workspaces')
-      .select('soma_credits_used')
-    somaCreditsMTD = (creditRows ?? []).reduce((acc, r) => acc + (r.soma_credits_used ?? 0), 0)
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { data: lastRun } = await admin
-      .from('soma_weekly_ingestion')
-      .select('created_at')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-    lastAutopilotRun = lastRun?.created_at ?? null
-  } catch { /* graceful fallback */ }
+    const creditRows = await selectAll<{ owner_id: string; soma_credits_used: number | null }>('workspaces', () =>
+      oldestFirst(admin.from('workspaces').select('owner_id, soma_credits_used')))
+    somaCreditsMTD = creditRows
+      .filter(r => !internalIds.has(r.owner_id))
+      .reduce((acc, r) => acc + (r.soma_credits_used ?? 0), 0)
+  } catch (e) { warn('SOMA credits', e) }
 
   // ── 5. Churn signals ──────────────────────────────────────────────────
-  let churnCount = 0
+  // Paid customers who joined over 30 days ago and have not published in 14.
+  // "Published" includes partial posts, like everywhere else.
+  let churnCount: number | null = null
   let churnEmails: string[] = []
-
   try {
-    // Paid users who joined > 30 days ago and have no post in 14+ days
-    const { data: paidWorkspaces } = await admin
+    const paidWorkspaces = await selectAll<{ owner_id: string }>('paid workspaces', () => oldestFirst(admin
       .from('workspaces')
-      .select('id, owner_id')
+      .select('owner_id')
       .in('plan', ['pro', 'pro_annual', 'agency', 'agency_annual'])
       .eq('is_personal', true)
       .not('owner_id', 'in', notInternal)
-      .lte('created_at', minus30d)
-
-    if (paidWorkspaces && paidWorkspaces.length > 0) {
-      const ownerIds = paidWorkspaces.map(w => w.owner_id)
-
-      // Get owner emails from auth
-      const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000 })
-      const emailMap = new Map((listData?.users ?? []).map(u => [u.id, u.email ?? '']))
-
-      // For each, check their last post
-      const atRisk: string[] = []
-      for (const ws of paidWorkspaces) {
-        const { data: lastPost } = await admin
-          .from('posts')
-          .select('published_at')
-          .eq('user_id', ws.owner_id)
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-
-        const isAtRisk = !lastPost || (lastPost.published_at && lastPost.published_at < minus14d)
-        if (isAtRisk) {
-          const email = emailMap.get(ws.owner_id)
-          if (email) atRisk.push(email)
-        }
-      }
-
-      churnCount = atRisk.length
-      churnEmails = atRisk.slice(0, 10)
-    }
-  } catch { /* graceful fallback */ }
+      .lte('created_at', minus30d)))
+    const atRisk = paidWorkspaces
+      .filter(ws => {
+        const last = facts.lastPublishedAt.get(ws.owner_id)
+        return !last || !since(last, minus14d)
+      })
+      .map(ws => emailMap.get(ws.owner_id))
+      .filter((e): e is string => !!e)
+    churnCount = atRisk.length
+    churnEmails = atRisk.slice(0, 10)
+  } catch (e) { warn('Churn', e) }
 
   // ── 6. Platform distribution ─────────────────────────────────────────
   interface PlatformCount { platform: string; count: number }
   let platformDist: PlatformCount[] = []
-
   try {
-    const { data: accounts } = await admin
-      .from('connected_accounts')
-      .select('platform, user_id')
-      .not('user_id', 'in', notInternal)
-    if (accounts) {
-      const pm = new Map<string, number>()
-      for (const acc of accounts) {
-        pm.set(acc.platform, (pm.get(acc.platform) ?? 0) + 1)
-      }
-      platformDist = Array.from(pm.entries())
-        .map(([platform, count]) => ({ platform, count }))
-        .sort((a, b) => b.count - a.count)
+    const accounts = await selectAll<{ user_id: string; platform: string }>('connected_accounts', () =>
+      oldestFirst(admin.from('connected_accounts').select('user_id, platform')))
+    const pm = new Map<string, number>()
+    for (const acc of accounts) {
+      if (internalIds.has(acc.user_id)) continue
+      pm.set(acc.platform, (pm.get(acc.platform) ?? 0) + 1)
     }
-  } catch { /* graceful fallback */ }
+    platformDist = Array.from(pm.entries())
+      .map(([platform, count]) => ({ platform, count }))
+      .sort((a, b) => b.count - a.count)
+  } catch (e) { warn('Platforms', e) }
 
   // ── 7. Signup attribution ─────────────────────────────────────────────
   interface SourceCount { source: string; count: number }
@@ -301,69 +240,71 @@ export default async function AdminOverviewPage() {
   let blogAttribution: SourceCount[] = []
   let attributedCount = 0
   let referredCount = 0
-  let totalTracked = 0
+  // Every customer, not every user_settings row: an account with no settings
+  // row is still a signup, just one with no source recorded.
+  const totalTracked = totalUsers
 
   try {
-    const { data: sourceRows } = await admin
+    type SourceRow = { user_id: string; signup_source: string | null; signup_medium: string | null; signup_campaign: string | null; signup_referrer: string | null }
+    const sourceRows = (await selectAll<SourceRow>('user_settings', () => oldestFirst(admin
       .from('user_settings')
-      .select('signup_source, signup_medium, signup_campaign, signup_referrer')
-      .not('user_id', 'in', notInternal)
+      .select('user_id, signup_source, signup_medium, signup_campaign, signup_referrer'))))
+      .filter(r => !internalIds.has(r.user_id))
 
-    if (sourceRows) {
-      totalTracked = sourceRows.length
-      const sourceMap = new Map<string, number>()
-      const refMap = new Map<string, number>()
-      const blogMap = new Map<string, number>()
+    const sourceMap = new Map<string, number>()
+    const refMap = new Map<string, number>()
+    const blogMap = new Map<string, number>()
 
-      for (const row of sourceRows) {
-        const src = row.signup_source
-        const ref = row.signup_referrer
+    for (const row of sourceRows) {
+      const src = row.signup_source
+      const ref = row.signup_referrer
 
-        if (src) {
-          attributedCount++
-          const label = row.signup_campaign
-            ? `${src} / ${row.signup_campaign}`
-            : row.signup_medium
-            ? `${src} / ${row.signup_medium}`
-            : src
-          sourceMap.set(label, (sourceMap.get(label) ?? 0) + 1)
-        }
-
-        if (ref) {
-          referredCount++
-          try {
-            const url = new URL(ref)
-            const host = url.hostname.replace('www.', '')
-            refMap.set(host, (refMap.get(host) ?? 0) + 1)
-
-            const blogMatch = url.pathname.match(/^\/blog\/([^/]+)/)
-            if (blogMatch && host.includes('socialmate.studio')) {
-              blogMap.set(blogMatch[1], (blogMap.get(blogMatch[1]) ?? 0) + 1)
-            }
-          } catch {
-            refMap.set(ref.slice(0, 40), (refMap.get(ref.slice(0, 40)) ?? 0) + 1)
-          }
-        }
+      if (src) {
+        attributedCount++
+        const label = row.signup_campaign
+          ? `${src} / ${row.signup_campaign}`
+          : row.signup_medium
+          ? `${src} / ${row.signup_medium}`
+          : src
+        sourceMap.set(label, (sourceMap.get(label) ?? 0) + 1)
       }
 
-      signupSources = Array.from(sourceMap.entries())
-        .map(([source, count]) => ({ source, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
+      if (ref) {
+        referredCount++
+        try {
+          const url = new URL(ref)
+          const host = url.hostname.replace('www.', '')
+          refMap.set(host, (refMap.get(host) ?? 0) + 1)
 
-      signupReferrers = Array.from(refMap.entries())
-        .map(([source, count]) => ({ source, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
-
-      blogAttribution = Array.from(blogMap.entries())
-        .map(([source, count]) => ({ source, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
+          const blogMatch = url.pathname.match(/^\/blog\/([^/]+)/)
+          if (blogMatch && host.includes('socialmate.studio')) {
+            blogMap.set(blogMatch[1], (blogMap.get(blogMatch[1]) ?? 0) + 1)
+          }
+        } catch {
+          refMap.set(ref.slice(0, 40), (refMap.get(ref.slice(0, 40)) ?? 0) + 1)
+        }
+      }
     }
-  } catch { /* graceful fallback */ }
+
+    signupSources = Array.from(sourceMap.entries())
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+
+    signupReferrers = Array.from(refMap.entries())
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+
+    blogAttribution = Array.from(blogMap.entries())
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+  } catch (e) { warn('Signup attribution', e) }
 
   // ── 8. Recent signups ─────────────────────────────────────────────────
+  // From auth, newest first. This listed newest personal workspaces, which
+  // skipped everyone who signed up and never got one.
   interface RecentUser {
     email: string
     plan: string
@@ -373,121 +314,95 @@ export default async function AdminOverviewPage() {
   let recentUsers: RecentUser[] = []
 
   try {
-    const { data: recentWorkspaces } = await admin
-      .from('workspaces')
-      .select('owner_id, plan, created_at')
-      .eq('is_personal', true)
-      .not('owner_id', 'in', notInternal)
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const newest = customers
+      .slice()
+      .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+      .slice(0, 10)
+    const ids = newest.map(u => u.id)
+    const [wsRows, settingsRows, postRows] = await Promise.all([
+      selectAll<{ owner_id: string; plan: string | null; is_personal: boolean | null }>('workspaces (recent)', () =>
+        oldestFirst(admin.from('workspaces').select('owner_id, plan, is_personal').in('owner_id', ids))),
+      selectAll<{ user_id: string; plan: string | null }>('user_settings (recent)', () =>
+        oldestFirst(admin.from('user_settings').select('user_id, plan').in('user_id', ids))),
+      selectAll<{ user_id: string }>('posts (recent)', () =>
+        oldestFirst(admin.from('posts').select('user_id').in('user_id', ids))),
+    ])
+    const planOf = (id: string) => normalizePlan(
+      wsRows.find(w => w.owner_id === id && w.is_personal && w.plan)?.plan
+        ?? settingsRows.find(s => s.user_id === id)?.plan
+        ?? null,
+    )
+    recentUsers = newest.map(u => ({
+      email: u.email ?? '(no email)',
+      plan: planOf(u.id),
+      created_at: u.created_at,
+      posts_count: postRows.filter(p => p.user_id === u.id).length,
+    }))
+  } catch (e) { warn('Recent signups', e) }
 
-    if (recentWorkspaces && recentWorkspaces.length > 0) {
-      const ownerIds = recentWorkspaces.map(w => w.owner_id)
+  // ── 9. Activation funnel ─────────────────────────────────────────────
+  // "Ever", from rows and the events that outlive them: a removed connection
+  // or a deleted post still happened. Identical to /admin/funnel.
+  const funnelConnected = customers.filter(u => facts.connected.has(u.id)).length
+  const funnelPosted    = customers.filter(u => facts.posted.has(u.id)).length
+  const funnelPublished = customers.filter(u => facts.published.has(u.id)).length
+  const funnelRetained  = customers.filter(u => {
+    const last = facts.lastPublishedAt.get(u.id)
+    return !!last && since(last, minus7d)
+  }).length
 
-      const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000 })
-      const emailMap = new Map((listData?.users ?? []).map(u => [u.id, u.email ?? '']))
-
-      // Batch post counts
-      const postCountMap = new Map<string, number>()
-      for (const ownerId of ownerIds) {
-        const { count } = await admin
-          .from('posts')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', ownerId)
-        postCountMap.set(ownerId, count ?? 0)
-      }
-
-      recentUsers = recentWorkspaces.map(ws => ({
-        email: emailMap.get(ws.owner_id) ?? '(unknown)',
-        plan: ws.plan ?? 'free',
-        created_at: ws.created_at,
-        posts_count: postCountMap.get(ws.owner_id) ?? 0,
-      }))
-    }
-  } catch { /* graceful fallback */ }
-
-  // ── 8. Activation funnel ─────────────────────────────────────────────
-  let funnelConnected = 0
-  let funnelPosted    = 0
-  let funnelPublished = 0
-  let funnelRetained  = 0
-
-  try {
-    const { data } = await admin
-      .from('connected_accounts')
-      .select('user_id')
-      .not('user_id', 'in', notInternal)
-    if (data) funnelConnected = new Set(data.map(r => r.user_id)).size
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { data } = await admin
-      .from('posts')
-      .select('user_id')
-      .not('user_id', 'in', notInternal)
-    if (data) funnelPosted = new Set(data.map(r => r.user_id)).size
-  } catch { /* graceful fallback */ }
-
-  try {
-    // A post that reached some but not all selected platforms is still a real
-    // publish, not a no-op — a strict 'published' filter here was undercounting
-    // every multi-platform post that had one platform flake, which is normal
-    // and common. Matches /admin/funnel's Ground Truth, which already treats
-    // partial the same way.
-    const { data } = await admin
-      .from('posts')
-      .select('user_id')
-      .in('status', ['published', 'partial'])
-      .not('user_id', 'in', notInternal)
-    if (data) funnelPublished = new Set(data.map(r => r.user_id)).size
-  } catch { /* graceful fallback */ }
-
-  try {
-    const { data } = await admin
-      .from('posts')
-      .select('user_id')
-      .in('status', ['published', 'partial'])
-      .gte('published_at', minus7d)
-      .not('user_id', 'in', notInternal)
-    if (data) funnelRetained = new Set(data.map(r => r.user_id)).size
-  } catch { /* graceful fallback */ }
-
-  // ── 9. Power users (most active by login count) ───────────────────────
+  // ── 10. Power users (most active by login count) ──────────────────────
   interface PowerUser { user_id: string; email: string; login_count: number; last_active: string | null; posts_count: number }
   let powerUsers: PowerUser[] = []
 
   try {
-    const { data: pwSettings } = await admin
+    const { data: pwSettings, error: pwErr } = await admin
       .from('user_settings')
       .select('user_id, login_count, last_active')
       .not('user_id', 'in', notInternal)
       .gt('login_count', 0)
       .order('login_count', { ascending: false })
       .limit(10)
+    if (pwErr) throw pwErr
 
     if (pwSettings && pwSettings.length > 0) {
-      const pwIds = pwSettings.map(s => s.user_id)
-      const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000 })
-      const emailMap = new Map((listData?.users ?? []).map(u => [u.id, u.email ?? '']))
-
+      const pwIds = pwSettings.map(s => s.user_id as string)
+      const postRows = await selectAll<{ user_id: string; status: string | null; published_at: string | null }>('posts (power users)', () =>
+        oldestFirst(admin.from('posts').select('user_id, status, published_at').in('user_id', pwIds)))
       const postCountMap = new Map<string, number>()
-      const { data: postRows } = await admin
-        .from('posts')
-        .select('user_id, status')
-        .in('user_id', pwIds)
-      for (const p of postRows ?? []) {
-        if (p.status === 'published') postCountMap.set(p.user_id, (postCountMap.get(p.user_id) ?? 0) + 1)
+      for (const p of postRows) {
+        if (postWentOut(p)) postCountMap.set(p.user_id, (postCountMap.get(p.user_id) ?? 0) + 1)
       }
+
+      // user_settings.last_active is only written on the login page, and
+      // sessions persist, so take the latest of it, the last sign-in and the
+      // last thing they did in the app (the same rule as /admin/users).
+      const systemEvents = `(${Array.from(SYSTEM_FUNNEL_EVENTS).join(',')})`
+      const lastEvents = await Promise.all(pwIds.map(async id => {
+        const { data, error } = await admin
+          .from('usage_events')
+          .select('created_at')
+          .eq('user_id', id)
+          .like('event_type', 'funnel_%')
+          .not('event_type', 'in', systemEvents)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (error) throw error
+        return [id, (data?.created_at as string | undefined) ?? null] as const
+      }))
+      const lastEventMap = new Map(lastEvents)
+      const signInMap = new Map(facts.users.map(u => [u.id, u.last_sign_in_at ?? null]))
 
       powerUsers = pwSettings.map(s => ({
         user_id:     s.user_id,
         email:       emailMap.get(s.user_id) ?? '(unknown)',
         login_count: s.login_count ?? 0,
-        last_active: s.last_active ?? null,
+        last_active: latestIso(s.last_active, signInMap.get(s.user_id), lastEventMap.get(s.user_id)),
         posts_count: postCountMap.get(s.user_id) ?? 0,
       }))
     }
-  } catch { /* graceful fallback */ }
+  } catch (e) { warn('Power users', e) }
 
   // ── render ─────────────────────────────────────────────────────────────
   const QUICK_LINKS = [
@@ -684,11 +599,19 @@ export default async function AdminOverviewPage() {
 
         {/* ── Status rail ──────────────────────────────────────────────── */}
         <div className="hud-rail">
-          <span className="hud-sig"><span className="hud-dot" />Systems <b>{failed24h === 0 ? 'nominal' : 'degraded'}</b></span>
-          <span className="hud-sig">Publish 24h <b>{successRate}%</b></span>
+          <span className="hud-sig"><span className="hud-dot" />Systems <b>{failed24h === null ? 'unknown' : failed24h === 0 ? 'nominal' : 'degraded'}</b></span>
+          <span className="hud-sig">Publish 24h <b>{successRate === null ? '—' : `${successRate}%`}</b></span>
           <span className="hud-sig">Revenue <b>{fmtMRR(estimatedMRR)}/mo</b></span>
           <span className="hud-sig hud-spacer">Operator <b>{user.email?.split('@')[0] ?? 'admin'}</b></span>
         </div>
+
+        {warnings.length > 0 && (
+          <div className="hud-card" style={{ padding: '14px 18px', marginBottom: 18, borderColor: 'var(--sev-high)' }}>
+            <p style={{ color: 'var(--sev-high)', fontSize: 13 }}>
+              Some numbers did not load and show as &ldquo;—&rdquo;: {warnings.join('; ')}
+            </p>
+          </div>
+        )}
 
         <p className="hud-kicker">Command Deck · God Mode</p>
         <div className="hud-mast">
@@ -771,26 +694,29 @@ export default async function AdminOverviewPage() {
           <div className="hud-card hud-tile">
             <div className={`hud-n ${newUsers7d === 0 ? 'dim' : ''}`}>{fmt(newUsers7d)}</div>
             <div className="hud-l">New last 7d</div>
-            <div className="hud-s">{totalAccounts > 0 ? `+${((newUsers7d / totalAccounts) * 100).toFixed(1)}% on base` : 'no base yet'}</div>
+            <div className="hud-s">{totalUsers > 0 ? `+${((newUsers7d / totalUsers) * 100).toFixed(1)}% on base · customers` : 'no base yet'}</div>
             <span className={`hud-chip ${newUsers7d > 0 ? 'pos' : 'idle'}`}>{newUsers7d > 0 ? 'Steady intake' : 'No signups'}</span>
           </div>
           <Link href="/admin/users?plan=pro" className="hud-card hud-tile">
             <div className={`hud-n ${proCount === 0 ? 'dim' : ''}`}>{fmt(proCount)}</div>
             <div className="hud-l">Pro</div>
             <div className="hud-s">pro + annual</div>
-            <span className={`hud-chip ${proCount > 0 ? 'pos' : 'idle'}`}>{proCount > 0 ? 'Paying' : 'None yet'}</span>
+            <span className={`hud-chip ${(proCount ?? 0) > 0 ? 'pos' : 'idle'}`}>{proCount == null ? 'Unavailable' : proCount > 0 ? 'Paying' : 'None yet'}</span>
           </Link>
           <Link href="/admin/users?plan=agency" className="hud-card hud-tile">
             <div className={`hud-n ${agencyCount === 0 ? 'dim' : ''}`}>{fmt(agencyCount)}</div>
             <div className="hud-l">Agency</div>
             <div className="hud-s">agency + annual</div>
-            <span className={`hud-chip ${agencyCount > 0 ? 'pos' : 'idle'}`}>{agencyCount > 0 ? 'Paying' : 'None yet'}</span>
+            <span className={`hud-chip ${(agencyCount ?? 0) > 0 ? 'pos' : 'idle'}`}>{agencyCount == null ? 'Unavailable' : agencyCount > 0 ? 'Paying' : 'None yet'}</span>
           </Link>
           <div className="hud-card hud-tile">
-            <div className={`hud-n ${estimatedMRR === 0 ? 'dim' : ''}`}>{fmtMRR(estimatedMRR)}</div>
+            <div className={`hud-n ${!estimatedMRR ? 'dim' : ''}`}>{fmtMRR(estimatedMRR)}</div>
             <div className="hud-l">Est. MRR</div>
-            <div className="hud-s">{fmt(activePaidCount)} paid workspace{activePaidCount === 1 ? '' : 's'} · excludes admin</div>
-            <span className={`hud-chip ${estimatedMRR > 0 ? 'pos' : 'mid'}`}>{estimatedMRR > 0 ? 'Earning' : 'Pre-revenue'}</span>
+            <div className="hud-s">
+              Stripe, renewing subscriptions · {fmt(activePaidCount)} on a paid plan
+              {endingSubs > 0 && ` · ${endingSubs} cancelled, paid through`}
+            </div>
+            <span className={`hud-chip ${estimatedMRR ? 'pos' : 'mid'}`}>{estimatedMRR == null ? 'Unavailable' : estimatedMRR > 0 ? 'Earning' : 'Pre-revenue'}</span>
           </div>
         </div>
 
@@ -801,15 +727,15 @@ export default async function AdminOverviewPage() {
             <div className={`hud-n ${churnCount === 0 ? '' : 'dim'}`}>{fmt(churnCount)}</div>
             <div className="hud-l">Paid at risk</div>
             <div className="hud-s">
-              {churnCount === 0 ? '30d+ old · no post in 14d' : churnEmails.slice(0, 2).join(', ')}
+              {churnCount === null ? 'could not load' : churnCount === 0 ? '30d+ old · no post in 14d' : churnEmails.slice(0, 2).join(', ')}
             </div>
-            <span className={`hud-chip ${churnCount === 0 ? 'pos' : 'high'}`}>{churnCount === 0 ? 'All clear' : 'Needs outreach'}</span>
+            <span className={`hud-chip ${churnCount === null ? 'idle' : churnCount === 0 ? 'pos' : 'high'}`}>{churnCount === null ? 'Unavailable' : churnCount === 0 ? 'All clear' : 'Needs outreach'}</span>
           </div>
           <div className="hud-card hud-tile">
             <div className={`hud-n ${failed24h === 0 ? '' : 'dim'}`}>{fmt(failed24h)}</div>
             <div className="hud-l">Failed 24h</div>
             <div className="hud-s">status = failed</div>
-            <span className={`hud-chip ${failed24h === 0 ? 'pos' : 'high'}`}>{failed24h === 0 ? 'Clean' : 'Investigate'}</span>
+            <span className={`hud-chip ${failed24h === null ? 'idle' : failed24h === 0 ? 'pos' : 'high'}`}>{failed24h === null ? 'Unavailable' : failed24h === 0 ? 'Clean' : 'Investigate'}</span>
           </div>
           <div className="hud-card hud-tile">
             <div className={`hud-n ${topReferrer ? '' : 'dim'}`}>{topReferrer ? fmt(topReferrer.count) : '0'}</div>
@@ -832,33 +758,33 @@ export default async function AdminOverviewPage() {
             <div className={`hud-n ${published24h === 0 ? 'dim' : ''}`}>{fmt(published24h)}</div>
             <div className="hud-l">Published</div>
             <div className="hud-s">status = published</div>
-            <span className={`hud-chip ${published24h > 0 ? 'pos' : 'idle'}`}>{published24h > 0 ? 'Flowing' : 'Quiet'}</span>
+            <span className={`hud-chip ${(published24h ?? 0) > 0 ? 'pos' : 'idle'}`}>{published24h == null ? 'Unavailable' : published24h > 0 ? 'Flowing' : 'Quiet'}</span>
           </div>
           <div className="hud-card hud-tile">
             <div className={`hud-n ${failed24h === 0 ? 'dim' : ''}`}>{fmt(failed24h)}</div>
             <div className="hud-l">Failed</div>
             <div className="hud-s">status = failed</div>
-            <span className={`hud-chip ${failed24h === 0 ? 'pos' : 'high'}`}>{failed24h === 0 ? 'None' : 'Errors'}</span>
+            <span className={`hud-chip ${failed24h === null ? 'idle' : failed24h === 0 ? 'pos' : 'high'}`}>{failed24h === null ? 'Unavailable' : failed24h === 0 ? 'None' : 'Errors'}</span>
           </div>
           <div className="hud-card hud-tile">
             <div className={`hud-n ${partial24h === 0 ? 'dim' : ''}`}>{fmt(partial24h)}</div>
             <div className="hud-l">Partial</div>
             <div className="hud-s">status = partial</div>
-            <span className={`hud-chip ${partial24h === 0 ? 'pos' : 'mid'}`}>{partial24h === 0 ? 'None' : 'Degraded'}</span>
+            <span className={`hud-chip ${partial24h === null ? 'idle' : partial24h === 0 ? 'pos' : 'mid'}`}>{partial24h === null ? 'Unavailable' : partial24h === 0 ? 'None' : 'Degraded'}</span>
           </div>
           <Link href="/admin/platform-stats" className="hud-card hud-tile">
-            <div className={`hud-n ${totalAttempted24h === 0 ? 'dim' : ''}`}>{successRate}%</div>
+            <div className={`hud-n ${totalAttempted24h === 0 ? 'dim' : ''}`}>{successRate === null ? '—' : `${successRate}%`}</div>
             <div className="hud-l">Success rate</div>
             <div className="hud-s">{totalAttempted24h === 0 ? '0 attempts this window' : `${fmt(totalAttempted24h)} attempts`}</div>
-            <span className={`hud-chip ${totalAttempted24h === 0 ? 'idle' : successRate >= 95 ? 'pos' : successRate >= 80 ? 'mid' : 'high'}`}>
-              {totalAttempted24h === 0 ? 'No signal' : successRate >= 95 ? 'Healthy' : successRate >= 80 ? 'Watch' : 'Failing'}
+            <span className={`hud-chip ${successRate === null ? 'idle' : successRate >= 95 ? 'pos' : successRate >= 80 ? 'mid' : 'high'}`}>
+              {successRate === null ? 'No signal' : successRate >= 95 ? 'Healthy' : successRate >= 80 ? 'Watch' : 'Failing'}
             </span>
           </Link>
           <div className="hud-card hud-tile">
             <div className={`hud-n ${somaActiveProjects === 0 ? 'dim' : ''}`}>{fmt(somaActiveProjects)}</div>
             <div className="hud-l">SOMA active</div>
-            <div className="hud-s">{fmt(somaProjects)} projects · {fmt(somaCreditsMTD)} credits MTD</div>
-            <span className={`hud-chip ${somaActiveProjects > 0 ? 'pos' : 'idle'}`}>{somaActiveProjects > 0 ? 'Running' : 'Idle'}</span>
+            <div className="hud-s">{fmt(somaProjects)} projects · {fmt(somaCreditsMTD)} credits used this cycle</div>
+            <span className={`hud-chip ${(somaActiveProjects ?? 0) > 0 ? 'pos' : 'idle'}`}>{somaActiveProjects == null ? 'Unavailable' : somaActiveProjects > 0 ? 'Running' : 'Idle'}</span>
           </div>
         </div>
 
@@ -947,7 +873,7 @@ export default async function AdminOverviewPage() {
           ) : (
             <table>
               <thead>
-                <tr><th>Account</th><th>Logins</th><th>Posts</th><th>Last active</th><th>Action</th></tr>
+                <tr><th>Account</th><th>Logins</th><th>Published</th><th>Last active</th><th>Action</th></tr>
               </thead>
               <tbody>
                 {powerUsers.map(u => (
@@ -1006,7 +932,7 @@ export default async function AdminOverviewPage() {
         </div>
 
         <div className="hud-foot">
-          <span>Live data · excludes admin account</span>
+          <span>Live data · customers only, our {internalIds.size} accounts excluded</span>
           <span>/admin/overview</span>
         </div>
       </div>

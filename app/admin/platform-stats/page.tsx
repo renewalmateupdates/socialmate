@@ -22,9 +22,9 @@ interface TopUser {
 
 interface StatsData {
   platform_stats: Record<string, PlatformStat>
-  posts_today: number
-  posts_week: number
-  posts_month: number
+  posts_24h: number
+  posts_7d: number
+  posts_30d: number
   top_users: TopUser[]
   total_published: number
   total_failed: number
@@ -81,7 +81,9 @@ export default function AdminPlatformStatsPage() {
         <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Platform Stats</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">Posts published per platform and trends</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
+              Customers&rsquo; posts per platform, our own accounts left out. A post counts once it reached at least one platform.
+            </p>
           </div>
           <button onClick={() => router.push('/admin')}
             className="text-sm text-gray-400 hover:text-black dark:hover:text-white transition-colors">
@@ -98,9 +100,9 @@ export default function AdminPlatformStatsPage() {
             {/* Time range summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { label: 'Today',          value: data.posts_today,      color: 'text-green-600 dark:text-green-400'   },
-                { label: 'Last 7 days',    value: data.posts_week,       color: 'text-blue-600 dark:text-blue-400'     },
-                { label: 'This month',     value: data.posts_month,      color: 'text-purple-600 dark:text-purple-400' },
+                { label: 'Last 24 hours',  value: data.posts_24h,        color: 'text-green-600 dark:text-green-400'   },
+                { label: 'Last 7 days',    value: data.posts_7d,         color: 'text-blue-600 dark:text-blue-400'     },
+                { label: 'Last 30 days',   value: data.posts_30d,        color: 'text-purple-600 dark:text-purple-400' },
                 { label: 'Total published',value: data.total_published,  color: 'text-gray-900 dark:text-gray-100'     },
               ].map((c, i) => (
                 <div key={i} className="bg-surface border border-theme rounded-2xl p-5">
@@ -159,14 +161,14 @@ export default function AdminPlatformStatsPage() {
             {/* Top posting users */}
             {data.top_users.length > 0 && (
               <div>
-                <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Top posting users</h2>
+                <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Top posting customers</h2>
                 <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-theme bg-gray-50 dark:bg-gray-800/50">
                         <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">#</th>
                         <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">User</th>
-                        <th className="text-right px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Posts</th>
+                        <th className="text-right px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Published</th>
                       </tr>
                     </thead>
                     <tbody>
