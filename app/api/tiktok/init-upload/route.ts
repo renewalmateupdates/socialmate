@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
+import { tiktokChunkPlan } from '@/lib/tiktok-chunks'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
   } = body
 
   if (!video_size) return NextResponse.json({ error: 'video_size required' }, { status: 400 })
+  const plan = tiktokChunkPlan(Number(video_size))
 
   const auth = await getValidAccessToken(user.id)
   if (!auth.ok) return NextResponse.json({ error: auth.message }, { status: 400 })
@@ -120,8 +122,8 @@ export async function POST(request: NextRequest) {
       source_info: {
         source:             'FILE_UPLOAD',
         video_size:         video_size,
-        chunk_size:         video_size,   // single chunk
-        total_chunk_count:  1,
+        // One piece up to 64 MB, 10 MB pieces above that (lib/tiktok-chunks.ts).
+        ...plan,
       },
     }),
   })
@@ -160,5 +162,10 @@ export async function POST(request: NextRequest) {
   const { publish_id, upload_url } = initData?.data ?? {}
   if (!upload_url) return NextResponse.json({ error: 'No upload URL from TikTok' }, { status: 502 })
 
-  return NextResponse.json({ upload_url, publish_id, open_id: auth.openId, full_caption: fullCaption, destination: toInbox ? 'inbox' : 'direct' })
+  return NextResponse.json({
+    upload_url, publish_id, open_id: auth.openId, full_caption: fullCaption,
+    destination: toInbox ? 'inbox' : 'direct',
+    // Studio PUTs the file in exactly these pieces.
+    chunk_size: plan.chunk_size, total_chunk_count: plan.total_chunk_count,
+  })
 }
