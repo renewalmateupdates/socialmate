@@ -12,6 +12,7 @@ import { CAMPAIGN_REWORD_COST } from '@/lib/ai-tool-costs'
 import { isValidTimeZone, localDayKey, validateCampaign } from '@/lib/campaigns'
 import { campaignWorkspace } from '@/lib/campaign-access'
 import { writeVariants } from '@/lib/campaign-variants'
+import { addTrackedLinks } from '@/lib/campaign-links'
 import { topUpCampaign, type CampaignRow } from '@/lib/campaign-run'
 import { recordUsage } from '@/lib/usage'
 
@@ -139,6 +140,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Click counting is on unless the form turned it off: each link gets a
+  // socialmate.studio/go short link that counts clicks per message.
+  let linkNote: string | null = null
+  if (body.trackLinks !== false) {
+    const tracking = await addTrackedLinks(db, user.id, check.value.name, messages)
+    messages = tracking.messages
+    if (tracking.untracked > 0) {
+      linkNote = `${tracking.untracked} link${tracking.untracked === 1 ? '' : 's'} will go out as written, without click counts.`
+    }
+  }
+
   const { data: row, error: insertErr } = await db.from('campaigns').insert({
     user_id:      user.id,
     workspace_id: ws.workspaceId,
@@ -155,6 +167,12 @@ export async function POST(req: NextRequest) {
   }).select('*').single()
   if (insertErr || !row) {
     console.error('[campaigns] insert failed:', insertErr?.message)
+    // The short links made for this campaign would sit unused in Link Shortener.
+    const slugs = messages.flatMap(m => (m.links ?? []).map(l => l.slug))
+    if (slugs.length) {
+      const { error: cleanErr } = await db.from('short_links').delete().in('slug', slugs).eq('user_id', user.id)
+      if (cleanErr) console.warn('[campaigns] short link cleanup failed:', cleanErr.message)
+    }
     if (split && charged > 0) await refundAiCredits(supabase, user.id, split)
     return NextResponse.json({ error: 'Could not save the campaign. Nothing was charged.' }, { status: 500 })
   }
@@ -171,5 +189,5 @@ export async function POST(req: NextRequest) {
     first_week:  topUp.created,
   })
 
-  return NextResponse.json({ id: row.id, created: topUp.created, note: topUp.note, charged })
+  return NextResponse.json({ id: row.id, created: topUp.created, note: [topUp.note, linkNote].filter(Boolean).join(' ') || null, charged })
 }

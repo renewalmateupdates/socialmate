@@ -12,11 +12,17 @@
 // has a post is skipped even if two runs overlap.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { TOP_UP_DAYS, campaignSlots, localDayKey, pickContent, type CampaignMessage } from './campaigns'
+import {
+  TOP_UP_DAYS, campaignSlots, charLimitFor, localDayKey, pickContent, withTrackedLinks, type CampaignMessage,
+} from './campaigns'
 import { postLimitFor, postsUsedThisMonth, scheduleWeeksFor } from './post-limits'
 import { resolveWorkspacePlan } from './plan'
 
 const DAY_MS = 86_400_000
+
+// Short links always point at production, like the Link Shortener's own
+// (app/api/links/route.ts): a preview deployment's host must not end up in a post.
+const SHORT_LINK_ORIGIN = 'https://socialmate.studio'
 
 export interface CampaignRow {
   id:                 string
@@ -88,12 +94,14 @@ export async function topUpCampaign(db: SupabaseClient, campaign: CampaignRow, n
     return { created: 0, note, ended: false }
   }
 
+  const maxChars = charLimitFor(campaign.platforms)
   const rows = slots.map(s => {
     const pick = pickContent(campaign.messages, s.ordinal)
     return {
       user_id:      campaign.user_id,
       workspace_id: campaign.workspace_id,
-      content:      pick.text,
+      // Tracked links go out as their short links, so clicks count per message.
+      content:      withTrackedLinks(pick.text, campaign.messages[pick.messageIndex]?.links, SHORT_LINK_ORIGIN, maxChars),
       platforms:    campaign.platforms,
       status:       'scheduled',
       scheduled_at: s.at.toISOString(),

@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { inngest } from '@/lib/inngest'
-import { localDayKey } from '@/lib/campaigns'
+import { campaignClicks, localDayKey } from '@/lib/campaigns'
 import { removeUpcomingPosts, topUpCampaign, type CampaignRow } from '@/lib/campaign-run'
 
 async function currentUser() {
@@ -49,7 +49,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (upcoming.error) console.warn('[campaigns] upcoming lookup failed:', upcoming.error.message)
   if (sent.error) console.warn('[campaigns] sent lookup failed:', sent.error.message)
 
-  return NextResponse.json({ campaign, upcoming: upcoming.data ?? [], sent: sent.data ?? [] })
+  // Clicks on the campaign's short links, per message and in total.
+  const slugs = (campaign.messages ?? []).flatMap(m => (m.links ?? []).map(l => l.slug))
+  let linkRows: { slug: string; clicks: number | null }[] = []
+  if (slugs.length) {
+    const { data, error } = await db.from('short_links').select('slug, clicks').in('slug', slugs).eq('user_id', user.id)
+    if (error) console.warn('[campaigns] click lookup failed:', error.message)
+    linkRows = data ?? []
+  }
+  const clicks = campaignClicks(campaign.messages ?? [], linkRows)
+
+  return NextResponse.json({ campaign, upcoming: upcoming.data ?? [], sent: sent.data ?? [], clicks })
 }
 
 // { action: 'pause' | 'resume' | 'end' }
