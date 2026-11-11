@@ -36,6 +36,10 @@ const PLATFORMS = [
   { id: 'reddit',    name: 'Reddit',    limit: 40000, live: false },
 ]
 
+// Platforms whose publishers drop video and send the text alone. Remove an
+// entry when its publisher learns to upload video.
+const VIDEO_DROPPED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky' }
+
 // TikTok is deliberately NOT in here. Its Production API has been approved
 // since 2026-05-17 and it is the single most-connected platform among external
 // accounts (7 of 16), but it takes video, so it publishes through
@@ -1596,6 +1600,16 @@ function ComposeInner() {
   const uploadedMediaUrls = [...mediaItems.filter(m => m.url).map(m => m.url!), ...externalMediaUrls]
   const mediaStillUploading = mediaItems.some(m => m.uploading)
 
+  // The X, LinkedIn and Bluesky publishers send images only (lib/publish/
+  // twitter.ts, linkedin.ts, bluesky.ts filter video out), so a video attached
+  // here used to go out as a text-only post on those platforms with no word to
+  // the user. Say so before they post.
+  const hasVideo = mediaItems.some(m => m.type === 'video')
+    || externalMediaUrls.some(u => /\.(mp4|mov|avi|webm)$/i.test(u.split('?')[0]))
+  const videoDroppedOn = hasVideo
+    ? selectedPlatforms.filter(id => VIDEO_DROPPED_ON[id]).map(id => VIDEO_DROPPED_ON[id])
+    : []
+
   // What the composer looked like when the person left it. The Post button is
   // disabled whenever a gate fails, so a blocked user never fires a click and a
   // click-based event cannot see them. Flags only: no post content is recorded.
@@ -2381,9 +2395,15 @@ function ComposeInner() {
                       </span>
                     )}
                     <span className="text-xs text-gray-400 dark:text-gray-500">
-                      Discord, Bluesky, Mastodon, Telegram · JPEG, PNG, GIF, WebP, MP4
+                      Images: JPEG, PNG, GIF, WebP · Video (MP4): Discord, Telegram, Mastodon
                     </span>
                   </div>
+
+                  {videoDroppedOn.length > 0 && (
+                    <p role="status" className="mt-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
+                      Your video won&rsquo;t go to {videoDroppedOn.join(' or ')}. SocialMate can only send images there for now, so {videoDroppedOn.length === 1 ? 'that post' : 'those posts'} will go out as text only. Post the video in {videoDroppedOn.length === 1 ? 'that app' : 'those apps'} directly, or unselect {videoDroppedOn.length === 1 ? 'it' : 'them'} here.
+                    </p>
+                  )}
 
                   {/* SOMA Unsplash image preview — shown when editing a SOMA post with an attached image */}
                   {draftMediaUrls && draftMediaUrls.length > 0 && draftMediaUrls[0]?.startsWith('http') && (
