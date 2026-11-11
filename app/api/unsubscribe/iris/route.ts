@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { listAllAuthUsers } from '@/lib/admin-metrics'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -12,7 +13,8 @@ export async function GET(req: Request) {
   const admin = getSupabaseAdmin()
 
   // Look up user by email
-  const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 })
+  // Every account: an unsubscribe must find the person even past the first 1,000.
+  const users = await listAllAuthUsers(admin)
   const user = users.find(u => u.email?.toLowerCase() === email.toLowerCase())
 
   if (user) {

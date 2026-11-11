@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { listAllAuthUsers } from '@/lib/admin-metrics'
 
 // Shared pieces for behaviour-driven lifecycle email.
 //
@@ -82,8 +83,8 @@ const UNKNOWN: ActivationState = { userId: null, hasConnected: false, hasPublish
 export async function resolveUserId(email: string): Promise<string | null> {
   try {
     const admin = getSupabaseAdmin()
-    const { data } = await admin.auth.admin.listUsers({ perPage: 1000 })
-    const match = (data?.users ?? []).find(u => u.email?.toLowerCase() === email.toLowerCase())
+    const users = await listAllAuthUsers(admin)
+    const match = users.find(u => u.email?.toLowerCase() === email.toLowerCase())
     return match?.id ?? null
   } catch {
     return null

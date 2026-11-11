@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
 import { REPLY_TO } from '@/lib/mail'
+import { listAllAuthUsers, oldestFirst, postWentOut, selectAll } from '@/lib/admin-metrics'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -54,30 +55,30 @@ export const stoppedPostingEmails = inngest.createFunction(
     const since = new Date(now - WINDOW_DAYS * DAY_MS).toISOString()
 
     const lastPublished = await step.run('map-last-published', async () => {
-      const { data, error } = await getSupabaseAdmin()
-        .from('posts')
-        .select('user_id, published_at')
-        .eq('status', 'published')
-        .not('published_at', 'is', null)
-        .gte('published_at', since)
-        .order('published_at', { ascending: false })
-        .limit(1000)
-
-      if (error) throw new Error(`last-published lookup failed: ${error.message}`)
+      // Every publish in the window, read in full (selectAll throws on error,
+      // so the step retries rather than treating everyone as quiet). Partial
+      // posts count: they went out.
+      const db = getSupabaseAdmin()
+      const rows = await selectAll<{ user_id: string; status: string | null; published_at: string | null }>('posts (last published)', () =>
+        oldestFirst(db.from('posts')
+          .select('user_id, status, published_at')
+          .in('status', ['published', 'partial'])
+          .not('published_at', 'is', null)
+          .gte('published_at', since)))
 
       const latest: Record<string, string> = {}
-      for (const row of data ?? []) {
-        // Rows arrive newest first, so the first hit per user is their latest.
-        if (row.user_id && !latest[row.user_id]) latest[row.user_id] = row.published_at
+      for (const row of rows) {
+        if (!row.user_id || !row.published_at || !postWentOut(row)) continue
+        if (!latest[row.user_id] || row.published_at > latest[row.user_id]) latest[row.user_id] = row.published_at
       }
       return latest
     })
 
     const targets = await step.run('segment-users', async () => {
-      const { data } = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 1000 })
+      const allUsers = await listAllAuthUsers(getSupabaseAdmin())
 
       const out: { email: string; name: string; daysQuiet: number; step: 'nudge' | 'last' }[] = []
-      for (const u of data?.users ?? []) {
+      for (const u of allUsers) {
         if (!u.email || u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) continue
 
         const last = lastPublished[u.id]
