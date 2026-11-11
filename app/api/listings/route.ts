@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
 import { LISTING_QUERY_STATUSES, isPublicListing } from '@/lib/studio-stax'
+import { listAllAuthUsers } from '@/lib/admin-metrics'
 
 function getAdminSupabase() {
   return createClient(
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
     ;(async () => {
       try {
         // auth.users is only accessible via service-role listUsers
-        const { data: { users } } = await db.auth.admin.listUsers({ perPage: 1000 })
+        const users = await listAllAuthUsers(db)
         const admin = users.find((u: { email?: string }) => u.email === adminEmail)
 
         if (admin?.id) {

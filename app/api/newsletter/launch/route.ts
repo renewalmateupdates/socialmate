@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
+import { listAllAuthUsers } from '@/lib/admin-metrics'
 
 export async function POST(req: NextRequest) {
   // Admin auth check
@@ -24,8 +25,13 @@ export async function POST(req: NextRequest) {
   const adminDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
   // We'll send to ALL users for the launch email (they signed up, they should know it launched)
-  const { data: { users }, error } = await adminDb.auth.admin.listUsers({ perPage: 1000 })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  // Every account, not the first 1,000 (lib/admin-metrics.ts).
+  let users: Awaited<ReturnType<typeof listAllAuthUsers>>
+  try {
+    users = await listAllAuthUsers(adminDb)
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+  }
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   let sent = 0

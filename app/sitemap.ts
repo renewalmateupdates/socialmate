@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { oldestFirst, selectAll } from '@/lib/admin-metrics'
 import { isProtectedPath } from '@/lib/protected-paths'
 import { POSTS } from '@/lib/blog/static-posts'
 import { AUDIENCES } from '@/lib/audiences'
@@ -194,12 +195,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // the static posts for a day (see revalidate above) rather than an empty sitemap.
   let dbSlugs: string[] = []
   try {
-    const { data, error } = await getSupabaseAdmin()
-      .from('blog_posts')
-      .select('slug')
-      .limit(2000)
-    if (error) console.warn('[sitemap] blog_posts lookup failed:', error.message)
-    else if (data) dbSlugs = data.map((row: { slug: string }) => row.slug)
+    // Every slug: one request stops at 1,000 rows whatever .limit() says, so
+    // an unpaged read would quietly drop posts from the sitemap past that.
+    const db = getSupabaseAdmin()
+    const rows = await selectAll<{ slug: string }>('blog_posts', () => oldestFirst(db.from('blog_posts').select('slug')))
+    dbSlugs = rows.map(row => row.slug)
   } catch (err) {
     console.warn('[sitemap] blog_posts lookup threw:', err)
   }

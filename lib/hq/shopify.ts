@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { selectAll } from '@/lib/admin-metrics'
 import { COUNTED_STATUSES } from '@/lib/shop-orders'
 
 // The Gilgamesh Enterprise Shopify store (shop.gilgameshenterprise.com) for
@@ -26,16 +27,16 @@ export function shopifyConfigured(): boolean {
 const SM_GIVE_SHARE = 0.25
 
 export async function shopifySummary(db: SupabaseClient, sinceIso: string): Promise<ShopifySummary> {
-  const { data, error } = await db
+  // Every order in the window, newest first, read 1,000 at a time (one
+  // request never returns more, so revenue would be understated past that).
+  type OrderRow = { order_name: string | null; financial_status: string | null; subtotal_cents: number | null; ordered_at: string; cancelled: boolean | null }
+  const rows = await selectAll<OrderRow>('shop_orders', () => db
     .from('shop_orders')
     .select('order_name, financial_status, subtotal_cents, ordered_at, cancelled')
     .eq('test', false)
     .gte('ordered_at', sinceIso)
     .order('ordered_at', { ascending: false })
-    .limit(1000)
-  if (error) throw new Error(`shop_orders: ${error.message}`)
-
-  const rows = data ?? []
+    .order('shopify_order_id', { ascending: true }))
   const counted = rows.filter(o => !o.cancelled && COUNTED_STATUSES.includes(o.financial_status ?? ''))
   const grossCents = counted.reduce((s, o) => s + (o.subtotal_cents ?? 0), 0)
 

@@ -26,6 +26,7 @@ import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { createNotification } from '@/lib/notify'
 import { sendScheduledTiktok, draftsNotice, stagedFilesToClean, isStagedVideoUrl, type TiktokSendOutcome, type StagedTiktokRow } from '@/lib/tiktok-scheduled'
+import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -377,8 +378,7 @@ export const weeklyDigest = inngest.createFunction(
 
     // Step 2: fetch user emails via Auth admin
     const emailMap = await step.run('fetch-user-emails', async () => {
-      const usersRes = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 1000 })
-      const users = usersRes.data?.users ?? []
+      const users = await listAllAuthUsers(getSupabaseAdmin())
       const map: Record<string, string> = {}
       for (const u of users) { if (u.email) map[u.id] = u.email }
       return map
@@ -2647,13 +2647,10 @@ export const monthlyCreditsResetEmail = inngest.createFunction(
     // Fetch all users + their plan
     const userData = await step.run('fetch-users', async () => {
       const supabase = getSupabaseAdmin()
-      const usersRes = await supabase.auth.admin.listUsers({ perPage: 1000 })
-      const authUsers = usersRes.data?.users ?? []
+      const authUsers = await listAllAuthUsers(supabase)
 
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('user_id, plan')
-        .limit(2000)
+      const settings = await selectAll<{ user_id: string; plan: string | null }>('user_settings', () =>
+        oldestFirst(supabase.from('user_settings').select('user_id, plan')))
 
       const planMap: Record<string, string> = {}
       for (const s of settings ?? []) planMap[s.user_id] = s.plan ?? 'free'
@@ -2747,8 +2744,8 @@ export const comebackEmails = inngest.createFunction(
     const now = Date.now()
 
     const users = await step.run('fetch-users', async () => {
-      const { data: { users: authUsers } } = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 1000 })
-      return (authUsers ?? [])
+      const authUsers = await listAllAuthUsers(getSupabaseAdmin())
+      return authUsers
         .filter(u => u.email && u.last_sign_in_at)
         .map(u => ({
           email: u.email!,
@@ -2941,7 +2938,7 @@ Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"
       const { data: optins } = await db.from('user_settings').select('user_id').or('iris_opt_in.eq.true,iris_opt_in.is.null')
       const optedInIds = new Set((optins ?? []).map((r: { user_id: string }) => r.user_id))
 
-      const { data: { users: authUsers } } = await db.auth.admin.listUsers({ perPage: 1000 })
+      const authUsers = await listAllAuthUsers(db)
       const emails = authUsers
         .filter(u => u.email && optedInIds.has(u.id))
         .map(u => u.email!)
