@@ -23,6 +23,8 @@
  * slow the thing it is measuring.
  */
 
+import { deviceClass, inAppBrowser } from '@/lib/device-class'
+
 /**
  * The funnel, in order. Adding a step here is the only way to get it recorded:
  * /api/track validates against this same list, so a typo drops the event at the
@@ -90,6 +92,23 @@ type GtagWindow = Window & {
   gtag?: (command: 'event', name: string, params?: Record<string, unknown>) => void
 }
 
+let deviceCache: TrackParams | null = null
+
+/** `device`, plus `in_app` when an app's built-in browser opened the page. Read once per page. */
+function deviceParams(): TrackParams {
+  if (deviceCache) return deviceCache
+  try {
+    const ua = navigator.userAgent || ''
+    const out: TrackParams = { device: deviceClass(ua, navigator.maxTouchPoints || 0) }
+    const app = inAppBrowser(ua)
+    if (app) out.in_app = app
+    deviceCache = out
+  } catch {
+    deviceCache = {}
+  }
+  return deviceCache
+}
+
 /**
  * Record one funnel step.
  *
@@ -112,8 +131,10 @@ export function track(event: FunnelEvent, params?: TrackParams): void {
   // sendBeacon survives the page unload that follows most of these events —
   // connect_clicked is immediately followed by a redirect to an OAuth consent
   // screen, and a plain fetch would be cancelled in flight roughly every time.
+  // Every event carries the device (lib/device-class.ts); a param of the same
+  // name, if an event ever sends one, wins.
   try {
-    const body = JSON.stringify({ event, params: params ?? {} })
+    const body = JSON.stringify({ event, params: { ...deviceParams(), ...(params ?? {}) } })
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }))
       return
