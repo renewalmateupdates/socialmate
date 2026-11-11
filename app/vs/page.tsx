@@ -501,6 +501,62 @@ const COMPARISONS = [
     tag:         'Missing key platforms, no free plan',
     tagColor:    'bg-amber/10 text-amber',
   },
+  // Nov 2026. Facts on each page were checked against the competitor's own
+  // pricing page on Nov 11; the page says which.
+  {
+    slug:        'postiz',
+    name:        'Postiz',
+    icon:       Wrench,
+    headline:    'Postiz is free only if you host it yourself',
+    angle:       'Open source and free to self-host, with 30+ channels including Instagram. Hosted plans start at $29/month. SocialMate is hosted and free for 250 posts a month.',
+    tag:         'Open source',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'planoly',
+    name:        'Planoly',
+    icon:       Camera,
+    headline:    'Planoly is built for Instagram, from $14/month',
+    angle:       'A grid planner with a 10-upload free plan in its app, and X as reminders only. SocialMate posts to X, Bluesky, Discord, Telegram and Mastodon, but not Instagram yet.',
+    tag:         'Instagram-first',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'predis-ai',
+    name:        'Predis.ai',
+    icon:       ImageIcon,
+    headline:    'Predis.ai makes visuals, and auto-posts from $40/month',
+    angle:       'AI images, carousels and video with no free plan and no auto posting on its $19 plan. SocialMate posts on every plan, free included.',
+    tag:         'AI visuals, no free plan',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'ocoya',
+    name:        'Ocoya',
+    icon:       Palette,
+    headline:    'Ocoya starts at $29/month after a card-required trial',
+    angle:       'A big AI suite with a design studio and 18+ networks. SocialMate is the scheduler part, free for 250 posts a month, Pro $8.',
+    tag:         'AI suite, no free plan',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'repurpose-io',
+    name:        'Repurpose.io',
+    icon:       Repeat,
+    headline:    'Repurpose.io re-posts videos; SocialMate schedules new posts',
+    angle:       'Video cross-posting from $35/month. SocialMate schedules text, images and TikTok video to 7 platforms, free to start.',
+    tag:         'Different job',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'mixpost',
+    name:        'Mixpost',
+    icon:       Package,
+    headline:    'Mixpost: free if you run the server, $29/month if not',
+    angle:       'Self-hosted Lite posts to 3 networks; Pro is $299 one-time; Cloud starts at $29/month. SocialMate is hosted and free for 250 posts a month.',
+    tag:         'Self-hosted',
+    tagColor:    'bg-amber/10 text-amber',
+  },
 ]
 
 const SOCIALMATE_WINS: { icon: LucideIcon; text: string }[] = [

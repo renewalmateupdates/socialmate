@@ -188,6 +188,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/vs/creatorstudio`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/discord-bots`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/tiktok-scheduler`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    // Nov 2026: the six from ChatGPT's own competitor list that had no page.
+    { url: `${base}/vs/postiz`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/planoly`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/predis-ai`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/ocoya`,          lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/repurpose-io`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/mixpost`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   // Same merge generateStaticParams does, so the sitemap and the set of pages
