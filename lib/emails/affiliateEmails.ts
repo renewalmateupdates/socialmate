@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 // ─── Shared styles ───────────────────────────────────────────────────────────
 
 const BASE = `
@@ -30,7 +31,7 @@ function wrapper(content: string) {
         <div style="border-top: 1px solid #222; padding: 20px 32px; text-align: center;">
           <p style="font-size: 11px; color: #374151; margin: 0;">
             © ${new Date().getFullYear()} Gilgamesh Enterprise LLC · SocialMate Partner Program ·
-            <a href="mailto:hello@socialmate.studio" style="color: #6b7280; text-decoration: none;">hello@socialmate.studio</a>
+            <a href="${SUPPORT_MAILTO}" style="color: #6b7280; text-decoration: none;">${SUPPORT_EMAIL}</a>
           </p>
         </div>
       </div>
@@ -137,7 +138,7 @@ export function affiliateDeclineBummerEmail({ email }: { email: string }) {
   return wrapper(`
     ${heading("No worries — door's always open 🤝")}
     ${p(`You declined the SocialMate Partner Program invite — totally understood! Life gets busy.`)}
-    ${p(`If you ever change your mind, just reply to this email or reach out at <a href="mailto:hello@socialmate.studio" style="color: #F59E0B; text-decoration: none;">hello@socialmate.studio</a> and we'll get you set up.`)}
+    ${p(`If you ever change your mind, just reply to this email or reach out at <a href="${SUPPORT_MAILTO}" style="color: #F59E0B; text-decoration: none;">${SUPPORT_EMAIL}</a> and we'll get you set up.`)}
     ${p(`In the meantime, you can still use SocialMate for free to schedule posts, manage your social channels, and use the AI content tools.`)}
     <div style="margin-top: 24px;">
       ${btn('https://socialmate.studio', 'Check out SocialMate →')}

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 const FROM = 'SocialMate <hello@socialmate.studio>'
@@ -80,7 +81,7 @@ function renewalEmail(opts: {
         </div>
 
         <p style="margin:0;font-size:11px;color:#9ca3af;text-align:center;">
-          Questions? Reply to this email or reach us at <a href="mailto:hello@socialmate.studio" style="color:#9ca3af;">hello@socialmate.studio</a>
+          Questions? Reply to this email or reach us at <a href="${SUPPORT_MAILTO}" style="color:#9ca3af;">${SUPPORT_EMAIL}</a>
         </p>
       </div>
     </div>

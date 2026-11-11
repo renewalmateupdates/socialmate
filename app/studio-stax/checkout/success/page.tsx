@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
 import { PartyPopper } from 'lucide-react'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 function SuccessInner() {
   const params      = useSearchParams()
@@ -58,7 +59,7 @@ function SuccessInner() {
       </div>
 
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-8">
-        Questions? <a href="mailto:hello@socialmate.studio" className="underline">hello@socialmate.studio</a>
+        Questions? <a href={SUPPORT_MAILTO} className="underline">{SUPPORT_EMAIL}</a>
       </p>
     </div>
   )

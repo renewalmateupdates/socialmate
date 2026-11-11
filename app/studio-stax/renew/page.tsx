@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import { AlertTriangle, Clock, Link2, RefreshCw, Siren } from 'lucide-react'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 interface RenewalData {
   valid:         boolean
@@ -28,7 +29,7 @@ function RenewInner() {
     fetch(`/api/studio-stax/renew?token=${token}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
-      .catch(() => { setError('Failed to load. Contact hello@socialmate.studio'); setLoading(false) })
+      .catch(() => { setError(`Failed to load. Contact ${SUPPORT_EMAIL}`); setLoading(false) })
   }, [token])
 
   const handleRenew = async () => {
@@ -72,8 +73,8 @@ function RenewInner() {
           ? "This renewal link has expired. Check your email for a fresh one, or contact us."
           : "This link is not valid. Use the link from your renewal reminder email."}
       </p>
-      <a href="mailto:hello@socialmate.studio" className="text-sm font-semibold text-amber-500 hover:text-amber-400">
-        hello@socialmate.studio →
+      <a href={SUPPORT_MAILTO} className="text-sm font-semibold text-amber-500 hover:text-amber-400">
+        {SUPPORT_EMAIL} →
       </a>
     </div>
   )
