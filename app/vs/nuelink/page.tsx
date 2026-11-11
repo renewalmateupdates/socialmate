@@ -155,7 +155,7 @@ export default function VsNuelinkPage() {
               {
                 n: '1',
                 title: 'A 7-day trial is barely enough to learn the tool',
-                desc: 'Nuelink gives you 7 days to evaluate before you start paying. Building real posting habits and testing your actual workflow in a week is difficult. SocialMate's free plan never expires, so you can take as long as you need to decide.',
+                desc: 'Nuelink gives you 7 days to evaluate before you start paying. Building real posting habits and testing your actual workflow in a week is difficult. SocialMate\'s free plan never expires, so you can take as long as you need to decide.',
               },
               {
                 n: '2',
