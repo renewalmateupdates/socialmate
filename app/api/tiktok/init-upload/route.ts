@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { tiktokChunkPlan } from '@/lib/tiktok-chunks'
+import { buildTikTokCaption } from '@/lib/tiktok-studio'
 
 // Every failure answers with JSON and a `code`, so TikTok Studio can show it and
 // the funnel can record it. On Nov 9 a new user's Post now failed here, and the
@@ -66,8 +67,9 @@ async function initUpload(request: NextRequest) {
   const auth = await getValidAccessToken(user.id)
   if (!auth.ok) return NextResponse.json({ error: auth.message, code: auth.reason }, { status: 400 })
 
-  const hashtagStr = (hashtags as string[]).map((t: string) => `#${t.replace(/^#/, '')}`).join(' ')
-  const fullCaption = [post_caption, hashtagStr].filter(Boolean).join('\n\n').slice(0, 2200)
+  // Tags already typed into the caption are skipped, so filling in both the
+  // caption and the Hashtags box no longer posts every tag twice.
+  const fullCaption = buildTikTokCaption(post_caption, hashtags as string[])
 
   // TikTok's accepted privacy values. Anything unrecognised falls back to
   // SELF_ONLY: an unknown value is rejected by TikTok with an opaque error, and

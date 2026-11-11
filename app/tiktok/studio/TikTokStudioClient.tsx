@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Toast from '@/components/Toast'
-import FilmstripTimeline from '@/components/tiktok/FilmstripTimeline'
+import FilmstripTimeline, { type TimelineFrame } from '@/components/tiktok/FilmstripTimeline'
 import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
 import PhotoComposer from '@/components/tiktok/PhotoComposer'
 import {
@@ -15,6 +15,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { track } from '@/lib/analytics'
 import { tiktokChunkRanges } from '@/lib/tiktok-chunks'
+import { defaultCoverTime, fullTikTokCaption, tagsToAppend } from '@/lib/tiktok-studio'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -252,6 +253,9 @@ function PostSettingsPanel({
               className="flex-1 bg-panel border border-edge rounded-xl px-3 py-2 text-xs text-white placeholder:text-ink-faint focus:border-[#fe2c55] outline-none transition-colors"
             />
           </div>
+          <p className="text-xs text-ink-faint mb-2">
+            Added to the end of your caption when you post. Tags already in the caption are skipped.
+          </p>
           {hashtags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {hashtags.map(tag => (
@@ -639,8 +643,25 @@ export default function TikTokStudioClient() {
   const [volume, setVolume]               = useState(100)
   // Frames come back from the timeline once, and the cover picker reuses them
   // rather than decoding the video a second time.
-  const [frames, setFrames]               = useState<{ time: number; url: string }[]>([])
+  const [frames, setFrames]               = useState<TimelineFrame[]>([])
   const [coverTime, setCoverTime]         = useState<number | null>(null)
+  // True while the cover is one Studio picked because the first frame is black.
+  const [coverAuto, setCoverAuto]         = useState(false)
+
+  // TikTok uses a video's very first frame as its thumbnail unless told
+  // otherwise, and for anything that fades in that frame is black (the Nov 11
+  // promo was). When it is, start the cover on the first lit frame instead.
+  // Only setters are used, so the timeline can hold on to this callback.
+  const handleFramesReady = useCallback((out: TimelineFrame[], meta: { firstFrameDark: boolean }) => {
+    setFrames(out)
+    if (!meta.firstFrameDark) return
+    const t = defaultCoverTime(out)
+    if (t === null) return
+    // The cover row only appears once frames are ready, and a new video resets
+    // the cover, so there is no choice of the creator's to overwrite here.
+    setCoverTime(t)
+    setCoverAuto(true)
+  }, [])
   const [showSafeArea, setShowSafeArea]   = useState(false)
   // "Browse files" assumed the creator already had a finished video, which is
   // the one thing a studio should not assume.
@@ -916,6 +937,12 @@ export default function TikTokStudioClient() {
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current) }
   }, [isPlaying, drawFrame])
 
+  // While paused, redraw when a filter or text overlay changes (drawFrame is
+  // rebuilt whenever one does), so the preview shows the edit straight away.
+  useEffect(() => {
+    if (!isPlaying) drawFrame()
+  }, [isPlaying, drawFrame])
+
   // ── Export ──────────────────────────────────────────────────────────────────
 
   // createMediaElementSource can only ever be called once per element; calling
@@ -1071,6 +1098,11 @@ export default function TikTokStudioClient() {
       setTrimEnd(tempVideo.duration)
       setCurrentTime(0)
       setIsPlaying(false)
+      // The last video's cover time and frames must not carry over: a cover
+      // past the new video's end is a timestamp TikTok can't use.
+      setFrames([])
+      setCoverTime(null)
+      setCoverAuto(false)
       track('tiktok_video_added', { seconds: Math.round(tempVideo.duration), mb: Math.round(file.size / 1e6) })
     }
   }, [maxDurationSec])
@@ -1111,9 +1143,9 @@ export default function TikTokStudioClient() {
       })
       const data = await res.json()
       if (data.hashtags) {
-        const newTags = (data.hashtags as string[])
-          .map(t => t.replace(/^#/, ''))
-          .filter(t => !hashtags.includes(t))
+        // Skip what the caption or the box already has.
+        const newTags = tagsToAppend(postCaption, data.hashtags as string[])
+          .filter(t => !hashtags.some(h => h.toLowerCase() === t.toLowerCase()))
         setHashtags(prev => [...prev, ...newTags].slice(0, 30))
       }
     } catch {
@@ -1419,7 +1451,8 @@ export default function TikTokStudioClient() {
   const canPost = !!privacyLevel && !disclosureIncomplete && !brandedAndPrivate
 
   const isWorking  = uploading || posting
-  const charCount  = postCaption.length + (hashtags.length ? hashtags.map(t => `#${t}`).join(' ').length + 2 : 0)
+  // The same string the routes send, so the counter can't disagree with TikTok.
+  const charCount  = fullTikTokCaption(postCaption, hashtags).length
 
   // Shared props object for PostSettingsPanel
   const postPanelProps: PostSettingsPanelProps = {
@@ -1551,6 +1584,9 @@ export default function TikTokStudioClient() {
                   setPostCaption('')
                   setHashtags([])
                   setSelectedSound(null)
+                  setFrames([])
+                  setCoverTime(null)
+                  setCoverAuto(false)
                 }}
                 className="bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-all shadow-lg shadow-[#fe2c55]/20"
               >
@@ -1743,6 +1779,10 @@ export default function TikTokStudioClient() {
                       height: '65vh',
                     }}
                   >
+                    {/* The canvas below is the preview, and it was only drawn while
+                        playing, so a new video sat black until play was pressed
+                        and a cover or arrow-key seek while paused showed nothing.
+                        Draw on the first decoded frame and after every seek. */}
                     <video
                       ref={videoRef}
                       src={videoUrl}
@@ -1750,6 +1790,9 @@ export default function TikTokStudioClient() {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onTimeUpdate={handleTimeUpdate}
                       onLoadedMetadata={handleVideoLoaded}
+                      onLoadedData={() => drawFrame()}
+                      onSeeked={() => drawFrame()}
+                      preload="auto"
                       playsInline
                       muted={false}
                     />
@@ -1864,7 +1907,7 @@ export default function TikTokStudioClient() {
                   minDuration={MIN_DURATION_S}
                   onSeek={seekTo}
                   onTrimChange={(a, b) => { setTrimStart(a); setTrimEnd(b) }}
-                  onFramesReady={setFrames}
+                  onFramesReady={handleFramesReady}
                 />
 
                 <p className="font-mono text-[10px] tracking-[0.1em] text-ink-faint text-center">
@@ -1882,7 +1925,7 @@ export default function TikTokStudioClient() {
                       </span>
                       {coverTime !== null && (
                         <button
-                          onClick={() => setCoverTime(null)}
+                          onClick={() => { setCoverTime(null); setCoverAuto(false) }}
                           className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted hover:text-ink-high transition-colors"
                         >
                           Reset
@@ -1898,7 +1941,7 @@ export default function TikTokStudioClient() {
                           return (
                             <button
                               key={f.time}
-                              onClick={() => { setCoverTime(f.time); seekTo(f.time) }}
+                              onClick={() => { setCoverTime(f.time); setCoverAuto(false); seekTo(f.time) }}
                               title={`Use the frame at ${formatTime(f.time)}`}
                               className={`shrink-0 rounded-md overflow-hidden border-2 transition-all ${
                                 active ? 'border-amber scale-105' : 'border-transparent hover:border-edge-lit opacity-70 hover:opacity-100'
@@ -1914,7 +1957,9 @@ export default function TikTokStudioClient() {
                     <p className="mt-1.5 font-mono text-[10px] tracking-[0.1em] text-ink-faint">
                       {coverTime === null
                         ? 'Using the first frame. Pick one that is not black.'
-                        : `Cover set to ${formatTime(coverTime)}`}
+                        : coverAuto
+                          ? `Your first frame is black, so the cover starts at ${formatTime(coverTime)}. Pick another any time.`
+                          : `Cover set to ${formatTime(coverTime)}`}
                     </p>
                   </div>
                 )}
@@ -1947,6 +1992,10 @@ export default function TikTokStudioClient() {
                         key={tab}
                         onClick={() => setToolTab(tab)}
                         className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold transition-all ${
+                          // On wide screens the panel on the right is the post
+                          // form; a second copy here read as two captions.
+                          tab === 'post' ? 'lg:hidden ' : ''
+                        }${
                           isActive
                             ? 'bg-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
                             : 'text-ink-muted hover:text-ink-body hover:bg-raised/50'
@@ -2210,9 +2259,18 @@ export default function TikTokStudioClient() {
                     </div>
                   )}
 
-                  {/* Post tab — full form on ALL screen sizes (fixes mobile) */}
+                  {/* Post tab: the full form below the lg breakpoint, where the
+                      right-hand panel is hidden. If the tab was picked on a
+                      narrow window that then widened, point at the panel. */}
                   {toolTab === 'post' && (
-                    <PostSettingsPanel {...postPanelProps} />
+                    <>
+                      <div className="lg:hidden">
+                        <PostSettingsPanel {...postPanelProps} />
+                      </div>
+                      <p className="hidden lg:block text-xs text-ink-muted text-center py-6">
+                        Caption, hashtags and posting are in the panel on the right.
+                      </p>
+                    </>
                   )}
 
                 </div>

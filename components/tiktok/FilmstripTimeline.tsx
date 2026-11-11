@@ -1,5 +1,13 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { frameLight, isDarkFrame, type FrameLight } from '@/lib/tiktok-studio'
+
+export interface TimelineFrame {
+  time: number
+  url: string
+  /** Brightness, measured when the frame is drawn. Missing if it couldn't be read. */
+  light?: FrameLight
+}
 
 /**
  * A real timeline, in place of two disconnected range sliders.
@@ -28,8 +36,11 @@ interface Props {
   minDuration: number
   onSeek: (t: number) => void
   onTrimChange: (start: number, end: number) => void
-  /** Frames are handed back so the cover picker can reuse them. */
-  onFramesReady?: (frames: { time: number; url: string }[]) => void
+  /**
+   * Frames are handed back so the cover picker can reuse them, with whether the
+   * video's very first frame (TikTok's default cover) is black.
+   */
+  onFramesReady?: (frames: TimelineFrame[], meta: { firstFrameDark: boolean }) => void
 }
 
 type Drag = 'start' | 'end' | 'playhead' | null
@@ -38,7 +49,7 @@ export default function FilmstripTimeline({
   videoUrl, duration, currentTime, trimStart, trimEnd, minDuration,
   onSeek, onTrimChange, onFramesReady,
 }: Props) {
-  const [frames, setFrames] = useState<{ time: number; url: string }[]>([])
+  const [frames, setFrames] = useState<TimelineFrame[]>([])
   const [extracting, setExtracting] = useState(true)
   const [drag, setDrag] = useState<Drag>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -76,7 +87,21 @@ export default function FilmstripTimeline({
       })
       if (cancelled || !ctx) return
 
-      const out: { time: number; url: string }[] = []
+      // The very first frame is what TikTok uses as the cover unless the
+      // creator picks another. Studio swaps in a lit frame when it's black.
+      let firstFrameDark = false
+      await seekTo(0)
+      if (cancelled) return
+      try {
+        if (video.readyState >= 2) {
+          ctx.drawImage(video, 0, 0, FRAME_W, FRAME_H)
+          firstFrameDark = isDarkFrame(frameLight(ctx.getImageData(0, 0, FRAME_W, FRAME_H).data))
+        }
+      } catch {
+        // Unreadable: keep TikTok's default cover.
+      }
+
+      const out: TimelineFrame[] = []
       for (let i = 0; i < FRAME_COUNT; i++) {
         if (cancelled) return
         // Sample from the middle of each slice, not the edges — the first and
@@ -86,7 +111,13 @@ export default function FilmstripTimeline({
         if (cancelled) return
         try {
           ctx.drawImage(video, 0, 0, FRAME_W, FRAME_H)
-          out.push({ time: t, url: canvas.toDataURL('image/jpeg', 0.6) })
+          let light: FrameLight | undefined
+          try {
+            light = frameLight(ctx.getImageData(0, 0, FRAME_W, FRAME_H).data)
+          } catch {
+            light = undefined
+          }
+          out.push({ time: t, url: canvas.toDataURL('image/jpeg', 0.6), light })
           // Paint progressively so the strip fills in rather than appearing
           // all at once after several seconds of nothing.
           setFrames(Array.from(out))
@@ -96,7 +127,7 @@ export default function FilmstripTimeline({
       }
       if (!cancelled) {
         setExtracting(false)
-        onFramesReady?.(out)
+        onFramesReady?.(out, { firstFrameDark })
       }
     }
     void run()

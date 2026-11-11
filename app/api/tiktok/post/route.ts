@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
+import { buildTikTokCaption } from '@/lib/tiktok-studio'
 import { inngest } from '@/lib/inngest'
 
 const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
@@ -123,9 +124,8 @@ export async function POST(request: NextRequest) {
     }, { status: 429 })
   }
 
-  // Build the full caption with hashtags
-  const hashtagStr = (hashtags as string[]).map(t => `#${t.replace(/^#/, '')}`).join(' ')
-  const fullCaption = [post_caption, hashtagStr].filter(Boolean).join('\n\n').slice(0, 2200)
+  // The caption plus any Hashtags-box tags it doesn't already have.
+  const fullCaption = buildTikTokCaption(post_caption, hashtags as string[])
 
   // Create tiktok_posts record
   const { data: tikPost, error: insertErr } = await getSupabaseAdmin()
