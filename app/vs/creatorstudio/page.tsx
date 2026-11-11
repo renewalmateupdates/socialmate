@@ -6,8 +6,8 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Price',                     creatorstudio: 'Free',                   socialmate: '$0 — free forever'        },
-  { feature: 'Instagram scheduling',      creatorstudio: '✅',                      socialmate: 'Coming soon'              },
-  { feature: 'Facebook scheduling',       creatorstudio: '✅',                      socialmate: 'Coming soon'              },
+  { feature: 'Instagram scheduling',      creatorstudio: '✅',                      socialmate: '❌ Not yet'               },
+  { feature: 'Facebook scheduling',       creatorstudio: '✅',                      socialmate: '❌ Not yet'               },
   { feature: 'TikTok scheduling',         creatorstudio: '❌',                      socialmate: '✅ (Production API live)'  },
   { feature: 'Discord scheduling',        creatorstudio: '❌',                      socialmate: '✅'                        },
   { feature: 'Telegram scheduling',       creatorstudio: '❌',                      socialmate: '✅'                        },
@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support Instagram?',
-    a: "Instagram requires Meta App Review for API access. We are working toward it — it is on the roadmap. For now, SocialMate covers 7 platforms where the APIs are open or approved. If Instagram is your only platform, Creator Studio works for that use case.",
+    a: "Instagram requires Meta App Review for API access, and SocialMate does not post to Instagram yet. It covers 7 platforms where the APIs are open or approved. If Instagram is your only platform, Creator Studio works for that use case.",
   },
   {
     q: 'What platforms does SocialMate cover that Creator Studio does not?',

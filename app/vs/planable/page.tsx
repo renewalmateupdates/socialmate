@@ -11,7 +11,7 @@ const COMPARISON = [
   { feature: 'Free plan',                 planable: '50 posts LIFETIME total',  socialmate: '250 posts / month'       },
   { feature: 'Post limits',               planable: '50 posts then forced pay', socialmate: 'None'                    },
   { feature: 'Pricing model',             planable: 'Per workspace',            socialmate: 'Flat rate'               },
-  { feature: 'Platforms supported',       planable: '8+',                       socialmate: '16 (growing)'            },
+  { feature: 'Platforms supported',       planable: '8+',                       socialmate: '7 live'                  },
   { feature: 'Discord support',           planable: '❌',                        socialmate: '✅'                      },
   { feature: 'Telegram support',          planable: '❌',                        socialmate: '✅'                      },
   { feature: 'Mastodon support',          planable: '❌',                        socialmate: '✅'                      },
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support the platforms I need?',
-    a: "SocialMate supports Bluesky, Discord, Mastodon, Telegram, TikTok, LinkedIn, YouTube, and Pinterest today — with Instagram, Reddit, and Facebook in review. Planable covers primarily the Meta/LinkedIn/Twitter stack. If your audience is on Discord, Telegram, or decentralized platforms, SocialMate is the only option.",
+    a: "SocialMate posts to TikTok, LinkedIn, X, Bluesky, Discord, Telegram and Mastodon today. It does not post to Instagram, Facebook, YouTube, Pinterest or Reddit yet. Planable covers primarily the Meta/LinkedIn/Twitter stack. If your audience is on Discord, Telegram, or decentralized platforms, SocialMate is the only option.",
   },
   {
     q: 'How many workspaces does SocialMate include?',
@@ -88,7 +88,7 @@ export default function VsPlanablePage() {
             SocialMate vs Planable
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Planable gives you 50 posts total — ever — before forcing you to pay. SocialMate gives you 100 a month, free forever, and it resets.
+            Planable gives you 50 posts total — ever — before forcing you to pay. SocialMate gives you 250 a month, free forever, and it resets.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
