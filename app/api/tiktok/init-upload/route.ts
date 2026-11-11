@@ -2,11 +2,26 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { tiktokChunkPlan } from '@/lib/tiktok-chunks'
 
+// Every failure answers with JSON and a `code`, so TikTok Studio can show it and
+// the funnel can record it. On Nov 9 a new user's Post now failed here, and the
+// funnel could only say "init": TikTok's own errors carried a code, ours didn't,
+// and an exception came back as a bare 500 page Studio could not read.
 export async function POST(request: NextRequest) {
+  try {
+    return await initUpload(request)
+  } catch (err) {
+    console.error('[tiktok/init-upload] unexpected error:', err)
+    return NextResponse.json({
+      error: 'Could not start the upload with TikTok. Try again in a minute.',
+      code:  'server_error',
+    }, { status: 500 })
+  }
+}
+
+async function initUpload(request: NextRequest) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,7 +35,9 @@ export async function POST(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) {
+    return NextResponse.json({ error: 'You are signed out. Sign in again and retry.', code: 'signed_out' }, { status: 401 })
+  }
 
   const body = await request.json()
   const {
@@ -43,11 +60,11 @@ export async function POST(request: NextRequest) {
     destination = 'direct',
   } = body
 
-  if (!video_size) return NextResponse.json({ error: 'video_size required' }, { status: 400 })
+  if (!video_size) return NextResponse.json({ error: 'video_size required', code: 'video_size_required' }, { status: 400 })
   const plan = tiktokChunkPlan(Number(video_size))
 
   const auth = await getValidAccessToken(user.id)
-  if (!auth.ok) return NextResponse.json({ error: auth.message }, { status: 400 })
+  if (!auth.ok) return NextResponse.json({ error: auth.message, code: auth.reason }, { status: 400 })
 
   const hashtagStr = (hashtags as string[]).map((t: string) => `#${t.replace(/^#/, '')}`).join(' ')
   const fullCaption = [post_caption, hashtagStr].filter(Boolean).join('\n\n').slice(0, 2200)
@@ -93,6 +110,7 @@ export async function POST(request: NextRequest) {
     if (brand_content_toggle && effectivePrivacy === 'SELF_ONLY') {
       return NextResponse.json({
         error: 'Branded content cannot be visible to only you. Choose a different audience.',
+        code:  'branded_self_only',
       }, { status: 400 })
     }
     postInfo.brand_content_toggle = !!brand_content_toggle
@@ -160,7 +178,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { publish_id, upload_url } = initData?.data ?? {}
-  if (!upload_url) return NextResponse.json({ error: 'No upload URL from TikTok' }, { status: 502 })
+  if (!upload_url) return NextResponse.json({ error: 'No upload URL from TikTok', code: 'no_upload_url' }, { status: 502 })
 
   return NextResponse.json({
     upload_url, publish_id, open_id: auth.openId, full_caption: fullCaption,
