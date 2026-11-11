@@ -60,6 +60,26 @@ function formatBytes(b: number) {
     : `${(b / (1024 * 1024)).toFixed(1)} MB`
 }
 
+/**
+ * A response body as JSON, or a readable error when it isn't JSON.
+ *
+ * A server error page (a timeout, a crash) is not JSON, and `res.json()` threw
+ * on it: Safari's message is "The string did not match the expected pattern."
+ * That was the whole error a creator saw, and the funnel recorded no code.
+ */
+async function readJson(res: Response): Promise<Record<string, unknown>> {
+  const text = await res.text().catch(() => '')
+  try {
+    const parsed = text ? JSON.parse(text) : {}
+    return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : {}
+  } catch {
+    return {
+      error: `SocialMate's server answered ${res.status} with no details. Try again in a minute.`,
+      code:  `http_${res.status}`,
+    }
+  }
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Sound = {
@@ -1163,9 +1183,12 @@ export default function TikTokStudioClient() {
       if (mode === 'schedule') {
         stage = 'stage_upload'
         const urlRes  = await fetch('/api/tiktok/upload-url')
-        const urlData = await urlRes.json()
-        if (!urlRes.ok) throw new Error(urlData.error || 'Failed to prepare upload')
-        const { signedUrl, path, publicUrl } = urlData
+        const urlData = await readJson(urlRes)
+        if (!urlRes.ok) {
+          tiktokCode = String(urlData.code ?? `http_${urlRes.status}`)
+          throw new Error(String(urlData.error || 'Failed to prepare upload'))
+        }
+        const { signedUrl, path, publicUrl } = urlData as { signedUrl: string; path: string; publicUrl: string }
 
         const putRes = await fetch(signedUrl, {
           method:  'PUT',
@@ -1203,8 +1226,11 @@ export default function TikTokStudioClient() {
             scheduled_at:           scheduledAt,
           }),
         })
-        const scheduleData = await scheduleRes.json()
-        if (!scheduleRes.ok) throw new Error(scheduleData.error || 'Failed to schedule TikTok post')
+        const scheduleData = await readJson(scheduleRes)
+        if (!scheduleRes.ok) {
+          tiktokCode = String(scheduleData.code ?? `http_${scheduleRes.status}`)
+          throw new Error(String(scheduleData.error || 'Failed to schedule TikTok post'))
+        }
 
         track('tiktok_post_done', { mode })
         setPostSuccess(true)
@@ -1236,13 +1262,15 @@ export default function TikTokStudioClient() {
           destination: mode === 'drafts' ? 'inbox' : 'direct',
         }),
       })
-      const initData = await initRes.json()
+      const initData = await readJson(initRes)
       if (!initRes.ok) {
-        tiktokCode = String(initData.code ?? '')
+        tiktokCode = String(initData.code ?? `http_${initRes.status}`)
         if (initData.remedy === 'drafts_or_private') setPostRemedy('drafts_or_private')
-        throw new Error(initData.error || 'Failed to initialize TikTok upload')
+        throw new Error(String(initData.error || 'Failed to initialize TikTok upload'))
       }
-      const { upload_url, publish_id, open_id, full_caption } = initData
+      const { upload_url, publish_id, open_id, full_caption } = initData as {
+        upload_url: string; publish_id: string; open_id: string; full_caption: string
+      }
       // The pieces init-upload told TikTok to expect (lib/tiktok-chunks.ts).
       const plan = {
         chunk_size:        Number(initData.chunk_size) || uploadBlob.size,
@@ -1252,16 +1280,27 @@ export default function TikTokStudioClient() {
       // Step 2: PUT the file to TikTok's upload URL, piece by piece, in order.
       stage = 'upload'
       for (const { start, end } of tiktokChunkRanges(uploadBlob.size, plan)) {
-        const tikPutRes = await fetch(upload_url, {
-          method:  'PUT',
-          body:    uploadBlob.slice(start, end + 1),
-          headers: {
-            'Content-Type':   mimeType,
-            'Content-Range':  `bytes ${start}-${end}/${uploadBlob.size}`,
-            'Content-Length': String(end - start + 1),
-          },
-        })
+        // The file goes from the browser straight to TikTok, so a dropped
+        // connection or a blocked request throws here instead of answering
+        // ("Load failed" on Safari). Both now carry a code into the funnel.
+        let tikPutRes: Response
+        try {
+          tikPutRes = await fetch(upload_url, {
+            method:  'PUT',
+            body:    uploadBlob.slice(start, end + 1),
+            headers: {
+              'Content-Type':   mimeType,
+              'Content-Range':  `bytes ${start}-${end}/${uploadBlob.size}`,
+              'Content-Length': String(end - start + 1),
+            },
+          })
+        } catch (err) {
+          tiktokCode = 'upload_network'
+          const why = err instanceof Error ? err.message : 'network error'
+          throw new Error(`The upload to TikTok was cut off (${why}). Check your connection and try again.`)
+        }
         if (!tikPutRes.ok) {
+          tiktokCode = `upload_http_${tikPutRes.status}`
           const errText = await tikPutRes.text().catch(() => '')
           throw new Error(`TikTok upload failed (${tikPutRes.status})${errText ? ': ' + errText.slice(0, 200) : ''}`)
         }
@@ -1303,8 +1342,11 @@ export default function TikTokStudioClient() {
           scheduled_at:           null,
         }),
       })
-      const confirmData = await confirmRes.json()
-      if (!confirmRes.ok) throw new Error(confirmData.error || 'Failed to save post record')
+      const confirmData = await readJson(confirmRes)
+      if (!confirmRes.ok) {
+        tiktokCode = String(confirmData.code ?? `http_${confirmRes.status}`)
+        throw new Error(String(confirmData.error || 'Failed to save post record'))
+      }
 
       track('tiktok_post_done', { mode })
       setPostSuccess(true)
@@ -1575,7 +1617,13 @@ export default function TikTokStudioClient() {
                 which account the post goes to. It was hidden on phones. */}
             <span className="max-w-32 truncate text-xs text-ink-muted">{creator.account_name}</span>
             <button
-              onClick={() => fetch('/api/tiktok/disconnect', { method: 'POST' }).then(() => setCreator({ connected: false }))}
+              onClick={() => {
+                // One tap used to disconnect at once, from a small link beside
+                // the account name, and a disconnect also starts the 45-day
+                // pause on this TikTok account for other SocialMate accounts.
+                if (!window.confirm('Disconnect this TikTok account from SocialMate? You can reconnect it any time.')) return
+                void fetch('/api/tiktok/disconnect', { method: 'POST' }).then(() => setCreator({ connected: false }))
+              }}
               className="text-xs text-ink-faint hover:text-ink-muted transition-colors"
             >
               Disconnect
