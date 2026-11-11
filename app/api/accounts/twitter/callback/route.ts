@@ -121,10 +121,16 @@ export async function GET(request: NextRequest) {
   }
 
   if (existing) {
-    await supabase
+    const { error: updateError } = await supabase
       .from('connected_accounts')
-      .update({ access_token, refresh_token, expires_at, account_name, profile_image_url })
+      // scope too: reconnecting is how an account gains a new permission
+      // (media.write, Nov 2026), and the publisher reads it from this row.
+      .update({ access_token, refresh_token, expires_at, account_name, profile_image_url, ...(scope ? { scope } : {}) })
       .eq('id', existing.id)
+    if (updateError) {
+      console.error('[Twitter OAuth] token update failed:', updateError.message)
+      return NextResponse.redirect(`${appUrl}/accounts?error=twitter_db_error`)
+    }
   } else {
     const { error: dbError } = await supabase
       .from('connected_accounts')
@@ -137,7 +143,7 @@ export async function GET(request: NextRequest) {
         access_token,
         refresh_token: refresh_token || null,
         expires_at,
-        scope: scope || 'tweet.read tweet.write users.read offline.access',
+        scope: scope || 'tweet.read tweet.write users.read offline.access media.write',
       })
 
     if (dbError) {

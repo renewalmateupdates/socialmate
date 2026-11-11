@@ -8,6 +8,46 @@ import { RetryablePublishError } from './retry'
 
 const MAX_TWEET_LENGTH = 280
 
+/** Whether a stored OAuth scope string includes X's media upload permission. */
+export function hasMediaScope(scope: string | null | undefined): boolean {
+  return (scope ?? '').split(/\s+/).includes('media.write')
+}
+
+/**
+ * Uploads one image through X's v2 endpoint and returns its media id.
+ *
+ * Until Nov 2026 this called the v1.1 endpoint (upload.twitter.com), which
+ * does not take OAuth 2.0 user tokens: every upload failed, the failure was
+ * swallowed, and X posts went out without their image. On Nov 11 the five most
+ * recent X posts with an image attached showed none on X. The v2 endpoint
+ * needs the media.write scope (docs.x.com/x-api/media/upload-media).
+ */
+async function uploadXImage(accessToken: string, imageUrl: string): Promise<string> {
+  const imgRes = await fetch(imageUrl)
+  if (!imgRes.ok) throw new Error(`could not fetch the image (HTTP ${imgRes.status})`)
+  const bytes = await imgRes.arrayBuffer()
+  const contentType = imgRes.headers.get('content-type') || 'image/jpeg'
+  const isGif = /gif/i.test(contentType) || /\.gif$/i.test(imageUrl.split('?')[0])
+
+  const form = new FormData()
+  form.append('media', new Blob([bytes], { type: contentType }), isGif ? 'image.gif' : 'image')
+  form.append('media_category', isGif ? 'tweet_gif' : 'tweet_image')
+
+  const res = await fetch('https://api.x.com/2/media/upload', {
+    method:  'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body:    form,
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const detail = body?.detail || body?.errors?.[0]?.message || body?.title || `HTTP ${res.status}`
+    throw Object.assign(new Error(`X media upload failed: ${detail}`), { status: res.status })
+  }
+  const id = body?.data?.id
+  if (!id) throw new Error('X media upload returned no media id')
+  return String(id)
+}
+
 export async function refreshTwitterToken(
   refreshToken: string,
   accountId: string
@@ -72,7 +112,7 @@ export async function publishToTwitter(
   // Fetch connected account
   let query = getSupabaseAdmin()
     .from('connected_accounts')
-    .select('id, access_token, refresh_token, platform_user_id, account_name, expires_at')
+    .select('id, access_token, refresh_token, platform_user_id, account_name, expires_at, scope')
     .eq('user_id', userId)
     .eq('platform', 'twitter')
 
@@ -210,39 +250,34 @@ export async function publishToTwitter(
     }
   }
 
-  // Handle media uploads if present (images only for now — video requires async upload)
+  // Images (video is not sent to X yet; Compose says so before posting).
   const mediaIds: string[] = []
   const imageUrls = (mediaUrls || []).filter(u =>
     /\.(jpg|jpeg|png|gif|webp)$/i.test(u.split('?')[0])
   ).slice(0, 4) // X allows max 4 images
 
-  for (const imageUrl of imageUrls) {
-    try {
-      // Download the image
-      const imgRes = await fetch(imageUrl)
-      if (!imgRes.ok) continue
-      const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
-      const contentType = imgRes.headers.get('content-type') || 'image/jpeg'
-
-      // Upload to Twitter v1.1 media upload endpoint
-      const uploadRes = await fetch('https://upload.twitter.com/1.1/media/upload.json', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          media_data: imgBuffer.toString('base64'),
-          media_type: contentType,
-        }),
-      })
-
-      if (uploadRes.ok) {
-        const { media_id_string } = await uploadRes.json()
-        if (media_id_string) mediaIds.push(media_id_string)
+  if (imageUrls.length > 0) {
+    // Accounts connected before Nov 2026 were never asked for media.write,
+    // and X refuses the upload without it. Say so rather than posting the
+    // text alone, which is what every image post to X quietly did until then.
+    if (!hasMediaScope(account.scope)) {
+      throw new Error(
+        'X needs one more permission to post images. Reconnect X on the Accounts page, then retry this post.'
+      )
+    }
+    for (const imageUrl of imageUrls) {
+      try {
+        mediaIds.push(await uploadXImage(accessToken, imageUrl))
+      } catch (e) {
+        const status = (e as { status?: number }).status
+        if (status === 401) throw new Error('X token expired. Please reconnect your X account in Accounts → X.')
+        if (status === 403) {
+          throw new Error('X refused the image upload. Reconnect X on the Accounts page, then retry this post.')
+        }
+        // Anything else (too big, unreadable): post without that image, as
+        // the other platforms do, and leave a trace.
+        console.warn('[Twitter] Image upload failed:', imageUrl, e instanceof Error ? e.message : e)
       }
-    } catch {
-      // Non-fatal — post text even if media upload fails
     }
   }
 
@@ -350,7 +385,7 @@ export async function publishToTwitter(
  * 2. Enable OAuth 2.0 with PKCE
  * 3. Set Type of App: "Web App, Automated App or Bot"
  * 4. Add callback URL: https://socialmate.studio/api/accounts/twitter/callback
- * 5. Add required scopes: tweet.read tweet.write users.read offline.access
+ * 5. Add required scopes: tweet.read tweet.write users.read offline.access media.write (images, Nov 2026)
  * 6. Save Client ID + Client Secret to env vars:
  *    TWITTER_CLIENT_ID=...
  *    TWITTER_CLIENT_SECRET=...
