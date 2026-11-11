@@ -21,6 +21,8 @@ interface AdminUser {
   post_stats: PostStats
   platform_stats: Record<string, PlatformStat>
   affiliate_status: string | null
+  // A team member posts to the owner's accounts, not their own.
+  team_of?: { owner_id: string; owner_email: string; role: string } | null
   is_stax: boolean
   plan_disagrees?: boolean
   is_internal?: boolean
@@ -302,6 +304,11 @@ function AdminUsersInner() {
                           )}
                         </div>
                         {u.display_name && <div className="text-xs text-gray-400 mt-0.5">{u.display_name}</div>}
+                        {u.team_of && (
+                          <div className="text-xs text-violet-500 dark:text-violet-400 mt-0.5">
+                            {u.team_of.role.charAt(0).toUpperCase() + u.team_of.role.slice(1)} on {u.team_of.owner_email || 'another account'}&rsquo;s team
+                          </div>
+                        )}
                         {/* stopPropagation so the row's quick-peek drawer does
                             not also fire on the way to the full page. */}
                         <Link href={`/admin/users/${u.user_id}`}
@@ -368,7 +375,11 @@ function AdminUsersInner() {
                       <td className="px-5 py-3">
                         <div className="flex flex-wrap gap-1">
                           {u.connected_platforms.length === 0
-                            ? <span className="text-gray-400 text-xs">{u.ever_connected ? 'none now (was connected)' : 'none'}</span>
+                            ? <span className="text-gray-400 text-xs">
+                                {u.team_of
+                                  ? 'posts to the owner\u2019s accounts'
+                                  : u.ever_connected ? 'none now (was connected)' : 'none'}
+                              </span>
                             : u.connected_platforms.map(p => {
                                 const ps = u.platform_stats?.[p]
                                 return (
