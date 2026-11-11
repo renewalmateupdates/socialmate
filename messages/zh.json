@@ -1006,7 +1006,8 @@
       "delete_account_confirm_note": "此操作无法撤销。输入 DELETE 确认。",
       "delete_account_placeholder": "输入 DELETE 确认",
       "processing": "处理中...",
-      "delete_account_final": "删除我的账户"
+      "delete_account_final": "删除我的账户",
+      "delete_account_failed": "无法删除您的账户，您的数据仍然保留。请稍后重试，或发送邮件至 {email}，我们会为您删除。"
     },
     "white_label_tab": {
       "title": "白标附加功能",

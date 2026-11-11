@@ -9,6 +9,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications'
 import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
+import { SUPPORT_EMAIL } from '@/lib/contact'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Check, CheckCircle2, Clock, Crown, Gem, Gift, Globe, Link2, Mic, Rocket, Star, Tag, Upload, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 
@@ -108,6 +109,7 @@ function SettingsInner() {
   const [confirmDeletePosts, setConfirmDeletePosts]   = useState(false)
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText]     = useState('')
+  const [deleteAccountFailed, setDeleteAccountFailed] = useState(false)
   const [dangerLoading, setDangerLoading]             = useState(false)
 
   // Change password state
@@ -556,22 +558,26 @@ function SettingsInner() {
     setTimeout(() => setSessionSignedOut(false), 3000)
   }
 
+  // A failure used to go to the console only: the button stopped spinning and
+  // nothing else happened. Say so, and say who can finish it.
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE') return
     setDangerLoading(true)
+    setDeleteAccountFailed(false)
     try {
       const res = await fetch('/api/user/delete', { method: 'POST' })
       if (res.ok) {
         await supabase.auth.signOut()
         router.push('/')
-      } else {
-        const json = await res.json().catch(() => ({}))
-        console.error('Delete account failed:', json.error)
-        setDangerLoading(false)
+        return
       }
-    } catch {
-      setDangerLoading(false)
+      const json = await res.json().catch(() => ({}))
+      console.error('Delete account failed:', json.error)
+    } catch (err) {
+      console.error('Delete account failed:', err)
     }
+    setDeleteAccountFailed(true)
+    setDangerLoading(false)
   }
 
   const handleEnroll2FA = async () => {
@@ -1354,11 +1360,16 @@ function SettingsInner() {
                           className="text-xs font-bold px-4 py-2 bg-red-600 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
                           {dangerLoading ? tSettings('app_settings.security_tab.processing') : tSettings('app_settings.security_tab.delete_account_final')}
                         </button>
-                        <button onClick={() => { setConfirmDeleteAccount(false); setDeleteConfirmText('') }}
+                        <button onClick={() => { setConfirmDeleteAccount(false); setDeleteConfirmText(''); setDeleteAccountFailed(false) }}
                           className="text-xs font-bold px-4 py-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
                           {tSettings('app_settings.security_tab.cancel')}
                         </button>
                       </div>
+                      {deleteAccountFailed && (
+                        <p role="alert" className="text-xs font-semibold text-red-700 mt-3">
+                          {tSettings('app_settings.security_tab.delete_account_failed', { email: SUPPORT_EMAIL })}
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <button onClick={() => setConfirmDeleteAccount(true)}

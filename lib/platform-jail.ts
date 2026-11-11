@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 /**
@@ -117,4 +118,97 @@ export async function startCooling(
     .eq('platform', platform)
     .eq('platform_account_id', platformAccountId)
   if (error) console.warn(`[platform-jail] ${platform} cooling write failed:`, error.message)
+}
+
+/** A registry row as account deletion reads it, so it can be put back. */
+export interface RegistryRow extends RegistryRecord {
+  id: string
+  disconnected_at: string | null
+  updated_at: string | null
+}
+
+/**
+ * What a registry row becomes when the account holding it is deleted.
+ *
+ * The owner has to go. connected_to_user references auth.users with no ON
+ * DELETE rule, so while a row names the account, the account cannot be
+ * deleted (lib/account-deletion.ts has the story). An active row then starts
+ * the same 45-day pause a disconnect does: with the owner gone, nobody is
+ * "the owner coming back", and deleting an account and signing up again is
+ * the hand-over this pause exists to slow down. A row that is already cooling
+ * or released keeps its status and dates. Pure, so it can be tested.
+ */
+export function releasedForDeletedOwner(
+  record: Pick<RegistryRow, 'status' | 'disconnected_at' | 'cooling_until'>,
+  now: Date = new Date(),
+) {
+  const stamp = now.toISOString()
+  if (record.status === 'active') {
+    return {
+      connected_to_user: null,
+      status: 'cooling',
+      disconnected_at: stamp,
+      cooling_until: new Date(now.getTime() + COOLING_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: stamp,
+    }
+  }
+  return {
+    connected_to_user: null,
+    status: record.status,
+    disconnected_at: record.disconnected_at,
+    cooling_until: record.cooling_until,
+    updated_at: stamp,
+  }
+}
+
+/**
+ * Frees every registry row that names `userId`, so the auth user can be
+ * deleted, and returns the rows as they were for restoreRegistryRows().
+ *
+ * Throws if a read or write fails, after putting back whatever it had already
+ * changed: an account with a row still pointing at it cannot be deleted, so
+ * carrying on would only fail later with a worse message.
+ */
+export async function releaseRegistryForDeletion(
+  db: SupabaseClient,
+  userId: string,
+  now: Date = new Date(),
+): Promise<RegistryRow[]> {
+  const { data, error } = await db
+    .from('platform_account_registry')
+    .select('id, status, connected_to_user, disconnected_at, cooling_until, updated_at')
+    .eq('connected_to_user', userId)
+  if (error) throw new Error(`registry read failed: ${error.message}`)
+
+  const rows = (data ?? []) as RegistryRow[]
+  const changed: RegistryRow[] = []
+  for (const row of rows) {
+    const { error: writeError } = await db
+      .from('platform_account_registry')
+      .update(releasedForDeletedOwner(row, now))
+      .eq('id', row.id)
+    if (writeError) {
+      await restoreRegistryRows(db, changed)
+      throw new Error(`registry release failed: ${writeError.message}`)
+    }
+    changed.push(row)
+  }
+  return rows
+}
+
+/** Puts rows back exactly as releaseRegistryForDeletion() found them. */
+export async function restoreRegistryRows(db: SupabaseClient, rows: RegistryRow[]): Promise<void> {
+  for (const row of rows) {
+    const { error } = await db
+      .from('platform_account_registry')
+      .update({
+        connected_to_user: row.connected_to_user,
+        status: row.status,
+        disconnected_at: row.disconnected_at,
+        cooling_until: row.cooling_until,
+        updated_at: row.updated_at,
+      })
+      .eq('id', row.id)
+    if (error) console.error(`[platform-jail] could not restore registry row ${row.id}:`, error.message)
+  }
 }
