@@ -65,12 +65,17 @@ export async function GET(req: NextRequest) {
     // the applicant typed.
     soft(selectAll<{ applicant_email: string | null; status: string | null }>('curated_listings', () =>
       oldestFirst(db.from('curated_listings').select('applicant_email, status')))),
+    // Team members post to the workspace owner's accounts, so an Editor with
+    // posts and no connected platform is normal, not a bug. Matched by email,
+    // the same way lib/team-workspaces.ts resolves access.
+    soft(selectAll<{ owner_id: string; email: string | null; role: string | null }>('team_members', () =>
+      oldestFirst(db.from('team_members').select('owner_id, email, role').eq('status', 'active')))),
   ]).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
   if (loaded instanceof Error) {
     console.error('[admin/users]', loaded.message)
     return NextResponse.json({ error: loaded.message }, { status: 500 })
   }
-  const [authUsers, settings, workspaces, accounts, posts, events, affiliates, listings] = loaded
+  const [authUsers, settings, workspaces, accounts, posts, events, affiliates, listings, teams] = loaded
 
   const settingsMap = new Map(settings.map(s => [s.user_id, s]))
 
@@ -131,6 +136,17 @@ export async function GET(req: NextRequest) {
   const affiliateMap = new Map<string, string>()
   for (const a of affiliates) affiliateMap.set(a.user_id, a.status ?? 'active')
 
+  const emailById = new Map(authUsers.map(u => [u.id, u.email ?? '']))
+  const teamByEmail = new Map<string, { owner_id: string; owner_email: string; role: string }>()
+  for (const t of teams) {
+    if (!t.email) continue
+    teamByEmail.set(t.email.toLowerCase(), {
+      owner_id: t.owner_id,
+      owner_email: emailById.get(t.owner_id) ?? '',
+      role: t.role ?? 'member',
+    })
+  }
+
   // Only live listings. The webhook writes the literal 'live', not 'active';
   // see isLiveListing() in app/admin/studio-stax/page.tsx.
   const staxSet = new Set<string>()
@@ -175,6 +191,8 @@ export async function GET(req: NextRequest) {
       published_events,
       ever_published: stats.published > 0 || published_events > 0,
       affiliate_status: affiliateMap.get(u.id) ?? null,
+      // Whose workspace they post into as a team member, if anyone's.
+      team_of: (u.email && teamByEmail.get(u.email.toLowerCase())) || null,
       is_stax:          !!u.email && staxSet.has(u.email.toLowerCase()),
     }
   })
