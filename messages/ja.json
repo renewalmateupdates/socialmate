@@ -1006,7 +1006,8 @@
       "delete_account_confirm_note": "この操作は取り消せません。確認するためにDELETEと入力してください。",
       "delete_account_placeholder": "DELETEと入力して確認",
       "processing": "処理中...",
-      "delete_account_final": "アカウントを削除"
+      "delete_account_final": "アカウントを削除",
+      "delete_account_failed": "アカウントを削除できませんでした。データはそのまま残っています。少し待ってからもう一度お試しいただくか、{email} までご連絡ください。こちらで削除します。"
     },
     "white_label_tab": {
       "title": "ホワイトラベルアドオン",

@@ -1006,7 +1006,8 @@
       "delete_account_confirm_note": "This action cannot be undone. Type DELETE to confirm.",
       "delete_account_placeholder": "Type DELETE to confirm",
       "processing": "Processing...",
-      "delete_account_final": "Delete my account"
+      "delete_account_final": "Delete my account",
+      "delete_account_failed": "Não foi possível excluir sua conta, e seus dados continuam aqui. Tente de novo em um minuto ou escreva para {email} e nós a excluiremos para você."
     },
     "white_label_tab": {
       "title": "White Label Add-on",

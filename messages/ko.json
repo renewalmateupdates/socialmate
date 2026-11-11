@@ -1006,7 +1006,8 @@
       "delete_account_confirm_note": "이 작업은 취소할 수 없습니다. 확인하려면 DELETE를 입력하세요.",
       "delete_account_placeholder": "DELETE를 입력하여 확인",
       "processing": "처리 중...",
-      "delete_account_final": "계정 삭제"
+      "delete_account_final": "계정 삭제",
+      "delete_account_failed": "계정을 삭제하지 못했습니다. 데이터는 그대로 남아 있습니다. 잠시 후 다시 시도하거나 {email}로 메일을 보내 주시면 대신 삭제해 드리겠습니다."
     },
     "white_label_tab": {
       "title": "화이트 라벨 애드온",
