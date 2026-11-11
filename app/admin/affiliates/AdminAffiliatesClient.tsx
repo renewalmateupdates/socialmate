@@ -242,7 +242,7 @@ export default function AdminAffiliatesClient() {
                   </div>
                   <div className="text-right text-xs text-gray-400">
                     <div className="font-bold text-gray-900 dark:text-gray-100 text-sm">
-                      {a.active_referral_count >= 100 ? '40%' : '30%'} rate
+                      {Math.round((a.commission_rate ?? 0.3) * 100)}% rate
                     </div>
                     <div>{cents(a.paid_out_cents)} paid out</div>
                   </div>
@@ -272,7 +272,7 @@ export default function AdminAffiliatesClient() {
                       { label: 'Email',      value: selected.email },
                       { label: 'Status',     value: selected.status },
                       { label: 'Referrals',  value: selected.active_referral_count },
-                      { label: 'Rate',       value: selected.active_referral_count >= 100 ? '40%' : '30%' },
+                      { label: 'Rate',       value: `${Math.round((selected.commission_rate ?? 0.3) * 100)}%` },
                       { label: 'Earned',     value: cents(selected.total_earnings_cents) },
                       { label: 'Available',  value: cents(selected.available_balance_cents) },
                       { label: 'Paid Out',   value: cents(selected.paid_out_cents) },

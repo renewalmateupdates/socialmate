@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { partnerRate } from '@/lib/partner-rate'
 
 // Partner commission and referral attribution, called from the Stripe webhook
 // and the checkout route.
@@ -18,9 +19,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 const HOLD_DAYS = 60
 
-export function partnerRate(activeReferralCount: number): number {
-  return activeReferralCount >= 100 ? 0.40 : 0.30
-}
+// The 30% / 40% rule, including "40% forever", lives in lib/partner-rate.ts.
+export { partnerRate }
 
 // Sales tax collected through automatic_tax is not revenue, so it's excluded.
 // Handles both invoice shapes: `tax` (API 2024-06-20, what lib/stripe.ts pins)
@@ -105,13 +105,13 @@ export async function creditPartnerCommission(
 
   const { data: affiliate, error: affErr } = await db
     .from('affiliates')
-    .select('id, status, unpaid_earnings, total_earnings, active_referral_count')
+    .select('id, status, unpaid_earnings, total_earnings, active_referral_count, commission_rate')
     .eq('user_id', partnerUserId)
     .maybeSingle()
   if (affErr) console.warn('[commission] partner lookup failed:', affErr.message)
   if (!affiliate || affiliate.status !== 'active') return { ...none, becamePaying }
 
-  const rate = params.rate ?? partnerRate(affiliate.active_referral_count ?? 0)
+  const rate = params.rate ?? partnerRate(affiliate.active_referral_count ?? 0, affiliate.commission_rate)
   const commissionCents = Math.floor(Math.max(0, params.amountCents) * rate)
   if (commissionCents <= 0) return { ...none, becamePaying }
 
@@ -138,7 +138,8 @@ export async function creditPartnerCommission(
     unpaid_earnings:       parseFloat(((affiliate.unpaid_earnings ?? 0) + dollars).toFixed(2)),
     total_earnings:        parseFloat(((affiliate.total_earnings  ?? 0) + dollars).toFixed(2)),
     active_referral_count: activeCount,
-    commission_rate:       partnerRate(activeCount),
+    // Never lowered: once this reaches 0.40 it stays (lib/partner-rate.ts).
+    commission_rate:       partnerRate(activeCount, affiliate.commission_rate),
   }).eq('id', affiliate.id)
   if (updErr) console.warn('[commission] balance update failed:', updErr.message)
 

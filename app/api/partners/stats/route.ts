@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { getAffiliateAvailableBalanceCents } from '@/lib/affiliate-balance'
 import { ensurePartnerProfile, ensureReferralCode, partnerReferralLink } from '@/lib/partners'
+import { partnerFigures, partnerTier } from '@/lib/partner-rate'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -82,14 +83,17 @@ export async function GET(req: NextRequest) {
       .select('*')
       .order('created_at', { ascending: false })
 
-    // Same real-balance fix as the affiliate's own view below -- the admin
-    // list was showing every partner's stale, never-written
-    // available_balance_cents instead of what they've actually earned.
-    const { data: realBalances } = await db.from('affiliates').select('user_id, unpaid_earnings')
-    const balanceByUser = new Map((realBalances ?? []).map(a => [a.user_id, Math.round((a.unpaid_earnings ?? 0) * 100)]))
+    // Every figure comes from the `affiliates` row the webhook credits. The
+    // profile's own balance, earnings, referral count and rate columns are
+    // never written, so the list showed zeros for all of them.
+    const { data: realRows, error: realErr } = await db
+      .from('affiliates')
+      .select('user_id, unpaid_earnings, total_earnings, active_referral_count, commission_rate')
+    if (realErr) console.warn('[partners/stats] affiliates read failed:', realErr.message)
+    const figuresByUser = new Map((realRows ?? []).map(a => [a.user_id, partnerFigures(a)]))
     const enrichedAffiliates = (affiliates ?? []).map(a => ({
       ...a,
-      available_balance_cents: balanceByUser.get(a.user_id) ?? 0,
+      ...(figuresByUser.get(a.user_id) ?? partnerFigures(null)),
     }))
 
     return NextResponse.json({ affiliates: enrichedAffiliates })
@@ -129,19 +133,19 @@ export async function GET(req: NextRequest) {
 
   if (!profile) return NextResponse.json({ profile: null })
 
-  const commissionRate = profile.active_referral_count >= 100 ? 0.40 : 0.30
-  const commissionLabel = profile.active_referral_count >= 100 ? '40%' : '30%'
-  const nextTier = profile.active_referral_count >= 100
-    ? null
-    : { rate: '40%', remaining: 100 - profile.active_referral_count }
-
   // The partner's `affiliates` row: the webhook credits commission against its
-  // id, and partner codes in `coupons` point at it.
-  const { data: affiliateRow } = await db
+  // id, partner codes in `coupons` point at it, and it holds the real referral
+  // count and rate. The profile's copies of those are never written.
+  const { data: affiliateRow, error: affiliateRowErr } = await db
     .from('affiliates')
-    .select('id')
+    .select('id, active_referral_count, commission_rate')
     .eq('user_id', user.id)
     .maybeSingle()
+  if (affiliateRowErr) console.warn('[partners/stats] affiliates read failed:', affiliateRowErr.message)
+
+  const activeReferralCount = affiliateRow?.active_referral_count ?? 0
+  const { rate: commissionRate, label: commissionLabel, nextTier } =
+    partnerTier(activeReferralCount, affiliateRow?.commission_rate)
 
   // Codes: the ones in `coupons` with this partner's affiliate_id. Those are
   // what the code box on /pricing, onboarding and settings accepts, and the
@@ -232,7 +236,12 @@ export async function GET(req: NextRequest) {
   const availableBalanceCents = await getAffiliateAvailableBalanceCents(db, user.id)
 
   return NextResponse.json({
-    profile: { ...profile, available_balance_cents: availableBalanceCents, commission_rate: commissionRate },
+    profile: {
+      ...profile,
+      available_balance_cents: availableBalanceCents,
+      commission_rate:         commissionRate,
+      active_referral_count:   activeReferralCount,
+    },
     referral_link: referralLink,
     promo_codes: promoCodes,
     conversions,

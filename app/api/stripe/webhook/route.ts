@@ -7,6 +7,7 @@ import Stripe from 'stripe'
 import { Resend } from 'resend'
 import { REPLY_TO } from '@/lib/mail'
 import { creditPartnerCommission, invoiceCommissionBase } from '@/lib/partner-commission'
+import { partnerRate } from '@/lib/partner-rate'
 
 // Aug 2026 pricing: Pro $5 -> $8, Agency $20 -> $29, annual moved to two months
 // free. New prices were created against the same Stripe products, so reporting
@@ -326,7 +327,8 @@ async function handleAffiliateChurn(
     if (!affiliate) return
 
     const newCount = Math.max(0, (affiliate.active_referral_count ?? 1) - 1)
-    const newRate  = newCount >= 100 ? 0.40 : 0.30
+    // A churned referral lowers the count, never a 40% rate already earned.
+    const newRate  = partnerRate(newCount, affiliate.commission_rate)
 
     await supabase
       .from('affiliates')
