@@ -143,6 +143,15 @@ export async function POST(req: NextRequest) {
     await admin.from('user_settings').delete().eq('user_id', userId)
     await admin.from('feedback').delete().eq('user_id', userId)
 
+    // Rows that point at the auth user. Until Nov 10, 2026 these two were
+    // never deleted, the auth delete below then failed, and two people who
+    // deleted their accounts were left as half-deleted accounts: every row
+    // gone except these, still counted as customers and still emailable.
+    for (const table of ['usage_events', 'user_achievements']) {
+      const { error } = await admin.from(table).delete().eq('user_id', userId)
+      if (error) console.error(`[Delete User] ${table} delete failed:`, error.message)
+    }
+
     // Profile (last public table before auth delete)
     await admin.from('profiles').delete().eq('id', userId)
 
