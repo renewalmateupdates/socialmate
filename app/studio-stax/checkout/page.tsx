@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import { Clock, Link2 } from 'lucide-react'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 interface CheckoutData {
   listing:        { id: string; name: string; tagline: string; applicant_name: string }
@@ -31,7 +32,7 @@ function CheckoutInner() {
     fetch(`/api/studio-stax/checkout?token=${token}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
-      .catch(() => { setError('Failed to load checkout. Try again or contact hello@socialmate.studio'); setLoading(false) })
+      .catch(() => { setError(`Failed to load checkout. Try again or contact ${SUPPORT_EMAIL}`); setLoading(false) })
   }, [token])
 
   const handlePay = async () => {
@@ -75,8 +76,8 @@ function CheckoutInner() {
           ? "Checkout links expire after 7 days. Contact us and we'll send a fresh one."
           : "This link is not valid. Make sure you're using the link from your approval email."}
       </p>
-      <a href="mailto:hello@socialmate.studio" className="text-sm font-semibold text-amber-500 hover:text-amber-400">
-        hello@socialmate.studio →
+      <a href={SUPPORT_MAILTO} className="text-sm font-semibold text-amber-500 hover:text-amber-400">
+        {SUPPORT_EMAIL} →
       </a>
     </div>
   )

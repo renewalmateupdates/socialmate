@@ -8,6 +8,7 @@ import {
   PartyPopper,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 export default function EnterprisePage() {
   const { t } = useI18n()
@@ -266,9 +267,9 @@ export default function EnterprisePage() {
 
               <p className="text-xs text-gray-600 text-center">
                 {t('enterprise.or_email')}{' '}
-                <a href="mailto:hello@socialmate.studio?subject=Enterprise Plan Inquiry"
+                <a href={`${SUPPORT_MAILTO}?subject=Enterprise Plan Inquiry`}
                   className="text-amber-400 hover:underline">
-                  hello@socialmate.studio
+                  {SUPPORT_EMAIL}
                 </a>
               </p>
             </form>

@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { Handshake } from 'lucide-react'
+import { SUPPORT_MAILTO } from '@/lib/contact'
 
 const gold  = '#F59E0B'
 const dark  = '#0a0a0a'
@@ -19,7 +20,7 @@ export default function DeclinedPage() {
           You've declined the SocialMate Partner Program invite — totally understood. If you ever change your mind, reach out and we'll set you up.
         </p>
         <a
-          href="mailto:hello@socialmate.studio?subject=Partner Program"
+          href={`${SUPPORT_MAILTO}?subject=Partner Program`}
           style={{
             display: 'block', padding: '11px 24px', borderRadius: 10,
             background: `rgba(245,158,11,0.1)`, border: `1px solid rgba(245,158,11,0.3)`,

@@ -10,6 +10,7 @@ import {
   Users, CheckCircle2,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 
@@ -543,7 +544,7 @@ export default function PartnersDashboardPage() {
             <AlertTriangle size={18} color="#f87171" strokeWidth={2} />
             <div>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#f87171' }}>Account Suspended</p>
-              <p style={{ margin: '4px 0 0', fontSize: 13, color: muted }}>Your account has been suspended. Contact hello@socialmate.studio to resolve this.</p>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: muted }}>Your account has been suspended. Contact {SUPPORT_EMAIL} to resolve this.</p>
             </div>
           </div>
         )}
@@ -1077,7 +1078,7 @@ export default function PartnersDashboardPage() {
       <footer style={{ padding: '32px 24px', textAlign: 'center', borderTop: `1px solid ${border}` }}>
         <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>
           © {new Date().getFullYear()} Gilgamesh Enterprise LLC · SocialMate Partner Program ·{' '}
-          <a href="mailto:hello@socialmate.studio" style={{ color: muted, textDecoration: 'none' }}>Support</a>
+          <a href={SUPPORT_MAILTO} style={{ color: muted, textDecoration: 'none' }}>Support</a>
         </p>
       </footer>
     </div>
