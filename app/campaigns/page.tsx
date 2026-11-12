@@ -61,6 +61,7 @@ export default function CampaignsPage() {
   const [startDate, setStartDate] = useState(today)
   const [endDate,   setEndDate]   = useState(() => { const d = new Date(); d.setDate(d.getDate() + 27); return dayKey(d) })
   const [reword,    setReword]    = useState(false)
+  const [trackLinks, setTrackLinks] = useState(true)
   const [saving,    setSaving]    = useState(false)
   const [error,     setError]     = useState('')
 
@@ -145,6 +146,7 @@ export default function CampaignsPage() {
           end_date:    endDate,
           messages:    messages.filter(m => m.text.trim()),
           reword,
+          trackLinks,
         }),
       })
       const d = await res.json().catch(() => ({}))
@@ -368,6 +370,17 @@ export default function CampaignsPage() {
                 <span className="block text-xs text-muted mt-1">
                   AI writes {VARIANTS_PER_MESSAGE} versions of each message now, keeping every link and price as written, so repeats never go out word for word.
                   {' '}{CAMPAIGN_REWORD_COST} credits per message, charged once{filled ? `: ${rewordCost} credits` : ''}. You have {credits}.
+                </span>
+              </span>
+            </label>
+
+            {/* Link tracking */}
+            <label className="flex items-start gap-3 rounded-xl border border-theme p-4 cursor-pointer">
+              <input type="checkbox" checked={trackLinks} onChange={e => setTrackLinks(e.target.checked)} className="mt-1 accent-amber-500" />
+              <span>
+                <span className="text-sm font-bold text-theme">Count link clicks</span>
+                <span className="block text-xs text-muted mt-1">
+                  Links in your messages go out as socialmate.studio/go short links, so the campaign page shows clicks for each message. They lead to the same place. Free.
                 </span>
               </span>
             </label>

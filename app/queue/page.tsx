@@ -20,7 +20,7 @@ import { CSS } from '@dnd-kit/utilities'
 import PostImageExporter from '@/components/PostImageExporter'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { AlertTriangle, CalendarClock, CalendarRange, Camera, CheckCircle2, Globe, Heart, Layers, Lock, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
+import { AlertTriangle, CalendarClock, CalendarRange, Camera, CheckCircle2, Globe, Heart, Layers, Lock, Megaphone, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -185,6 +185,16 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
                 <Repeat className="w-3 h-3" strokeWidth={2} /> <span className="hidden sm:inline capitalize">{post.recurrence_rule ?? 'Recurring'}</span>
               </span>
+            )}
+            {/* Campaign posts look like any other post here; say which ones
+                they are and link to the campaign (its clicks live there). */}
+            {post.metadata?.source === 'campaign' && typeof post.metadata?.campaign_id === 'string' && (
+              <Link
+                href={`/campaigns/${post.metadata.campaign_id}`}
+                title="Made by a campaign. Open it to see all its posts and link clicks."
+                className="flex items-center gap-1 text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full hover:underline">
+                <Megaphone className="w-3 h-3" strokeWidth={2} /> <span className="hidden sm:inline">Campaign</span>
+              </Link>
             )}
             {(post.tags || []).map((tag: string) => (
               <span key={tag} className="text-xs font-semibold px-2 py-0.5 rounded-full"

@@ -8,10 +8,10 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',           publer: '$12/month (Professional)',  socialmate: '$0 — free forever'       },
-  { feature: 'Free plan accounts',        publer: '3 social accounts',         socialmate: 'Multiple per platform'   },
+  { feature: 'Free plan accounts',        publer: '3 social accounts',         socialmate: '1 per platform (Pro: 5)' },
   { feature: 'Free plan post limit',      publer: '10 posts per account',      socialmate: '250 posts / month'               },
   { feature: 'Pricing model',             publer: 'Per workspace',             socialmate: 'Flat rate'               },
-  { feature: 'Platforms supported',       publer: '12+',                       socialmate: '16 (growing)'            },
+  { feature: 'Platforms supported',       publer: '12+',                       socialmate: '7 live'                  },
   { feature: 'TikTok scheduling',          publer: '✅ (paid plans)',             socialmate: '✅ Free'                  },
   { feature: 'TikTok on free plan',        publer: '❌',                         socialmate: '✅ (20 videos/month)'    },
   { feature: 'Discord support',           publer: '❌',                         socialmate: '✅'                      },
@@ -89,7 +89,7 @@ export default function VsPublerPage() {
             SocialMate vs Publer
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Publer's free tier caps at 10 posts per account. SocialMate gives you 100 a month across every account — with 15+ AI tools and no credit card needed.
+            Publer's free tier caps at 10 posts per account. SocialMate gives you 250 a month, with 15+ AI tools and no credit card needed.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -119,7 +119,7 @@ export default function VsPublerPage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">250 posts / month. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ 100 scheduled posts / month</li>
+              <li>✅ 250 scheduled posts / month</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ RSS import free</li>
@@ -157,7 +157,7 @@ export default function VsPublerPage() {
               {
                 n: '1',
                 title: '10 posts per account is not a real free plan',
-                desc: 'Publer\'s free tier gives you 10 scheduled posts per account. If you manage 3 accounts, that\'s 30 total posts in your queue at any time. For a weekly posting schedule across platforms, you\'ll burn through that in 2–3 weeks. SocialMate has no queue limits.',
+                desc: 'Publer\'s free tier gives you 10 scheduled posts per account. If you manage 3 accounts, that\'s 30 total posts in your queue at any time. For a weekly posting schedule across platforms, you\'ll burn through that in 2–3 weeks. SocialMate gives you 250 posts a month, and the count resets every month.',
               },
               {
                 n: '2',

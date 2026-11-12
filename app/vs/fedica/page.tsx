@@ -11,7 +11,7 @@ const COMPARISON = [
   { feature: 'Free plan',                 fedica: '❌ None',                      socialmate: '✅ Free forever'         },
   { feature: 'Primary focus',             fedica: 'Twitter/X analytics only',    socialmate: 'Scheduling + analytics'  },
   { feature: 'Platform support',          fedica: 'Twitter/X primary',           socialmate: '7 platforms'            },
-  { feature: 'Instagram support',         fedica: 'Limited',                      socialmate: '✅'                      },
+  { feature: 'Instagram support',         fedica: 'Limited',                      socialmate: '❌ Not yet'               },
   { feature: 'Discord support',           fedica: '❌',                           socialmate: '✅'                      },
   { feature: 'Telegram support',          fedica: '❌',                           socialmate: '✅'                      },
   { feature: 'Mastodon support',          fedica: '❌',                           socialmate: '✅'                      },

@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Platforms supported',    skedsocial: '8 (Instagram-focused)',  socialmate: '7 live (free)'               },
   { feature: 'Team seats',             skedsocial: '1 on Fundamentals',      socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       skedsocial: 'AI Assist (paid)',       socialmate: '15+ tools free'           },
-  { feature: 'Instagram Stories',      skedsocial: '✅',                     socialmate: '🔜 Coming soon'          },
+  { feature: 'Instagram Stories',      skedsocial: '✅',                     socialmate: '❌ Not yet'               },
   { feature: 'Visual content calendar',skedsocial: '✅',                     socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',        skedsocial: '✅ (paid)',              socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            skedsocial: '✅ (paid)',              socialmate: '✅ Free'                  },
@@ -53,7 +53,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support Instagram?',
-    a: 'Instagram is on SocialMate\'s near-term roadmap. In the meantime, SocialMate covers 7 live platforms including TikTok (free), Bluesky, Discord, Telegram, Mastodon, LinkedIn, and X/Twitter, with Instagram coming soon.',
+    a: 'SocialMate does not post to Instagram yet. It covers 7 live platforms: TikTok (free), Bluesky, Discord, Telegram, Mastodon, LinkedIn, and X/Twitter.',
   },
   {
     q: 'What does SocialMate offer that Sked doesn\'t?',

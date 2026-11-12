@@ -35,10 +35,18 @@ export const PLATFORM_CHAR_LIMITS: Record<string, number> = {
   telegram: 4096,
 }
 
+/** A link in a message and the short link (short_links.slug) that counts its clicks. */
+export interface CampaignLink {
+  url:  string
+  slug: string
+}
+
 export interface CampaignMessage {
   text:       string
   variants?:  string[]
   image_url?: string | null
+  /** Set when the campaign counts clicks: each link in the message, and its short link. */
+  links?:     CampaignLink[]
 }
 
 export interface CampaignSchedule {
@@ -283,6 +291,66 @@ export function acceptRewrite(original: string, rewrite: unknown, maxChars: numb
 /** The shortest post any of these platforms takes. */
 export function charLimitFor(platforms: string[]): number {
   return Math.min(...platforms.map(p => PLATFORM_CHAR_LIMITS[p] ?? 500))
+}
+
+// ── Link tracking ────────────────────────────────────────────────────────────
+
+// Punctuation that ends a sentence, not the link: "see https://shop.com/item."
+const TRAILING_PUNCT = /[.,!?;:'"’”]+$/
+
+function splitTrailing(match: string): { url: string; tail: string } {
+  const url = match.replace(TRAILING_PUNCT, '')
+  return { url, tail: match.slice(url.length) }
+}
+
+/** Every link in these texts, in first-seen order, without repeats or trailing punctuation. */
+export function linkTargets(texts: string[]): string[] {
+  const out: string[] = []
+  for (const t of texts) {
+    for (const m of t.match(URL_RE) ?? []) {
+      const { url } = splitTrailing(m)
+      if (url && !out.includes(url)) out.push(url)
+    }
+  }
+  return out
+}
+
+export function shortLinkUrl(appUrl: string, slug: string): string {
+  return `${appUrl.replace(/\/+$/, '')}/go/${slug}`
+}
+
+/**
+ * The post text with each tracked link swapped for its short link, so clicks
+ * are counted per message. One pass over the original text, so a short link
+ * just inserted is never matched again. If the swap would push the post past
+ * `maxChars`, the text goes out as written: a counted click is not worth a
+ * truncated post.
+ */
+export function withTrackedLinks(text: string, links: CampaignLink[] | undefined, appUrl: string, maxChars: number): string {
+  if (!links?.length) return text
+  const slugByUrl: Record<string, string> = {}
+  for (const l of links) slugByUrl[l.url] = l.slug
+  const out = text.replace(URL_RE, m => {
+    const { url, tail } = splitTrailing(m)
+    const slug = slugByUrl[url]
+    return slug ? shortLinkUrl(appUrl, slug) + tail : m
+  })
+  return out.length <= maxChars ? out : text
+}
+
+/** Clicks per message and in total, from short_links rows. */
+export function campaignClicks(
+  messages: CampaignMessage[],
+  rows: { slug: string; clicks: number | null }[],
+): { total: number; byMessage: number[]; tracked: boolean } {
+  const bySlug: Record<string, number> = {}
+  for (const r of rows) bySlug[r.slug] = r.clicks ?? 0
+  const byMessage = messages.map(m => (m.links ?? []).reduce((s, l) => s + (bySlug[l.slug] ?? 0), 0))
+  return {
+    total: byMessage.reduce((a, b) => a + b, 0),
+    byMessage,
+    tracked: messages.some(m => (m.links?.length ?? 0) > 0),
+  }
 }
 
 // ── Shopify import ───────────────────────────────────────────────────────────

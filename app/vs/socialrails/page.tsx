@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',              socialrails: '$29/month',               socialmate: '$0 — free forever'        },
   { feature: 'Free plan',                   socialrails: '❌ None',                  socialmate: '✅ Free forever'          },
-  { feature: 'Platforms supported',         socialrails: '9',                        socialmate: '16 (growing)'             },
+  { feature: 'Platforms supported',         socialrails: '9',                        socialmate: '7 live'                   },
   { feature: 'Discord support',             socialrails: '❌',                        socialmate: '✅'                       },
   { feature: 'Telegram support',            socialrails: '❌',                        socialmate: '✅'                       },
   { feature: 'Mastodon support',            socialrails: '✅',                        socialmate: '✅'                       },

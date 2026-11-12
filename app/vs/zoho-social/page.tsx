@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',              zoho: '$15/month (Standard)',       socialmate: '$0 — free forever'        },
   { feature: 'Free plan',                   zoho: '❌ Trial only (15 days)',     socialmate: '✅ Free forever'          },
   { feature: 'Professional plan',           zoho: '$40/month',                  socialmate: 'Pro from $12/month'       },
-  { feature: 'Platforms supported',         zoho: '9',                          socialmate: '16 (growing)'             },
+  { feature: 'Platforms supported',         zoho: '9',                          socialmate: '7 live'                   },
   { feature: 'Discord support',             zoho: '❌',                          socialmate: '✅'                       },
   { feature: 'Telegram support',            zoho: '❌',                          socialmate: '✅'                       },
   { feature: 'Mastodon support',            zoho: '❌',                          socialmate: '✅'                       },

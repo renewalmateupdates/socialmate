@@ -7,7 +7,8 @@ import Toast from '@/components/Toast'
 import { ArrowLeft, Pause, Play, Square } from 'lucide-react'
 import { PLATFORM_NAMES, scheduleSummary, StatusPill } from '../shared'
 
-type Message = { text: string; variants?: string[]; image_url?: string | null }
+type Message = { text: string; variants?: string[]; image_url?: string | null; links?: { url: string; slug: string }[] }
+type Clicks = { total: number; byMessage: number[]; tracked: boolean }
 type Campaign = {
   id: string
   name: string
@@ -35,6 +36,7 @@ export default function CampaignPage() {
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [upcoming, setUpcoming] = useState<UpcomingPost[]>([])
   const [sent,     setSent]     = useState<SentPost[]>([])
+  const [clicks,   setClicks]   = useState<Clicks | null>(null)
   const [loading,  setLoading]  = useState(true)
   const [missing,  setMissing]  = useState(false)
   const [busy,     setBusy]     = useState(false)
@@ -50,6 +52,7 @@ export default function CampaignPage() {
       setCampaign(d.campaign)
       setUpcoming(d.upcoming ?? [])
       setSent(d.sent ?? [])
+      setClicks(d.clicks ?? null)
     }
     setLoading(false)
   }, [id])
@@ -107,6 +110,11 @@ export default function CampaignPage() {
                   <h1 className="text-2xl font-black text-theme">{campaign.name}</h1>
                   <p className="text-sm text-muted mt-1">{scheduleSummary(campaign)}</p>
                   <p className="text-sm text-muted">{campaign.platforms.map(p => PLATFORM_NAMES[p] ?? p).join(', ')} · {campaign.timezone.replace(/_/g, ' ')}</p>
+                  {clicks?.tracked && (
+                    <p className="text-sm font-bold text-theme mt-1">
+                      {clicks.total.toLocaleString()} link click{clicks.total === 1 ? '' : 's'} so far
+                    </p>
+                  )}
                 </div>
                 <StatusPill status={campaign.status} />
               </div>
@@ -188,6 +196,12 @@ export default function CampaignPage() {
                       )}
                       <p className="flex-1 min-w-0 text-sm text-theme whitespace-pre-line">{m.text}</p>
                     </div>
+                    {(m.links?.length ?? 0) > 0 && (
+                      <p className="text-xs text-muted mt-2">
+                        <span className="font-bold text-theme">{(clicks?.byMessage[i] ?? 0).toLocaleString()}</span>
+                        {' '}click{(clicks?.byMessage[i] ?? 0) === 1 ? '' : 's'} on {m.links!.length === 1 ? 'its link' : `its ${m.links!.length} links`}
+                      </p>
+                    )}
                     {(m.variants?.length ?? 0) > 0 && (
                       <div className="mt-2">
                         <button onClick={() => setOpenMsg(openMsg === i ? null : i)} className="text-xs font-bold text-amber-500 hover:text-amber-400">

@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { linkFacets } from '@/lib/bluesky-facets'
 
 
 const MAX_BLUESKY_LENGTH = 300
@@ -143,6 +144,11 @@ export async function publishToBluesky(
     }
   }
 
+  // Bluesky shows a link as clickable only when the record marks it with a
+  // facet; until Nov 2026 every link in these posts was plain text. Measured
+  // on the final (possibly truncated) text, since offsets are in bytes.
+  const facets = linkFacets(content)
+
   // Create the post
   const postRes = await fetch('https://bsky.social/xrpc/com.atproto.repo.createRecord', {
     method: 'POST',
@@ -157,6 +163,7 @@ export async function publishToBluesky(
         $type:     'app.bsky.feed.post',
         text:      content,
         createdAt: new Date().toISOString(),
+        ...(facets.length ? { facets } : {}),
         ...(embed ? { embed } : {}),
         ...(replyTo ? { reply: replyTo } : {}),
       },

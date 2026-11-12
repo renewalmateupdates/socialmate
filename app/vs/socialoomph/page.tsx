@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Telegram scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'X / Twitter scheduling',        competitor: '✅ (paid)',                  socialmate: '✅ (Pro+, 150/mo)'      },
-  { feature: 'Facebook scheduling',           competitor: '✅ (paid)',                  socialmate: '🔜 Roadmap'              },
+  { feature: 'Facebook scheduling',           competitor: '✅ (paid)',                  socialmate: '❌ Not yet'               },
   { feature: 'AI writing tools',              competitor: '❌ No AI tools',             socialmate: '15+ AI tools free'        },
   { feature: 'Content calendar',             competitor: '✅ Basic',                   socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },

@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',            recurpost: '$25/month (Personal)',       socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                 recurpost: '✅ (100 posts lifetime cap)', socialmate: '✅ 250 posts/month free' },
-  { feature: 'Free plan post limit',      recurpost: '100 posts — lifetime',       socialmate: 'No limit ever'           },
+  { feature: 'Free plan post limit',      recurpost: '100 posts — lifetime',       socialmate: '250 a month, resets'     },
   { feature: 'Social accounts (free)',    recurpost: '3 accounts',                 socialmate: 'No hard cap (free tier)' },
   { feature: 'Bulk scheduling',           recurpost: 'Paid plans',                 socialmate: '✅ Free'                 },
   { feature: 'Discord support',           recurpost: '❌',                         socialmate: '✅'                      },

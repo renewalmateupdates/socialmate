@@ -27,6 +27,7 @@ new Function('module', 'exports', 'require', outputText)(mod, mod.exports, requi
 const {
   zonedTimeToUtc, localDayKey, campaignSlots, pickContent, postsPerWeek, validateCampaign,
   acceptRewrite, charLimitFor, normalizeStoreUrl, parseShopifyProducts, productMessage,
+  linkTargets, shortLinkUrl, withTrackedLinks, campaignClicks,
 } = mod.exports
 
 const NY = 'America/New_York'
@@ -178,4 +179,64 @@ test('the Shopify import keeps only products someone can buy', () => {
   assert.equal(products[1].image_url, null)
   assert.equal(productMessage(products[0]), 'Complete Edition, $19\n\nhttps://shop.example.com/products/complete')
   assert.deepEqual(parseShopifyProducts({ nope: true }, 'https://x.com'), [])
+})
+
+// ── Link tracking (campaign mode phase 2) ────────────────────────────────────
+
+const APP = 'https://socialmate.studio'
+
+test('the links in a message and its versions, once each, without trailing punctuation', () => {
+  assert.deepEqual(
+    linkTargets(['Grab it: https://shop.com/a. Or https://shop.com/b!', 'New version https://shop.com/a']),
+    ['https://shop.com/a', 'https://shop.com/b'],
+  )
+  assert.deepEqual(linkTargets(['no links here']), [])
+})
+
+test('tracked links are swapped for short links, punctuation kept', () => {
+  const links = [{ url: 'https://shop.com/a', slug: 'abc1234' }]
+  assert.equal(shortLinkUrl(APP + '/', 'abc1234'), 'https://socialmate.studio/go/abc1234')
+  assert.equal(
+    withTrackedLinks('Grab it: https://shop.com/a. Now', links, APP, 500),
+    'Grab it: https://socialmate.studio/go/abc1234. Now',
+  )
+  // An untracked link stays as written.
+  assert.equal(withTrackedLinks('https://other.com', links, APP, 500), 'https://other.com')
+  assert.equal(withTrackedLinks('https://shop.com/a', undefined, APP, 500), 'https://shop.com/a')
+})
+
+test('a short link is never matched again, even for a socialmate.studio link', () => {
+  const links = [
+    { url: 'https://socialmate.studio', slug: 'home123' },
+    { url: 'https://socialmate.studio/pricing', slug: 'price12' },
+  ]
+  assert.equal(
+    withTrackedLinks('https://socialmate.studio and https://socialmate.studio/pricing', links, APP, 500),
+    'https://socialmate.studio/go/home123 and https://socialmate.studio/go/price12',
+  )
+})
+
+test('if the short link would push a post over the limit, the text goes out as written', () => {
+  const links = [{ url: 'https://x.co/a', slug: 'abc1234' }]
+  const text = 'y'.repeat(270) + ' https://x.co/a'
+  assert.equal(withTrackedLinks(text, links, APP, 280), text)
+})
+
+test('clicks per message and in total', () => {
+  const messages = [
+    { text: 'a', links: [{ url: 'https://a.com', slug: 's1' }, { url: 'https://b.com', slug: 's2' }] },
+    { text: 'no link' },
+    { text: 'c', links: [{ url: 'https://c.com', slug: 's3' }] },
+  ]
+  assert.deepEqual(
+    campaignClicks(messages, [{ slug: 's1', clicks: 4 }, { slug: 's2', clicks: 1 }, { slug: 's3', clicks: null }]),
+    { total: 5, byMessage: [5, 0, 0], tracked: true },
+  )
+  assert.deepEqual(campaignClicks([{ text: 'x' }], []), { total: 0, byMessage: [0], tracked: false })
+})
+
+test('AI versions are still checked against the links as written', () => {
+  // Tracking swaps links only when a post is made, so the rewrite check
+  // compares versions with the message's own links, as before.
+  assert.equal(acceptRewrite('Buy https://shop.com/a now', 'Get it today: https://shop.com/a', 280), 'Get it today: https://shop.com/a')
 })

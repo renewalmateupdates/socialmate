@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Discord support',           meetedgar: '❌',                       socialmate: '✅'                      },
   { feature: 'Telegram support',          meetedgar: '❌',                       socialmate: '✅'                      },
   { feature: 'Mastodon support',          meetedgar: '❌',                       socialmate: '✅'                      },
-  { feature: 'Instagram support',         meetedgar: '✅',                       socialmate: '✅'                      },
+  { feature: 'Instagram support',         meetedgar: '✅',                       socialmate: '❌ Not yet'               },
   { feature: 'LinkedIn support',          meetedgar: '✅',                       socialmate: '✅'                      },
   { feature: 'TikTok support',            meetedgar: '✅',                       socialmate: '✅'                      },
   { feature: 'AI writing tools',          meetedgar: 'Basic AI captions',       socialmate: '15+ tools included'       },

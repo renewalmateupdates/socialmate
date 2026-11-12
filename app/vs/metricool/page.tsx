@@ -11,7 +11,7 @@ const COMPARISON = [
   { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: '250 posts / month'               },
   { feature: 'Free plan brands',        metricool: '1 brand',                socialmate: 'Multiple workspaces'     },
   { feature: 'Pricing model',           metricool: 'Per brand',              socialmate: 'Flat rate'               },
-  { feature: 'Platforms supported',     metricool: '12+',                    socialmate: '16 (growing)'            },
+  { feature: 'Platforms supported',     metricool: '12+',                    socialmate: '7 live'                  },
   { feature: 'Discord support',         metricool: '❌',                      socialmate: '✅'                      },
   { feature: 'Telegram support',        metricool: '❌',                      socialmate: '✅'                      },
   { feature: 'Mastodon support',        metricool: '❌',                      socialmate: '✅'                      },
@@ -88,7 +88,7 @@ export default function VsMetricoolPage() {
             SocialMate vs Metricool
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Metricool's free plan caps at 50 posts per month. SocialMate has no limits — and includes 15+ AI tools at zero cost.
+            Metricool's free plan caps at 50 posts per month. SocialMate gives you 250 a month, and includes 15+ AI tools at zero cost.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

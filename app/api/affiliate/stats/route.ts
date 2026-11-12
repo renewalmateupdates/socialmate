@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { partnerTier } from '@/lib/partner-rate'
 
 const ADMIN_EMAIL_ADDR = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
 
@@ -78,11 +79,8 @@ export async function GET(req: NextRequest) {
     .order('converted_at', { ascending: false })
 
   const activeCount: number = affiliate.active_referral_count ?? 0
-  const commissionRate = activeCount >= 100 ? 0.40 : 0.30
-  const commissionLabel = activeCount >= 100 ? '40%' : '30%'
-  const nextTier = activeCount >= 100
-    ? null
-    : { rate: '40%', remaining: 100 - activeCount }
+  const { rate: commissionRate, label: commissionLabel, nextTier } =
+    partnerTier(activeCount, affiliate.commission_rate)
 
   return NextResponse.json({
     affiliate: { ...affiliate, commission_rate: commissionRate },

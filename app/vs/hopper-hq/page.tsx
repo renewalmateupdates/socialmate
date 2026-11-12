@@ -11,7 +11,7 @@ const COMPARISON = [
   { feature: 'Starting price',         hopperhq: '$19/month (1 social set)', socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              hopperhq: '❌ No free plan',           socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    hopperhq: '8 (Instagram-focused)',    socialmate: '7 live (free)'               },
-  { feature: 'Instagram grid preview', hopperhq: '✅ Core feature',          socialmate: '🔜 Coming soon'          },
+  { feature: 'Instagram grid preview', hopperhq: '✅ Core feature',          socialmate: '❌ Not yet'               },
   { feature: 'Team seats',             hopperhq: 'Extra cost per user',      socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hopperhq: 'AI Caption (paid)',        socialmate: '15+ tools free'           },
   { feature: 'Bulk scheduling',        hopperhq: '✅',                       socialmate: '✅ Free'                  },
@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate have an Instagram grid preview?',
-    a: 'Instagram grid preview is on SocialMate\'s roadmap as Instagram support is added. Currently, SocialMate focuses on Bluesky, Mastodon, Discord, Telegram, and X/Twitter as primary scheduling platforms.',
+    a: 'No. SocialMate does not post to Instagram yet, so it has no grid preview. It schedules to TikTok, LinkedIn, X, Bluesky, Discord, Telegram and Mastodon.',
   },
   {
     q: 'How does Hopper HQ pricing scale for agencies?',
@@ -160,7 +160,7 @@ export default function VsHopperHq() {
             But the per-social-set pricing model gets expensive fast — especially for agencies managing multiple clients. And with no support for emerging platforms like Bluesky, Mastodon, or Discord, it&#39;s a limiting choice for creators building audience across channels.
           </p>
           <p className="text-sm text-ink-muted leading-relaxed">
-            SocialMate is the better choice if you value breadth, AI tools, and a free starting point. Instagram grid preview is coming — and when it lands, SocialMate will offer everything Hopper HQ does, for less.
+            SocialMate is the better choice if you post beyond Instagram and want AI tools and a free starting point. If Instagram is your main platform, Hopper HQ covers it and SocialMate does not yet.
           </p>
         </div>
 

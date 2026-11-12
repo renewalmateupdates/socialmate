@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support LinkedIn?',
-    a: 'LinkedIn support is on SocialMate\'s roadmap and coming soon. In the meantime, SocialMate covers 7 platforms including Bluesky, Discord, Telegram, Mastodon, and X/Twitter — all channels most B2B creators are building on in 2026.',
+    a: 'SocialMate posts to LinkedIn personal profiles today (not company pages yet), alongside X, Bluesky, Discord, Telegram, Mastodon and TikTok.',
   },
   {
     q: 'What does Oktopost do better than SocialMate?',

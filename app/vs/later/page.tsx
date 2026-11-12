@@ -116,7 +116,7 @@ export default function VsLaterPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">All platforms. No limits. Free.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts a month. 7 platforms. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 7 platforms on free plan</li>
               <li>✅ TikTok live — free for all users</li>

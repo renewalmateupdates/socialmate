@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Discord support',             pallyy: '❌',                                 socialmate: '✅'                       },
   { feature: 'Telegram support',            pallyy: '❌',                                 socialmate: '✅'                       },
   { feature: 'Mastodon support',            pallyy: '❌',                                 socialmate: '✅'                       },
-  { feature: 'Instagram support',           pallyy: '✅ Strong (grid planner)',           socialmate: '✅ (approval pending)'    },
+  { feature: 'Instagram support',           pallyy: '✅ Strong (grid planner)',           socialmate: '❌ Not yet'               },
   { feature: 'TikTok support',              pallyy: '✅',                                 socialmate: '✅ Live'                  },
   { feature: 'AI writing tools',            pallyy: 'Basic AI (paid)',                   socialmate: '15+ tools included'        },
   { feature: 'AI credits free tier',        pallyy: 'None',                              socialmate: '50/month free'            },
