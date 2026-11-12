@@ -20,17 +20,14 @@ const LIVE_PLATFORMS = [
   { id: 'telegram', label: 'Telegram' },
   { id: 'mastodon', label: 'Mastodon' },
   { id: 'twitter',  label: 'X/Twitter' },
+  { id: 'linkedin', label: 'LinkedIn' },
 ]
 
+// TikTok takes video and posts from TikTok Studio, so it is not a row option
+// here. YouTube is waiting on Google's review. Instagram, Facebook, Threads,
+// Pinterest and Reddit are not coming soon, so they are not shown as if they were.
 const COMING_SOON_PLATFORMS = [
-  { id: 'linkedin',  label: 'LinkedIn' },
   { id: 'youtube',   label: 'YouTube' },
-  { id: 'pinterest', label: 'Pinterest' },
-  { id: 'reddit',    label: 'Reddit' },
-  { id: 'instagram', label: 'Instagram' },
-  { id: 'tiktok',    label: 'TikTok' },
-  { id: 'facebook',  label: 'Facebook' },
-  { id: 'threads',   label: 'Threads' },
 ]
 
 // Per-platform character limits
@@ -40,6 +37,7 @@ const PLATFORM_CHAR_LIMITS: Record<string, number> = {
   mastodon: 500,
   discord:  2000,
   telegram: 4096,
+  linkedin: 3000,
 }
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -437,7 +435,7 @@ export default function BulkScheduler() {
                 {COMING_SOON_PLATFORMS.slice(0, 3).map(p => (
                   <div key={p.id}
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
-                    title={`${p.label} — coming soon`}>
+                    title={`${p.label}: waiting on Google's review`}>
                     <PlatformGlyph id={p.id} size={13} />
                     <span className="hidden sm:inline">{p.label}</span>
                     <span className="text-xs text-gray-200 dark:text-gray-700 ml-0.5">Soon</span>
@@ -567,7 +565,7 @@ export default function BulkScheduler() {
                       {COMING_SOON_PLATFORMS.slice(0, 3).map(p => (
                         <span key={p.id}
                           className="opacity-20 cursor-not-allowed"
-                          title={`${p.label} — coming soon`}>
+                          title={`${p.label}: waiting on Google's review`}>
                           <PlatformGlyph id={p.id} size={16} />
                         </span>
                       ))}
