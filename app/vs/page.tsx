@@ -557,6 +557,53 @@ const COMPARISONS = [
     tag:         'Self-hosted',
     tagColor:    'bg-amber/10 text-amber',
   },
+  // Nov 12, 2026. Each page says which of the competitor's own pages it was
+  // checked against, and when.
+  {
+    slug:        'post-bridge',
+    name:        'Post Bridge',
+    icon:       Send,
+    headline:    'Post Bridge starts at $39/month after a 7-day trial',
+    angle:       'Unlimited posts to 10 platforms including Instagram, but no Discord, Telegram or Mastodon. SocialMate is free for 250 posts a month, Pro $8.',
+    tag:         'No free plan',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'blotato',
+    name:        'Blotato',
+    icon:       Bot,
+    headline:    'Blotato starts at $29/month, with a card-required trial',
+    angle:       'AI images and video plus 9 platforms including Instagram and YouTube. SocialMate is free to start and adds Discord, Telegram and Mastodon.',
+    tag:         'AI visuals, no free plan',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'supergrow',
+    name:        'Supergrow',
+    icon:       Sprout,
+    headline:    'Supergrow is LinkedIn only, from $39/month',
+    angle:       'Deep LinkedIn AI with no free plan; Teams is $199/month. SocialMate schedules LinkedIn plus 6 more platforms, free to start.',
+    tag:         'LinkedIn only',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'authoredup',
+    name:        'AuthoredUp',
+    icon:       PenLine,
+    headline:    'AuthoredUp is $19.95/month per LinkedIn profile',
+    angle:       'A LinkedIn editor that schedules through a Chrome extension. SocialMate schedules LinkedIn and 6 other platforms from the web, free to start.',
+    tag:         'LinkedIn only',
+    tagColor:    'bg-amber/10 text-amber',
+  },
+  {
+    slug:        'opus-clip',
+    name:        'OpusClip',
+    icon:       Film,
+    headline:    'OpusClip makes clips; posting starts at $15/month',
+    angle:       'AI clipping with auto-posting on paid plans. SocialMate schedules text, images and video to 7 platforms, posting included on the free plan.',
+    tag:         'Different job',
+    tagColor:    'bg-amber/10 text-amber',
+  },
 ]
 
 const SOCIALMATE_WINS: { icon: LucideIcon; text: string }[] = [

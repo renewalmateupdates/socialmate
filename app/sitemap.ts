@@ -195,6 +195,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/vs/ocoya`,          lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/repurpose-io`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/mixpost`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    // Nov 12, 2026: creator schedulers and LinkedIn tools people compare us with.
+    { url: `${base}/vs/post-bridge`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/blotato`,        lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/supergrow`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/authoredup`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/opus-clip`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   // Same merge generateStaticParams does, so the sitemap and the set of pages
