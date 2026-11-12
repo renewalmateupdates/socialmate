@@ -25,6 +25,8 @@ const stub = (id) => {
   if (id === '@/lib/supabase-admin') return { getSupabaseAdmin: () => { throw new Error('no db in tests') } }
   if (id === '@/lib/plan') return { resolveWorkspacePlan: async () => 'free' }
   if (id === './retry') return { RetryablePublishError: class extends Error {} }
+  // The video upload path isn't under test here (scripts/test-publish-video.mjs covers it).
+  if (id === './video') return { VIDEO_WAIT_MS: 0, VideoStillProcessing: class extends Error {}, fetchVideo: async () => { throw new Error('unused') }, firstVideo: () => null, sleep: async () => {} }
   return require(id)
 }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, stub)

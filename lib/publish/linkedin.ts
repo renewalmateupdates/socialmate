@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { VIDEO_WAIT_MS, VideoStillProcessing, fetchVideo, firstVideo, sleep, type FetchedVideo } from './video'
 
 
 // LinkedIn UGC posts max length
@@ -65,6 +66,75 @@ async function uploadLinkedInImage(
   return asset
 }
 
+/**
+ * Registers a video asset (recipe feedshare-video), PUTs the file to it, then
+ * waits for LinkedIn to finish processing, as the Assets API docs ask ("Wait
+ * for the upload to complete"). Files under 200 MB go up in one request, and
+ * SocialMate's cap is 50 MB. Returns the asset and whether LinkedIn reported
+ * it AVAILABLE before the deadline.
+ */
+export async function uploadLinkedInVideo(
+  accessToken: string,
+  personUrn: string,
+  video: FetchedVideo,
+  deadline: number,
+): Promise<{ asset: string; ready: boolean }> {
+  const registerRes = await fetch('https://api.linkedin.com/v2/assets?action=registerUpload', {
+    method:  'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      registerUploadRequest: {
+        recipes: ['urn:li:digitalmediaRecipe:feedshare-video'],
+        owner: personUrn,
+        serviceRelationships: [
+          { relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' },
+        ],
+      },
+    }),
+  })
+  if (!registerRes.ok) {
+    const detail = await registerRes.text().catch(() => '')
+    if (registerRes.status === 401) throw new Error('LinkedIn token expired (LinkedIn tokens last 60 days). Please reconnect your LinkedIn account.')
+    throw new Error(`LinkedIn would not take the video (register ${registerRes.status}): ${detail.slice(0, 200)}`)
+  }
+  const registerData = await registerRes.json()
+  const uploadUrl: string | undefined =
+    registerData?.value?.uploadMechanism?.['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']?.uploadUrl
+  const asset: string | undefined = registerData?.value?.asset
+  if (!uploadUrl || !asset) throw new Error('LinkedIn returned no upload address for the video.')
+
+  const putRes = await fetch(uploadUrl, {
+    method:  'PUT',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/octet-stream' },
+    body:    video.bytes,
+  })
+  if (!putRes.ok) {
+    const detail = await putRes.text().catch(() => '')
+    throw new Error(`The video upload to LinkedIn failed (${putRes.status}): ${detail.slice(0, 200)}`)
+  }
+
+  // Poll the asset until its recipe is AVAILABLE. If the status can't be read,
+  // stop polling and let the post decide: LinkedIn may still accept it.
+  const assetId = asset.split(':').pop()
+  while (Date.now() < deadline) {
+    const res = await fetch(`https://api.linkedin.com/v2/assets/${encodeURIComponent(assetId ?? '')}`, {
+      headers: { Authorization: `Bearer ${accessToken}`, 'X-Restli-Protocol-Version': '2.0.0' },
+    })
+    if (!res.ok) {
+      console.warn('[LinkedIn] Video status read failed:', res.status)
+      return { asset, ready: false }
+    }
+    const body = await res.json().catch(() => ({}))
+    const statuses: string[] = (body?.recipes ?? []).map((r: { status?: string }) => String(r.status ?? ''))
+    if (statuses.includes('AVAILABLE')) return { asset, ready: true }
+    if (statuses.some(s => s === 'CLIENT_ERROR' || s === 'SERVER_ERROR' || s === 'INCOMPLETE')) {
+      throw new Error(`LinkedIn could not process this video (${statuses.join(', ')}).`)
+    }
+    await sleep(3000)
+  }
+  return { asset, ready: false }
+}
+
 export async function publishToLinkedIn(
   userId:     string,
   content:    string,
@@ -124,7 +194,19 @@ export async function publishToLinkedIn(
     shareMediaCategory: 'NONE',
   }
 
-  if (mediaUrls && mediaUrls.length > 0) {
+  // A video goes up as a video share. LinkedIn doesn't mix a video with
+  // images in one share, so the video wins. A failed video fails the post:
+  // the text alone is not what the creator wrote.
+  const videoUrl = firstVideo(mediaUrls)
+  let videoReady = true
+  if (videoUrl) {
+    const { asset, ready } = await uploadLinkedInVideo(
+      account.access_token, personUrn, await fetchVideo(videoUrl), Date.now() + VIDEO_WAIT_MS,
+    )
+    videoReady = ready
+    shareContent.shareMediaCategory = 'VIDEO'
+    shareContent.media = [{ status: 'READY', media: asset }]
+  } else if (mediaUrls && mediaUrls.length > 0) {
     const imageUrls = mediaUrls.filter(u => !u.match(/\.(mp4|mov|avi|webm)/i)).slice(0, 9)
     const assets: string[] = []
     for (const url of imageUrls) {
@@ -165,6 +247,11 @@ export async function publishToLinkedIn(
     }
     if (res.status === 403) {
       throw new Error('LinkedIn API permission denied. Your app may not have the r/w_member_social scope approved. See /accounts for details.')
+    }
+    // Posted before LinkedIn said the video was ready, and refused: that's
+    // the processing, not the post. Retrying in a minute or two sends it.
+    if (videoUrl && !videoReady && res.status >= 400 && res.status < 500) {
+      throw new VideoStillProcessing('LinkedIn')
     }
     if (res.status === 422) {
       throw new Error(`LinkedIn rejected the post: ${err.message || 'invalid content format'}`)

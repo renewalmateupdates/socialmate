@@ -1,4 +1,7 @@
 export const dynamic = 'force-dynamic'
+// Publishing a post with a video waits on each platform to process it
+// (lib/publish/video.ts). 60 s is the longest any route here sets.
+export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'

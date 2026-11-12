@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { resolveWorkspacePlan } from '@/lib/plan'
 import { RetryablePublishError } from './retry'
+import { VIDEO_WAIT_MS, VideoStillProcessing, fetchVideo, firstVideo, sleep, type FetchedVideo } from './video'
 
 // X (Twitter) API v2
 // Required env vars: TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET
@@ -22,6 +23,78 @@ export function hasMediaScope(scope: string | null | undefined): boolean {
  * recent X posts with an image attached showed none on X. The v2 endpoint
  * needs the media.write scope (docs.x.com/x-api/media/upload-media).
  */
+/** X's chunk size: the docs ask for 5 MB or less per segment (server max 8 MB). */
+export const X_VIDEO_CHUNK_BYTES = 4 * 1024 * 1024
+
+async function xJson(res: Response, step: string): Promise<Record<string, unknown>> {
+  const text = await res.text().catch(() => '')
+  let body: Record<string, unknown> = {}
+  try { body = text ? JSON.parse(text) : {} } catch { body = {} }
+  if (!res.ok) {
+    const errs = body.errors as { message?: string }[] | undefined
+    const detail = (body.detail as string) || errs?.[0]?.message || (body.title as string) || `HTTP ${res.status}`
+    throw Object.assign(new Error(`X video ${step} failed: ${detail}`), { status: res.status })
+  }
+  return body
+}
+
+type XProcessing = { state?: string; check_after_secs?: number; error?: { message?: string } }
+
+function processingOf(body: Record<string, unknown>): XProcessing | undefined {
+  const data = body.data as Record<string, unknown> | undefined
+  return (data?.processing_info ?? body.processing_info) as XProcessing | undefined
+}
+
+/**
+ * Uploads a video with X's chunked v2 upload (initialize, append, finalize),
+ * then waits for X to finish processing it, which X requires before the post
+ * can use it (docs.x.com/x-api/media/quickstart/media-upload-chunked).
+ * Returns the media id, or throws VideoStillProcessing at the deadline.
+ */
+export async function uploadXVideo(accessToken: string, video: FetchedVideo, deadline: number): Promise<string> {
+  const auth = { Authorization: `Bearer ${accessToken}` }
+  const init = await xJson(await fetch('https://api.x.com/2/media/upload/initialize', {
+    method:  'POST',
+    headers: { ...auth, 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      media_type:     video.contentType,
+      total_bytes:    video.bytes.byteLength,
+      media_category: 'tweet_video',
+    }),
+  }), 'initialize')
+  const initData = init.data as Record<string, unknown> | undefined
+  const id = String(initData?.id ?? init.id ?? init.media_id_string ?? '')
+  if (!id) throw new Error('X video initialize returned no media id')
+
+  for (let start = 0, segment = 0; start < video.bytes.byteLength; start += X_VIDEO_CHUNK_BYTES, segment++) {
+    const form = new FormData()
+    form.append('segment_index', String(segment))
+    form.append('media', new Blob([video.bytes.subarray(start, start + X_VIDEO_CHUNK_BYTES)], { type: video.contentType }), 'chunk')
+    await xJson(await fetch(`https://api.x.com/2/media/upload/${id}/append`, {
+      method: 'POST', headers: auth, body: form,
+    }), `append ${segment}`)
+  }
+
+  const fin = await xJson(await fetch(`https://api.x.com/2/media/upload/${id}/finalize`, {
+    method: 'POST', headers: auth,
+  }), 'finalize')
+
+  let processing = processingOf(fin)
+  while (processing && processing.state !== 'succeeded') {
+    if (processing.state === 'failed') {
+      throw new Error(`X could not process this video: ${processing.error?.message ?? 'no reason given'}`)
+    }
+    const wait = Math.max(1, Number(processing.check_after_secs) || 2) * 1000
+    if (Date.now() + wait > deadline) throw new VideoStillProcessing('X')
+    await sleep(wait)
+    processing = processingOf(await xJson(await fetch(
+      `https://api.x.com/2/media/upload?command=STATUS&media_id=${encodeURIComponent(id)}`,
+      { headers: auth },
+    ), 'status'))
+  }
+  return id
+}
+
 async function uploadXImage(accessToken: string, imageUrl: string): Promise<string> {
   const imgRes = await fetch(imageUrl)
   if (!imgRes.ok) throw new Error(`could not fetch the image (HTTP ${imgRes.status})`)
@@ -250,21 +323,39 @@ export async function publishToTwitter(
     }
   }
 
-  // Images (video is not sent to X yet; Compose says so before posting).
+  // A video, or up to 4 images: X does not mix the two in one post, so a
+  // video wins and the images are left off.
   const mediaIds: string[] = []
-  const imageUrls = (mediaUrls || []).filter(u =>
+  const videoUrl = firstVideo(mediaUrls)
+  const imageUrls = videoUrl ? [] : (mediaUrls || []).filter(u =>
     /\.(jpg|jpeg|png|gif|webp)$/i.test(u.split('?')[0])
   ).slice(0, 4) // X allows max 4 images
 
-  if (imageUrls.length > 0) {
+  if (videoUrl || imageUrls.length > 0) {
     // Accounts connected before Nov 2026 were never asked for media.write,
     // and X refuses the upload without it. Say so rather than posting the
     // text alone, which is what every image post to X quietly did until then.
     if (!hasMediaScope(account.scope)) {
       throw new Error(
-        'X needs one more permission to post images. Reconnect X on the Accounts page, then retry this post.'
+        `X needs one more permission to post ${videoUrl ? 'videos' : 'images'}. Reconnect X on the Accounts page, then retry this post.`
       )
     }
+  }
+
+  if (videoUrl) {
+    try {
+      mediaIds.push(await uploadXVideo(accessToken, await fetchVideo(videoUrl), Date.now() + VIDEO_WAIT_MS))
+    } catch (e) {
+      const status = (e as { status?: number }).status
+      if (status === 401) throw new Error('X token expired. Please reconnect your X account in Accounts → X.')
+      if (status === 403) throw new Error('X refused the video upload. Reconnect X on the Accounts page, then retry this post.')
+      // Unlike an image, a video is the post: going out as text alone would
+      // not be the post the creator wrote. Fail it with the reason.
+      throw e
+    }
+  }
+
+  if (imageUrls.length > 0) {
     for (const imageUrl of imageUrls) {
       try {
         mediaIds.push(await uploadXImage(accessToken, imageUrl))
