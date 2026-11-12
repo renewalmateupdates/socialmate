@@ -18,6 +18,7 @@ import type { LucideIcon } from 'lucide-react'
 import { HASHTAGS_COST, REPURPOSE_COST } from '@/lib/ai-tool-costs'
 import { loadWorkspacePosts } from '@/lib/workspace-posts'
 import { readToolDraft, TOOL_LABELS } from '@/lib/tool-draft'
+import { uploadMediaFile } from '@/lib/media-upload'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -36,9 +37,9 @@ const PLATFORMS = [
   { id: 'reddit',    name: 'Reddit',    limit: 40000, live: false },
 ]
 
-// Platforms whose publishers drop video and send the text alone. Remove an
-// entry when its publisher learns to upload video.
-const VIDEO_DROPPED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky' }
+// Platforms that process a video before it appears (lib/publish/video.ts).
+// Until Nov 2026 their publishers dropped video and posted the text alone.
+const VIDEO_PROCESSED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky' }
 
 // TikTok is deliberately NOT in here. Its Production API has been approved
 // since 2026-05-17 and it is the single most-connected platform among external
@@ -1559,25 +1560,17 @@ function ComposeInner() {
 
       setMediaItems(prev => [...prev, item])
 
-      try {
-        const form = new FormData()
-        form.append('file', file)
-        const res  = await fetch('/api/media/upload', { method: 'POST', body: form })
-        const data = await res.json()
-
-        if (res.ok && data.url) {
-          setMediaItems(prev => prev.map(m =>
-            m.preview === preview && m.file === file
-              ? { ...m, url: data.url, uploading: false }
-              : m
-          ))
-        } else {
-          showToast(data.error || 'Upload failed — try a smaller file', 'error')
-          setMediaItems(prev => prev.filter(m => !(m.preview === preview && m.file === file)))
-          if (preview) URL.revokeObjectURL(preview)
-        }
-      } catch {
-        showToast('Upload failed — check your connection', 'error')
+      // Straight to storage through a signed URL (lib/media-upload.ts): the old
+      // POST through a function refused anything over 4.5 MB.
+      const result = await uploadMediaFile(file)
+      if (result.ok) {
+        setMediaItems(prev => prev.map(m =>
+          m.preview === preview && m.file === file
+            ? { ...m, url: result.url, uploading: false }
+            : m
+        ))
+      } else {
+        showToast(result.error, 'error')
         setMediaItems(prev => prev.filter(m => !(m.preview === preview && m.file === file)))
         if (preview) URL.revokeObjectURL(preview)
       }
@@ -1600,14 +1593,13 @@ function ComposeInner() {
   const uploadedMediaUrls = [...mediaItems.filter(m => m.url).map(m => m.url!), ...externalMediaUrls]
   const mediaStillUploading = mediaItems.some(m => m.uploading)
 
-  // The X, LinkedIn and Bluesky publishers send images only (lib/publish/
-  // twitter.ts, linkedin.ts, bluesky.ts filter video out), so a video attached
-  // here used to go out as a text-only post on those platforms with no word to
-  // the user. Say so before they post.
+  // X, LinkedIn and Bluesky process a video before it shows, and a publish
+  // only waits so long (lib/publish/video.ts). Say so before they post, so a
+  // Retry button on one of them later isn't a surprise.
   const hasVideo = mediaItems.some(m => m.type === 'video')
     || externalMediaUrls.some(u => /\.(mp4|mov|avi|webm)$/i.test(u.split('?')[0]))
-  const videoDroppedOn = hasVideo
-    ? selectedPlatforms.filter(id => VIDEO_DROPPED_ON[id]).map(id => VIDEO_DROPPED_ON[id])
+  const videoProcessedOn = hasVideo
+    ? selectedPlatforms.filter(id => VIDEO_PROCESSED_ON[id]).map(id => VIDEO_PROCESSED_ON[id])
     : []
 
   // What the composer looked like when the person left it. The Post button is
@@ -2395,13 +2387,15 @@ function ComposeInner() {
                       </span>
                     )}
                     <span className="text-xs text-gray-400 dark:text-gray-500">
-                      Images: JPEG, PNG, GIF, WebP · Video (MP4): Discord, Telegram, Mastodon
+                      Images: JPEG, PNG, GIF, WebP · Video (MP4 or MOV, up to 50 MB): X, LinkedIn, Bluesky, Discord, Telegram, Mastodon
                     </span>
                   </div>
 
-                  {videoDroppedOn.length > 0 && (
-                    <p role="status" className="mt-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
-                      Your video won&rsquo;t go to {videoDroppedOn.join(' or ')}. SocialMate can only send images there for now, so {videoDroppedOn.length === 1 ? 'that post' : 'those posts'} will go out as text only. Post the video in {videoDroppedOn.length === 1 ? 'that app' : 'those apps'} directly, or unselect {videoDroppedOn.length === 1 ? 'it' : 'them'} here.
+                  {videoProcessedOn.length > 0 && (
+                    <p role="status" className="mt-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2">
+                      {videoProcessedOn.length > 2
+                        ? `${videoProcessedOn.slice(0, -1).join(', ')} and ${videoProcessedOn[videoProcessedOn.length - 1]}`
+                        : videoProcessedOn.join(' and ')} process{videoProcessedOn.length === 1 ? 'es' : ''} a video before it appears. If {videoProcessedOn.length === 1 ? 'it isn’t' : 'one isn’t'} ready in time, that platform shows a Retry button on the post.
                     </p>
                   )}
 

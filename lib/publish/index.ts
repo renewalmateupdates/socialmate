@@ -7,6 +7,7 @@ import { publishToLinkedIn }  from './linkedin'
 import { publishToPinterest } from './pinterest'
 import { publishToTwitter }   from './twitter'
 import { isRetryablePublishError } from './retry'
+import { firstVideo } from './video'
 
 export type PublishResult = {
   platform:  string
@@ -37,13 +38,12 @@ export async function publishToAll(
   selectedAccountIds: Record<string, string> = {},
   mediaUrls:          string[] = []
 ): Promise<PublishResult[]> {
-  const results: PublishResult[] = []
+  const media = mediaUrls.length > 0 ? mediaUrls : undefined
 
-  for (const platform of platforms) {
+  const publishOne = async (platform: string): Promise<PublishResult> => {
     try {
       let postId: string | undefined
       const destId = destinations[platform]
-      const media  = mediaUrls.length > 0 ? mediaUrls : undefined
 
       switch (platform) {
         case 'discord':
@@ -79,28 +79,35 @@ export async function publishToAll(
             'Use TikTok Studio (/tiktok/studio) to upload and schedule videos directly.'
           )
         default:
-          results.push({
+          return {
             platform,
             success:   false,
             error:     `${platform} publishing is not yet available`,
             userError: `${capitalize(platform)} support is coming soon. Remove it from this post for now.`,
-          })
-          continue
+          }
       }
 
-      results.push({ platform, success: true, postId })
+      return { platform, success: true, postId }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      results.push({
+      return {
         platform,
         success:   false,
         error:     message,
         userError: message,
         retryable: isRetryablePublishError(err),
-      })
+      }
     }
   }
 
+  // A post with a video waits on each platform to process it, and a publish
+  // route has 60 seconds. So those posts go to every platform at once (each
+  // publisher waits at most VIDEO_WAIT_MS). Everything else goes one platform
+  // at a time, exactly as before. Results keep the platforms' order either way.
+  if (firstVideo(mediaUrls)) return Promise.all(platforms.map(publishOne))
+
+  const results: PublishResult[] = []
+  for (const platform of platforms) results.push(await publishOne(platform))
   return results
 }
 

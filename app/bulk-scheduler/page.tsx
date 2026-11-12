@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import { AlertTriangle, Building2, CalendarDays, CheckCircle2, Globe, Lightbulb, Loader2, Paperclip, Unlock, Video, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { uploadMediaFile } from '@/lib/media-upload'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -219,24 +220,18 @@ export default function BulkScheduler() {
   // ── Media upload ───────────────────────────────────────────────────────────
   const handleMediaSelect = async (postId: string, file: File) => {
     setPosts(prev => prev.map(p => p.id === postId ? { ...p, mediaUploading: true, status: 'ready' } : p))
-    try {
-      const form = new FormData()
-      form.append('file', file)
-      const res = await fetch('/api/media/upload', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!res.ok) {
-        showToast(data.error || 'Media upload failed', 'error')
-        setPosts(prev => prev.map(p => p.id === postId ? { ...p, mediaUploading: false } : p))
-        return
-      }
-      setPosts(prev => prev.map(p => p.id === postId
-        ? { ...p, mediaUrl: data.url, mediaType: data.type, mediaUploading: false }
-        : p
-      ))
-    } catch {
-      showToast('Media upload failed', 'error')
+    // Straight to storage through a signed URL (lib/media-upload.ts): the old
+    // POST through a function refused anything over 4.5 MB.
+    const result = await uploadMediaFile(file)
+    if (!result.ok) {
+      showToast(result.error, 'error')
       setPosts(prev => prev.map(p => p.id === postId ? { ...p, mediaUploading: false } : p))
+      return
     }
+    setPosts(prev => prev.map(p => p.id === postId
+      ? { ...p, mediaUrl: result.url, mediaType: result.type, mediaUploading: false }
+      : p
+    ))
   }
 
   const removeMedia = (postId: string) => {
