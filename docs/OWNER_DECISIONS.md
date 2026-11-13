@@ -11,6 +11,9 @@ Things a session should not decide alone, with a recommendation. Most urgent fir
    `/monetize`) as-is.
 4. **`/ai.txt`'s training-permission line stays, alongside robots.txt allowing
    every AI crawler.**
+5. **Publer's live pricing confirmed** (`publer.com/plans`, checked directly):
+   Free $0, Professional $5/mo, Business $10/mo, Enterprise custom.
+   `docs/COMPETITIVE_BENCHMARK.md` updated.
 
 ## Open
 
@@ -23,7 +26,3 @@ Things a session should not decide alone, with a recommendation. Most urgent fir
 
 2. **Make `npm run verify:content` part of `npm test`** once its open findings
    (`docs/CONTENT_AUDIT.md`) are at zero, so a wrong price cannot merge again.
-
-3. **Publer's price could not be verified** (`publer.com/pricing` redirect-loops
-   for automated fetches) for `docs/COMPETITIVE_BENCHMARK.md`. If `/vs/publer`
-   gets touched, check the live number in a browser first.
