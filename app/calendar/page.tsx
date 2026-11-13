@@ -200,6 +200,7 @@ function CalendarDayCell({
   selectedDay,
   onSelectDay,
   dayPosts,
+  tiktokCount,
 }: {
   day: Date
   i: number
@@ -208,6 +209,9 @@ function CalendarDayCell({
   selectedDay: string | null
   onSelectDay: (key: string) => void
   dayPosts: Post[]
+  /** TikTok Studio posts for this day. Shown as a static badge, not a
+   * draggable pill — see the tiktokScheduled note where it's fetched. */
+  tiktokCount: number
 }) {
   const key         = toDateKey(day)
   const isCurrentMo = day.getMonth() === currentMonth
@@ -266,15 +270,22 @@ function CalendarDayCell({
         {overflow > 0 && (
           <span className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold pl-2.5">+{overflow} more</span>
         )}
+        {tiktokCount > 0 && (
+          <span className="flex items-center gap-1 pl-0.5 text-[10px] text-gray-500 dark:text-gray-400 font-semibold">
+            <PlatformGlyph id="tiktok" size={9} className="flex-shrink-0" />
+            {tiktokCount} TikTok
+          </span>
+        )}
       </div>
 
       {/* Mobile: dot indicators */}
-      {dayPosts.length > 0 && (
+      {(dayPosts.length > 0 || tiktokCount > 0) && (
         <div className="flex items-center gap-0.5 flex-wrap mt-0.5 sm:hidden">
           {dayPosts.slice(0, 5).map(post => (
             <span key={post.id} className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
           ))}
           {dayPosts.length > 5 && <span className="text-[9px] text-gray-400 font-bold leading-none">+</span>}
+          {tiktokCount > 0 && <PlatformGlyph id="tiktok" size={9} className="flex-shrink-0" />}
         </div>
       )}
     </div>
@@ -291,6 +302,14 @@ export default function CalendarPage() {
   const [currentYear,  setCurrentYear]  = useState(today.getFullYear())
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [posts,        setPosts]        = useState<Post[]>([])
+  // TikTok Studio posts: a separate table, read-only here (same reason as
+  // Queue — drag/reschedule writes straight to `posts` and would silently
+  // no-op against a tiktok_posts id). Until this existed, the calendar had
+  // no idea these posts existed at all: "No posts this month" showed with a
+  // week of TikTok posts actually scheduled, and the "next scheduled posts
+  // are in <month>" hint pointed at old test posts in the `posts` table
+  // because that was the only table it ever looked at. Found Nov 13, 2026.
+  const [tiktokScheduled, setTiktokScheduled] = useState<{ id: string; scheduled_at: string }[]>([])
   const [loading,      setLoading]      = useState(true)
   const [selectedDay,  setSelectedDay]  = useState<string | null>(null)
   const [retrying,     setRetrying]     = useState<string | null>(null)
@@ -421,30 +440,61 @@ export default function CalendarPage() {
     setLoading(false)
   }, [activeWorkspace, router])
 
+  // Mirrors app/queue/page.tsx's tiktok_posts query.
+  const fetchTiktokScheduled = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    let q = supabase
+      .from('tiktok_posts')
+      .select('id, scheduled_at')
+      .eq('user_id', user.id)
+      .eq('status', 'scheduled')
+    if (activeWorkspace && !activeWorkspace.is_personal) q = q.eq('workspace_id', activeWorkspace.id)
+    const { data, error } = await q
+    if (error) { console.warn('[Calendar] tiktok_posts fetch failed:', error.message); return }
+    setTiktokScheduled((data ?? []).filter(p => p.scheduled_at))
+  }, [activeWorkspace])
+
+  useEffect(() => {
+    if (!wsLoading) fetchTiktokScheduled()
+  }, [fetchTiktokScheduled, wsLoading])
+
   // Wait for workspace context to resolve before fetching — avoids a double-fetch
   // where the second run (with workspace filter) overwrites correct results.
   useEffect(() => {
     if (!wsLoading) fetchPosts()
   }, [fetchPosts, wsLoading])
 
-  // Auto-navigate to the most recent post's month when the current month is empty.
-  // Posts are ordered newest-first, so posts.find(...) below lands on the latest activity
-  // rather than the oldest — never jumps back to an ancient month with the current month full.
+  // Every scheduled date across both sources — a TikTok Studio post is a
+  // scheduled post same as any other for this purpose, see tiktokScheduled above.
+  const scheduledDates = [
+    ...posts.filter(p => p.scheduled_at).map(p => new Date(p.scheduled_at!)),
+    ...tiktokScheduled.map(p => new Date(p.scheduled_at)),
+  ]
+
+  // Auto-navigate to the nearest month that actually has something scheduled,
+  // when the current month is empty. "Nearest" is by distance from today, not
+  // array order: the old version took posts.find(p => p.scheduled_at) off a
+  // newest-first list, which (its own comment said) was meant to land on the
+  // latest activity. With nothing upcoming in `posts` some months — every
+  // TikTok Studio post lives in tiktok_posts instead, which this never looked
+  // at — "first with a scheduled_at" fell through to old test posts and sent
+  // the empty-state message backward, into the past, while a week of real
+  // scheduled TikTok posts sat one tab over. Found Nov 13, 2026.
   useEffect(() => {
-    if (loading || posts.length === 0) return
+    if (loading || scheduledDates.length === 0) return
     const monthStart = new Date(currentYear, currentMonth, 1)
     const monthEnd   = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59)
-    const currentMonthHasPosts = posts.some(p => {
-      const d = new Date(p.scheduled_at || p.created_at)
-      return d >= monthStart && d <= monthEnd
-    })
+    const currentMonthHasPosts = scheduledDates.some(d => d >= monthStart && d <= monthEnd)
     if (currentMonthHasPosts) return
-    const first = posts.find(p => p.scheduled_at)
-    if (!first) return
-    const d = new Date(first.scheduled_at!)
-    setCurrentYear(d.getFullYear())
-    setCurrentMonth(d.getMonth())
-  }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
+    const now = Date.now()
+    const nearest = scheduledDates.reduce((best, d) =>
+      Math.abs(d.getTime() - now) < Math.abs(best.getTime() - now) ? d : best
+    )
+    setCurrentYear(nearest.getFullYear())
+    setCurrentMonth(nearest.getMonth())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, tiktokScheduled.length])
 
   const postMap = posts.reduce<Record<string, Post[]>>((acc, post) => {
     const key = getPostDateKey(post)
@@ -477,7 +527,16 @@ export default function CalendarPage() {
   const monthHasPosts = posts.some(post => {
     const d = new Date(post.scheduled_at || post.created_at)
     return d >= monthStart && d <= monthEnd
-  })
+  }) || scheduledDates.some(d => d >= monthStart && d <= monthEnd)
+
+  // Day -> how many TikTok Studio posts, for the read-only badge in
+  // CalendarDayCell. Not merged into postMap: those pills are draggable and
+  // write straight to `posts`, which would silently no-op on a tiktok_posts id.
+  const tiktokCountByDay = tiktokScheduled.reduce<Record<string, number>>((acc, p) => {
+    const key = toDateKey(new Date(p.scheduled_at))
+    acc[key] = (acc[key] ?? 0) + 1
+    return acc
+  }, {})
 
   const days = buildCalendarDays(currentYear, currentMonth)
 
@@ -622,6 +681,7 @@ export default function CalendarPage() {
                     selectedDay={selectedDay}
                     onSelectDay={key => setSelectedDay(selectedDay === key ? null : key)}
                     dayPosts={postMap[toDateKey(day)] ?? []}
+                    tiktokCount={tiktokCountByDay[toDateKey(day)] ?? 0}
                   />
                 ))}
               </div>

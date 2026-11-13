@@ -49,6 +49,17 @@ const PRIVACY_LABELS: Record<string, string> = {
 }
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+/**
+ * A Date as "YYYY-MM-DDTHH:mm" in the browser's local time, for a
+ * `<input type="datetime-local">`'s `min` (and for building its initial
+ * value). `toISOString().slice(0, 16)` looks the same shape but is UTC, which
+ * silently moves the bound by the viewer's offset from UTC.
+ */
+function localDatetimeInputValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 function formatTime(s: number) {
   const m   = Math.floor(s / 60)
   const sec = Math.floor(s % 60)
@@ -181,6 +192,10 @@ function PostSettingsPanel({
   scheduledAt, setScheduledAt,
   postError, accountName, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, handlePost,
 }: PostSettingsPanelProps) {
+  // Computed once, not on every render — it only needs to be "about now",
+  // never a precise clock, and calling Date.now() during render is impure.
+  const scheduleMin = useMemo(() => localDatetimeInputValue(new Date(Date.now() + 5 * 60_000)), [])
+
   // Same gate as the parent, derived from props so the panel never enables a
   // button the parent would reject.
   const canPost =
@@ -491,7 +506,7 @@ function PostSettingsPanel({
               type="datetime-local"
               value={scheduledAt}
               onChange={e => setScheduledAt(e.target.value)}
-              min={new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16)}
+              min={scheduleMin}
               className="w-full bg-panel border border-edge rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors"
             />
           )}
@@ -1255,7 +1270,16 @@ export default function TikTokStudioClient() {
             disable_stitch:         disableStitch,
             brand_content_toggle:   brandedContent,
             brand_organic_toggle:   yourBrand,
-            scheduled_at:           scheduledAt,
+            // scheduledAt is a <input type="datetime-local"> value: wall-clock
+            // text with no timezone, meant as the browser's local time. Every
+            // other scheduler in the app (Compose, Bulk Scheduler) converts
+            // this through `new Date(...)` before sending, which reads it as
+            // local and emits a real UTC instant. This route sent the raw
+            // string instead, so Postgres stored "12:00" as 12:00 UTC -- five
+            // hours early for an Eastern user. Found Nov 13, 2026: a week of
+            // promo posts typed for noon and 6pm were scheduled for 7am and
+            // 1pm instead.
+            scheduled_at:           scheduledAt ? new Date(scheduledAt).toISOString() : scheduledAt,
           }),
         })
         const scheduleData = await readJson(scheduleRes)
