@@ -741,7 +741,15 @@ function QueueInner() {
               <h1 className="text-2xl font-extrabold tracking-tight">{t('app_queue.title')}</h1>
               <div className="flex items-center gap-3 mt-0.5">
                 <p className="text-sm text-gray-400">
-                  {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
+                  {loading ? 'Loading...' : (() => {
+                    // Counts only `posts`, so a workspace with nothing but TikTok
+                    // Studio posts (their own table, see tiktokScheduled above)
+                    // read "0 posts scheduled" directly above a list showing them.
+                    // "days" still counts `posts` only — folding in TikTok's dates
+                    // needs its own day-grouping, not just a bigger number here.
+                    const total = posts.length + tiktokScheduled.length
+                    return `${total} post${total !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`
+                  })()}
                   {activeWorkspace && !activeWorkspace.is_personal && (
                     <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
                   )}
