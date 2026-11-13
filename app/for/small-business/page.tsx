@@ -161,7 +161,7 @@ const FAQ = [
   },
   {
     q: 'Can I schedule posts months in advance?',
-    a: 'Free plan has a 2-week scheduling window. Pro and Agency have no limit — schedule as far out as you want.',
+    a: 'Free plan has a 2-week scheduling window. Pro schedules up to a month ahead and Agency up to 3 months.',
   },
 ]
 

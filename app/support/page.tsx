@@ -9,7 +9,7 @@ import { ChevronDown } from 'lucide-react'
 const FAQS = [
   {
     q: 'What platforms can I schedule to?',
-    a: 'SocialMate currently supports Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn — 7 platforms live. More are coming soon: Instagram, Facebook, Threads, YouTube, Reddit, and Pinterest are on the roadmap.',
+    a: 'SocialMate currently supports Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn — 7 platforms live. Not available yet: Instagram, Facebook and Threads need app review by Meta, YouTube posting is waiting on review by Google, and Pinterest and Reddit declined the SocialMate application.',
   },
   {
     q: 'How do credits work?',

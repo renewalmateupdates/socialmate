@@ -150,7 +150,7 @@ export default function VsVistaSocialPage() {
               {
                 n: '2',
                 title: "A 15-day trial is not a free plan",
-                desc: 'Vista Social advertises a free trial — but it expires. SocialMate has a permanent free tier with no posting caps, no credit card required, and no expiry date. You can stay on the free plan indefinitely and upgrade only when the value is obvious.',
+                desc: 'Vista Social advertises a free trial — but it expires. SocialMate has a permanent free tier with 250 posts a month, no credit card required, and no expiry date. You can stay on the free plan indefinitely and upgrade only when the value is obvious.',
               },
               {
                 n: '3',

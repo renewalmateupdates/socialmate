@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/vibe-coding-with-ai' },
   title: "Vibe Coding — Building Software with AI (Free Guide) — Gilgamesh's Guides",
   description:
     'How to ship real software with no CS degree using AI as your co-pilot. The actual workflow, the real mistakes, and why vision matters more than syntax. Free playbook from a solo founder who built a live SaaS with AI.',

@@ -36,6 +36,7 @@ function getHostname(url: string) {
 }
 
 export const metadata = {
+  alternates: { canonical: 'https://socialmate.studio/studio-stax' },
   title: 'Studio Stax — SocialMate',
   description: 'Founder-approved tools for creators, builders, and communities. Ranked by generosity, not budget.',
 }

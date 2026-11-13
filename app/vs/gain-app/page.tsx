@@ -83,7 +83,7 @@ export default function VsGainAppPage() {
             SocialMate vs Gain
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $29/month — and includes approvals, 7 platforms, 20+ AI tools and SOMA.
+            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $29/month — and includes approvals, 7 platforms, 15 AI tools and SOMA.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -115,7 +115,7 @@ export default function VsGainAppPage() {
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ Client approval workflows (free)</li>
               <li>✅ 7 platforms including Discord + Telegram</li>
-              <li>✅ 20+ AI content and writing tools</li>
+              <li>✅ 15 AI content and writing tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Agency plan: $29/month</li>
               <li>✅ Free plan available</li>
@@ -197,7 +197,7 @@ export default function VsGainAppPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency tools at $29/mo — not $99/mo</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $29/month.
+            SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 15 AI tools, and SOMA. Everything Gain does — plus much more — at $29/month.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

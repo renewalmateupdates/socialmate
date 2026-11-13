@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/local-business-website' },
   title: "Local Business Websites: A Complete Guide — Gilgamesh's Guides Vol. 11",
   description:
     'How to build, price, and sell local business websites. Tech stack, what every page needs, Google Business Profile, getting your first client, and how to hand it off. Real process, no fluff.',

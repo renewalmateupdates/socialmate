@@ -25,6 +25,7 @@
  *
  * Exit code 1 on any finding that is not in the allow file.
  */
+import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -101,7 +102,13 @@ function contentFiles() {
     ...walk(join(root, 'public'), (f) => /\.(txt|json|html|svg)$/.test(f)),
     ...walk(join(root, 'browser-extension'), (f) => /\.(json|html|js)$/.test(f)),
   ]
-  return files.map(f => posix(relative(root, f)))
+  // Only what ships: files git tracks. Private, git-excluded files never deploy.
+  let tracked = null
+  try {
+    const out = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+    tracked = new Set(out.split(/\r?\n/))
+  } catch { /* not a checkout */ }
+  return files.map(f => posix(relative(root, f))).filter(f => !tracked || tracked.has(f) || !existsSync(join(root, '.git')))
 }
 
 // ─── 1. Guarded copies ──────────────────────────────────────────────────────
@@ -245,7 +252,7 @@ function extractLinks(text) {
   const lineOf = (index) => text.slice(0, index).split('\n').length
   for (const re of patterns) {
     for (const m of text.matchAll(re)) {
-      let href = m[1].replace(/[.,;:!]+$/, '')
+      const href = m[1].replace(/[.,;:!]+$/, '')
       if (/\[|\]|\*|\.\.\./.test(href)) continue // a pattern in docs, not a link
       links.push({ href, line: lineOf(m.index) })
     }

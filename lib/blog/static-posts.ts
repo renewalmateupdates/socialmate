@@ -1247,7 +1247,7 @@ If you already have 10,000 followers on X, that's a real asset — don't abandon
 
 The most practical approach is cross-posting. Write your content once and send it to both platforms. Adjust slightly for tone — Bluesky's community is a bit more conversational and skeptical of heavy self-promotion.
 
-SocialMate lets you schedule to both Bluesky and X (coming soon to X) from the same dashboard. Write once, distribute to both, spend your remaining time on replies and engagement — not on content production for two separate platforms.
+SocialMate lets you schedule to both Bluesky and X (X needs Pro) from the same dashboard. Write once, distribute to both, spend your remaining time on replies and engagement — not on content production for two separate platforms.
 
 SocialMate is free to start — no credit card required.
     `,
@@ -4123,7 +4123,7 @@ The adaptation work is lighter than it sounds. A 7-post Bluesky thread becomes a
 
 Multi-platform growth requires multi-platform consistency. An audience on 5 platforms that you post to sporadically on each one is essentially no audience — algorithms and chronological feeds both reward regular presence.
 
-Batch scheduling solves this. Write your week's content in one session, schedule everything in SocialMate, and maintain consistent presence on all 5 platforms with 90-100 minutes of total weekly work.
+Batch scheduling solves this. Write your week's content in one session, schedule everything in SocialMate, and maintain consistent presence on every platform you use with 90-100 minutes of total weekly work.
 
 ## The Growth Timeline
 

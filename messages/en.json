@@ -125,7 +125,7 @@
     "clips": {
       "badge": "🎬 Built for streamers & content creators",
       "headline": "From clip to scheduled post. No extra tabs.",
-      "subheadline": "Browse your Twitch clips or YouTube videos directly inside SocialMate and schedule them to 5 platforms in one click. No downloading. No app-switching. No copy-pasting URLs into five different tabs.",
+      "subheadline": "Browse your Twitch clips or YouTube videos directly inside SocialMate and schedule them to all your connected platforms in one click. No downloading. No app-switching. No copy-pasting URLs into five different tabs.",
       "twitch_title": "Twitch Clips",
       "twitch_desc": "Connect your Twitch account and your top clips appear in a thumbnail grid — view counts, duration, everything. Hit Schedule and you're done.",
       "youtube_title": "YouTube Videos",
@@ -2209,7 +2209,7 @@
     "features_desc": "Enterprise includes every Agency feature plus unlimited scale, custom terms, and a direct line to Joshua.",
     "feat1_title": "Unlimited seats",
     "feat1_desc": "No per-seat limits. Add your whole team — designers, writers, strategists, clients.",
-    "feat2_title": "Unlimited client workspaces",
+    "feat2_title": "Client workspaces set by contract",
     "feat2_desc": "Isolated workspaces for every brand you manage. No more workspace caps.",
     "feat3_title": "Custom credit allocation",
     "feat3_desc": "AI credit limits tailored to your actual usage. No arbitrary monthly caps.",

@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/ai-tools-for-creators-2026' },
   title: "AI Tools for Creators: The Complete 2026 Handbook (Free Guide) — Gilgamesh's Guides",
   description:
     'The complete AI toolkit for creators in 2026: AI for ideation, writing, visuals, video, scheduling, analytics, and the full stack that costs almost nothing. Written by a solo founder who builds with AI daily.',
@@ -218,7 +219,7 @@ export default function AIToolsForCreatorsPage() {
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Long-form to short-form conversion</h3>
                 <p className="mb-4 leading-relaxed text-gray-300">
-                  If you write long-form content (blog posts, newsletters, LinkedIn articles), AI makes repurposing automatic. Paste the full piece into Claude and ask it to: extract the five most shareable one-liner insights, write a Twitter/X thread version, write a TikTok script hook from the most interesting point, write a LinkedIn opening paragraph. One piece of content becomes five. SocialMate&apos;s Content Repurposing tool (1 credit per format) does this in one click inside the compose panel.
+                  If you write long-form content (blog posts, newsletters, LinkedIn articles), AI makes repurposing automatic. Paste the full piece into Claude and ask it to: extract the five most shareable one-liner insights, write a Twitter/X thread version, write a TikTok script hook from the most interesting point, write a LinkedIn opening paragraph. One piece of content becomes five. SocialMate&apos;s Content Repurposing tool (10 credits a use) does this in one click inside the compose panel.
                 </p>
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Maintaining your voice with AI</h3>

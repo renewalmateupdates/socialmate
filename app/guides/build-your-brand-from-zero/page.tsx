@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/build-your-brand-from-zero' },
   title: "Build Your Brand from Zero (Free Guide) — Gilgamesh's Guides",
   description:
     'The no-budget personal brand playbook: finding your niche without pigeonholing yourself, telling your story, building a visual identity for free, developing your voice, and turning your brand into real opportunity.',

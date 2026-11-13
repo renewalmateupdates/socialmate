@@ -79,6 +79,21 @@ function mentionsCompetitorOnly(sentence) {
     OTHER_PRODUCTS.some(name => new RegExp(`\\b${escapeRe(name)}\\b`).test(sentence))
 }
 
+/**
+ * The part of a sentence that speaks for SocialMate. A comparison table row
+ * ({ feature, buffer: '...', socialmate: '...' }) is judged on its socialmate
+ * or us column only; a sentence about a competitor alone says nothing about us.
+ */
+export function ourPart(sentence) {
+  const cols = Array.from(sentence.matchAll(/\b(?:socialmate|us|sm)\s*:\s*(['"`])((?:(?!\1).)*)\1/gi)).map(m => m[2])
+  if (cols.length) return cols.join(' . ')
+  if (/\bfeature\s*:/.test(sentence)) return ''
+  return mentionsCompetitorOnly(sentence) ? '' : sentence
+}
+
+/** Wraps a rule so it only ever sees SocialMate's part of a sentence. */
+const ours = (rule) => ({ ...rule, check: (s) => { const part = ourPart(s); return part ? rule.check(part) : [] } })
+
 export function buildRules(facts) {
   const { PLANS, PLATFORMS, UNAVAILABLE_PLATFORM_NAMES, AI_TOOLS, AFFILIATE } = facts
   const liveCount = PLATFORMS.length
@@ -99,7 +114,7 @@ export function buildRules(facts) {
   ]
 
   return [
-    {
+    ours({
       id: 'plan-price',
       why: 'A SocialMate plan price that is not the one in lib/plan.ts',
       check(s) {
@@ -119,7 +134,7 @@ export function buildRules(facts) {
         }
         return hits
       },
-    },
+    }),
     {
       id: 'old-price',
       why: 'A price SocialMate used before the August 2026 repricing',
@@ -131,12 +146,12 @@ export function buildRules(facts) {
         return hits
       },
     },
-    {
+    ours({
       id: 'plan-limit',
       why: 'A plan limit that is not the one the server enforces',
       check(s) {
-        const names = Array.from(new Set(Array.from(s.matchAll(/\b(Free|Pro|Agency)\b(?! (?:tools?|to |and easy|trial))/g))
-          .filter(m => !isOtherProductsPlan(s, m.index)).map(m => m[1])))
+        const names = Array.from(new Set(Array.from(s.matchAll(/\b(Free|Pro|Agency|free(?= (?:plan|tier|account|users?)))\b(?! (?:tools?|to |and easy|trial))/g))
+          .filter(m => !isOtherProductsPlan(s, m.index)).map(m => m[1].charAt(0).toUpperCase() + m[1].slice(1))))
         if (names.length !== 1) return []
         if (mentionsCompetitorOnly(s)) return []
         if (/\bpack|booster|SOMA|HERMES|bank|bonus|earn|referral|TikTok|videos?\b|tweets?|X posts|outreach|prospects/i.test(s)) return []
@@ -151,8 +166,8 @@ export function buildRules(facts) {
         }
         return hits
       },
-    },
-    {
+    }),
+    ours({
       id: 'platform-count',
       why: `SocialMate posts to ${liveCount} platforms (${freeCount} on Free)`,
       check(s) {
@@ -168,12 +183,13 @@ export function buildRules(facts) {
         }
         return hits
       },
-    },
-    {
+    }),
+    ours({
       id: 'unavailable-platform',
       why: `SocialMate does not post to ${UNAVAILABLE_PLATFORM_NAMES.join(', ')}`,
       check(s) {
         if (!/SocialMate|\b(our scheduler|we support|we post)\b/i.test(s)) return []
+        if (/\?\s*['"`,]*\s*$|\bq\s*:/.test(s)) return [] // a question is not a claim
         if (NEGATION.test(s)) return []
         if (/\b(clips?|feed|RSS|link|bio|profile|handle|competitor|alternative|vs\.?|compared|like|such as|whether|native|app itself|subscribers?|channel grid|videos? from|Shorts feed|Twitch)\b/i.test(s)) return []
         const hits = []
@@ -184,8 +200,8 @@ export function buildRules(facts) {
         }
         return hits
       },
-    },
-    {
+    }),
+    ours({
       id: 'unlimited',
       why: 'Every plan is capped. Only Enterprise seats are unlimited',
       check(s) {
@@ -196,8 +212,8 @@ export function buildRules(facts) {
         if (/\b(not|never|isn't|aren't|no such|nothing is|none are)\b[^.]{0,40}unlimited/i.test(s)) return []
         return [m[0]]
       },
-    },
-    {
+    }),
+    ours({
       id: 'ai-tool-count',
       why: `There are ${AI_TOOLS.length} AI tools`,
       check(s) {
@@ -207,7 +223,7 @@ export function buildRules(facts) {
         }
         return hits
       },
-    },
+    }),
     {
       id: 'ai-tool-cost',
       why: 'An AI tool credit cost that is not what the route charges',
@@ -245,6 +261,8 @@ export function buildRules(facts) {
       why: 'socialmate.studio has no mailbox. The public address is in lib/site-facts.ts',
       check(s) {
         const m = s.match(/[A-Za-z0-9._%+-]+@socialmate\.studio/)
+        // A sending address (Resend sends from the domain) is fine; a contact address is not.
+        if (m && /\bfrom\s*:|\bFROM_|<[^>]*@socialmate\.studio>|noreply@|notifications@/.test(s)) return []
         return m ? [m[0]] : []
       },
     },
@@ -256,7 +274,7 @@ export function buildRules(facts) {
         return m ? [m[0]] : []
       },
     },
-    {
+    ours({
       id: 'trial-or-refund',
       why: 'There is no free trial and no refund. The free plan is the trial',
       check(s) {
@@ -267,7 +285,7 @@ export function buildRules(facts) {
         if (NEGATION.test(s)) return []
         return [m[0]]
       },
-    },
+    }),
     {
       id: 'coming-soon',
       why: 'A "coming soon" that may describe something already shipped, or never planned',

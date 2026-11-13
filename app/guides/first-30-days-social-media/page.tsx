@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/first-30-days-social-media' },
   title: "Your First 30 Days on Social Media (Free Guide) — Gilgamesh's Guides",
   description:
     'The creator launchpad: how to choose your starting platform, set up your profiles right, write your first 10 posts, build a consistency system, and get your first 100 followers — without running any ads.',

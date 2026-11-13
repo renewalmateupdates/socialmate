@@ -114,7 +114,7 @@ export default function VsCanvaPage() {
             <p className="font-extrabold text-lg mb-2">Purpose-built Creator OS. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
-              <li>✅ 20+ AI content tools</li>
+              <li>✅ 15 AI content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Full analytics, inbox, and link in bio</li>
               <li>✅ Free plan — no credit card required</li>
@@ -159,8 +159,8 @@ export default function VsCanvaPage() {
               },
               {
                 n: '3',
-                title: 'SocialMate has 20+ AI content tools — not just design magic',
-                desc: "Canva's AI tools are focused on design: Magic Write, text effects, background removal. SocialMate's 20+ AI tools are focused on content: caption generation, hook writing, thread builder, hashtag suggestions, content repurposing, and SOMA autonomous weekly generation.",
+                title: 'SocialMate has 15 AI content tools — not just design magic',
+                desc: "Canva's AI tools are focused on design: Magic Write, text effects, background removal. SocialMate's 15 AI tools are focused on content: caption generation, hook writing, thread builder, hashtag suggestions, content repurposing, and SOMA autonomous weekly generation.",
               },
               {
                 n: '4',
@@ -196,7 +196,7 @@ export default function VsCanvaPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready for a scheduling platform — not a design tool?</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is purpose-built for social media. 7 platforms, 20+ AI tools, SOMA autonomous content — all starting at $0.
+            SocialMate is purpose-built for social media. 7 platforms, 15 AI tools, SOMA autonomous content — all starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

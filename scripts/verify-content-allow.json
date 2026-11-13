@@ -1,1 +1,13 @@
-{ "allow": [] }
+{
+  "allow": [
+    { "file": "app/changelog/page.tsx", "reason": "A dated record of what shipped and what it cost at the time. Old prices and counts there are history, not claims." },
+    { "file": "app/roadmap/RoadmapClient.tsx", "reason": "Dated roadmap entries describe what was true on their date." },
+    { "rule": "plan-price", "contains": "HERMES", "reason": "HERMES Starter and Pro are $12 and $25, a separate add-on." },
+    { "rule": "plan-price", "contains": "White label", "reason": "White Label Pro is a $40 add-on." },
+    { "rule": "plan-price", "file": "app/pricing/page.tsx", "contains": "Pro ($40/mo) adds a custom domain", "reason": "White Label Pro add-on." },
+    { "rule": "plan-price", "file": "app/for/agencies/page.tsx", "contains": "Pro ($40/mo add-on)", "reason": "White Label Pro add-on." },
+    { "rule": "plan-price", "file": "/llms-full.txt", "contains": "Pro ($25/month): 10 campaigns", "reason": "HERMES Pro." },
+    { "rule": "platform-count", "contains": "socialmate: '✅ 4 platforms'", "reason": "The inbox covers 4: Bluesky, Mastodon, Telegram, Discord." },
+    { "rule": "platform-count", "contains": "All 3 channels", "reason": "HERMES channels, not platforms." }
+  ]
+}

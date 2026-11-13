@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/content-creator-business' },
   title: "The Content Creator's Business Guide (Free) — Gilgamesh's Guides",
   description:
     'Run your creator career like a real business: LLC and taxes, contracts that protect you, pricing your work, tools worth paying for, brand deal negotiations, and building a team when you\'re ready.',

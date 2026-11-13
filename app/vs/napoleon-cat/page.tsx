@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '15+ tools free'           },
   { feature: 'Bulk scheduling',        napoleoncat: '✅',                    socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            napoleoncat: '❌',                    socialmate: '✅ Free'                  },
-  { feature: 'Comment moderation',     napoleoncat: '✅ Core feature',       socialmate: '🔜 Coming soon'          },
+  { feature: 'Comment moderation',     napoleoncat: '✅ Core feature',       socialmate: '❌'                       },
   { feature: 'Analytics',             napoleoncat: 'Pro plan only',        socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',    napoleoncat: '✅ (paid)',             socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',    napoleoncat: '❌',                    socialmate: '✅ Free'                  },

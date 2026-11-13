@@ -123,7 +123,7 @@ export default function TrendScoutPage() {
               </ul>
               <p className="text-xs text-muted mt-3">
                 {results === null
-                  ? <>Add competitors in <Link href="/competitors" className="text-amber-600 underline">Competitor Tracking</Link> first — Trend Scout uses that data.</>
+                  ? <>Add competitors in <Link href="/competitor-tracking" className="text-amber-600 underline">Competitor Tracking</Link> first — Trend Scout uses that data.</>
                   : 'Enable the agent above — first results will arrive tomorrow at 7am UTC.'}
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function TrendScoutPage() {
             <Telescope className="w-5 h-5" strokeWidth={1.75} />
             <div>
               <p className="text-sm font-semibold text-theme">Needs competitor data</p>
-              <p className="text-xs text-muted">Trend Scout reads your competitor posts. <Link href="/competitors" className="text-amber-500 hover:underline">Add competitors →</Link></p>
+              <p className="text-xs text-muted">Trend Scout reads your competitor posts. <Link href="/competitor-tracking" className="text-amber-500 hover:underline">Add competitors →</Link></p>
             </div>
           </div>
         </div>

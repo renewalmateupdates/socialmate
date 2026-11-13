@@ -5,6 +5,7 @@ import PublicFooter from '@/components/PublicFooter'
 import { AlertTriangle } from 'lucide-react'
 
 export const metadata = {
+  alternates: { canonical: 'https://socialmate.studio/terms' },
   title: 'Terms of Service — SocialMate',
   description: 'The terms and conditions governing your use of SocialMate.',
 }

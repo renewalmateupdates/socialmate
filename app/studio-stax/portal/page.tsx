@@ -539,7 +539,7 @@ export default function StudioStaxPortalPage() {
                 No tool can hold a top 3 spot for more than 3 consecutive months — keeping it fair for everyone.
               </p>
               <Link
-                href="/sm-give"
+                href="/give"
                 className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-void font-bold px-5 py-2.5 rounded-xl transition-all text-sm">
                 Donate to SM-Give →
               </Link>

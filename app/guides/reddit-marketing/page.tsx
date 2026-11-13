@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/reddit-marketing' },
   title: 'Reddit Marketing Without Getting Banned (Free Guide) — Gilgamesh\'s Guides',
   description:
     'How to use Reddit to grow your business, find users, and build community without getting shadowbanned or roasted. The real playbook from someone who actually does it.',
