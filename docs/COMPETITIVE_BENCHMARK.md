@@ -7,11 +7,11 @@ competitor pages on the site were re-verified in this pass; see "Not covered"
 at the end.
 
 **Source discipline:** every price below was read from the vendor's own
-pricing page on Nov 13, 2026 (fetched directly, or confirmed with a screenshot
-where the price only renders after a JS toggle). Where a page gave conflicting
+pricing page on Nov 13, 2026 (fetched directly, confirmed with a screenshot
+where the price only renders after a JS toggle, or checked by Joshua directly
+in a browser where the automated fetch failed). Where a page gave conflicting
 numbers (annual vs. monthly, or the page itself was inconsistent), both are
-shown. One entry (Publer) could not be fetched; it is marked unverified and
-should not be quoted on any SocialMate page without checking publer.com directly.
+shown.
 
 ## Pricing and plan matrix
 
@@ -27,11 +27,11 @@ should not be quoted on any SocialMate page without checking publer.com directly
 | Postiz | No (7-day trial) | $23/mo annual / $29/mo monthly (Standard) | per plan, 5 channels | $79/mo annual / $99/mo monthly (Ultimate) | AI copilot all tiers; AI images/video scale by tier | Not listed on the pricing page |
 | Vista Social | No (14-day trial) | $80/mo annual / $99/mo monthly (Professional) | per plan, profile-capped | $360/mo annual / $449/mo monthly (Scale); custom Enterprise | 1,000-3,500 AI credits/mo by tier | Advanced tier and up (multi-stage) |
 | Typefully | Yes, free, 1 social set, 10 posts/mo | $99/year (Creator, annual only) or $18/mo per social set annual / $20/mo monthly (Business) | per "social set" | Business, up to 50 social sets | Writing assistant, rewrite, AI image descriptions | Business tier (teams/roles) |
-| Publer *(unverified — see note)* | Reported: yes, 3 accounts | Reported: ~$10/mo per account (Business) | per account, reported | Enterprise, custom | GPT-4 captions, DALL-E images (reported) | Unknown |
+| Publer | Yes, free forever, 1 user, 3 accounts (except X) | $5/mo (Professional, 1 account, 0 extra members) | per account + per member, scales up from there | Enterprise, custom | Unlimited AI prompts + hashtag suggestions from Business ($10/mo) up; none on Free/Professional | Business tier and up (approval workflows listed as a paid feature starting Professional) |
 
 Notes on reading this table:
 - "Per seat/per channel/per social set" pricing means the sticker price understates cost for anyone with more than one account or more than one teammate — SocialMate's flat-per-workspace price is the exception, not the norm.
-- Free plans that are real (no card, no expiry) exist at exactly two of these ten: SocialMate and Metricool. Buffer's is real but capped at 3 channels and 10 posts/channel. Everyone else gates behind a time-boxed trial.
+- Free plans that are real (no card, no expiry) exist at three of these ten: SocialMate, Metricool and Publer. Buffer's is real but capped at 3 channels and 10 posts/channel; Publer's free plan caps daily posts per platform (e.g. 12/day on Facebook, 25/day on X) rather than a monthly total. Everyone else gates behind a time-boxed trial.
 - AI credit pools and per-use costs are universal now; nobody charges extra per AI call the way SocialMate did before credits existed. This is fully table stakes.
 
 ## 1. What's table stakes SocialMate must have
@@ -74,6 +74,10 @@ this session; `docs/CONTENT_AUDIT.md` flags this as open work, and
 `CLAUDE.md`'s rule stands: any price quoted on a `/vs` page must come from
 that vendor's own page, with the date checked, before publishing a change to it.
 
-**Publer could not be verified.** `publer.com/pricing` returns a redirect loop
-from an automated fetch. A person should open it in a browser and copy the
-current numbers before any SocialMate page states a Publer price.
+**Publer verified Nov 13, 2026** at `publer.com/plans` (the automated fetch of
+`publer.com/pricing` redirect-loops; Joshua checked the live page directly).
+Free $0; Professional $5/mo (1 account, "Most Popular"); Business $10/mo;
+Enterprise custom — all at 1 social account with 0 extra members, scaling up
+from there. Approval workflows, bulk scheduling and unlimited workspaces start
+at Professional; analytics, best-times, hashtag/competitor analysis, AI
+prompts and the Publer API/MCP start at Business.
