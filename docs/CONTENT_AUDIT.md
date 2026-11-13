@@ -4,6 +4,70 @@ How to reproduce: `npm run verify:content` (static), `npm run verify:content -- 
 (adds every blog post, read-only), `npm run verify:content -- --crawl http://localhost:3000`
 (fetches every sitemap URL from a running build). Rules: `scripts/lib/content-rules.mjs`.
 
+## Nov 13 follow-up: the 648 blog posts checked against the database
+
+Ran `npm run verify:content -- --db`. 283 findings on the first pass; after
+fixing the real ones and allow-listing confirmed false positives, 188 remain
+(same shape as the static-only count: mostly accurate historical/competitor
+text, see "Still open" below for the honest breakdown).
+
+**Fixed (SQL, `supabase/blog_accuracy_nov13.sql`, pasted in chat for Joshua to run):**
+- 7 blog posts quoted the AI credit system wrong: the repurposer at 1 or 5
+  credits (it is 10), the hashtag tool at 1 credit (it is 5), caption writing
+  at 2 credits (it is 5).
+- `hootsuite-alternative-with-tiktok-linkedin` said Instagram/Facebook
+  scheduling is "SocialMate coming" and something SocialMate "is still
+  working toward." Per CLAUDE.md, Meta's app review has not started and
+  Pinterest outright declined SocialMate's application; reworded to the real
+  status instead of implying active progress.
+- `soma-projects-multiple-brands` linked to `/soma/projects`, which has no
+  page (only `/soma/projects/new` and `/soma/projects/[id]` exist) and 404s.
+  Pointed at `/soma/dashboard`, which lists projects.
+
+**Fixed in code (no SQL needed):** `app/blog/[slug]/page.tsx` rendered the raw
+`excerpt` column under every post's headline with no fallback. 56 of 648 posts
+have no excerpt, so those pages showed an empty teaser line. The index page
+and the meta description already fell back to `describePost()` (the opening
+paragraph); the post page itself did not. Now it does, for all three.
+
+**A checker bug, not a content bug:** the link-extraction regex matched
+`${variableName}` inside template literals as if it were a literal path
+(`https://socialmate.studio/${automated ? 'queue' : ...}` read as a broken
+link to `/${automated`). Fixed in `scripts/verify-site-content.mjs`; this
+produced several false "broken link" findings in earlier runs that are gone
+now, not actually broken.
+
+**Needs an editorial decision, not fixed here (see `docs/OWNER_DECISIONS.md`):**
+nine blog posts share a title with another post:
+
+| This slug | Shares a title with |
+|---|---|
+| `repurpose-content-across-platforms` | `repurpose-content-across-6-platforms` |
+| `bluesky-vs-twitter-2026` | `bluesky-vs-twitter-creators-2026` |
+| `creator-economy-2026` | `creator-economy-2026-whats-changed` |
+| `how-to-build-a-personal-brand-on-social-media` | `how-to-build-personal-brand-social-media-2026` |
+| `caption-writing-formula` | `write-social-media-captions-get-engagement` |
+| `social-media-strategy-small-business-2026` | `small-business-social-media-strategy-2026` |
+| `how-to-write-social-media-captions-that-get-engagement` | `write-social-media-captions-get-engagement` |
+| `how-to-schedule-tiktok-posts-free` | `schedule-tiktok-posts-free` |
+| `free-social-media-tools-2026` | `best-free-social-media-tools-creators-2026` |
+
+Same title does not always mean duplicate content (these may be different
+angles that happened to converge on the same headline), but it is worth a
+human read before two pages keep competing for the same search result.
+Merging or 301-redirecting either side is an editorial and SEO call this
+session did not make unprompted.
+
+**Reviewed and left alone, with why (allow-listed in
+`scripts/verify-content-allow.json`):** a sample of the larger buckets
+(`unlimited` 57, `coming-soon` 43, `stale-year` 42, `plan-limit` 24,
+`plan-price` 7) was read in full. Every one checked was either a competitor's
+own number in a comparison table/post, a historical fact ("Hootsuite removed
+their free plan in 2023"), or SM-Give's 2% charity cut being mismatched for an
+affiliate rate by a sentence that mentions both. The remaining unread ones in
+these buckets were not individually re-verified this session; treat them as
+likely-fine based on this sample, not confirmed.
+
 ## Fixed on this branch
 
 | Where | Was | Now |
@@ -56,12 +120,12 @@ What they are, honestly:
 
 ## Not checked yet
 
-- **The 648 blog posts in the database.** Run `npm run verify:content -- --db`.
-  Earlier sweeps found $5 prices and Instagram claims there; `supabase/blog_accuracy_nov5.sql`
-  (in TODO.md) has not been confirmed as run. Fixes there are SQL for Joshua, never
-  a write from a session.
-- **Competitor prices on the ~95 hand-written /vs pages.** Not re-verified against
-  each competitor's live pricing page in this pass. The rule is: from their own
-  page, with the date shown.
+- **The 9 duplicate-title blog pairs above.** Needs a human read, not a script.
+- **Competitor prices on most of the ~95 hand-written /vs pages.** 10 were
+  re-verified against vendor pricing pages Nov 13 (`docs/COMPETITIVE_BENCHMARK.md`);
+  the rest were not. The rule is: from their own page, with the date shown.
 - **Platform specs in guides** (character limits, video specs) against official docs.
 - **A full crawl of a production build** (`--crawl`) and Lighthouse before/after.
+
+Resolved this pass: `supabase/blog_accuracy_nov5.sql` ran Nov 13 (confirmed by
+Joshua); the 648-post database check above ran against the live table.

@@ -316,7 +316,7 @@ export function buildRules(facts) {
       why: 'Enki is a separate project and is not sold or described on SocialMate',
       check(s) {
         if (!/\bEnki\b/.test(s)) return []
-        if (/\b(separate|not (a |part )|no longer|wound down|removed|is not)\b/i.test(s)) return []
+        if (/\b(separate|not (a |part )|no longer|wound down|removed|is not|moved out|its own product)\b/i.test(s)) return []
         return ['Enki']
       },
     },
