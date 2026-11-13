@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { normalizePlan, PLAN_POST_LIMITS } from './plan'
+import { normalizePlan, PLAN_POST_LIMITS, PLAN_SCHEDULE_WEEKS } from './plan'
 
 // Monthly post quota — the single source of truth for how many posts a plan
 // gets, how the month is counted, and what we tell someone who runs out.
@@ -11,14 +11,7 @@ import { normalizePlan, PLAN_POST_LIMITS } from './plan'
 //
 // These numbers must match app/pricing/page.tsx. PR #542 corrected 34 public
 // pages that had drifted from them.
-export { PLAN_POST_LIMITS }
-
-// How far ahead each plan may schedule.
-export const PLAN_SCHEDULE_WEEKS: Record<string, number> = {
-  free:   2,
-  pro:    4,
-  agency: 12,
-}
+export { PLAN_POST_LIMITS, PLAN_SCHEDULE_WEEKS }
 
 // Every helper here normalises its own argument. Callers pass whatever is in
 // user_settings.plan, which is the billing SKU ('pro_annual'), and these tables

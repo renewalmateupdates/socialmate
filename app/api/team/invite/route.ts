@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { normalizePlan } from '@/lib/plan'
+import { normalizePlan, PLAN_SEATS } from '@/lib/plan'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -12,11 +12,6 @@ import { REPLY_TO } from '@/lib/mail'
 
 
 
-const PLAN_SEAT_LIMITS: Record<string, number> = {
-  free:   2,
-  pro:    5,
-  agency: 15,
-}
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -58,7 +53,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   const plan      = normalizePlan(settings?.plan)
-  const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
+  const seatLimit = PLAN_SEATS[plan]
 
   // Count existing members (not counting owner — owner is +1 implicit)
   const { count: memberCount } = await getSupabaseAdmin()

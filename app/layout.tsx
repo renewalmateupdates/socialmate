@@ -1,4 +1,4 @@
-import { SUPPORT_EMAIL } from '@/lib/contact'
+import { AI_TOOLS, BRAND, FEATURES, LIVE_PLATFORM_NAMES, PLANS, SENTENCES, listWords } from '@/lib/site-facts'
 import type { Metadata, Viewport } from 'next'
 import { fontVars } from './fonts'
 import './globals.css'
@@ -11,35 +11,43 @@ import GoogleAnalytics from '@/components/GoogleAnalytics'
 // ssr:false dynamic imports must live in a 'use client' module — see LazyClientComponents
 import LazyClientComponents from '@/components/LazyClientComponents'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || BRAND.url
+
+// Every fact below is read from lib/site-facts.ts. Until Nov 12, 2026 this
+// file typed its own: the JSON-LD on every page still offered Pro at $5 and
+// Agency at $20 three months after the repricing, said the free plan covered
+// all 7 platforms, and linked a Bluesky profile that does not exist.
+const PLATFORM_LIST = listWords(LIVE_PLATFORM_NAMES)
+const SHORT_DESCRIPTION = `Schedule posts to ${PLATFORM_LIST}. Free plan, ${AI_TOOLS.length} AI tools, no credit card required.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'SocialMate — Free Social Media Scheduler — 7 Platforms Live',
+    default: `SocialMate: Free Social Media Scheduler for ${LIVE_PLATFORM_NAMES.length} Platforms`,
     template: '%s | SocialMate',
   },
-  description: 'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok for free. AI content tools, Twitch & YouTube clip scheduling, bulk scheduling, and more. No credit card required.',
+  description: SENTENCES.metaDescription,
   keywords: [
     'social media scheduler',
     'free buffer alternative',
     'free hootsuite alternative',
     'social media management',
-    'instagram scheduler',
+    'tiktok scheduler',
+    'linkedin scheduler',
     'discord scheduler',
+    'telegram scheduler',
     'bluesky scheduler',
     'mastodon scheduler',
     'bulk scheduler',
     'link in bio',
     'ai social media',
     'free social media tool',
-    'social media automation',
     'content scheduler',
     'post scheduler',
   ],
   authors: [{ name: 'SocialMate', url: APP_URL }],
-  creator: 'Gilgamesh Enterprise LLC',
-  publisher: 'Gilgamesh Enterprise LLC',
+  creator: BRAND.legalEntity,
+  publisher: BRAND.legalEntity,
   category: 'productivity',
   applicationName: 'SocialMate',
   openGraph: {
@@ -47,16 +55,16 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: APP_URL,
     siteName: 'SocialMate',
-    title: 'SocialMate — Free Social Media Scheduler',
-    description: 'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn for free. 15+ AI tools included. No credit card required.',
-    images: [{ url: '/og-image.png', width: 1270, height: 760, alt: 'SocialMate — Schedule smarter. Start free.' }],
+    title: 'SocialMate: Free Social Media Scheduler',
+    description: SHORT_DESCRIPTION,
+    images: [{ url: '/og-image.png', width: 1270, height: 760, alt: 'SocialMate. Schedule smarter. Start free.' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SocialMate — Free Social Media Scheduler',
-    description: 'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn for free. 15+ AI tools included. No credit card required.',
+    title: 'SocialMate: Free Social Media Scheduler',
+    description: SHORT_DESCRIPTION,
     images: ['/og-image.png'],
-    creator: '@socialmatehq',
+    creator: BRAND.xHandle,
   },
   robots: {
     index: true,
@@ -69,11 +77,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
+  // No `icons` here. It used to name /favicon.ico and /apple-touch-icon.png,
+  // neither of which exists, so every page linked two 404s. Next adds the
+  // right tags itself from app/icon.png and app/apple-icon.png.
   manifest: '/manifest.json',
   // No canonical here. Metadata set on the root layout is inherited by every
   // page that does not set its own, so a canonical of the home page told
@@ -89,140 +95,102 @@ export const viewport: Viewport = {
   themeColor: '#000000',
 }
 
+const SOCIAL_PROFILES = Object.values(BRAND.social)
+
 const organizationLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': `${APP_URL}/#organization`,
-  name: 'Gilgamesh Enterprise LLC',
-  alternateName: 'SocialMate',
+  name: BRAND.legalEntity,
+  alternateName: BRAND.name,
   url: APP_URL,
   logo: {
     '@type': 'ImageObject',
     url: `${APP_URL}/logo.png`,
-    width: 512,
-    height: 512,
+    width: 1024,
+    height: 1024,
   },
-  foundingDate: '2026-03-26',
+  foundingDate: BRAND.launched,
   founder: {
     '@type': 'Person',
-    name: 'Joshua Bostic',
+    name: BRAND.founder,
     jobTitle: 'Founder & CEO',
-    sameAs: ['https://twitter.com/socialmatehq'],
   },
   contactPoint: {
     '@type': 'ContactPoint',
-    email: SUPPORT_EMAIL,
+    email: BRAND.supportEmail,
     contactType: 'customer support',
   },
-  sameAs: [
-    'https://twitter.com/socialmatehq',
-    'https://bsky.app/profile/socialmate.studio',
-  ],
+  sameAs: SOCIAL_PROFILES,
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Indiana',
+    addressRegion: 'IN',
     addressCountry: 'US',
   },
 }
 
+// No SearchAction. It pointed at /blog?q=..., and the blog index does not read
+// a query, so the markup promised a site search that is not there.
 const websiteLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   '@id': `${APP_URL}/#website`,
-  name: 'SocialMate',
+  name: BRAND.name,
   url: APP_URL,
-  description: 'Free social media scheduler for Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. 15+ AI tools. No credit card required.',
+  description: SHORT_DESCRIPTION,
   publisher: {
     '@id': `${APP_URL}/#organization`,
   },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: `${APP_URL}/blog?q={search_term_string}`,
-    },
-    'query-input': 'required name=search_term_string',
-  },
-  inLanguage: ['en', 'es', 'de', 'fr', 'pt', 'ru', 'zh', 'ja', 'ko'],
+  inLanguage: BRAND.languages,
+}
+
+function offer(tier: 'free' | 'pro' | 'agency') {
+  const p = PLANS[tier]
+  const workspaces = p.clientWorkspaces > 0
+    ? `, ${p.clientWorkspaces} client workspace${p.clientWorkspaces === 1 ? '' : 's'}`
+    : ''
+  return {
+    '@type': 'Offer',
+    name: `${p.name} Plan`,
+    price: String(p.monthly),
+    priceCurrency: 'USD',
+    url: `${APP_URL}/pricing`,
+    availability: 'https://schema.org/InStock',
+    description: `${p.postsPerMonth.toLocaleString('en-US')} posts and ${p.aiCreditsPerMonth.toLocaleString('en-US')} AI credits a month, ${p.seats} seats${workspaces}${tier === 'free' ? ', no credit card required' : ''}`,
+    ...(tier === 'free' ? {} : {
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: String(p.monthly),
+        priceCurrency: 'USD',
+        billingDuration: 'P1M',
+      },
+    }),
+  }
 }
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
   '@id': `${APP_URL}/#software`,
-  name: 'SocialMate',
+  name: BRAND.name,
   applicationCategory: 'BusinessApplication',
   applicationSubCategory: 'Social Media Management',
-  operatingSystem: 'Web, Android',
+  operatingSystem: 'Web',
   url: APP_URL,
-  description: 'Free social media scheduling platform for Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. 15+ AI-powered content tools, 8 autonomous agents, SOMA AI content OS, team collaboration, analytics, and creator monetization.',
+  description: BRAND.summary,
   screenshot: `${APP_URL}/og-image.png`,
-  softwareVersion: '1.0',
-  datePublished: '2026-03-26',
-  offers: [
-    {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      name: 'Free Plan',
-      description: '50 AI credits/month, 2 seats, all 7 platforms, no credit card required',
-    },
-    {
-      '@type': 'Offer',
-      price: '5',
-      priceCurrency: 'USD',
-      name: 'Pro Plan',
-      description: '500 AI credits/month, 5 seats, Smart Queue, Brand Voice, A/B testing',
-      priceSpecification: {
-        '@type': 'UnitPriceSpecification',
-        price: '5',
-        priceCurrency: 'USD',
-        billingIncrement: 'P1M',
-      },
-    },
-    {
-      '@type': 'Offer',
-      price: '20',
-      priceCurrency: 'USD',
-      name: 'Agency Plan',
-      description: '2,000 AI credits/month, 15 seats, 5 client workspaces',
-      priceSpecification: {
-        '@type': 'UnitPriceSpecification',
-        price: '20',
-        priceCurrency: 'USD',
-        billingIncrement: 'P1M',
-      },
-    },
-  ],
+  datePublished: BRAND.launched,
+  offers: [offer('free'), offer('pro'), offer('agency')],
   author: {
     '@id': `${APP_URL}/#organization`,
   },
   publisher: {
     '@id': `${APP_URL}/#organization`,
   },
+  // Live features only: nothing marked beta in site-facts is advertised here.
   featureList: [
-    'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn',
-    '15+ AI-powered content tools (caption, hashtags, hook, thread, repurpose, post score)',
-    'SOMA — autonomous AI content OS with voice learning and project memory',
-    '8 autonomous AI agents (newsletter, client reports, trend scout, inbox agent, and more)',
-    'SIGIL Link in Bio page builder — free on all plans',
-    'Team collaboration with role-based access and content approval workflows',
-    'Bulk scheduler with per-platform character limit enforcement',
-    'Smart Queue — auto-schedule drafts at platform-optimal times',
-    'Recurring posts (daily/weekly/bi-weekly/monthly)',
-    'Social inbox — unified Bluesky, Mastodon, Telegram, Discord mentions',
-    'Analytics dashboard — posting streaks, content DNA, best times heatmap',
-    'A/B post variant testing',
-    'Creator monetization via Stripe Connect — 0% platform cut',
-    'Clips Studio — schedule Twitch and YouTube clips',
-    'Creator Studio — video editor with trim, filters, captions, GIF export',
-    'Competitor tracking with engagement alerts',
-    'Evergreen recycling — auto-requeue evergreen content',
-    'RSS/blog import',
-    'Multi-workspace support (client isolation)',
-    'Browser push notifications',
-    'SM-Give — 2% of subscriptions to charitable causes',
-    '9-language internationalization (en, es, de, fr, pt, ru, zh, ja, ko)',
+    `Schedule posts to ${PLATFORM_LIST}`,
+    ...FEATURES.filter(f => f.status === 'live').map(f => `${f.name}: ${f.what}`),
   ],
   // No aggregateRating. We do not have a review system, so any rating here would be
   // invented — and Google treats fabricated review markup as a structured-data violation.
