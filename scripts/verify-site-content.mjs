@@ -31,7 +31,7 @@ import { dirname, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadTs, repoRoot as root } from './lib/load-ts.mjs'
 import { buildRules, checkText } from './lib/content-rules.mjs'
-import { APP_ONLY, LOCALE_PREFIXES, discover } from './gen-route-manifest.mjs'
+import { APP_ONLY, discover } from './gen-route-manifest.mjs'
 
 const args = process.argv.slice(2)
 const flag = (name) => args.includes(name)
@@ -253,7 +253,7 @@ function extractLinks(text) {
   for (const re of patterns) {
     for (const m of text.matchAll(re)) {
       const href = m[1].replace(/[.,;:!]+$/, '')
-      if (/\[|\]|\*|\.\.\./.test(href)) continue // a pattern in docs, not a link
+      if (/\[|\]|\*|\.\.\.|\$\{/.test(href)) continue // a pattern in docs or a template literal, not a literal link
       links.push({ href, line: lineOf(m.index) })
     }
   }
@@ -393,7 +393,9 @@ function checkBlogPosts(posts, resolve) {
       if (problem && problem !== 'skip') add('link', file, `${href}: ${problem}`, { sentence: href })
     }
     if (!post.title?.trim()) add('blog', file, 'no title')
-    if (!post.excerpt?.trim()) add('blog', file, 'no excerpt (it is the meta description)')
+    // Not a defect: app/blog/[slug]/page.tsx, the index card and the meta
+    // description all fall back to describePost() (the opening paragraph)
+    // when excerpt is empty, same as the RSS feed always did.
     if ((post.content || '').trim().length < 600) add('blog', file, `thin post: ${(post.content || '').trim().length} characters`)
     const key = (post.title || '').trim().toLowerCase()
     if (key) { if (titles.has(key)) add('blog', file, `same title as blog_posts/${titles.get(key)}`); else titles.set(key, post.slug) }

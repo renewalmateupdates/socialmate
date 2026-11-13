@@ -37,7 +37,10 @@ function dbPostToPost(db: DbPost) {
     category: db.category || 'Studio Stax',
     date:     dateStr,
     readTime: `${readMins} min read`,
-    excerpt:  db.excerpt || '',
+    // Falls back the same way the meta description and the index card already
+    // do (lib/blog/describe.ts). Without this, the 60 rows with no excerpt
+    // rendered an empty teaser line under the headline, on every device.
+    excerpt:  db.excerpt || describePost(db),
     content:  db.content,
     author:   db.author,
   }

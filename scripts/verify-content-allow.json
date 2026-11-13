@@ -2,12 +2,21 @@
   "allow": [
     { "file": "app/changelog/page.tsx", "reason": "A dated record of what shipped and what it cost at the time. Old prices and counts there are history, not claims." },
     { "file": "app/roadmap/RoadmapClient.tsx", "reason": "Dated roadmap entries describe what was true on their date." },
-    { "rule": "plan-price", "contains": "HERMES", "reason": "HERMES Starter and Pro are $12 and $25, a separate add-on." },
-    { "rule": "plan-price", "contains": "White label", "reason": "White Label Pro is a $40 add-on." },
     { "rule": "plan-price", "file": "app/pricing/page.tsx", "contains": "Pro ($40/mo) adds a custom domain", "reason": "White Label Pro add-on." },
     { "rule": "plan-price", "file": "app/for/agencies/page.tsx", "contains": "Pro ($40/mo add-on)", "reason": "White Label Pro add-on." },
     { "rule": "plan-price", "file": "/llms-full.txt", "contains": "Pro ($25/month): 10 campaigns", "reason": "HERMES Pro." },
-    { "rule": "platform-count", "contains": "socialmate: '✅ 4 platforms'", "reason": "The inbox covers 4: Bluesky, Mastodon, Telegram, Discord." },
-    { "rule": "platform-count", "contains": "All 3 channels", "reason": "HERMES channels, not platforms." }
+    { "rule": "platform-count", "contains": "All 3 channels", "reason": "HERMES channels, not platforms." },
+    { "rule": "plan-price", "file": "blog_posts/socialmate-vs-buffer", "contains": "Agency: $120/month", "reason": "Buffer's own Agency plan, listed under a 'Buffer:' heading above it." },
+    { "rule": "plan-price", "file": "blog_posts/link-in-bio-tools-compared-2026", "reason": "Third-party tool prices (Carrd etc.) in a link-in-bio roundup." },
+    { "rule": "plan-price", "file": "blog_posts/link-in-bio-tools-comparison-2026", "reason": "Third-party tool prices (Carrd etc.) in a link-in-bio roundup." },
+    { "rule": "plan-price", "file": "blog_posts/free-tools-for-freelancers-2026", "reason": "Third-party tool prices in a freelancer-tools roundup." },
+    { "rule": "plan-price", "file": "blog_posts/section-179-deduction-2026-write-off-tech", "reason": "A MacBook Pro's retail price in a tax-deduction guide, not a SocialMate price." },
+    { "rule": "plan-price", "file": "blog_posts/blotato-alternative-free-scheduler", "contains": "checked November 12, 2026", "reason": "Blotato's own rate card, dated and sourced from its own pricing page." },
+    { "rule": "plan-limit", "file": "blog_posts/socialmate-vs-later", "contains": "Free: 5 posts/month per profile", "reason": "Later's own free-plan limit, in a comparison table." },
+    { "rule": "unavailable-platform", "file": "lib/tools/char-count.ts", "reason": "The character counter explicitly marks Threads and Instagram inSocialMate:false; that is the tool telling the user they are not supported, not a claim that they are." },
+    { "rule": "unavailable-platform", "file": "lib/blog/static-posts.ts", "contains": "alongside Instagram or LinkedIn", "reason": "Says SocialMate is worth using for its own platforms alongside a reader's existing Instagram use, not that SocialMate posts to Instagram." },
+    { "rule": "unavailable-platform", "file": "blog_posts/tiktok-scheduling-api-explained", "contains": "as reliable as scheduling Instagram posts", "reason": "An analogy to posting generally, not a claim that SocialMate posts to Instagram." },
+    { "rule": "mailbox", "contains": "VAPID_SUBJECT", "reason": "mailto: in the Web Push protocol's required VAPID subject field, never shown to a user." },
+    { "rule": "metadata", "file": "app/guides/page.tsx", "reason": "Deliberate: the hub has no canonical of its own so each guide page is never read as a duplicate of it (see the comment in app/guides/layout.tsx)." }
   ]
 }
