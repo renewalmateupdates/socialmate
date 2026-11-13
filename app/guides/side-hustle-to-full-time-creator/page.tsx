@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/side-hustle-to-full-time-creator' },
   title: "From Side Hustle to Full-Time Creator (Free Guide) — Gilgamesh's Guides",
   description:
     "The realistic roadmap for going full-time as a creator: building while you work, hitting your first $500 online, stacking revenue streams, knowing when to quit your day job, and what full-time actually looks like.",

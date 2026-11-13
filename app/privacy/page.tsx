@@ -4,6 +4,7 @@ import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata = {
+  alternates: { canonical: 'https://socialmate.studio/privacy' },
   title: 'Privacy Policy — SocialMate',
   description: 'How SocialMate collects, uses, and protects your personal data.',
 }
@@ -140,7 +141,7 @@ export default function PrivacyPolicy() {
                 </ul>
                 <p className="mt-2">We do not read, analyze, store, or share your TikTok video content, view counts, follower data, comments, inbox, or any account data beyond what is listed above. Your TikTok OAuth tokens are stored encrypted and used solely to fulfill your scheduled posts. Tokens are immediately revoked and deleted when you disconnect TikTok or delete your SocialMate account. <a href="https://www.tiktok.com/legal/page/global/privacy-policy/en" target="_blank" rel="noopener noreferrer" className="underline">TikTok Privacy Policy</a></p>
               </li>
-              <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize for post scheduling: Bluesky, Discord, Mastodon, Telegram, X/Twitter, and TikTok (live). LinkedIn, YouTube posting, Reddit, Instagram, Facebook, and Pinterest (coming soon). Each platform's own privacy policy governs their data use.</li>
+              <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize for post scheduling: Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok and LinkedIn. Each platform's own privacy policy governs their data use.</li>
             </ul>
             <p className="mt-3">We do not share your personal data with advertising networks, data brokers, or analytics companies beyond the privacy-friendly analytics described above. We may disclose your data if required by law, court order, or valid government request, or to protect the rights, property, or safety of Gilgamesh Enterprise LLC, our users, or the public.</p>
             <p className="mt-2">In the event of a business acquisition, merger, or sale of substantially all of our assets, your data may be transferred to the acquiring entity, subject to the same privacy protections. We will notify you via email or prominent in-app notice before such a transfer.</p>

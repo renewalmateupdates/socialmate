@@ -58,12 +58,15 @@ const COMING_SOON_PLATFORMS = [
 
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
-const AI_TOOLS: { id: string; label: string; icon: LucideIcon; credits: number; desc: string }[] = [
-  { id: 'caption',   label: 'Caption',   icon: PenLine,     credits: 5,  desc: 'Generate a caption from your topic'     },
-  { id: 'rewrite',   label: 'Rewrite',   icon: Repeat2,     credits: 5,  desc: 'Rewrite your post to be punchier'       },
-  { id: 'hook',      label: 'Hook',      icon: Fish,        credits: 5,  desc: 'Generate 3 viral opening hooks'         },
-  { id: 'thread',    label: 'Thread',    icon: ListOrdered, credits: 10, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', icon: Recycle,     credits: 10, desc: 'Reshape long content for this platform' },
+// `hint` is shown under each button on every screen size. It used to live only
+// in a hover tooltip, so on a phone "Hook" (3 opening lines) and "Caption"
+// (the whole post) looked like the same button (reported Nov 12, 2026).
+const AI_TOOLS: { id: string; label: string; icon: LucideIcon; credits: number; desc: string; hint: string }[] = [
+  { id: 'caption',   label: 'Caption',   icon: PenLine,     credits: 5,  hint: 'Writes the whole post', desc: 'Write the whole post from your topic'    },
+  { id: 'rewrite',   label: 'Rewrite',   icon: Repeat2,     credits: 5,  hint: 'Punchier version',      desc: 'Rewrite your post to be punchier'       },
+  { id: 'hook',      label: 'Hook',      icon: Fish,        credits: 5,  hint: '3 opening lines',       desc: 'Suggest 3 opening lines to start with'  },
+  { id: 'thread',    label: 'Thread',    icon: ListOrdered, credits: 10, hint: 'Idea into a thread',    desc: 'Turn your idea into a full thread'      },
+  { id: 'repurpose', label: 'Repurpose', icon: Recycle,     credits: 10, hint: 'Fit this platform',     desc: 'Reshape long content for this platform' },
 ]
 
 const SCORE_CREDIT_COST = 5
@@ -2439,7 +2442,7 @@ function ComposeInner() {
                     <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">GIF Search</p>
                     {gifMissingKey ? (
                       <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
-                        GIF search coming soon — add <code className="font-mono">TENOR_API_KEY</code> to Vercel env vars (free at tenor.com/gifapi).
+                        GIF search is not available right now. You can still attach a GIF you have saved.
                       </p>
                     ) : (
                       <>
@@ -2730,6 +2733,7 @@ function ComposeInner() {
                   {AI_TOOLS.map(tool => (
                     <button key={tool.id} onClick={() => handleAiTool(tool)}
                       disabled={aiLoading || !!rateLimitedUntil} title={tool.desc}
+                      aria-label={`${tool.label}: ${tool.desc}, ${tool.credits} credits`}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id ? 'bg-black text-white border-black'
                         : (aiLoading || !!rateLimitedUntil) ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
@@ -2737,6 +2741,7 @@ function ComposeInner() {
                       }`}>
                       <div className="mb-1 flex justify-center"><tool.icon size={18} strokeWidth={1.75} /></div>
                       <p className="text-xs font-bold">{tool.label}</p>
+                      <p className={`text-[11px] leading-tight mt-0.5 ${activeAiTool === tool.id ? 'text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>{tool.hint}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tool.credits} cr</p>
                     </button>
                   ))}
@@ -2748,8 +2753,9 @@ function ComposeInner() {
                       : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-amber-400 text-gray-700 dark:text-gray-300'
                     }`}>
                     <RefreshCw className="w-[18px] h-[18px] mx-auto mb-1" strokeWidth={1.75} />
-                    <p className="text-xs font-bold">Repurpose</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">5 cr</p>
+                    <p className="text-xs font-bold">Formats</p>
+                    <p className="text-[11px] leading-tight mt-0.5 text-gray-500 dark:text-gray-400">Email, thread, more</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{REPURPOSE_COST} cr</p>
                   </button>
                   <button
                     onClick={() => { setShowHashtagSuggestPanel(p => !p); setSuggestedHashtags([]); setHashtagSuggestError('') }}
@@ -2760,7 +2766,8 @@ function ComposeInner() {
                     }`}>
                     <Hash className="w-[18px] h-[18px] mx-auto mb-1" strokeWidth={1.75} />
                     <p className="text-xs font-bold">Hashtags</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">1 cr</p>
+                    <p className="text-[11px] leading-tight mt-0.5 text-gray-500 dark:text-gray-400">Suggested tags</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{HASHTAGS_COST} cr</p>
                   </button>
                 </div>
 

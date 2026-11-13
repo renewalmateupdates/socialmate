@@ -4,8 +4,12 @@ import { supabase } from '@/lib/supabase'
 import {
   normalizePlan as normalizePlanShared,
   PLAN_ACCOUNTS_PER_PLATFORM,
+  PLAN_AI_CREDITS,
   PLAN_CLIENT_WORKSPACES,
+  PLAN_CREDIT_BANK,
   PLAN_POST_LIMITS,
+  PLAN_SCHEDULE_WEEKS,
+  PLAN_SEATS,
   type PlanTier,
 } from '@/lib/plan'
 
@@ -15,8 +19,6 @@ import {
 // file, so no OAuth callback could enforce it.
 export type Plan = PlanTier
 const normalizePlan = normalizePlanShared
-
-export const PLATFORMS_TOTAL = 16
 
 export const PLAN_CONFIG: Record<Plan, {
   label: string
@@ -30,32 +32,32 @@ export const PLAN_CONFIG: Record<Plan, {
 }> = {
   free: {
     label: 'Free',
-    credits: 50,
-    creditBank: 75,
-    seats: 2,
+    credits: PLAN_AI_CREDITS.free,
+    creditBank: PLAN_CREDIT_BANK.free,
+    seats: PLAN_SEATS.free,
     accountsPerPlatform: PLAN_ACCOUNTS_PER_PLATFORM.free,
     maxPosts: PLAN_POST_LIMITS.free,
-    scheduleWeeks: 2,
+    scheduleWeeks: PLAN_SCHEDULE_WEEKS.free,
     clientWorkspaces: PLAN_CLIENT_WORKSPACES.free,
   },
   pro: {
     label: 'Pro',
-    credits: 500,
-    creditBank: 750,
-    seats: 5,
+    credits: PLAN_AI_CREDITS.pro,
+    creditBank: PLAN_CREDIT_BANK.pro,
+    seats: PLAN_SEATS.pro,
     accountsPerPlatform: PLAN_ACCOUNTS_PER_PLATFORM.pro,
     maxPosts: PLAN_POST_LIMITS.pro,
-    scheduleWeeks: 4,
+    scheduleWeeks: PLAN_SCHEDULE_WEEKS.pro,
     clientWorkspaces: PLAN_CLIENT_WORKSPACES.pro,
   },
   agency: {
     label: 'Agency',
-    credits: 2000,
-    creditBank: 3000,
-    seats: 15,
+    credits: PLAN_AI_CREDITS.agency,
+    creditBank: PLAN_CREDIT_BANK.agency,
+    seats: PLAN_SEATS.agency,
     accountsPerPlatform: PLAN_ACCOUNTS_PER_PLATFORM.agency,
     maxPosts: PLAN_POST_LIMITS.agency,
-    scheduleWeeks: 12,
+    scheduleWeeks: PLAN_SCHEDULE_WEEKS.agency,
     clientWorkspaces: PLAN_CLIENT_WORKSPACES.agency,
   },
 }

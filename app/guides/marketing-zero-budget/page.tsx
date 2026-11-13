@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/marketing-zero-budget' },
   title: "Marketing on Zero Budget (Free Guide) — Gilgamesh's Guides",
   description:
     'How to grow your business, brand, or product with no ad budget. Organic content strategy, community seeding, platform flywheels, and how to turn attention into customers — for free.',

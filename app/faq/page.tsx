@@ -16,7 +16,7 @@ const sections = [
       },
       {
         q: 'What platforms does SocialMate support?',
-        a: 'Live today: Bluesky, Mastodon, Discord, Telegram (all free), X/Twitter (Pro+ plan — X charges us $0.01/tweet, so we gate it to Pro), TikTok (Production API approved May 2026), and LinkedIn (personal profile, live since May 2026). Clip support: Twitch and YouTube. Coming soon: Instagram, Facebook, Threads, Pinterest, Reddit.',
+        a: 'Live today: Bluesky, Mastodon, Discord, Telegram (all free), X/Twitter (Pro+ plan — X charges us $0.01/tweet, so we gate it to Pro), TikTok (Production API approved May 2026), and LinkedIn (personal profile, live since May 2026). Clip support: Twitch and YouTube. Not available: Instagram, Facebook and Threads (they need app review by Meta, not started), YouTube posting (waiting on Google), Pinterest and Reddit (both declined the SocialMate application).',
       },
       {
         q: 'Is there a free plan?',
@@ -115,7 +115,7 @@ const sections = [
       },
       {
         q: 'Which platforms are live today?',
-        a: 'Live now: Bluesky, Mastodon, Discord, Telegram (all free), X/Twitter (Pro+ plan), TikTok (Production API approved May 2026 — connect at /accounts), and LinkedIn (personal profile, live since May 2026). Clip support: Twitch (OAuth connect + clip scheduler) and YouTube (RSS-based, no API key needed). Coming soon: Instagram, Facebook, Threads, Pinterest, Reddit.',
+        a: 'Live now: Bluesky, Mastodon, Discord, Telegram (all free), X/Twitter (Pro+ plan), TikTok (Production API approved May 2026 — connect at /accounts), and LinkedIn (personal profile, live since May 2026). Clip support: Twitch (OAuth connect + clip scheduler) and YouTube (RSS-based, no API key needed). Not available: Instagram, Facebook and Threads (they need app review by Meta, not started), YouTube posting (waiting on Google), Pinterest and Reddit (both declined the SocialMate application).',
       },
     ],
   },

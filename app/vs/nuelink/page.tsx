@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',            nuelink: '$15/month (Individual)',      socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                 nuelink: '❌ None',                     socialmate: '✅ Free forever'         },
   { feature: 'Free trial',                nuelink: '7-day trial only',            socialmate: 'Free forever, no trial'  },
-  { feature: 'Social accounts (starter)', nuelink: '5 channels',                  socialmate: 'No hard cap (free tier)' },
+  { feature: 'Social accounts (starter)', nuelink: '5 channels',                  socialmate: '1 per platform (free)'   },
   { feature: 'Bulk scheduling',           nuelink: '✅ All plans',                socialmate: '✅ Free'                 },
   { feature: 'Discord support',           nuelink: '❌',                          socialmate: '✅'                      },
   { feature: 'Telegram support',          nuelink: '❌',                          socialmate: '✅'                      },

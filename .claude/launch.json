@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "socialmate-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }
+    { "name": "socialmate-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 },
+    { "name": "socialmate-prod", "runtimeExecutable": "npm", "runtimeArgs": ["run", "start", "--", "-p", "3111"], "port": 3111 }
   ]
 }

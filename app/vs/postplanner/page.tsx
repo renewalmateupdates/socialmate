@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',            postplanner: '$9/month (Starter)',       socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                 postplanner: '✅ (10 posts/month cap)',   socialmate: '✅ 250 posts/month free' },
-  { feature: 'Free plan post limit',      postplanner: '10 posts/month',           socialmate: 'No limit'                },
+  { feature: 'Free plan post limit',      postplanner: '10 posts/month',           socialmate: '250 posts/month'         },
   { feature: 'Social accounts (free)',    postplanner: '3 accounts',               socialmate: 'No hard cap (free tier)' },
   { feature: 'Bulk scheduling',           postplanner: 'Paid plans',               socialmate: '✅ Free'                 },
   { feature: 'Discord support',           postplanner: '❌',                       socialmate: '✅'                      },

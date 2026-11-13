@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',              zoho: '$15/month (Standard)',       socialmate: '$0 — free forever'        },
   { feature: 'Free plan',                   zoho: '❌ Trial only (15 days)',     socialmate: '✅ Free forever'          },
-  { feature: 'Professional plan',           zoho: '$40/month',                  socialmate: 'Pro from $12/month'       },
+  { feature: 'Professional plan',           zoho: '$40/month',                  socialmate: 'Pro $8/month'            },
   { feature: 'Platforms supported',         zoho: '9',                          socialmate: '7 live'                   },
   { feature: 'Discord support',             zoho: '❌',                          socialmate: '✅'                       },
   { feature: 'Telegram support',            zoho: '❌',                          socialmate: '✅'                       },
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Which platforms does SocialMate support that Zoho Social does not?',
-    a: 'SocialMate supports Discord, Telegram, Mastodon, and Bluesky — none of which Zoho Social covers. Zoho Social supports 9 platforms, SocialMate supports 16. If any part of your audience is on community-first or decentralized platforms, Zoho Social cannot help.',
+    a: 'SocialMate supports Discord, Telegram, Mastodon, and Bluesky — none of which Zoho Social covers. Zoho Social supports 9 platforms, SocialMate posts to 7. If any part of your audience is on community-first or decentralized platforms, Zoho Social cannot help.',
   },
   {
     q: 'Is SocialMate actually free with no catch?',

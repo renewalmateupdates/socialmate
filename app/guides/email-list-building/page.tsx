@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/email-list-building' },
   title: 'Email List Building From Zero (Free Guide) — Gilgamesh\'s Guides',
   description:
     'How to build an email list from scratch with no budget. Lead magnets, welcome sequences, free tools, growing from 0 to 500 subscribers, and turning your list into customers.',

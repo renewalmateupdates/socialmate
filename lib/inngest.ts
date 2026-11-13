@@ -2699,7 +2699,7 @@ export const monthlyCreditsResetEmail = inngest.createFunction(
             ${isFree ? `
             <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:20px;margin-bottom:24px;">
               <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px;">💡 Want 10× more credits?</div>
-              <div style="font-size:13px;color:#78350f;line-height:1.6;">Upgrade to Pro for <strong>500 credits/month</strong> — plus unlimited scheduling, 5 team seats, and priority support. Just $5/month.</div>
+              <div style="font-size:13px;color:#78350f;line-height:1.6;">Upgrade to Pro for <strong>500 credits/month</strong> , plus 1,000 posts a month, 5 team seats and scheduling a month ahead. $8/month.</div>
               <div style="margin-top:12px;text-align:center;">
                 <a href="${appUrl}/pricing" style="display:inline-block;background:#d97706;color:#ffffff;padding:10px 24px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;">Upgrade to Pro — $8/mo →</a>
               </div>

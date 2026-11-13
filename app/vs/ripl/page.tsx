@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate better for content scheduling than Ripl?",
-    a: "Yes, if your goal is multi-platform content scheduling. Ripl is designed primarily for creating animated video posts. SocialMate is a full Creator OS with scheduling, 20+ AI tools, autonomous content generation (SOMA), an analytics dashboard, social inbox, and link in bio — all starting free.",
+    a: "Yes, if your goal is multi-platform content scheduling. Ripl is designed primarily for creating animated video posts. SocialMate is a full Creator OS with scheduling, 15 AI tools, autonomous content generation (SOMA), an analytics dashboard, social inbox, and link in bio — all starting free.",
   },
   {
     q: "Can SocialMate create video content like Ripl?",
@@ -83,7 +83,7 @@ export default function VsRiplPage() {
             SocialMate vs Ripl
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 7 platforms, 20+ AI tools, autonomous content, and a $0 free plan.
+            Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 7 platforms, 15 AI tools, autonomous content, and a $0 free plan.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -114,7 +114,7 @@ export default function VsRiplPage() {
             <p className="font-extrabold text-lg mb-2">Full Creator OS. 7 platforms. Starts free.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
-              <li>✅ 20+ AI writing and content tools</li>
+              <li>✅ 15 AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Creator Studio: trim, filters, GIF export</li>
               <li>✅ Full analytics + social inbox</li>
@@ -197,7 +197,7 @@ export default function VsRiplPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Need more than animated videos? Start free.</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms, gives you 20+ AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
+            SocialMate covers 7 platforms, gives you 15 AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

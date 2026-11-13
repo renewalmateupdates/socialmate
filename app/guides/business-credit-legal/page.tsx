@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/business-credit-legal' },
   title: "Business Credit, Legal Foundations & Tax Breaks (Free Guide) — Gilgamesh's Guides",
   description:
     'The complete no-BS guide to DUNS numbers, building business credit, licenses, tax deductions, LLC vs S-Corp, and insurance. Real numbers, real resources, zero paywalls.',

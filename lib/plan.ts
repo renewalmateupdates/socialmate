@@ -54,13 +54,66 @@ export const PLAN_POST_LIMITS: Record<PlanTier, number> = {
 }
 
 // Client workspaces an owner may create. Matches /pricing and the in-app
-// limit on /workspaces/new. NOTE: CLAUDE.md's plan table, llms.txt and
-// /vs/buffer say Pro gets 0; /pricing sells 1. Joshua to decide; change it
+// limit on /workspaces/new. Decided Nov 5, 2026: Pro includes 1. Change it
 // here and nowhere else.
 export const PLAN_CLIENT_WORKSPACES: Record<PlanTier, number> = {
   free:   0,
   pro:    1,
   agency: 5,
+}
+
+// Team seats per plan, the owner included. Enforced in app/api/team/invite and
+// app/api/team/accept, shown on /team and /pricing.
+export const PLAN_SEATS: Record<PlanTier, number> = {
+  free:   2,
+  pro:    5,
+  agency: 15,
+}
+
+// Monthly AI credits, and the most a monthly balance can roll up to.
+// app/api/stripe/webhook and app/api/cron/reset-credits keep their own copies
+// (both are ask-first files); scripts/test-site-facts.mjs fails if they differ.
+export const PLAN_AI_CREDITS: Record<PlanTier, number> = {
+  free:   50,
+  pro:    500,
+  agency: 2000,
+}
+
+export const PLAN_CREDIT_BANK: Record<PlanTier, number> = {
+  free:   75,
+  pro:    750,
+  agency: 3000,
+}
+
+// How many weeks ahead each plan may schedule. lib/post-limits.ts owns the
+// wording built on top of it.
+export const PLAN_SCHEDULE_WEEKS: Record<PlanTier, number> = {
+  free:   2,
+  pro:    4,
+  agency: 12,
+}
+
+// TikTok videos per month (TikTok's API is free; this bounds storage egress).
+export const PLAN_TIKTOK_VIDEOS: Record<PlanTier, number> = {
+  free:   20,
+  pro:    60,
+  agency: 200,
+}
+
+// X posts per month. Free is 0 because X bills SocialMate per post.
+// lib/publish/twitter.ts keeps its own copy (publish pipeline, ask-first);
+// scripts/test-site-facts.mjs fails if it differs.
+export const PLAN_X_POSTS: Record<PlanTier, number> = {
+  free:   0,
+  pro:    150,
+  agency: 400,
+}
+
+// What each paid plan costs, in whole US dollars. The Stripe price IDs that
+// charge these amounts are in lib/site-facts.ts (STRIPE_PLAN_PRICE_IDS).
+export const PLAN_PRICES: Record<Exclude<PlanTier, 'free'>, { monthly: number; annual: number }> = {
+  pro:    { monthly: 8,  annual: 80  },
+  agency: { monthly: 29, annual: 290 },
 }
 
 export function accountsPerPlatformFor(plan: string | null | undefined): number {

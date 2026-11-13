@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/seo-for-beginners' },
   title: 'SEO for Normal People (Free Guide) — Gilgamesh\'s Guides',
   description:
     'How to get found on Google without paying anyone $3,000 a month. Keyword research, Google Search Console, on-page SEO, blog strategy, and backlinks — explained plainly for non-technical founders.',

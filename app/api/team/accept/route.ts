@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { normalizePlan } from '@/lib/plan'
+import { normalizePlan, PLAN_SEATS } from '@/lib/plan'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { logActivity } from '@/lib/workspace-activity'
 import { Resend } from 'resend'
@@ -11,11 +11,6 @@ function getResend() {
   return _resend
 }
 
-const PLAN_SEAT_LIMITS: Record<string, number> = {
-  free:   2,
-  pro:    5,
-  agency: 15,
-}
 
 export async function POST(request: NextRequest) {
   const { token, userId, email } = await request.json()
@@ -57,7 +52,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   const plan      = normalizePlan(ownerSettings?.plan)
-  const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
+  const seatLimit = PLAN_SEATS[plan]
 
   const { count: memberCount } = await adminSupabase
     .from('team_members')

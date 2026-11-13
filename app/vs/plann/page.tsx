@@ -114,7 +114,7 @@ export default function VsPlannPage() {
             <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok, LinkedIn</li>
-              <li>✅ 20+ AI writing and content tools</li>
+              <li>✅ 15 AI writing and content tools</li>
               <li>✅ SOMA autonomous weekly content generation</li>
               <li>✅ Full analytics + social inbox</li>
               <li>✅ Free forever — no credit card</li>
@@ -155,7 +155,7 @@ export default function VsPlannPage() {
               {
                 n: '2',
                 title: "SocialMate costs less than half of Plann's starting price",
-                desc: "Plann's Solo plan starts at $13/month. SocialMate Pro is $8/month and includes far more platforms, 20+ AI tools, and an autonomous content system. Free plan covers all core scheduling features.",
+                desc: "Plann's Solo plan starts at $13/month. SocialMate Pro is $8/month and includes far more platforms, 15 AI tools, and an autonomous content system. Free plan covers all core scheduling features.",
               },
               {
                 n: '3',
@@ -196,7 +196,7 @@ export default function VsPlannPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Beyond Instagram — reach every platform from one place</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers Bluesky, Discord, Telegram, TikTok, Mastodon, and X. 20+ AI tools. SOMA autonomous content. All starting at $0.
+            SocialMate covers Bluesky, Discord, Telegram, TikTok, Mastodon, and X. 15 AI tools. SOMA autonomous content. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

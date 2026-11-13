@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node scripts/run-tests.mjs"
+    "test": "node scripts/run-tests.mjs",
+    "verify:content": "node scripts/verify-site-content.mjs",
+    "gen:routes": "node scripts/gen-route-manifest.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",

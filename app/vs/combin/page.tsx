@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate comparable to Combin?',
-    a: "SocialMate covers the Instagram scheduling part of what Combin does, but SocialMate's Instagram support relies on workarounds since Meta's Instagram API is restrictive. Where SocialMate excels is everything outside Instagram: Discord, Telegram, Bluesky, TikTok, LinkedIn, X/Twitter, and Mastodon — all of which Combin doesn't support at all. If Instagram is your only platform, Combin is more Instagram-specialized. If you post anywhere else, SocialMate is the answer.",
+    a: "SocialMate does not post to Instagram, so it does not replace Combin's Instagram tools. Where SocialMate helps is everything outside Instagram: Discord, Telegram, Bluesky, TikTok, LinkedIn, X/Twitter, and Mastodon — all of which Combin doesn't support at all. If Instagram is your only platform, Combin is more Instagram-specialized. If you post anywhere else, SocialMate is the answer.",
   },
   {
     q: 'Does SocialMate help grow followers like Combin?',

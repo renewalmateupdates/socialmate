@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate cheaper than Preview App?",
-    a: "SocialMate is free to start. Preview App's Pro plan starts at $8/month. SocialMate Pro is $8/month and includes far more platforms, 20+ AI tools, autonomous content generation (SOMA), analytics, and a social inbox — none of which Preview App offers.",
+    a: "SocialMate is free to start. Preview App's Pro plan starts at $8/month. SocialMate Pro is $8/month and includes far more platforms, 15 AI tools, autonomous content generation (SOMA), analytics, and a social inbox — none of which Preview App offers.",
   },
   {
     q: "What makes SocialMate a better choice for most creators?",
@@ -114,7 +114,7 @@ export default function VsPreviewAppPage() {
             <p className="font-extrabold text-lg mb-2">7 platforms. Full Creator OS. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ TikTok, Discord, Telegram, Bluesky, Mastodon, X, LinkedIn</li>
-              <li>✅ 20+ AI writing and content tools</li>
+              <li>✅ 15 AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Full analytics + social inbox</li>
               <li>✅ Free forever — no credit card</li>
@@ -155,12 +155,12 @@ export default function VsPreviewAppPage() {
               {
                 n: '2',
                 title: "SocialMate is cheaper — and does far more",
-                desc: "Preview App Pro starts at $8/month. SocialMate is free to start and $8/month for Pro — which includes more platforms, 20+ AI tools, autonomous content generation (SOMA), full analytics, and a social inbox. Preview App has none of these.",
+                desc: "Preview App Pro starts at $8/month. SocialMate is free to start and $8/month for Pro — which includes more platforms, 15 AI tools, autonomous content generation (SOMA), full analytics, and a social inbox. Preview App has none of these.",
               },
               {
                 n: '3',
                 title: 'No AI content generation in Preview App',
-                desc: "Preview App has basic hashtag and caption suggestions. SocialMate has 20+ AI tools: caption generation, hook writing, content repurposing, thread builder, hashtag suggestions, and SOMA that generates a full week of content autonomously.",
+                desc: "Preview App has basic hashtag and caption suggestions. SocialMate has 15 AI tools: caption generation, hook writing, content repurposing, thread builder, hashtag suggestions, and SOMA that generates a full week of content autonomously.",
               },
               {
                 n: '4',
@@ -196,7 +196,7 @@ export default function VsPreviewAppPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Beyond Instagram — schedule everywhere for free</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers TikTok, Discord, Telegram, Bluesky, Mastodon, and X — with 20+ AI tools and SOMA autonomous content. All starting at $0.
+            SocialMate covers TikTok, Discord, Telegram, Bluesky, Mastodon, and X — with 15 AI tools and SOMA autonomous content. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

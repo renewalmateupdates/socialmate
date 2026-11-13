@@ -5,6 +5,7 @@ import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/integrations' },
   title: 'Integrations & Webhooks — SocialMate',
   description: 'Connect SocialMate to Zapier, Make, n8n, or any custom automation with outbound webhooks.',
 }

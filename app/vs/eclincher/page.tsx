@@ -18,7 +18,7 @@ const COMPARISON = [
   { feature: 'Competitor tracking',    eclincher: 'Premier+ only',          socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',    eclincher: '✅ Auto post queues',    socialmate: '✅ Free'                  },
   { feature: 'RSS import',             eclincher: '✅',                     socialmate: '✅ Free'                  },
-  { feature: 'Unified inbox',          eclincher: '✅ All plans',           socialmate: '🔜 Coming soon'          },
+  { feature: 'Unified inbox',          eclincher: '✅ All plans',           socialmate: '✅ Bluesky, Mastodon, Telegram, Discord' },
   { feature: 'Analytics',             eclincher: 'Basic (paid)',           socialmate: '✅ Free'                  },
   { feature: 'Bluesky / Mastodon',     eclincher: '❌',                     socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     eclincher: '❌',                     socialmate: '✅'                       },

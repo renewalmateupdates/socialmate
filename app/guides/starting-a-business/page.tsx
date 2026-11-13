@@ -7,6 +7,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/starting-a-business' },
   title: "How to Start a Business From Scratch (Free Guide) — Gilgamesh's Guides",
   description:
     'The no-BS playbook for starting a business with no money, no connections, and no permission. Wyoming LLC for $150, free tech stack, Reddit validation, and what nobody tells you about doing it alone.',

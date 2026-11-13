@@ -6,6 +6,7 @@ import GuideShopCard from '@/components/GuideShopCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
+  alternates: { canonical: 'https://socialmate.studio/guides/creator-monetization' },
   title: "Creator Monetization — How to Actually Get Paid Online (Free Guide) — Gilgamesh's Guides",
   description:
     'The real monetization stack for creators: tip jars, fan subscriptions, digital products, brand deals, and affiliate income. How to stack multiple streams to $5K/month starting from zero.',

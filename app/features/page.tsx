@@ -261,7 +261,7 @@ const FEATURE_CATEGORIES = [
         credits: 'Free',
         proOnly: false,
         what: 'Comments and mentions from all your connected platforms — in one unified inbox.',
-        how: 'Filter by platform, type (comment, mention, DM), and read/unread status. Click any message to mark it read. Live sync coming soon.',
+        how: 'Filter by platform, type (comment, mention, DM), and read/unread status. Click any message to mark it read.',
       },
     ],
   },
