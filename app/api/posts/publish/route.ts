@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 // Publishing a post with a video waits on each platform to process it
 // (lib/publish/video.ts). 60 s is the longest any route here sets.
 export const maxDuration = 60
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -334,14 +334,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Outbound webhooks — non-fatal, fire-and-forget
+    // after() keeps the function alive until delivery finishes. A bare promise
+    // left running past the response can be frozen with it, and the user's
+    // endpoint never hears about the post (found Nov 13, 2026).
     try {
+      const webhookUser  = userId
       const webhookEvent = allFailed ? 'post.failed' : 'post.published'
-      dispatchWebhook(userId, webhookEvent, {
+      const webhookBody  = {
         post_id:      postId,
         content:      post.content,
         platforms:    post.platforms,
         published_at: new Date().toISOString(),
-      }).catch(() => {})
+      }
+      after(() => dispatchWebhook(webhookUser, webhookEvent, webhookBody).catch(() => {}))
     } catch {}
 
     return NextResponse.json({
@@ -517,14 +522,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Outbound webhooks — non-fatal, fire-and-forget
+    // after() keeps the function alive until delivery finishes. A bare promise
+    // left running past the response can be frozen with it, and the user's
+    // endpoint never hears about the post (found Nov 13, 2026).
     try {
+      const webhookUser  = userId
       const webhookEvent = allFailed ? 'post.failed' : 'post.published'
-      dispatchWebhook(userId, webhookEvent, {
+      const webhookBody  = {
         post_id:      postId,
         content:      post.content,
         platforms:    post.platforms,
         published_at: new Date().toISOString(),
-      }).catch(() => {})
+      }
+      after(() => dispatchWebhook(webhookUser, webhookEvent, webhookBody).catch(() => {}))
     } catch {}
 
     return NextResponse.json({

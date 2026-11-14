@@ -455,11 +455,29 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 5, 2026).** #769 through #773 and the cloud session's
-consolidation branch are merged; nothing is open in this repo. On Nov 5 the
-merged branches were deleted (every one is tagged `backup/<branch>-2026-11-05`
-on GitHub) and lint became a gate (0 errors). HereNow's own list is in its
-CLAUDE.md.
+**Pick up here (updated Nov 13, 2026).** #786 through #792 are merged. Branch
+`feat/queue-calendar-sidebar-nov13` holds batches 1 and 2 of the Nov 13 product
+plan: Queue and Calendar rebuilt (range picker, collapsible days, red Failed
+section, TikTok posts in the day lists, week view, Calendar opens on today),
+webhooks delivered with `after()` and sent by Post Now too, `feature_opened`
+tracking read on `/admin/usage`, Terms and Privacy at 18+ (and Privacy now
+discloses Google Analytics, which the site loads), and a short sidebar: Schedule
+(Calendar and List tabs), More tools, Customize, a one-time guide. HereNow's own
+list is in its CLAUDE.md.
+
+*Claude, after that branch deploys:*
+- Walk Schedule signed in: Calendar opens on today; Week view; a TikTok Studio
+  post shows in the day panel; List keeps its range after a reload; a failed
+  post shows red with Retry; each summary card opens its details.
+- Walk the sidebar on desktop and phone: the guide shows once, More tools opens,
+  + adds a tool, Customize opens on screen inside the mobile drawer.
+- Webhooks: one Post Now and one scheduled post each reach a test endpoint with
+  `X-SocialMate-Signature`.
+- `/admin/usage` "App areas" fills in from the first day after deploy.
+- Next, batch 3 (after promo week, Nov 19): Compose simple and full modes, one
+  "Write with AI" menu, Bulk Scheduler as a Compose mode with CSV, plain
+  subtitles beside brand names in the sidebar (SIGIL becomes "Link in bio"), and
+  the new sidebar strings moved into the nine locale files.
 
 *Claude, after a deploy or when asked:*
 - Test the free-tool path once (#771): in a private window write a post in

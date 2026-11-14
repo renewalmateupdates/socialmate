@@ -22,6 +22,20 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
    and proposes cuts and captions (AI credits), the cut happens in the browser
    (ffmpeg.wasm, no server video bills), then schedule it. Say go to plan it properly.
 
+## Decided (Nov 13, 2026)
+
+1. **18 and over only.** Terms and Privacy say so from the Nov 13 branch (they
+   said 13+ with a parental-consent promise nothing checked). What adults
+   schedule within each platform's rules is their business, but SocialMate is
+   never marketed as an adult tool: it is a creator OS. Fan-platform copy stays
+   safe for work.
+2. **The free tier is as free as it is to run.** Anything that costs nothing to
+   serve stays free; anything with a running cost (video rendering, clipping, AI,
+   storage) is credits, an add-on or Pro.
+3. **No feature is removed until `/admin/usage` shows what people use.** Until
+   then the sidebar starts short and the rest waits under More tools.
+4. **The Calendar always opens on today.**
+
 ## Decided (Nov 5, 2026)
 
 1. **RenewalMate PRs #13 and #6 closed (Nov 5).** #13's fixes were already on master;

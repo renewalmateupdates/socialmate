@@ -331,7 +331,7 @@ export interface FeatureFacts {
 export const FEATURES: FeatureFacts[] = [
   // Scheduling
   { name: 'Compose', what: 'Write one post and send it to several platforms, now or later, with per-platform previews and character counts', status: 'live', href: '/compose', minPlan: 'free' },
-  { name: 'Calendar, Queue and Drafts', what: 'See, move, retry and edit everything scheduled', status: 'live', href: '/calendar', minPlan: 'free' },
+  { name: 'Schedule (calendar and list) and Drafts', what: 'See, move, retry and edit everything scheduled, by month, week or list, TikTok posts included', status: 'live', href: '/calendar', minPlan: 'free' },
   { name: 'Bulk scheduler', what: 'Schedule many posts at once, each checked against its platform character limit', status: 'live', href: '/bulk-scheduler', minPlan: 'free' },
   { name: 'TikTok Studio', what: 'Upload, caption and schedule TikTok videos', status: 'live', href: '/tiktok/studio', minPlan: 'free' },
   { name: 'Campaigns', what: 'Write a set of messages once and have them post in rotation on the days and times you choose', status: 'live', href: '/campaigns', minPlan: 'free' },

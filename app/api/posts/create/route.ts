@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic'
 // Publishing a post with a video waits on each platform to process it
 // (lib/publish/video.ts). 60 s is the longest any route here sets.
 export const maxDuration = 60
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
+import { dispatchWebhook } from '@/lib/webhooks'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
@@ -383,6 +384,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (draftId && !allFailed) await removeSentDraft(user, draftId)
+
+    // Outbound webhooks, as the scheduled path in /api/posts/publish sends them.
+    // Post Now never did, so a user's endpoint only heard about scheduled posts
+    // (found Nov 13, 2026, from a user asking why theirs was silent).
+    try {
+      const webhookEvent = allFailed ? 'post.failed' : 'post.published'
+      const webhookBody  = { post_id: post.id, content, platforms, published_at: new Date().toISOString() }
+      after(() => dispatchWebhook(user.id, webhookEvent, webhookBody).catch(() => {}))
+    } catch {}
 
     // This "Post Now" path is a second, separate implementation of publishing
     // from /api/posts/publish's — this one is what compose's actual Post Now

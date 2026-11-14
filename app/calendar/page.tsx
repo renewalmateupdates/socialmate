@@ -23,6 +23,42 @@ import UnsplashCredit from '@/components/UnsplashCredit'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { CalendarDays, ChevronDown, Clock, Globe, Sparkles, X as CloseIcon } from 'lucide-react'
 import { loadWorkspacePosts } from '@/lib/workspace-posts'
+import VideoPeek from '@/components/VideoPeek'
+import ScheduleTabs from '@/components/ScheduleTabs'
+
+/** A TikTok Studio row (tiktok_posts). Published ones are copied into `posts`
+ * (lib/tiktok-post-sync.ts) and show from there, so only unsynced rows are used. */
+interface TiktokItem {
+  id: string
+  post_caption: string | null
+  scheduled_at: string | null
+  created_at: string | null
+  video_url: string | null
+  status: string
+  error_message?: string | null
+  synced_post_id?: string | null
+}
+
+function tiktokDate(tp: TiktokItem): string {
+  return (tp.scheduled_at || tp.created_at) as string
+}
+
+function isVideoFile(url: string | null): url is string {
+  return !!url && /\.(mp4|mov|m4v|webm)$/i.test(url.split('?')[0])
+}
+
+function addDays(d: Date, n: number): Date {
+  const x = new Date(d)
+  x.setDate(x.getDate() + n)
+  return x
+}
+
+function startOfWeek(d: Date): Date {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  return addDays(x, -x.getDay())
+}
+
+const VIEW_STORAGE_KEY = 'sm_calendar_view'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -292,6 +328,83 @@ function CalendarDayCell({
   )
 }
 
+/** One day in the week view: every post with its time, nothing cut off. */
+function WeekDayColumn({
+  day,
+  todayKey,
+  selectedDay,
+  onSelectDay,
+  dayPosts,
+  dayTiktok,
+}: {
+  day: Date
+  todayKey: string
+  selectedDay: string | null
+  onSelectDay: (key: string) => void
+  dayPosts: Post[]
+  dayTiktok: TiktokItem[]
+}) {
+  const key        = toDateKey(day)
+  const isToday    = key === todayKey
+  const isSelected = key === selectedDay
+  const { setNodeRef, isOver } = useDroppable({ id: key })
+
+  return (
+    <div
+      ref={setNodeRef}
+      onClick={() => onSelectDay(key)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onSelectDay(key)}
+      className={[
+        'border-r border-theme last:border-r-0 min-h-[240px] p-1.5 sm:p-2 transition-all cursor-pointer',
+        isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : '',
+        isOver ? 'bg-indigo-50 dark:bg-indigo-950/30 ring-2 ring-inset ring-indigo-400' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40',
+      ].join(' ')}
+    >
+      <div className="text-center mb-2">
+        <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{DAY_LABELS[day.getDay()]}</div>
+        <div className={`mx-auto mt-0.5 text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-orange-500 text-white' : 'text-gray-800 dark:text-gray-100'}`}>
+          {day.getDate()}
+        </div>
+      </div>
+      <div className="space-y-1">
+        {dayPosts.map(post => (
+          <DraggablePostPill key={post.id} post={post}>
+            <div className={`w-full min-w-0 rounded-md border px-1.5 py-1 ${post.status === 'failed' ? 'border-red-300 dark:border-red-800 bg-red-50/60 dark:bg-red-950/20' : 'border-theme bg-white/60 dark:bg-gray-900/40'}`}>
+              <div className="flex items-center gap-1">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
+                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tabular-nums truncate">
+                  {formatTime(post.scheduled_at || post.created_at)}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5 mt-0.5 flex-wrap">
+                {(post.platforms ?? []).map(p => <PlatformGlyph key={p} id={p} size={10} className="flex-shrink-0" />)}
+              </div>
+              <p className="text-[10px] text-gray-600 dark:text-gray-300 line-clamp-2 leading-tight mt-0.5 break-words">
+                {post.content}
+              </p>
+            </div>
+          </DraggablePostPill>
+        ))}
+        {dayTiktok.map(tp => (
+          <div key={tp.id} className={`rounded-md border px-1.5 py-1 ${tp.status === 'failed' ? 'border-red-300 dark:border-red-800 bg-red-50/60 dark:bg-red-950/20' : 'border-theme'}`}>
+            <div className="flex items-center gap-1">
+              <PlatformGlyph id="tiktok" size={10} className="flex-shrink-0" />
+              <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tabular-nums truncate">
+                {formatTime(tiktokDate(tp))}
+              </span>
+            </div>
+            <p className="text-[10px] text-gray-600 dark:text-gray-300 line-clamp-2 leading-tight mt-0.5 break-words">
+              {tp.post_caption || 'TikTok video'}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function CalendarPage() {
   const router = useRouter()
   const { activeWorkspace, loading: wsLoading } = useWorkspace()
@@ -309,9 +422,13 @@ export default function CalendarPage() {
   // week of TikTok posts actually scheduled, and the "next scheduled posts
   // are in <month>" hint pointed at old test posts in the `posts` table
   // because that was the only table it ever looked at. Found Nov 13, 2026.
-  const [tiktokScheduled, setTiktokScheduled] = useState<{ id: string; scheduled_at: string }[]>([])
+  // Nov 13: the day panel lists them too, and failed ones show in red.
+  const [tiktokPosts, setTiktokPosts] = useState<TiktokItem[]>([])
   const [loading,      setLoading]      = useState(true)
-  const [selectedDay,  setSelectedDay]  = useState<string | null>(null)
+  // Opens on today, with today's posts listed below the grid.
+  const [selectedDay,  setSelectedDay]  = useState<string | null>(todayKey)
+  const [view,         setView]         = useState<'month' | 'week'>('month')
+  const [weekStart,    setWeekStart]    = useState<Date>(() => startOfWeek(today))
   const [retrying,     setRetrying]     = useState<string | null>(null)
   const [retryToast,   setRetryToast]   = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [duplicating,  setDuplicating]  = useState<string | null>(null)
@@ -440,24 +557,46 @@ export default function CalendarPage() {
     setLoading(false)
   }, [activeWorkspace, router])
 
-  // Mirrors app/queue/page.tsx's tiktok_posts query.
-  const fetchTiktokScheduled = useCallback(async () => {
+  // Scheduled, sending and failed TikTok Studio posts. Published ones are
+  // already in `posts` (synced_post_id), so they'd show twice if read here.
+  const fetchTiktokPosts = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     let q = supabase
       .from('tiktok_posts')
-      .select('id, scheduled_at')
+      .select('*')
       .eq('user_id', user.id)
-      .eq('status', 'scheduled')
+      .in('status', ['scheduled', 'publishing', 'failed'])
+      .order('created_at', { ascending: false })
+      .limit(300)
     if (activeWorkspace && !activeWorkspace.is_personal) q = q.eq('workspace_id', activeWorkspace.id)
     const { data, error } = await q
     if (error) { console.warn('[Calendar] tiktok_posts fetch failed:', error.message); return }
-    setTiktokScheduled((data ?? []).filter(p => p.scheduled_at))
+    setTiktokPosts(((data ?? []) as TiktokItem[]).filter(p => !p.synced_post_id && tiktokDate(p)))
   }, [activeWorkspace])
 
   useEffect(() => {
-    if (!wsLoading) fetchTiktokScheduled()
-  }, [fetchTiktokScheduled, wsLoading])
+    if (!wsLoading) fetchTiktokPosts()
+  }, [fetchTiktokPosts, wsLoading])
+
+  // Month or week, remembered in this browser.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(VIEW_STORAGE_KEY) === 'week') setView('week')
+    } catch { /* private mode */ }
+  }, [])
+  const chooseView = (v: 'month' | 'week') => {
+    setView(v)
+    try { localStorage.setItem(VIEW_STORAGE_KEY, v) } catch { /* private mode */ }
+    // Keep the same stretch of time in view when switching.
+    if (v === 'week') {
+      const anchor = selectedDay ? new Date(selectedDay + 'T12:00:00') : new Date(currentYear, currentMonth, 1)
+      setWeekStart(startOfWeek(anchor))
+    } else {
+      setCurrentYear(weekStart.getFullYear())
+      setCurrentMonth(weekStart.getMonth())
+    }
+  }
 
   // Wait for workspace context to resolve before fetching — avoids a double-fetch
   // where the second run (with workspace filter) overwrites correct results.
@@ -469,32 +608,15 @@ export default function CalendarPage() {
   // scheduled post same as any other for this purpose, see tiktokScheduled above.
   const scheduledDates = [
     ...posts.filter(p => p.scheduled_at).map(p => new Date(p.scheduled_at!)),
-    ...tiktokScheduled.map(p => new Date(p.scheduled_at)),
+    ...tiktokPosts.map(p => new Date(tiktokDate(p))),
   ]
 
-  // Auto-navigate to the nearest month that actually has something scheduled,
-  // when the current month is empty. "Nearest" is by distance from today, not
-  // array order: the old version took posts.find(p => p.scheduled_at) off a
-  // newest-first list, which (its own comment said) was meant to land on the
-  // latest activity. With nothing upcoming in `posts` some months — every
-  // TikTok Studio post lives in tiktok_posts instead, which this never looked
-  // at — "first with a scheduled_at" fell through to old test posts and sent
-  // the empty-state message backward, into the past, while a week of real
-  // scheduled TikTok posts sat one tab over. Found Nov 13, 2026.
-  useEffect(() => {
-    if (loading || scheduledDates.length === 0) return
-    const monthStart = new Date(currentYear, currentMonth, 1)
-    const monthEnd   = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59)
-    const currentMonthHasPosts = scheduledDates.some(d => d >= monthStart && d <= monthEnd)
-    if (currentMonthHasPosts) return
-    const now = Date.now()
-    const nearest = scheduledDates.reduce((best, d) =>
-      Math.abs(d.getTime() - now) < Math.abs(best.getTime() - now) ? d : best
-    )
-    setCurrentYear(nearest.getFullYear())
-    setCurrentMonth(nearest.getMonth())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, tiktokScheduled.length])
+  // The calendar always opens on today (Joshua, Nov 13 2026). #792 made it
+  // jump to the nearest month with posts instead; that jump is gone. When this
+  // month is empty, the empty state offers a button to the next busy month.
+  const nextBusy = scheduledDates
+    .filter(d => d.getTime() > Date.now())
+    .sort((a, b) => a.getTime() - b.getTime())[0] ?? null
 
   const postMap = posts.reduce<Record<string, Post[]>>((acc, post) => {
     const key = getPostDateKey(post)
@@ -532,20 +654,27 @@ export default function CalendarPage() {
   // Day -> how many TikTok Studio posts, for the read-only badge in
   // CalendarDayCell. Not merged into postMap: those pills are draggable and
   // write straight to `posts`, which would silently no-op on a tiktok_posts id.
-  const tiktokCountByDay = tiktokScheduled.reduce<Record<string, number>>((acc, p) => {
-    const key = toDateKey(new Date(p.scheduled_at))
-    acc[key] = (acc[key] ?? 0) + 1
+  const tiktokByDay = tiktokPosts.reduce<Record<string, TiktokItem[]>>((acc, p) => {
+    const key = toDateKey(new Date(tiktokDate(p)))
+    if (!acc[key]) acc[key] = []
+    acc[key].push(p)
     return acc
   }, {})
+  Object.values(tiktokByDay).forEach(list =>
+    list.sort((a, b) => new Date(tiktokDate(a)).getTime() - new Date(tiktokDate(b)).getTime())
+  )
 
-  const days = buildCalendarDays(currentYear, currentMonth)
+  const days     = buildCalendarDays(currentYear, currentMonth)
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
   const prevMonth = () => {
+    if (view === 'week') { setWeekStart(w => addDays(w, -7)); return }
     setSelectedDay(null)
     if (currentMonth === 0) { setCurrentYear(y => y - 1); setCurrentMonth(11) }
     else setCurrentMonth(m => m - 1)
   }
   const nextMonth = () => {
+    if (view === 'week') { setWeekStart(w => addDays(w, 7)); return }
     setSelectedDay(null)
     if (currentMonth === 11) { setCurrentYear(y => y + 1); setCurrentMonth(0) }
     else setCurrentMonth(m => m + 1)
@@ -553,10 +682,25 @@ export default function CalendarPage() {
   const goToToday = () => {
     setCurrentYear(today.getFullYear())
     setCurrentMonth(today.getMonth())
+    setWeekStart(startOfWeek(today))
     setSelectedDay(todayKey)
   }
+  const goToNextBusy = () => {
+    if (!nextBusy) return
+    setCurrentYear(nextBusy.getFullYear())
+    setCurrentMonth(nextBusy.getMonth())
+    setWeekStart(startOfWeek(nextBusy))
+    setSelectedDay(toDateKey(nextBusy))
+  }
 
-  const selectedPosts = selectedDay ? (postMap[selectedDay] ?? []) : []
+  const weekEnd = addDays(weekStart, 6)
+  const navTitle = view === 'week'
+    ? `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: weekEnd.getMonth() === weekStart.getMonth() ? undefined : 'short', day: 'numeric' })}, ${weekEnd.getFullYear()}`
+    : `${MONTH_NAMES[currentMonth]} ${currentYear}`
+
+  const selectedPosts  = selectedDay ? (postMap[selectedDay] ?? []) : []
+  const selectedTiktok = selectedDay ? (tiktokByDay[selectedDay] ?? []) : []
+  const selectedCount  = selectedPosts.length + selectedTiktok.length
 
   return (
     <div className="min-h-dvh bg-theme flex">
@@ -570,6 +714,7 @@ export default function CalendarPage() {
       />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
+          <ScheduleTabs active="calendar" />
 
           {/* Header */}
           <div id="calendar-header" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -583,17 +728,13 @@ export default function CalendarPage() {
                 )}
               </h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
-                Monthly view of all your scheduled, published, and draft posts
+                Everything you&apos;ve scheduled, published and drafted. Drag a post to move it.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Link href="/compose"
                 className="text-xs font-bold px-4 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
                 + New Post
-              </Link>
-              <Link href="/queue"
-                className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                Queue
               </Link>
             </div>
           </div>
@@ -604,20 +745,28 @@ export default function CalendarPage() {
               <div className="flex items-center gap-3">
                 <button onClick={prevMonth}
                   className="w-9 h-9 rounded-xl border border-theme flex items-center justify-center text-sm font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                  aria-label="Previous month">
+                  aria-label={view === 'week' ? 'Previous week' : 'Previous month'}>
                   ‹
                 </button>
-                <h2 className="text-lg font-extrabold tracking-tight min-w-[160px] text-center">
-                  {MONTH_NAMES[currentMonth]} {currentYear}
+                <h2 className="text-base sm:text-lg font-extrabold tracking-tight min-w-[150px] text-center">
+                  {navTitle}
                 </h2>
                 <button onClick={nextMonth}
                   className="w-9 h-9 rounded-xl border border-theme flex items-center justify-center text-sm font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                  aria-label="Next month">
+                  aria-label={view === 'week' ? 'Next week' : 'Next month'}>
                   ›
                 </button>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="hidden sm:flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1" role="group" aria-label="Calendar view">
+                  {(['month', 'week'] as const).map(v => (
+                    <button key={v} onClick={() => chooseView(v)} aria-pressed={view === v}
+                      className={`text-xs font-bold px-2.5 py-1 rounded-lg capitalize transition-all ${view === v ? 'bg-white dark:bg-gray-950 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'}`}>
+                      {v}
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden lg:flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />{t('app_calendar.legend_scheduled')}
                   </span>
@@ -649,7 +798,8 @@ export default function CalendarPage() {
             onDragEnd={handleDragEnd}
           >
           <div id="calendar-grid" className="bg-surface border border-theme rounded-2xl overflow-hidden mb-4">
-          <div className="overflow-x-auto"><div className="min-w-[320px]">
+          <div className="overflow-x-auto"><div className={view === 'week' ? 'min-w-[640px]' : 'min-w-[320px]'}>
+            {view === 'month' && (
             <div className="grid grid-cols-7 border-b border-theme">
               {DAY_LABELS.map(day => (
                 <div key={day} className="py-2 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
@@ -658,8 +808,23 @@ export default function CalendarPage() {
                 </div>
               ))}
             </div>
+            )}
 
-            {loading ? (
+            {!loading && view === 'week' ? (
+              <div className="grid grid-cols-7">
+                {weekDays.map(day => (
+                  <WeekDayColumn
+                    key={toDateKey(day)}
+                    day={day}
+                    todayKey={todayKey}
+                    selectedDay={selectedDay}
+                    onSelectDay={key => setSelectedDay(selectedDay === key ? null : key)}
+                    dayPosts={postMap[toDateKey(day)] ?? []}
+                    dayTiktok={tiktokByDay[toDateKey(day)] ?? []}
+                  />
+                ))}
+              </div>
+            ) : loading ? (
               <div className="grid grid-cols-7">
                 {Array.from({ length: 42 }).map((_, i) => (
                   <div key={i} className="border-b border-r border-theme p-2 min-h-[80px]">
@@ -681,7 +846,7 @@ export default function CalendarPage() {
                     selectedDay={selectedDay}
                     onSelectDay={key => setSelectedDay(selectedDay === key ? null : key)}
                     dayPosts={postMap[toDateKey(day)] ?? []}
-                    tiktokCount={tiktokCountByDay[toDateKey(day)] ?? 0}
+                    tiktokCount={tiktokByDay[toDateKey(day)]?.length ?? 0}
                   />
                 ))}
               </div>
@@ -703,26 +868,28 @@ export default function CalendarPage() {
           </DndContext>
 
           {/* Empty state */}
-          {!loading && !monthHasPosts && (() => {
-            const nextMonth = posts.length > 0
-              ? (() => {
-                  const d = new Date(posts[0].scheduled_at || posts[0].created_at)
-                  return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`
-                })()
-              : null
+          {!loading && view === 'month' && !monthHasPosts && (() => {
+            const busyLabel = nextBusy ? `${MONTH_NAMES[nextBusy.getMonth()]} ${nextBusy.getFullYear()}` : null
             return (
               <div className="bg-surface border border-theme rounded-2xl p-10 text-center mb-4">
                 <CalendarDays className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                 <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">{t('app_calendar.no_posts')}</p>
                 <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
-                  {nextMonth
-                    ? `Your next scheduled posts are in ${nextMonth} — use the arrow to navigate there.`
-                    : 'Schedule your first post to see it appear here.'}
+                  {busyLabel
+                    ? `Your next scheduled post is in ${busyLabel}.`
+                    : posts.length > 0 || tiktokPosts.length > 0
+                      ? 'Nothing is scheduled ahead of today.'
+                      : 'Schedule your first post to see it appear here.'}
                 </p>
-                {!nextMonth && (
+                {busyLabel ? (
+                  <button onClick={goToNextBusy}
+                    className="inline-block text-sm font-bold px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
+                    Go to {busyLabel} →
+                  </button>
+                ) : (
                   <Link href="/compose"
                     className="inline-block text-sm font-bold px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
-                    Schedule your first post →
+                    Schedule a post →
                   </Link>
                 )}
               </div>
@@ -740,9 +907,9 @@ export default function CalendarPage() {
                     })}
                   </h3>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                    {selectedPosts.length === 0
+                    {selectedCount === 0
                       ? 'No posts on this day'
-                      : `${selectedPosts.length} post${selectedPosts.length !== 1 ? 's' : ''}`}
+                      : `${selectedCount} post${selectedCount !== 1 ? 's' : ''}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -758,7 +925,7 @@ export default function CalendarPage() {
                 </div>
               </div>
 
-              {selectedPosts.length === 0 ? (
+              {selectedCount === 0 ? (
                 <div className="text-center py-8">
                   <Sparkles className="w-7 h-7 mx-auto mb-2 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
                   <p className="text-sm text-gray-400 dark:text-gray-500">
@@ -769,7 +936,9 @@ export default function CalendarPage() {
                 <div className="space-y-3">
                   {selectedPosts.map(post => (
                     <div key={post.id}
-                      className="border border-theme rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-all">
+                      className={`border rounded-xl p-4 transition-all ${post.status === 'failed'
+                        ? 'border-red-300 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20'
+                        : 'border-theme hover:bg-gray-50 dark:hover:bg-gray-800/40'}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
@@ -852,13 +1021,47 @@ export default function CalendarPage() {
                       </div>
                     </div>
                   ))}
+                  {selectedTiktok.map(tp => (
+                    <div key={tp.id}
+                      className={`border rounded-xl p-4 transition-all ${tp.status === 'failed'
+                        ? 'border-red-300 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20'
+                        : 'border-theme'}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <PlatformGlyph id="tiktok" size={16} />
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400">TikTok Studio</span>
+                          </div>
+                          <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                            {(tp.post_caption || 'No caption').slice(0, 80)}{(tp.post_caption || '').length > 80 ? '…' : ''}
+                          </p>
+                          {isVideoFile(tp.video_url) && <VideoPeek src={tp.video_url} />}
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 inline-flex items-center gap-1">
+                            <Clock size={11} strokeWidth={2} /> {formatTime(tiktokDate(tp))}
+                          </p>
+                          {tp.status === 'failed' && tp.error_message && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-1.5 line-clamp-2">{tp.error_message}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[tp.status] ?? STATUS_BADGE.scheduled}`}>
+                            {tp.status === 'publishing' ? 'Sending' : tp.status}
+                          </span>
+                          <Link href={tp.status === 'scheduled' ? '/queue' : '/tiktok/studio'}
+                            className="text-xs font-semibold text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                            {tp.status === 'scheduled' ? 'View in Queue →' : 'Open Studio →'}
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           )}
 
           {/* Legend — mobile shows below calendar, desktop shows inline in header */}
-          <div className="flex sm:hidden items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 pb-4 flex-wrap">
+          <div className="flex lg:hidden items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 pb-4 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />{t('app_calendar.legend_scheduled')}
             </span>

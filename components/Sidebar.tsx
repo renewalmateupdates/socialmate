@@ -1,6 +1,7 @@
 'use client'
 import { SUPPORT_MAILTO } from '@/lib/contact'
 import { useEffect, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -11,6 +12,11 @@ import NotificationBell from '@/components/NotificationBell'
 import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
+import { track } from '@/lib/analytics'
+import SidebarCustomizer from '@/components/SidebarCustomizer'
+import SidebarGuide, { CUSTOMIZE_EVENT, GUIDE_OPEN_EVENT } from '@/components/SidebarGuide'
+import { SCHEDULE_TAB_KEY } from '@/components/ScheduleTabs'
+import { HelpCircle, LayoutGrid, Plus, SlidersHorizontal } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -41,6 +47,38 @@ const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
 const ORDER_KEY             = 'sidebar_section_order'
 const STATS_VIS_KEY         = 'sidebar_stats_visible'
 const DESKTOP_COLLAPSED_KEY = 'sidebar_desktop_collapsed'
+
+// The sidebar starts short (Joshua, Nov 13 2026: "my biggest fear is
+// overwhelming people"). These show until someone customizes it; every other
+// tool sits under "More tools", one click away. The chosen list is saved per
+// browser, and new tools added later land in More tools rather than growing
+// everyone's sidebar unasked.
+const SHOWN_KEY       = 'sidebar_shown_items'
+const ITEMS_EVENT     = 'sidebar-items-change'
+const ESSENTIAL_HREFS = ['/dashboard', '/compose', '/calendar', '/drafts', '/tiktok/studio', '/accounts', '/notifications', '/settings']
+
+function getStoredShown(): Set<string> {
+  if (typeof window === 'undefined') return new Set(ESSENTIAL_HREFS)
+  try {
+    const stored = JSON.parse(localStorage.getItem(SHOWN_KEY) || 'null')
+    if (Array.isArray(stored)) return new Set(stored.filter((x): x is string => typeof x === 'string'))
+  } catch {}
+  return new Set(ESSENTIAL_HREFS)
+}
+
+function saveShown(next: Set<string>) {
+  try {
+    localStorage.setItem(SHOWN_KEY, JSON.stringify(Array.from(next)))
+    window.dispatchEvent(new CustomEvent(ITEMS_EVENT))
+  } catch {}
+}
+
+/** The app area a path belongs to, for feature_opened (lib/analytics.ts). */
+function featureOf(pathname: string): string | null {
+  const first = pathname.split('/').filter(Boolean)[0]
+  if (!first || first === 'admin') return null
+  return first.slice(0, 40)
+}
 
 function getStoredCollapsed(): Record<string, boolean> {
   if (typeof window === 'undefined') return {}
@@ -124,22 +162,23 @@ const NAV_BASE = [
   {
     section: 'Content',
     items: [
+      // The everyday five first, then the rest A to Z. Calendar and Queue are
+      // one item, Schedule, with Calendar and List tabs (components/ScheduleTabs).
+      { label: 'Dashboard',      href: '/dashboard'      },
+      { label: 'Compose',        href: '/compose'        },
+      { label: 'Schedule',       href: '/calendar'       },
+      { label: 'Drafts',         href: '/drafts'         },
+      { label: 'TikTok Studio',  href: '/tiktok/studio'  },
       { label: 'Bulk Scheduler', href: '/bulk-scheduler' },
-      { label: 'Calendar',       href: '/calendar'       },
       { label: 'Campaigns',      href: '/campaigns'      },
       { label: 'Clips',          href: '/clips'          },
-      { label: 'Compose',        href: '/compose'        },
       { label: 'Creator Studio', href: '/create'         },
-      { label: 'Dashboard',      href: '/dashboard'      },
-      { label: 'Drafts',         href: '/drafts'         },
       { label: 'Go-Live Alerts', href: '/live-alerts'    },
       { label: 'Hashtags',       href: '/hashtag-collections' },
       { label: 'SIGIL',          href: '/link-in-bio'    },
       { label: 'Link Shortener', href: '/links'          },
       { label: 'Media Library',  href: '/media'          },
-      { label: 'Queue',          href: '/queue'          },
       { label: 'Templates',      href: '/templates'      },
-      { label: 'TikTok Studio',  href: '/tiktok/studio'  },
     ],
   },
   {
@@ -278,6 +317,41 @@ function SidebarContent({
   const router   = useRouter()
   const { t, locale, setLocale } = useI18n()
   const [langOpen, setLangOpen] = useState(false)
+  const [shown, setShown]               = useState<Set<string>>(() => new Set(ESSENTIAL_HREFS))
+  const [customizing, setCustomizing]   = useState(false)
+  const [scheduleHref, setScheduleHref] = useState('/calendar')
+  // Two copies of this component exist (mobile drawer, desktop rail); only the
+  // one on screen should open the customizer when the guide asks for it.
+  const isMobileInstance = !!onNavClick
+
+  useEffect(() => {
+    setShown(getStoredShown())
+    try {
+      const tab = localStorage.getItem(SCHEDULE_TAB_KEY)
+      if (tab === '/queue' || tab === '/calendar') setScheduleHref(tab)
+    } catch {}
+    const sync = () => setShown(getStoredShown())
+    const openCustomizer = () => {
+      const wide = window.matchMedia('(min-width: 768px)').matches
+      if (wide !== isMobileInstance) setCustomizing(true)
+    }
+    window.addEventListener(ITEMS_EVENT, sync)
+    window.addEventListener(CUSTOMIZE_EVENT, openCustomizer)
+    return () => {
+      window.removeEventListener(ITEMS_EVENT, sync)
+      window.removeEventListener(CUSTOMIZE_EVENT, openCustomizer)
+    }
+  }, [isMobileInstance])
+
+  const setItemShown = useCallback((href: string, on: boolean) => {
+    setShown(prev => {
+      const next = new Set(prev)
+      if (on) next.add(href)
+      else next.delete(href)
+      saveShown(next)
+      return next
+    })
+  }, [])
 
   const SECTION_LABELS: Record<string, string> = {
     Content:     t('app_sidebar.section_content'),
@@ -293,6 +367,7 @@ function SidebarContent({
     'ZENITH':         'ZENITH',
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
+    'Schedule':       'Schedule',
     'Campaigns':      'Campaigns',
     'Go-Live Alerts': 'Go-Live Alerts',
     'Clips':          t('app_sidebar.nav_clips'),
@@ -570,8 +645,69 @@ function SidebarContent({
 
   const isActive = (href: string) => {
     const base = href.split('?')[0]
+    // Schedule covers both of its tabs.
+    if (base === '/calendar' || base === '/queue') return pathname === '/calendar' || pathname === '/queue'
     return pathname === base || pathname === href
   }
+
+  // Where an item links: Schedule reopens the tab used last; the admin's
+  // Partners link goes straight to the admin portal.
+  const linkHref = (item: { href: string }) =>
+    item.href === '/calendar' ? scheduleHref : isAdminUser && item.href === '/partners' ? '/admin' : item.href
+
+  const NAV_SHOWN = NAV.map(g => ({ ...g, items: g.items.filter(i => shown.has(i.href)) })).filter(g => g.items.length > 0)
+  const NAV_MORE  = NAV.map(g => ({ ...g, items: g.items.filter(i => !shown.has(i.href)) })).filter(g => g.items.length > 0)
+  const moreCount     = NAV_MORE.reduce((n, g) => n + g.items.length, 0)
+  const moreHasActive = NAV_MORE.some(g => g.items.some(i => isActive(linkHref(i))))
+  const moreOpen      = !!collapsed.__more || moreHasActive
+
+  const showEverything = () => {
+    const all = new Set(NAV.flatMap(g => g.items.map(i => i.href)))
+    setShown(all)
+    saveShown(all)
+  }
+  const backToShortList = () => {
+    try { localStorage.removeItem(SHOWN_KEY) } catch {}
+    setShown(new Set(ESSENTIAL_HREFS))
+    try { window.dispatchEvent(new CustomEvent(ITEMS_EVENT)) } catch {}
+  }
+
+  const languageMenu = (placement: 'down' | 'up') => (
+    <div className="relative">
+      <button
+        onClick={() => setLangOpen(p => !p)}
+        className="flex items-center justify-center w-7 h-7 rounded-lg text-sm transition-all hover:opacity-70"
+        style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}
+        title="Change language"
+        aria-label="Change language"
+      >
+        {SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'}
+      </button>
+      {langOpen && (
+        <div
+          className={`absolute right-0 w-36 rounded-xl overflow-hidden shadow-xl z-50 ${placement === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}
+          style={{ background: 'var(--surface)', border: '1px solid var(--sidebar-border)' }}
+        >
+          {SUPPORTED_LOCALES.map(loc => (
+            <button
+              key={loc.code}
+              onClick={() => { setLocale(loc.code); setLangOpen(false) }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all hover:opacity-70 text-left"
+              style={{
+                color: loc.code === locale ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                fontWeight: loc.code === locale ? '700' : '400',
+                background: loc.code === locale ? 'var(--sidebar-active)' : 'transparent',
+              }}
+            >
+              <span>{loc.flag}</span>
+              <span>{loc.label}</span>
+              {loc.code === locale && <Check size={13} strokeWidth={2.5} className="ml-auto" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <div
@@ -597,45 +733,21 @@ function SidebarContent({
 
           {!isIconOnly && (
             <div className="flex items-center gap-1 flex-shrink-0">
+              {/* Header holds the bell and the collapse arrow only. Language
+                  moved to the bottom by Sign out, the plan badge into the
+                  workspace button (Nov 13, 2026: "the top looks weird"). */}
               <NotificationBell />
-              {/* Language button — compact globe in header */}
-              <div className="relative">
+              {onToggleDesktop && (
                 <button
-                  onClick={() => setLangOpen(p => !p)}
-                  className="flex items-center justify-center w-7 h-7 rounded-lg text-sm transition-all hover:opacity-70"
-                  style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}
-                  title="Change language"
+                  onClick={onToggleDesktop}
+                  className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg transition-all hover:opacity-70"
+                  style={{ color: 'var(--sidebar-faint)' }}
+                  title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
                 >
-                  {SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'}
+                  <ChevronLeft className="w-4 h-4" strokeWidth={2} />
                 </button>
-                {langOpen && (
-                  <div
-                    className="absolute top-full right-0 mt-1 w-36 rounded-xl overflow-hidden shadow-xl z-50"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--sidebar-border)' }}
-                  >
-                    {SUPPORTED_LOCALES.map(loc => (
-                      <button
-                        key={loc.code}
-                        onClick={() => { setLocale(loc.code); setLangOpen(false) }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all hover:opacity-70 text-left"
-                        style={{
-                          color: loc.code === locale ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
-                          fontWeight: loc.code === locale ? '700' : '400',
-                          background: loc.code === locale ? 'var(--sidebar-active)' : 'transparent',
-                        }}
-                      >
-                        <span>{loc.flag}</span>
-                        <span>{loc.label}</span>
-                        {loc.code === locale && <Check size={13} strokeWidth={2.5} className="ml-auto" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"
-                style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}>
-                {badge.label}
-              </span>
+              )}
             </div>
           )}
 
@@ -677,10 +789,10 @@ function SidebarContent({
         </div>
 
         {/* Desktop collapse toggle — desktop only */}
-        {onToggleDesktop && (
+        {onToggleDesktop && isIconOnly && (
           <button
             onClick={onToggleDesktop}
-            className={`hidden md:flex items-center justify-center rounded-lg transition-all hover:opacity-70 ${isIconOnly ? 'w-10 h-8 mx-auto mt-1' : 'w-full h-7 mt-2'}`}
+            className="hidden md:flex items-center justify-center rounded-lg transition-all hover:opacity-70 w-10 h-8 mx-auto mt-1"
             style={{
               background: 'var(--sidebar-active)',
               color: 'var(--sidebar-faint)',
@@ -710,7 +822,11 @@ function SidebarContent({
                     : activeWorkspace?.name || 'My Workspace'}
                 </span>
               </div>
-              <span className="flex-shrink-0 ml-1" style={{ color: 'var(--sidebar-faint)' }}>
+              <span className="flex items-center gap-1.5 flex-shrink-0 ml-1" style={{ color: 'var(--sidebar-faint)' }}>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                  style={{ background: 'var(--sidebar-border)', color: 'var(--sidebar-muted)' }}>
+                  {badge.label}
+                </span>
                 {wsOpen ? <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} /> : <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />}
               </span>
             </button>
@@ -847,8 +963,8 @@ function SidebarContent({
         {isIconOnly ? (
           /* Icon-only mode: flat list of all nav icons with native title tooltips */
           <div className="space-y-0.5">
-            {NAV.flatMap(group => group.items).map(item => {
-              const href   = isAdminUser && item.href === '/partners' ? '/admin' : item.href
+            {NAV_SHOWN.flatMap(group => group.items).map(item => {
+              const href   = linkHref(item)
               const active = isActive(href)
               return (
                 <Link
@@ -870,11 +986,23 @@ function SidebarContent({
                 </Link>
               )
             })}
+            {moreCount > 0 && (
+              <button
+                onClick={() => { onToggleDesktop?.(); if (!collapsed.__more) toggleSection('__more') }}
+                title={`More tools (${moreCount})`}
+                aria-label="More tools"
+                className="flex items-center justify-center w-10 h-10 mx-auto rounded-lg transition-all hover:opacity-70"
+                style={{ color: 'var(--sidebar-muted)' }}
+              >
+                <LayoutGrid className="w-[18px] h-[18px]" strokeWidth={1.75} />
+              </button>
+            )}
           </div>
         ) : (
+          <>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-              {NAV.map((group, gi) => {
+            <SortableContext items={NAV_SHOWN.map(g => g.section)} strategy={verticalListSortingStrategy}>
+              {NAV_SHOWN.map((group, gi) => {
                 const isCollapsed = !!collapsed[group.section]
                 return (
                   <div key={group.section}>
@@ -886,8 +1014,7 @@ function SidebarContent({
                       showBorder={gi > 0}
                     />
                     {!isCollapsed && group.items.map(item => {
-                      // Admin: Partners link goes directly to the admin portal
-                      const href   = isAdminUser && item.href === '/partners' ? '/admin' : item.href
+                      const href   = linkHref(item)
                       const active = isActive(href)
                       return (
                         <Link key={item.label} href={href}
@@ -914,7 +1041,7 @@ function SidebarContent({
                               'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                             }`}>{credits}</span>
                           )}
-                          {item.href === '/queue' && scheduledCount > 0 && (
+                          {item.href === '/calendar' && scheduledCount > 0 && (
                             <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
                               {scheduledCount}
                             </span>
@@ -937,6 +1064,82 @@ function SidebarContent({
               })}
             </SortableContext>
           </DndContext>
+
+          {/* MORE TOOLS: everything not in the sidebar, one click away */}
+          <div className="pt-2 mt-2" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
+            {moreCount > 0 && (
+              <button
+                onClick={() => toggleSection('__more')}
+                aria-expanded={moreOpen}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                style={{ color: 'var(--sidebar-muted)' }}
+              >
+                <LayoutGrid className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+                <span className="flex-1 text-left">More tools</span>
+                <span className="text-[10px] font-bold" style={{ color: 'var(--sidebar-faint)' }}>{moreCount}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+              </button>
+            )}
+            {moreCount > 0 && moreOpen && (
+              <div className="pb-1">
+                {NAV_MORE.map(group => (
+                  <div key={group.section}>
+                    <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--sidebar-faint)' }}>
+                      {SECTION_LABELS[group.section] ?? group.section}
+                    </div>
+                    {group.items.map(item => {
+                      const href   = linkHref(item)
+                      const active = isActive(href)
+                      const Icon   = NAV_ICONS[item.href] ?? Circle
+                      const label  = NAV_LABEL[item.label] ?? item.label
+                      return (
+                        <div key={item.href} className="flex items-center group/more">
+                          <Link href={href}
+                            onClick={onNavClick}
+                            {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                            className="flex-1 min-w-0 flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                            style={{
+                              background: active ? 'var(--sidebar-active)' : 'transparent',
+                              color:      active ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                              fontWeight: active ? '700' : '500',
+                            }}>
+                            <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+                            <span className="truncate">{label}</span>
+                          </Link>
+                          <button
+                            onClick={() => setItemShown(item.href, true)}
+                            title={`Add ${label} to your sidebar`}
+                            aria-label={`Add ${label} to your sidebar`}
+                            className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-md opacity-50 group-hover/more:opacity-100 focus:opacity-100 transition-opacity hover:bg-[var(--sidebar-active)]"
+                            style={{ color: 'var(--sidebar-muted)' }}
+                          >
+                            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setCustomizing(true)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+              style={{ color: 'var(--sidebar-faint)' }}
+            >
+              <SlidersHorizontal className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+              Customize sidebar
+            </button>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent(GUIDE_OPEN_EVENT))}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+              style={{ color: 'var(--sidebar-faint)' }}
+            >
+              <HelpCircle className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+              Quick guide
+            </button>
+          </div>
+          </>
         )}
       </nav>
 
@@ -1092,13 +1295,34 @@ function SidebarContent({
 
           <div className="px-1 pt-1">
             <div className="text-xs truncate mb-1" style={{ color: 'var(--sidebar-faint)' }}>{user?.email}</div>
-            <button onClick={handleSignOut}
-              className="text-xs transition-all hover:opacity-70"
-              style={{ color: 'var(--sidebar-muted)' }}>
-              Sign out
-            </button>
+            <div className="flex items-center justify-between gap-2">
+              <button onClick={handleSignOut}
+                className="text-xs transition-all hover:opacity-70"
+                style={{ color: 'var(--sidebar-muted)' }}>
+                Sign out
+              </button>
+              {languageMenu('up')}
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Portaled to <body>: the mobile drawer is transformed, which would pin a
+          fixed-position modal to the drawer instead of the screen. */}
+      {customizing && typeof document !== 'undefined' && createPortal(
+        <SidebarCustomizer
+          groups={NAV.map(g => ({
+            section: g.section,
+            label:   SECTION_LABELS[g.section] ?? g.section,
+            items:   g.items.map(i => ({ href: i.href, label: NAV_LABEL[i.label] ?? i.label })),
+          }))}
+          shown={shown}
+          onChange={setItemShown}
+          onShowAll={showEverything}
+          onReset={backToShortList}
+          onClose={() => setCustomizing(false)}
+        />,
+        document.body,
       )}
     </div>
   )
@@ -1118,6 +1342,21 @@ export default function Sidebar() {
     } catch {}
   }, [])
 
+  // Which app areas people open, for /admin/usage. At most once per person,
+  // area and day, so a busy afternoon in the Queue is one row, not fifty.
+  const pathname = usePathname()
+  useEffect(() => {
+    const feature = featureOf(pathname || '')
+    if (!feature) return
+    const key   = `sm_feat_${feature}`
+    const today = new Date().toDateString()
+    try {
+      if (localStorage.getItem(key) === today) return
+      localStorage.setItem(key, today)
+    } catch { return }
+    track('feature_opened', { feature })
+  }, [pathname])
+
   const toggleDesktop = useCallback(() => {
     setDesktopCollapsed(prev => {
       const next = !prev
@@ -1132,6 +1371,7 @@ export default function Sidebar() {
   return (
     <>
       <ComposeShortcut />
+      <SidebarGuide />
 
       {/* Mobile hamburger button — safe-area-inset aware, min 44×44px touch target for iOS */}
       <button

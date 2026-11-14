@@ -3,7 +3,7 @@
 // Queue, Calendar and Drafts use this instead of querying `posts` from the
 // browser, which RLS limits to the viewer's own rows.
 
-export type PostsView = 'queue' | 'partial' | 'calendar' | 'drafts' | 'one'
+export type PostsView = 'queue' | 'partial' | 'failed' | 'calendar' | 'drafts' | 'one'
 
 /** Extra fields the API adds: whether the viewer wrote the post, and may change it. */
 export type TeamPostFields = { mine?: boolean; can_manage?: boolean }

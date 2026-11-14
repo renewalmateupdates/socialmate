@@ -47,6 +47,12 @@ export async function GET() {
       .select('user_id, platform_errors, status')
       .in('status', ['failed', 'partial'])
       .gte('updated_at', since))),
+    // App areas opened (lib/analytics.ts 'feature_opened', once per person,
+    // area and day). Started Nov 13, 2026.
+    selectAll<EventRow>('usage_events (feature_opened)', () => oldestFirst(db.from('usage_events')
+      .select('user_id, metadata')
+      .eq('event_type', 'funnel_feature_opened')
+      .gte('created_at', since))),
     db.from('feedback')
       .select('id', { count: 'exact', head: true })
       .gte('created_at', since)
@@ -59,7 +65,7 @@ export async function GET() {
     console.error('[admin/usage]', loaded.message)
     return NextResponse.json({ error: loaded.message }, { status: 500 })
   }
-  const [users, allAi, allAgents, allFailed, feedback] = loaded
+  const [users, allAi, allAgents, allFailed, allFeatures, feedback] = loaded
 
   const internalIds = internalIdsOf(users)
   internalIds.add(user.id)
@@ -106,8 +112,14 @@ export async function GET() {
     }
   }
 
+  // Each row is one person opening one area on one day, so `runs` reads as
+  // "person-days" and `users` as distinct people.
+  const features = tally(theirs(allFeatures), 'feature').map(({ tool, runs, users }) => ({ feature: tool, days: runs, users }))
+    .sort((a, b) => b.users - a.users || b.days - a.days)
+
   return NextResponse.json({
     windowDays: WINDOW_DAYS,
+    features,
     aiTools:    tally(aiEvents, 'tool'),
     agents:     tally(agentEvents, 'agent'),
     totals: {
