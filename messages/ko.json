@@ -797,7 +797,10 @@
     "x_booster_none": "남은 수량 없음",
     "x_booster_posts": "X 부스터 게시물",
     "x_connect": "계정을 연결하면 예약할 수 있습니다",
-    "x_live": "X / Twitter 사용 가능 —"
+    "x_live": "X / Twitter 사용 가능 —",
+    "tiktok_first_title": "TikTok이 연결되었습니다. 첫 동영상을 올려 보세요.",
+    "tiktok_first_body": "TikTok Studio에서 동영상을 추가하고 캡션을 쓴 다음, 바로 올리거나 시간을 정하세요.",
+    "tiktok_first_cta": "TikTok Studio 열기"
   },
   "app_queue": {
     "title": "큐",

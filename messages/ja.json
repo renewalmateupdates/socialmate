@@ -797,7 +797,10 @@
     "x_booster_none": "残りなし",
     "x_booster_posts": "X ブースター投稿",
     "x_connect": "アカウントを接続して投稿を予約",
-    "x_live": "X / Twitter が利用可能です —"
+    "x_live": "X / Twitter が利用可能です —",
+    "tiktok_first_title": "TikTokが接続されました。最初の動画を投稿しましょう。",
+    "tiktok_first_body": "TikTok Studioで動画を追加し、キャプションを書いて、今すぐ投稿するか時間を選びましょう。",
+    "tiktok_first_cta": "TikTok Studioを開く"
   },
   "app_queue": {
     "title": "キュー",

@@ -797,7 +797,10 @@
     "x_booster_none": "Nenhuma restante",
     "x_booster_posts": "Publicações X Booster",
     "x_connect": "conecte sua conta para agendar publicações",
-    "x_live": "X / Twitter está no ar —"
+    "x_live": "X / Twitter está no ar —",
+    "tiktok_first_title": "Seu TikTok está conectado. Publique seu primeiro vídeo.",
+    "tiktok_first_body": "Adicione um vídeo no TikTok Studio, escreva uma legenda e publique agora ou escolha um horário.",
+    "tiktok_first_cta": "Abrir o TikTok Studio"
   },
   "app_queue": {
     "title": "Fila",

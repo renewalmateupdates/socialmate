@@ -797,7 +797,10 @@
     "x_booster_none": "已用完",
     "x_booster_posts": "X Booster 帖子数",
     "x_connect": "连接账号即可排程发布",
-    "x_live": "X / Twitter 已上线 —"
+    "x_live": "X / Twitter 已上线 —",
+    "tiktok_first_title": "你的 TikTok 已连接。发布你的第一个视频吧。",
+    "tiktok_first_body": "在 TikTok Studio 中添加视频、写好文案，然后立即发布或选择时间。",
+    "tiktok_first_cta": "打开 TikTok Studio"
   },
   "app_queue": {
     "title": "队列",

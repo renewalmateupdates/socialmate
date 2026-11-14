@@ -797,7 +797,10 @@
     "x_booster_none": "Keine mehr übrig",
     "x_booster_posts": "X-Booster-Beiträge",
     "x_connect": "verbinde dein Konto, um Beiträge zu planen",
-    "x_live": "X / Twitter ist live —"
+    "x_live": "X / Twitter ist live —",
+    "tiktok_first_title": "Dein TikTok ist verbunden. Poste dein erstes Video.",
+    "tiktok_first_body": "Füge in TikTok Studio ein Video hinzu, schreib eine Beschreibung und poste es sofort oder wähle eine Uhrzeit.",
+    "tiktok_first_cta": "TikTok Studio öffnen"
   },
   "app_queue": {
     "title": "Warteschlange",

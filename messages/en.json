@@ -797,7 +797,10 @@
     "x_booster_none": "None remaining",
     "x_booster_posts": "X Booster posts",
     "x_connect": "connect your account to schedule posts",
-    "x_live": "X / Twitter is live —"
+    "x_live": "X / Twitter is live —",
+    "tiktok_first_title": "Your TikTok is connected. Post your first video.",
+    "tiktok_first_body": "Add a video in TikTok Studio, write a caption, then post it now or pick a time.",
+    "tiktok_first_cta": "Open TikTok Studio"
   },
   "app_queue": {
     "title": "Queue",
