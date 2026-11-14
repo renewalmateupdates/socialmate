@@ -1,4 +1,4 @@
-import { AtSign, Bold, Clock, Hash, Link2, MessagesSquare, type LucideIcon } from 'lucide-react'
+import { AtSign, Bold, Clock, Crop, Hash, Link2, MessagesSquare, Quote, type LucideIcon } from 'lucide-react'
 
 // Every free tool, once: the /tools index, the "More free tools" strip on each
 // tool page and the sitemap all read this list, so a new tool is added in one
@@ -23,6 +23,18 @@ export const FREE_TOOLS: FreeTool[] = [
     icon: MessagesSquare,
     name: 'Thread splitter',
     blurb: 'Turn long text into a numbered thread that fits X, Bluesky or Mastodon, counted the way each platform counts.',
+  },
+  {
+    href: '/tools/quote-card',
+    icon: Quote,
+    name: 'Quote card maker',
+    blurb: 'Turn a quote into a clean image card sized for X, LinkedIn, Bluesky, Discord, TikTok, Pinterest or a square post.',
+  },
+  {
+    href: '/tools/image-resizer',
+    icon: Crop,
+    name: 'Image resizer',
+    blurb: 'One picture, cropped or fitted for every platform at once. Drag to move each crop. Nothing is uploaded.',
   },
   {
     href: '/tools/discord-timestamp',

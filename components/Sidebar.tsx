@@ -32,7 +32,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, Clock, CreditCard, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, Megaphone, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Radar, Radio, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Bell, Bot, Building2, Calendar, CalendarClock, CalendarDays, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, CircleCheck, Clapperboard, CreditCard, Crop, Crown, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, GripVertical, Handshake, Hash, Heart, Home, Images, Inbox, LayoutDashboard, Link2, ListOrdered, LogOut, Mail, Map, Megaphone, MapPin, Menu, MessageCircle, MessagesSquare, Music2, Package, PenLine, Plug, Puzzle, Quote, Radar, Radio, Recycle, Rocket, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, X as CloseIcon, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // "Alex's workspace" for a personal workspace shared with you; a shared client
@@ -113,6 +113,8 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   '/dashboard': LayoutDashboard,
   '/drafts': FolderOpen,
   '/hashtag-collections': Hash,
+  '/tools/image-resizer': Crop,
+  '/tools/quote-card': Quote,
   '/link-in-bio': Link2,
   '/links': Scissors,
   '/media': Images,
@@ -175,9 +177,13 @@ const NAV_BASE = [
       { label: 'Creator Studio', href: '/create'         },
       { label: 'Go-Live Alerts', href: '/live-alerts'    },
       { label: 'Hashtags',       href: '/hashtag-collections' },
+      // The two image tools are the free public pages, open to signed-out
+      // visitors too; signed in, they sit under More tools like any new item.
+      { label: 'Image Resizer',  href: '/tools/image-resizer' },
       { label: 'SIGIL',          href: '/link-in-bio'    },
       { label: 'Link Shortener', href: '/links'          },
       { label: 'Media Library',  href: '/media'          },
+      { label: 'Quote Cards',    href: '/tools/quote-card' },
       { label: 'Templates',      href: '/templates'      },
     ],
   },
@@ -376,6 +382,8 @@ function SidebarContent({
     'Dashboard':      t('app_sidebar.nav_dashboard'),
     'Drafts':         t('app_sidebar.nav_drafts'),
     'Hashtags':       t('app_sidebar.nav_hashtags'),
+    'Image Resizer':  t('app_sidebar.nav_image_resizer'),
+    'Quote Cards':    t('app_sidebar.nav_quote_cards'),
     // Plain name in the sidebar; the page itself is still SIGIL.
     'SIGIL':          t('app_sidebar.nav_link_in_bio'),
     'Link Shortener': t('app_sidebar.nav_link_shortener'),

@@ -50,9 +50,23 @@ const UTM: RelatedTool = {
   pitch: 'Tag one link for every platform you post to, so your analytics show which post sent each visit. Free, no signup.',
 }
 
+const IMAGE_RESIZER: RelatedTool = {
+  href: '/tools/image-resizer',
+  name: 'Image resizer',
+  pitch: 'Crop or fit one picture for X, LinkedIn, Bluesky, Discord, TikTok and more at once. Runs in your browser, nothing uploaded.',
+}
+
+const QUOTE_CARD: RelatedTool = {
+  href: '/tools/quote-card',
+  name: 'Quote card maker',
+  pitch: 'Turn a quote into a clean image card at every platform size. Free, no signup.',
+}
+
 export function relatedToolFor(post: { slug: string; title: string }): RelatedTool | null {
   const text = `${post.slug.replace(/-/g, ' ')} ${post.title}`.toLowerCase()
   if (/\bbluesky\b/.test(text) && /\b(custom domain|domain|handle|verif)/.test(text)) return BLUESKY_DOMAIN
+  if (/\bquote (cards?|graphics?|images?)\b/.test(text)) return QUOTE_CARD
+  if (/\b(image|photo|picture|thumbnail|banner|cover) (sizes?|dimensions?)\b|\bresiz(e|ing)\b/.test(text)) return IMAGE_RESIZER
   if (/\bcharacter (limit|count)s?\b|\bhow long\b|\blength\b/.test(text)) return CHARACTER_COUNTER
   if (/\bdiscord\b/.test(text)) return DISCORD
   if (/\blinkedin\b/.test(text)) return LINKEDIN

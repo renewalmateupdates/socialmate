@@ -21,6 +21,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 13, 2026',
+    version: 'Free Image Tools',
+    changes: [
+      { type: 'New', text: 'A free quote card maker at /tools/quote-card: type a quote, add a name or handle, pick one of three styles in dark, light or gold, and download a PNG sized for X, LinkedIn, Bluesky, Discord, a YouTube thumbnail, a TikTok cover, a Pinterest pin or a square post.' },
+      { type: 'New', text: 'A free image resizer at /tools/image-resizer: choose one picture and see it at all eight sizes at once, drag to move each crop or fit the whole picture on a blurred, dark or white background, and download the ones you need. Your picture never leaves your browser.' },
+      { type: 'New', text: 'Use in a post, on both tools, opens Compose with the image attached. Signed in, it is there straight away; after signing up, Compose offers it the first time you open it.' },
+    ],
+  },
+  {
     date: 'November 5, 2026',
     version: 'From Free Tool to First Post',
     changes: [
