@@ -367,7 +367,7 @@ function SidebarContent({
     'ZENITH':         'ZENITH',
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
-    'Schedule':       'Schedule',
+    'Schedule':       t('app_sidebar.nav_schedule'),
     'Campaigns':      'Campaigns',
     'Go-Live Alerts': 'Go-Live Alerts',
     'Clips':          t('app_sidebar.nav_clips'),
@@ -376,7 +376,8 @@ function SidebarContent({
     'Dashboard':      t('app_sidebar.nav_dashboard'),
     'Drafts':         t('app_sidebar.nav_drafts'),
     'Hashtags':       t('app_sidebar.nav_hashtags'),
-    'SIGIL':          'SIGIL',
+    // Plain name in the sidebar; the page itself is still SIGIL.
+    'SIGIL':          t('app_sidebar.nav_link_in_bio'),
     'Link Shortener': t('app_sidebar.nav_link_shortener'),
     'Media Library':  t('app_sidebar.nav_media_library'),
     'Queue':          t('app_sidebar.nav_queue'),
@@ -415,6 +416,25 @@ function SidebarContent({
     'Search':         t('app_sidebar.nav_search'),
     'Settings':       t('app_sidebar.nav_settings'),
   }
+
+  // Brand names keep their name and gain a plain word beside it, so someone
+  // new can tell what SOMA or HERMES is without opening it (Nov 13, 2026).
+  const NAV_SUBTITLE: Record<string, string> = {
+    'SOMA':     t('app_sidebar.sub_soma'),
+    'HERMES':   t('app_sidebar.sub_hermes'),
+    'HESTIA':   t('app_sidebar.sub_hestia'),
+    'ZENITH':   t('app_sidebar.sub_zenith'),
+    'SM-Pulse': t('app_sidebar.sub_pulse'),
+    'SM-Radar': t('app_sidebar.sub_radar'),
+  }
+  const fullLabel = (label: string) => {
+    const name = NAV_LABEL[label] ?? label
+    return NAV_SUBTITLE[label] ? `${name} · ${NAV_SUBTITLE[label]}` : name
+  }
+  const subtitleOf = (label: string) =>
+    NAV_SUBTITLE[label]
+      ? <span className="text-[10px] font-medium truncate" style={{ color: 'var(--sidebar-faint)' }}>{NAV_SUBTITLE[label]}</span>
+      : null
 
   const isIconOnly = !!desktopCollapsed
 
@@ -972,7 +992,7 @@ function SidebarContent({
                   href={href}
                   onClick={onNavClick}
                   {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  title={NAV_LABEL[item.label] ?? item.label}
+                  title={fullLabel(item.label)}
                   className="flex items-center justify-center w-10 h-10 mx-auto rounded-lg text-base transition-all"
                   style={{
                     background: active ? 'var(--sidebar-active)' : 'transparent',
@@ -1030,8 +1050,9 @@ function SidebarContent({
                           }}>
                           {(() => { const Icon = NAV_ICONS[item.href] ?? Circle
                             return <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} /> })()}
-                          <span className="flex-1 flex items-center gap-1">
+                          <span className="flex-1 min-w-0 flex items-center gap-1.5">
                             {NAV_LABEL[item.label] ?? item.label}
+                            {subtitleOf(item.label)}
                             {isAdminUser && item.href === '/partners' && <Crown className="w-3 h-3 flex-shrink-0" strokeWidth={2} />}
                           </span>
                           {item.href === '/ai-features' && !loading && (
@@ -1075,7 +1096,7 @@ function SidebarContent({
                 style={{ color: 'var(--sidebar-muted)' }}
               >
                 <LayoutGrid className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
-                <span className="flex-1 text-left">More tools</span>
+                <span className="flex-1 text-left">{t('app_sidebar.more_tools')}</span>
                 <span className="text-[10px] font-bold" style={{ color: 'var(--sidebar-faint)' }}>{moreCount}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
               </button>
@@ -1105,6 +1126,7 @@ function SidebarContent({
                             }}>
                             <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
                             <span className="truncate">{label}</span>
+                            {subtitleOf(item.label)}
                           </Link>
                           <button
                             onClick={() => setItemShown(item.href, true)}
@@ -1128,7 +1150,7 @@ function SidebarContent({
               style={{ color: 'var(--sidebar-faint)' }}
             >
               <SlidersHorizontal className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
-              Customize sidebar
+              {t('app_sidebar.customize_sidebar')}
             </button>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent(GUIDE_OPEN_EVENT))}
@@ -1136,7 +1158,7 @@ function SidebarContent({
               style={{ color: 'var(--sidebar-faint)' }}
             >
               <HelpCircle className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
-              Quick guide
+              {t('app_sidebar.quick_guide')}
             </button>
           </div>
           </>
@@ -1314,7 +1336,7 @@ function SidebarContent({
           groups={NAV.map(g => ({
             section: g.section,
             label:   SECTION_LABELS[g.section] ?? g.section,
-            items:   g.items.map(i => ({ href: i.href, label: NAV_LABEL[i.label] ?? i.label })),
+            items:   g.items.map(i => ({ href: i.href, label: fullLabel(i.label) })),
           }))}
           shown={shown}
           onChange={setItemShown}

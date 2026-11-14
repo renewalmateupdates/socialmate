@@ -554,7 +554,17 @@
     "section_insights": "Аналитика",
     "section_grow": "Рост",
     "section_manage": "Управление",
-    "section_account": "Аккаунт"
+    "section_account": "Аккаунт",
+    "nav_schedule": "Расписание",
+    "more_tools": "Другие инструменты",
+    "customize_sidebar": "Настроить боковую панель",
+    "quick_guide": "Краткое руководство",
+    "sub_soma": "Автопилот",
+    "sub_hermes": "Привлечение клиентов",
+    "sub_hestia": "Сообщество",
+    "sub_zenith": "Карточка автора",
+    "sub_pulse": "Тренды",
+    "sub_radar": "Анализ ниши"
   },
   "app_common": {
     "save": "Сохранить",

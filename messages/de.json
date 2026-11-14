@@ -554,7 +554,17 @@
     "section_insights": "Einblicke",
     "section_grow": "Wachsen",
     "section_manage": "Verwalten",
-    "section_account": "Konto"
+    "section_account": "Konto",
+    "nav_schedule": "Planung",
+    "more_tools": "Weitere Tools",
+    "customize_sidebar": "Seitenleiste anpassen",
+    "quick_guide": "Kurzanleitung",
+    "sub_soma": "Autopilot",
+    "sub_hermes": "Akquise",
+    "sub_hestia": "Community",
+    "sub_zenith": "Creator-Karte",
+    "sub_pulse": "Trends",
+    "sub_radar": "Nischenanalyse"
   },
   "app_common": {
     "save": "Speichern",

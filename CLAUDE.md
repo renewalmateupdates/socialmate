@@ -455,17 +455,33 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 13, 2026).** #786 through #792 are merged. Branch
-`feat/queue-calendar-sidebar-nov13` holds batches 1 and 2 of the Nov 13 product
-plan: Queue and Calendar rebuilt (range picker, collapsible days, red Failed
-section, TikTok posts in the day lists, week view, Calendar opens on today),
-webhooks delivered with `after()` and sent by Post Now too, `feature_opened`
-tracking read on `/admin/usage`, Terms and Privacy at 18+ (and Privacy now
-discloses Google Analytics, which the site loads), and a short sidebar: Schedule
-(Calendar and List tabs), More tools, Customize, a one-time guide. HereNow's own
-list is in its CLAUDE.md.
+**Pick up here (updated Nov 13, 2026, evening).** #786 through #793 are merged.
+#793 (batches 1 and 2) rebuilt Queue and Calendar (range picker, collapsible
+days, red Failed section, TikTok posts in the day lists, week view, Calendar
+opens on today), delivered webhooks with `after()` and from Post Now too, added
+`feature_opened` tracking read on `/admin/usage`, put Terms and Privacy at 18+
+(Privacy now discloses Google Analytics, which the site loads), and made the
+sidebar short: Schedule (Calendar and List tabs), More tools, Customize, a
+one-time guide. Branch `feat/compose-modes-bulk-csv-nov13` is batch 3: Compose
+Simple and Full modes (`sm_compose_mode`; a draft already using a Full-only
+tool opens in Full), one "Write with AI" menu, One post / Bulk tabs
+(`components/ComposeTabs.tsx`), CSV import and a CSV template on Bulk
+(`lib/bulk-csv.ts`, tested), plain subtitles beside SOMA, HERMES, HESTIA,
+ZENITH, SM-Pulse and SM-Radar, SIGIL shown as "Link in bio", and the new
+sidebar strings in all nine locale files. HereNow's own list is in its
+CLAUDE.md.
 
-*Claude, after that branch deploys:*
+*Claude, after the batch 3 branch deploys:*
+- Compose signed in: Simple hides threads, polls, A/B, tags, hashtag sets, Post
+  Score, repeats and templates; Full shows them; opening a draft with a poll or
+  tags shows Full. Write with AI opens and each tool still works.
+- Bulk: import the downloaded template, then a sheet saved from Google Sheets
+  (M/D/YYYY dates, 12-hour times); a bad row arrives red and saves once fixed.
+- Still English: the Quick guide and Customize sidebar dialogs' body text.
+- Batch 4 (homepage demo video with chapters, real screenshots, per-platform
+  how-to videos) waits on Joshua's screen recordings: sessions can't sign in.
+
+*Claude, after #793 deployed (Joshua walks these signed in):*
 - Walk Schedule signed in: Calendar opens on today; Week view; a TikTok Studio
   post shows in the day panel; List keeps its range after a reload; a failed
   post shows red with Retry; each summary card opens its details.
@@ -474,10 +490,6 @@ list is in its CLAUDE.md.
 - Webhooks: one Post Now and one scheduled post each reach a test endpoint with
   `X-SocialMate-Signature`.
 - `/admin/usage` "App areas" fills in from the first day after deploy.
-- Next, batch 3 (after promo week, Nov 19): Compose simple and full modes, one
-  "Write with AI" menu, Bulk Scheduler as a Compose mode with CSV, plain
-  subtitles beside brand names in the sidebar (SIGIL becomes "Link in bio"), and
-  the new sidebar strings moved into the nine locale files.
 
 *Claude, after a deploy or when asked:*
 - Test the free-tool path once (#771): in a private window write a post in

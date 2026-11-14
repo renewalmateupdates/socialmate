@@ -554,7 +554,17 @@
     "section_insights": "Insights",
     "section_grow": "Crescer",
     "section_manage": "Gerenciar",
-    "section_account": "Conta"
+    "section_account": "Conta",
+    "nav_schedule": "Agenda",
+    "more_tools": "Mais ferramentas",
+    "customize_sidebar": "Personalizar barra lateral",
+    "quick_guide": "Guia rápido",
+    "sub_soma": "Piloto automático",
+    "sub_hermes": "Prospecção",
+    "sub_hestia": "Comunidade",
+    "sub_zenith": "Cartão de criador",
+    "sub_pulse": "Tendências",
+    "sub_radar": "Pesquisa de nicho"
   },
   "app_common": {
     "save": "Salvar",
