@@ -469,7 +469,11 @@ tool opens in Full), one "Write with AI" menu, One post / Bulk tabs
 (`lib/bulk-csv.ts`, tested), plain subtitles beside SOMA, HERMES, HESTIA,
 ZENITH, SM-Pulse and SM-Radar, SIGIL shown as "Link in bio", and the new
 sidebar strings in all nine locale files. HereNow's own list is in its
-CLAUDE.md.
+CLAUDE.md. Branch `claude/photo-tools-becee7` adds two free image tools,
+`/tools/quote-card` and `/tools/image-resizer` (canvas only, nothing uploaded;
+size math in `lib/tools/image-sizes.ts`, tested), listed in the tools catalog
+and under More tools, with "Use in a post" handing the image to Compose
+through IndexedDB (`lib/tool-image.ts`, `/start?from=tool-image`).
 
 *Claude, after the batch 3 branch deploys:*
 - Compose signed in: Simple hides threads, polls, A/B, tags, hashtag sets, Post
@@ -480,6 +484,9 @@ CLAUDE.md.
 - Still English: the Quick guide and Customize sidebar dialogs' body text.
 - Batch 4 (homepage demo video with chapters, real screenshots, per-platform
   how-to videos) waits on Joshua's screen recordings: sessions can't sign in.
+- Image tools, signed in: "Use in a post" on each tool lands in Compose with
+  the image uploaded and attached; on an iPhone, download saves the file. Then
+  `node scripts/indexnow-submit.mjs` for the two new `/tools` pages.
 
 *Claude, after #793 deployed (Joshua walks these signed in):*
 - Walk Schedule signed in: Calendar opens on today; Week view; a TikTok Studio

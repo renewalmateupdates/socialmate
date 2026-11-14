@@ -64,6 +64,7 @@ function SignupForm() {
   // "Schedule this post" sends people here with redirect=/compose?from=tool).
   const loginHref = redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'
   const fromTool = searchParams.get('from') === 'tool'
+  const fromToolImage = searchParams.get('from') === 'tool-image'
   // Derived directly from the URL rather than mirrored into state via an
   // effect — useSearchParams() already resolves synchronously on the first
   // render (server and client agree, since both know the request URL), so
@@ -225,7 +226,9 @@ function SignupForm() {
       headline="Create your account"
       sub={fromTool
         ? 'Your post is saved in this browser and opens as your first post. Free plan, no card, about a minute.'
-        : 'Free plan, no card, about a minute.'}
+        : fromToolImage
+          ? 'Your image is saved in this browser and waits for you in Compose. Free plan, no card, about a minute.'
+          : 'Free plan, no card, about a minute.'}
       altHref={loginHref}
       altLabel="Sign in"
       asideNote={<SignupPerks />}

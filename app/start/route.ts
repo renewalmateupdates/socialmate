@@ -11,12 +11,17 @@ export const dynamic = 'force-dynamic'
  * this browser. Not signed in: to signup, after which onboarding's first-post
  * step uses the same post (new accounts always go through onboarding).
  *
+ * /start?from=tool-image is the image tools' "Use in a post" (lib/tool-image.ts):
+ * the same two paths, and Compose attaches the image the tool kept in this
+ * browser. After a signup it waits there until the person opens Compose.
+ *
  * The public pages skip the auth round trip (see proxy.ts), so this one
  * small route does it, only when someone clicks.
  */
 export async function GET(request: NextRequest) {
-  const from = request.nextUrl.searchParams.get('from') === 'tool' ? 'tool' : null
-  const compose = from ? '/compose?from=tool' : '/compose'
+  const param = request.nextUrl.searchParams.get('from')
+  const from = param === 'tool' || param === 'tool-image' ? param : null
+  const compose = from ? `/compose?from=${from}` : '/compose'
 
   let signedIn = false
   try {
@@ -35,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   const target = signedIn
     ? compose
-    : `/signup?redirect=${encodeURIComponent(compose)}${from ? '&from=tool' : ''}`
+    : `/signup?redirect=${encodeURIComponent(compose)}${from ? `&from=${from}` : ''}`
   const res = NextResponse.redirect(new URL(target, request.url))
   res.headers.set('Cache-Control', 'no-store')
   res.headers.set('X-Robots-Tag', 'noindex')

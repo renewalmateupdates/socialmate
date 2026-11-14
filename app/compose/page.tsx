@@ -20,6 +20,7 @@ import ComposeTabs from '@/components/ComposeTabs'
 import { HASHTAGS_COST, REPURPOSE_COST } from '@/lib/ai-tool-costs'
 import { loadWorkspacePosts } from '@/lib/workspace-posts'
 import { readToolDraft, TOOL_LABELS } from '@/lib/tool-draft'
+import { clearToolImage, readToolImage, IMAGE_TOOL_LABELS, type ToolImageMeta } from '@/lib/tool-image'
 import { uploadMediaFile } from '@/lib/media-upload'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
@@ -325,6 +326,12 @@ function ComposeInner() {
   // File object.
   const [externalMediaUrls, setExternalMediaUrls] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // An image made in a free image tool (/tools/quote-card, /tools/image-resizer)
+  // and kept in this browser by its "Use in a post" button (lib/tool-image.ts).
+  // Attached straight away when that button brought the person here; otherwise
+  // (say, after a signup detour through onboarding) Compose asks first.
+  const [toolImage, setToolImage] = useState<{ file: File; meta: ToolImageMeta; preview: string } | null>(null)
+  const toolImageChecked = useRef(false)
 
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
@@ -1565,11 +1572,16 @@ function ComposeInner() {
     const files = Array.from(e.target.files || [])
     if (!files.length) return
     e.target.value = '' // reset so same file can be reselected
+    await attachFiles(files)
+  }
 
+  /** Uploads and attaches files; returns how many made it. Used by the file picker and the tool image. */
+  const attachFiles = async (files: File[]): Promise<number> => {
     const MAX_FILES = 4
     const slots     = MAX_FILES - mediaItems.length
-    if (slots <= 0) return
+    if (slots <= 0) return 0
     const toAdd = files.slice(0, slots)
+    let attached = 0
 
     for (const file of toAdd) {
       const type    = file.type.startsWith('video/') ? 'video' : 'image'
@@ -1582,6 +1594,7 @@ function ComposeInner() {
       // POST through a function refused anything over 4.5 MB.
       const result = await uploadMediaFile(file)
       if (result.ok) {
+        attached++
         setMediaItems(prev => prev.map(m =>
           m.preview === preview && m.file === file
             ? { ...m, url: result.url, uploading: false }
@@ -1593,7 +1606,41 @@ function ComposeInner() {
         if (preview) URL.revokeObjectURL(preview)
       }
     }
+    return attached
   }
+
+  // The tool image: attached on "Use in a post", offered otherwise. Cleared
+  // from the browser only once it is uploaded, or when the person discards it.
+  const attachToolImage = async (found: { file: File; meta: ToolImageMeta }, how: 'auto' | 'asked') => {
+    setToolImage(null)
+    const attached = await attachFiles([found.file])
+    if (attached > 0) {
+      await clearToolImage()
+      setTemplateBanner(`Your image from the free ${IMAGE_TOOL_LABELS[found.meta.tool]} is attached. Add your words, then pick where it goes and when.`)
+      track('tool_draft_used', { tool: found.meta.tool, where: 'compose', kind: 'image', how })
+    } else {
+      setToolImage({ ...found, preview: URL.createObjectURL(found.file) })
+    }
+  }
+
+  const discardToolImage = async () => {
+    setToolImage(null)
+    await clearToolImage()
+  }
+
+  useEffect(() => {
+    if (toolImageChecked.current) return
+    toolImageChecked.current = true
+    const fromButton = searchParams.get('from') === 'tool-image'
+    readToolImage().then(found => {
+      if (!found) return
+      if (fromButton) attachToolImage(found, 'auto')
+      else setToolImage({ ...found, preview: URL.createObjectURL(found.file) })
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- once per visit; the image waits in the browser, not the URL
+
+  // Let go of the offered image's preview when it is attached or discarded.
+  useEffect(() => () => { if (toolImage?.preview) URL.revokeObjectURL(toolImage.preview) }, [toolImage])
 
   const removeMediaItem = (preview: string, file: File) => {
     setMediaItems(prev => {
@@ -1724,6 +1771,31 @@ function ComposeInner() {
                 Active workspace: <span className="font-extrabold">{activeWorkspace.client_name || activeWorkspace.name}</span>
                 {' '}— posts will be scoped to this client.
               </p>
+            </div>
+          )}
+
+          {toolImage && (
+            <div className="mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 flex flex-wrap items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL */}
+              <img src={toolImage.preview} alt="" className="w-11 h-11 rounded-lg object-cover flex-shrink-0 border border-amber-200 dark:border-amber-800" />
+              <p className="flex-1 min-w-[180px] text-xs font-semibold text-amber-800 dark:text-amber-300">
+                You made an image in the free {IMAGE_TOOL_LABELS[toolImage.meta.tool]}. Attach it to this post?
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => attachToolImage(toolImage, 'asked')}
+                  disabled={mediaItems.length >= 4}
+                  className="min-h-[44px] px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors disabled:opacity-40">
+                  Attach
+                </button>
+                <button
+                  type="button"
+                  onClick={discardToolImage}
+                  className="min-h-[44px] px-3 rounded-xl text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors">
+                  Discard
+                </button>
+              </div>
             </div>
           )}
 

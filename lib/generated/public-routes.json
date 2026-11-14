@@ -262,8 +262,16 @@
       "lastModified": "2026-11-03"
     },
     {
+      "path": "/tools/image-resizer",
+      "lastModified": "2026-11-13"
+    },
+    {
       "path": "/tools/linkedin-formatter",
       "lastModified": "2026-11-03"
+    },
+    {
+      "path": "/tools/quote-card",
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/tools/thread-splitter",

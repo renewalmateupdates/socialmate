@@ -76,6 +76,8 @@ const TOOL_NOTES: Record<string, string> = {
   '/tools/linkedin-formatter': 'bold and italic text and clean lists for LinkedIn, with a preview of where "see more" cuts in',
   '/tools/utm-builder': 'tags a link with UTM parameters, one link per platform in one step',
   '/tools/bluesky-custom-domain': 'gives the DNS record to use your own domain as a Bluesky handle and checks whether it is live',
+  '/tools/quote-card': 'turns a quote into a PNG image card at X, LinkedIn, Bluesky, Discord, YouTube thumbnail, TikTok cover, Pinterest and square sizes, drawn in the browser',
+  '/tools/image-resizer': 'crops or fits one picture to X, LinkedIn, Bluesky, Discord, YouTube thumbnail, TikTok cover, Pinterest and square sizes in the browser; nothing is uploaded',
 }
 
 function titleCase(slug: string): string {
