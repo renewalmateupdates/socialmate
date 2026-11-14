@@ -20,7 +20,9 @@ import { CSS } from '@dnd-kit/utilities'
 import PostImageExporter from '@/components/PostImageExporter'
 import UnsplashCredit from '@/components/UnsplashCredit'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import { AlertTriangle, CalendarClock, CalendarRange, Camera, CheckCircle2, Globe, Heart, Layers, Lock, Megaphone, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
+import VideoPeek from '@/components/VideoPeek'
+import ScheduleTabs from '@/components/ScheduleTabs'
+import { AlertTriangle, CalendarClock, CalendarRange, Camera, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Globe, Heart, Layers, Lock, Megaphone, MessageCircle, Recycle, Repeat, XCircle, Zap } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -101,6 +103,41 @@ function dateParamToDateString(param: string): string | null {
   return d.toDateString()
 }
 
+function startOfDay(d: Date): Date {
+  const x = new Date(d)
+  x.setHours(0, 0, 0, 0)
+  return x
+}
+
+function addDays(d: Date, n: number): Date {
+  const x = new Date(d)
+  x.setDate(x.getDate() + n)
+  return x
+}
+
+// The Queue shows one window of time at a time, so a busy week no longer
+// buries the posts after it. The choice is remembered in this browser.
+const RANGE_OPTIONS = [
+  { key: '7',   label: 'Week',    days: 7 },
+  { key: '14',  label: '2 weeks', days: 14 },
+  { key: '30',  label: 'Month',   days: 30 },
+  { key: 'all', label: 'All',     days: 0 },
+] as const
+type RangeKey = typeof RANGE_OPTIONS[number]['key']
+const RANGE_STORAGE_KEY    = 'sm_queue_range'
+const SECTIONS_STORAGE_KEY = 'sm_queue_closed_sections'
+
+function readStorage(key: string): string | null {
+  try { return localStorage.getItem(key) } catch { return null }
+}
+function writeStorage(key: string, value: string) {
+  try { localStorage.setItem(key, value) } catch { /* private mode: not remembered */ }
+}
+
+function shortDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle, isSelected, onToggleSelect, onDuplicate, duplicating }: {
   post: any
   isHighlighted: boolean
@@ -162,10 +199,19 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
 
         <div className="flex-1 min-w-0">
           {post.scheduled_at && (
-            <div className="mb-2">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+            <div className="mb-2 flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full">
                 {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
               </span>
+              {/* Still scheduled, but the last attempt failed and the publisher
+                  will try again. Without this it looked like any other post. */}
+              {post.platform_errors && Object.keys(post.platform_errors).length > 0 && (
+                <span
+                  title={Object.entries(post.platform_errors as Record<string, string>).map(([p, e]) => `${PLATFORM_NAMES[p] ?? p}: ${e}`).join('\n')}
+                  className="text-xs font-bold text-red-700 bg-red-50 dark:bg-red-900/30 dark:text-red-300 px-2 py-0.5 rounded-full cursor-help">
+                  Last try failed, retrying
+                </span>
+              )}
             </div>
           )}
           <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-2">
@@ -321,9 +367,6 @@ const PLATFORM_FILTER_LABELS: Record<string, string> = {
   linkedin: 'LinkedIn',
 }
 
-const STATUS_OPTIONS = ['scheduled', 'draft', 'published', 'failed'] as const
-type StatusOption = typeof STATUS_OPTIONS[number]
-
 function QueueInner() {
   const [posts, setPosts]               = useState<any[]>([])
   const [partialPosts, setPartialPosts] = useState<any[]>([])
@@ -333,6 +376,13 @@ function QueueInner() {
   // the generic scheduled-post pipeline, which has no 'tiktok' case).
   const [tiktokScheduled, setTiktokScheduled] = useState<any[]>([])
   const [cancellingTiktok, setCancellingTiktok] = useState<string | null>(null)
+  const [failedPosts, setFailedPosts]   = useState<any[]>([])
+  // Range, window and collapsed sections (see RANGE_OPTIONS)
+  const [range, setRange]               = useState<RangeKey>('14')
+  const [windowStart, setWindowStart]   = useState<Date>(() => startOfDay(new Date()))
+  const [windowMoved, setWindowMoved]   = useState(false)
+  const [collapsed, setCollapsed]       = useState<Record<string, boolean>>({})
+  const [openStat, setOpenStat]         = useState<null | 'scheduled' | 'days' | 'platforms'>(null)
   const [loading, setLoading]           = useState(true)
   const [cancelling, setCancelling]     = useState<string | null>(null)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
@@ -346,7 +396,6 @@ function QueueInner() {
   // Search + platform/status filters
   const [searchQuery, setSearchQuery]       = useState<string>('')
   const [platformFilter, setPlatformFilter] = useState<string>('all')
-  const [statusFilter, setStatusFilter]     = useState<string>('all')
   // Bulk reschedule
   const [showRescheduleBar, setShowRescheduleBar] = useState(false)
   const [rescheduleOffset, setRescheduleOffset]   = useState<number>(1)
@@ -382,16 +431,18 @@ function QueueInner() {
         showToast(data.error || 'Retry failed', 'error')
       } else {
         showToast(data.status === 'published' ? 'All platforms published!' : 'Partially retried — check results', 'success')
-        // Remove from partial list if fully published, otherwise update
-        if (data.status === 'published') {
-          setPartialPosts(prev => prev.filter(p => p.id !== postId))
-        } else {
-          // Re-fetch updated post to show refreshed breakdown
-          const [updated] = await loadWorkspacePosts('one', activeWorkspace?.id, postId).catch(() => [])
-          if (updated) {
-            setPartialPosts(prev => prev.map(p => p.id === postId ? updated : p))
+        // A retried post can move between the Failed and Partial lists, or leave both.
+        const [updated] = data.status === 'published'
+          ? [null]
+          : await loadWorkspacePosts('one', activeWorkspace?.id, postId).catch(() => [])
+        const place = (list: any[], status: string) => {
+          if (updated && updated.status === status) {
+            return list.some(p => p.id === postId) ? list.map(p => p.id === postId ? updated : p) : [updated, ...list]
           }
+          return list.filter(p => p.id !== postId)
         }
+        setFailedPosts(prev => place(prev, 'failed'))
+        setPartialPosts(prev => place(prev, 'partial'))
       }
     } catch {
       showToast('Network error — try again', 'error')
@@ -435,6 +486,7 @@ function QueueInner() {
         showToast(d.error || 'Could not cancel that post', 'error')
       } else {
         setTiktokScheduled(prev => prev.filter(p => p.id !== id))
+        setConfirmCancel(null)
         showToast('Scheduled TikTok post cancelled', 'success')
       }
     } catch {
@@ -494,12 +546,17 @@ function QueueInner() {
       // Through the API, so an owner sees what their team scheduled too
       // (lib/workspace-posts.ts). RLS hides other authors' rows from the browser.
       try {
-        const [queued, partial] = await Promise.all([
+        const [queued, partial, failed] = await Promise.all([
           loadWorkspacePosts('queue', activeWorkspace.id),
           loadWorkspacePosts('partial', activeWorkspace.id),
+          loadWorkspacePosts('failed', activeWorkspace.id).catch(err => {
+            console.warn('[queue] failed-posts load failed:', err)
+            return []
+          }),
         ])
         setPosts(queued)
         setPartialPosts(partial)
+        setFailedPosts(failed)
       } catch (err) {
         console.warn('[queue] load failed:', err)
         showToast('Could not load your queue. Refresh to try again.', 'error')
@@ -516,7 +573,8 @@ function QueueInner() {
       if (!activeWorkspace.is_personal) {
         tiktokQuery = tiktokQuery.eq('workspace_id', activeWorkspace.id)
       }
-      const { data: tiktokData } = await tiktokQuery
+      const { data: tiktokData, error: tiktokError } = await tiktokQuery
+      if (tiktokError) console.warn('[queue] tiktok_posts load failed:', tiktokError.message)
       setTiktokScheduled(tiktokData || [])
 
       // Fetch draft count for auto-schedule button
@@ -526,6 +584,56 @@ function QueueInner() {
     }
     load()
   }, [router, activeWorkspace?.id])
+
+  // The remembered range and closed sections. Read after mount, not in the
+  // useState initializers, so the server render and the first client render match.
+  useEffect(() => {
+    const saved = readStorage(RANGE_STORAGE_KEY)
+    if (saved && RANGE_OPTIONS.some(r => r.key === saved)) setRange(saved as RangeKey)
+    try {
+      const closed = JSON.parse(readStorage(SECTIONS_STORAGE_KEY) || '[]')
+      if (Array.isArray(closed)) setCollapsed(Object.fromEntries(closed.map((k: string) => [k, true])))
+    } catch { /* ignore a malformed value */ }
+  }, [])
+
+  // Open on the window that holds the next posts: today's, or, when that one
+  // is empty, the one starting on the day of the next scheduled post. A date
+  // from the Calendar (?date=) wins. Stops once the viewer moves the window.
+  useEffect(() => {
+    if (loading || windowMoved) return
+    const today  = startOfDay(new Date())
+    const target = targetDate ? new Date(targetDate + 'T12:00:00') : null
+    if (target && !isNaN(target.getTime())) { setWindowStart(startOfDay(target)); return }
+    const days = RANGE_OPTIONS.find(r => r.key === range)?.days ?? 0
+    if (!days) { setWindowStart(today); return }
+    const end   = addDays(today, days).getTime()
+    const times = [...posts, ...tiktokScheduled]
+      .map(p => p.scheduled_at ? new Date(p.scheduled_at).getTime() : NaN)
+      .filter(t => !isNaN(t) && t >= today.getTime())
+    if (times.length === 0 || times.some(t => t < end)) { setWindowStart(today); return }
+    setWindowStart(startOfDay(new Date(Math.min(...times))))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, range, windowMoved, targetDate, posts.length, tiktokScheduled.length])
+
+  const chooseRange = (key: RangeKey) => {
+    setRange(key)
+    setWindowMoved(false)
+    writeStorage(RANGE_STORAGE_KEY, key)
+  }
+
+  // Days collapse for this visit; the Failed and Partial sections stay how
+  // the viewer left them.
+  const toggleCollapsed = (key: string, remember = false) => {
+    setCollapsed(prev => {
+      const next = { ...prev, [key]: !prev[key] }
+      if (remember) {
+        writeStorage(SECTIONS_STORAGE_KEY, JSON.stringify(
+          ['failed', 'partial'].filter(k => next[k])
+        ))
+      }
+      return next
+    })
+  }
 
   // Auto-scroll to target date after posts load
   useEffect(() => {
@@ -576,7 +684,8 @@ function QueueInner() {
     })
   }
 
-  const selectAll = () => setSelectedIds(new Set(posts.map(p => p.id)))
+  // What's on screen: the range and filters decide, not the whole queue.
+  const selectAll = () => setSelectedIds(new Set(filteredPosts.map(p => p.id)))
   const clearSelection = () => setSelectedIds(new Set())
 
   const selectDay = (dateKey: string) => {
@@ -706,35 +815,88 @@ function QueueInner() {
   const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))) as string[]
 
   // Determine if any filter is active
-  const hasActiveFilter = searchQuery.trim() !== '' || platformFilter !== 'all' || statusFilter !== 'all' || tagFilter !== 'all'
+  const hasActiveFilter = searchQuery.trim() !== '' || platformFilter !== 'all' || tagFilter !== 'all'
+  const hasAnything     = posts.length + tiktokScheduled.length > 0
 
-  // Filter posts by search, platform, status, and tag before grouping
+  // The window on screen (RANGE_OPTIONS). "All" has no end.
+  const rangeDays = RANGE_OPTIONS.find(r => r.key === range)?.days ?? 0
+  const windowEnd = rangeDays ? addDays(windowStart, rangeDays) : null
+  const inWindow  = (iso: string | null | undefined) => {
+    if (!iso || !windowEnd) return true
+    const t = new Date(iso).getTime()
+    return t >= windowStart.getTime() && t < windowEnd.getTime()
+  }
+  const shiftWindow = (dir: 1 | -1) => {
+    if (!rangeDays) return
+    setWindowMoved(true)
+    setWindowStart(prev => {
+      const next  = addDays(prev, dir * rangeDays)
+      const today = startOfDay(new Date())
+      return next < today ? today : next
+    })
+  }
+  const atFirstWindow = windowStart.getTime() <= startOfDay(new Date()).getTime()
+
+  // Filter posts by window, search, platform and tag before grouping
+  const query = searchQuery.trim().toLowerCase()
   const filteredPosts = posts.filter(p => {
+    if (!inWindow(p.scheduled_at)) return false
     if (tagFilter !== 'all' && !(p.tags || []).includes(tagFilter)) return false
     if (platformFilter !== 'all' && !(p.platforms || []).includes(platformFilter)) return false
-    if (statusFilter !== 'all' && p.status !== statusFilter) return false
-    if (searchQuery.trim() !== '') {
-      const q = searchQuery.trim().toLowerCase()
-      if (!(p.content || '').toLowerCase().includes(q)) return false
-    }
+    if (query && !(p.content || '').toLowerCase().includes(query)) return false
     return true
   })
 
+  // TikTok Studio posts join their day in the list, read-only (they live in
+  // tiktok_posts, and drag and bulk actions here write to `posts`).
+  const filteredTiktok = tiktokScheduled.filter(tp => {
+    if (!inWindow(tp.scheduled_at)) return false
+    if (tagFilter !== 'all') return false
+    if (platformFilter !== 'all' && platformFilter !== 'tiktok') return false
+    if (query && !(tp.post_caption || '').toLowerCase().includes(query)) return false
+    return true
+  })
+  const tiktokByDay = groupByDate(filteredTiktok)
+
   const grouped  = groupByDate(filteredPosts)
-  const dateKeys = Object.keys(grouped).sort((a, b) => {
+  const dateKeys = Array.from(new Set([...Object.keys(grouped), ...Object.keys(tiktokByDay)])).sort((a, b) => {
     if (a === 'Unscheduled') return 1
     if (b === 'Unscheduled') return -1
     return new Date(a).getTime() - new Date(b).getTime()
   })
 
   const daysWithPosts     = dateKeys.filter(k => k !== 'Unscheduled').length
+  const visibleCount      = filteredPosts.length + filteredTiktok.length
   const targetDateString  = targetDate ? dateParamToDateString(targetDate) : null
+
+  // Everything queued, for the header line (not just this window).
+  const allDayCount = new Set(
+    [...posts, ...tiktokScheduled].filter(p => p.scheduled_at).map(p => new Date(p.scheduled_at).toDateString())
+  ).size
+
+  // Summary card details
+  const platformCounts: Record<string, number> = {}
+  filteredPosts.forEach(p => (p.platforms || []).forEach((pl: string) => { platformCounts[pl] = (platformCounts[pl] ?? 0) + 1 }))
+  if (filteredTiktok.length) platformCounts.tiktok = (platformCounts.tiktok ?? 0) + filteredTiktok.length
+  const nextUp = [
+    ...filteredPosts.map(p => ({ id: p.id, at: p.scheduled_at as string, text: p.content as string, platforms: (p.platforms || []) as string[] })),
+    ...filteredTiktok.map(tp => ({ id: tp.id, at: tp.scheduled_at as string, text: tp.post_caption as string, platforms: ['tiktok'] })),
+  ].filter(x => x.at).sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()).slice(0, 6)
+
+  const openDay = (dateKey: string) => {
+    setCollapsed(prev => ({ ...prev, [dateKey]: false }))
+    setTimeout(() => sectionRefs.current[dateKey]?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+  }
+  const allDaysClosed = dateKeys.length > 0 && dateKeys.every(k => collapsed[k])
+  const setAllDays = (closed: boolean) =>
+    setCollapsed(prev => ({ ...prev, ...Object.fromEntries(dateKeys.map(k => [k, closed])) }))
 
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
+          <ScheduleTabs active="list" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
@@ -742,13 +904,9 @@ function QueueInner() {
               <div className="flex items-center gap-3 mt-0.5">
                 <p className="text-sm text-gray-400">
                   {loading ? 'Loading...' : (() => {
-                    // Counts only `posts`, so a workspace with nothing but TikTok
-                    // Studio posts (their own table, see tiktokScheduled above)
-                    // read "0 posts scheduled" directly above a list showing them.
-                    // "days" still counts `posts` only — folding in TikTok's dates
-                    // needs its own day-grouping, not just a bigger number here.
+                    // Both tables: `posts` and TikTok Studio's tiktok_posts.
                     const total = posts.length + tiktokScheduled.length
-                    return `${total} post${total !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`
+                    return `${total} post${total !== 1 ? 's' : ''} scheduled${allDayCount > 0 ? ` across ${allDayCount} day${allDayCount !== 1 ? 's' : ''}` : ''}`
                   })()}
                   {activeWorkspace && !activeWorkspace.is_personal && (
                     <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
@@ -828,8 +986,52 @@ function QueueInner() {
             </div>
           </div>
 
+          {/* Range: which stretch of time the list shows */}
+          {!loading && hasAnything && (
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1" role="group" aria-label="Date range">
+                {RANGE_OPTIONS.map(r => (
+                  <button
+                    key={r.key}
+                    onClick={() => chooseRange(r.key)}
+                    aria-pressed={range === r.key}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${range === r.key ? 'bg-white dark:bg-gray-950 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'}`}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+              {windowEnd && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => shiftWindow(-1)}
+                    disabled={atFirstWindow}
+                    aria-label="Earlier"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-theme text-gray-500 hover:border-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                    <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+                  </button>
+                  <span className="text-xs font-bold text-gray-600 dark:text-gray-300 px-1 tabular-nums">
+                    {shortDate(windowStart)} - {shortDate(addDays(windowEnd, -1))}
+                  </span>
+                  <button
+                    onClick={() => shiftWindow(1)}
+                    aria-label="Later"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-theme text-gray-500 hover:border-gray-400 transition-all">
+                    <ChevronRight className="w-4 h-4" strokeWidth={2} />
+                  </button>
+                </div>
+              )}
+              {dateKeys.length > 1 && (
+                <button
+                  onClick={() => setAllDays(!allDaysClosed)}
+                  className="ml-auto text-xs font-semibold text-gray-400 hover:text-amber-500 transition-colors">
+                  {allDaysClosed ? 'Expand all days' : 'Collapse all days'}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Search input */}
-          {!loading && posts.length > 0 && (
+          {!loading && hasAnything && (
             <div className="mb-3">
               <div className="relative">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-3.5 h-3.5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
@@ -852,16 +1054,15 @@ function QueueInner() {
               </div>
               {searchQuery.trim() && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 pl-1">
-                  {filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''} for &ldquo;{searchQuery.trim()}&rdquo;
+                  {visibleCount} result{visibleCount !== 1 ? 's' : ''} for &ldquo;{searchQuery.trim()}&rdquo;
                 </p>
               )}
             </div>
           )}
 
-          {/* Platform + Status filters */}
-          {!loading && posts.length > 0 && (
+          {/* Platform filter */}
+          {!loading && hasAnything && (
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              {/* Platform filter */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   onClick={() => setPlatformFilter('all')}
@@ -870,6 +1071,7 @@ function QueueInner() {
                 </button>
                 {LIVE_PLATFORMS.map(p => {
                   const hasThisPlatform = posts.some(post => (post.platforms || []).includes(p))
+                    || (p === 'tiktok' && tiktokScheduled.length > 0)
                   if (!hasThisPlatform) return null
                   return (
                     <button
@@ -881,26 +1083,12 @@ function QueueInner() {
                   )
                 })}
               </div>
-              {/* Status filter */}
-              <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
-              <div className="flex items-center gap-1.5 flex-wrap">
+              {/* The status filter that sat here only ever matched "scheduled":
+                  this list holds scheduled posts, and failed ones have their own
+                  red section below. */}
+              {hasActiveFilter && (
                 <button
-                  onClick={() => setStatusFilter('all')}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${statusFilter === 'all' ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
-                  All
-                </button>
-                {STATUS_OPTIONS.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setStatusFilter(statusFilter === s ? 'all' : s as StatusOption)}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all capitalize ${statusFilter === s ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-              {hasActiveFilter && (platformFilter !== 'all' || statusFilter !== 'all') && (
-                <button
-                  onClick={() => { setPlatformFilter('all'); setStatusFilter('all') }}
+                  onClick={() => { setPlatformFilter('all'); setTagFilter('all'); setSearchQuery('') }}
                   className="text-xs font-semibold text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-1">
                   Clear filters
                 </button>
@@ -1011,20 +1199,6 @@ function QueueInner() {
             </div>
           )}
 
-          {/* X / Twitter callout banner */}
-          <Link href="/compose?platform=twitter"
-            className="flex items-center justify-between gap-3 mb-4 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900 rounded-2xl px-5 py-3 hover:border-sky-300 dark:hover:border-sky-700 transition-all group">
-            <div className="flex items-center gap-2.5">
-              <PlatformGlyph id="twitter" size={18} className="text-sky-700 dark:text-sky-400" />
-              <p className="text-xs font-semibold text-sky-700 dark:text-sky-400">
-                <span className="font-extrabold">New: Post to X</span> — schedule tweets alongside your other platforms
-              </p>
-            </div>
-            <span className="text-xs font-bold text-sky-500 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 flex-shrink-0 hidden sm:block">
-              Schedule a tweet →
-            </span>
-          </Link>
-
           {targetDate && targetDateString && (
             <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
               <CalendarClock className="w-4 h-4 text-blue-500 flex-shrink-0" strokeWidth={1.75} />
@@ -1039,20 +1213,87 @@ function QueueInner() {
             </div>
           )}
 
+          {/* Failed posts: the last 30 days, in red, with Retry */}
+          {!loading && failedPosts.length > 0 && (
+            <div className="mb-6 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-2xl p-4">
+              <button
+                onClick={() => toggleCollapsed('failed', true)}
+                aria-expanded={!collapsed.failed}
+                className={`w-full flex items-center gap-2 text-left ${collapsed.failed ? '' : 'mb-3'}`}>
+                <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" strokeWidth={2} />
+                <span className="text-xs font-extrabold text-red-800 dark:text-red-300 uppercase tracking-widest">
+                  Failed ({failedPosts.length})
+                </span>
+                <span className="flex-1 h-px bg-red-200 dark:bg-red-900" />
+                <ChevronDown className={`w-4 h-4 text-red-400 transition-transform ${collapsed.failed ? '-rotate-90' : ''}`} strokeWidth={2} />
+              </button>
+              {!collapsed.failed && (
+                <div className="space-y-3">
+                  {failedPosts.map(post => {
+                    const firstError = Object.values((post.platform_errors ?? {}) as Record<string, string>)[0]
+                    return (
+                      <div key={post.id} className="bg-white dark:bg-gray-900/60 border border-red-200 dark:border-red-900 rounded-xl p-3">
+                        <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2 mb-2">
+                          {post.content || <span className="italic text-gray-300 dark:text-gray-600">No content</span>}
+                        </p>
+                        <PartialBreakdown post={post} />
+                        {firstError && (
+                          <p className="text-[11px] text-red-600 dark:text-red-400 mt-2 line-clamp-2" title={firstError}>
+                            {firstError}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                            {post.scheduled_at || post.created_at
+                              ? new Date(post.scheduled_at || post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                              : ''}
+                          </span>
+                          <div className="flex items-center gap-3">
+                            {post.can_manage !== false && (
+                              <button
+                                onClick={() => handleRetry(post.id)}
+                                disabled={retrying === post.id}
+                                className="text-[10px] font-bold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 transition-colors flex items-center gap-1 disabled:opacity-50 min-h-[32px]">
+                                {retrying === post.id
+                                  ? <><div className="w-2.5 h-2.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />Retrying...</>
+                                  : 'Retry →'}
+                              </button>
+                            )}
+                            <Link href="/drafts"
+                              className="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                              View →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Partial posts — recent posts that partially failed */}
           {!loading && partialPosts.length > 0 && (
             <div className="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" strokeWidth={2} />
-                <p className="text-xs font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-widest">
-                  Partial publishes ({partialPosts.length})
-                </p>
-                <div className="flex-1 h-px bg-amber-200 dark:bg-amber-800" />
+              <div className={`flex items-center gap-2 ${collapsed.partial ? '' : 'mb-3'}`}>
+                <button
+                  onClick={() => toggleCollapsed('partial', true)}
+                  aria-expanded={!collapsed.partial}
+                  className="flex-1 flex items-center gap-2 text-left">
+                  <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" strokeWidth={2} />
+                  <span className="text-xs font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-widest">
+                    Partial publishes ({partialPosts.length})
+                  </span>
+                  <span className="flex-1 h-px bg-amber-200 dark:bg-amber-800" />
+                  <ChevronDown className={`w-4 h-4 text-amber-400 transition-transform ${collapsed.partial ? '-rotate-90' : ''}`} strokeWidth={2} />
+                </button>
                 <Link href="/drafts?filter=partial"
                   className="text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors">
                   View all →
                 </Link>
               </div>
+              {!collapsed.partial && (
               <div className="space-y-3">
                 {partialPosts.map(post => (
                   <div key={post.id} className="bg-white dark:bg-gray-900/60 border border-amber-100 dark:border-amber-900 rounded-xl p-3">
@@ -1086,66 +1327,86 @@ function QueueInner() {
                   </div>
                 ))}
               </div>
+              )}
             </div>
           )}
 
-          {!loading && posts.length > 0 && (
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {[
-                { label: 'Scheduled',  value: posts.length,  icon: CalendarClock },
-                { label: 'Days Ahead', value: daysWithPosts, icon: CalendarRange },
-                { label: 'Platforms',  value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: Layers },
-              ].map(stat => (
-                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
-                  <stat.icon className="w-5 h-5 mx-auto mb-1 text-gray-400" strokeWidth={1.75} />
-                  <p className="text-xl font-extrabold">{stat.value}</p>
-                  <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* TikTok posts scheduled via TikTok Studio — kept in their own
-              section rather than merged into the day-grouped list below,
-              since drag-reorder and bulk actions there write straight to
-              `posts` and would silently no-op against a tiktok_posts id. */}
-          {!loading && tiktokScheduled.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-3 px-1">
-                <PlatformGlyph id="tiktok" size={14} />
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Scheduled to TikTok ({tiktokScheduled.length})
-                </h2>
-              </div>
-              <div className="space-y-2">
-                {tiktokScheduled.map(tp => (
-                  <div
-                    key={tp.id}
-                    className="bg-surface border border-theme rounded-2xl p-4 flex items-start justify-between gap-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-                        {tp.post_caption || <span className="italic text-gray-400">No caption</span>}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1.5 font-semibold">
-                        {tp.scheduled_at
-                          ? new Date(tp.scheduled_at).toLocaleString(undefined, {
-                              weekday: 'short', month: 'short', day: 'numeric',
-                              hour: 'numeric', minute: '2-digit',
-                            })
-                          : '—'}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleCancelTiktok(tp.id)}
-                      disabled={cancellingTiktok === tp.id}
-                      className="flex-shrink-0 text-xs font-semibold text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
-                    >
-                      {cancellingTiktok === tp.id ? 'Cancelling…' : 'Cancel'}
-                    </button>
-                  </div>
+          {/* Summary cards: they count this window, TikTok included, and each
+              opens its details. */}
+          {!loading && hasAnything && (
+            <div className="mb-6">
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { key: 'scheduled', label: 'Scheduled',  value: visibleCount,  icon: CalendarClock },
+                  { key: 'days',      label: 'Days',       value: daysWithPosts, icon: CalendarRange },
+                  { key: 'platforms', label: 'Platforms',  value: Object.keys(platformCounts).length, icon: Layers },
+                ] as const).map(stat => (
+                  <button
+                    key={stat.key}
+                    onClick={() => setOpenStat(openStat === stat.key ? null : stat.key)}
+                    aria-expanded={openStat === stat.key}
+                    className={`bg-surface border rounded-2xl p-4 text-center transition-all hover:border-gray-400 ${openStat === stat.key ? 'border-amber-400 dark:border-amber-500' : 'border-theme'}`}>
+                    <stat.icon className="w-5 h-5 mx-auto mb-1 text-gray-400" strokeWidth={1.75} />
+                    <p className="text-xl font-extrabold">{stat.value}</p>
+                    <p className="text-xs text-gray-400 font-semibold mt-0.5 inline-flex items-center gap-1">
+                      {stat.label}
+                      <ChevronDown className={`w-3 h-3 transition-transform ${openStat === stat.key ? 'rotate-180' : ''}`} strokeWidth={2} />
+                    </p>
+                  </button>
                 ))}
               </div>
+
+              {openStat && (
+                <div className="mt-3 bg-surface border border-theme rounded-2xl p-4">
+                  {openStat === 'scheduled' && (
+                    nextUp.length === 0
+                      ? <p className="text-xs text-gray-400">Nothing scheduled in this range.</p>
+                      : <ul className="space-y-1">
+                          <li className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Next up</li>
+                          {nextUp.map(item => (
+                            <li key={item.id}>
+                              <button
+                                onClick={() => openDay(new Date(item.at).toDateString())}
+                                className="w-full flex items-center gap-2 text-left text-xs py-1.5 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/60">
+                                <span className="font-bold text-gray-500 dark:text-gray-400 w-28 flex-shrink-0 tabular-nums">
+                                  {new Date(item.at).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}
+                                </span>
+                                <span className="flex items-center gap-0.5 flex-shrink-0">
+                                  {item.platforms.map(p => <PlatformGlyph key={p} id={p} size={12} />)}
+                                </span>
+                                <span className="truncate text-gray-700 dark:text-gray-300">{item.text || 'No caption'}</span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                  )}
+                  {openStat === 'days' && (
+                    dateKeys.length === 0
+                      ? <p className="text-xs text-gray-400">No days with posts in this range.</p>
+                      : <div className="flex flex-wrap gap-2">
+                          {dateKeys.map(k => (
+                            <button key={k} onClick={() => openDay(k)}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-theme hover:border-amber-400 transition-all">
+                              {formatDateLabel(k)} <span className="text-gray-400">· {(grouped[k]?.length ?? 0) + (tiktokByDay[k]?.length ?? 0)}</span>
+                            </button>
+                          ))}
+                        </div>
+                  )}
+                  {openStat === 'platforms' && (
+                    Object.keys(platformCounts).length === 0
+                      ? <p className="text-xs text-gray-400">No platforms in this range.</p>
+                      : <div className="flex flex-wrap gap-2">
+                          {Object.entries(platformCounts).sort((a, b) => b[1] - a[1]).map(([p, n]) => (
+                            <button key={p}
+                              onClick={() => setPlatformFilter(platformFilter === p ? 'all' : p)}
+                              className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all inline-flex items-center gap-1.5 ${platformFilter === p ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-theme hover:border-amber-400'}`}>
+                              <PlatformGlyph id={p} size={12} /> {PLATFORM_NAMES[p] ?? p} <span className="text-gray-400">· {n}</span>
+                            </button>
+                          ))}
+                        </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1153,7 +1414,18 @@ function QueueInner() {
             <div className="space-y-3">
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-24" />)}
             </div>
-          ) : posts.length === 0 ? (
+          ) : hasAnything && dateKeys.length === 0 ? (
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
+              <CalendarClock className="w-8 h-8 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
+              <p className="text-sm font-bold mb-1">{hasActiveFilter ? 'Nothing matches these filters here' : 'Nothing scheduled in this range'}</p>
+              <p className="text-xs text-gray-400 mb-5">Your other posts are outside it.</p>
+              <button
+                onClick={() => { chooseRange('all'); setPlatformFilter('all'); setTagFilter('all'); setSearchQuery('') }}
+                className="inline-block bg-black dark:bg-white text-white dark:text-black text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                Show everything
+              </button>
+            </div>
+          ) : !hasAnything ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <CalendarClock className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm font-bold mb-1">{t('app_queue.empty')}</p>
@@ -1167,65 +1439,67 @@ function QueueInner() {
             <div className="space-y-8">
               {dateKeys.map(dateKey => {
                 const isHighlighted = targetDateString === dateKey
+                const dayPosts      = grouped[dateKey] ?? []
+                const dayTiktok     = tiktokByDay[dateKey] ?? []
+                const dayCount      = dayPosts.length + dayTiktok.length
+                const daySelected   = dayPosts.length > 0 && dayPosts.every((p: any) => selectedIds.has(p.id))
+                const isClosed      = !!collapsed[dateKey]
                 return (
                   <div
                     key={dateKey}
                     ref={el => { sectionRefs.current[dateKey] = el }}
                     className={`scroll-mt-8 rounded-2xl transition-all ${isHighlighted ? 'ring-2 ring-blue-300 ring-offset-2' : ''}`}>
-                    <div className="flex items-center gap-3 mb-3 px-1">
-                      {/* Per-day checkbox — master select-all on first day */}
-                      {dateKey === dateKeys[0] ? (
-                        <button
-                          onClick={() => selectedIds.size === posts.length ? clearSelection() : selectAll()}
-                          className="flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
-                          style={{
-                            borderColor: selectedIds.size > 0 ? '#f59e0b' : '#9ca3af',
-                            backgroundColor: selectedIds.size === posts.length ? '#f59e0b' : selectedIds.size > 0 ? 'rgba(245,158,11,0.15)' : 'transparent',
-                          }}
-                          title={selectedIds.size === posts.length ? 'Deselect all' : 'Select all'}>
-                          {selectedIds.size === posts.length
-                            ? <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            : selectedIds.size > 0
-                              ? <span className="w-2 h-0.5 bg-amber-500 rounded" />
-                              : null}
-                        </button>
-                      ) : (
+                    <div className={`flex items-center gap-3 px-1 ${isClosed ? '' : 'mb-3'}`}>
+                      {dayPosts.length > 0 ? (
                         <button
                           onClick={() => selectDay(dateKey)}
                           className="flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
                           style={{
-                            borderColor: grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? '#f59e0b' : '#9ca3af',
-                            backgroundColor: grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? '#f59e0b' : 'transparent',
+                            borderColor: daySelected ? '#f59e0b' : '#9ca3af',
+                            backgroundColor: daySelected ? '#f59e0b' : 'transparent',
                           }}
-                          title={grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? 'Deselect day' : 'Select day'}>
-                          {grouped[dateKey].every((p: any) => selectedIds.has(p.id)) && (
+                          aria-label={daySelected ? 'Deselect day' : 'Select day'}
+                          title={daySelected ? 'Deselect day' : 'Select day'}>
+                          {daySelected && (
                             <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           )}
                         </button>
+                      ) : (
+                        <span className="flex-shrink-0 w-4" aria-hidden />
                       )}
-                      <p className={`text-xs font-extrabold uppercase tracking-widest ${isHighlighted ? 'text-blue-600' : 'text-gray-900 dark:text-gray-100'}`}>
-                        {formatDateLabel(dateKey)}
-                        {isHighlighted && <span className="ml-2 text-blue-400 normal-case tracking-normal font-semibold">← from calendar</span>}
-                      </p>
-                      <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
                       <button
-                        onClick={() => selectDay(dateKey)}
-                        className="text-[11px] font-semibold text-gray-400 hover:text-amber-500 transition-colors">
-                        {grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? 'Deselect day' : 'Select day'}
+                        onClick={() => toggleCollapsed(dateKey)}
+                        aria-expanded={!isClosed}
+                        className="flex-1 min-w-0 flex items-center gap-3 text-left">
+                        <ChevronDown className={`w-4 h-4 flex-shrink-0 text-gray-400 transition-transform ${isClosed ? '-rotate-90' : ''}`} strokeWidth={2} />
+                        <span className={`text-xs font-extrabold uppercase tracking-widest ${isHighlighted ? 'text-blue-600' : 'text-gray-900 dark:text-gray-100'}`}>
+                          {formatDateLabel(dateKey)}
+                          {isHighlighted && <span className="ml-2 text-blue-400 normal-case tracking-normal font-semibold">← from calendar</span>}
+                        </span>
+                        <span className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
                       </button>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
-                        {grouped[dateKey].length} post{grouped[dateKey].length !== 1 ? 's' : ''}
+                      {dayPosts.length > 0 && !isClosed && (
+                        <button
+                          onClick={() => selectDay(dateKey)}
+                          className="text-[11px] font-semibold text-gray-400 hover:text-amber-500 transition-colors hidden sm:inline">
+                          {daySelected ? 'Deselect day' : 'Select day'}
+                        </button>
+                      )}
+                      <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                        {dayCount} post{dayCount !== 1 ? 's' : ''}
                       </span>
                     </div>
+                    {!isClosed && (
+                    <>
                     <DndContext
                       sensors={sensors}
                       collisionDetection={closestCenter}
                       onDragEnd={e => handleDragEnd(e, dateKey)}>
                       <SortableContext
-                        items={grouped[dateKey].map(p => p.id)}
+                        items={dayPosts.map(p => p.id)}
                         strategy={verticalListSortingStrategy}>
                         <div className="space-y-3">
-                          {grouped[dateKey].map(post => (
+                          {dayPosts.map(post => (
                             <SortablePostCard
                               key={post.id}
                               post={post}
@@ -1244,6 +1518,67 @@ function QueueInner() {
                         </div>
                       </SortableContext>
                     </DndContext>
+                    {dayTiktok.length > 0 && (
+                      <div className={`space-y-3 ${dayPosts.length > 0 ? 'mt-3' : ''}`}>
+                        {[...dayTiktok]
+                          .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+                          .map(tp => {
+                            const confirming = confirmCancel === `tt:${tp.id}`
+                            return (
+                              <div key={tp.id} className="bg-surface border border-theme rounded-2xl p-4 md:p-5">
+                                <div className="flex items-start gap-3">
+                                  <PlatformGlyph id="tiktok" size={16} className="mt-1 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="mb-2 flex items-center gap-2 flex-wrap">
+                                      <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                                        {new Date(tp.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                      </span>
+                                      <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400">TikTok Studio</span>
+                                    </div>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">
+                                      {tp.post_caption || <span className="italic text-gray-400">No caption</span>}
+                                    </p>
+                                    {tp.video_url && <VideoPeek src={tp.video_url} />}
+                                  </div>
+                                  {!confirming && (
+                                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+                                      <Link href="/tiktok/studio"
+                                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                                        Studio
+                                      </Link>
+                                      <button
+                                        onClick={() => setConfirmCancel(`tt:${tp.id}`)}
+                                        className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                                {confirming && (
+                                  <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <p className="text-xs text-red-600 font-semibold flex-1">Cancel this TikTok post? It won&apos;t go out.</p>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                      <button
+                                        onClick={() => handleCancelTiktok(tp.id)}
+                                        disabled={cancellingTiktok === tp.id}
+                                        className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
+                                        {cancellingTiktok === tp.id ? 'Cancelling...' : 'Yes, cancel it'}
+                                      </button>
+                                      <button
+                                        onClick={() => setConfirmCancel(null)}
+                                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                                        Keep it
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                      </div>
+                    )}
+                    </>
+                    )}
                   </div>
                 )
               })}

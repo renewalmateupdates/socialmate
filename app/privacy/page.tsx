@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
           <img src="/logo.png" alt="SocialMate" className="w-24 h-24 rounded-3xl" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Privacy Policy</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: October 26, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: November 13, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Your privacy matters to us. This policy explains what data we collect, why we collect it, and how we protect it.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -70,6 +70,8 @@ export default function PrivacyPolicy() {
               <li>Session identifiers and authentication tokens</li>
               <li>Error logs and diagnostic data when the Service encounters issues</li>
               <li>Vercel Analytics data: page views, navigation patterns (anonymized, no personal identifiers)</li>
+              <li>Google Analytics (GA4) data: page views, the page or site you arrived from, device and browser type, approximate location, and a few product steps such as reaching the signup page</li>
+              <li>Product usage events tied to your account, stored by us: steps like connecting a platform or scheduling a post, the platforms involved, and your device type. Never the text of your posts.</li>
             </ul>
 
             <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">2.3 Information from Third Parties</p>
@@ -129,6 +131,7 @@ export default function PrivacyPolicy() {
               <li><span className="font-semibold">Google Gemini API</span> — AI content generation. Your prompts are transmitted to Google for processing. <a href="https://ai.google.dev/terms" target="_blank" rel="noopener noreferrer" className="underline">ai.google.dev/terms</a></li>
               <li><span className="font-semibold">Resend</span> — transactional email delivery (account, billing, team invites). <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">resend.com/privacy</a></li>
               <li><span className="font-semibold">Vercel</span> — application hosting, CDN, and privacy-friendly analytics. <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline">vercel.com/legal/privacy-policy</a></li>
+              <li><span className="font-semibold">Google</span>: Google Analytics 4, to measure site traffic and which steps people reach. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">policies.google.com/privacy</a></li>
               <li><span className="font-semibold">Inngest</span> — background job and scheduled task processing. <a href="https://inngest.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">inngest.com/privacy</a></li>
               <li><span className="font-semibold">Twitch</span> — when you connect Twitch, we use your OAuth token to fetch your clips via the Twitch API. The "Search Any Channel" feature uses app-level credentials (not your account) to access public clip data from any channel you search. <a href="https://www.twitch.tv/p/legal/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline">twitch.tv privacy policy</a></li>
               <li><span className="font-semibold">YouTube (Google)</span> — when you connect a YouTube channel, we access that channel's public RSS feed using the URL you provide. No YouTube OAuth token is required or stored. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">google.com/policies/privacy</a></li>
@@ -143,7 +146,7 @@ export default function PrivacyPolicy() {
               </li>
               <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize for post scheduling: Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok and LinkedIn. Each platform's own privacy policy governs their data use.</li>
             </ul>
-            <p className="mt-3">We do not share your personal data with advertising networks, data brokers, or analytics companies beyond the privacy-friendly analytics described above. We may disclose your data if required by law, court order, or valid government request, or to protect the rights, property, or safety of Gilgamesh Enterprise LLC, our users, or the public.</p>
+            <p className="mt-3">We do not share your personal data with advertising networks, data brokers, or analytics companies beyond the analytics services described above. We may disclose your data if required by law, court order, or valid government request, or to protect the rights, property, or safety of Gilgamesh Enterprise LLC, our users, or the public.</p>
             <p className="mt-2">In the event of a business acquisition, merger, or sale of substantially all of our assets, your data may be transferred to the acquiring entity, subject to the same privacy protections. We will notify you via email or prominent in-app notice before such a transfer.</p>
           </section>
 
@@ -270,16 +273,16 @@ export default function PrivacyPolicy() {
               <li><span className="font-semibold">Essential / Authentication Cookies:</span> Required for you to log in and use the Service. Cannot be disabled. These include session tokens managed by Supabase Auth.</li>
               <li><span className="font-semibold">Preference Cookies:</span> Remember your settings like dark/light mode.</li>
               <li><span className="font-semibold">Analytics Cookies (Vercel):</span> Privacy-friendly, cookieless analytics from Vercel. No personal identifiers, no cross-site tracking.</li>
+              <li><span className="font-semibold">Analytics Cookies (Google Analytics):</span> GA4 sets first-party cookies (such as <code>_ga</code>) to count visits and tell new visitors from returning ones. We don&apos;t use them for advertising. You can block them with your browser&apos;s settings or a tracker-blocking extension, and SocialMate keeps working.</li>
             </ul>
-            <p className="mt-3">We do <span className="font-semibold">not</span> use: advertising cookies, Google Analytics, Facebook Pixel, retargeting cookies, or any third-party tracking cookies.</p>
+            <p className="mt-3">We do <span className="font-semibold">not</span> use advertising cookies, Facebook Pixel or retargeting cookies, and we don&apos;t use analytics for advertising. Google Analytics is the only third-party analytics service we use.</p>
           </section>
 
           {/* ── 15. Children's Privacy ── */}
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Children's Privacy</h2>
-            <p>SocialMate is not directed at, designed for, or intended to be used by children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
-            <p className="mt-2">Users between 13 and 17 years of age must have verifiable parental or legal guardian consent prior to using the Service. By using the Service, users in this age range represent that they have obtained such consent.</p>
-            <p className="mt-2">If you believe we have inadvertently collected personal information from a child under 13, please contact us immediately at <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a>. We will promptly delete such information.</p>
+            <p>SocialMate is for adults. You must be 18 or older, or the age of majority where you live if that is higher, to create an account or use the Service. It is not directed at, designed for, or intended to be used by anyone under 18, and we do not knowingly collect personal information from anyone under 18.</p>
+            <p className="mt-2">If you believe someone under 18 has given us personal information, please contact us immediately at <a href={SUPPORT_MAILTO} className="font-semibold underline text-gray-900 dark:text-gray-100">{SUPPORT_EMAIL}</a>. We will promptly delete such information.</p>
           </section>
 
           {/* ── 16. Do Not Track ── */}

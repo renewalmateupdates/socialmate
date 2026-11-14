@@ -24,7 +24,7 @@ export default function TermsOfService() {
           <img src="/logo.png" alt="SocialMate" className="w-24 h-24 rounded-3xl" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Terms of Service</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: October 26, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: November 13, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Please read these Terms carefully before using SocialMate. By accessing or using the Service, you agree to be bound by these Terms.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -51,7 +51,7 @@ export default function TermsOfService() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">3. Eligibility and Account Registration</h2>
             <p className="mb-2">To use the Service, you must meet the following requirements:</p>
             <ul className="list-disc pl-5 space-y-2">
-              <li>You must be at least <span className="font-semibold">13 years of age</span>. Users between 13 and 17 must have verifiable parental or guardian consent. By using the Service, you represent and warrant that you meet this age requirement.</li>
+              <li>You must be at least <span className="font-semibold">18 years of age</span>, or the age of majority where you live if that is higher. SocialMate is not for minors. By using the Service, you represent and warrant that you meet this age requirement.</li>
               <li>You must provide accurate, current, and complete registration information and keep it updated.</li>
               <li>You may not register more than one free account per individual. Multiple accounts created to circumvent plan limits will be terminated.</li>
               <li>You are solely responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account.</li>

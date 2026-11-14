@@ -1,12 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Sparkles, Bot, AlertTriangle, MessageSquare, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Sparkles, Bot, AlertTriangle, MessageSquare, ChevronDown, LayoutGrid } from 'lucide-react'
 
 interface ToolRow { tool: string; runs: number; credits: number; users: number }
+interface FeatureRow { feature: string; days: number; users: number }
 interface ErrorRow { platform: string; message: string; count: number }
 interface UsageData {
   windowDays: number
+  features?: FeatureRow[]
   aiTools: ToolRow[]
   agents: ToolRow[]
   totals: { aiRuns: number; aiCredits: number; agentRuns: number; failedPosts: number; feedback: number }
@@ -64,6 +66,35 @@ function ToolTable({ rows, unit }: { rows: ToolRow[]; unit: string }) {
           <div className="w-24 shrink-0 text-right text-xs tabular-nums text-ink-faint">
             {r.credits > 0 ? `${r.credits} cr` : `${r.users} ${unit}`}
           </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** App areas by how many customers opened them. Zero-use areas never appear
+ * here at all, which is itself the answer for them. */
+function FeatureTable({ rows }: { rows: FeatureRow[] }) {
+  if (rows.length === 0) {
+    return <Empty>Nothing recorded yet. Tracking started Nov 13, 2026, so this fills in from the next deploy on.</Empty>
+  }
+  const max = Math.max(...rows.map(r => r.users))
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 text-[10px] uppercase tracking-wide text-ink-faint">
+        <div className="w-40 shrink-0">Area</div>
+        <div className="flex-1" />
+        <div className="w-14 shrink-0 text-right">People</div>
+        <div className="w-24 shrink-0 text-right">Person-days</div>
+      </div>
+      {rows.map(r => (
+        <div key={r.feature} className="flex items-center gap-3">
+          <div className="w-40 shrink-0 truncate text-xs font-medium text-ink-body">/{r.feature}</div>
+          <div className="flex-1 h-2 rounded-full bg-raised overflow-hidden">
+            <div className="h-full rounded-full bg-amber/70" style={{ width: `${Math.max(4, (r.users / max) * 100)}%` }} />
+          </div>
+          <div className="w-14 shrink-0 text-right text-xs tabular-nums text-ink-high">{r.users}</div>
+          <div className="w-24 shrink-0 text-right text-xs tabular-nums text-ink-faint">{r.days}</div>
         </div>
       ))}
     </div>
@@ -130,6 +161,10 @@ export default function AdminUsagePage() {
             </div>
 
             <div className="space-y-4">
+              <Panel icon={LayoutGrid} title="App areas" sub="Which parts of the app customers open. Counted once per person, area and day." count={data.features?.length ?? 0}>
+                <FeatureTable rows={data.features ?? []} />
+              </Panel>
+
               <Panel icon={Sparkles} title="AI tools" sub="Which tools people actually use, and what they cost" count={data.aiTools.length}>
                 <ToolTable rows={data.aiTools} unit="users" />
               </Panel>

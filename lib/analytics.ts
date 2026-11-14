@@ -82,6 +82,12 @@ export const FUNNEL_EVENTS = [
   'checkout_started',     // { plan }
 
   'ai_tool_used',         // { tool }
+
+  // ── Feature usage ────────────────────────────────────────────────────────
+  // Which parts of the app people actually open, so "keep it or cut it" has a
+  // number behind it (Joshua, Nov 13 2026). Sent by the Sidebar at most once
+  // per person, per area, per day. Read on /admin/usage.
+  'feature_opened',       // { feature: first path segment, e.g. 'calendar' }
 ] as const
 
 export type FunnelEvent = typeof FUNNEL_EVENTS[number]

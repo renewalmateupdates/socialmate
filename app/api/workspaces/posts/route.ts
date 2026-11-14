@@ -15,7 +15,7 @@ import { canManagePost, managesTeamPosts, realWorkspaceId, resolveWorkspaceAcces
  * and RLS stopped her from moving, cancelling or deleting them. Reported
  * 1 Nov 2026 by a free-plan owner whose assistant schedules for her.
  *
- *   GET    ?workspaceId=&view=queue|partial|calendar|drafts|draft-count|one&id=
+ *   GET    ?workspaceId=&view=queue|partial|failed|calendar|drafts|draft-count|one&id=
  *   PATCH  { ids, action: 'unschedule' } | { ids: [id], action: 'edit', content, platforms }
  *   DELETE { ids }
  *
@@ -93,6 +93,13 @@ export async function GET(request: NextRequest) {
     case 'partial': {
       const since = new Date(Date.now() - 30 * 86_400_000).toISOString()
       query = base().eq('status', 'partial').gte('created_at', since).order('published_at', { ascending: false }).limit(10)
+      break
+    }
+    case 'failed': {
+      // Queue shows these in red with a Retry button. Before, a failed post
+      // simply left the Queue and was only findable in Drafts or the Calendar.
+      const since = new Date(Date.now() - 30 * 86_400_000).toISOString()
+      query = base().eq('status', 'failed').gte('created_at', since).order('created_at', { ascending: false }).limit(20)
       break
     }
     case 'drafts':

@@ -1,5 +1,6 @@
 'use client'
 import { Camera } from 'lucide-react'
+import VideoPeek from '@/components/VideoPeek'
 
 /**
  * Parses a media_urls array and renders:
@@ -36,6 +37,12 @@ export default function UnsplashCredit({ mediaUrls, size = 'sm' }: Props) {
   const imgClass = size === 'md'
     ? 'w-full h-28 object-cover rounded-lg'
     : 'w-full h-20 object-cover rounded-lg'
+
+  // A video in an <img> showed as a broken "Post image" in Queue and Calendar.
+  // VideoPeek loads nothing until the viewer presses play.
+  if (/\.(mp4|mov|m4v|webm)$/i.test(imageUrl.split('?')[0])) {
+    return <VideoPeek src={imageUrl} />
+  }
 
   return (
     <div className="mt-2.5">
