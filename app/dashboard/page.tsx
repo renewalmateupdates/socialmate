@@ -170,6 +170,7 @@ function DashboardInner() {
   const [xBannerDismissed, setXBannerDismissed] = useState(true) // default true to avoid flash
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0)
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
+  const [tiktokFirstPost, setTiktokFirstPost] = useState(false)
   const [xBoosterBalance, setXBoosterBalance] = useState<number>(0)
   // Plan card — seat roster
   const [seatMembers, setSeatMembers] = useState<{ email: string; role: string }[]>([])
@@ -311,6 +312,20 @@ function DashboardInner() {
         .eq('user_id', user.id)
       const platforms = (accounts || []).map((a: { platform: string }) => a.platform)
       setConnectedPlatforms(platforms)
+
+      // TikTok connected, nothing ever posted or scheduled from TikTok Studio:
+      // show the first-post card. Most people who connect TikTok connect only
+      // TikTok, and in Nov 2026 almost none of them had posted; an email did
+      // not move them (CLAUDE.md, Nov 11-13). Dismissible, never shown again.
+      if (platforms.includes('tiktok') && !localStorage.getItem('sm-tiktok-first-post-dismissed')) {
+        const { count, error: tiktokError } = await supabase
+          .from('tiktok_posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .in('status', ['scheduled', 'publishing', 'published'])
+        if (tiktokError) console.warn('[dashboard] tiktok_posts count failed:', tiktokError.message)
+        else if ((count ?? 0) === 0) setTiktokFirstPost(true)
+      }
 
       // Load seat roster for plan card
       const { data: teamData } = await supabase
@@ -539,6 +554,31 @@ function DashboardInner() {
                 <span className="text-amber-ink font-semibold">{t('app_dashboard.review_now')} →</span>
               </p>
             </Link>
+          )}
+
+          {/* ── TIKTOK FIRST POST ──────────────────────────────────────── */}
+          {tiktokFirstPost && (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-surface border border-amber/40 rounded-2xl px-5 py-4 mb-4">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <span className="w-9 h-9 rounded-xl bg-app-raised border border-theme flex items-center justify-center flex-shrink-0">
+                  <PlatformIcon name="tiktok" size={16} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-theme">{t('app_dashboard.tiktok_first_title')}</p>
+                  <p className="text-xs text-app-muted mt-0.5">{t('app_dashboard.tiktok_first_body')}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Link href="/tiktok/studio?from=dashboard"
+                  className="inline-flex items-center text-xs font-bold px-4 py-2.5 min-h-[40px] rounded-xl bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-all">
+                  {t('app_dashboard.tiktok_first_cta')} →
+                </Link>
+                <button
+                  onClick={() => { setTiktokFirstPost(false); localStorage.setItem('sm-tiktok-first-post-dismissed', '1') }}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg text-app-faint hover:text-theme hover:bg-app-fill transition-all flex-shrink-0"
+                  aria-label={t('app_common.close')}><X className="w-3.5 h-3.5" /></button>
+              </div>
+            </div>
           )}
 
           {/* ── X/TWITTER NUDGE ────────────────────────────────────────── */}

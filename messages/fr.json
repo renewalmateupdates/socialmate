@@ -797,7 +797,10 @@
     "x_booster_none": "Il n'en reste aucune",
     "x_booster_posts": "Publications X Booster",
     "x_connect": "connectez votre compte pour planifier",
-    "x_live": "X / Twitter est disponible —"
+    "x_live": "X / Twitter est disponible —",
+    "tiktok_first_title": "Votre TikTok est connecté. Publiez votre première vidéo.",
+    "tiktok_first_body": "Ajoutez une vidéo dans TikTok Studio, écrivez une légende, puis publiez-la maintenant ou choisissez une heure.",
+    "tiktok_first_cta": "Ouvrir TikTok Studio"
   },
   "app_queue": {
     "title": "File d'attente",

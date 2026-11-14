@@ -619,8 +619,15 @@ export default function TikTokStudioClient() {
   // a reload is an ordinary visit.
   const searchParams = useSearchParams()
   const viaConnect = useRef(searchParams.get('connected') === '1')
+  // From the Dashboard's "post your first video" card (Nov 13, 2026).
+  const viaDashboard = useRef(searchParams.get('from') === 'dashboard')
   const [connectedToast, setConnectedToast] = useState('')
   useEffect(() => {
+    if (viaDashboard.current) {
+      const cleaned = new URL(window.location.href)
+      cleaned.searchParams.delete('from')
+      window.history.replaceState(null, '', cleaned.pathname + cleaned.search)
+    }
     if (!viaConnect.current) return
     setConnectedToast('TikTok connected. Drop a video below to post it.')
     const cleaned = new URL(window.location.href)
@@ -639,7 +646,7 @@ export default function TikTokStudioClient() {
     openedTracked.current = true
     track('tiktok_studio_opened', {
       connected: !!creator?.connected,
-      ...(viaConnect.current && { via: 'connect' }),
+      ...(viaConnect.current ? { via: 'connect' } : viaDashboard.current ? { via: 'dashboard' } : {}),
     })
   }, [creatorLoading, creator?.connected])
 

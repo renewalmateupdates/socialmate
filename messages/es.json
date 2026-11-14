@@ -797,7 +797,10 @@
     "x_booster_none": "No queda ninguna",
     "x_booster_posts": "Publicaciones X Booster",
     "x_connect": "conecta tu cuenta para programar publicaciones",
-    "x_live": "X / Twitter ya está activo —"
+    "x_live": "X / Twitter ya está activo —",
+    "tiktok_first_title": "Tu TikTok está conectado. Publica tu primer video.",
+    "tiktok_first_body": "Añade un video en TikTok Studio, escribe una descripción y publícalo ahora o elige una hora.",
+    "tiktok_first_cta": "Abrir TikTok Studio"
   },
   "app_queue": {
     "title": "Cola",

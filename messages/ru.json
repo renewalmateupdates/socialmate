@@ -797,7 +797,10 @@
     "x_booster_none": "Не осталось",
     "x_booster_posts": "Публикации X Booster",
     "x_connect": "подключите аккаунт, чтобы планировать публикации",
-    "x_live": "X / Twitter уже работает —"
+    "x_live": "X / Twitter уже работает —",
+    "tiktok_first_title": "Ваш TikTok подключён. Опубликуйте первое видео.",
+    "tiktok_first_body": "Добавьте видео в TikTok Studio, напишите подпись и опубликуйте сразу или выберите время.",
+    "tiktok_first_cta": "Открыть TikTok Studio"
   },
   "app_queue": {
     "title": "Очередь",
