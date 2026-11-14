@@ -15,6 +15,8 @@ import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { AlertTriangle, BadgePercent, Ban, BarChart3, Bookmark, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ClipboardList, Clock, Eye, Fish, FlaskConical, Film, Flame, Globe, Hash, Heart, HeartHandshake, HelpCircle, Image as ImageIcon, Lightbulb, ListOrdered, Lock, Mic, MessageCircle, MessagesSquare, Newspaper, Paperclip, PartyPopper, PenLine, Recycle, RefreshCw, Repeat, Repeat2, Reply, Rocket, Scissors, Sparkles, Star, TrendingUp, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
+import ComposeTabs from '@/components/ComposeTabs'
 import { HASHTAGS_COST, REPURPOSE_COST } from '@/lib/ai-tool-costs'
 import { loadWorkspacePosts } from '@/lib/workspace-posts'
 import { readToolDraft, TOOL_LABELS } from '@/lib/tool-draft'
@@ -348,6 +350,19 @@ function ComposeInner() {
   // Thread builder
   const [threadMode, setThreadMode] = useState(false)
   const [threadParts, setThreadParts] = useState<string[]>([''])
+  // Simple shows what a post needs (platforms, text, media, AI, a time).
+  // Full adds threads, polls, A/B, tags, hashtag sets, Post Score, repeats
+  // and templates. Remembered in this browser (Joshua, Nov 13 2026: "my
+  // biggest fear is overwhelming people").
+  const [composeMode, setComposeMode] = useState<'simple' | 'full'>('simple')
+  const [aiMenuOpen, setAiMenuOpen]   = useState(false)
+  useEffect(() => {
+    try { if (localStorage.getItem('sm_compose_mode') === 'full') setComposeMode('full') } catch {}
+  }, [])
+  const chooseComposeMode = (mode: 'simple' | 'full') => {
+    setComposeMode(mode)
+    try { localStorage.setItem('sm_compose_mode', mode) } catch {}
+  }
 
   // Save as template
   const TEMPLATE_CATEGORIES = ['Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Question', 'Poll', 'Thread', 'Other']
@@ -1660,6 +1675,11 @@ function ComposeInner() {
     )
   }
 
+  // A tool already in use is never hidden: a draft with a thread, poll, A/B
+  // version, tags or a repeat shows Full whatever the saved mode.
+  const fullView = composeMode === 'full' || threadMode || abMode || showPollPanel || postTags.length > 0 || isRecurring
+  const aiOpen   = aiMenuOpen || !!activeAiTool || showRepurposePanel || showHashtagSuggestPanel || aiLoading || !!rateLimitedUntil
+
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
@@ -1791,6 +1811,20 @@ function ComposeInner() {
               />
             </div>
           )}
+
+          {/* One post or Bulk, then Simple or Full */}
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+            <ComposeTabs active="one" />
+            <div className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1" role="group" aria-label="Compose mode">
+              {(['simple', 'full'] as const).map(m => (
+                <button key={m} type="button" onClick={() => chooseComposeMode(m)} aria-pressed={composeMode === m}
+                  title={m === 'simple' ? 'Just what a post needs' : 'Threads, polls, A/B tests, tags, Post Score, repeats and templates'}
+                  className={`text-xs font-bold px-3 py-2 rounded-lg capitalize transition-all ${composeMode === m ? 'bg-white dark:bg-gray-950 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'}`}>
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
@@ -2066,7 +2100,8 @@ function ComposeInner() {
               {/* TEXT AREA / THREAD BUILDER */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
 
-                {/* Thread + A/B toolbar */}
+                {/* Thread + A/B toolbar (Full mode) */}
+                {fullView && (
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <button
                     type="button"
@@ -2153,6 +2188,7 @@ function ComposeInner() {
                     )
                   )}
                 </div>
+                )}
 
                 {threadMode ? (
                   <div className="space-y-3">
@@ -2553,7 +2589,8 @@ function ComposeInner() {
                   </div>
                 )}
 
-                {/* POST TAGS */}
+                {/* POST TAGS (Full mode) */}
+                {fullView && (
                 <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Tags <span className="font-normal normal-case">· {postTags.length}/5 · press Enter or comma to add</span></p>
                   <div
@@ -2580,8 +2617,11 @@ function ComposeInner() {
                     )}
                   </div>
                 </div>
+                )}
               </div>
 
+              {/* Hashtag collections and the brand voice badge: Full mode */}
+              {fullView && (<>
               {/* HASHTAG COLLECTIONS */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between">
@@ -2715,12 +2755,26 @@ function ComposeInner() {
                 )}
               </div>
 
-              {/* AI TOOLS */}
+              </>)}
+
+              {/* AI TOOLS: one "Write with AI" menu. It used to be a grid of
+                  eight buttons always on screen; now it opens on demand, and
+                  stays open while a tool's panel is in use. */}
               <div id="compose-ai-tools" className="bg-surface border border-theme rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{t('app_compose.ai_tools_label')}</p>
-                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} {t('app_compose.credits_remaining')}</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setAiMenuOpen(o => !o)}
+                  aria-expanded={aiOpen}
+                  className={`w-full flex items-center justify-between gap-3 text-left min-h-[44px] ${aiOpen ? 'mb-3' : ''}`}>
+                  <span className="inline-flex items-center gap-2 text-sm font-bold">
+                    <Sparkles className="w-4 h-4 text-amber-500" strokeWidth={2} /> Write with AI
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
+                    {credits} {t('app_compose.credits_remaining')}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${aiOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+                  </span>
+                </button>
+                {aiOpen && (<>
 
                 {rateLimitedUntil && (
                   <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl px-4 py-3 text-sm text-orange-700 dark:text-orange-300 mb-3">
@@ -3024,8 +3078,11 @@ function ComposeInner() {
                     </div>
                   </div>
                 )}
+                </>)}
               </div>
 
+              {/* Post Score: Full mode */}
+              {fullView && (<>
               {/* POST SCORE */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -3105,6 +3162,8 @@ function ComposeInner() {
                 )}
               </div>
 
+              </>)}
+
               {/* SCHEDULE */}
               <div id="compose-schedule" className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
@@ -3144,7 +3203,7 @@ function ComposeInner() {
                 </div>
 
                 {/* Repeat toggle — only shown when a future date is selected */}
-                {scheduleDate && (
+                {scheduleDate && fullView && (
                   <div className="mt-3">
                     <button
                       type="button"
@@ -3232,6 +3291,8 @@ function ComposeInner() {
                 </div>
               )}
 
+              {/* Save as template: Full mode */}
+              {fullView && (<>
               {/* SAVE AS TEMPLATE */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between">
@@ -3278,6 +3339,8 @@ function ComposeInner() {
                   </div>
                 )}
               </div>
+
+              </>)}
 
               {/* ACTIONS — pinned to the bottom of the screen at every size. On
                   mobile that keeps the keyboard from pushing them off screen. On

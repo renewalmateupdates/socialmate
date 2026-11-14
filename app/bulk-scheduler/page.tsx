@@ -8,6 +8,9 @@ import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import { AlertTriangle, Building2, CalendarDays, CheckCircle2, Globe, Lightbulb, Loader2, Paperclip, Unlock, Video, X as CloseIcon, XCircle, Zap } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { uploadMediaFile } from '@/lib/media-upload'
+import ComposeTabs from '@/components/ComposeTabs'
+import { bulkCsvTemplate, parseBulkCsv } from '@/lib/bulk-csv'
+import { Download, FileUp } from 'lucide-react'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -155,6 +158,61 @@ export default function BulkScheduler() {
     }
     init()
   }, [router])
+
+  // CSV import (lib/bulk-csv.ts). Rows already written stay; imported rows go
+  // after them, up to the plan's row limit. A row with a problem arrives
+  // marked in red so it can be fixed in place instead of silently dropped.
+  const csvInputRef = useRef<HTMLInputElement | null>(null)
+  const handleCsvImport = async (file: File) => {
+    if (file.size > 1_000_000) { showToast('That file is over 1 MB. Split it into smaller files.', 'error'); return }
+    const result = parseBulkCsv(await file.text(), {
+      allowed: Object.keys(PLATFORM_CHAR_LIMITS),
+      defaultPlatforms,
+      defaultTime,
+    })
+    if (result.error) { showToast(result.error, 'error'); return }
+    if (result.posts.length === 0) { showToast('No posts found in that file.', 'error'); return }
+
+    const kept = posts.filter(p => p.content.trim())
+    const room = Math.max(0, maxRows - kept.length)
+    const today = getTodayDate()
+    const incoming: BulkPost[] = result.posts.slice(0, room).map(p => {
+      let problem = p.problem
+      if (!problem && p.date && p.date < today) problem = 'date is in the past'
+      if (!problem && p.date && p.date > maxScheduleDate) problem = `date is past your plan's ${scheduleHorizonLabel} limit`
+      return {
+        id: makeId(),
+        content: p.content,
+        platforms: p.platforms.length ? p.platforms : [...defaultPlatforms],
+        date: p.date,
+        time: p.time,
+        status: problem ? 'error' : 'ready',
+        ...(problem ? { error: problem } : {}),
+      }
+    })
+    if (incoming.length === 0) {
+      showToast(`No room: your plan holds ${maxRows} rows per session.`, 'error')
+      return
+    }
+    setPosts([...kept, ...incoming])
+
+    const left = result.posts.length - incoming.length
+    const notes = [`Imported ${incoming.length} post${incoming.length !== 1 ? 's' : ''}`]
+    const flagged = incoming.filter(p => p.status === 'error').length
+    if (flagged) notes.push(`${flagged} need a fix (in red)`)
+    if (left > 0) notes.push(`${left} left out: your plan holds ${maxRows} rows`)
+    if (result.unknownPlatforms.length) notes.push(`not supported here: ${result.unknownPlatforms.join(', ')}`)
+    showToast(notes.join('. '), left > 0 || flagged > 0 ? 'error' : 'success')
+  }
+
+  const downloadCsvTemplate = () => {
+    const url = URL.createObjectURL(new Blob([bulkCsvTemplate()], { type: 'text/csv' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'socialmate-bulk-template.csv'
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
 
   const addRow = () => {
     if (posts.length >= maxRows) {
@@ -373,6 +431,7 @@ export default function BulkScheduler() {
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
+          <div className="mb-4"><ComposeTabs active="bulk" /></div>
 
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -386,8 +445,32 @@ export default function BulkScheduler() {
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Write and schedule multiple posts at once</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              <input
+                ref={csvInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={e => {
+                  const f = e.target.files?.[0]
+                  if (f) handleCsvImport(f)
+                  e.target.value = ''
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => csvInputRef.current?.click()}
+                className="text-xs font-bold px-4 py-2.5 min-h-[40px] bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all inline-flex items-center gap-1.5">
+                <FileUp size={13} strokeWidth={2} /> Import CSV
+              </button>
+              <button
+                type="button"
+                onClick={downloadCsvTemplate}
+                title="A CSV with the columns: content, date, time, platforms"
+                className="text-xs font-bold px-4 py-2.5 min-h-[40px] border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all inline-flex items-center gap-1.5">
+                <Download size={13} strokeWidth={2} /> CSV template
+              </button>
               <Link href="/calendar"
-                className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all inline-flex items-center gap-1.5">
+                className="text-xs font-bold px-4 py-2.5 min-h-[40px] border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all inline-flex items-center gap-1.5">
                 <CalendarDays size={13} strokeWidth={2} /> Calendar
               </Link>
             </div>

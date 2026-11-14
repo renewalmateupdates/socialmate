@@ -554,7 +554,17 @@
     "section_insights": "洞察",
     "section_grow": "增长",
     "section_manage": "管理",
-    "section_account": "账户"
+    "section_account": "账户",
+    "nav_schedule": "排程",
+    "more_tools": "更多工具",
+    "customize_sidebar": "自定义侧边栏",
+    "quick_guide": "快速指南",
+    "sub_soma": "自动驾驶",
+    "sub_hermes": "外联",
+    "sub_hestia": "社区",
+    "sub_zenith": "创作者名片",
+    "sub_pulse": "趋势",
+    "sub_radar": "细分领域研究"
   },
   "app_common": {
     "save": "保存",

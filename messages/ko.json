@@ -554,7 +554,17 @@
     "section_insights": "인사이트",
     "section_grow": "성장",
     "section_manage": "관리",
-    "section_account": "계정"
+    "section_account": "계정",
+    "nav_schedule": "일정",
+    "more_tools": "더 많은 도구",
+    "customize_sidebar": "사이드바 맞춤 설정",
+    "quick_guide": "빠른 가이드",
+    "sub_soma": "자동 운영",
+    "sub_hermes": "아웃리치",
+    "sub_hestia": "커뮤니티",
+    "sub_zenith": "크리에이터 카드",
+    "sub_pulse": "트렌드",
+    "sub_radar": "틈새 분석"
   },
   "app_common": {
     "save": "저장",

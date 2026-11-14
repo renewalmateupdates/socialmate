@@ -554,7 +554,17 @@
     "section_insights": "Insights",
     "section_grow": "Grow",
     "section_manage": "Manage",
-    "section_account": "Account"
+    "section_account": "Account",
+    "nav_schedule": "Schedule",
+    "more_tools": "More tools",
+    "customize_sidebar": "Customize sidebar",
+    "quick_guide": "Quick guide",
+    "sub_soma": "Autopilot",
+    "sub_hermes": "Outreach",
+    "sub_hestia": "Community",
+    "sub_zenith": "Creator card",
+    "sub_pulse": "Trends",
+    "sub_radar": "Niche research"
   },
   "app_common": {
     "save": "Save",

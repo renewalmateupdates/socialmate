@@ -554,7 +554,17 @@
     "section_insights": "インサイト",
     "section_grow": "成長",
     "section_manage": "管理",
-    "section_account": "アカウント"
+    "section_account": "アカウント",
+    "nav_schedule": "スケジュール",
+    "more_tools": "その他のツール",
+    "customize_sidebar": "サイドバーをカスタマイズ",
+    "quick_guide": "クイックガイド",
+    "sub_soma": "オートパイロット",
+    "sub_hermes": "アウトリーチ",
+    "sub_hestia": "コミュニティ",
+    "sub_zenith": "クリエイターカード",
+    "sub_pulse": "トレンド",
+    "sub_radar": "ニッチ調査"
   },
   "app_common": {
     "save": "保存",
