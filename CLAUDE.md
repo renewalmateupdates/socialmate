@@ -455,7 +455,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 16, 2026).** #786 through #797 are merged.
+**Pick up here (updated Nov 16, 2026).** #786 through #799 are merged.
 #793 (batches 1 and 2) rebuilt Queue and Calendar (range picker, collapsible
 days, red Failed section, TikTok posts in the day lists, week view, Calendar
 opens on today), delivered webhooks with `after()` and from Post Now too, added
@@ -476,7 +476,7 @@ and under More tools, with "Use in a post" handing the image to Compose
 through IndexedDB (`lib/tool-image.ts`, `/start?from=tool-image`).
 
 **Nov 16:** #794 to #798 are merged (#798 is the homepage demo, also on YouTube
-at youtu.be/aNYEvhoSPIY). Branch `feat/update-email-nov16` adds the November
+at youtu.be/aNYEvhoSPIY). #799 (merged) added the November
 update email to every confirmed outside account (what changed, what's next, and
 one question: what stops you using SocialMate every week). It sends nothing on
 its own: `/api/admin/update-email` GET previews, `POST ?to=` sends a test copy,
@@ -486,6 +486,14 @@ its own: `/api/admin/update-email` GET previews, `POST ?to=` sends a test copy,
 `lib/emails/product-update-nov2026.ts`, tested. Found while building it: Resend
 reports a rejected send in its return value without throwing, so the TikTok
 email routes count a failed send as sent; the new route checks the error.
+It went to 184 of 246 on Nov 16 before Resend's daily quota stopped it (a
+spent quota blocks all app mail until it resets, so cap the next bulk send
+below it); the other 62 go Nov 17. The first reply came from someone who signed
+up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
+pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
+posts each issue automatically (it imports drafts by hand). Fixed in the
+`fix/vs-substack-claims-nov16` branch, with the page's Repurpose price (now
+`REPURPOSE_COST`) and its scheduled-Bluesky-threads claim (threads post at once).
 
 **Nov 16, earlier:** #794 to #797 are merged. #797 fixed four bugs found while capturing
 the demo, all checked live afterwards: Write with AI buttons looked disabled in
