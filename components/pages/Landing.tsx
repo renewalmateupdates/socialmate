@@ -6,6 +6,7 @@ import PublicFooter from '@/components/PublicFooter'
 import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
 import PlatformIcon from '@/components/landing/PlatformIcon'
 import HeroLoop from '@/components/landing/HeroLoop'
+import DemoVideo from '@/components/landing/DemoVideo'
 import EmberField from '@/components/landing/EmberField'
 import Reveal from '@/components/landing/Reveal'
 import ShopStrip from '@/components/landing/ShopStrip'
@@ -127,6 +128,22 @@ const FREE_TIER: { value: string | null; valueKey?: string; labelKey: string }[]
   { value: null, valueKey: 'analytics_value', labelKey: 'analytics'   },
   { value: null, valueKey: 'window_value',    labelKey: 'window'      },
   { value: null, valueKey: 'sigil_value',     labelKey: 'sigil'       },
+]
+
+// Seconds into public/demo/socialmate-demo.mp4 where each chapter card starts,
+// from the render's chapters.txt. A re-rendered video means re-reading these.
+const DEMO_CHAPTERS: { start: number; key: string }[] = [
+  { start: 0,   key: 'intro'    },
+  { start: 13,  key: 'home'     },
+  { start: 29,  key: 'accounts' },
+  { start: 51,  key: 'compose'  },
+  { start: 87,  key: 'ai'       },
+  { start: 107, key: 'full'     },
+  { start: 126, key: 'bulk'     },
+  { start: 153, key: 'schedule' },
+  { start: 189, key: 'tiktok'   },
+  { start: 210, key: 'tools'    },
+  { start: 225, key: 'pricing'  },
 ]
 
 const GUIDES = [
@@ -261,6 +278,30 @@ export default function Landing({
       <div className="mx-auto w-full max-w-7xl px-gutter pb-section">
         <LazyUserStatsCounter />
       </div>
+
+      {/* ══ DEMO ═══════════════════════════════════════════════════════════
+          The whole product in four minutes, real screens only. Sits right
+          under the proof numbers because it answers the next question a
+          visitor has: "what does it actually look like?" */}
+      <Section id="demo" divide>
+        <Eyebrow>{t('landing.demo.eyebrow')}</Eyebrow>
+        <Display size="md" className="mt-5 max-w-2xl">
+          {t('landing.demo.headline')}
+        </Display>
+        <Body className="mt-5 max-w-xl text-ink-muted">
+          {t('landing.demo.body')}
+        </Body>
+        <p className="mt-3 max-w-xl text-small text-ink-muted">{t('landing.demo.note')}</p>
+        <div className="mt-12">
+          <DemoVideo
+            src="/demo/socialmate-demo.mp4"
+            poster="/demo/socialmate-demo-poster.jpg"
+            playLabel={t('landing.demo.play')}
+            chaptersLabel={t('landing.demo.chapters_label')}
+            chapters={DEMO_CHAPTERS.map(c => ({ start: c.start, label: t(`landing.demo.chapters.${c.key}`) }))}
+          />
+        </div>
+      </Section>
 
       {/* ══ TESTIMONIALS ═══════════════════════════════════════════════════
           Real quotes only, from lib/testimonials.ts. One quote is a single

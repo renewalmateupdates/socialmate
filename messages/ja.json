@@ -2580,6 +2580,27 @@
       "cta_secondary": "料金を見る",
       "no_card": "カード不要 · 無料プランに期限はありません"
     },
+    "demo": {
+      "eyebrow": "デモ · 4分",
+      "headline": "4分ですべてが分かります。",
+      "body": "公開中のアプリの実際の画面です。アカウントの連携、全プラットフォーム向けの投稿作成、カレンダー、TikTok Studio、料金まで。見たいところへ直接ジャンプできます。",
+      "note": "画面に字幕（英語）があるので、音声なしでも見られます。",
+      "chapters_label": "チャプター",
+      "play": "デモを再生",
+      "chapters": {
+        "intro": "イントロ",
+        "home": "ホーム画面",
+        "accounts": "アカウントを連携",
+        "compose": "1つの投稿を全プラットフォームへ",
+        "ai": "AIで書く",
+        "full": "必要なときはフルモード",
+        "bulk": "1か月分の投稿を一度にアップロード",
+        "schedule": "スケジュール全体",
+        "tiktok": "TikTok Studio",
+        "tools": "無料ツール（アカウント不要）",
+        "pricing": "料金"
+      }
+    },
     "testimonials": {
       "eyebrow": "使っている人の声",
       "more": "Wall of Loveをもっと見る"

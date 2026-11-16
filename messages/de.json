@@ -2580,6 +2580,27 @@
       "cta_secondary": "Preise ansehen",
       "no_card": "Keine Karte nötig · Der kostenlose Plan läuft nie ab"
     },
+    "demo": {
+      "eyebrow": "Demo · 4 Minuten",
+      "headline": "Alles in vier Minuten.",
+      "body": "Echte Bildschirme aus der Live-App: Konten verbinden, einen Beitrag für alle Plattformen schreiben, der Kalender, TikTok Studio und die Preise. Spring direkt zu dem Teil, der dich interessiert.",
+      "note": "Mit Untertiteln (auf Englisch), funktioniert also auch ohne Ton.",
+      "chapters_label": "Kapitel",
+      "play": "Demo abspielen",
+      "chapters": {
+        "intro": "Einleitung",
+        "home": "Deine Zentrale",
+        "accounts": "Konten verbinden",
+        "compose": "Ein Beitrag, alle Plattformen",
+        "ai": "Mit KI schreiben",
+        "full": "Der volle Modus, wenn du ihn brauchst",
+        "bulk": "Ein Monat Beiträge in einem Upload",
+        "schedule": "Dein ganzer Zeitplan",
+        "tiktok": "TikTok Studio",
+        "tools": "Kostenlose Tools, ohne Konto",
+        "pricing": "Preise"
+      }
+    },
     "testimonials": {
       "eyebrow": "Von Leuten, die es nutzen",
       "more": "Mehr auf der Wall of Love"
