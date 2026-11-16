@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
+import { REPURPOSE_COST } from '@/lib/ai-tool-costs'
 
 const COMPARISON = [
   { feature: 'Price',                          substack: 'Free (10% cut of paid subs)',       socialmate: '$0 — free forever'        },
@@ -12,7 +13,7 @@ const COMPARISON = [
   { feature: 'Schedule to LinkedIn',           substack: '❌',                                 socialmate: '✅ Free'                   },
   { feature: 'Schedule to Discord',            substack: '❌',                                 socialmate: '✅ Free'                   },
   { feature: 'Schedule to Telegram',           substack: '❌',                                 socialmate: '✅ Free'                   },
-  { feature: 'Schedule to Bluesky',            substack: '⚠️ Substack Notes only',            socialmate: '✅ Full scheduling'        },
+  { feature: 'Schedule to Bluesky',            substack: '❌ Notes stay on Substack',          socialmate: '✅ Full scheduling'        },
   { feature: 'Schedule to Mastodon',           substack: '❌',                                 socialmate: '✅ Free'                   },
   { feature: 'Schedule to X / Twitter',        substack: '❌',                                 socialmate: '✅ (Pro+)'                 },
   { feature: 'Content calendar',               substack: '❌ No scheduling calendar',          socialmate: '✅ Full calendar UI'       },
@@ -20,8 +21,8 @@ const COMPARISON = [
   { feature: 'AI writing tools',               substack: '❌ No AI social tools',             socialmate: '15+ tools free'            },
   { feature: 'Analytics',                      substack: 'Email open rate / subscriber stats', socialmate: '✅ Social analytics free'  },
   { feature: 'Link in bio (SIGIL)',             substack: '❌',                                 socialmate: '✅ Free'                   },
-  { feature: 'RSS import',                     substack: 'N/A (is the RSS source)',           socialmate: '✅ Import Substack RSS'    },
-  { feature: 'Monetization',                   substack: '✅ Paid subscriptions (10% cut)',    socialmate: '✅ Tip jar + fan subs (0% cut)' },
+  { feature: 'RSS import',                     substack: 'N/A (is the RSS source)',           socialmate: '✅ Import issues as drafts' },
+  { feature: 'Paid newsletter subscriptions',  substack: '✅ Built in (10% cut)',              socialmate: '❌ Not a newsletter platform' },
   { feature: 'Team collaboration',             substack: '⚠️ Limited',                        socialmate: '✅ Free (2 seats)'         },
 ]
 
@@ -32,19 +33,19 @@ const FAQ = [
   },
   {
     q: 'Can I use SocialMate to promote my Substack newsletter?',
-    a: "Yes — and this is one of the best use cases. SocialMate can import your Substack RSS feed and automatically create social posts when a new issue publishes. You write the newsletter in Substack; SocialMate promotes it across 7 social platforms automatically. Turn every Substack issue into a week of social content.",
+    a: "Yes, it's one of the best uses for it. SocialMate's RSS import reads your Substack feed (yourname.substack.com/feed) and brings the issues you pick in as drafts with the headline, a teaser and the link. Nothing posts on its own: edit each draft, then schedule it to Bluesky, LinkedIn, Mastodon, Discord and Telegram (and X on Pro). Write the newsletter in Substack; promote it from SocialMate.",
   },
   {
     q: 'Should I use Substack or SocialMate?',
     a: "They solve different problems. Substack is for newsletter publishing and email-first monetization. SocialMate is for scheduling social media posts across 7 platforms. Most serious creators use both: Substack to own their email list, SocialMate to stay active on social without spending hours posting manually.",
   },
   {
-    q: 'How does SocialMate monetization compare to Substack?',
-    a: "Substack takes 10% of paid subscription revenue (plus Stripe fees). SocialMate's Creator Monetization Hub takes 0% — all tip jar payments and fan subscriptions go directly to you via Stripe Connect. SocialMate is a social scheduling tool with optional monetization, not a publishing platform. For newsletter-first monetization, Substack is purpose-built. For tip jars alongside your social presence, SocialMate costs less.",
+    q: 'Can SocialMate collect paid subscribers like Substack?',
+    a: "No. SocialMate doesn't host articles, send newsletters or run paid subscriptions. If you want readers to pay for your writing, use Substack (or Beehiiv or Ghost). SocialMate is for after you publish: it schedules posts about each issue to the social platforms your readers already use.",
   },
   {
     q: 'Can SocialMate post to Bluesky like Substack Notes?',
-    a: "Yes. SocialMate supports full Bluesky scheduling — not just Substack Notes-style quick posts. You can schedule long-form threads, images, and posts to Bluesky in advance from SocialMate's content calendar. Substack Notes posts to your Substack-branded profile; SocialMate posts to your actual Bluesky account.",
+    a: "Yes, and to your actual Bluesky account rather than your Substack profile. Schedule posts with images to Bluesky in advance from SocialMate's calendar. Threads also post to Bluesky as real reply chains, but a thread goes out right away; it can't be scheduled for later.",
   },
 ]
 
@@ -82,7 +83,7 @@ export default function VsSubstackPage() {
         {/* HERO */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-raised border border-edge-lit rounded-full px-4 py-1.5 text-xs font-bold text-ink-muted mb-4">
-            Updated June 2026
+            Updated November 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs Substack
@@ -119,11 +120,11 @@ export default function VsSubstackPage() {
             <p className="font-extrabold text-lg mb-2">Social scheduling for 7 platforms. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule to 7 social platforms simultaneously</li>
-              <li>✅ Import Substack RSS feed — auto-promote each issue</li>
+              <li>✅ Import each Substack issue as a draft post</li>
               <li>✅ 15+ AI tools for social content creation</li>
               <li>✅ Cross-platform analytics and calendar</li>
-              <li>✅ Tip jar + fan subs with 0% platform cut</li>
               <li>✅ No credit card required</li>
+              <li>❌ Not a newsletter or paid subscription platform</li>
             </ul>
           </div>
         </div>
@@ -155,22 +156,22 @@ export default function VsSubstackPage() {
               {
                 n: '1',
                 title: "Substack owns your email list — SocialMate owns your social reach",
-                desc: "Substack is the right home for your newsletter. Email subscribers are the most valuable audience you can own — Substack makes that easy. But most Substack readers also follow creators on LinkedIn, Bluesky, TikTok, and Discord. SocialMate lets you reach them there too, automatically.",
+                desc: "Substack is the right home for your newsletter. Email subscribers are the most valuable audience you can own — Substack makes that easy. But most Substack readers also follow creators on LinkedIn, Bluesky, TikTok, and Discord. SocialMate lets you reach them there too, on a schedule.",
               },
               {
                 n: '2',
-                title: 'Import your Substack RSS to auto-promote every issue',
-                desc: "SocialMate's RSS import reads your Substack feed. When you publish a new issue, SocialMate can generate a social post for each platform automatically — showing the headline, a teaser excerpt, and a link. Your newsletter announcement goes to all 7 social platforms without you writing 7 separate posts.",
+                title: 'Import your Substack RSS to promote every issue',
+                desc: "SocialMate's RSS import reads your Substack feed and turns the issues you pick into drafts with the headline, a teaser and the link. Edit the draft once, then schedule it to every text platform you've connected at the same time. Nothing posts until you schedule it.",
               },
               {
                 n: '3',
                 title: 'AI tools to repurpose newsletter content into social posts',
-                desc: "SocialMate's content repurposing AI reads long-form content and turns it into thread formats, short captions, LinkedIn posts, TikTok hooks, and email teasers. Paste a Substack article → get 6 social-optimized formats in seconds. 5 credits per run.",
+                desc: `Paste a Substack article into Repurpose and pick a format: a thread, a short caption, a hook, a LinkedIn post, a long-form post or an email teaser. Each run makes one format and costs ${REPURPOSE_COST} AI credits.`,
               },
               {
                 n: '4',
-                title: '0% creator cut vs Substack\'s 10% cut',
-                desc: "Substack takes 10% of paid subscription revenue. SocialMate's Creator Monetization Hub takes 0% — tip jars and fan subscriptions go directly to you via Stripe Connect. If you want monetization outside your Substack newsletter (tips from social followers, one-time support), SocialMate is the free option.",
+                title: "SocialMate doesn't replace Substack",
+                desc: "SocialMate doesn't host your writing or collect paid subscribers, and it isn't trying to. Keep your newsletter and your paying readers on Substack. Use SocialMate to keep showing up on social between issues, so more people find the newsletter.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-raised border border-edge rounded-2xl hover:border-edge transition-all">
@@ -199,9 +200,9 @@ export default function VsSubstackPage() {
 
         {/* CTA */}
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Promote your Substack on 7 social platforms — free</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Promote your Substack on social, free</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate schedules to LinkedIn, TikTok, Discord, Bluesky, Telegram, Mastodon, and X. Import your Substack RSS and auto-promote every issue. Free forever.
+            SocialMate schedules to Bluesky, LinkedIn, Mastodon, Discord and Telegram on the free plan, X on Pro, and TikTok for video. Import your Substack RSS and turn each issue into a draft in seconds.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}
