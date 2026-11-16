@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
-import { sendMail, REPLY_TO } from '@/lib/mail'
+import { REPLY_TO } from '@/lib/mail'
+import { BULK_BATCH_SIZE, bulkSentLast24h, runBulkSend, sendOrThrow } from '@/lib/bulk-email'
 import {
   FIRST_POST_CONFIRM, FIRST_POST_EVENT, FIRST_POST_SUBJECT, OCT23_EVENT,
   firstPostAudience, firstPostEmailHtml,
@@ -15,16 +16,15 @@ import {
 // Oct 23 send (/api/admin/tiktok-live-email):
 //   GET                              previews the audience
 //   POST ?to=you@example.com         sends one test copy, records nothing
-//   POST { confirm: CONFIRM }        sends to everyone eligible
+//   POST { confirm: CONFIRM }        sends the next batch (lib/bulk-email.ts caps it)
 // Each send is recorded in usage_events after it succeeds, so a re-POST only
 // reaches people not yet sent and a failure stays eligible.
 
-// Resend round trips at SEND_INTERVAL_MS each; 60s covers well over 100 sends.
+// A batch of BULK_BATCH_SIZE at ~0.7s per send finishes well inside 60s.
 export const maxDuration = 60
 
 // Resend's free tier allows 2 requests/second.
 const SEND_INTERVAL_MS = 400
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
   const testTo = new URL(req.url).searchParams.get('to')
   if (testTo) {
     try {
-      await sendMail({ to: testTo, subject: `[TEST] ${FIRST_POST_SUBJECT}`, html: firstPostEmailHtml('', true, APP_URL) })
+      await sendOrThrow({ to: testTo, subject: `[TEST] ${FIRST_POST_SUBJECT}`, html: firstPostEmailHtml('', true, APP_URL) })
       return NextResponse.json({ test: true, sentTo: testTo, recorded: false, replyTo: REPLY_TO })
     } catch (e) {
       return NextResponse.json({ test: true, error: errMsg(e) || 'send failed' }, { status: 500 })
@@ -106,35 +106,29 @@ export async function POST(req: Request) {
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
   const db = getSupabaseAdmin()
-  let sent = 0
-  const failed: string[] = []
+  let sentLast24h: number
+  try {
+    sentLast24h = await bulkSentLast24h(db)
+  } catch (e) {
+    console.error('[tiktok-first-post-email] bulk count failed:', errMsg(e))
+    return NextResponse.json({ error: errMsg(e), sent: 0 }, { status: 500 })
+  }
 
-  // Indexed loop: this repo compiles below es2015, so no for..of over iterators.
-  for (let i = 0; i < targets.length; i++) {
-    const t = targets[i]
-    if (i > 0) await sleep(SEND_INTERVAL_MS)
-    try {
-      await sendMail({ to: t.email, subject: FIRST_POST_SUBJECT, html: firstPostEmailHtml(t.name, t.gotOct23, APP_URL) })
-      // Recorded only after a successful send, so a failure stays eligible.
+  return NextResponse.json(await runBulkSend({
+    label: 'tiktok-first-post-email',
+    targets,
+    sentLast24h,
+    batchSize: BULK_BATCH_SIZE,
+    intervalMs: SEND_INTERVAL_MS,
+    send: t => sendOrThrow({ to: t.email, subject: FIRST_POST_SUBJECT, html: firstPostEmailHtml(t.name, t.gotOct23, APP_URL) }),
+    // Recorded only after a successful send, so a failure stays eligible.
+    record: async t => {
       const { error } = await db.from('usage_events').insert({
         user_id: t.id,
         event_type: FIRST_POST_EVENT,
         metadata: { got_oct23: t.gotOct23 },
       })
-      if (error) console.warn('[tiktok-first-post-email] usage_events insert failed:', t.email, error.message)
-      sent++
-    } catch (e) {
-      failed.push(t.email)
-      console.error('[tiktok-first-post-email] send failed:', t.email, errMsg(e))
-    }
-  }
-
-  const remaining = targets.length - sent
-  return NextResponse.json({
-    sent,
-    failed: failed.length,
-    failedEmails: failed.slice(0, 10),
-    remaining,
-    note: remaining > 0 ? 'POST again with the same confirm to reach the rest; nobody already sent is re-sent.' : 'done',
-  })
+      if (error) throw new Error(error.message)
+    },
+  }))
 }
