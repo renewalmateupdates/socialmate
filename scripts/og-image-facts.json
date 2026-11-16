@@ -1,0 +1,14 @@
+{
+  "freePosts": 250,
+  "proMonthly": 8,
+  "agencyMonthly": 29,
+  "platforms": [
+    "TikTok",
+    "LinkedIn",
+    "X",
+    "Bluesky",
+    "Discord",
+    "Telegram",
+    "Mastodon"
+  ]
+}

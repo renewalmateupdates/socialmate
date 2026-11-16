@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     siteName: 'SocialMate',
     title: 'SocialMate: Free Social Media Scheduler',
     description: SHORT_DESCRIPTION,
-    images: [{ url: '/og-image.png', width: 1270, height: 760, alt: 'SocialMate. Schedule smarter. Start free.' }],
+    images: [{ url: '/og-image.png', width: 1270, height: 760, alt: 'SocialMate. Post everywhere. All at once.' }],
   },
   twitter: {
     card: 'summary_large_image',
