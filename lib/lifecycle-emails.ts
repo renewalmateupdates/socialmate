@@ -33,6 +33,8 @@ export function lifecycleEmail(opts: {
   headline: string
   paragraphs: string[]
   panel?: EmailPanel
+  /** Paragraphs after the panel and before the button. */
+  afterPanel?: string[]
   ctaLabel: string
   ctaHref: string
   signoff?: string
@@ -42,9 +44,9 @@ export function lifecycleEmail(opts: {
   const signoff  = opts.signoff ?? 'Joshua, Founder of SocialMate'
   const footnote = opts.footnote ?? 'Reply "unsubscribe" and I will take you off these.'
 
-  const body = paragraphs
-    .map(p => `<p style="font-size:15px;color:${INK_BODY};line-height:1.7;margin:0 0 16px;">${p}</p>`)
-    .join('')
+  const para = (p: string) => `<p style="font-size:15px;color:${INK_BODY};line-height:1.7;margin:0 0 16px;">${p}</p>`
+  const body = paragraphs.map(para).join('')
+  const after = (opts.afterPanel ?? []).map(para).join('')
 
   const panelHtml = panel
     ? `<div style="background:${PANEL};border:1px solid ${EDGE};border-radius:12px;padding:20px;margin:12px 0 28px;">
@@ -60,6 +62,7 @@ export function lifecycleEmail(opts: {
     <h1 style="font-size:24px;font-weight:800;color:${INK_HIGH};margin:0 0 16px;letter-spacing:-0.5px;line-height:1.25;">${headline}</h1>
     ${body}
     ${panelHtml}
+    ${after}
     <a href="${ctaHref}" style="display:inline-block;background:linear-gradient(180deg,${GOLD_BRIGHT} 0%,${GOLD} 100%);color:#1A1206;font-size:14px;font-weight:800;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:28px;">${ctaLabel}</a>
     <p style="font-size:13px;color:${INK_MUTED};margin:0;">${signoff}</p>
     <p style="font-size:11px;color:${INK_FAINT};margin-top:16px;">${footnote}</p>

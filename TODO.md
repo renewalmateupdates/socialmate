@@ -6,12 +6,11 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
 
 ## Needs Joshua (a click or a query, not a decision)
 
-1. **Run `supabase/blog_accuracy_nov5.sql` in the Supabase SQL editor.** It fixes
-   21 wrong claims in 16 blog posts (a $5 Pro price, Instagram and YouTube posting,
-   TikTok "pending", the SIGIL address, Enki as a SocialMate feature, a 50-post free
-   cap) and removes 11 trading posts that sell Enki plans on the SocialMate blog.
-   Originals are backed up in the git-excluded `blog_price_backup_nov5_accuracy.json`.
-   The next deploy (or `/api/admin/revalidate`) refreshes the pages.
+1. **Before the November update email goes out:** any "unsubscribe" replies to
+   earlier emails (socialmatehq@gmail.com, and Resend's Receiving tab). Those
+   addresses get recorded first so the send skips them.
+
+(`supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old $5 price is gone.)
 
 ## Waiting on a decision
 
