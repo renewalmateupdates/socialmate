@@ -475,7 +475,19 @@ size math in `lib/tools/image-sizes.ts`, tested), listed in the tools catalog
 and under More tools, with "Use in a post" handing the image to Compose
 through IndexedDB (`lib/tool-image.ts`, `/start?from=tool-image`).
 
-**Nov 16:** #794 to #797 are merged. #797 fixed four bugs found while capturing
+**Nov 16:** #794 to #798 are merged (#798 is the homepage demo, also on YouTube
+at youtu.be/aNYEvhoSPIY). Branch `feat/update-email-nov16` adds the November
+update email to every confirmed outside account (what changed, what's next, and
+one question: what stops you using SocialMate every week). It sends nothing on
+its own: `/api/admin/update-email` GET previews, `POST ?to=` sends a test copy,
+`POST { unsubscribe: [...] }` records "unsubscribe" replies as
+`email_unsubscribed` events (every send skips them), and
+`POST { confirm }` sends the next batch of 50. Copy and audience are in
+`lib/emails/product-update-nov2026.ts`, tested. Found while building it: Resend
+reports a rejected send in its return value without throwing, so the TikTok
+email routes count a failed send as sent; the new route checks the error.
+
+**Nov 16, earlier:** #794 to #797 are merged. #797 fixed four bugs found while capturing
 the demo, all checked live afterwards: Write with AI buttons looked disabled in
 dark mode, the Compose preview ignored thread mode, Bulk said "1 failed" for a
 bad CSV row nothing had sent, and X handles showed "@@". Branch
