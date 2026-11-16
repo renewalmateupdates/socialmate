@@ -1,7 +1,7 @@
 import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { createNotification } from '@/lib/notify'
-import { sendMail } from '@/lib/mail'
+import { sendMailOrThrow } from '@/lib/mail'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 const DAY_MS  = 86_400_000
@@ -82,7 +82,7 @@ export const tokenExpiryWarnings = inngest.createFunction(
         const email = authUser?.user?.email
         if (email) {
           try {
-            await sendMail({
+            await sendMailOrThrow({
               to: email,
               subject: `Your ${meta.label} connection ${when}`,
               html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#18181b;">

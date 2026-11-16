@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { Check, X as CloseIcon } from 'lucide-react'
+import { useI18n } from '@/contexts/I18nContext'
 
 export type CustomizerGroup = { section: string; label: string; items: { href: string; label: string }[] }
 
@@ -18,6 +19,7 @@ export default function SidebarCustomizer({
   onReset: () => void
   onClose: () => void
 }) {
+  const { t } = useI18n()
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
@@ -34,12 +36,12 @@ export default function SidebarCustomizer({
         className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-lg max-h-[85dvh] flex flex-col shadow-2xl">
         <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 id="customize-sidebar-title" className="text-base font-extrabold">Customize your sidebar</h2>
+            <h2 id="customize-sidebar-title" className="text-base font-extrabold">{t('app_sidebar.customize_title')}</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Tick the tools you use. The rest wait under More tools, so nothing goes away.
+              {t('app_sidebar.customize_intro')}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Close"
+          <button onClick={onClose} aria-label={t('app_sidebar.close')}
             className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
             <CloseIcon className="w-4 h-4" strokeWidth={2} />
           </button>
@@ -77,15 +79,15 @@ export default function SidebarCustomizer({
         <div className="flex flex-wrap items-center gap-2 p-4 border-t border-gray-100 dark:border-gray-800">
           <button onClick={onShowAll}
             className="text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-400">
-            Show everything
+            {t('app_sidebar.customize_show_all')}
           </button>
           <button onClick={onReset}
             className="text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-400">
-            Back to the short list
+            {t('app_sidebar.customize_reset')}
           </button>
           <button onClick={onClose}
             className="ml-auto text-xs font-bold px-5 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black hover:opacity-80">
-            Done
+            {t('app_sidebar.customize_done')}
           </button>
         </div>
       </div>

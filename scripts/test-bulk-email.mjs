@@ -16,17 +16,24 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const require = createRequire(join(root, 'package.json'))
 const ts = require('typescript')
 
-// What the fake Resend returns for the next sendMail call, by recipient.
+// What the fake Resend returns for a send, by recipient. Everything else is the
+// real lib/mail.ts and lib/bulk-email.ts, compiled down to ES5 like the
+// tsconfig target, so the error classes are tested the way they can compile.
 let resendReplies = {}
+class FakeResend {
+  constructor() { this.emails = { send: async (opts) => resendReplies[opts.to] ?? { data: { id: 'x' }, error: null } } }
+}
+const cache = new Map()
 function load(rel) {
+  if (cache.has(rel)) return cache.get(rel).exports
   const { outputText } = ts.transpileModule(readFileSync(join(root, rel), 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2019 },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES5, lib: ['es2019'] },
   })
   const mod = { exports: {} }
+  cache.set(rel, mod)
   const localRequire = (id) => {
-    if (id === '@/lib/mail') {
-      return { sendMail: async (opts) => resendReplies[opts.to] ?? { data: { id: 'x' }, error: null } }
-    }
+    if (id === 'resend') return { Resend: FakeResend }
+    if (id.startsWith('@/lib/')) return load(`lib/${id.slice('@/lib/'.length)}.ts`)
     return require(id)
   }
   new Function('module', 'exports', 'require', outputText)(mod, mod.exports, localRequire)
@@ -35,6 +42,7 @@ function load(rel) {
 
 const { runBulkSend, sendOrThrow, isQuotaError, QuotaError, positiveInt, BULK_EMAIL_EVENTS, BULK_BATCH_SIZE } =
   load('lib/bulk-email.ts')
+const { sendMailOrThrow, MailError } = load('lib/mail.ts')
 
 const people = (n) => Array.from({ length: n }, (_, i) => ({ email: `p${i}@example.com` }))
 const quiet = () => { const e = console.error, w = console.warn; console.error = () => {}; console.warn = () => {}; return () => { console.error = e; console.warn = w } }
@@ -130,6 +138,21 @@ test('sendOrThrow: a quota error is a QuotaError, any other rejection a plain Er
   await assert.rejects(sendOrThrow({ to: 'q@example.com', subject: 's', html: 'h' }), (e) => e instanceof QuotaError)
   await assert.rejects(sendOrThrow({ to: 'b@example.com', subject: 's', html: 'h' }), (e) => !(e instanceof QuotaError) && e.message === 'bad')
   await sendOrThrow({ to: 'ok@example.com', subject: 's', html: 'h' })
+})
+
+test('sendMailOrThrow: a rejected single send reaches the caller\'s catch', async () => {
+  resendReplies = { 'x@example.com': { data: null, error: { name: 'validation_error', message: 'Invalid to field' } } }
+  await assert.rejects(sendMailOrThrow({ to: 'x@example.com', subject: 's', html: 'h' }),
+    (e) => e instanceof MailError && e.name === 'MailError' && e.code === 'validation_error' && e.message === 'Invalid to field')
+  await sendMailOrThrow({ to: 'fine@example.com', subject: 's', html: 'h' })
+})
+
+test('the three single-send sites use the throwing send inside their try/catch', () => {
+  for (const file of ['app/api/soma/projects/[id]/generate/route.ts', 'lib/inngest-token-expiry.ts', 'lib/inngest.ts']) {
+    const src = readFileSync(join(root, file), 'utf8')
+    assert.match(src, /await sendMailOrThrow\(/, `${file} should use sendMailOrThrow`)
+    assert.doesNotMatch(src, /await sendMail\(/, `${file} still awaits sendMail, whose rejection a catch never sees`)
+  }
 })
 
 test('helpers', () => {

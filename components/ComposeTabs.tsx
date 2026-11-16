@@ -1,13 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { PenLine, Rows3 } from 'lucide-react'
+import { useI18n } from '@/contexts/I18nContext'
 
 /**
  * Compose and the Bulk Scheduler are one place now: "One post" and "Bulk"
  * tabs on top of both pages (Nov 13, 2026). Bulk is where a CSV goes.
  */
 export default function ComposeTabs({ active }: { active: 'one' | 'bulk' }) {
-  const tab = (key: 'one' | 'bulk', href: string, label: string, Icon: typeof PenLine) => (
+  const { t } = useI18n()
+  const tab =(key: 'one' | 'bulk', href: string, label: string, Icon: typeof PenLine) => (
     <Link
       href={href}
       aria-current={active === key ? 'page' : undefined}
@@ -21,9 +23,9 @@ export default function ComposeTabs({ active }: { active: 'one' | 'bulk' }) {
   )
 
   return (
-    <nav aria-label="Compose views" className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-      {tab('one', '/compose', 'One post', PenLine)}
-      {tab('bulk', '/bulk-scheduler', 'Bulk', Rows3)}
+    <nav aria-label={t('app_sidebar.compose_views')} className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+      {tab('one', '/compose', t('app_sidebar.tab_one_post'), PenLine)}
+      {tab('bulk', '/bulk-scheduler', t('app_sidebar.tab_bulk'), Rows3)}
     </nav>
   )
 }

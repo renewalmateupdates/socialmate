@@ -8,7 +8,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { inngest } from '@/lib/inngest'
-import { sendMail } from '@/lib/mail'
+import { sendMailOrThrow } from '@/lib/mail'
 import { runCapForMode, runCapReached } from '@/lib/soma-runs'
 import { effectiveSomaMode } from '@/lib/soma-mode'
 import { GENERATE_COST, SomaRunError, runSomaGeneration, type SomaInsights } from '@/lib/soma-generate'
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (user.email && process.env.RESEND_API_KEY) {
       try {
         const automated = result.mode !== 'safe'
-        await sendMail({
+        await sendMailOrThrow({
           from:    'SOMA <soma@socialmate.studio>',
           to:      user.email,
           subject: automated

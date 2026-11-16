@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { sendMail, type SendMailOpts } from '@/lib/mail'
+import { MailError, sendMailOrThrow, type SendMailOpts } from '@/lib/mail'
 
 /**
  * The one way the admin one-shot emails (update, reactivation, TikTok,
@@ -45,20 +45,30 @@ export const BULK_BATCH_SIZE = 50
 /** Bulk sends allowed per rolling 24 hours, leaving the rest of Resend's quota for app mail. */
 export const BULK_DAILY_CAP = positiveInt(process.env.BULK_EMAIL_DAILY_CAP, 100)
 
-export class QuotaError extends Error {}
+export class QuotaError extends Error {
+  constructor(message: string) {
+    super(message)
+    // Keeps `instanceof QuotaError` true where classes compile down to ES5.
+    Object.setPrototypeOf(this, QuotaError.prototype)
+    this.name = 'QuotaError'
+  }
+}
 
 /** Resend's 429s for this are daily_quota_exceeded and monthly_quota_exceeded. */
-export function isQuotaError(err: { message?: string; name?: string } | null | undefined): boolean {
+export function isQuotaError(err: { message?: string; name?: string; code?: string } | null | undefined): boolean {
   if (!err) return false
-  return /quota/i.test(err.name || '') || /quota/i.test(err.message || '')
+  return /quota/i.test(err.code || '') || /quota/i.test(err.name || '') || /quota/i.test(err.message || '')
 }
 
 /** Send one email; throw if Resend rejected it, as a QuotaError when the quota is spent. */
 export async function sendOrThrow(opts: SendMailOpts): Promise<void> {
-  const { error } = await sendMail(opts)
-  if (error) {
-    const msg = error.message || 'Resend rejected the send'
-    throw isQuotaError(error) ? new QuotaError(msg) : new Error(msg)
+  try {
+    await sendMailOrThrow(opts)
+  } catch (e) {
+    if ((e instanceof MailError || (e as Error)?.name === 'MailError') && isQuotaError(e as MailError)) {
+      throw new QuotaError((e as MailError).message)
+    }
+    throw e
   }
 }
 
@@ -123,7 +133,7 @@ export async function runBulkSend<T extends { email: string }>(opts: {
     } catch (e) {
       failedEmails.push(t.email)
       console.error(`[${opts.label}] send failed:`, t.email, errMsg(e))
-      if (e instanceof QuotaError) { stopped = 'quota'; break }
+      if (e instanceof QuotaError || (e as Error)?.name === 'QuotaError') { stopped = 'quota'; break }
       continue
     }
     sent++

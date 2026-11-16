@@ -44,6 +44,11 @@ export interface SendMailOpts {
   replyTo?: string
 }
 
+/**
+ * Resend's answer to a send. It reports a rejection in `error` and does NOT
+ * throw, so `await sendMail(...)` inside a try/catch never reaches the catch.
+ * Check `error`, or use sendMailOrThrow.
+ */
 export async function sendMail(opts: SendMailOpts) {
   return resend().emails.send({
     from: opts.from ?? FROM_JOSHUA,
@@ -52,4 +57,22 @@ export async function sendMail(opts: SendMailOpts) {
     html: opts.html,
     replyTo: opts.replyTo ?? REPLY_TO,
   })
+}
+
+/** A send Resend rejected. `code` is Resend's error name, e.g. daily_quota_exceeded. */
+export class MailError extends Error {
+  code?: string
+  constructor(message: string, code?: string) {
+    super(message)
+    // Keeps `instanceof MailError` true where classes compile down to ES5.
+    Object.setPrototypeOf(this, MailError.prototype)
+    this.name = 'MailError'
+    this.code = code
+  }
+}
+
+/** sendMail, but a rejected send throws a MailError, so a surrounding catch actually catches it. */
+export async function sendMailOrThrow(opts: SendMailOpts): Promise<void> {
+  const { error } = await sendMail(opts)
+  if (error) throw new MailError(error.message || 'Resend rejected the send', error.name)
 }
