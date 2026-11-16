@@ -18,7 +18,7 @@ import {
   type InsightsSource, type QueuedPost, type SavedDocResult, type SomaRunResult,
 } from '@/lib/soma-generate'
 import { normalizePlan } from '@/lib/plan'
-import { REPLY_TO, sendMail } from '@/lib/mail'
+import { REPLY_TO, sendMailOrThrow } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
@@ -2124,7 +2124,7 @@ async function notifySomaWeeklyRun(
     const email = owner?.user?.email
     if (!email || !process.env.RESEND_API_KEY) return
     const modeLabel = result.mode === 'full_send' ? 'Full Send' : 'Autopilot'
-    await sendMail({
+    await sendMailOrThrow({
       from:    'SOMA <soma@socialmate.studio>',
       to:      email,
       subject: `SOMA ${verb} ${result.postsCreated} posts for "${project.name}"`,

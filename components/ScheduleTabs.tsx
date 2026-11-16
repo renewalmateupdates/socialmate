@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { CalendarDays, List } from 'lucide-react'
+import { useI18n } from '@/contexts/I18nContext'
 
 /**
  * Calendar and Queue are one place now: "Schedule" in the sidebar, with these
@@ -11,6 +12,7 @@ import { CalendarDays, List } from 'lucide-react'
 export const SCHEDULE_TAB_KEY = 'sm_schedule_tab'
 
 export default function ScheduleTabs({ active }: { active: 'calendar' | 'list' }) {
+  const { t } = useI18n()
   useEffect(() => {
     try { localStorage.setItem(SCHEDULE_TAB_KEY, active === 'list' ? '/queue' : '/calendar') } catch { /* private mode */ }
   }, [active])
@@ -29,9 +31,9 @@ export default function ScheduleTabs({ active }: { active: 'calendar' | 'list' }
   )
 
   return (
-    <nav aria-label="Schedule views" className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-4">
-      {tab('calendar', '/calendar', 'Calendar', CalendarDays)}
-      {tab('list', '/queue', 'List', List)}
+    <nav aria-label={t('app_sidebar.schedule_views')} className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-4">
+      {tab('calendar', '/calendar', t('app_sidebar.tab_calendar'), CalendarDays)}
+      {tab('list', '/queue', t('app_sidebar.tab_list'), List)}
     </nav>
   )
 }

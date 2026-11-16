@@ -494,8 +494,13 @@ emails, unblocked) sends through `lib/bulk-email.ts`: a rejected send throws
 and is never recorded, one POST sends at most 50, all of them together stop at
 `BULK_EMAIL_DAILY_CAP` (default 100) per rolling 24 hours, and a batch stops at
 the first quota error. `scripts/test-bulk-email.mjs` fails if a bulk route
-calls `sendMail` directly. Seven single-send sites elsewhere still ignore
-Resend's error. The first reply came from someone who signed
+calls `sendMail` directly (#802). Then `sendMailOrThrow` in `lib/mail.ts`
+(bulk-email builds on it) went into the three `sendMail` calls that sat in a
+try/catch expecting a throw (SOMA generate, SOMA autopilot, token-expiry), and
+the Quick guide, Customize dialog and the Schedule and Compose tab bars got
+their strings in all nine locales. **Still open:** 56 places call
+`resend.emails.send` directly and only 3 check its error (31 files, including
+the Stripe webhook, which needs Joshua's OK before anyone touches it). The first reply came from someone who signed
 up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
 pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
 posts each issue automatically (it imports drafts by hand). Fixed in #800
@@ -528,7 +533,6 @@ of the video on purpose: they save but don't publish yet.
 - Bulk: a sheet saved from Google Sheets (M/D/YYYY dates, 12-hour times), and a
   bad row saves once fixed. Seen Nov 16: CSV import, a bad date arrives red
   with the reason.
-- Still English: the Quick guide and Customize sidebar dialogs' body text.
 - Batch 4: the homepage demo ships in `feat/homepage-demo-nov16`. Still to do:
   per-platform how-to videos (each needs that platform's connect flow on
   screen). If the demo is re-rendered, update `DEMO_CHAPTERS` from its
