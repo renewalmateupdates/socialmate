@@ -2580,6 +2580,27 @@
       "cta_secondary": "查看价格",
       "no_card": "无需信用卡 · 免费版永不过期"
     },
+    "demo": {
+      "eyebrow": "演示 · 4 分钟",
+      "headline": "四分钟看完全部功能。",
+      "body": "来自正式版应用的真实界面：连接账号、一次撰写发到所有平台、日历、TikTok Studio 和价格。可以直接跳到你关心的部分。",
+      "note": "画面带字幕（英文），静音也能看。",
+      "chapters_label": "章节",
+      "play": "播放演示",
+      "chapters": {
+        "intro": "开场",
+        "home": "你的主页",
+        "accounts": "连接你的账号",
+        "compose": "一条帖子，所有平台",
+        "ai": "用 AI 写作",
+        "full": "需要时切换完整模式",
+        "bulk": "一次上传一个月的帖子",
+        "schedule": "你的全部日程",
+        "tiktok": "TikTok Studio",
+        "tools": "免费工具，无需账号",
+        "pricing": "价格"
+      }
+    },
     "testimonials": {
       "eyebrow": "来自用户的声音",
       "more": "在 Wall of Love 查看更多"

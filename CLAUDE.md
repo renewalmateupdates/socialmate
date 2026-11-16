@@ -455,7 +455,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 13, 2026, evening).** #786 through #793 are merged.
+**Pick up here (updated Nov 16, 2026).** #786 through #797 are merged.
 #793 (batches 1 and 2) rebuilt Queue and Calendar (range picker, collapsible
 days, red Failed section, TikTok posts in the day lists, week view, Calendar
 opens on today), delivered webhooks with `after()` and from Post Now too, added
@@ -475,23 +475,40 @@ size math in `lib/tools/image-sizes.ts`, tested), listed in the tools catalog
 and under More tools, with "Use in a post" handing the image to Compose
 through IndexedDB (`lib/tool-image.ts`, `/start?from=tool-image`).
 
+**Nov 16:** #794 to #797 are merged. #797 fixed four bugs found while capturing
+the demo, all checked live afterwards: Write with AI buttons looked disabled in
+dark mode, the Compose preview ignored thread mode, Bulk said "1 failed" for a
+bad CSV row nothing had sent, and X handles showed "@@". Branch
+`feat/homepage-demo-nov16` puts the demo on the homepage: a 4:13 walkthrough
+built from real screens of the live app (`public/demo/socialmate-demo.mp4`,
+self-hosted, `preload="none"` so it costs nothing until played), with clickable
+chapters (`components/landing/DemoVideo.tsx`, times in `DEMO_CHAPTERS` in
+`components/pages/Landing.tsx`). The full-quality video, 9 vertical clips for
+TikTok and Shorts, the YouTube chapter list and the render scripts live in
+Joshua's `Videos\SocialMate demo` folder, outside the repo. Polls are left out
+of the video on purpose: they save but don't publish yet.
+
 *Claude, after the batch 3 branch deploys:*
-- Compose signed in: Simple hides threads, polls, A/B, tags, hashtag sets, Post
-  Score, repeats and templates; Full shows them; opening a draft with a poll or
-  tags shows Full. Write with AI opens and each tool still works.
-- Bulk: import the downloaded template, then a sheet saved from Google Sheets
-  (M/D/YYYY dates, 12-hour times); a bad row arrives red and saves once fixed.
+- Compose signed in: opening a draft with a poll or tags shows Full, and each
+  Write with AI tool still works (running one costs credits, so not yet tried).
+  Already seen live Nov 16: the Simple and Full toggle, the Write with AI menu,
+  thread mode in Full.
+- Bulk: a sheet saved from Google Sheets (M/D/YYYY dates, 12-hour times), and a
+  bad row saves once fixed. Seen Nov 16: CSV import, a bad date arrives red
+  with the reason.
 - Still English: the Quick guide and Customize sidebar dialogs' body text.
-- Batch 4 (homepage demo video with chapters, real screenshots, per-platform
-  how-to videos) waits on Joshua's screen recordings: sessions can't sign in.
+- Batch 4: the homepage demo ships in `feat/homepage-demo-nov16`. Still to do:
+  per-platform how-to videos (each needs that platform's connect flow on
+  screen). If the demo is re-rendered, update `DEMO_CHAPTERS` from its
+  chapters.txt.
 - Image tools, signed in: "Use in a post" on each tool lands in Compose with
   the image uploaded and attached; on an iPhone, download saves the file. Then
   `node scripts/indexnow-submit.mjs` for the two new `/tools` pages.
 
 *Claude, after #793 deployed (Joshua walks these signed in):*
-- Walk Schedule signed in: Calendar opens on today; Week view; a TikTok Studio
-  post shows in the day panel; List keeps its range after a reload; a failed
-  post shows red with Retry; each summary card opens its details.
+- Walk Schedule signed in: List keeps its range after a reload; a failed post
+  shows red with Retry; each summary card opens its details. Seen Nov 16:
+  Calendar on today, Week view, TikTok Studio posts in the day lists, List.
 - Walk the sidebar on desktop and phone: the guide shows once, More tools opens,
   + adds a tool, Customize opens on screen inside the mobile drawer.
 - Webhooks: one Post Now and one scheduled post each reach a test endpoint with

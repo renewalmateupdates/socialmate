@@ -132,7 +132,7 @@ function platformsSection(): string[] {
 function pagesSection(): string[] {
   const has = (p: string) => routes.includes(p)
   const pages: [string, string, string][] = [
-    ['/', 'Home', 'what SocialMate is, in one page'],
+    ['/', 'Home', 'what SocialMate is, in one page, with a 4-minute demo video of the real app, in chapters'],
     ['/features', 'Features', 'everything in the app, grouped by job'],
     ['/pricing', 'Pricing', 'plans, limits and add-ons'],
     ['/faq', 'FAQ', 'common questions'],

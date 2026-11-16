@@ -2580,6 +2580,27 @@
       "cta_secondary": "Ver precios",
       "no_card": "Sin tarjeta · El plan gratuito nunca caduca"
     },
+    "demo": {
+      "eyebrow": "Demo · 4 minutos",
+      "headline": "Míralo todo en cuatro minutos.",
+      "body": "Pantallas reales de la app en vivo: conectar cuentas, escribir una publicación para todas las plataformas, el calendario, TikTok Studio y los precios. Salta directo a la parte que te interesa.",
+      "note": "Con subtítulos en pantalla (en inglés), así que funciona sin sonido.",
+      "chapters_label": "Capítulos",
+      "play": "Reproducir la demo",
+      "chapters": {
+        "intro": "Introducción",
+        "home": "Tu base",
+        "accounts": "Conecta tus cuentas",
+        "compose": "Una publicación, todas las plataformas",
+        "ai": "Escribe con IA",
+        "full": "Modo completo, cuando lo necesites",
+        "bulk": "Un mes de publicaciones en una sola carga",
+        "schedule": "Toda tu programación",
+        "tiktok": "TikTok Studio",
+        "tools": "Herramientas gratis, sin cuenta",
+        "pricing": "Precios"
+      }
+    },
     "testimonials": {
       "eyebrow": "De quienes lo usan",
       "more": "Más en el Muro de Amor"

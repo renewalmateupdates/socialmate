@@ -2580,6 +2580,27 @@
       "cta_secondary": "See pricing",
       "no_card": "No card required · Free plan never expires"
     },
+    "demo": {
+      "eyebrow": "Demo · 4 minutes",
+      "headline": "See the whole thing in four minutes.",
+      "body": "Real screens from the live app: connecting accounts, writing one post for every platform, the calendar, TikTok Studio and pricing. Jump straight to the part you care about.",
+      "note": "Captions are on screen, so it works with the sound off.",
+      "chapters_label": "Chapters",
+      "play": "Play the demo",
+      "chapters": {
+        "intro": "Intro",
+        "home": "Your home base",
+        "accounts": "Connect your accounts",
+        "compose": "One post, every platform",
+        "ai": "Write with AI",
+        "full": "Full mode, when you need it",
+        "bulk": "A month of posts in one upload",
+        "schedule": "Your whole schedule",
+        "tiktok": "TikTok Studio",
+        "tools": "Free tools, no account needed",
+        "pricing": "Pricing"
+      }
+    },
     "testimonials": {
       "eyebrow": "From the people using it",
       "more": "More on the Wall of Love"

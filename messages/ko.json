@@ -2580,6 +2580,27 @@
       "cta_secondary": "요금 보기",
       "no_card": "카드 불필요 · 무료 플랜은 만료되지 않습니다"
     },
+    "demo": {
+      "eyebrow": "데모 · 4분",
+      "headline": "4분이면 전부 볼 수 있습니다.",
+      "body": "실제 서비스 중인 앱의 화면입니다. 계정 연결, 모든 플랫폼용 게시물 작성, 캘린더, TikTok Studio, 요금까지. 원하는 부분으로 바로 이동하세요.",
+      "note": "화면에 자막(영어)이 있어 소리 없이도 볼 수 있습니다.",
+      "chapters_label": "챕터",
+      "play": "데모 재생",
+      "chapters": {
+        "intro": "소개",
+        "home": "홈 대시보드",
+        "accounts": "계정 연결",
+        "compose": "하나의 게시물, 모든 플랫폼",
+        "ai": "AI로 작성",
+        "full": "필요할 때는 전체 모드",
+        "bulk": "한 번의 업로드로 한 달 치 게시물",
+        "schedule": "전체 일정",
+        "tiktok": "TikTok Studio",
+        "tools": "무료 도구, 계정 필요 없음",
+        "pricing": "요금"
+      }
+    },
     "testimonials": {
       "eyebrow": "사용하는 사람들의 이야기",
       "more": "Wall of Love에서 더 보기"

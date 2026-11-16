@@ -2580,6 +2580,27 @@
       "cta_secondary": "Voir les tarifs",
       "no_card": "Sans carte · Le plan gratuit n’expire jamais"
     },
+    "demo": {
+      "eyebrow": "Démo · 4 minutes",
+      "headline": "Tout voir en quatre minutes.",
+      "body": "De vrais écrans de l’application en ligne : connecter ses comptes, écrire une publication pour toutes les plateformes, le calendrier, TikTok Studio et les tarifs. Allez directement à la partie qui vous intéresse.",
+      "note": "Sous-titres à l’écran (en anglais) : ça marche aussi sans le son.",
+      "chapters_label": "Chapitres",
+      "play": "Lancer la démo",
+      "chapters": {
+        "intro": "Introduction",
+        "home": "Votre tableau de bord",
+        "accounts": "Connectez vos comptes",
+        "compose": "Une publication, toutes les plateformes",
+        "ai": "Écrire avec l’IA",
+        "full": "Le mode complet, quand il le faut",
+        "bulk": "Un mois de publications en un seul import",
+        "schedule": "Tout votre planning",
+        "tiktok": "TikTok Studio",
+        "tools": "Outils gratuits, sans compte",
+        "pricing": "Tarifs"
+      }
+    },
     "testimonials": {
       "eyebrow": "Ceux qui l’utilisent en parlent",
       "more": "Plus sur le Wall of Love"
