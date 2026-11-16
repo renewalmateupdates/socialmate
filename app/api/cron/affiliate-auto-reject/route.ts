@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
 function getAdminSupabase() {
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
     const email = authUser?.user?.email
 
     if (email) {
-      await getResend().emails.send({
+      await logIfRejected('api/cron/affiliate-auto-reject:89', getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
             <p style="color: #aaa; font-size: 12px;">SocialMate · Questions? Reply to this email.</p>
           </div>
         `,
-      }).catch(err => console.warn('Auto-reject email failed:', err))
+      })).catch(err => console.warn('Auto-reject email failed:', err))
     }
 
     rejected++

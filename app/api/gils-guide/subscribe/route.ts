@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 function getAdmin() {
   return createClient(
@@ -119,13 +119,13 @@ export async function POST(req: NextRequest) {
     // Send the guide email via Resend
     const resend = new Resend(process.env.RESEND_API_KEY)
     try {
-      await resend.emails.send({
+      await logIfRejected('api/gils-guide/subscribe:122', resend.emails.send({
         from: 'Joshua @ SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to: cleanEmail,
         subject: "Your copy of Gilgamesh's Guide is here 📖",
         html: generateGuideEmail(cleanName),
-      })
+      }))
     } catch (emailErr) {
       // Non-fatal — subscriber is saved, email just didn't send
       console.error('Resend error for gils-guide:', emailErr)

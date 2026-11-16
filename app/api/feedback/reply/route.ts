@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
+import { logIfRejected } from '@/lib/mail'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
 export async function POST(req: NextRequest) {
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (item.email) {
-    await getResend().emails.send({
+    await logIfRejected('api/feedback/reply:40', getResend().emails.send({
       from: 'SocialMate <hello@socialmate.studio>',
       to: item.email,
       replyTo: 'socialmatehq@gmail.com',
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
           <p style="color: #aaa; font-size: 12px;">SocialMate · <a href="https://socialmate.studio" style="color: #aaa;">socialmate.studio</a></p>
         </div>
       `,
-    })
+    }))
   }
 
   const { error: updateError } = await admin

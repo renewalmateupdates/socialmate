@@ -18,7 +18,7 @@ import {
   type InsightsSource, type QueuedPost, type SavedDocResult, type SomaRunResult,
 } from '@/lib/soma-generate'
 import { normalizePlan } from '@/lib/plan'
-import { REPLY_TO, sendMailOrThrow } from '@/lib/mail'
+import { REPLY_TO, sendMailOrThrow, logIfRejected } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
@@ -555,13 +555,13 @@ export const weeklyDigest = inngest.createFunction(
 </body>
 </html>`
 
-            await resend.emails.send({
+            await logIfRejected('lib/inngest:558', resend.emails.send({
               from: 'SocialMate <hello@socialmate.studio>',
               replyTo: REPLY_TO,
               to: email,
               subject,
               html,
-            })
+            }))
             batchSent++
           } catch (err) {
             // Never let one user's failure stop the rest
@@ -990,7 +990,7 @@ export const onboardingSequence = inngest.createFunction(
 
     // ── Email 1 — Day 0: Welcome ───────────────────────────────────────────────
     await step.run('send-welcome-email', async () => {
-      await getResend().emails.send({
+      await logIfRejected('lib/inngest:993', getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -1051,7 +1051,7 @@ export const onboardingSequence = inngest.createFunction(
           </div>
           </div>
         `,
-      })
+      }))
     })
 
     // ── Wait 20 hours then check for activation ───────────────────────────────
@@ -1103,7 +1103,7 @@ export const onboardingSequence = inngest.createFunction(
       if (notifErr) console.warn('[onboarding] day1 notification insert failed:', notifErr.message)
 
       // Send email nudge
-      await getResend().emails.send({
+      await logIfRejected('lib/inngest:1106', getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -1134,7 +1134,7 @@ export const onboardingSequence = inngest.createFunction(
           </div>
           </div>
         `,
-      })
+      }))
     })
 
     // ── Wait remaining ~2 days to hit Day 3 total ─────────────────────────────
@@ -1147,7 +1147,7 @@ export const onboardingSequence = inngest.createFunction(
     await step.run('send-day3-email', async () => {
       const state = await getActivationState(email)
       if (state.userId && !state.hasConnected) {
-        await getResend().emails.send({
+        await logIfRejected('lib/inngest:1150', getResend().emails.send({
           from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
           replyTo: REPLY_TO,
           to: email,
@@ -1169,11 +1169,11 @@ export const onboardingSequence = inngest.createFunction(
             ctaLabel: 'Connect a platform',
             ctaHref: `${appUrl}/accounts`,
           }),
-        })
+        }))
         return
       }
 
-      await getResend().emails.send({
+      await logIfRejected('lib/inngest:1176', getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -1269,7 +1269,7 @@ export const onboardingSequence = inngest.createFunction(
           </div>
           </div>
         `,
-      })
+      }))
     })
 
     // ── Wait 4 more days (7 days total from signup) ────────────────────────────
@@ -1282,7 +1282,7 @@ export const onboardingSequence = inngest.createFunction(
     await step.run('send-day7-email', async () => {
       const state = await getActivationState(email)
       if (state.userId && !state.hasConnected) {
-        await getResend().emails.send({
+        await logIfRejected('lib/inngest:1285', getResend().emails.send({
           from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
           replyTo: REPLY_TO,
           to: email,
@@ -1298,11 +1298,11 @@ export const onboardingSequence = inngest.createFunction(
             ctaHref: `${appUrl}/accounts`,
             footnote: 'This is the last email in your setup series.',
           }),
-        })
+        }))
         return
       }
 
-      await getResend().emails.send({
+      await logIfRejected('lib/inngest:1305', getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -1389,7 +1389,7 @@ export const onboardingSequence = inngest.createFunction(
           </div>
           </div>
         `,
-      })
+      }))
     })
 
     console.log(`[OnboardingSequence] Completed 3-email sequence for ${email}`)
@@ -2716,13 +2716,13 @@ export const monthlyCreditsResetEmail = inngest.createFunction(
 </html>`
 
       try {
-        await resend.emails.send({
+        await logIfRejected('lib/inngest:2719', resend.emails.send({
           from: 'SocialMate <noreply@socialmate.studio>',
           replyTo: REPLY_TO,
           to: u.email,
           subject: `Your ${credits} SocialMate credits just reset — ${month}`,
           html,
-        })
+        }))
         sent++
       } catch (err) {
         console.error('[Monthly Credits Email] failed for', u.email, err)
@@ -2764,7 +2764,7 @@ export const comebackEmails = inngest.createFunction(
       const resend = getResend()
       for (const u of day7) {
         try {
-          await resend.emails.send({
+          await logIfRejected('lib/inngest:2767', resend.emails.send({
             from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
             replyTo: REPLY_TO,
             to: u.email,
@@ -2788,7 +2788,7 @@ export const comebackEmails = inngest.createFunction(
               <p style="font-size:13px;color:#52525b;">— Joshua, Founder of SocialMate</p>
               <p style="font-size:11px;color:#3f3f46;margin-top:16px;">Reply "unsubscribe" to stop these check-ins.</p>
             </div>`,
-          })
+          }))
         } catch { /* non-fatal */ }
       }
     })
@@ -2797,7 +2797,7 @@ export const comebackEmails = inngest.createFunction(
       const resend = getResend()
       for (const u of day14) {
         try {
-          await resend.emails.send({
+          await logIfRejected('lib/inngest:2800', resend.emails.send({
             from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
             replyTo: REPLY_TO,
             to: u.email,
@@ -2821,7 +2821,7 @@ export const comebackEmails = inngest.createFunction(
               <p style="font-size:13px;color:#52525b;">— Joshua, Founder of SocialMate</p>
               <p style="font-size:11px;color:#3f3f46;margin-top:16px;">Reply "unsubscribe" to stop these check-ins.</p>
             </div>`,
-          })
+          }))
         } catch { /* non-fatal */ }
       }
     })
@@ -2830,7 +2830,7 @@ export const comebackEmails = inngest.createFunction(
       const resend = getResend()
       for (const u of day30) {
         try {
-          await resend.emails.send({
+          await logIfRejected('lib/inngest:2833', resend.emails.send({
             from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
             replyTo: REPLY_TO,
             to: u.email,
@@ -2850,7 +2850,7 @@ export const comebackEmails = inngest.createFunction(
               <a href="${appUrl}/dashboard" style="display:inline-block;background:#7C3AED;color:#ffffff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:28px;">Log back in →</a>
               <p style="font-size:13px;color:#52525b;line-height:1.6;">— Joshua, Founder of SocialMate<br><span style="font-size:12px;color:#3f3f46;">After this I'll leave you alone. Promise.</span></p>
             </div>`,
-          })
+          }))
         } catch { /* non-fatal */ }
       }
     })
@@ -2991,7 +2991,7 @@ Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"
     // Lightweight FYI to admin — no action needed, just visibility
     if (result.success) {
       await step.run('notify-admin', async () => {
-        await getResend().emails.send({
+        await logIfRejected('lib/inngest:2994', getResend().emails.send({
           from: 'SocialMate System <joshua@socialmate.studio>',
           replyTo: REPLY_TO,
           to: 'socialmatehq@gmail.com',
@@ -3001,7 +3001,7 @@ Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"
             <p style="color:#6b7280;font-size:14px;margin:0 0 16px;">Sent automatically to ${result.sent}/${result.total} opted-in subscribers. No action needed.</p>
             <p style="color:#374151;font-size:14px;"><strong>Subject:</strong> ${draft.subject}</p>
           </div>`,
-        })
+        }))
       })
     }
 
@@ -3033,7 +3033,7 @@ export const adminHealthAlert = inngest.createFunction(
     if (failures < threshold) return { failures, partial, alert: false }
 
     await step.run('send-alert', async () => {
-      await getResend().emails.send({
+      await logIfRejected('lib/inngest:3036', getResend().emails.send({
         from: 'SocialMate System <joshua@socialmate.studio>',
         replyTo: REPLY_TO,
         to: 'socialmatehq@gmail.com',
@@ -3048,7 +3048,7 @@ export const adminHealthAlert = inngest.createFunction(
           </ul>
           <p style="color:#6b7280;font-size:12px;">Threshold: ${threshold} failures / 4h window</p>
         </div>`,
-      })
+      }))
     })
 
     return { failures, partial, alert: true }

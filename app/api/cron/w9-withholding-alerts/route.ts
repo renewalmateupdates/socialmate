@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { w9AlertEmail } from '@/lib/emails/affiliateEmails'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
 
       // Send email
       try {
-        await getResend().emails.send({
+        await logIfRejected('api/cron/w9-withholding-alerts:96', getResend().emails.send({
           from: 'SocialMate Partners <hello@socialmate.studio>',
           replyTo: REPLY_TO,
           to: affiliate.email,
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
             deadlineDate:       deadline,
             withheldAmountCents: affiliate.available_balance_cents,
           }),
-        })
+        }))
       } catch (err) {
         console.error(`Failed to send W-9 day ${alertDay} alert to ${affiliate.email}:`, err)
         continue

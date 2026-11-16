@@ -71,6 +71,23 @@ export class MailError extends Error {
   }
 }
 
+/**
+ * Logs a send Resend rejected and hands the result back unchanged. For the
+ * places that call `resend.emails.send` themselves: wrapping a call in this
+ * changes nothing about what the route does, it only stops a rejection from
+ * vanishing (on Nov 16, 2026, 53 such calls ignored Resend's error).
+ */
+export async function logIfRejected<T extends { error?: { message?: string; name?: string } | null }>(
+  label: string,
+  sending: Promise<T>,
+): Promise<T> {
+  const result = await sending
+  if (result && result.error) {
+    console.error(`[mail] ${label} rejected:`, result.error.name || '', result.error.message || '')
+  }
+  return result
+}
+
 /** sendMail, but a rejected send throws a MailError, so a surrounding catch actually catches it. */
 export async function sendMailOrThrow(opts: SendMailOpts): Promise<void> {
   const { error } = await sendMail(opts)

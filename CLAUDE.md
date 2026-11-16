@@ -498,9 +498,12 @@ calls `sendMail` directly (#802). Then `sendMailOrThrow` in `lib/mail.ts`
 (bulk-email builds on it) went into the three `sendMail` calls that sat in a
 try/catch expecting a throw (SOMA generate, SOMA autopilot, token-expiry), and
 the Quick guide, Customize dialog and the Schedule and Compose tab bars got
-their strings in all nine locales. **Still open:** 56 places call
-`resend.emails.send` directly and only 3 check its error (31 files, including
-the Stripe webhook, which needs Joshua's OK before anyone touches it). The first reply came from someone who signed
+their strings in all nine locales (#803). Then the 52 direct
+`resend.emails.send` calls that ignored Resend's error were wrapped in
+`logIfRejected(label, ...)` (`lib/mail.ts`), which logs a rejection and
+returns the result unchanged, so no route behaves differently. A test fails if
+a new direct call skips it. **Still open:** the Stripe webhook's two sends
+(lines ~524 and ~821) still ignore the error; it needs Joshua's OK first. The first reply came from someone who signed
 up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
 pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
 posts each issue automatically (it imports drafts by hand). Fixed in #800

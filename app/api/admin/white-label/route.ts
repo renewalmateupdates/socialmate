@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 // GET — list all white label requests (pending, active, rejected)
 export async function GET(req: NextRequest) {
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       if (userEmail) {
         const resend = new Resend(process.env.RESEND_API_KEY)
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-        await resend.emails.send({
+        await logIfRejected('api/admin/white-label:84', resend.emails.send({
           from: 'SocialMate <hello@socialmate.studio>',
           replyTo: REPLY_TO,
           to:   userEmail,
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
   </div>
 </body>
 </html>`,
-        })
+        }))
       }
     } catch (emailErr) {
       console.warn('[WhiteLabel] Approval email failed (non-fatal):', emailErr)
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
     if (userEmail) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-      await resend.emails.send({
+      await logIfRejected('api/admin/white-label:146', resend.emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to:   userEmail,
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
   </div>
 </body>
 </html>`,
-      })
+      }))
     }
   } catch (emailErr) {
     console.warn('[WhiteLabel] Rejection email failed (non-fatal):', emailErr)

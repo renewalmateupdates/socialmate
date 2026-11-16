@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 const BLOG_INTERVAL_DAYS = 90  // First article at 3 months; repeat every 3 months while active
 
@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
 
       // Notify lister
       const blogUrl = `${appUrl}/blog/${fullSlug}`
-      await resend.emails.send({
+      await logIfRejected('api/cron/stax-blog-gen:135', resend.emails.send({
         from:    'SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to:      slot.buyer_email,
@@ -164,7 +164,7 @@ export async function GET(req: NextRequest) {
   </div>
 </body>
 </html>`,
-      })
+      }))
 
       generated++
     } catch (err) {

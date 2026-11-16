@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 const PLAY_STORE_OPT_IN = 'https://play.google.com/apps/testing/studio.socialmate.app'
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY!)
-    await resend.emails.send({
+    await logIfRejected('api/beta/join:35', resend.emails.send({
       from: 'Joshua @ SocialMate <hello@socialmate.studio>',
       replyTo: REPLY_TO,
       to: [email],
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
           </div>
         </div>
       `,
-    })
+    }))
   } catch (emailErr) {
     console.error('beta email send error:', emailErr)
     // Non-fatal — email failed but DB insert succeeded

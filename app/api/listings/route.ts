@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { LISTING_QUERY_STATUSES, isPublicListing } from '@/lib/studio-stax'
 import { listAllAuthUsers } from '@/lib/admin-metrics'
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY)
     const missionExcerpt = mission_statement ? mission_statement.slice(0, 200) + (mission_statement.length > 200 ? '…' : '') : null
     const whyExcerpt = why_apply ? why_apply.slice(0, 200) + (why_apply.length > 200 ? '…' : '') : null
-    resend.emails.send({
+    logIfRejected('api/listings:75', resend.emails.send({
       from: 'SocialMate <noreply@socialmate.studio>',
       replyTo: REPLY_TO,
       to: adminEmail,
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
   </div>
 </body>
 </html>`,
-    }).catch(() => {})
+    })).catch(() => {})
 
     return NextResponse.json({ success: true })
   } catch (err) {

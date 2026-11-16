@@ -3,7 +3,7 @@ import { normalizePlan, PLAN_SEATS } from '@/lib/plan'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { logActivity } from '@/lib/workspace-activity'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       const ownerEmail = ownerAuth?.user?.email
 
       if (ownerEmail) {
-        await getResend().emails.send({
+        await logIfRejected('api/team/accept:131', getResend().emails.send({
           from: 'SocialMate <notifications@socialmate.studio>',
           replyTo: REPLY_TO,
           to: ownerEmail,
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
               <p style="color: #aaa; font-size: 12px; margin-top: 24px;">To disable these emails, go to Settings → Notifications.</p>
             </div>
           `,
-        })
+        }))
       }
     }
   } catch (emailErr) {

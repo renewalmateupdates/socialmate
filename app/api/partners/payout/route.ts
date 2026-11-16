@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { payoutConfirmationEmail, payoutApprovedEmail } from '@/lib/emails/affiliateEmails'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { getAffiliateAvailableBalanceCents, deductAffiliateEarnings } from '@/lib/affiliate-balance'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
 
   // Send confirmation email
   if (user.email) {
-    await getResend().emails.send({
+    await logIfRejected('api/partners/payout:149', getResend().emails.send({
       from: 'SocialMate Partners <hello@socialmate.studio>',
       replyTo: REPLY_TO,
       to: user.email,
@@ -156,19 +156,19 @@ export async function POST(req: NextRequest) {
         amountCents: amount,
         payoutId: payout.id,
       }),
-    })
+    }))
   }
 
   // Notify admin
   const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
   if (adminEmail) {
-    await getResend().emails.send({
+    await logIfRejected('api/partners/payout:165', getResend().emails.send({
       from: 'SocialMate Partners <hello@socialmate.studio>',
       replyTo: REPLY_TO,
       to: adminEmail,
       subject: `[Partners] Payout request: $${(amount / 100).toFixed(2)} from ${user.email}`,
       html: `<p>${user.email} has requested a payout of <strong>$${(amount / 100).toFixed(2)}</strong>.</p><p>Review in the <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/partners">Admin Panel</a>.</p>`,
-    })
+    }))
   }
 
   return NextResponse.json({ success: true, payout_id: payout.id })
@@ -230,13 +230,13 @@ export async function PATCH(req: NextRequest) {
     // Email affiliate
     const affiliateEmail = (payout.affiliate_profiles as any).email
     if (affiliateEmail) {
-      await getResend().emails.send({
+      await logIfRejected('api/partners/payout:233', getResend().emails.send({
         from: 'SocialMate Partners <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to: affiliateEmail,
         subject: 'Your payout has been approved!',
         html: payoutApprovedEmail({ email: affiliateEmail, amountCents: payout.amount_cents }),
-      })
+      }))
     }
 
   } else if (action === 'reject') {
