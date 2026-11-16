@@ -215,6 +215,7 @@ claiming otherwise. Enterprise seats are the single exception.
 | Schema drift audit | `python scripts/audit-schema-drift.py` (needs production read keys in `.env.local`) |
 | Upsert target audit | `python scripts/audit-dead-features.py` |
 | Submit URLs to IndexNow | `node scripts/indexnow-submit.mjs` |
+| Redraw the share image | `node scripts/make-og-image.mjs` (after any price, free-cap or platform change; `npm test` fails until it's run) |
 
 Deploys: Vercel builds every push to `main` (production) and every branch (preview).
 Environment variables live in Vercel and in your local `.env.local`, which is
@@ -491,9 +492,14 @@ spent quota blocks all app mail until it resets, so cap the next bulk send
 below it); the other 62 go Nov 17. The first reply came from someone who signed
 up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
 pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
-posts each issue automatically (it imports drafts by hand). Fixed in the
-`fix/vs-substack-claims-nov16` branch, with the page's Repurpose price (now
-`REPURPOSE_COST`) and its scheduled-Bluesky-threads claim (threads post at once).
+posts each issue automatically (it imports drafts by hand). Fixed in #800
+(merged), with the page's Repurpose price (now `REPURPOSE_COST`) and its
+scheduled-Bluesky-threads claim (threads post at once). Then
+`public/og-image.png`, the share card for the whole site and every blog post,
+turned out to still say "Pro $5/mo, Agency $20/mo", "Launching on Product
+Hunt" and four platforms. It is now drawn by `scripts/make-og-image.mjs` from
+`lib/plan.ts` and `lib/site-facts.ts`, and `scripts/test-og-image-facts.mjs`
+fails when a price, the free cap or the platform list moves without a redraw.
 
 **Nov 16, earlier:** #794 to #797 are merged. #797 fixed four bugs found while capturing
 the demo, all checked live afterwards: Write with AI buttons looked disabled in
