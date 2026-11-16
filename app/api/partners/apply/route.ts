@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     // Notify admin — fire and forget
-    resend.emails.send({
+    logIfRejected('api/partners/apply:17', resend.emails.send({
       from:    'SocialMate <noreply@socialmate.studio>',
       // replyTo is set to the applicant's address at the end of this object —
       // this is the notification telling us someone applied, so replying should
@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`,
       replyTo: email,
-    }).catch(() => {})
+    })).catch(() => {})
 
     // Confirm to applicant
-    await resend.emails.send({
+    await logIfRejected('api/partners/apply:70', resend.emails.send({
       from:    'SocialMate <hello@socialmate.studio>',
       replyTo: REPLY_TO,
       to:      email,
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
           </p>
         </div>
       `,
-    })
+    }))
 
     return NextResponse.json({ success: true })
   } catch (err) {

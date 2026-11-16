@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { listAllAuthUsers } from '@/lib/admin-metrics'
 
 export async function POST(req: NextRequest) {
@@ -43,13 +43,13 @@ export async function POST(req: NextRequest) {
     const greeting = firstName ? `Hey ${firstName}` : 'Hey there'
 
     try {
-      await resend.emails.send({
+      await logIfRejected('api/newsletter/launch:46', resend.emails.send({
         from: 'Joshua @ SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to: u.email,
         subject: '🚀 SocialMate is officially live — and we\'re on Product Hunt today',
         html: generateLaunchEmail(greeting),
-      })
+      }))
       sent++
     } catch (err) {
       console.warn(`Failed to send to ${u.email}:`, err)

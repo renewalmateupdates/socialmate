@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from './usage'
 import { createNotification } from './notify'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { resolveWorkspacePlan } from '@/lib/plan'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
@@ -121,15 +121,15 @@ Return ONLY valid JSON:
           if (cfg.mode === 'auto' && (cfg.subscriber_emails ?? []).length > 0) {
             const resend = getResend()
             for (const email of cfg.subscriber_emails) {
-              await resend.emails.send({
+              await logIfRejected('lib/inngest-agents:124', resend.emails.send({
                 from: 'Newsletter <newsletter@socialmate.studio>',
                 replyTo: REPLY_TO,
                 to: email, subject, html: parsed.html,
-              }).catch((e: any) => console.error('[NewsletterAgent] send failed:', e))
+              })).catch((e: any) => console.error('[NewsletterAgent] send failed:', e))
             }
             sent++
           } else {
-            await getResend().emails.send({
+            await logIfRejected('lib/inngest-agents:132', getResend().emails.send({
               from:    'SOMA <soma@socialmate.studio>',
               replyTo: REPLY_TO,
               to:      userEmail,
@@ -140,7 +140,7 @@ Return ONLY valid JSON:
                 <p><strong>Subject:</strong> ${subject}</p>
                 <a href="${APP_URL}/agents/newsletter" style="display:inline-block;background:#f59e0b;color:#000;font-weight:700;padding:12px 24px;border-radius:6px;text-decoration:none;margin-top:12px;">Review Draft</a>
               </div>`,
-            }).catch((e: any) => console.error('[NewsletterAgent] draft notify failed:', e))
+            })).catch((e: any) => console.error('[NewsletterAgent] draft notify failed:', e))
             drafted++
           }
         })
@@ -244,13 +244,13 @@ export const clientReportAgent = inngest.createFunction(
 
           const recipients = [ownerEmail, ...(cfg.recipient_emails ?? [])]
           for (const email of recipients) {
-            await getResend().emails.send({
+            await logIfRejected('lib/inngest-agents:247', getResend().emails.send({
               from:    'SocialMate Reports <reports@socialmate.studio>',
               replyTo: REPLY_TO,
               to:      email,
               subject: `Weekly Report: ${ws.name} — ${weekStr}`,
               html,
-            }).catch((e: any) => console.error('[ClientReportAgent] send failed:', e?.message))
+            })).catch((e: any) => console.error('[ClientReportAgent] send failed:', e?.message))
           }
 
           await admin.from('client_report_settings')

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
         if (email) {
           const errMsg = errorMessage || 'Unknown error'
-          await getResend().emails.send({
+          await logIfRejected('api/posts/fail:55', getResend().emails.send({
             from: 'SocialMate <notifications@socialmate.studio>',
             replyTo: REPLY_TO,
             to: email,
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
                 <p style="color: #aaa; font-size: 12px; margin-top: 24px;">To disable these emails, go to Settings → Notifications.</p>
               </div>
             `,
-          })
+          }))
         }
       }
     } catch (emailErr) {

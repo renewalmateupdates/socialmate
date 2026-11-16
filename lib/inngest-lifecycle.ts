@@ -2,7 +2,7 @@ import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { listAllAuthUsers, oldestFirst, postWentOut, selectAll } from '@/lib/admin-metrics'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
@@ -142,7 +142,7 @@ export const stoppedPostingEmails = inngest.createFunction(
             })
 
         try {
-          await resend.emails.send({
+          await logIfRejected('lib/inngest-lifecycle:145', resend.emails.send({
             from: FROM,
             replyTo: REPLY_TO,
             to: t.email,
@@ -150,7 +150,7 @@ export const stoppedPostingEmails = inngest.createFunction(
               ? 'Your queue is empty'
               : 'What stopped you?',
             html,
-          })
+          }))
           if (t.step === 'nudge') nudge++
           else last++
         } catch { /* non-fatal, one bad address must not stop the batch */ }

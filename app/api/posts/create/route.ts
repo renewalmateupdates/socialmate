@@ -14,7 +14,7 @@ import {
   scheduleWeeksFor, scheduleWindowLabel, scheduleUpgradeCopyFor, postLimitFor, postsUsedThisMonth, postLimitReachedBody,
 } from '@/lib/post-limits'
 import { resolveWorkspacePlan } from '@/lib/plan'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { canCreatePosts, canManagePost, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
               weekday: 'long', month: 'long', day: 'numeric',
               hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
             })
-            await resend.emails.send({
+            await logIfRejected('api/posts/create:262', resend.emails.send({
               from: 'Joshua @ SocialMate <hello@socialmate.studio>',
               replyTo: REPLY_TO,
               to:   authUser.user.email,
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest) {
   </div>
 </body>
 </html>`,
-            }).catch((err: any) => console.warn('[activation-email] non-fatal:', err?.message))
+            })).catch((err: any) => console.warn('[activation-email] non-fatal:', err?.message))
           }
         }
       } catch (activationErr) {
@@ -436,13 +436,13 @@ export async function POST(request: NextRequest) {
               .map((r: any) => r.platform)
               .join(', ')
             const postPreview = (content || '').substring(0, 100) + ((content || '').length > 100 ? '...' : '')
-            await resend.emails.send({
+            await logIfRejected('api/posts/create:439', resend.emails.send({
               from: 'SocialMate <notifications@socialmate.studio>',
               replyTo: REPLY_TO,
               to: authUser.user.email,
               subject: `Your post is live ✓`,
               html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;"><div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:16px;border-radius:8px;margin-bottom:20px;"><h2 style="margin:0 0 8px;color:#15803d;font-size:18px;">Your post is live ✓</h2><p style="margin:0;color:#166534;font-size:14px;">Published to: <strong>${successfulPlatforms}</strong></p></div>${postPreview ? `<p style="color:#374151;font-size:14px;background:#f9fafb;padding:12px;border-radius:6px;border:1px solid #e5e7eb;">"${postPreview}"</p>` : ''}<p style="color:#6b7280;font-size:13px;">💡 Tip: Engage with replies in the first 30 minutes — the algorithm rewards early engagement.</p><a href="https://socialmate.studio/drafts" style="display:inline-block;background:#000;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;margin-top:8px;">View in Drafts →</a><p style="color:#9ca3af;font-size:11px;margin-top:20px;">To disable these emails, go to Settings → Notifications.</p></div>`,
-            }).catch(() => {})
+            })).catch(() => {})
           }
         }
       } catch { /* non-fatal */ }

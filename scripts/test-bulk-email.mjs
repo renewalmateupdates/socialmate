@@ -5,7 +5,7 @@
  *
  *   node scripts/test-bulk-email.mjs
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -42,7 +42,7 @@ function load(rel) {
 
 const { runBulkSend, sendOrThrow, isQuotaError, QuotaError, positiveInt, BULK_EMAIL_EVENTS, BULK_BATCH_SIZE } =
   load('lib/bulk-email.ts')
-const { sendMailOrThrow, MailError } = load('lib/mail.ts')
+const { sendMailOrThrow, MailError, logIfRejected } = load('lib/mail.ts')
 
 const people = (n) => Array.from({ length: n }, (_, i) => ({ email: `p${i}@example.com` }))
 const quiet = () => { const e = console.error, w = console.warn; console.error = () => {}; console.warn = () => {}; return () => { console.error = e; console.warn = w } }
@@ -153,6 +153,46 @@ test('the three single-send sites use the throwing send inside their try/catch',
     assert.match(src, /await sendMailOrThrow\(/, `${file} should use sendMailOrThrow`)
     assert.doesNotMatch(src, /await sendMail\(/, `${file} still awaits sendMail, whose rejection a catch never sees`)
   }
+})
+
+test('logIfRejected logs a rejection and passes every result through unchanged', async () => {
+  const logged = []
+  const orig = console.error
+  console.error = (...a) => logged.push(a.join(' '))
+  try {
+    const bad = { data: null, error: { name: 'validation_error', message: 'Invalid to field' } }
+    assert.equal(await logIfRejected('api/x:1', Promise.resolve(bad)), bad)
+    const ok = { data: { id: 'e1' }, error: null }
+    assert.equal(await logIfRejected('api/x:2', Promise.resolve(ok)), ok)
+    await assert.rejects(logIfRejected('api/x:3', Promise.reject(new Error('network'))), /network/)
+  } finally { console.error = orig }
+  assert.equal(logged.length, 1)
+  assert.match(logged[0], /api\/x:1 rejected: validation_error Invalid to field/)
+})
+
+test('no direct resend.emails.send call ignores its error', () => {
+  // The Stripe webhook is left alone until Joshua says otherwise (CLAUDE.md,
+  // "What NOT to Touch"); lib/mail.ts is where sendMail itself calls Resend.
+  const ALLOWED = new Set(['app/api/stripe/webhook/route.ts', 'lib/mail.ts'])
+  const files = []
+  const walk = (dir) => {
+    for (const e of readdirSync(join(root, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${e.name}`
+      if (e.isDirectory()) walk(rel)
+      else if (/\.tsx?$/.test(e.name)) files.push(rel)
+    }
+  }
+  walk('app'); walk('lib')
+  const bad = []
+  for (const rel of files) {
+    if (ALLOWED.has(rel)) continue
+    readFileSync(join(root, rel), 'utf8').split('\n').forEach((line, i) => {
+      if (!/\.emails\.send\(/.test(line)) return
+      if (/logIfRejected\(/.test(line) || /\{\s*(data\s*,\s*)?error\b/.test(line)) return
+      bad.push(`${rel}:${i + 1}`)
+    })
+  }
+  assert.deepEqual(bad, [], 'wrap these in logIfRejected(...) or check { error }: ' + bad.join(', '))
 })
 
 test('helpers', () => {

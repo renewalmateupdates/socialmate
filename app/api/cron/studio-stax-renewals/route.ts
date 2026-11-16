@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
@@ -194,11 +194,11 @@ export async function GET(req: NextRequest) {
       : `Your Studio Stax listing for ${toolName} expires in ${days} days`
 
     try {
-      await getResend().emails.send({
+      await logIfRejected('api/cron/studio-stax-renewals:197', getResend().emails.send({
         from: FROM, to: slot.buyer_email, subject,
         replyTo: REPLY_TO,
         html: renewalEmail({ name: slot.buyer_name, toolName, daysLeft: days, expiresAt: slot.expires_at, renewalLink, renewalPrice: renewal, tier: tierLabel }),
-      })
+      }))
       const updateField = days <= 7 ? 'renewal_email_7_sent' : days <= 14 ? 'renewal_email_14_sent' : 'renewal_email_30_sent'
       await admin.from('studio_stax_slots').update({ [updateField]: true }).eq('id', slot.id)
       sent++
@@ -265,13 +265,13 @@ export async function GET(req: NextRequest) {
           .update({ renewal_token: reclaimToken, renewal_token_expires: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(), reclaim_offer_sent: true })
           .eq('id', stdSlot.id)
         try {
-          await getResend().emails.send({
+          await logIfRejected('api/cron/studio-stax-renewals:268', getResend().emails.send({
             from: FROM,
             replyTo: REPLY_TO,
             to:   stdSlot.buyer_email,
             subject: `🎉 A founding spot just opened in Studio Stax — it's yours`,
             html: reclaimEmail({ name: stdSlot.buyer_name, toolName, offerLink: `${appUrl}/studio-stax/renew?token=${reclaimToken}` }),
-          })
+          }))
           reclaims++
         } catch (err) {
           console.error(`[StaxRenewals] Reclaim email failed for ${stdSlot.buyer_email}:`, err)

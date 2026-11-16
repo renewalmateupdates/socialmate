@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { Resend } from 'resend'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
 // ── GET — admin fetch all feedback ─────────────────────────────────────────
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
   // Email + push notification — non-fatal, never block the user response
   try {
-    await getResend().emails.send({
+    await logIfRejected('api/feedback:85', getResend().emails.send({
       from: 'SocialMate <hello@socialmate.studio>',
       replyTo: REPLY_TO,
       to: 'renewalmate.updates@gmail.com',
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         <blockquote style="border-left:3px solid #f59e0b;padding-left:12px;margin:12px 0;color:#374151">${message.trim()}</blockquote>
         <p><a href="https://socialmate.studio/admin/feedback">View in Admin</a></p>
       `,
-    })
+    }))
   } catch (emailErr) {
     console.error('Feedback email notification failed:', emailErr)
   }

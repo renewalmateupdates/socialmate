@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 export type HermesChannel = 'email' | 'bluesky' | 'mastodon'
 
@@ -15,14 +15,14 @@ export async function sendHermesEmail(params: {
 }): Promise<SendResult> {
   const resend = new Resend(process.env.RESEND_API_KEY!)
   try {
-    await resend.emails.send({
+    await logIfRejected('lib/hermes-send:18', resend.emails.send({
       from: `${params.fromName ?? 'Joshua @ SocialMate'} <hello@socialmate.studio>`,
       replyTo: REPLY_TO,
       to: [params.to],
       subject: params.subject,
       html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;color:#111;line-height:1.6">${params.body.replace(/\n/g, '<br/>')}</div>`,
       text: params.body,
-    })
+    }))
     return { ok: true }
   } catch (e: unknown) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) }

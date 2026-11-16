@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 function audienceSizeQualifies(size: string | null | undefined): boolean {
   if (!size) return false
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
     const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY!)
     const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
-    await resend.emails.send({
+    await logIfRejected('api/affiliate/join:126', resend.emails.send({
       from: 'SocialMate <hello@socialmate.studio>',
       replyTo: REPLY_TO,
       to: adminEmail,
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
         <p><strong>Promotion plan:</strong> ${promotion_plan}</p>
         <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'}/admin">Review in Admin Hub →</a></p>
       `,
-    }).catch(() => {}) // non-fatal
+    })).catch(() => {}) // non-fatal
   }
 
   return NextResponse.json({ success: true })

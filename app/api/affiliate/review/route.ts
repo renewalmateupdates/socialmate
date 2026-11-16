@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { ensurePartnerProfile, ensureReferralCode, partnerReferralLink, syncPartnerProfileStatus } from '@/lib/partners'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
       const appUrl       = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
       const referralLink = partnerReferralLink(referralCode) ?? `${appUrl}/partners/dashboard`
 
-      await getResend().emails.send({
+      await logIfRejected('api/affiliate/review:127', getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
             <p style="color: #aaa; font-size: 12px;">SocialMate · 60-day hold on new commission · Payouts through Stripe once you reach $25</p>
           </div>
         `,
-      })
+      }))
     }
 
     return NextResponse.json({ success: true, action: 'approved' })
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     if (email) {
-      await getResend().emails.send({
+      await logIfRejected('api/affiliate/review:173', getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to: email,
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
             <p style="color: #aaa; font-size: 12px;">SocialMate</p>
           </div>
         `,
-      })
+      }))
     }
 
     return NextResponse.json({ success: true, action: 'rejected' })

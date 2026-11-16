@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 import crypto from 'crypto'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 
 function getAdminSupabase() {
   return getSupabaseAdmin()
@@ -83,7 +83,7 @@ export async function PATCH(req: NextRequest) {
     // Send confirmation email to applicant — fire and forget
     if (listing.applicant_email) {
       const resend = new Resend(process.env.RESEND_API_KEY)
-      resend.emails.send({
+      logIfRejected('api/listings/admin:86', resend.emails.send({
         from: 'SocialMate <noreply@socialmate.studio>',
         replyTo: REPLY_TO,
         to: listing.applicant_email,
@@ -126,7 +126,7 @@ export async function PATCH(req: NextRequest) {
   </div>
 </body>
 </html>`,
-      }).catch(() => {})
+      })).catch(() => {})
     }
 
     return NextResponse.json({ success: true })
@@ -169,7 +169,7 @@ export async function PATCH(req: NextRequest) {
 
     try {
       const resend = new Resend(process.env.RESEND_API_KEY)
-      await resend.emails.send({
+      await logIfRejected('api/listings/admin:172', resend.emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         replyTo: REPLY_TO,
         to:   listing.applicant_email,
@@ -220,7 +220,7 @@ export async function PATCH(req: NextRequest) {
   </div>
 </body>
 </html>`,
-      })
+      }))
     } catch (emailErr) {
       console.error('[StaxAdmin] Failed to send approval email:', emailErr)
       // Don't fail the request — token is saved, admin can resend

@@ -13,7 +13,7 @@ import { Resend } from 'resend'
 import { logActivity } from '@/lib/workspace-activity'
 import { dispatchWebhook } from '@/lib/webhooks'
 import { recordFunnel } from '@/lib/usage'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 import { notDueYet } from '@/lib/publish/due'
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
             const postContent = post.content || ''
             const postPreview = postContent.substring(0, 100) + (postContent.length > 100 ? '...' : '')
 
-            await getResend().emails.send({
+            await logIfRejected('api/posts/publish:300', getResend().emails.send({
               from: 'SocialMate <notifications@socialmate.studio>',
               replyTo: REPLY_TO,
               to: authUser.user.email,
@@ -314,7 +314,7 @@ export async function POST(request: NextRequest) {
                   <p style="color: #9ca3af; font-size: 11px; margin-top: 20px;">To disable these emails, go to Settings → Notifications.</p>
                 </div>
               `
-            })
+            }))
           }
         }
       } catch (emailErr) {
@@ -483,7 +483,7 @@ export async function POST(request: NextRequest) {
             const postContent = post.content || ''
             const postPreview = postContent.substring(0, 100) + (postContent.length > 100 ? '...' : '')
 
-            await getResend().emails.send({
+            await logIfRejected('api/posts/publish:486', getResend().emails.send({
               from: 'SocialMate <notifications@socialmate.studio>',
               replyTo: REPLY_TO,
               to: authUser.user.email,
@@ -500,7 +500,7 @@ export async function POST(request: NextRequest) {
                   <p style="color: #9ca3af; font-size: 11px; margin-top: 20px;">To disable these emails, go to Settings → Notifications.</p>
                 </div>
               `
-            }).catch(emailErr => {
+            })).catch(emailErr => {
               console.error('[PUBLISH] post published email failed (non-fatal):', emailErr)
             })
           }
