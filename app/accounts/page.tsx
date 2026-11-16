@@ -774,7 +774,7 @@ function AccountsInner() {
                             )}
                           </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            @{account.account_name} · Connected {new Date(account.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            @{account.account_name?.replace(/^@/, '')} · Connected {new Date(account.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </p>
                         </div>
                         {!isConfirming && (

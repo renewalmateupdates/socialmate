@@ -2863,7 +2863,7 @@ function ComposeInner() {
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id ? 'bg-black text-white border-black'
                         : (aiLoading || !!rateLimitedUntil) ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                        : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-gray-400 text-gray-700'
+                        : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-gray-400 text-gray-700 dark:text-gray-300'
                       }`}>
                       <div className="mb-1 flex justify-center"><tool.icon size={18} strokeWidth={1.75} /></div>
                       <p className="text-xs font-bold">{tool.label}</p>
@@ -3567,7 +3567,18 @@ function ComposeInner() {
               <div className="bg-surface border border-theme rounded-2xl p-4 sticky top-8">
                 <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Preview</p>
                 <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 min-h-32">
-                  {content
+                  {/* Thread mode writes into threadParts, not content, so this
+                      panel used to keep showing whatever the main box held. */}
+                  {threadMode && threadParts.some(p => p.trim())
+                    ? <div className="space-y-3">
+                        {threadParts.filter(p => p.trim()).map((part, i, all) => (
+                          <div key={i}>
+                            <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 mb-0.5">{i + 1}/{all.length}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{part}</p>
+                          </div>
+                        ))}
+                      </div>
+                    : !threadMode && content
                     ? <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{content}</p>
                     : <div className="text-center mt-6">
                         <p className="text-xs text-gray-300 dark:text-gray-600 mb-3">Your post preview appears here</p>
@@ -3575,7 +3586,7 @@ function ComposeInner() {
                       </div>
                   }
                 </div>
-                {content && selectedPlatforms.length > 0 && (
+                {!threadMode && content && selectedPlatforms.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
                     {selectedPlatforms.map(id => {
                       const p = PLATFORMS.find(pl => pl.id === id)
