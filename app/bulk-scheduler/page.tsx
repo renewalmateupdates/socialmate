@@ -561,12 +561,16 @@ export default function BulkScheduler() {
           {/* STATUS BAR */}
           {(savedPosts > 0 || errorPosts > 0) && (
             <div className={`rounded-2xl px-5 py-3 mb-4 flex flex-wrap items-center gap-4 text-xs font-semibold ${
-              errorPosts > 0 ? 'bg-red-50 border border-red-100' : 'bg-green-50 border border-green-100'
+              errorPosts > 0 ? 'bg-red-50 border border-red-100 dark:bg-red-950/40 dark:border-red-900/60' : 'bg-green-50 border border-green-100 dark:bg-green-950/40 dark:border-green-900/60'
             }`}>
-              {savedPosts > 0 && <span className="text-green-700 inline-flex items-center gap-1.5"><CheckCircle2 size={14} strokeWidth={2} /> {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>}
+              {savedPosts > 0 && <span className="text-green-700 dark:text-green-400 inline-flex items-center gap-1.5"><CheckCircle2 size={14} strokeWidth={2} /> {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>}
               {errorPosts > 0 && (
-                <span className="text-red-600 inline-flex items-center gap-1.5">
-                  <XCircle size={14} strokeWidth={2} /> {errorPosts} failed{quotaWall ? '' : ' — check content and try again'}
+                <span className="text-red-600 dark:text-red-400 inline-flex items-center gap-1.5">
+                  {/* A CSV row with a bad date arrives as an error before anything
+                      has been sent, so "failed" read as a scheduling failure. */}
+                  <XCircle size={14} strokeWidth={2} /> {quotaWall
+                    ? `${errorPosts} failed`
+                    : `${errorPosts} ${errorPosts === 1 ? 'row needs' : 'rows need'} a fix: check the red ${errorPosts === 1 ? 'row' : 'rows'} and try again`}
                 </span>
               )}
             </div>
