@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
-import { sendMail, REPLY_TO } from '@/lib/mail'
+import { REPLY_TO } from '@/lib/mail'
+import { BULK_DAILY_CAP, bulkSentLast24h, runBulkSend, sendOrThrow } from '@/lib/bulk-email'
 import {
   UNSUBSCRIBED_EVENT, UPDATE_CONFIRM, UPDATE_EVENT, UPDATE_SUBJECT,
   updateAudience, updateEmailHtml,
@@ -16,7 +17,8 @@ import {
 //   GET                                   previews the audience
 //   POST ?to=you@example.com              sends one test copy, records nothing
 //   POST { unsubscribe: ["a@b.com"] }     records those people as unsubscribed
-//   POST { confirm: CONFIRM }             sends the next batch of BATCH_SIZE
+//   POST { confirm: CONFIRM }             sends the next batch of BATCH_SIZE, never
+//                                         past the daily bulk cap (lib/bulk-email.ts)
 // Each send is recorded in usage_events after Resend accepts it, so POSTing
 // again reaches only people not yet sent, and a failure stays eligible.
 
@@ -27,7 +29,6 @@ export const maxDuration = 60
 // between a send and its record and email someone twice.
 const SEND_INTERVAL_MS = 400
 const BATCH_SIZE = 50
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -54,17 +55,11 @@ async function audience() {
   }
 }
 
-// Resend reports a rejected send in its return value and does not throw, so
-// a bare `await sendMail()` counts a failure as sent. Turn it into a throw.
-async function send(to: string, subject: string, html: string) {
-  const { error } = await sendMail({ to, subject, html })
-  if (error) throw new Error(error.message || 'Resend rejected the send')
-}
-
 export async function GET() {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
-    const { targets, signups, alreadySent, unsubscribed, unconfirmed } = await audience()
+    const [{ targets, signups, alreadySent, unsubscribed, unconfirmed }, bulkSent] =
+      await Promise.all([audience(), bulkSentLast24h(getSupabaseAdmin())])
     return NextResponse.json({
       wouldSend: targets.length,
       signups,
@@ -72,6 +67,8 @@ export async function GET() {
       unsubscribed,
       unconfirmed,
       batchSize: BATCH_SIZE,
+      dailyCap: BULK_DAILY_CAP,
+      bulkSentLast24h: bulkSent,
       confirmWith: UPDATE_CONFIRM,
       replyTo: REPLY_TO,
       preview: targets.slice(0, 20).map(t => ({ email: t.email, name: t.name })),
@@ -96,7 +93,7 @@ export async function POST(req: Request) {
   const testTo = new URL(req.url).searchParams.get('to')
   if (testTo) {
     try {
-      await send(testTo, `[TEST] ${UPDATE_SUBJECT}`, updateEmailHtml('', aud.signups, APP_URL))
+      await sendOrThrow({ to: testTo, subject: `[TEST] ${UPDATE_SUBJECT}`, html: updateEmailHtml('', aud.signups, APP_URL) })
       return NextResponse.json({ test: true, sentTo: testTo, recorded: false, replyTo: REPLY_TO, wouldSend: aud.targets.length })
     } catch (e) {
       return NextResponse.json({ test: true, error: errMsg(e) || 'send failed' }, { status: 500 })
@@ -129,38 +126,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Refused. Send with { "confirm": "${UPDATE_CONFIRM}" }.` }, { status: 400 })
   }
 
-  const batch = aud.targets.slice(0, BATCH_SIZE)
-  if (batch.length === 0) return NextResponse.json({ sent: 0, remaining: 0, note: 'nobody eligible' })
+  if (aud.targets.length === 0) return NextResponse.json({ sent: 0, remaining: 0, note: 'nobody eligible' })
 
-  let sent = 0
-  const failed: string[] = []
+  let sentLast24h: number
+  try {
+    sentLast24h = await bulkSentLast24h(db)
+  } catch (e) {
+    console.error('[update-email] bulk count failed:', errMsg(e))
+    return NextResponse.json({ error: errMsg(e), sent: 0 }, { status: 500 })
+  }
 
-  // Indexed loop: this repo compiles below es2015, so no for..of over iterators.
-  for (let i = 0; i < batch.length; i++) {
-    const t = batch[i]
-    if (i > 0) await sleep(SEND_INTERVAL_MS)
-    try {
-      await send(t.email, UPDATE_SUBJECT, updateEmailHtml(t.name, aud.signups, APP_URL))
-      // Recorded only after Resend accepts it, so a failure stays eligible.
+  return NextResponse.json(await runBulkSend({
+    label: 'update-email',
+    targets: aud.targets,
+    sentLast24h,
+    batchSize: BATCH_SIZE,
+    intervalMs: SEND_INTERVAL_MS,
+    send: t => sendOrThrow({ to: t.email, subject: UPDATE_SUBJECT, html: updateEmailHtml(t.name, aud.signups, APP_URL) }),
+    // Recorded only after Resend accepts it, so a failure stays eligible.
+    record: async t => {
       const { error } = await db.from('usage_events').insert({
         user_id: t.id,
         event_type: UPDATE_EVENT,
         metadata: { signups_shown: aud.signups },
       })
-      if (error) console.warn('[update-email] usage_events insert failed:', t.email, error.message)
-      sent++
-    } catch (e) {
-      failed.push(t.email)
-      console.error('[update-email] send failed:', t.email, errMsg(e))
-    }
-  }
-
-  const remaining = aud.targets.length - sent
-  return NextResponse.json({
-    sent,
-    failed: failed.length,
-    failedEmails: failed.slice(0, 10),
-    remaining,
-    note: remaining > 0 ? 'POST again with the same confirm for the next batch; nobody already sent is re-sent.' : 'done',
-  })
+      if (error) throw new Error(error.message)
+    },
+  }))
 }

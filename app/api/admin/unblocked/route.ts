@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { sendMail, REPLY_TO } from '@/lib/mail'
+import { REPLY_TO } from '@/lib/mail'
+import { BULK_BATCH_SIZE, bulkSentLast24h, runBulkSend, sendOrThrow } from '@/lib/bulk-email'
 import { isInternalEmail } from '@/lib/internal-accounts'
 import { unblockedHtml, UNBLOCKED_SUBJECT } from '@/lib/emails/unblocked'
 
@@ -26,7 +27,6 @@ export const maxDuration = 60
 // Resend's free tier allows 2 requests/second. Twelve sends at this interval
 // finish in about five seconds, well inside the budget above.
 const SEND_INTERVAL_MS = 400
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 // Written by the backfill that recorded who #610 released, so the audience is a
 // recorded fact rather than a list of addresses pasted into a source file.
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
   const testTo = new URL(req.url).searchParams.get('to')
   if (testTo) {
     try {
-      await sendMail({
+      await sendOrThrow({
         to: testTo,
         subject: '[TEST] That one was on us, and it is fixed',
         html: unblockedHtml({ name: 'Joshua', platform: 'discord', since: '2026-04-17' }),
@@ -119,40 +119,33 @@ export async function POST(req: Request) {
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
   const admin = getSupabaseAdmin()
-  let sent = 0
-  const failed: string[] = []
+  let sentLast24h: number
+  try {
+    sentLast24h = await bulkSentLast24h(admin)
+  } catch (e: unknown) {
+    return NextResponse.json({ sent: 0, error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+  }
 
-  for (let i = 0; i < targets.length; i++) {
-    const t = targets[i]
-    if (i > 0) await sleep(SEND_INTERVAL_MS)
-    try {
-      await sendMail({
-        to: t.email,
-        subject: UNBLOCKED_SUBJECT,
-        html: unblockedHtml(t),
-      })
-      // Recorded only after the send succeeded, so a failure leaves them
-      // eligible for a retry rather than burning their one shot silently.
-      await admin.from('usage_events').insert({
+  return NextResponse.json(await runBulkSend({
+    label: 'unblocked',
+    targets,
+    sentLast24h,
+    batchSize: BULK_BATCH_SIZE,
+    intervalMs: SEND_INTERVAL_MS,
+    send: t => sendOrThrow({
+      to: t.email,
+      subject: UNBLOCKED_SUBJECT,
+      html: unblockedHtml(t),
+    }),
+    // Recorded only after the send succeeded, so a failure leaves them
+    // eligible for a retry rather than burning their one shot silently.
+    record: async t => {
+      const { error } = await admin.from('usage_events').insert({
         user_id: t.id,
         event_type: EVENT,
         metadata: { platform: t.platform },
       })
-      sent++
-    } catch (e: unknown) {
-      failed.push(t.email)
-      console.error('[unblocked] send failed:', t.email, e instanceof Error ? e.message : e)
-    }
-  }
-
-  const remaining = targets.length - sent
-  return NextResponse.json({
-    sent,
-    failed: failed.length,
-    failedEmails: failed.slice(0, 10),
-    remaining,
-    note: remaining > 0
-      ? remaining + ' not sent, and not recorded. POST again to retry only those.'
-      : 'All eligible targets sent.',
-  })
+      if (error) throw new Error(error.message)
+    },
+  }))
 }

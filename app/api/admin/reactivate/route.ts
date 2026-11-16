@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
-import { sendMail, REPLY_TO } from '@/lib/mail'
+import { REPLY_TO } from '@/lib/mail'
+import { BULK_BATCH_SIZE, bulkSentLast24h, runBulkSend, sendOrThrow } from '@/lib/bulk-email'
 import { isInternalEmail } from '@/lib/internal-accounts'
 import { loadAccountFacts, oldestFirst, selectAll } from '@/lib/admin-metrics'
 
@@ -33,7 +34,6 @@ export const maxDuration = 60
 // sent. 400ms keeps us under the limit with room, and 61 sends still finish in
 // well under the budget above.
 const SEND_INTERVAL_MS = 400
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 const EVENT = 'reactivation_email'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
@@ -159,7 +159,7 @@ export async function POST(req: Request) {
   const testTo = new URL(req.url).searchParams.get('to')
   if (testTo) {
     try {
-      await sendMail({
+      await sendOrThrow({
         to: testTo,
         subject: '[TEST] That was our fault, and it is fixed',
         html: reactivationHtml(testTo.split('@')[0]),
@@ -180,47 +180,34 @@ export async function POST(req: Request) {
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
   const admin = getSupabaseAdmin()
-  let sent = 0
-  const failed: string[] = []
+  let sentLast24h: number
+  try {
+    sentLast24h = await bulkSentLast24h(admin)
+  } catch (e) {
+    return NextResponse.json({ sent: 0, error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+  }
 
-  // Indexed loop, not `.entries()` — that returns an iterator, and this repo
-  // compiles below es2015 downlevel, so for..of over it fails the build.
-  for (let i = 0; i < targets.length; i++) {
-    const t = targets[i]
-    if (i > 0) await sleep(SEND_INTERVAL_MS)
-    const html = reactivationHtml(t.name)
-
-    try {
-      await sendMail({
-        to: t.email,
-        subject: 'That was our fault, and it is fixed',
-        html,
-      })
-      // Record only after the send actually succeeded, so a failure leaves them
-      // eligible for a retry rather than silently burning their one shot.
-      await admin.from('usage_events').insert({
+  // Anyone who failed, or who was not reached (batch size, daily cap, quota),
+  // was never recorded and is still eligible, so a plain re-POST picks up
+  // exactly the remainder and re-sends to nobody.
+  return NextResponse.json(await runBulkSend({
+    label: 'reactivate',
+    targets,
+    sentLast24h,
+    batchSize: BULK_BATCH_SIZE,
+    intervalMs: SEND_INTERVAL_MS,
+    send: t => sendOrThrow({
+      to: t.email,
+      subject: 'That was our fault, and it is fixed',
+      html: reactivationHtml(t.name),
+    }),
+    record: async t => {
+      const { error } = await admin.from('usage_events').insert({
         user_id: t.id,
         event_type: EVENT,
         metadata: { age_days: t.ageDays },
       })
-      sent++
-    } catch (e: any) {
-      failed.push(t.email)
-      console.error('[reactivate] send failed:', t.email, e?.message)
-    }
-  }
-
-  // Say what is left. Anyone who failed, or who never got reached because the
-  // function ran out of budget, was never recorded and is still eligible — so
-  // a plain re-POST picks up exactly the remainder and re-sends to nobody.
-  const remaining = targets.length - sent
-  return NextResponse.json({
-    sent,
-    failed: failed.length,
-    failedEmails: failed.slice(0, 10),
-    remaining,
-    note: remaining > 0
-      ? `${remaining} not sent. They were not recorded, so POST again to retry only those.`
-      : 'All eligible targets sent.',
-  })
+      if (error) throw new Error(error.message)
+    },
+  }))
 }

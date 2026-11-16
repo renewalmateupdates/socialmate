@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
-import { sendMail, REPLY_TO } from '@/lib/mail'
+import { REPLY_TO } from '@/lib/mail'
+import { BULK_BATCH_SIZE, bulkSentLast24h, runBulkSend, sendOrThrow } from '@/lib/bulk-email'
 import { isInternalEmail } from '@/lib/internal-accounts'
 
 // One-shot announcement for the day TikTok clears SocialMate's content sharing
@@ -25,12 +26,11 @@ import { isInternalEmail } from '@/lib/internal-accounts'
 // Idempotency rides on usage_events, like /api/admin/reactivate: anyone with a
 // row for EVENT is skipped, so a re-POST only reaches people not yet sent.
 
-// Resend round trips at SEND_INTERVAL_MS each; 60s covers well over 100 sends.
+// A batch of BULK_BATCH_SIZE at ~0.7s per send finishes well inside 60s.
 export const maxDuration = 60
 
 // Resend's free tier allows 2 requests/second.
 const SEND_INTERVAL_MS = 400
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 const EVENT = 'tiktok_live_email'
 const CONFIRM = 'tiktok public posting is live'
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
   const testTo = new URL(req.url).searchParams.get('to')
   if (testTo) {
     try {
-      await sendMail({ to: testTo, subject: `[TEST] ${SUBJECT}`, html: tiktokLiveHtml(testTo.split('@')[0], true) })
+      await sendOrThrow({ to: testTo, subject: `[TEST] ${SUBJECT}`, html: tiktokLiveHtml(testTo.split('@')[0], true) })
       return NextResponse.json({ test: true, sentTo: testTo, recorded: false, replyTo: REPLY_TO })
     } catch (e: any) {
       return NextResponse.json({ test: true, error: e?.message ?? 'send failed' }, { status: 500 })
@@ -132,35 +132,28 @@ export async function POST(req: Request) {
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
   const admin = getSupabaseAdmin()
-  let sent = 0
-  const failed: string[] = []
+  let sentLast24h: number
+  try {
+    sentLast24h = await bulkSentLast24h(admin)
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e), sent: 0 }, { status: 500 })
+  }
 
-  // Indexed loop: this repo compiles below es2015, so no for..of over iterators.
-  for (let i = 0; i < targets.length; i++) {
-    const t = targets[i]
-    if (i > 0) await sleep(SEND_INTERVAL_MS)
-    try {
-      await sendMail({ to: t.email, subject: SUBJECT, html: tiktokLiveHtml(t.name, t.tiktokOnly) })
-      // Recorded only after a successful send, so a failure stays eligible.
+  return NextResponse.json(await runBulkSend({
+    label: 'tiktok-live-email',
+    targets,
+    sentLast24h,
+    batchSize: BULK_BATCH_SIZE,
+    intervalMs: SEND_INTERVAL_MS,
+    send: t => sendOrThrow({ to: t.email, subject: SUBJECT, html: tiktokLiveHtml(t.name, t.tiktokOnly) }),
+    // Recorded only after a successful send, so a failure stays eligible.
+    record: async t => {
       const { error } = await admin.from('usage_events').insert({
         user_id: t.id,
         event_type: EVENT,
         metadata: { tiktok_only: t.tiktokOnly },
       })
-      if (error) console.warn('[tiktok-live-email] usage_events insert failed:', t.email, error.message)
-      sent++
-    } catch (e: any) {
-      failed.push(t.email)
-      console.error('[tiktok-live-email] send failed:', t.email, e?.message)
-    }
-  }
-
-  const remaining = targets.length - sent
-  return NextResponse.json({
-    sent,
-    failed: failed.length,
-    failedEmails: failed.slice(0, 10),
-    remaining,
-    note: remaining > 0 ? 'POST again with the same confirm to reach the rest; nobody already sent is re-sent.' : 'done',
-  })
+      if (error) throw new Error(error.message)
+    },
+  }))
 }

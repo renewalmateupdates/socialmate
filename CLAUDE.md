@@ -488,8 +488,14 @@ its own: `/api/admin/update-email` GET previews, `POST ?to=` sends a test copy,
 reports a rejected send in its return value without throwing, so the TikTok
 email routes count a failed send as sent; the new route checks the error.
 It went to 184 of 246 on Nov 16 before Resend's daily quota stopped it (a
-spent quota blocks all app mail until it resets, so cap the next bulk send
-below it); the other 62 go Nov 17. The first reply came from someone who signed
+spent quota blocks all app mail until it resets); the other 62 go Nov 17.
+Since then every one-shot admin email (update, reactivation, both TikTok
+emails, unblocked) sends through `lib/bulk-email.ts`: a rejected send throws
+and is never recorded, one POST sends at most 50, all of them together stop at
+`BULK_EMAIL_DAILY_CAP` (default 100) per rolling 24 hours, and a batch stops at
+the first quota error. `scripts/test-bulk-email.mjs` fails if a bulk route
+calls `sendMail` directly. Seven single-send sites elsewhere still ignore
+Resend's error. The first reply came from someone who signed
 up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
 pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
 posts each issue automatically (it imports drafts by hand). Fixed in #800
