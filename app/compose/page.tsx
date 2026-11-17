@@ -35,6 +35,10 @@ const PLATFORMS = [
   { id: 'mastodon',  name: 'Mastodon',  limit: 500,   live: true  },
   { id: 'twitter',   name: 'X',         limit: 280,   live: true  },
   { id: 'linkedin',  name: 'LinkedIn',  limit: 3000,  live: true  },
+  // Instagram and Facebook Pages: live for anyone who has connected one, which
+  // before Meta App Review means only the admin (see META_PLATFORM_IDS below).
+  { id: 'instagram', name: 'Instagram', limit: 2200,  live: true  },
+  { id: 'facebook',  name: 'Facebook',  limit: 63206, live: true  },
   { id: 'youtube',   name: 'YouTube',   limit: 5000,  live: false },
   { id: 'pinterest', name: 'Pinterest', limit: 500,   live: false },
   { id: 'reddit',    name: 'Reddit',    limit: 40000, live: false },
@@ -42,7 +46,13 @@ const PLATFORMS = [
 
 // Platforms that process a video before it appears (lib/publish/video.ts).
 // Until Nov 2026 their publishers dropped video and posted the text alone.
-const VIDEO_PROCESSED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky' }
+const VIDEO_PROCESSED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky', instagram: 'Instagram' }
+
+// Built, waiting on Meta App Review. Offered here only once connected, or to
+// everyone after NEXT_PUBLIC_META_CONNECT_OPEN is set; until then they stay in
+// the "Soon" row below.
+const META_PLATFORM_IDS = ['instagram', 'facebook']
+const META_CONNECT_OPEN = process.env.NEXT_PUBLIC_META_CONNECT_OPEN === 'true'
 
 // TikTok is deliberately NOT in here. Its Production API has been approved
 // since 2026-05-17 and it is the single most-connected platform among external
@@ -667,7 +677,9 @@ function ComposeInner() {
       .catch(() => {/* non-critical */})
   }, [selectedPlatforms.includes('twitter')]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const livePlatforms = PLATFORMS.filter(p => p.live)
+  const livePlatforms = PLATFORMS.filter(p =>
+    p.live && (!META_PLATFORM_IDS.includes(p.id) || META_CONNECT_OPEN || connectedPlatforms.has(p.id))
+  )
   // Only Bluesky, Mastodon, and X have a real reply-chain concept this app can
   // use for Thread Mode -- Discord/Telegram messages aren't threaded the same
   // way and LinkedIn UGC posts can't reply to each other. Restricting the
@@ -2019,7 +2031,7 @@ function ComposeInner() {
                       <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
                     </div>
                   ))}
-                  {COMING_SOON_PLATFORMS.map(p => (
+                  {COMING_SOON_PLATFORMS.filter(p => !livePlatforms.some(l => l.id === p.id)).map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
                       <PlatformGlyph id={p.id} size={14} className="text-gray-300 dark:text-gray-600" /><span>{p.name}</span>
@@ -2123,6 +2135,15 @@ function ComposeInner() {
                         )
                       })}
                   </div>
+                </div>
+              )}
+
+              {selectedPlatforms.includes('instagram') &&
+                mediaItems.length + externalMediaUrls.length + (draftMediaUrls?.filter(u => u.startsWith('http')).length ?? 0) === 0 && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-700">
+                    Instagram needs a photo (JPG) or a video. Add one, or the other platforms will post and Instagram will be skipped.
+                  </p>
                 </div>
               )}
 

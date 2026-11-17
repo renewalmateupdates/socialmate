@@ -17,6 +17,11 @@ import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import { isLegacyDiscordAccount } from '@/lib/discord-accounts'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from 'lucide-react'
+import { SUPPORT_EMAIL } from '@/lib/contact'
+
+// Built and working, waiting on Meta App Review (see lib/meta.ts).
+const META_PLATFORMS = ['instagram', 'facebook']
+const META_CONNECT_OPEN = process.env.NEXT_PUBLIC_META_CONNECT_OPEN === 'true'
 
 function PlatformGlyph({ id, size = 20, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Plug size={size} className={className} strokeWidth={1.75} />
@@ -55,8 +60,8 @@ const PLATFORM_META: Record<string, {
   youtube:   { color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Awaiting Google review' },
   pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'planned',     statusNote: 'Not approved by Pinterest yet' },
   reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'planned',     statusNote: 'Not approved by Reddit yet' },
-  instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
-  facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
+  instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Built, waiting on Meta app review'          },
+  facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Pages. Built, waiting on Meta app review'   },
   tiktok:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
   threads:   { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
   twitter:   { color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'live'                                       },
@@ -83,6 +88,12 @@ const CONNECT_ERROR_COPY: Record<string, string> = {
   twitter_user_failed:           'Could not fetch your X profile. Please try again.',
   twitter_db_error:              'X connected but failed to save. Please try again.',
   youtube_no_channel:            'No YouTube channel found on this account',
+  instagram_not_professional:    'Instagram only lets Business and Creator accounts post through apps. Switch your account to Professional in the Instagram app (Settings → Account type and tools), then connect again.',
+  instagram_not_open:            'Instagram connections open once Meta finishes reviewing SocialMate.',
+  facebook_not_open:             'Facebook Page connections open once Meta finishes reviewing SocialMate.',
+  instagram_not_configured:      'Instagram is not set up on this server yet.',
+  facebook_not_configured:       'Facebook is not set up on this server yet.',
+  facebook_no_pages:             'No Facebook Page found that you can post to. SocialMate posts to Pages you manage, not personal profiles.',
 }
 
 // Every connect callback comes back here as `<platform>_<reason>`, so the
@@ -205,6 +216,16 @@ function PlatformCard({
           Videos only. Post and schedule them from TikTok Studio.
         </p>
       )}
+      {platform === 'instagram' && !atLimit && (
+        <p className="text-xs text-gray-400 leading-relaxed pl-1">
+          Business or Creator accounts. Every post needs a JPG photo or a video.
+        </p>
+      )}
+      {platform === 'facebook' && !atLimit && (
+        <p className="text-xs text-gray-400 leading-relaxed pl-1">
+          Posts to Facebook Pages you manage. Each Page counts as one account.
+        </p>
+      )}
     </div>
   )
 }
@@ -246,6 +267,13 @@ function AccountsInner() {
   const [showTelegramModal, setShowTelegramModal] = useState(false)
   const [showMastodonModal, setShowMastodonModal] = useState(false)
   const [twitterQuota, setTwitterQuota] = useState<{ used: number; limit: number; plan: string } | null>(null)
+  // Only used to show the Instagram/Facebook cards before Meta App Review. The
+  // connect routes check admin server-side; this just avoids a dead button.
+  const [isAdmin, setIsAdmin] = useState(false)
+  useEffect(() => {
+    if (META_CONNECT_OPEN) return
+    supabase.auth.getUser().then(({ data }) => setIsAdmin(data.user?.email === SUPPORT_EMAIL))
+  }, [])
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan, activeWorkspace } = useWorkspace()
@@ -356,6 +384,8 @@ function AccountsInner() {
     if (success === 'linkedin_connected')  showToast('LinkedIn connected successfully!', 'success')
     if (success === 'twitter_connected')   showToast('X (Twitter) connected successfully!', 'success')
     if (success === 'youtube_connected')   showToast('YouTube connected successfully!', 'success')
+    if (success === 'instagram_connected') showToast('Instagram connected successfully!', 'success')
+    if (success === 'facebook_connected')  showToast('Facebook Page connected successfully!', 'success')
     // Every other refusal gets a message too, the plan cap having its own above.
     if (error && !error.endsWith('_plan_limit')) {
       showToast(connectErrorMessage(error, searchParams.get('until')), 'error')
@@ -515,6 +545,8 @@ function AccountsInner() {
     if (platform === 'linkedin')  { window.open('/api/accounts/linkedin/connect', '_blank');  return }
     if (platform === 'youtube')   { window.open('/api/accounts/youtube/connect', '_blank');   return }
     if (platform === 'twitter')   { window.open('/api/accounts/twitter/connect', '_blank');   return }
+    if (platform === 'instagram') { window.open('/api/accounts/instagram/connect', '_blank'); return }
+    if (platform === 'facebook')  { window.open('/api/accounts/facebook/connect', '_blank');  return }
     if (platform === 'tiktok')   { window.location.href = '/api/tiktok/auth';                 return }
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
@@ -544,6 +576,16 @@ function AccountsInner() {
   }, {} as Record<string, Account[]>)
 
   const connectedPlatforms = new Set(accounts.map(a => a.platform))
+
+  // Instagram and Facebook are built but wait on Meta App Review: until then
+  // Meta refuses anyone without a role on the app. So they show as connectable
+  // only to the admin (who has that role), to anyone who already connected one,
+  // or to everyone once NEXT_PUBLIC_META_CONNECT_OPEN is set after approval.
+  const metaVisible = META_CONNECT_OPEN || isAdmin || accounts.some(a => META_PLATFORMS.includes(a.platform))
+  const livePlatforms = metaVisible ? [...LIVE_PLATFORMS, ...META_PLATFORMS] : LIVE_PLATFORMS
+  const comingSoonPlatforms = metaVisible
+    ? COMING_SOON_PLATFORMS.filter(p => !META_PLATFORMS.includes(p))
+    : COMING_SOON_PLATFORMS
 
   return (
     <div className="min-h-dvh bg-theme flex">
@@ -711,7 +753,7 @@ function AccountsInner() {
                     Pick one of the live platforms below to get started. You can connect as many as you want — all free.
                   </p>
                   <div className="flex flex-wrap gap-3">
-                    {LIVE_PLATFORMS.map(platform => {
+                    {livePlatforms.map(platform => {
                       const meta = PLATFORM_META[platform]
                       return (
                         <div key={platform} className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm font-semibold">
@@ -730,7 +772,7 @@ function AccountsInner() {
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
                 { label: 'Connected',            value: accounts.length,                                               icon: CheckCircle2, color: 'text-green-600' },
-                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: Smartphone, color: 'text-gray-700' },
+                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${livePlatforms.length} live`, icon: Smartphone, color: 'text-gray-700' },
                 { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                 icon: Unlock, color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
@@ -956,7 +998,7 @@ function AccountsInner() {
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">{t('app_accounts.add_account')}</h2>
-              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{LIVE_PLATFORMS.length} available now</span>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{livePlatforms.length} available now</span>
             </div>
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -964,7 +1006,7 @@ function AccountsInner() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {LIVE_PLATFORMS.map(platform => (
+                {livePlatforms.map(platform => (
                   <PlatformCard
                     key={platform}
                     platform={platform}
@@ -986,7 +1028,7 @@ function AccountsInner() {
               <span className="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full">Awaiting approval</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {COMING_SOON_PLATFORMS.map(platform => (
+              {comingSoonPlatforms.map(platform => (
                 <PlatformCard
                   key={platform}
                   platform={platform}

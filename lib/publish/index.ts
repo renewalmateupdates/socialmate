@@ -6,6 +6,8 @@ import { publishToYouTube }   from './youtube'
 import { publishToLinkedIn }  from './linkedin'
 import { publishToPinterest } from './pinterest'
 import { publishToTwitter }   from './twitter'
+import { publishToInstagram } from './instagram'
+import { publishToFacebook }  from './facebook'
 import { isRetryablePublishError } from './retry'
 import { firstVideo } from './video'
 
@@ -72,6 +74,12 @@ export async function publishToAll(
           break
         case 'twitter':
           postId = await publishToTwitter(userId, content, workspaceId, selectedAccountIds['twitter'], media)
+          break
+        case 'instagram':
+          postId = await publishToInstagram(userId, content, workspaceId, selectedAccountIds['instagram'], media)
+          break
+        case 'facebook':
+          postId = await publishToFacebook(userId, content, workspaceId, selectedAccountIds['facebook'], media)
           break
         case 'tiktok':
           throw new Error(
