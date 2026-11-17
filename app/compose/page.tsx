@@ -35,10 +35,11 @@ const PLATFORMS = [
   { id: 'mastodon',  name: 'Mastodon',  limit: 500,   live: true  },
   { id: 'twitter',   name: 'X',         limit: 280,   live: true  },
   { id: 'linkedin',  name: 'LinkedIn',  limit: 3000,  live: true  },
-  // Instagram and Facebook Pages: live for anyone who has connected one, which
-  // before Meta App Review means only the admin (see META_PLATFORM_IDS below).
+  // Instagram, Facebook Pages and Threads: live for anyone who has connected
+  // one, which before Meta App Review means only the admin (META_PLATFORM_IDS).
   { id: 'instagram', name: 'Instagram', limit: 2200,  live: true  },
   { id: 'facebook',  name: 'Facebook',  limit: 63206, live: true  },
+  { id: 'threads',   name: 'Threads',   limit: 500,   live: true  },
   { id: 'youtube',   name: 'YouTube',   limit: 5000,  live: false },
   { id: 'pinterest', name: 'Pinterest', limit: 500,   live: false },
   { id: 'reddit',    name: 'Reddit',    limit: 40000, live: false },
@@ -46,12 +47,12 @@ const PLATFORMS = [
 
 // Platforms that process a video before it appears (lib/publish/video.ts).
 // Until Nov 2026 their publishers dropped video and posted the text alone.
-const VIDEO_PROCESSED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky', instagram: 'Instagram' }
+const VIDEO_PROCESSED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky', instagram: 'Instagram', threads: 'Threads' }
 
 // Built, waiting on Meta App Review. Offered here only once connected, or to
 // everyone after NEXT_PUBLIC_META_CONNECT_OPEN is set; until then they stay in
 // the "Soon" row below.
-const META_PLATFORM_IDS = ['instagram', 'facebook']
+const META_PLATFORM_IDS = ['instagram', 'facebook', 'threads']
 const META_CONNECT_OPEN = process.env.NEXT_PUBLIC_META_CONNECT_OPEN === 'true'
 
 // TikTok is deliberately NOT in here. Its Production API has been approved

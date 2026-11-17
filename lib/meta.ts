@@ -18,7 +18,10 @@ import { RetryablePublishError } from '@/lib/publish/retry'
  *   INSTAGRAM_APP_ID, INSTAGRAM_APP_SECRET  "Instagram app ID/secret" shown under
  *                                           Instagram > API setup with Instagram login
  *   META_FB_LOGIN_CONFIG_ID                 optional, Facebook Login for Business config
+ *   THREADS_APP_ID, THREADS_APP_SECRET      "Threads app ID/secret" shown under the
+ *                                           Threads use case settings
  *   META_GRAPH_VERSION                      optional, defaults to v25.0
+ *   THREADS_GRAPH_VERSION                   optional, defaults to v1.0
  *   META_CONNECT_OPEN=true                  let everyone connect (after App Review)
  *   NEXT_PUBLIC_META_CONNECT_OPEN=true      show the connect cards to everyone
  */
@@ -27,6 +30,10 @@ export const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v25.0'
 
 export const FB_GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`
 export const IG_GRAPH = `https://graph.instagram.com/${GRAPH_VERSION}`
+export const THREADS_GRAPH = `https://graph.threads.net/${process.env.THREADS_GRAPH_VERSION || 'v1.0'}`
+
+/** What SocialMate asks Threads for: who you are, and permission to post. No replies, insights or mentions. */
+export const THREADS_SCOPES = ['threads_basic', 'threads_content_publish']
 
 /** What SocialMate asks Instagram for. Nothing that reads DMs, comments or insights. */
 export const INSTAGRAM_SCOPES = ['instagram_business_basic', 'instagram_business_content_publish']
@@ -135,15 +142,15 @@ export type SignedRequestPayload = {
  * Verifies the `signed_request` Meta sends to the deauthorize and data deletion
  * callbacks: `<base64url HMAC-SHA256 signature>.<base64url JSON payload>`,
  * signed with the app secret. Instagram Login callbacks are signed with the
- * Instagram app secret and Facebook ones with the Facebook app secret, so every
- * configured secret is tried. Returns null for anything that does not verify.
+ * Instagram app secret, Threads ones with the Threads app secret and Facebook
+ * ones with the Facebook app secret, so every configured secret is tried. Returns null for anything that does not verify.
  */
 export function parseSignedRequest(signedRequest: string | null | undefined): SignedRequestPayload | null {
   if (!signedRequest || !signedRequest.includes('.')) return null
   const [encodedSig, encodedPayload] = signedRequest.split('.', 2)
   if (!encodedSig || !encodedPayload) return null
 
-  const secrets = [process.env.META_APP_SECRET, process.env.INSTAGRAM_APP_SECRET].filter(
+  const secrets = [process.env.META_APP_SECRET, process.env.INSTAGRAM_APP_SECRET, process.env.THREADS_APP_SECRET].filter(
     (s): s is string => typeof s === 'string' && s.length > 0,
   )
   const sig = base64UrlDecode(encodedSig)

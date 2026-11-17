@@ -2,11 +2,13 @@ import crypto from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 /**
- * Deletes every Instagram and Facebook connection tied to one Meta user, for
- * Meta's "Deauthorize" and "Data deletion request" callbacks. Meta identifies
- * the person by an app-scoped id, which SocialMate keeps on the row:
+ * Deletes every Instagram, Facebook and Threads connection tied to one Meta
+ * user, for Meta's "Deauthorize"/"Uninstall" and "Data deletion request"
+ * callbacks. Meta identifies the person by an app-scoped id, which SocialMate
+ * keeps on the row:
  *   Facebook Pages  metadata.fb_user_id   (the person who connected the Page)
  *   Instagram       metadata.app_scoped_id, and platform_user_id as a fallback
+ *   Threads         platform_user_id
  *
  * Only the connection rows are removed (tokens, ids, names, avatar URLs).
  * Posts the person wrote in SocialMate are their SocialMate data, not Meta's,
@@ -28,7 +30,7 @@ export async function deleteMetaConnections(
   const { data: rows, error } = await db
     .from('connected_accounts')
     .select('id, user_id, platform')
-    .in('platform', ['instagram', 'facebook'])
+    .in('platform', ['instagram', 'facebook', 'threads'])
     .or(
       `platform_user_id.eq.${metaUserId},` +
       `metadata->>fb_user_id.eq.${metaUserId},` +

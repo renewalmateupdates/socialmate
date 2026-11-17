@@ -5,8 +5,8 @@ import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/contact'
 
 export const metadata = {
   alternates: { canonical: 'https://socialmate.studio/meta/data-deletion' },
-  title: 'Instagram and Facebook Data Deletion — SocialMate',
-  description: 'How to delete the Instagram and Facebook data SocialMate stores, and the status of a deletion request.',
+  title: 'Instagram, Facebook and Threads Data Deletion — SocialMate',
+  description: 'How to delete the Instagram, Facebook and Threads data SocialMate stores, and the status of a deletion request.',
 }
 
 // The page Meta links to from a data deletion request (the `url` returned by
@@ -29,7 +29,7 @@ export default async function MetaDataDeletion({
           <Link href="/privacy" className="text-sm font-bold text-gray-400 hover:text-black dark:hover:text-white transition-all">← Privacy Policy</Link>
         </div>
 
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Instagram and Facebook data deletion</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Instagram, Facebook and Threads data deletion</h1>
         <p className="text-sm text-gray-400 dark:text-gray-500 mb-10">SocialMate · Gilgamesh Enterprise LLC</p>
 
         {safeCode && (
@@ -39,8 +39,8 @@ export default async function MetaDataDeletion({
               Confirmation code: <span className="font-mono font-semibold">{safeCode}</span>
             </p>
             <p className="text-sm text-green-800 dark:text-green-300 mt-2">
-              SocialMate processes these requests automatically the moment Meta sends them. Any Instagram or Facebook
-              connection data SocialMate held for your account (access tokens, account IDs, names and profile picture
+              SocialMate processes these requests automatically the moment Meta sends them. Any Instagram, Facebook or
+              Threads connection data SocialMate held for your account (access tokens, account IDs, names and profile picture
               links) has been deleted. Questions: <a href={SUPPORT_MAILTO} className="underline font-semibold">{SUPPORT_EMAIL}</a>
             </p>
           </div>
@@ -49,9 +49,9 @@ export default async function MetaDataDeletion({
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">What SocialMate stores</h2>
-            <p>When you connect Instagram or a Facebook Page, SocialMate stores only what it needs to publish the posts you schedule:</p>
+            <p>When you connect Instagram, a Facebook Page or Threads, SocialMate stores only what it needs to publish the posts you schedule:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Your Instagram account ID, username, account type and profile picture link, or your Facebook Page ID, name, category and picture link</li>
+              <li>Your Instagram account ID, username, account type and profile picture link; your Facebook Page ID, name, category and picture link; or your Threads user ID, username and profile picture link</li>
               <li>The access token Meta issues, used only to publish the posts you schedule</li>
               <li>An app-scoped Meta user ID, so a deletion request from Meta can find your data</li>
             </ul>
@@ -64,9 +64,10 @@ export default async function MetaDataDeletion({
               <li><span className="font-semibold">In SocialMate:</span> open <Link href="/accounts" className="underline font-semibold">Accounts</Link> and press Disconnect on the Instagram account or Facebook Page. The token and account details are deleted immediately.</li>
               <li><span className="font-semibold">From Facebook:</span> Settings &amp; privacy → Settings → Apps and websites → remove SocialMate. Meta notifies SocialMate and the data is deleted automatically.</li>
               <li><span className="font-semibold">From Instagram:</span> Settings → Website permissions → Apps and websites → remove SocialMate. Meta notifies SocialMate and the data is deleted automatically.</li>
+              <li><span className="font-semibold">From Threads:</span> Settings → Account → Website permissions → remove SocialMate. Meta notifies SocialMate and the data is deleted automatically.</li>
               <li><span className="font-semibold">Everything else:</span> to delete your whole SocialMate account, email <a href={SUPPORT_MAILTO} className="underline font-semibold">{SUPPORT_EMAIL}</a> with &quot;Delete My Account&quot; in the subject line. See section 13 of the <Link href="/privacy" className="underline font-semibold">Privacy Policy</Link>.</li>
             </ol>
-            <p className="mt-3">Posts already published to Instagram or Facebook stay there. Delete them on Instagram or Facebook directly.</p>
+            <p className="mt-3">Posts already published to Instagram, Facebook or Threads stay there. Delete them on that app directly.</p>
           </section>
         </div>
       </div>
