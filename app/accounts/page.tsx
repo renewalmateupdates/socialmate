@@ -90,6 +90,7 @@ const CONNECT_ERROR_COPY: Record<string, string> = {
   youtube_no_channel:            'No YouTube channel found on this account',
   instagram_not_professional:    'Instagram only lets Business and Creator accounts post through apps. Switch your account to Professional in the Instagram app (Settings → Account type and tools), then connect again.',
   instagram_not_open:            'Instagram connections open once Meta finishes reviewing SocialMate.',
+  instagram_no_accounts:         'No Instagram account was shared. Connect again and choose your Instagram Business or Creator account when Meta asks.',
   facebook_not_open:             'Facebook Page connections open once Meta finishes reviewing SocialMate.',
   instagram_not_configured:      'Instagram is not set up on this server yet.',
   facebook_not_configured:       'Facebook is not set up on this server yet.',

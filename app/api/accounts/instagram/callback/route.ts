@@ -5,18 +5,29 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { checkAccountSlot } from '@/lib/account-limits'
 import { checkOAuthState, isRepeatOfFreshConnect } from '@/lib/oauth-state'
-import { IG_GRAPH, INSTAGRAM_SCOPES, appUrl } from '@/lib/meta'
+import { FB_GRAPH, INSTAGRAM_SCOPES, appUrl } from '@/lib/meta'
 
-// Instagram Login callback: code -> short-lived token -> 60-day token -> profile
-// -> one connected_accounts row per Instagram professional account.
+// Instagram API with Unified Login callback:
+//   code -> Business Integration System User token (server to server)
+//   -> /me/assigned_instagram_accounts (the Instagram account(s) the login shared)
+//   -> one connected_accounts row per Instagram account.
 //
 // Row shape (connected_accounts, all existing columns):
 //   platform           'instagram'
-//   platform_user_id   the professional account id used for publishing (/me user_id)
-//   access_token       the long-lived (60 day) Instagram user token
-//   expires_at         when that token lapses; lib/publish/instagram.ts refreshes it
-//   metadata           { username, account_type, app_scoped_id }
-//                      app_scoped_id is the id Meta's deletion callbacks send.
+//   platform_user_id   the Instagram account id used for publishing
+//   access_token       the system-user token. The configuration sets it to never
+//                      expire; it stops working if the person removes SocialMate
+//                      from their business portfolio or moves the account.
+//   expires_at         only if Meta returns an expiry
+//   metadata           { username, auth: 'unified_login', system_user_id }
+
+type IgAccount = {
+  id?: string
+  username?: string
+  name?: string
+  profile_picture_url?: string
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code  = searchParams.get('code')
@@ -42,11 +53,13 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${base}/login?redirect=/accounts`)
 
+  const db = getSupabaseAdmin()
+
   const stateCheck = checkOAuthState(cookieStore.get('instagram_oauth_state')?.value, state)
   if (!stateCheck.ok) {
     // A second hit on the callback (double tap, reload) after a connect that
     // worked is not a failure: show success if the row was just written.
-    const { data: latest, error: latestErr } = await getSupabaseAdmin()
+    const { data: latest, error: latestErr } = await db
       .from('connected_accounts')
       .select('updated_at, created_at')
       .eq('user_id', user.id)
@@ -61,144 +74,122 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${base}/accounts?error=instagram_${stateCheck.reason}`)
   }
 
-  const clientId     = process.env.INSTAGRAM_APP_ID
-  const clientSecret = process.env.INSTAGRAM_APP_SECRET
+  const clientId     = process.env.META_APP_ID
+  const clientSecret = process.env.META_APP_SECRET
   if (!clientId || !clientSecret) {
-    console.error('[Instagram OAuth] INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET not set')
+    console.error('[Instagram OAuth] META_APP_ID / META_APP_SECRET not set')
     return NextResponse.redirect(`${base}/accounts?error=instagram_not_configured`)
   }
 
-  // 1. Code -> short-lived token (one hour).
-  const shortRes = await fetch('https://api.instagram.com/oauth/access_token', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id:     clientId,
-      client_secret: clientSecret,
-      grant_type:    'authorization_code',
-      redirect_uri:  `${base}/api/accounts/instagram/callback`,
-      code,
-    }),
-  })
-  if (!shortRes.ok) {
-    console.error('[Instagram OAuth] code exchange failed:', await shortRes.text().catch(() => ''))
-    return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
-  }
-  const shortBody = await shortRes.json().catch(() => ({}))
-  // The response is either flat or wrapped in data[] depending on API version.
-  const shortToken: string | undefined = shortBody.access_token ?? shortBody.data?.[0]?.access_token
-  if (!shortToken) {
-    console.error('[Instagram OAuth] no short-lived token in response')
-    return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
-  }
-
-  // 2. Short-lived -> long-lived (60 days).
-  const longParams = new URLSearchParams({
-    grant_type:    'ig_exchange_token',
+  // 1. Code -> system-user token.
+  const tokenRes = await fetch(`${FB_GRAPH}/oauth/access_token?${new URLSearchParams({
+    client_id:     clientId,
     client_secret: clientSecret,
-    access_token:  shortToken,
-  })
-  const longRes = await fetch(`https://graph.instagram.com/access_token?${longParams.toString()}`)
-  if (!longRes.ok) {
-    console.error('[Instagram OAuth] long-lived exchange failed:', await longRes.text().catch(() => ''))
+    redirect_uri:  `${base}/api/accounts/instagram/callback`,
+    code,
+  })}`)
+  if (!tokenRes.ok) {
+    console.error('[Instagram OAuth] code exchange failed:', await tokenRes.text().catch(() => ''))
     return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
   }
-  const longBody = await longRes.json().catch(() => ({}))
-  const accessToken: string | undefined = longBody.access_token
-  const expiresIn = Number(longBody.expires_in || 0)
-  if (!accessToken) {
-    return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
-  }
+  const tokenBody = await tokenRes.json().catch(() => ({}))
+  const accessToken: string | undefined = tokenBody.access_token
+  if (!accessToken) return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
+  const expiresIn = Number(tokenBody.expires_in || 0)
   const expiresAt = expiresIn > 0 ? new Date(Date.now() + expiresIn * 1000).toISOString() : null
 
-  // 3. Who is this?
-  const meParams = new URLSearchParams({
-    fields:       'id,user_id,username,name,profile_picture_url,account_type',
+  // 2. The system user the token belongs to (kept for deletion requests).
+  const meRes = await fetch(`${FB_GRAPH}/me?${new URLSearchParams({ fields: 'id', access_token: accessToken })}`)
+  const systemUserId = meRes.ok ? String((await meRes.json().catch(() => ({}))).id ?? '') || null : null
+
+  // 3. The Instagram account(s) the person shared at login.
+  const listRes = await fetch(`${FB_GRAPH}/me/assigned_instagram_accounts?${new URLSearchParams({
+    fields:       'id,username,name,profile_picture_url',
+    limit:        '50',
     access_token: accessToken,
-  })
-  const meRes = await fetch(`${IG_GRAPH}/me?${meParams.toString()}`)
-  if (!meRes.ok) {
-    console.error('[Instagram OAuth] profile fetch failed:', await meRes.text().catch(() => ''))
+  })}`)
+  if (!listRes.ok) {
+    console.error('[Instagram OAuth] account list failed:', await listRes.text().catch(() => ''))
     return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
   }
-  const me = await meRes.json().catch(() => ({}))
-  const platformUserId = String(me.user_id ?? me.id ?? '')
-  if (!platformUserId) {
-    return NextResponse.redirect(`${base}/accounts?error=instagram_token_failed`)
-  }
-  const accountType = String(me.account_type ?? '')
-  if (accountType && accountType !== 'BUSINESS' && accountType !== 'MEDIA_CREATOR') {
-    return NextResponse.redirect(`${base}/accounts?error=instagram_not_professional`)
-  }
+  const listed: IgAccount[] = ((await listRes.json().catch(() => ({}))).data ?? []) as IgAccount[]
 
-  const username    = me.username ? String(me.username) : null
-  const accountName = username ?? (me.name ? String(me.name) : 'Instagram account')
-  const avatarUrl   = me.profile_picture_url ? String(me.profile_picture_url) : null
-  const metadata    = {
-    username,
-    account_type:  accountType || null,
-    app_scoped_id: me.id ? String(me.id) : null,
+  // Some API versions return ids only on this edge; fill in the profile per account.
+  const accounts: IgAccount[] = []
+  for (const acc of listed) {
+    if (!acc.id) continue
+    if (acc.username) { accounts.push(acc); continue }
+    const profRes = await fetch(`${FB_GRAPH}/${acc.id}?${new URLSearchParams({
+      fields:       'id,username,name,profile_picture_url',
+      access_token: accessToken,
+    })}`)
+    accounts.push(profRes.ok ? { ...acc, ...(await profRes.json().catch(() => ({}))) } : acc)
   }
 
-  const db = getSupabaseAdmin()
-  const { data: existing, error: existingErr } = await db
-    .from('connected_accounts')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('platform', 'instagram')
-    .eq('platform_user_id', platformUserId)
-    .maybeSingle()
-  if (existingErr) console.warn('[Instagram OAuth] existing lookup failed:', existingErr.message)
-
-  // Plan cap on accounts per platform. A reconnect of an account already held
-  // is a token refresh, not a new slot.
-  if (!existing) {
-    const slot = await checkAccountSlot(user.id, 'instagram', null, platformUserId)
-    if (!slot.allowed) {
-      return NextResponse.redirect(
-        `${base}/accounts?error=instagram_plan_limit&limit=${slot.limit}&plan=${slot.plan}`,
-      )
-    }
+  if (accounts.length === 0) {
+    return NextResponse.redirect(`${base}/accounts?error=instagram_no_accounts`)
   }
 
-  if (existing) {
-    const { error: updateErr } = await db
+  let saved = 0
+  let refusedByPlan: { limit: number; plan: string } | null = null
+
+  for (const acc of accounts) {
+    const igId = String(acc.id)
+    const { data: existing, error: existingErr } = await db
       .from('connected_accounts')
-      .update({
-        access_token:      accessToken,
-        expires_at:        expiresAt,
-        account_name:      accountName,
-        profile_image_url: avatarUrl,
-        metadata,
-        is_active:         true,
-        updated_at:        new Date().toISOString(),
-      })
-      .eq('id', existing.id)
-    if (updateErr) {
-      console.error('[Instagram OAuth] update failed:', updateErr)
-      return NextResponse.redirect(`${base}/accounts?error=instagram_db_error`)
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('platform', 'instagram')
+      .eq('platform_user_id', igId)
+      .maybeSingle()
+    if (existingErr) console.warn('[Instagram OAuth] existing lookup failed:', existingErr.message)
+
+    const row = {
+      account_name:      acc.username || acc.name || 'Instagram account',
+      profile_image_url: acc.profile_picture_url ?? null,
+      access_token:      accessToken,
+      expires_at:        expiresAt,
+      metadata:          { username: acc.username ?? null, auth: 'unified_login', system_user_id: systemUserId },
     }
-  } else {
+
+    if (existing) {
+      const { error: updateErr } = await db
+        .from('connected_accounts')
+        .update({ ...row, is_active: true, updated_at: new Date().toISOString() })
+        .eq('id', existing.id)
+      if (updateErr) console.error('[Instagram OAuth] update failed:', updateErr)
+      else saved++
+      continue
+    }
+
+    // Plan cap on accounts per platform. A reconnect is a token refresh, not a new slot.
+    const slot = await checkAccountSlot(user.id, 'instagram', null, igId)
+    if (!slot.allowed) {
+      refusedByPlan = { limit: slot.limit, plan: slot.plan }
+      continue
+    }
+
     const { error: insertErr } = await db
       .from('connected_accounts')
       .insert({
-        user_id:           user.id,
-        platform:          'instagram',
-        platform_user_id:  platformUserId,
-        account_name:      accountName,
-        profile_image_url: avatarUrl,
-        access_token:      accessToken,
-        refresh_token:     null, // Instagram refreshes the access token itself
-        expires_at:        expiresAt,
-        scope:             INSTAGRAM_SCOPES.join(','),
-        metadata,
+        user_id:          user.id,
+        platform:         'instagram',
+        platform_user_id: igId,
+        refresh_token:    null,
+        scope:            INSTAGRAM_SCOPES.join(','),
+        ...row,
       })
-    if (insertErr) {
-      console.error('[Instagram OAuth] insert failed:', insertErr)
-      return NextResponse.redirect(`${base}/accounts?error=instagram_db_error`)
-    }
+    if (insertErr) console.error('[Instagram OAuth] insert failed:', insertErr)
+    else saved++
   }
 
   cookieStore.delete('instagram_oauth_state')
+
+  if (saved === 0 && refusedByPlan) {
+    return NextResponse.redirect(
+      `${base}/accounts?error=instagram_plan_limit&limit=${refusedByPlan.limit}&plan=${refusedByPlan.plan}`,
+    )
+  }
+  if (saved === 0) return NextResponse.redirect(`${base}/accounts?error=instagram_db_error`)
   return NextResponse.redirect(`${base}/accounts?success=instagram_connected`)
 }

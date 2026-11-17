@@ -51,7 +51,7 @@ export default async function MetaDataDeletion({
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">What SocialMate stores</h2>
             <p>When you connect Instagram, a Facebook Page or Threads, SocialMate stores only what it needs to publish the posts you schedule:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Your Instagram account ID, username, account type and profile picture link; your Facebook Page ID, name, category and picture link; or your Threads user ID, username and profile picture link</li>
+              <li>Your Instagram account ID, username and profile picture link; your Facebook Page ID, name, category and picture link; or your Threads user ID, username and profile picture link</li>
               <li>The access token Meta issues, used only to publish the posts you schedule</li>
               <li>An app-scoped Meta user ID, so a deletion request from Meta can find your data</li>
             </ul>

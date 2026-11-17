@@ -7,7 +7,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
  * callbacks. Meta identifies the person by an app-scoped id, which SocialMate
  * keeps on the row:
  *   Facebook Pages  metadata.fb_user_id   (the person who connected the Page)
- *   Instagram       metadata.app_scoped_id, and platform_user_id as a fallback
+ *   Instagram       metadata.system_user_id (Unified Login), metadata.app_scoped_id,
+ *                   and platform_user_id as a fallback
  *   Threads         platform_user_id
  *
  * Only the connection rows are removed (tokens, ids, names, avatar URLs).
@@ -34,7 +35,8 @@ export async function deleteMetaConnections(
     .or(
       `platform_user_id.eq.${metaUserId},` +
       `metadata->>fb_user_id.eq.${metaUserId},` +
-      `metadata->>app_scoped_id.eq.${metaUserId}`,
+      `metadata->>app_scoped_id.eq.${metaUserId},` +
+      `metadata->>system_user_id.eq.${metaUserId}`,
     )
 
   if (error) {

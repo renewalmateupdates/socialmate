@@ -2,41 +2,49 @@ import crypto from 'crypto'
 import { RetryablePublishError } from '@/lib/publish/retry'
 
 /**
- * Shared plumbing for the two Meta integrations (Nov 2026):
+ * Shared plumbing for the three Meta integrations (Nov 2026):
  *
- *   • Instagram, through "Instagram API with Instagram Login" (graph.instagram.com).
- *     Works for Business and Creator accounts and needs no Facebook Page.
- *   • Facebook Pages, through Facebook Login (graph.facebook.com). Posts as the Page.
+ *   • Instagram, through "Instagram API with Unified Login" (graph.facebook.com).
+ *     Meta stopped offering "Instagram API with Instagram Login" to new apps, so
+ *     this is Facebook Login for Business with an Instagram configuration: the
+ *     person logs in with Instagram or Facebook, picks their Instagram account,
+ *     and SocialMate gets a system-user token for it. No Facebook Page needed.
+ *   • Facebook Pages, through Facebook Login for Business. Posts as the Page.
+ *   • Threads, through the Threads API (graph.threads.net).
  *
- * Both need Meta App Review (Advanced Access) before anyone outside the app's own
+ * All need Meta App Review (Advanced Access) before anyone outside the app's own
  * roles can connect. Until then Meta itself refuses strangers at its consent
  * screen, so the connect buttons stay hidden from the public behind
  * META_CONNECT_OPEN / NEXT_PUBLIC_META_CONNECT_OPEN (see metaConnectOpen below).
  *
  * Env:
- *   META_APP_ID, META_APP_SECRET            Facebook app (Facebook Login + Pages)
- *   INSTAGRAM_APP_ID, INSTAGRAM_APP_SECRET  "Instagram app ID/secret" shown under
- *                                           Instagram > API setup with Instagram login
- *   META_FB_LOGIN_CONFIG_ID                 optional, Facebook Login for Business config
+ *   META_APP_ID, META_APP_SECRET            the Meta app (App settings > Basic)
+ *   META_IG_CONFIG_ID                       Facebook Login for Business configuration
+ *                                           for Instagram (system-user token, Instagram asset)
+ *   META_FB_LOGIN_CONFIG_ID                 Facebook Login for Business configuration
+ *                                           for Pages (user token, pages permissions)
  *   THREADS_APP_ID, THREADS_APP_SECRET      "Threads app ID/secret" shown under the
  *                                           Threads use case settings
- *   META_GRAPH_VERSION                      optional, defaults to v25.0
+ *   META_GRAPH_VERSION                      optional, defaults to v26.0
  *   THREADS_GRAPH_VERSION                   optional, defaults to v1.0
  *   META_CONNECT_OPEN=true                  let everyone connect (after App Review)
  *   NEXT_PUBLIC_META_CONNECT_OPEN=true      show the connect cards to everyone
  */
 
-export const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v25.0'
+export const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v26.0'
 
 export const FB_GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`
-export const IG_GRAPH = `https://graph.instagram.com/${GRAPH_VERSION}`
 export const THREADS_GRAPH = `https://graph.threads.net/${process.env.THREADS_GRAPH_VERSION || 'v1.0'}`
 
 /** What SocialMate asks Threads for: who you are, and permission to post. No replies, insights or mentions. */
 export const THREADS_SCOPES = ['threads_basic', 'threads_content_publish']
 
-/** What SocialMate asks Instagram for. Nothing that reads DMs, comments or insights. */
-export const INSTAGRAM_SCOPES = ['instagram_business_basic', 'instagram_business_content_publish']
+/**
+ * What the Instagram configuration (META_IG_CONFIG_ID) asks for. Nothing that
+ * reads DMs, comments or insights. business_management is required to list the
+ * Instagram accounts the login shared (/me/assigned_instagram_accounts).
+ */
+export const INSTAGRAM_SCOPES = ['instagram_basic', 'instagram_content_publish', 'business_management']
 
 /** What SocialMate asks Facebook for: list the Pages you manage, and post to them. */
 export const FACEBOOK_SCOPES = ['pages_show_list', 'pages_read_engagement', 'pages_manage_posts']
@@ -141,16 +149,15 @@ export type SignedRequestPayload = {
 /**
  * Verifies the `signed_request` Meta sends to the deauthorize and data deletion
  * callbacks: `<base64url HMAC-SHA256 signature>.<base64url JSON payload>`,
- * signed with the app secret. Instagram Login callbacks are signed with the
- * Instagram app secret, Threads ones with the Threads app secret and Facebook
- * ones with the Facebook app secret, so every configured secret is tried. Returns null for anything that does not verify.
+ * signed with the app secret. Threads callbacks are signed with the Threads app
+ * secret and Facebook/Instagram ones with the Meta app secret, so both are tried. Returns null for anything that does not verify.
  */
 export function parseSignedRequest(signedRequest: string | null | undefined): SignedRequestPayload | null {
   if (!signedRequest || !signedRequest.includes('.')) return null
   const [encodedSig, encodedPayload] = signedRequest.split('.', 2)
   if (!encodedSig || !encodedPayload) return null
 
-  const secrets = [process.env.META_APP_SECRET, process.env.INSTAGRAM_APP_SECRET, process.env.THREADS_APP_SECRET].filter(
+  const secrets = [process.env.META_APP_SECRET, process.env.THREADS_APP_SECRET].filter(
     (s): s is string => typeof s === 'string' && s.length > 0,
   )
   const sig = base64UrlDecode(encodedSig)
