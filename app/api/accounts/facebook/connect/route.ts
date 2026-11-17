@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
-import { requireAdmin } from '@/lib/admin-auth'
-import { FACEBOOK_SCOPES, GRAPH_VERSION, appUrl, metaConnectOpen } from '@/lib/meta'
+import { FACEBOOK_SCOPES, GRAPH_VERSION, appUrl } from '@/lib/meta'
+import { canConnectMeta } from '@/lib/meta-access'
 
 // Starts Facebook Login to connect the Facebook Pages a person manages.
 // SocialMate posts as a Page, never to someone's personal profile (Meta's API
@@ -11,7 +11,7 @@ import { FACEBOOK_SCOPES, GRAPH_VERSION, appUrl, metaConnectOpen } from '@/lib/m
 export async function GET() {
   const base = appUrl()
 
-  if (!metaConnectOpen() && !(await requireAdmin())) {
+  if (!(await canConnectMeta())) {
     return NextResponse.redirect(`${base}/accounts?error=facebook_not_open`)
   }
 

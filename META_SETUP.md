@@ -53,6 +53,7 @@ sees the Instagram, Facebook and Threads cards on /accounts.
 | `THREADS_APP_ID` | `2185331902357341` |
 | `THREADS_APP_SECRET` | App settings → Basic → Threads app secret → Show |
 | `META_GRAPH_VERSION` | optional, defaults to `v26.0` |
+| `META_REVIEWER_EMAILS` | the SocialMate login email(s) given to Meta's reviewers, comma-separated. Those logins can connect before approval. Remove after approval. |
 | `META_CONNECT_OPEN` | leave unset until App Review passes, then `true` |
 | `NEXT_PUBLIC_META_CONNECT_OPEN` | leave unset until App Review passes, then `true` (needs a redeploy) |
 
