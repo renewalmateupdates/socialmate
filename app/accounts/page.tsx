@@ -20,7 +20,7 @@ import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from '
 import { SUPPORT_EMAIL } from '@/lib/contact'
 
 // Built and working, waiting on Meta App Review (see lib/meta.ts).
-const META_PLATFORMS = ['instagram', 'facebook']
+const META_PLATFORMS = ['instagram', 'facebook', 'threads']
 const META_CONNECT_OPEN = process.env.NEXT_PUBLIC_META_CONNECT_OPEN === 'true'
 
 function PlatformGlyph({ id, size = 20, className = '' }: { id: string; size?: number; className?: string }) {
@@ -63,7 +63,7 @@ const PLATFORM_META: Record<string, {
   instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Built, waiting on Meta app review'          },
   facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Pages. Built, waiting on Meta app review'   },
   tiktok:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
-  threads:   { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Planned, needs Meta app review'             },
+  threads:   { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Built, waiting on Meta app review'          },
   twitter:   { color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'live'                                       },
   snapchat:  { color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
   lemon8:    { color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
@@ -90,10 +90,13 @@ const CONNECT_ERROR_COPY: Record<string, string> = {
   youtube_no_channel:            'No YouTube channel found on this account',
   instagram_not_professional:    'Instagram only lets Business and Creator accounts post through apps. Switch your account to Professional in the Instagram app (Settings → Account type and tools), then connect again.',
   instagram_not_open:            'Instagram connections open once Meta finishes reviewing SocialMate.',
+  instagram_no_accounts:         'No Instagram account was shared. Connect again and choose your Instagram Business or Creator account when Meta asks.',
   facebook_not_open:             'Facebook Page connections open once Meta finishes reviewing SocialMate.',
   instagram_not_configured:      'Instagram is not set up on this server yet.',
   facebook_not_configured:       'Facebook is not set up on this server yet.',
   facebook_no_pages:             'No Facebook Page found that you can post to. SocialMate posts to Pages you manage, not personal profiles.',
+  threads_not_open:              'Threads connections open once Meta finishes reviewing SocialMate.',
+  threads_not_configured:        'Threads is not set up on this server yet.',
 }
 
 // Every connect callback comes back here as `<platform>_<reason>`, so the
@@ -224,6 +227,11 @@ function PlatformCard({
       {platform === 'facebook' && !atLimit && (
         <p className="text-xs text-gray-400 leading-relaxed pl-1">
           Posts to Facebook Pages you manage. Each Page counts as one account.
+        </p>
+      )}
+      {platform === 'threads' && !atLimit && (
+        <p className="text-xs text-gray-400 leading-relaxed pl-1">
+          Text up to 500 characters, with photos or a video if you like.
         </p>
       )}
     </div>
@@ -385,6 +393,7 @@ function AccountsInner() {
     if (success === 'twitter_connected')   showToast('X (Twitter) connected successfully!', 'success')
     if (success === 'youtube_connected')   showToast('YouTube connected successfully!', 'success')
     if (success === 'instagram_connected') showToast('Instagram connected successfully!', 'success')
+    if (success === 'threads_connected')   showToast('Threads connected successfully!', 'success')
     if (success === 'facebook_connected')  showToast('Facebook Page connected successfully!', 'success')
     // Every other refusal gets a message too, the plan cap having its own above.
     if (error && !error.endsWith('_plan_limit')) {
@@ -547,6 +556,7 @@ function AccountsInner() {
     if (platform === 'twitter')   { window.open('/api/accounts/twitter/connect', '_blank');   return }
     if (platform === 'instagram') { window.open('/api/accounts/instagram/connect', '_blank'); return }
     if (platform === 'facebook')  { window.open('/api/accounts/facebook/connect', '_blank');  return }
+    if (platform === 'threads')   { window.open('/api/accounts/threads/connect', '_blank');   return }
     if (platform === 'tiktok')   { window.location.href = '/api/tiktok/auth';                 return }
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')

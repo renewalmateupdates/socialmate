@@ -1,9 +1,10 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { IG_GRAPH, metaError } from '@/lib/meta'
+import { FB_GRAPH, metaError } from '@/lib/meta'
 import { VIDEO_WAIT_MS, VideoStillProcessing, firstVideo, isVideoUrl, sleep } from './video'
 
 /**
- * Instagram publishing through "Instagram API with Instagram Login" (Nov 2026).
+ * Instagram publishing through "Instagram API with Unified Login" (Nov 2026),
+ * on graph.facebook.com with the system-user token from the connect.
  *
  * Instagram has no text-only posts: every post is a photo, a carousel of up to
  * 10 photos, or a Reel. Publishing is two steps: create a media container from a
@@ -15,8 +16,6 @@ const MAX_CAPTION = 2200
 const MAX_CAROUSEL = 10
 /** Photos are usually ready in a second or two. */
 const IMAGE_WAIT_MS = 20_000
-/** Refresh the 60-day token when it has less than this left. */
-const REFRESH_WITHIN_MS = 7 * 24 * 60 * 60 * 1000
 
 type IgAccount = {
   id: string
@@ -29,41 +28,21 @@ function isJpeg(url: string): boolean {
   return /\.(jpe?g)$/i.test(String(url).split('?')[0])
 }
 
-/** Keeps the 60-day token alive. Instagram only refreshes a token that is still valid. */
-async function freshToken(account: IgAccount): Promise<string> {
+/**
+ * The system-user token is set to never expire by the configuration, so there
+ * is nothing to refresh. If Meta ever returned an expiry, honour it.
+ */
+function usableToken(account: IgAccount): string {
   const token = account.access_token
   if (!token) throw new Error('Instagram connection is missing its token. Reconnect Instagram on the Accounts page.')
-  if (!account.expires_at) return token
-
-  const expiresAt = new Date(account.expires_at).getTime()
-  if (expiresAt <= Date.now()) {
-    throw new Error('Instagram connection expired (Instagram tokens last 60 days without use). Reconnect Instagram on the Accounts page.')
+  if (account.expires_at && new Date(account.expires_at).getTime() <= Date.now()) {
+    throw new Error('Instagram connection expired. Reconnect Instagram on the Accounts page.')
   }
-  if (expiresAt - Date.now() > REFRESH_WITHIN_MS) return token
-
-  const params = new URLSearchParams({ grant_type: 'ig_refresh_token', access_token: token })
-  const res = await fetch(`https://graph.instagram.com/refresh_access_token?${params.toString()}`)
-  if (!res.ok) {
-    // The old token still works until it expires; post with it and log.
-    console.warn('[Instagram] token refresh failed:', await res.text().catch(() => ''))
-    return token
-  }
-  const body = await res.json().catch(() => ({}))
-  if (!body.access_token) return token
-
-  const newExpiry = body.expires_in
-    ? new Date(Date.now() + Number(body.expires_in) * 1000).toISOString()
-    : account.expires_at
-  const { error } = await getSupabaseAdmin()
-    .from('connected_accounts')
-    .update({ access_token: body.access_token, expires_at: newExpiry, updated_at: new Date().toISOString() })
-    .eq('id', account.id)
-  if (error) console.warn('[Instagram] saving refreshed token failed:', error.message)
-  return String(body.access_token)
+  return token
 }
 
 async function createContainer(igUserId: string, token: string, fields: Record<string, string>): Promise<string> {
-  const res = await fetch(`${IG_GRAPH}/${igUserId}/media`, {
+  const res = await fetch(`${FB_GRAPH}/${igUserId}/media`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body:    new URLSearchParams({ ...fields, access_token: token }),
@@ -78,7 +57,7 @@ async function createContainer(igUserId: string, token: string, fields: Record<s
 async function waitForContainer(containerId: string, token: string, deadline: number): Promise<boolean> {
   while (Date.now() < deadline) {
     const params = new URLSearchParams({ fields: 'status_code,status', access_token: token })
-    const res = await fetch(`${IG_GRAPH}/${containerId}?${params.toString()}`)
+    const res = await fetch(`${FB_GRAPH}/${containerId}?${params.toString()}`)
     if (!res.ok) throw await metaError(res, 'Instagram')
     const body = await res.json().catch(() => ({}))
     const status = String(body.status_code ?? '')
@@ -127,7 +106,7 @@ export async function publishToInstagram(
     throw new Error('No Instagram account connected. Go to Accounts to connect Instagram.')
   }
 
-  const token = await freshToken(account as IgAccount)
+  const token = usableToken(account as IgAccount)
   const igUserId = String(account.platform_user_id)
 
   let containerId: string
@@ -174,7 +153,7 @@ export async function publishToInstagram(
     if (!ready) throw new Error('Instagram is still processing this photo. Press Retry on the post in a minute.')
   }
 
-  const pubRes = await fetch(`${IG_GRAPH}/${igUserId}/media_publish`, {
+  const pubRes = await fetch(`${FB_GRAPH}/${igUserId}/media_publish`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body:    new URLSearchParams({ creation_id: containerId, access_token: token }),
