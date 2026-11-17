@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
-import { requireAdmin } from '@/lib/admin-auth'
-import { THREADS_SCOPES, appUrl, metaConnectOpen } from '@/lib/meta'
+import { THREADS_SCOPES, appUrl } from '@/lib/meta'
+import { canConnectMeta } from '@/lib/meta-access'
 
 // Starts Threads login (Threads API, Nov 2026). Any Threads profile can connect;
 // unlike Instagram it does not have to be a professional account.
@@ -11,8 +11,9 @@ export async function GET() {
   const base = appUrl()
 
   // Until Meta approves the app, Threads refuses anyone who isn't a Threads
-  // tester on it, so the button is admin-only and the route matches.
-  if (!metaConnectOpen() && !(await requireAdmin())) {
+  // tester on it (or one of Meta's reviewers), so the button is limited and the
+  // route matches.
+  if (!(await canConnectMeta())) {
     return NextResponse.redirect(`${base}/accounts?error=threads_not_open`)
   }
 

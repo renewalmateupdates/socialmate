@@ -29,6 +29,9 @@ import { RetryablePublishError } from '@/lib/publish/retry'
  *   THREADS_GRAPH_VERSION                   optional, defaults to v1.0
  *   META_CONNECT_OPEN=true                  let everyone connect (after App Review)
  *   NEXT_PUBLIC_META_CONNECT_OPEN=true      show the connect cards to everyone
+ *   META_REVIEWER_EMAILS                    optional, comma-separated SocialMate login
+ *                                           emails that may connect before App Review
+ *                                           (the test login given to Meta's reviewers)
  */
 
 export const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v26.0'
@@ -49,9 +52,26 @@ export const INSTAGRAM_SCOPES = ['instagram_basic', 'instagram_content_publish',
 /** What SocialMate asks Facebook for: list the Pages you manage, and post to them. */
 export const FACEBOOK_SCOPES = ['pages_show_list', 'pages_read_engagement', 'pages_manage_posts']
 
-/** Before App Review, only the admin (who has a role on the Meta app) may start a connect. */
+/**
+ * Before App Review, only the admin (who has a role on the Meta app) and Meta's
+ * own reviewers may start a connect. See canConnectMeta in lib/meta-access.ts.
+ */
 export function metaConnectOpen(): boolean {
   return process.env.META_CONNECT_OPEN === 'true'
+}
+
+/**
+ * Meta's reviewers get access to the app while it is under review, but they log
+ * in to SocialMate with an ordinary test login, so they would otherwise see the
+ * "coming soon" cards. META_REVIEWER_EMAILS lists those test logins.
+ */
+export function isMetaReviewerEmail(email: string | null | undefined): boolean {
+  if (!email) return false
+  const reviewers = (process.env.META_REVIEWER_EMAILS || '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean)
+  return reviewers.includes(email.trim().toLowerCase())
 }
 
 export function appUrl(): string {

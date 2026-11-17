@@ -17,7 +17,6 @@ import StarterDraftBuilder from '@/components/StarterDraftBuilder'
 import { isLegacyDiscordAccount } from '@/lib/discord-accounts'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from 'lucide-react'
-import { SUPPORT_EMAIL } from '@/lib/contact'
 
 // Built and working, waiting on Meta App Review (see lib/meta.ts).
 const META_PLATFORMS = ['instagram', 'facebook', 'threads']
@@ -275,12 +274,20 @@ function AccountsInner() {
   const [showTelegramModal, setShowTelegramModal] = useState(false)
   const [showMastodonModal, setShowMastodonModal] = useState(false)
   const [twitterQuota, setTwitterQuota] = useState<{ used: number; limit: number; plan: string } | null>(null)
-  // Only used to show the Instagram/Facebook cards before Meta App Review. The
-  // connect routes check admin server-side; this just avoids a dead button.
-  const [isAdmin, setIsAdmin] = useState(false)
+  // Only used to show the Instagram/Facebook/Threads cards before Meta App
+  // Review, to the admin and to Meta's reviewer test logins. The server makes
+  // the same call the connect routes do (lib/meta-access.ts), so a shown button
+  // always works.
+  const [metaAllowed, setMetaAllowed] = useState(false)
   useEffect(() => {
     if (META_CONNECT_OPEN) return
-    supabase.auth.getUser().then(({ data }) => setIsAdmin(data.user?.email === SUPPORT_EMAIL))
+    fetch('/api/meta/access')
+      .then(r => (r.ok ? r.json() : { allowed: false }))
+      .then(d => setMetaAllowed(d?.allowed === true))
+      .catch(err => {
+        console.warn('[accounts] meta access check failed:', err)
+        setMetaAllowed(false)
+      })
   }, [])
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -587,11 +594,12 @@ function AccountsInner() {
 
   const connectedPlatforms = new Set(accounts.map(a => a.platform))
 
-  // Instagram and Facebook are built but wait on Meta App Review: until then
-  // Meta refuses anyone without a role on the app. So they show as connectable
-  // only to the admin (who has that role), to anyone who already connected one,
-  // or to everyone once NEXT_PUBLIC_META_CONNECT_OPEN is set after approval.
-  const metaVisible = META_CONNECT_OPEN || isAdmin || accounts.some(a => META_PLATFORMS.includes(a.platform))
+  // Instagram, Facebook and Threads are built but wait on Meta App Review: until
+  // then Meta refuses anyone without a role on the app. So they show as
+  // connectable only to the admin (who has that role), Meta's reviewers, anyone
+  // who already connected one, or everyone once NEXT_PUBLIC_META_CONNECT_OPEN is
+  // set after approval.
+  const metaVisible = META_CONNECT_OPEN || metaAllowed || accounts.some(a => META_PLATFORMS.includes(a.platform))
   const livePlatforms = metaVisible ? [...LIVE_PLATFORMS, ...META_PLATFORMS] : LIVE_PLATFORMS
   const comingSoonPlatforms = metaVisible
     ? COMING_SOON_PLATFORMS.filter(p => !META_PLATFORMS.includes(p))

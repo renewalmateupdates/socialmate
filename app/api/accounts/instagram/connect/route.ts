@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
-import { requireAdmin } from '@/lib/admin-auth'
-import { appUrl, metaConnectOpen } from '@/lib/meta'
+import { appUrl } from '@/lib/meta'
+import { canConnectMeta } from '@/lib/meta-access'
 
 // Starts "Instagram API with Unified Login": Facebook Login for Business with
 // the Instagram configuration (META_IG_CONFIG_ID). The person can log in with
@@ -13,9 +13,9 @@ import { appUrl, metaConnectOpen } from '@/lib/meta'
 export async function GET() {
   const base = appUrl()
 
-  // Until Meta approves the app, only people with a role on it can log in, so
-  // the button is admin-only and the route matches.
-  if (!metaConnectOpen() && !(await requireAdmin())) {
+  // Until Meta approves the app, only people with a role on it (and Meta's
+  // reviewers) can log in, so the button is limited and the route matches.
+  if (!(await canConnectMeta())) {
     return NextResponse.redirect(`${base}/accounts?error=instagram_not_open`)
   }
 
