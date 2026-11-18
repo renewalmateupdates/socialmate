@@ -12,6 +12,10 @@ import {
 // The November 2026 update to everyone with an account. Who gets it and what it
 // says live in lib/emails/product-update-nov2026.ts.
 //
+// Never sent to: our own accounts and reviewer logins (lib/internal-accounts.ts),
+// anyone recorded as unsubscribed, and anyone whose user_settings.iris_opt_in is
+// false (said no to the newsletter at signup, in onboarding or in Settings).
+//
 // It sends nothing on its own: no cron, no trigger. Same steps as the TikTok
 // emails, plus a way to honour "unsubscribe" replies first:
 //   GET                                   previews the audience
@@ -38,12 +42,16 @@ async function audience() {
   const db = getSupabaseAdmin()
   // Every read pages past PostgREST's 1,000-row cap and throws on error, so a
   // failed read can never shrink "already sent" or "unsubscribed".
-  const [users, sent, unsub] = await Promise.all([
+  const [users, sent, unsub, noNewsletter] = await Promise.all([
     listAllAuthUsers(db),
     selectAll<{ user_id: string }>('update emails sent', () =>
       oldestFirst(db.from('usage_events').select('id, user_id, created_at').eq('event_type', UPDATE_EVENT))),
     selectAll<{ user_id: string }>('unsubscribed', () =>
       oldestFirst(db.from('usage_events').select('id, user_id, created_at').eq('event_type', UNSUBSCRIBED_EVENT))),
+    // false only: null is an account from before the choice existed, and the
+    // IRIS send (app/api/admin/iris/send) treats it as opted in too.
+    selectAll<{ user_id: string }>('newsletter opt-outs', () =>
+      db.from('user_settings').select('user_id').eq('iris_opt_in', false).order('user_id', { ascending: true })),
   ])
   return {
     users,
@@ -51,6 +59,7 @@ async function audience() {
       users,
       alreadySentIds: sent.map(r => r.user_id),
       unsubscribedIds: unsub.map(r => r.user_id),
+      optedOutIds: noNewsletter.map(r => r.user_id),
     }),
   }
 }
@@ -58,13 +67,14 @@ async function audience() {
 export async function GET() {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
-    const [{ targets, signups, alreadySent, unsubscribed, unconfirmed }, bulkSent] =
+    const [{ targets, signups, alreadySent, unsubscribed, optedOut, unconfirmed }, bulkSent] =
       await Promise.all([audience(), bulkSentLast24h(getSupabaseAdmin())])
     return NextResponse.json({
       wouldSend: targets.length,
       signups,
       alreadySent,
       unsubscribed,
+      optedOut,
       unconfirmed,
       batchSize: BATCH_SIZE,
       dailyCap: BULK_DAILY_CAP,

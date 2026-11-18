@@ -133,7 +133,8 @@ These have burned us before — always apply:
 ## Platforms
 
 **Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026; Direct Post audit approved Oct 23, 2026, so videos post publicly), LinkedIn (OAuth live May 21, 2026 — personal profile, `w_member_social` scope)
-**Not available yet (Sept 24, 2026):** YouTube (waiting on Google's review), Pinterest (built, application declined), Reddit (application declined; no connect or publish code exists), Instagram / Facebook / Threads (need Meta app review, not started)
+**Built, waiting on the platform's review (Nov 17, 2026, PRs #805 to #809):** Instagram, Facebook Pages and Threads (Meta App Review) and YouTube (Google verification; uploads stay Private until its API audit). Only the admin and the reviewer logins in `META_REVIEWER_EMAILS` / `YOUTUBE_REVIEWER_EMAILS` can connect them until `META_CONNECT_OPEN` / `YOUTUBE_CONNECT_OPEN` are set; steps in `META_SETUP.md`. Not a public claim yet.
+**Not available:** Pinterest (built, application declined), Reddit (application declined; no connect or publish code exists)
 **Roadmap ideas:** Tumblr, Pixelfed, LinkedIn Company Pages
 
 ---
@@ -449,6 +450,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   in the cloud, `git am` on Joshua's PC, then `gh` to push, PR and merge. Prove
   the patch applies to the current main before sending it.
 
+**From: November 18, 2026: the update email's audience missed an opt-out**
+
+- **An email audience honors every opt-out the product offers, not just the one
+  its route was written around.** The update email skipped "unsubscribe" replies
+  but not the newsletter checkbox (`user_settings.iris_opt_in = false`), and its
+  Nov 16 batch reached 15 people who had said no. Before a bulk send, grep for
+  every place a person can say no to email.
+- **A test login is ours.** Reviewer logins for a platform's review live in
+  `META_REVIEWER_EMAILS` / `YOUTUBE_REVIEWER_EMAILS`, and `isInternalEmail` reads
+  both. The Meta reviewer login had been counted as a customer publisher and was
+  queued for the update email.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -456,7 +469,21 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 16, 2026).** #786 through #799 are merged.
+**Pick up here (updated Nov 18, 2026).** #786 through #809 are merged.
+
+**Nov 17-18:** #805 to #809 built Instagram, Facebook Pages, Threads and YouTube
+posting, gated to the admin and the reviewer logins until Meta App Review and
+Google's verification pass (`META_SETUP.md`). Joshua connected all four on the
+admin account. The update email's last batch never went out (the Nov 17
+scheduled run hit the usage limit). Before sending it, its audience turned out
+to ignore the newsletter opt-out and to include the Meta reviewer login; fixed
+in branch `fix/update-email-opt-outs-nov18`, and Resend's Receiving tab still
+needs a look for "unsubscribe" replies to the Aug 30 email (`TODO.md`). The
+streamer tester signed up Nov 17 (Pro comped); Twitch alerts and tips are not
+set up yet. Found Nov 18, not fixed yet: TikTok Studio rows stay `publishing`
+forever when the creator leaves the page before `/api/tiktok/publish-status`
+settles them (the Studio polls it for two minutes and nothing else does), and
+phone uploads to TikTok sometimes cut off ("Load failed").
 #793 (batches 1 and 2) rebuilt Queue and Calendar (range picker, collapsible
 days, red Failed section, TikTok posts in the day lists, week view, Calendar
 opens on today), delivered webhooks with `after()` and from Post Now too, added
@@ -620,7 +647,8 @@ their complaints are all fixed (Sept 11). Do not re-litigate the refund.
   on the signup page. Needs 12 testers for 14 days before production.
 - **LinkedIn Company Pages.** Needs `r_organization_social` +
   `w_organization_social`. Personal profiles cover most users.
-- **Instagram / Facebook / Threads.** Meta App Review, not started; plan 4–8 weeks.
+- **Instagram / Facebook / Threads.** Built and gated (Nov 17, #805 to #807); next
+  is the Meta App Review submission (`META_SETUP.md`). Plan 4 to 8 weeks for review.
 - **Apple App Store (SocialMate).** Deferred.
 - **Cofounder search.** Marketing cofounder, ~10% sweat equity over a 24-month
   vest, 2-week trial, real contract.
