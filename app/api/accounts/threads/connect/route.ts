@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 import { THREADS_SCOPES, appUrl } from '@/lib/meta'
-import { canConnectMeta } from '@/lib/meta-access'
+import { canConnectMeta } from '@/lib/review-access'
 
 // Starts Threads login (Threads API, Nov 2026). Any Threads profile can connect;
 // unlike Instagram it does not have to be a professional account.

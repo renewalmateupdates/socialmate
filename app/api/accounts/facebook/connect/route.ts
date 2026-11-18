@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 import { FACEBOOK_SCOPES, GRAPH_VERSION, appUrl } from '@/lib/meta'
-import { canConnectMeta } from '@/lib/meta-access'
+import { canConnectMeta } from '@/lib/review-access'
 
 // Starts Facebook Login to connect the Facebook Pages a person manages.
 // SocialMate posts as a Page, never to someone's personal profile (Meta's API

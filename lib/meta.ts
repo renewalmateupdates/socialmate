@@ -54,7 +54,7 @@ export const FACEBOOK_SCOPES = ['pages_show_list', 'pages_read_engagement', 'pag
 
 /**
  * Before App Review, only the admin (who has a role on the Meta app) and Meta's
- * own reviewers may start a connect. See canConnectMeta in lib/meta-access.ts.
+ * own reviewers may start a connect. See canConnectMeta in lib/review-access.ts.
  */
 export function metaConnectOpen(): boolean {
   return process.env.META_CONNECT_OPEN === 'true'
