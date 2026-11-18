@@ -52,16 +52,44 @@ const USERS = [
   user('e', 'ed@example.com', 'Ed'),                // already got this email
   user('f', INTERNAL_EMAILS[0], 'Us'),              // our own account
   user('g', null, 'No Email'),                      // no address
+  user('h', 'hal@example.com', 'Hal'),              // unticked the newsletter (iris_opt_in false)
 ]
-const INPUT = { users: USERS, alreadySentIds: ['e'], unsubscribedIds: ['d'] }
+const INPUT = { users: USERS, alreadySentIds: ['e'], unsubscribedIds: ['d'], optedOutIds: ['h'] }
 
-test('only confirmed outside accounts that were not sent and did not unsubscribe', () => {
-  const { targets, signups, alreadySent, unsubscribed, unconfirmed } = updateAudience(INPUT)
+test('only confirmed outside accounts that were not sent, did not unsubscribe and want the newsletter', () => {
+  const { targets, signups, alreadySent, unsubscribed, optedOut, unconfirmed } = updateAudience(INPUT)
   assert.deepEqual(targets.map(t => t.id), ['a', 'b'])
-  assert.equal(signups, 5, 'every outside account with an email counts as a signup')
+  assert.equal(signups, 6, 'every outside account with an email counts as a signup')
   assert.equal(alreadySent, 1)
   assert.equal(unsubscribed, 1)
+  assert.equal(optedOut, 1)
   assert.equal(unconfirmed, 1)
+})
+
+test('a newsletter opt-out gets nothing, even confirmed and never sent; unsubscribed counts first', () => {
+  const both = updateAudience({ ...INPUT, optedOutIds: ['d', 'h'] })
+  assert.deepEqual(both.targets.map(t => t.id), ['a', 'b'])
+  assert.equal(both.unsubscribed, 1, "'d' unsubscribed and opted out: counted once, as unsubscribed")
+  assert.equal(both.optedOut, 1)
+  // Without the opt-out, 'h' is an ordinary target.
+  assert.deepEqual(updateAudience({ ...INPUT, optedOutIds: [] }).targets.map(t => t.id), ['a', 'b', 'h'])
+})
+
+test('reviewer test logins (META_REVIEWER_EMAILS, YOUTUBE_REVIEWER_EMAILS) are ours, not signups', () => {
+  const saved = { meta: process.env.META_REVIEWER_EMAILS, yt: process.env.YOUTUBE_REVIEWER_EMAILS }
+  try {
+    process.env.META_REVIEWER_EMAILS = ' Reviewer@Example.com , other@example.com'
+    process.env.YOUTUBE_REVIEWER_EMAILS = 'yt-review@example.com'
+    const users = [...USERS, user('r', 'reviewer@example.com', 'Meta Reviewer'), user('y', 'YT-Review@Example.com', 'Google Reviewer')]
+    const { targets, signups } = updateAudience({ ...INPUT, users })
+    assert.deepEqual(targets.map(t => t.id), ['a', 'b'])
+    assert.equal(signups, 6, 'neither reviewer login counts as a signup')
+  } finally {
+    for (const [name, value] of [['META_REVIEWER_EMAILS', saved.meta], ['YOUTUBE_REVIEWER_EMAILS', saved.yt]]) {
+      if (value === undefined) delete process.env[name]
+      else process.env[name] = value
+    }
+  }
 })
 
 test('an unsubscribe wins even over an unconfirmed or already-sent account', () => {

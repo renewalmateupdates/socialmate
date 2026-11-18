@@ -1,3 +1,6 @@
+import { isMetaReviewerEmail } from '@/lib/meta'
+import { isYouTubeReviewerEmail } from '@/lib/youtube'
+
 /**
  * Accounts that belong to us, not to customers.
  *
@@ -31,8 +34,19 @@ export const INTERNAL_EMAILS: string[] = [
 
 const set = new Set(INTERNAL_EMAILS.map(e => e.toLowerCase()))
 
+/**
+ * Ours too: the reviewer test logins we create for a platform's own review
+ * (META_REVIEWER_EMAILS, YOUTUBE_REVIEWER_EMAILS). On Nov 17, 2026 the Meta
+ * reviewer login connected Instagram, Facebook and Threads and published a test
+ * post; every funnel counted it as a customer publisher, and it was queued for
+ * the November update email. Read from the same variables the connect routes
+ * use, so those addresses stay out of this public repo. Removing a variable
+ * after approval makes that login count as a customer again, so delete the login
+ * at the same time.
+ */
 export function isInternalEmail(email: string | null | undefined): boolean {
-  return !!email && set.has(email.toLowerCase())
+  if (!email) return false
+  return set.has(email.toLowerCase()) || isMetaReviewerEmail(email) || isYouTubeReviewerEmail(email)
 }
 
 /** Ids for the internal accounts present in a given id→email mapping. */

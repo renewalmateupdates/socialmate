@@ -44,6 +44,13 @@ export interface UpdateAudienceInput {
   alreadySentIds: string[]
   /** Users who asked to stop getting these. */
   unsubscribedIds: string[]
+  /**
+   * Users whose user_settings.iris_opt_in is false: they unticked the newsletter
+   * at signup, in onboarding or in Settings, or used its unsubscribe link. This
+   * is that kind of email, so they don't get it. Until Nov 18, 2026 nothing
+   * passed this, and the Nov 16 batch reached 15 of them.
+   */
+  optedOutIds: string[]
 }
 
 export interface UpdateAudience {
@@ -52,6 +59,8 @@ export interface UpdateAudience {
   signups: number
   alreadySent: number
   unsubscribed: number
+  /** Would get it otherwise (confirmed, not yet sent), but said no to the newsletter. */
+  optedOut: number
   unconfirmed: number
 }
 
@@ -62,18 +71,20 @@ function idSet(ids: string[]): Record<string, true> {
 }
 
 /**
- * Outside accounts with a confirmed email that haven't had this email and
- * haven't asked to stop. An unconfirmed address never proved it belongs to the
- * person who typed it, so it gets nothing.
+ * Outside accounts with a confirmed email that haven't had this email, haven't
+ * asked to stop and haven't said no to the newsletter. An unconfirmed address
+ * never proved it belongs to the person who typed it, so it gets nothing.
  */
 export function updateAudience(input: UpdateAudienceInput): UpdateAudience {
   const sent = idSet(input.alreadySentIds)
   const unsub = idSet(input.unsubscribedIds)
+  const noNewsletter = idSet(input.optedOutIds)
 
   const targets: UpdateTarget[] = []
   let signups = 0
   let alreadySent = 0
   let unsubscribed = 0
+  let optedOut = 0
   let unconfirmed = 0
   for (let i = 0; i < input.users.length; i++) {
     const u = input.users[i]
@@ -82,6 +93,8 @@ export function updateAudience(input: UpdateAudienceInput): UpdateAudience {
     if (unsub[u.id]) { unsubscribed++; continue }
     if (!u.email_confirmed_at) { unconfirmed++; continue }
     if (sent[u.id]) { alreadySent++; continue }
+    // Last, so the preview's optedOut counts only people it actually held back.
+    if (noNewsletter[u.id]) { optedOut++; continue }
     const fullName = u.user_metadata?.full_name
     targets.push({
       id: u.id,
@@ -90,7 +103,7 @@ export function updateAudience(input: UpdateAudienceInput): UpdateAudience {
       name: typeof fullName === 'string' ? (fullName.trim().split(/\s+/)[0] || '') : '',
     })
   }
-  return { targets, signups, alreadySent, unsubscribed, unconfirmed }
+  return { targets, signups, alreadySent, unsubscribed, optedOut, unconfirmed }
 }
 
 function escapeHtml(s: string): string {
