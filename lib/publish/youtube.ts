@@ -1,139 +1,163 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { youtubeDescription, youtubeTitle } from '@/lib/youtube'
+import { RetryablePublishError } from './retry'
+import { fetchVideo, firstVideo } from './video'
 
+/**
+ * YouTube publishing (Nov 2026): uploads the post's video to the connected
+ * channel with videos.insert (resumable upload). The post's first line is the
+ * title and the whole post is the description.
+ *
+ * This replaces a publisher that posted to /youtube/v3/communityPosts, an
+ * endpoint the YouTube Data API does not have, so YouTube posting had never
+ * worked. YouTube has no text-only posts through the API: every post needs a
+ * video.
+ *
+ * Until the Google project passes the YouTube API Services audit, YouTube
+ * itself locks uploads to Private. Each upload costs 1,600 of the project's
+ * 10,000 daily quota units.
+ */
 
-async function refreshYouTubeToken(userId: string, refreshToken: string): Promise<string> {
+type YtAccount = {
+  id: string
+  access_token: string | null
+  refresh_token: string | null
+  expires_at: string | null
+}
+
+const UPLOAD_URL = 'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status'
+
+async function refreshToken(account: YtAccount): Promise<string> {
+  if (!account.refresh_token) {
+    throw new Error('YouTube sign-in expired. Reconnect your YouTube account on the Accounts page.')
+  }
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method:  'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       client_id:     process.env.YOUTUBE_CLIENT_ID!,
       client_secret: process.env.YOUTUBE_CLIENT_SECRET!,
-      refresh_token: refreshToken,
+      refresh_token: account.refresh_token,
       grant_type:    'refresh_token',
     }),
   })
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    console.error('[YouTube] Token refresh failed:', err)
-    throw new Error('YouTube token refresh failed. Please reconnect your YouTube account.')
+    console.error('[YouTube] token refresh failed:', res.status, err)
+    if (res.status >= 500) throw new RetryablePublishError('Google sign-in is temporarily unavailable. SocialMate will try again.')
+    throw new Error('YouTube sign-in expired. Reconnect your YouTube account on the Accounts page.')
   }
-
-  const data      = await res.json()
-  const expiresAt = new Date(Date.now() + data.expires_in * 1000).toISOString()
-
-  await getSupabaseAdmin()
+  const data = await res.json()
+  const expiresAt = new Date(Date.now() + Number(data.expires_in || 3600) * 1000).toISOString()
+  const { error } = await getSupabaseAdmin()
     .from('connected_accounts')
     .update({ access_token: data.access_token, expires_at: expiresAt })
-    .eq('user_id', userId)
-    .eq('platform', 'youtube')
-
-  return data.access_token
+    .eq('id', account.id)
+  if (error) console.warn('[YouTube] could not save the refreshed token:', error.message)
+  return String(data.access_token)
 }
 
-export async function publishToYouTube(userId: string, content: string): Promise<string> {
-  const { data: account, error: accountError } = await getSupabaseAdmin()
+/** Turns a YouTube API error response into a message people can act on. */
+async function youtubeError(res: Response): Promise<Error> {
+  const body = await res.json().catch(() => ({}))
+  const reason: string = body?.error?.errors?.[0]?.reason || ''
+  const message: string = body?.error?.message || `HTTP ${res.status}`
+  console.error('[YouTube] upload failed:', res.status, reason, message)
+
+  if (res.status === 401) {
+    return new Error('YouTube sign-in expired. Reconnect your YouTube account on the Accounts page.')
+  }
+  if (reason === 'quotaExceeded' || reason === 'dailyLimitExceeded') {
+    return new Error("SocialMate has used today's YouTube upload allowance. Press Retry tomorrow.")
+  }
+  if (reason === 'uploadLimitExceeded') {
+    return new Error('Your YouTube channel has reached its upload limit for now. Press Retry later.')
+  }
+  if (reason === 'youtubeSignupRequired') {
+    return new Error('This Google account has no YouTube channel. Create one on YouTube, then reconnect.')
+  }
+  if (res.status === 429 || res.status >= 500) {
+    return new RetryablePublishError('YouTube is busy right now. SocialMate will try the upload again.')
+  }
+  return new Error(`YouTube upload failed: ${message}`)
+}
+
+export async function publishToYouTube(
+  userId:       string,
+  content:      string,
+  workspaceId?: string | null,
+  accountId?:   string,
+  mediaUrls?:   string[],
+): Promise<string> {
+  const videoUrl = firstVideo((mediaUrls ?? []).filter(u => typeof u === 'string' && u.startsWith('http')))
+  if (!videoUrl) {
+    throw new Error('YouTube needs a video. Attach an MP4 or MOV to this post to send it to YouTube.')
+  }
+
+  // Same account choice as Instagram: an explicit pick, else the most recently
+  // connected account in this workspace.
+  let query = getSupabaseAdmin()
     .from('connected_accounts')
-    .select('access_token, refresh_token, expires_at, platform_user_id')
+    .select('id, access_token, refresh_token, expires_at')
     .eq('user_id', userId)
     .eq('platform', 'youtube')
-    .single()
+  if (accountId) query = query.eq('id', accountId)
+  else if (workspaceId) query = query.eq('workspace_id', workspaceId)
+  else query = query.is('workspace_id', null)
 
-  if (accountError || !account) {
-    throw new Error('No YouTube account connected. Go to Accounts to connect your YouTube account.')
+  const { data: account, error: accountError } = await query
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (accountError) console.warn('[YouTube] account lookup failed:', accountError.message)
+  if (!account) {
+    throw new Error('No YouTube account connected. Go to Accounts to connect YouTube.')
   }
 
-  // Refresh token if expired (or within 60 seconds of expiry)
-  let accessToken = account.access_token
-  const expiresAt = account.expires_at ? new Date(account.expires_at) : null
-  const bufferMs  = 60 * 1000 // 60 second buffer
+  const acct = account as YtAccount
+  let token = acct.access_token
+  const expiresAt = acct.expires_at ? new Date(acct.expires_at).getTime() : 0
+  if (!token || expiresAt - Date.now() < 60_000) token = await refreshToken(acct)
 
-  if (!expiresAt || expiresAt.getTime() - Date.now() < bufferMs) {
-    if (!account.refresh_token) {
-      throw new Error('YouTube token expired and no refresh token found. Please reconnect your YouTube account.')
-    }
-    accessToken = await refreshYouTubeToken(userId, account.refresh_token)
-  }
+  const video = await fetchVideo(videoUrl)
 
-  // Post as a YouTube Community post
-  // NOTE: Community posts require the channel to have 500+ subscribers
-  const res = await fetch(
-    'https://www.googleapis.com/youtube/v3/communityPosts?part=snippet',
-    {
-      method:  'POST',
-      headers: {
-        Authorization:  `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+  // 1. Start a resumable upload with the video's details.
+  const startRes = await fetch(UPLOAD_URL, {
+    method: 'POST',
+    headers: {
+      Authorization:             `Bearer ${token}`,
+      'Content-Type':            'application/json; charset=UTF-8',
+      'X-Upload-Content-Type':   video.contentType,
+      'X-Upload-Content-Length': String(video.bytes.byteLength),
+    },
+    body: JSON.stringify({
+      snippet: {
+        title:       youtubeTitle(content),
+        description: youtubeDescription(content),
+        // 22 = People & Blogs, YouTube's general-purpose category.
+        categoryId:  '22',
       },
-      body: JSON.stringify({
-        snippet: {
-          type:                'textPost',
-          textOriginalContent: content,
-        },
-      }),
-    }
-  )
+      status: { privacyStatus: 'public' },
+    }),
+  })
+  if (!startRes.ok) throw await youtubeError(startRes)
+  const uploadUrl = startRes.headers.get('location')
+  if (!uploadUrl) throw new Error('YouTube did not return an upload address. Press Retry on the post.')
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    console.error('[YouTube] Community post failed:', err)
+  // 2. Send the file.
+  const putRes = await fetch(uploadUrl, {
+    method:  'PUT',
+    headers: {
+      Authorization:    `Bearer ${token}`,
+      'Content-Type':   video.contentType,
+      'Content-Length': String(video.bytes.byteLength),
+    },
+    body: video.bytes,
+  })
+  if (!putRes.ok) throw await youtubeError(putRes)
 
-    const errMsg = err.error?.message || err.error?.errors?.[0]?.message || `HTTP ${res.status}`
-
-    if (res.status === 401) {
-      throw new Error('YouTube authentication failed. Please reconnect your YouTube account.')
-    }
-    if (res.status === 403) {
-      const reason = err.error?.errors?.[0]?.reason || ''
-      if (reason === 'commentsDisabled' || errMsg.includes('community')) {
-        throw new Error('YouTube Community Posts require your channel to have at least 500 subscribers. This feature is not available for smaller channels.')
-      }
-      if (reason === 'forbidden') {
-        throw new Error('YouTube API permission denied. Your app may need the youtube.force-ssl scope approved.')
-      }
-      throw new Error(`YouTube API access denied: ${errMsg}`)
-    }
-    if (res.status === 429) {
-      throw new Error('YouTube API quota exceeded. Please try again tomorrow or contact support.')
-    }
-    throw new Error(`YouTube post failed: ${errMsg}`)
-  }
-
-  const data = await res.json()
-  console.log(`[YouTube] Published community post: ${data.id}`)
-  return data.id
+  const uploaded = await putRes.json().catch(() => ({}))
+  if (!uploaded.id) throw new Error('YouTube accepted the upload but returned no video id.')
+  console.log(`[YouTube] Uploaded video ${uploaded.id}`)
+  return String(uploaded.id)
 }
-
-/*
- * ─── YOUTUBE API APPROVAL REQUIREMENTS ────────────────────────────────────
- *
- * To use YouTube Community Posts, you need:
- *
- * 1. Create a project at https://console.cloud.google.com/
- *
- * 2. Enable the YouTube Data API v3:
- *    → https://console.cloud.google.com/apis/library/youtube.googleapis.com
- *
- * 3. Create OAuth 2.0 credentials (Web application type):
- *    → Authorized redirect URIs: https://socialmate.studio/api/accounts/youtube/callback
- *
- * 4. Set env vars:
- *    - YOUTUBE_CLIENT_ID
- *    - YOUTUBE_CLIENT_SECRET
- *
- * 5. Request YouTube Data API v3 production access:
- *    → https://support.google.com/youtube/contact/yt_api_form
- *    → Default quota: 10,000 units/day (free)
- *    → Community posts use ~50 units each
- *
- * Required OAuth Scopes:
- *   - https://www.googleapis.com/auth/youtube.force-ssl
- *   - https://www.googleapis.com/auth/youtube
- *
- * IMPORTANT USER REQUIREMENT:
- *   - YouTube Community Posts require the user's channel to have 500+ subscribers
- *   - Channels with fewer subscribers will get a 403 error
- *   - Display this limitation clearly in the accounts/connect UI
- *
- * ───────────────────────────────────────────────────────────────────────────
- */

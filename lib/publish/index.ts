@@ -65,7 +65,7 @@ export async function publishToAll(
           postId = await publishToMastodon(userId, content, workspaceId, selectedAccountIds['mastodon'], media)
           break
         case 'youtube':
-          postId = await publishToYouTube(userId, content)
+          postId = await publishToYouTube(userId, content, workspaceId, selectedAccountIds['youtube'], media)
           break
         case 'linkedin':
           postId = await publishToLinkedIn(userId, content, workspaceId, selectedAccountIds['linkedin'], media)

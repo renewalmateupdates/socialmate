@@ -36,11 +36,12 @@ const PLATFORMS = [
   { id: 'twitter',   name: 'X',         limit: 280,   live: true  },
   { id: 'linkedin',  name: 'LinkedIn',  limit: 3000,  live: true  },
   // Instagram, Facebook Pages and Threads: live for anyone who has connected
-  // one, which before Meta App Review means only the admin (META_PLATFORM_IDS).
+  // one, which before Meta App Review means only the admin (REVIEW_GATED).
   { id: 'instagram', name: 'Instagram', limit: 2200,  live: true  },
   { id: 'facebook',  name: 'Facebook',  limit: 63206, live: true  },
   { id: 'threads',   name: 'Threads',   limit: 500,   live: true  },
-  { id: 'youtube',   name: 'YouTube',   limit: 5000,  live: false },
+  // YouTube: video uploads, waiting on Google's verification; same gating as Meta.
+  { id: 'youtube',   name: 'YouTube',   limit: 5000,  live: true  },
   { id: 'pinterest', name: 'Pinterest', limit: 500,   live: false },
   { id: 'reddit',    name: 'Reddit',    limit: 40000, live: false },
 ]
@@ -49,11 +50,19 @@ const PLATFORMS = [
 // Until Nov 2026 their publishers dropped video and posted the text alone.
 const VIDEO_PROCESSED_ON: Record<string, string> = { twitter: 'X', linkedin: 'LinkedIn', bluesky: 'Bluesky', instagram: 'Instagram', threads: 'Threads' }
 
-// Built, waiting on Meta App Review. Offered here only once connected, or to
-// everyone after NEXT_PUBLIC_META_CONNECT_OPEN is set; until then they stay in
-// the "Soon" row below.
-const META_PLATFORM_IDS = ['instagram', 'facebook', 'threads']
+// Built, waiting on Meta App Review (Instagram, Facebook, Threads) or Google's
+// verification (YouTube). Offered here only once connected, or to everyone after
+// NEXT_PUBLIC_META_CONNECT_OPEN / NEXT_PUBLIC_YOUTUBE_CONNECT_OPEN is set; until
+// then they stay in the "Soon" row below.
 const META_CONNECT_OPEN = process.env.NEXT_PUBLIC_META_CONNECT_OPEN === 'true'
+const YOUTUBE_CONNECT_OPEN = process.env.NEXT_PUBLIC_YOUTUBE_CONNECT_OPEN === 'true'
+// Platforms waiting on their own review, and whether each is open to everyone yet.
+const REVIEW_GATED: Record<string, boolean> = {
+  instagram: META_CONNECT_OPEN,
+  facebook:  META_CONNECT_OPEN,
+  threads:   META_CONNECT_OPEN,
+  youtube:   YOUTUBE_CONNECT_OPEN,
+}
 
 // TikTok is deliberately NOT in here. Its Production API has been approved
 // since 2026-05-17 and it is the single most-connected platform among external
@@ -65,6 +74,7 @@ const COMING_SOON_PLATFORMS = [
   { id: 'instagram', name: 'Instagram' },
   { id: 'facebook',  name: 'Facebook' },
   { id: 'threads',   name: 'Threads' },
+  { id: 'youtube',   name: 'YouTube' },
   { id: 'snapchat',  name: 'Snapchat' },
   { id: 'lemon8',    name: 'Lemon8' },
   { id: 'bereal',    name: 'BeReal' },
@@ -679,7 +689,7 @@ function ComposeInner() {
   }, [selectedPlatforms.includes('twitter')]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const livePlatforms = PLATFORMS.filter(p =>
-    p.live && (!META_PLATFORM_IDS.includes(p.id) || META_CONNECT_OPEN || connectedPlatforms.has(p.id))
+    p.live && (!(p.id in REVIEW_GATED) || REVIEW_GATED[p.id] || connectedPlatforms.has(p.id))
   )
   // Only Bluesky, Mastodon, and X have a real reply-chain concept this app can
   // use for Thread Mode -- Discord/Telegram messages aren't threaded the same
@@ -2144,6 +2154,14 @@ function ComposeInner() {
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
                   <p className="text-xs font-semibold text-amber-700">
                     Instagram needs a photo (JPG) or a video. Add one, or the other platforms will post and Instagram will be skipped.
+                  </p>
+                </div>
+              )}
+
+              {selectedPlatforms.includes('youtube') && !hasVideo && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-700">
+                    YouTube needs a video (MP4 or MOV, up to 50 MB). Add one, or the other platforms will post and YouTube will be skipped. The first line of your post becomes the video title.
                   </p>
                 </div>
               )}

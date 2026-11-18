@@ -21,6 +21,8 @@ import { Building2, CheckCircle2, Plug, Rocket, Smartphone, Unlock, Zap } from '
 // Built and working, waiting on Meta App Review (see lib/meta.ts).
 const META_PLATFORMS = ['instagram', 'facebook', 'threads']
 const META_CONNECT_OPEN = process.env.NEXT_PUBLIC_META_CONNECT_OPEN === 'true'
+// Built, waiting on Google's verification of the app (see lib/youtube.ts).
+const YOUTUBE_CONNECT_OPEN = process.env.NEXT_PUBLIC_YOUTUBE_CONNECT_OPEN === 'true'
 
 function PlatformGlyph({ id, size = 20, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Plug size={size} className={className} strokeWidth={1.75} />
@@ -87,6 +89,8 @@ const CONNECT_ERROR_COPY: Record<string, string> = {
   twitter_user_failed:           'Could not fetch your X profile. Please try again.',
   twitter_db_error:              'X connected but failed to save. Please try again.',
   youtube_no_channel:            'No YouTube channel found on this account',
+  youtube_not_open:              'YouTube connections open once Google finishes reviewing SocialMate.',
+  youtube_not_configured:        'YouTube is not set up on this server yet.',
   instagram_not_professional:    'Instagram only lets Business and Creator accounts post through apps. Switch your account to Professional in the Instagram app (Settings → Account type and tools), then connect again.',
   instagram_not_open:            'Instagram connections open once Meta finishes reviewing SocialMate.',
   instagram_no_accounts:         'No Instagram account was shared. Connect again and choose your Instagram Business or Creator account when Meta asks.',
@@ -218,6 +222,11 @@ function PlatformCard({
           Videos only. Post and schedule them from TikTok Studio.
         </p>
       )}
+      {platform === 'youtube' && !atLimit && (
+        <p className="text-xs text-gray-400 leading-relaxed pl-1">
+          Videos only. Every post needs an MP4 or MOV; the first line becomes the title.
+        </p>
+      )}
       {platform === 'instagram' && !atLimit && (
         <p className="text-xs text-gray-400 leading-relaxed pl-1">
           Business or Creator accounts. Every post needs a JPG photo or a video.
@@ -274,19 +283,19 @@ function AccountsInner() {
   const [showTelegramModal, setShowTelegramModal] = useState(false)
   const [showMastodonModal, setShowMastodonModal] = useState(false)
   const [twitterQuota, setTwitterQuota] = useState<{ used: number; limit: number; plan: string } | null>(null)
-  // Only used to show the Instagram/Facebook/Threads cards before Meta App
-  // Review, to the admin and to Meta's reviewer test logins. The server makes
-  // the same call the connect routes do (lib/meta-access.ts), so a shown button
-  // always works.
-  const [metaAllowed, setMetaAllowed] = useState(false)
+  // Only used to show platforms still waiting on their own review (Meta for
+  // Instagram/Facebook/Threads, Google for YouTube) to the admin and to the
+  // reviewer test logins. The server makes the same call the connect routes do
+  // (lib/review-access.ts), so a shown button always works.
+  const [reviewAccess, setReviewAccess] = useState({ meta: false, youtube: false })
   useEffect(() => {
-    if (META_CONNECT_OPEN) return
-    fetch('/api/meta/access')
-      .then(r => (r.ok ? r.json() : { allowed: false }))
-      .then(d => setMetaAllowed(d?.allowed === true))
+    if (META_CONNECT_OPEN && YOUTUBE_CONNECT_OPEN) return
+    fetch('/api/accounts/review-access')
+      .then(r => (r.ok ? r.json() : { meta: false, youtube: false }))
+      .then(d => setReviewAccess({ meta: d?.meta === true, youtube: d?.youtube === true }))
       .catch(err => {
-        console.warn('[accounts] meta access check failed:', err)
-        setMetaAllowed(false)
+        console.warn('[accounts] review access check failed:', err)
+        setReviewAccess({ meta: false, youtube: false })
       })
   }, [])
   const router = useRouter()
@@ -599,11 +608,15 @@ function AccountsInner() {
   // connectable only to the admin (who has that role), Meta's reviewers, anyone
   // who already connected one, or everyone once NEXT_PUBLIC_META_CONNECT_OPEN is
   // set after approval.
-  const metaVisible = META_CONNECT_OPEN || metaAllowed || accounts.some(a => META_PLATFORMS.includes(a.platform))
-  const livePlatforms = metaVisible ? [...LIVE_PLATFORMS, ...META_PLATFORMS] : LIVE_PLATFORMS
-  const comingSoonPlatforms = metaVisible
-    ? COMING_SOON_PLATFORMS.filter(p => !META_PLATFORMS.includes(p))
-    : COMING_SOON_PLATFORMS
+  const metaVisible = META_CONNECT_OPEN || reviewAccess.meta || accounts.some(a => META_PLATFORMS.includes(a.platform))
+  // YouTube works the same way, waiting on Google's verification of the app.
+  const youtubeVisible = YOUTUBE_CONNECT_OPEN || reviewAccess.youtube || accounts.some(a => a.platform === 'youtube')
+  const reviewOpen = [
+    ...(metaVisible ? META_PLATFORMS : []),
+    ...(youtubeVisible ? ['youtube'] : []),
+  ]
+  const livePlatforms = [...LIVE_PLATFORMS, ...reviewOpen]
+  const comingSoonPlatforms = COMING_SOON_PLATFORMS.filter(p => !reviewOpen.includes(p))
 
   return (
     <div className="min-h-dvh bg-theme flex">

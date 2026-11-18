@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 import { appUrl } from '@/lib/meta'
-import { canConnectMeta } from '@/lib/meta-access'
+import { canConnectMeta } from '@/lib/review-access'
 
 // Starts "Instagram API with Unified Login": Facebook Login for Business with
 // the Instagram configuration (META_IG_CONFIG_ID). The person can log in with
