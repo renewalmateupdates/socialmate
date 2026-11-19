@@ -7,6 +7,7 @@ import { getHermesAccess, HERMES_LIMITS, discoverRunsThisMonth, prospectsAddedTh
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage } from '@/lib/hermes-send'
 import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -60,7 +61,7 @@ Instructions:
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
       || process.env.GEMINI_API_KEY
       || process.env.GOOGLE_AI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
     const result = await model.generateContent(prompt)
     const raw = result.response.text().trim()
     const json = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()

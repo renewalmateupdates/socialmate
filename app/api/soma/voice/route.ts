@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { MAX_RULES_CHARS, cleanExamples, houseRules } from '@/lib/soma-voice'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
 // Voice DNA: SOMA's one voice interview. The separate identity interview
 // (/soma/onboarding, 15 credits) merged into it; its one input Voice DNA did
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY
     if (apiKey) {
       try {
-        const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: 'gemini-3.6-flash' }, { timeout: 20_000 })
+        const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: GEMINI_MODEL }, { timeout: 20_000 })
         const prompt = `You are building a voice profile for an AI content agent. Based on these interview answers, write a concise 150-200 word Voice DNA summary that can be injected into any content generation prompt. Describe HOW this person sounds, WHAT they talk about, WHO they talk to, and WHAT to absolutely avoid. Write it as a clear instruction set for an AI writing in their voice.
 
 INTERVIEW ANSWERS:

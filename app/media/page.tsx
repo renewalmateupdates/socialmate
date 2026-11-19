@@ -163,7 +163,7 @@ export default function MediaLibrary() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="md:ml-56 flex-1 p-4 md:p-8">
+      <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           {/* HEADER */}

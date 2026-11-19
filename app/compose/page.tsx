@@ -22,6 +22,7 @@ import { loadWorkspacePosts } from '@/lib/workspace-posts'
 import { readToolDraft, TOOL_LABELS } from '@/lib/tool-draft'
 import { clearToolImage, readToolImage, IMAGE_TOOL_LABELS, type ToolImageMeta } from '@/lib/tool-image'
 import { uploadMediaFile } from '@/lib/media-upload'
+import { draftPoll } from '@/lib/compose-poll'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -597,6 +598,15 @@ function ComposeInner() {
           // one more step between the person and sending it.
           setSelectedPlatforms(draft.platforms?.length > 0 ? draft.platforms : defaultSelection)
           if (draft.tags?.length > 0) setPostTags(draft.tags)
+          // The poll panel says "Poll data is saved with the post", and it was,
+          // but a reopened draft never read it back, so the next save wrote
+          // poll_data: null over it (Nov 19, 2026).
+          const poll = draftPoll(draft.poll_data)
+          if (poll) {
+            setPollOptions(poll.options)
+            setPollDuration(poll.duration)
+            setShowPollPanel(true)
+          }
           if (draft.media_urls?.length > 0) setDraftMediaUrls(draft.media_urls)
           setCurrentDraftId(draftId)
           const isFailed = draft.status === 'failed'
@@ -912,7 +922,8 @@ function ComposeInner() {
           handleRateLimit()
           setAiError(data.message || "You're going too fast — wait 30 seconds and try again.")
         } else {
-          setAiError('Something went wrong. Please try again.')
+          // The route says whether it timed out and that credits came back.
+          setAiError(data.message || 'Something went wrong. Please try again.')
         }
         return
       }

@@ -179,7 +179,7 @@ export default function InboxPage() {
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <main className="md:ml-56 flex-1 p-4 md:p-8">
+        <main className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
           <div className="max-w-4xl mx-auto space-y-3 pt-4">
             {[1,2,3,4,5].map(i => <InboxSkeleton key={i} />)}
           </div>
@@ -191,7 +191,7 @@ export default function InboxPage() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <main className="md:ml-56 flex-1 flex flex-col" style={{ minHeight: 0 }}>
+      <main className="md:ml-56 flex-1 min-w-0 flex flex-col" style={{ minHeight: 0 }}>
         <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col p-4 md:p-8" style={{ minHeight: 0 }}>
 
           {/* ── HEADER ────────────────────────────────────────────────── */}

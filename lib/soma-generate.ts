@@ -31,8 +31,9 @@ import { planGapSlots, utcDayKey, windowDayKeys, type PlannedSlot } from './soma
 import { fetchUnsplashImage, usedPhotoKeys } from './soma-images'
 import { MAX_DOC_CHARS, fetchDocText } from './soma-fetch-doc'
 import { cleanExamples, houseRules } from './soma-voice'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
-export const SOMA_MODEL = 'gemini-3.6-flash'
+export const SOMA_MODEL = GEMINI_MODEL
 export const GENERATE_COST = SOMA_COSTS.generate_week
 /** Reading a new master doc version, pasted or pulled from a saved link. */
 export const INGEST_COST = SOMA_COSTS.ingest_weekly

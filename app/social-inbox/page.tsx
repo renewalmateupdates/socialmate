@@ -178,7 +178,7 @@ export default function SocialInbox() {
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <main className="md:ml-56 flex-1 p-4 md:p-8">
+        <main className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
           <div className="max-w-3xl mx-auto space-y-3 pt-4">
             {[1,2,3,4,5].map(i => <NotifSkeleton key={i} />)}
           </div>
@@ -190,7 +190,7 @@ export default function SocialInbox() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <main className="md:ml-56 flex-1 p-4 md:p-8">
+      <main className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           {/* ── HEADER ──────────────────────────────────────────────────── */}

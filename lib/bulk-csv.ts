@@ -4,7 +4,9 @@
  * One row per post. Columns, matched by header name in any order and case:
  *   content    (required) the post text
  *   date       YYYY-MM-DD, or M/D/YYYY as Excel and Google Sheets write it
- *   time       24-hour 09:00, or 12-hour 9:00 AM
+ *   time       24-hour 09:00, or 12-hour 9:00 AM. Seconds are allowed and
+ *              dropped (9:00:00 AM, 17:30:00), because Google Sheets and
+ *              Excel write a time cell's seconds when they save a CSV
  *   platforms  separated by ; | or spaces, e.g. "bluesky; linkedin". x means twitter
  *
  * Pure functions, no DOM, so scripts/test-bulk-csv.mjs can run them in node.
@@ -71,12 +73,14 @@ function toIso(y: number, mo: number, d: number): string | null {
 function normalizeTime(raw: string): string | null {
   const s = raw.trim().toLowerCase().replace(/\s+/g, ' ')
   if (!s) return ''
-  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s?(am|pm)?$/)
+  // Seconds (":00") are accepted and dropped. A sheet's time cell saves as
+  // "9:00:00 AM" or "17:30:00", which this used to reject as "isn't a time".
+  const m = s.match(/^(\d{1,2})(?::(\d{2})(?::(\d{2}))?)?\s?(am|pm|a\.m\.|p\.m\.)?$/)
   if (!m) return null
   let h = +m[1]
   const min = m[2] ? +m[2] : 0
-  const ampm = m[3]
-  if (min > 59) return null
+  const ampm = m[4]?.replace(/\./g, '')
+  if (min > 59 || (m[3] && +m[3] > 59)) return null
   if (ampm) {
     if (h < 1 || h > 12) return null
     if (ampm === 'pm' && h !== 12) h += 12

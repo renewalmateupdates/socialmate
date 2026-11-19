@@ -10,6 +10,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
 import { requireAdmin } from '@/lib/admin-auth'
 import { MAX_DOC_CHARS as MAX_CHARS, fetchDocText } from '@/lib/soma-fetch-doc'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
 
@@ -205,7 +206,7 @@ Do NOT repeat or re-extract themes, wins, or angles that are already in SOMA's m
     // controls reasoning differently, and the real cause of the earlier failures
     // was a dead API key + a retired model, not a thinking budget.
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3.6-flash',
+      model: GEMINI_MODEL,
       generationConfig: {
         responseMimeType: 'application/json',
         maxOutputTokens: 65536,

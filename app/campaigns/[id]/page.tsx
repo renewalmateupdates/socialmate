@@ -87,7 +87,7 @@ export default function CampaignPage() {
   return (
     <div className="flex min-h-screen bg-theme">
       <Sidebar />
-      <main className="md:ml-56 flex-1 p-6 md:p-10">
+      <main className="md:ml-56 flex-1 min-w-0 p-6 md:p-10">
        <div className="max-w-3xl mx-auto">
         <Link href="/campaigns" className="inline-flex items-center gap-1 text-sm text-muted hover:text-theme mb-6">
           <ArrowLeft className="w-4 h-4" /> Campaigns

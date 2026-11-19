@@ -7,8 +7,9 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { VARIANTS_PER_MESSAGE, acceptRewrite, charLimitFor, type CampaignMessage } from './campaigns'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
-const MODEL = 'gemini-3.6-flash'
+const MODEL = GEMINI_MODEL
 const TIMEOUT_MS = 30_000
 
 export type VariantResult =
