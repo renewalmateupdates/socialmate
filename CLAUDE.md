@@ -474,6 +474,15 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   `META_REVIEWER_EMAILS` / `YOUTUBE_REVIEWER_EMAILS`, and `isInternalEmail` reads
   both. The Meta reviewer login had been counted as a customer publisher and was
   queued for the update email.
+- **A reply that only reaches Resend is gone in 30 days.** Resend keeps sent and
+  received mail for 30 days on every plan below Enterprise, so the replies to
+  the Aug 30 email (sent seven minutes before #591 added a reply-to) could never
+  be checked again. Every send sets a reply-to through `lib/mail.ts`; keep it so.
+- **Resend's free plan allows 100 emails per UTC day, received mail included.**
+  The day resets at midnight UTC: 7 PM Eastern in winter, 8 PM in summer.
+  `BULK_EMAIL_DAILY_CAP` defaults to 100, the whole quota, so a full day of bulk
+  sends still leaves nothing for app mail. Start a big send right after the
+  reset and keep it well under 100.
 
 ## Pending / In Progress
 
@@ -482,16 +491,17 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 18, 2026).** #786 through #809 are merged.
+**Pick up here (updated Nov 18, 2026).** #786 through #810 are merged.
 
 **Nov 17-18:** #805 to #809 built Instagram, Facebook Pages, Threads and YouTube
 posting, gated to the admin and the reviewer logins until Meta App Review and
 Google's verification pass (`META_SETUP.md`). Joshua connected all four on the
-admin account. The update email's last batch never went out (the Nov 17
-scheduled run hit the usage limit). Before sending it, its audience turned out
-to ignore the newsletter opt-out and to include the Meta reviewer login; fixed
-in branch `fix/update-email-opt-outs-nov18`, and Resend's Receiving tab still
-needs a look for "unsubscribe" replies to the Aug 30 email (`TODO.md`). The
+admin account. The update email is finished. The Nov 17 scheduled run hit the
+usage limit, and before the last batch went out its audience turned out to
+ignore the newsletter opt-out and to include the Meta reviewer login (#810
+fixed both). The last 61 went out Nov 18 at 8:50 PM ET with 0 failures,
+checked against production: 245 people have it, and the 9 newsletter opt-outs
+and 2 unsubscribes were held back. Replies go to socialmatehq@gmail.com. The
 streamer tester signed up Nov 17 (Pro comped); Twitch alerts and tips are not
 set up yet. Found Nov 18: TikTok Studio rows stayed `publishing` forever when
 the creator left before the Studio's two-minute poll settled them (3 rows, one
@@ -538,7 +548,7 @@ its own: `/api/admin/update-email` GET previews, `POST ?to=` sends a test copy,
 reports a rejected send in its return value without throwing, so the TikTok
 email routes count a failed send as sent; the new route checks the error.
 It went to 184 of 246 on Nov 16 before Resend's daily quota stopped it (a
-spent quota blocks all app mail until it resets); the other 62 go Nov 17.
+spent quota blocks all app mail until it resets); the rest went out Nov 18.
 Since then every one-shot admin email (update, reactivation, both TikTok
 emails, unblocked) sends through `lib/bulk-email.ts`: a rejected send throws
 and is never recorded, one POST sends at most 50, all of them together stop at
@@ -637,9 +647,11 @@ of the video on purpose: they save but don't publish yet.
   (read-only queries only; any production write needs Joshua's yes). Screenshots
   of `/admin/funnel`, `/admin/overview` and `/admin/feedback` also work.
 - Inbox (socialmatehq@gmail.com): replies to the TikTok-live email (Oct 23), the
-  Sept 25 emails to the 38, the Oct 15 confirmation resends. Replies to the Aug 30
-  reactivation send land in Resend's **Receiving** tab (Resend is under
-  `renewalmate.updates@gmail.com`).
+  Sept 25 emails to the 38, the Oct 15 confirmation resends, and the November
+  update email. Replies to the Aug 30 reactivation send went only to Resend's
+  Receiving tab and expired there (Resend keeps mail 30 days); every email since
+  sets a reply-to. Resend is under `renewalmate.updates@gmail.com`: signing in
+  with socialmatehq@gmail.com opens a different, empty team.
 - Run the SOMA removal SQL from Oct 23 if it hasn't run.
 - Supabase dashboard: do auth emails go through custom SMTP (Resend) or the
   built-in mailer, which delivers worse and caps low?
