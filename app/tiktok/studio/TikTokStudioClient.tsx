@@ -1618,7 +1618,7 @@ export default function TikTokStudioClient() {
     return (
       <div className="min-h-dvh bg-void flex">
         <Sidebar />
-        <div className="md:ml-56 flex-1 flex items-center justify-center p-8">
+        <div className="md:ml-56 flex-1 min-w-0 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
             <div className="w-20 h-20 rounded-2xl bg-[#fe2c55]/10 border border-[#fe2c55]/20 flex items-center justify-center mx-auto mb-6">
               <Music className="w-9 h-9 text-[#fe2c55]" strokeWidth={1.5} />
@@ -1646,7 +1646,7 @@ export default function TikTokStudioClient() {
     return (
       <div className="min-h-dvh bg-void flex">
         <Sidebar />
-        <div className="md:ml-56 flex-1 flex items-center justify-center p-8">
+        <div className="md:ml-56 flex-1 min-w-0 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
             {/* What TikTok actually said, rather than what we hoped. The old
                 screen declared the video live the moment the bytes finished
@@ -1750,7 +1750,7 @@ export default function TikTokStudioClient() {
       {UploadProgressBanner}
       <Toast message={connectedToast} type="success" />
 
-      <div className="md:ml-56 flex-1 flex flex-col">
+      <div className="md:ml-56 flex-1 min-w-0 flex flex-col">
 
         {/* ── Header ── */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-6 py-3 bg-void/95 backdrop-blur border-b border-edge/80">

@@ -132,7 +132,7 @@ export default function ApprovalsPage() {
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <main className="md:ml-56 flex-1 p-4 md:p-8">
+        <main className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
           <div className="max-w-3xl mx-auto">
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <CheckCircle2 className="w-10 h-10 mx-auto mb-4" strokeWidth={1.5} />
@@ -160,7 +160,7 @@ export default function ApprovalsPage() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <main className="md:ml-56 flex-1 p-4 md:p-8">
+      <main className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">

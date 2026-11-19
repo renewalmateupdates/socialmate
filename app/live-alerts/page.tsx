@@ -249,7 +249,7 @@ export default function LiveAlertsPage() {
   return (
     <div className="flex min-h-screen bg-theme">
       <Sidebar />
-      <main className="md:ml-56 flex-1 p-6 md:p-10">
+      <main className="md:ml-56 flex-1 min-w-0 p-6 md:p-10">
        <div className="max-w-3xl mx-auto">
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>

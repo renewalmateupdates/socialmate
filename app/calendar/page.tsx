@@ -712,7 +712,7 @@ export default function CalendarPage() {
           { target: 'calendar-grid',   title: 'Click any post to manage it', body: 'Click a day to see its posts. From there you can edit, reschedule, or retry failed platforms.' },
         ]}
       />
-      <div className="md:ml-56 flex-1 p-4 md:p-8">
+      <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
           <ScheduleTabs active="calendar" />
 

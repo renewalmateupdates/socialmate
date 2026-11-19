@@ -53,7 +53,7 @@ export default function Workspaces() {
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 min-w-0 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
             <Building2 className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
@@ -90,7 +90,7 @@ export default function Workspaces() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="md:ml-56 flex-1 p-4 md:p-8">
+      <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
 
           {/* HEADER */}

@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic'
+// Gemini gets 40 s (lib/gemini.ts); this leaves time to refund and answer.
+export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { geminiModel, aiFailureMessage, isGeminiTimeout } from '@/lib/gemini'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
@@ -80,8 +82,7 @@ Rules:
 - Write in a natural, conversational TikTok voice
 - No explanations outside the JSON`
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
+    const model = geminiModel(apiKey)
 
     let script: { hook: string; body: string[]; cta: string }
     try {
@@ -129,7 +130,7 @@ Rules:
       }
 
       console.error('Gemini tiktok-script error:', aiErr)
-      return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
+      return NextResponse.json({ error: aiFailureMessage(aiErr), message: aiFailureMessage(aiErr) }, { status: isGeminiTimeout(aiErr) ? 504 : 500 })
     }
 
     return NextResponse.json({

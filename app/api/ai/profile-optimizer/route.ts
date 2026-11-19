@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic'
+// Gemini gets 40 s (lib/gemini.ts); this leaves time to refund and answer.
+export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { geminiModel, aiFailureMessage, isGeminiTimeout } from '@/lib/gemini'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
@@ -82,8 +84,7 @@ Return a JSON object with this exact shape:
 Score labels: 0-49 = "Needs Work", 50-69 = "Getting There", 70-84 = "Strong", 85-100 = "Excellent".
 Return ONLY the JSON. No markdown fences, no explanations.`
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
+    const model = geminiModel(apiKey)
 
     let score: number
     let scoreLabel: string
@@ -127,7 +128,7 @@ Return ONLY the JSON. No markdown fences, no explanations.`
       }
 
       console.error('Gemini profile-optimizer error:', aiErr)
-      return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
+      return NextResponse.json({ error: aiFailureMessage(aiErr), message: aiFailureMessage(aiErr) }, { status: isGeminiTimeout(aiErr) ? 504 : 500 })
     }
 
     return NextResponse.json({

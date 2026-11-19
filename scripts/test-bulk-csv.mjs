@@ -58,6 +58,19 @@ test('12 AM is midnight and 12 PM is noon', () => {
   assert.deepEqual(posts.map(p => p.time), ['00:00', '12:00'])
 })
 
+test('times with seconds, as a Google Sheets or Excel CSV writes them, are read (Nov 19, 2026)', () => {
+  // These rows came back red ("isn't a time") from a real import on Nov 19.
+  const csv = 'content,date,time\na,12/2/2026,9:00:00 AM\nb,12/3/2026,17:30:00\nc,12/4/2026,12:00:00 PM\nd,12/5/2026,5:30 p.m.\n'
+  const { posts } = parseBulkCsv(csv, OPTS)
+  assert.deepEqual(posts.map(p => p.time), ['09:00', '17:30', '12:00', '17:30'])
+  assert.ok(posts.every(p => !p.problem), JSON.stringify(posts.map(p => p.problem)))
+})
+
+test('a time with impossible seconds is still flagged', () => {
+  const { posts } = parseBulkCsv('content,time\na,9:00:75 AM\nb,9:00:00:00\n', OPTS)
+  assert.ok(posts.every(p => /time/.test(p.problem ?? '')))
+})
+
 test('skips rows with no content and explains a missing content column', () => {
   assert.equal(parseBulkCsv('content,date\n,2026-12-01\nx,\n', OPTS).skippedEmpty, 1)
   assert.match(parseBulkCsv('text_body,date\nx,2026-12-01\n', OPTS).error, /content/)

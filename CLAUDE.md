@@ -475,6 +475,21 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   but never posted" was 92 of 99 accounts, 62 of them TikTok only, and it read
   like motivation. The funnel by device pointed at the screen instead.
 
+**From: November 19, 2026: Write with AI hung for five minutes and kept the credits**
+
+- **Every outside call a person waits on needs a time limit shorter than the
+  function's.** The AI routes took credits, then called Gemini with no limit.
+  When Gemini never answered, Vercel ended the function at 300 seconds
+  (`FUNCTION_INVOCATION_TIMEOUT`), the person saw "Network error", and the
+  refund in the catch block never ran. `lib/gemini.ts` gives Gemini 40 seconds
+  inside a 60-second route.
+- **"The variable is set" is not "it works".** `/api/admin/health` said AI was
+  configured while every AI request failed. It now asks Gemini for one word
+  with the production key and shows Google's own answer.
+- **A flex column with no `min-w-0` takes the width of its longest line.** One
+  row of post previews made the Queue 801 px wide on a 375 px phone.
+  `scripts/test-layout-columns.mjs` holds every main column to it.
+
 **From: November 18, 2026: the update email's audience missed an opt-out**
 
 - **An email audience honors every opt-out the product offers, not just the one
@@ -503,7 +518,31 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 19, 2026).** #786 through #813 are merged.
+**Pick up here (updated Nov 19, 2026).** #786 through #814 are merged.
+
+**Nov 19, later: AI is down in production.** A walk of Schedule, Compose and
+Bulk on the admin account found every Write with AI request either hanging for
+300 seconds or failing ("AI generation failed — credits refunded"). The last AI
+result saved anywhere was Nov 17, 02:12 UTC (an SM-Pulse scan). The production
+key is not the one in socialmatehq's AI Studio (that project shows no requests in
+28 days), and the local `.env.local` key is still dead, so the cause can't be
+seen from here. Branch `fix/ai-timeouts-and-walk-nov19` (one PR):
+`lib/gemini.ts` holds the model name for all 25 call sites and a 40 s limit for
+the seven `/api/ai` routes (maxDuration 60, refund, "took too long" message);
+`/api/admin/health` makes one real Gemini request and reports Google's status,
+error text (keys removed), latency and the flash models the key can use. **After
+it deploys, open `/api/admin/health` signed in as admin: the `gemini` block says
+why AI fails.** If the model is gone, change `GEMINI_MODEL`; if the key or its
+project is refused, Joshua replaces `GEMINI_API_KEY` in Vercel. The same walk
+found and this PR fixes: the Queue's Scheduled card made the page 801 px wide
+on a phone (`min-w-0` on every main column), a reopened draft lost its poll
+and the next save erased it (`lib/compose-poll.ts`), and Bulk rejected Google
+Sheets times with seconds ("9:00:00 AM"). Checked and fine: the List range
+survives a reload, the three summary cards open, a draft with tags opens in
+Full, a bad CSV row clears when fixed. Not checked: the red Failed section
+(the admin has no failure in 30 days) and Bulk's Save (it schedules real
+posts). A test draft from the walk (tag `claude-test`, X, Yes/No poll) is on
+the admin account until the poll fix is checked, then gets deleted.
 
 **Nov 19:** #812 deployed at 02:30 UTC and Inngest was resynced (its API lists
 `settle-tiktok-publishes`). The 3 stuck TikTok rows were settled through the

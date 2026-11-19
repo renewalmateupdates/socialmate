@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { GEMINI_MODEL, redactKeys } from '@/lib/gemini'
 
 // Which features are actually switched on in this environment.
 //
@@ -25,6 +26,69 @@ import { requireAdmin } from '@/lib/admin-auth'
 // Presence only. This never returns a value, a length, or a prefix. An admin
 // wanting to know WHICH key is set can look in Vercel; an endpoint that leaks
 // key material because someone wanted a nicer debug view is not worth it.
+//
+// One live check on top (Nov 19, 2026): presence is not working. That day every
+// AI request hung or failed while this endpoint said AI was configured, and the
+// cause could not be seen without the production key or Vercel's logs. So it
+// asks Gemini for one word with the key this deployment has, and reports what
+// Google answered: the HTTP status, Google's own error text with anything
+// key-shaped removed, how long it took, and which flash models the key can
+// use. Still never the key.
+
+type GeminiProbe = {
+  model: string
+  ok: boolean
+  status?: number
+  ms?: number
+  error?: string
+  /** whether GEMINI_MODEL is in the key's model list */
+  modelListed?: boolean
+  flashModels?: string[]
+}
+
+const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta'
+
+async function probeGemini(): Promise<GeminiProbe> {
+  const key = process.env.GEMINI_API_KEY?.trim()
+  const probe: GeminiProbe = { model: GEMINI_MODEL, ok: false }
+  if (!key) return { ...probe, error: 'GEMINI_API_KEY is not set' }
+  const headers = { 'x-goog-api-key': key, 'Content-Type': 'application/json' }
+
+  const started = Date.now()
+  try {
+    const res = await fetch(`${GEMINI_API}/models/${GEMINI_MODEL}:generateContent`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with the single word OK.' }] }] }),
+      signal: AbortSignal.timeout(20_000),
+      cache: 'no-store',
+    })
+    probe.status = res.status
+    probe.ok = res.ok
+    const body = (await res.json().catch(() => null)) as { error?: { status?: string; message?: string } } | null
+    if (!res.ok) {
+      probe.error = redactKeys([body?.error?.status, body?.error?.message].filter(Boolean).join(': ') || `HTTP ${res.status}`)
+    }
+  } catch (err) {
+    probe.error = err instanceof Error && err.name === 'TimeoutError'
+      ? 'No answer within 20 seconds'
+      : redactKeys(err instanceof Error ? err.message : String(err))
+  }
+  probe.ms = Date.now() - started
+
+  // Which models this key can call, so a retired model shows up as one.
+  try {
+    const res = await fetch(`${GEMINI_API}/models?pageSize=200`, { headers, signal: AbortSignal.timeout(10_000), cache: 'no-store' })
+    if (res.ok) {
+      const body = (await res.json()) as { models?: { name?: string }[] }
+      const names = (body.models ?? []).map(m => (m.name ?? '').replace(/^models\//, '')).filter(Boolean)
+      probe.modelListed = names.includes(GEMINI_MODEL)
+      probe.flashModels = names.filter(n => n.includes('flash')).sort()
+    }
+  } catch { /* the answer to the one-word request above is what matters */ }
+
+  return probe
+}
 
 type Check = {
   feature: string
@@ -84,12 +148,15 @@ export async function GET() {
   })
 
   const broken = results.filter(r => !r.ok)
+  const gemini = await probeGemini()
 
   return NextResponse.json({
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'unknown',
     checkedAt: new Date().toISOString(),
-    ok: broken.length === 0,
+    ok: broken.length === 0 && gemini.ok,
     brokenCount: broken.length,
+    // A real request with this deployment's key, not just "the variable is set".
+    gemini,
     // Unconfigured first: this is a list of things that are quietly not working.
     features: [...broken, ...results.filter(r => r.ok)],
   })

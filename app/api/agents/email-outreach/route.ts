@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from '@/lib/usage'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
 const CREDIT_COST = 5
 
@@ -93,7 +94,7 @@ Return ONLY valid JSON:
 }`
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
     // Credits are already spent, so any failure past this point refunds them
     // rather than charging for nothing.

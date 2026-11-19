@@ -397,7 +397,7 @@ export default function LinkInBio() {
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <div className="md:ml-56 flex-1 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 min-w-0 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
         </div>
       </div>
@@ -407,7 +407,7 @@ export default function LinkInBio() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="md:ml-56 flex-1 p-4 md:p-8">
+      <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           {/* HEADER */}

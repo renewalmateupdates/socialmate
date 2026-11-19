@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage, type HermesChannel } from '@/lib/hermes-send'
 import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
 import { HERMES_LIMITS, prospectsAddedThisMonth } from '@/lib/hermes-access'
+import { GEMINI_MODEL } from '@/lib/gemini'
 
 const STEP_LABELS = ['Intro', 'Follow-up 1', 'Follow-up 2', 'Break-up']
 
@@ -50,7 +51,7 @@ ${!isEmail ? `- body must be under ${charLimit} characters.` : ''}
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
       || process.env.GEMINI_API_KEY
       || process.env.GOOGLE_AI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
     const result = await model.generateContent(prompt)
     const raw = result.response.text().trim()
     const jsonStr = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
@@ -256,7 +257,7 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
       || process.env.GEMINI_API_KEY
       || process.env.GOOGLE_AI_API_KEY!)
-        const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
+        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
         for (const person of newPeople) {
           const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${person.name}${person.company ? `, runs "${person.company}"` : ''}. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
