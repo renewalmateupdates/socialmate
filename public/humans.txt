@@ -21,7 +21,7 @@ Database: Supabase (PostgreSQL + RLS)
 Auth: Supabase Auth
 Background jobs: Inngest
 Payments: Stripe
-AI: Google Gemini API (gemini-3.6-flash)
+AI: Google Gemini API (gemini-3.8-flash)
 Deployment: Vercel
 Analytics: Vercel Analytics and Speed Insights, Google Analytics 4, first-party funnel events
 Email: Resend
