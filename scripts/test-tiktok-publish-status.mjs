@@ -29,7 +29,32 @@ new Function('module', 'exports', 'require', outputText)(mod, mod.exports, requi
 const {
   TIKTOK_STATUS_URL, STUDIO_POLL_MS, FOLLOW_UP_DELAYS_MS, SWEEP_MIN_AGE_MS, GIVE_UP_AFTER_MS, NEVER_CONFIRMED,
   readTiktokPublishStatus, fetchTiktokPublishStatus, recordTiktokPublishCheck, shouldGiveUp, settledNotice,
+  sentAt, dueForSweep,
 } = mod.exports
+
+// lib/tiktok-scheduled.ts has no imports, so the scheduled sender runs here
+// against fake TikTok answers.
+const sched = { exports: {} }
+new Function('module', 'exports', 'require', ts.transpileModule(read('lib/tiktok-scheduled.ts'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
+}).outputText)(sched, sched.exports, require)
+const { sendScheduledTiktok } = sched.exports
+
+/** A fake TikTok that answers each init URL with the given body and status. */
+function fakeTiktok(answers) {
+  const calls = []
+  const impl = async (url, init) => {
+    calls.push({ url, body: JSON.parse(init.body) })
+    const a = answers[url.includes('/inbox/') ? 'inbox' : 'direct']
+    return new Response(JSON.stringify(a.body), { status: a.status ?? 200 })
+  }
+  return { impl, calls }
+}
+const SCHEDULED_POST = {
+  video_url: 'https://socialmate.studio/api/tiktok/video/abc', post_caption: 'Scheduled one', sound_id: null,
+  privacy_level: 'PUBLIC_TO_EVERYONE', disable_duet: false, disable_comment: false, disable_stitch: false,
+  brand_content_toggle: false, brand_organic_toggle: false,
+}
 
 /** Just enough of supabase-js for update().eq().eq().select(). */
 function fakeDb(rows, { failWith } = {}) {
@@ -183,6 +208,64 @@ test('gives up only after a week', () => {
   assert.equal(shouldGiveUp('not a date', now), false)
   assert.equal(GIVE_UP_AFTER_MS, 7 * 24 * 60 * 60 * 1000)
   assert.match(NEVER_CONFIRMED, /post it again/)
+})
+
+test('ages count from when the video went to TikTok, not when the post was made', () => {
+  const now = Date.parse('2026-11-25T19:30:00Z')
+  // Scheduled ten days ahead, sent half an hour ago.
+  const scheduled = { created_at: '2026-11-15T10:00:00Z', scheduled_at: '2026-11-25T19:01:00Z' }
+  assert.equal(sentAt(scheduled), '2026-11-25T19:01:00Z')
+  assert.equal(shouldGiveUp(sentAt(scheduled), now), false, 'a fresh send must not be given up on')
+  assert.equal(shouldGiveUp(scheduled.created_at, now), true, 'which is what counting from created_at would do')
+  assert.equal(sentAt({ created_at: '2026-11-18T12:07:00Z', scheduled_at: null }), '2026-11-18T12:07:00Z')
+
+  assert.equal(dueForSweep('2026-11-25T19:21:00Z', now), false, 'nine minutes old: the follow-up has it')
+  assert.equal(dueForSweep('2026-11-25T19:19:00Z', now), true)
+  assert.equal(dueForSweep('garbage', now), false)
+})
+
+test('a scheduled video TikTok accepts is "sent", not published', async () => {
+  const ok = fakeTiktok({ direct: { body: { data: { publish_id: 'v_pub~123' }, error: { code: 'ok' } } } })
+  assert.deepEqual(await sendScheduledTiktok(SCHEDULED_POST, 'tok', ok.impl), { kind: 'sent', publishId: 'v_pub~123' })
+  assert.equal(ok.calls.length, 1)
+  assert.equal(ok.calls[0].body.source_info.source, 'PULL_FROM_URL')
+
+  // The drafts fallback and a hard refusal are unchanged.
+  const drafts = fakeTiktok({
+    direct: { status: 403, body: { error: { code: 'unaudited_client_can_only_post_to_private_accounts', message: 'x' } } },
+    inbox:  { body: { data: { publish_id: 'inbox_1' }, error: { code: 'ok' } } },
+  })
+  const d = await sendScheduledTiktok(SCHEDULED_POST, 'tok', drafts.impl)
+  assert.equal(d.kind, 'in_drafts')
+  assert.equal(d.publishId, 'inbox_1')
+
+  const refused = fakeTiktok({ direct: { status: 400, body: { error: { code: 'spam_risk_too_many_posts', message: 'x' } } } })
+  const r = await sendScheduledTiktok(SCHEDULED_POST, 'tok', refused.impl)
+  assert.equal(r.kind, 'failed')
+  assert.equal(r.code, 'spam_risk_too_many_posts')
+})
+
+test('wiring: scheduled sends and /api/tiktok/post wait for TikTok too', () => {
+  const inngestSrc = read('lib/inngest.ts')
+  const start = inngestSrc.indexOf('export const publishScheduledTiktokPosts')
+  const publisher = inngestSrc.slice(start, inngestSrc.indexOf('// ── TikTok publish follow-up', start))
+  assert.match(publisher, /if \(outcome\.kind === 'sent'\)/)
+  assert.doesNotMatch(publisher, /status: 'published'/, 'accepted is not published')
+  assert.doesNotMatch(publisher, /syncTiktokPublishToPosts/, 'mirrored only once TikTok confirms')
+  assert.match(publisher, /step\.sendEvent\(`follow-up-tiktok-\$\{post\.id\}`/)
+  assert.match(publisher, /name: 'tiktok\/uploaded'/)
+  // A run that straddled the deploy replays the old memoized shape.
+  assert.match(publisher, /legacy\.kind === 'published'/)
+
+  const settle = inngestSrc.slice(inngestSrc.indexOf('// ── TikTok publish follow-up'), inngestSrc.indexOf('// ── TikTok staged video cleanup'))
+  assert.match(settle, /shouldGiveUp\(sentAt\(row\), now\)/)
+  assert.match(settle, /dueForSweep\(sentAt\(row\), now\)/)
+  assert.doesNotMatch(settle, /shouldGiveUp\(row\.created_at/)
+
+  const post = read('app/api/tiktok/post/route.ts')
+  assert.doesNotMatch(post, /syncTiktokPublishToPosts/)
+  assert.doesNotMatch(post, /status:\s*'published'/)
+  assert.match(post, /inngest\.send\(\{ name: 'tiktok\/uploaded'/)
 })
 
 test('the follow-up starts after the Studio stops, and the daily sweep is the backstop', () => {

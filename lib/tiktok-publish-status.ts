@@ -7,6 +7,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  *    for two minutes after an upload, while the creator watches.
  *  - settleTiktokPublishes in lib/inngest.ts, which keeps asking after the
  *    creator leaves the page, and sweeps once a day for anything still open.
+ *    It also settles scheduled videos and /api/tiktok/post's Post Now, which
+ *    until Nov 18, 2026 were marked published the moment TikTok accepted the
+ *    upload, before TikTok had pulled the file and decided.
  *
  * TikTok's Content Posting API is asynchronous. Uploading the bytes is not
  * publishing: TikTok processes the video on its own time, and
@@ -181,9 +184,25 @@ export async function recordTiktokPublishCheck(
   return { status, settled: true, changed, recorded: true, reason }
 }
 
-/** A row the follow-up could not settle in a week. */
-export function shouldGiveUp(createdAt: string, now: number): boolean {
-  const t = new Date(createdAt).getTime()
+/**
+ * When the video went to TikTok: a scheduled post at its scheduled time (the
+ * publisher sends it then, or within the hour), anything else when its row was
+ * made. Ages are counted from here, never from created_at alone: a post
+ * scheduled a week ahead would otherwise be given up on the moment it was sent.
+ */
+export function sentAt(row: { scheduled_at?: string | null; created_at: string }): string {
+  return row.scheduled_at || row.created_at
+}
+
+/** Old enough for the daily sweep; younger uploads belong to the follow-up job. */
+export function dueForSweep(sentAtIso: string, now: number): boolean {
+  const t = Date.parse(sentAtIso)
+  return Number.isFinite(t) && now - t >= SWEEP_MIN_AGE_MS
+}
+
+/** A row the follow-up could not settle within a week of sending it. */
+export function shouldGiveUp(sentAtIso: string, now: number): boolean {
+  const t = Date.parse(sentAtIso)
   return Number.isFinite(t) && now - t > GIVE_UP_AFTER_MS
 }
 

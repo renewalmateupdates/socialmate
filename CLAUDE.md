@@ -458,6 +458,10 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   sat on "Sending" for up to three days and never reached the posts table.
   Anything that settles a record's status needs a server-side follow-up (an
   Inngest event that sleeps and checks, plus a daily sweep), not just a poll.
+- **TikTok accepting a video is not TikTok publishing it.** The scheduled
+  publisher and `/api/tiktok/post` marked a post published, mirrored it and
+  counted it the moment TikTok accepted the upload, before TikTok pulled the
+  file and decided. Only PUBLISH_COMPLETE from the status endpoint means live.
 
 **From: November 18, 2026: the update email's audience missed an opt-out**
 
@@ -491,16 +495,18 @@ needs a look for "unsubscribe" replies to the Aug 30 email (`TODO.md`). The
 streamer tester signed up Nov 17 (Pro comped); Twitch alerts and tips are not
 set up yet. Found Nov 18: TikTok Studio rows stayed `publishing` forever when
 the creator left before the Studio's two-minute poll settled them (3 rows, one
-creator). Fixed in branch `fix/tiktok-stuck-publishing-nov18`: `confirm-upload`
-sends `tiktok/uploaded`, and `settleTiktokPublishes` (`lib/inngest.ts`) asks
-TikTok 3, 13 and 43 minutes and about 2.7 hours after the upload, notifies the
-creator, and sweeps daily at 08:15 UTC, giving up after a week. The check and
-the write are one module (`lib/tiktok-publish-status.ts`, tested) that the
-Studio's route shares. After it deploys: resync Inngest (Apps, Resync); the next
-sweep settles the 3 rows. Still open: phone uploads to TikTok sometimes cut off
-("Load failed"), and scheduled posts and `/api/tiktok/post`'s Post Now are
-marked published when TikTok accepts the upload, before it finishes processing
-(that changes the scheduled publisher, so ask first).
+creator). Fixed in #812: every path that hands TikTok a video (`confirm-upload`,
+the scheduled publisher, `/api/tiktok/post`) sends `tiktok/uploaded`, and
+`settleTiktokPublishes` (`lib/inngest.ts`) asks TikTok 3, 13 and 43 minutes and
+about 2.7 hours later, records the answer, mirrors a published video into
+posts, notifies the creator, and sweeps daily at 08:15 UTC, giving up a week
+after the send. Scheduled videos used to be marked published the moment TikTok
+accepted them; now they read "Sending" for a few minutes until TikTok confirms.
+The check and the write are one module (`lib/tiktok-publish-status.ts`,
+tested) shared with the Studio's route. After it deploys, resync Inngest (Apps,
+Resync) at once: until then nothing listens for `tiktok/uploaded`, and a
+scheduled video waits on "Sending" until a sweep. The next sweep settles the 3
+rows. Still open: phone uploads to TikTok sometimes cut off ("Load failed").
 #793 (batches 1 and 2) rebuilt Queue and Calendar (range picker, collapsible
 days, red Failed section, TikTok posts in the day lists, week view, Calendar
 opens on today), delivered webhooks with `after()` and from Post Now too, added

@@ -35,7 +35,12 @@ export interface ScheduledTiktokPost {
 }
 
 export type TiktokSendOutcome =
-  | { kind: 'published'; postId: string }
+  /**
+   * TikTok accepted the video and will pull the file and process it. That is
+   * not published: TikTok can still reject it (length, format, copyrighted
+   * audio). settleTiktokPublishes in lib/inngest.ts asks until TikTok answers.
+   */
+  | { kind: 'sent'; publishId: string }
   | { kind: 'in_drafts'; publishId: string; directCode: string }
   | { kind: 'failed'; code: string; message: string }
 
@@ -54,7 +59,7 @@ export const DRAFTS_FALLBACK_CODES: ReadonlySet<string> = new Set([
 const DIRECT_INIT = 'https://open.tiktokapis.com/v2/post/publish/video/init/'
 const INBOX_INIT  = 'https://open.tiktokapis.com/v2/post/publish/inbox/video/init/'
 
-type TiktokData = { publish_id?: string; publicaly_available_post_id?: string[] }
+type TiktokData = { publish_id?: string }
 type CallResult = { ok: boolean; code: string; message: string; data: TiktokData }
 
 async function callTiktok(fetchImpl: typeof fetch, url: string, token: string, body: unknown): Promise<CallResult> {
@@ -131,8 +136,9 @@ export async function sendScheduledTiktok(
 
   const direct = await callTiktok(fetchImpl, DIRECT_INIT, token, { post_info: postInfo, source_info: sourceInfo })
   if (direct.ok) {
-    const id = direct.data.publicaly_available_post_id?.[0] ?? direct.data.publish_id ?? ''
-    return { kind: 'published', postId: String(id) }
+    // Until Nov 18, 2026 this returned 'published', so a video TikTok rejected
+    // after accepting it still showed as live and counted as a post.
+    return { kind: 'sent', publishId: String(direct.data.publish_id ?? '') }
   }
   if (!DRAFTS_FALLBACK_CODES.has(direct.code)) {
     return { kind: 'failed', code: direct.code, message: friendlyTiktokError(direct.code, direct.message) }

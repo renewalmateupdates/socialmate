@@ -5,11 +5,14 @@ import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 // A TikTok publish used to live only in tiktok_posts -- invisible to the main
 // posts table, which every admin dashboard, the funnel, Queue, Calendar,
 // Analytics and the shared monthly post quota all read from instead. Call
-// this once a TikTok post actually publishes (from any of the three places
-// that can settle one: an immediate FILE_UPLOAD post whose status poll
-// resolves, an immediate PULL_FROM_URL post, or the scheduled-post cron) so
-// that success becomes visible everywhere a post from any other platform
-// already is, including the first-post credit bonus and streak update.
+// this once a TikTok post actually publishes, so that success becomes visible
+// everywhere a post from any other platform already is, including the
+// first-post credit bonus and streak update. Since Nov 18, 2026 the only
+// caller is recordTiktokPublishCheck (lib/tiktok-publish-status.ts), when
+// TikTok reports PUBLISH_COMPLETE: through the Studio's status poll or the
+// settleTiktokPublishes follow-up. The scheduled publisher and
+// /api/tiktok/post used to call it the moment TikTok accepted a video, before
+// TikTok had decided to publish it.
 //
 // Deliberately does NOT run at schedule time, only at actual publish time.
 // The generic scheduled-post pipeline (lib/inngest.ts's publishScheduledPost,
