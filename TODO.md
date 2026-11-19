@@ -6,14 +6,10 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
 
 ## Needs Joshua (a click or a query, not a decision)
 
-1. **Before the rest of the November update email goes out:** Resend's Receiving
-   tab (Resend is under the RenewalMate Google account) for "unsubscribe" replies
-   to the Aug 30 email; 47 of the 61 still waiting got that one. The local Resend
-   key can only send, so a session can't read it. Gmail was checked Nov 18: only
-   the two Nov 16 replies, both recorded. Anyone found gets recorded with the
-   route's `POST { unsubscribe: [...] }` before the send.
-
-(`supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old $5 price is gone.)
+Nothing waiting. (`supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old
+$5 price is gone. The November update email finished Nov 18; Resend's Receiving
+tab no longer needs a look, because Resend keeps mail only 30 days and the Aug 30
+replies expired long ago.)
 
 ## Waiting on a decision
 
