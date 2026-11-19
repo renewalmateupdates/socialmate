@@ -8,7 +8,7 @@ import FilmstripTimeline, { type TimelineFrame } from '@/components/tiktok/Films
 import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
 import PhotoComposer from '@/components/tiktok/PhotoComposer'
 import {
-  AlertTriangle, CalendarDays, Check, CheckCircle2, HelpCircle, Lightbulb, Loader2,
+  AlertTriangle, ArrowRight, CalendarDays, Check, CheckCircle2, HelpCircle, Lightbulb, Loader2,
   Mic, Music, Pause, Play, Rocket, Search, Smartphone, Sparkles, Volume2, VolumeX,
   MessageCircle, Palette, XCircle, Zap,
 } from 'lucide-react'
@@ -16,7 +16,10 @@ import type { LucideIcon } from 'lucide-react'
 import { track } from '@/lib/analytics'
 import { tiktokChunkRanges } from '@/lib/tiktok-chunks'
 import { STUDIO_POLL_MS } from '@/lib/tiktok-publish-status'
-import { defaultCoverTime, fullTikTokCaption, tagsToAppend } from '@/lib/tiktok-studio'
+import { putStagedVideo, uploadToTiktok } from '@/lib/tiktok-upload'
+import {
+  cannotPostDirect, defaultCoverTime, fullTikTokCaption, postBlocker, tagsToAppend, type PostBlocker,
+} from '@/lib/tiktok-studio'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -133,6 +136,24 @@ const DISCLOSURE_REQUIRED = 'You need to indicate if your content promotes yours
 // guidelines say to answer with "try again later", not with "reconnect".
 const CANT_POST_NOW = new Set(['spam_risk_too_many_posts', 'spam_risk_user_banned_from_posting', 'reached_active_user_cap'])
 
+/**
+ * Asks the device to keep its screen on while an upload runs, and returns the
+ * release. A phone that locks mid-upload suspends the page and the upload is
+ * cut off ("Load failed"). Screen Wake Lock is in Safari 16.4+ and Chrome;
+ * where it is missing or refused, nothing changes.
+ */
+async function keepScreenOn(): Promise<() => void> {
+  type Sentinel = { release(): Promise<void> }
+  const wakeLock = (navigator as unknown as { wakeLock?: { request(type: 'screen'): Promise<Sentinel> } }).wakeLock
+  if (!wakeLock) return () => {}
+  try {
+    const sentinel = await wakeLock.request('screen')
+    return () => { void sentinel.release().catch(() => {}) }
+  } catch {
+    return () => {}
+  }
+}
+
 // ── Post settings panel (shared between right panel and mobile Post tab) ──────
 
 interface PostSettingsPanelProps {
@@ -176,7 +197,17 @@ interface PostSettingsPanelProps {
   isWorking:       boolean
   uploading:       boolean
   posting:         boolean
+  /** Share of a multi-piece upload TikTok has, 0 to 100; null when not measured. */
+  uploadPercent:   number | null
   handlePost:      () => void
+}
+
+// What the creator is told, and taken to, when a press finds something missing.
+const BLOCKER_TEXT: Record<PostBlocker, string> = {
+  disclosure:      DISCLOSURE_REQUIRED,
+  branded_private: 'Branded content visibility cannot be set to private.',
+  privacy:         'Choose who can see this video first.',
+  schedule:        'Pick a date and time to post it.',
 }
 
 function PostSettingsPanel({
@@ -191,26 +222,39 @@ function PostSettingsPanel({
   disableComment, setDisableComment,
   scheduleMode, setScheduleMode,
   scheduledAt, setScheduledAt,
-  postError, accountName, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, handlePost,
+  postError, accountName, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting,
+  uploadPercent, handlePost,
 }: PostSettingsPanelProps) {
   // Computed once, not on every render — it only needs to be "about now",
   // never a precise clock, and calling Date.now() during render is impure.
   const scheduleMin = useMemo(() => localDatetimeInputValue(new Date(Date.now() + 5 * 60_000)), [])
 
-  // Same gate as the parent, derived from props so the panel never enables a
-  // button the parent would reject.
-  const canPost =
-    !!privacyLevel &&
-    !(commercial && !yourBrand && !brandedContent) &&
-    !(brandedContent && privacyLevel === 'SELF_ONLY')
+  // What still has to be chosen (lib/tiktok-studio.ts). The button used to sit
+  // greyed out with the reason in a hover tooltip, which a phone never shows.
+  // Now the reason is on screen and a press takes the creator to the choice.
+  const blocker = postBlocker({
+    mode: scheduleMode, privacyLevel, privacyOptionCount: limits.privacyOptions.length,
+    commercial, yourBrand, brandedContent, scheduledAt,
+  })
+  const cannotPost = cannotPostDirect(scheduleMode, limits.privacyOptions.length)
 
-  // Why the button is disabled, in TikTok's own words where the guidelines
-  // give them. Shown when hovering the disabled button.
-  const blockedReason =
-    commercial && !yourBrand && !brandedContent ? DISCLOSURE_REQUIRED
-    : brandedContent && privacyLevel === 'SELF_ONLY' ? 'Branded content visibility cannot be set to private.'
-    : !privacyLevel ? 'Choose who can see this video.'
-    : null
+  // Per panel instance: the phone layout and the desktop panel each have their own.
+  const privacyRef    = useRef<HTMLSelectElement>(null)
+  const disclosureRef = useRef<HTMLDivElement>(null)
+  const scheduleRef   = useRef<HTMLInputElement>(null)
+  const [nudged, setNudged] = useState<PostBlocker | null>(null)
+  // Lit only while that choice is still the one missing.
+  const nudge = nudged !== null && nudged === blocker ? nudged : null
+
+  const showBlocker = (b: PostBlocker) => {
+    const el = b === 'disclosure' ? disclosureRef.current : b === 'schedule' ? scheduleRef.current : privacyRef.current
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (el instanceof HTMLSelectElement || el instanceof HTMLInputElement) el.focus({ preventScroll: true })
+    setNudged(b)
+    track('tiktok_post_blocked', { reason: b, mode: scheduleMode })
+  }
+  const ring = (b: PostBlocker | PostBlocker[]) =>
+    nudge && (Array.isArray(b) ? b.includes(nudge) : b === nudge) ? ' ring-2 ring-[#fe2c55] ring-offset-2 ring-offset-void' : ''
 
   return (
     <div className="flex flex-col h-full">
@@ -322,10 +366,11 @@ function PostSettingsPanel({
             // A dropdown with no default, as TikTok's guidelines specify. The
             // options are exactly what this account allows, from creator_info.
             <select
+              ref={privacyRef}
               value={privacyLevel}
               onChange={e => setPrivacyLevel(e.target.value)}
               aria-label="Who can see this video"
-              className="w-full min-h-[44px] rounded-xl border border-edge bg-panel px-3 text-sm text-ink-high focus:border-[#fe2c55] focus:outline-none"
+              className={`w-full min-h-[44px] rounded-xl border border-edge bg-panel px-3 text-sm text-ink-high focus:border-[#fe2c55] focus:outline-none${ring(['privacy', 'branded_private'])}`}
             >
               <option value="" disabled>Choose who can see this video</option>
               {limits.privacyOptions.map(opt => {
@@ -341,7 +386,11 @@ function PostSettingsPanel({
             </select>
           )}
           {!privacyLevel && limits.privacyOptions.length > 0 && (
-            <p className="mt-2 text-[11px] text-ink-faint">Choose one to enable posting.</p>
+            <p className={`mt-2 text-[11px] ${nudge === 'privacy' ? 'text-[#fe2c55] font-semibold' : 'text-ink-faint'}`}>
+              {scheduleMode === 'drafts'
+                ? 'Not needed for drafts: you choose who can see it in the TikTok app.'
+                : 'Choose one to post. TikTok asks every time, so there is no default.'}
+            </p>
           )}
           {brandedContent && (
             <p className={`mt-2 text-[11px] ${privacyLevel === 'SELF_ONLY' ? 'text-alert' : 'text-ink-muted'}`}>
@@ -404,7 +453,7 @@ function PostSettingsPanel({
             before. The declaration text below is not decoration - it is the
             disclosure TikTok requires be shown to the creator before posting,
             and it changes with what they select. */}
-        <div>
+        <div ref={disclosureRef} className={`rounded-xl${ring('disclosure')}`}>
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-ink-muted uppercase tracking-wider">Content disclosure</label>
             <button
@@ -504,11 +553,13 @@ function PostSettingsPanel({
           </button>
           {scheduleMode === 'schedule' && (
             <input
+              ref={scheduleRef}
               type="datetime-local"
               value={scheduledAt}
               onChange={e => setScheduledAt(e.target.value)}
               min={scheduleMin}
-              className="w-full bg-panel border border-edge rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors"
+              aria-label="Date and time to post"
+              className={`w-full bg-panel border border-edge rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors${ring('schedule')}`}
             />
           )}
         </div>
@@ -563,14 +614,31 @@ function PostSettingsPanel({
             <span className="font-semibold text-ink-high">{accountName}</span> on TikTok
           </p>
         )}
+        {/* What is missing, on screen rather than in a hover tooltip, and one
+            tap from being fixed. */}
+        {blocker && !isWorking && (
+          <button
+            type="button"
+            onClick={() => showBlocker(blocker)}
+            className="w-full min-h-[44px] text-left flex items-start gap-2 rounded-xl border border-amber/40 bg-amber/10 px-3 py-2.5 text-xs text-amber"
+          >
+            <AlertTriangle size={13} strokeWidth={2} className="mt-0.5 shrink-0" />
+            <span>{BLOCKER_TEXT[blocker]} <span className="font-bold underline underline-offset-2">Show me</span></span>
+          </button>
+        )}
+        {cannotPost && !blocker && !isWorking && (
+          <p className="text-xs text-amber text-center">
+            TikTok is not offering any audience for this account right now, so it cannot post directly. Send it to your TikTok drafts instead, or reconnect TikTok.
+          </p>
+        )}
         <button
-          onClick={handlePost}
-          disabled={!videoUrl || isWorking || !canPost || (scheduleMode === 'schedule' && !scheduledAt)}
-          title={blockedReason ?? undefined}
-          className="w-full bg-[#fe2c55] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20"
+          // A press with something missing goes to it instead of doing nothing.
+          onClick={() => (blocker ? showBlocker(blocker) : handlePost())}
+          disabled={!videoUrl || isWorking || (cannotPost && !blocker)}
+          className="w-full min-h-[48px] bg-[#fe2c55] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20"
         >
           {uploading
-            ? <><Loader2 size={15} strokeWidth={2} className="animate-spin" /> {scheduleMode === 'schedule' ? 'Saving video…' : 'Uploading to TikTok…'}</>
+            ? <><Loader2 size={15} strokeWidth={2} className="animate-spin" /> {scheduleMode === 'schedule' ? 'Saving video…' : `Uploading to TikTok…${uploadPercent !== null ? ` ${uploadPercent}%` : ''}`}</>
             : posting
             ? <><Rocket size={15} strokeWidth={2} className="animate-pulse" /> {scheduleMode === 'schedule' ? 'Scheduling…' : 'Publishing…'}</>
             : scheduleMode === 'schedule'
@@ -581,7 +649,9 @@ function PostSettingsPanel({
         </button>
         <p className="text-xs text-ink-faint text-center">
           {uploading
-            ? (scheduleMode === 'schedule' ? 'Saving your video so it can be posted later…' : 'Uploading your video directly to TikTok…')
+            ? (scheduleMode === 'schedule'
+                ? 'Saving your video so it can be posted later. Keep this screen open until it finishes.'
+                : 'Uploading your video directly to TikTok. Keep this screen open until it finishes.')
             : scheduleMode === 'schedule'
             ? "Saved now and posted to TikTok at the time you pick, with the privacy you chose."
             : scheduleMode === 'drafts'
@@ -705,6 +775,21 @@ export default function TikTokStudioClient() {
 
   // Post settings state
   const [toolTab, setToolTab] = useState<'filters' | 'captions' | 'audio' | 'post'>('filters')
+  // A field has focus, so the phone keyboard is likely up. The "Next" bar at
+  // the bottom hides then, rather than riding the keyboard over the field.
+  const [typing, setTyping] = useState(false)
+  useEffect(() => {
+    const isField = (t: EventTarget | null) =>
+      t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)
+    const onIn = (e: FocusEvent) => { if (isField(e.target)) setTyping(true) }
+    const onOut = () => setTyping(false)
+    document.addEventListener('focusin', onIn)
+    document.addEventListener('focusout', onOut)
+    return () => {
+      document.removeEventListener('focusin', onIn)
+      document.removeEventListener('focusout', onOut)
+    }
+  }, [])
   const [postCaption, setPostCaption]           = useState('')
   const [hashtags, setHashtags]                 = useState<string[]>([])
   const [hashtagInput, setHashtagInput]         = useState('')
@@ -737,6 +822,9 @@ export default function TikTokStudioClient() {
   // Export / upload / post state
   const [exporting, setExporting]   = useState(false)
   const [uploading, setUploading]   = useState(false)
+  // How much of a multi-piece upload TikTok has: a long phone upload with no
+  // number on it looks stuck, and a creator who leaves the page cuts it off.
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null)
   const [posting, setPosting]       = useState(false)
   const [postError, setPostError]   = useState<string | null>(null)
   const [postRemedy, setPostRemedy] = useState<'drafts_or_private' | null>(null)
@@ -1188,10 +1276,14 @@ export default function TikTokStudioClient() {
     setPostError(null)
     setPostRemedy(null)
     setUploading(true)
+    // A phone that locks its screen mid-upload cuts the upload off.
+    const releaseScreen = await keepScreenOn()
 
     // Where a failure happened, for the funnel. Moved forward as each step starts.
     let stage = hasEdits ? 'export' : 'upload'
     let tiktokCode = ''
+    // Pieces sent again after a dropped connection or a TikTok 5xx.
+    let resent = 0
     track('tiktok_post_attempted', { mode })
 
     try {
@@ -1245,12 +1337,13 @@ export default function TikTokStudioClient() {
         }
         const { signedUrl, path, publicUrl } = urlData as { signedUrl: string; path: string; publicUrl: string }
 
-        const putRes = await fetch(signedUrl, {
-          method:  'PUT',
-          body:    uploadBlob,
-          headers: { 'Content-Type': mimeType },
-        })
-        if (!putRes.ok) throw new Error(`Video upload failed (${putRes.status})`)
+        // Resent once after a dropped connection or a 5xx, and storage's own
+        // reason when it refuses. This said only "Video upload failed (400)".
+        const staged = await putStagedVideo({ url: signedUrl, blob: uploadBlob, mimeType })
+        if (!staged.ok) {
+          tiktokCode = staged.code
+          throw new Error(staged.message)
+        }
 
         setUploading(false)
         setPosting(true)
@@ -1342,32 +1435,22 @@ export default function TikTokStudioClient() {
       }
 
       // Step 2: PUT the file to TikTok's upload URL, piece by piece, in order.
+      // The file goes from the browser straight to TikTok, so a dropped
+      // connection throws ("Load failed" on Safari). A dropped piece is now
+      // sent again instead of failing the whole video (lib/tiktok-upload.ts).
       stage = 'upload'
-      for (const { start, end } of tiktokChunkRanges(uploadBlob.size, plan)) {
-        // The file goes from the browser straight to TikTok, so a dropped
-        // connection or a blocked request throws here instead of answering
-        // ("Load failed" on Safari). Both now carry a code into the funnel.
-        let tikPutRes: Response
-        try {
-          tikPutRes = await fetch(upload_url, {
-            method:  'PUT',
-            body:    uploadBlob.slice(start, end + 1),
-            headers: {
-              'Content-Type':   mimeType,
-              'Content-Range':  `bytes ${start}-${end}/${uploadBlob.size}`,
-              'Content-Length': String(end - start + 1),
-            },
-          })
-        } catch (err) {
-          tiktokCode = 'upload_network'
-          const why = err instanceof Error ? err.message : 'network error'
-          throw new Error(`The upload to TikTok was cut off (${why}). Check your connection and try again.`)
-        }
-        if (!tikPutRes.ok) {
-          tiktokCode = `upload_http_${tikPutRes.status}`
-          const errText = await tikPutRes.text().catch(() => '')
-          throw new Error(`TikTok upload failed (${tikPutRes.status})${errText ? ': ' + errText.slice(0, 200) : ''}`)
-        }
+      const ranges = tiktokChunkRanges(uploadBlob.size, plan)
+      if (ranges.length > 1) setUploadPercent(0)
+      const sent = await uploadToTiktok({
+        url: upload_url, blob: uploadBlob, mimeType, ranges,
+        onProgress: (done, total) => {
+          if (ranges.length > 1) setUploadPercent(Math.min(100, Math.round((done / total) * 100)))
+        },
+      })
+      resent = sent.resent
+      if (!sent.ok) {
+        tiktokCode = sent.code
+        throw new Error(sent.message)
       }
 
       setUploading(false)
@@ -1412,7 +1495,7 @@ export default function TikTokStudioClient() {
         throw new Error(String(confirmData.error || 'Failed to save post record'))
       }
 
-      track('tiktok_post_done', { mode })
+      track('tiktok_post_done', { mode, ...(resent && { resent }) })
       setPostSuccess(true)
 
       // Uploading the bytes is not publishing. TikTok returns 200 for the
@@ -1457,8 +1540,12 @@ export default function TikTokStudioClient() {
       setPostError(msg)
       // The message too: on Nov 9 a new user failed at init and then at upload,
       // and the funnel could only say which step, never why.
-      track('tiktok_post_failed', { mode, stage, detail: msg.slice(0, 140), ...(tiktokCode && { code: tiktokCode }) })
+      track('tiktok_post_failed', {
+        mode, stage, detail: msg.slice(0, 140), ...(tiktokCode && { code: tiktokCode }), ...(resent && { resent }),
+      })
     } finally {
+      releaseScreen()
+      setUploadPercent(null)
       setExporting(false)
       setUploading(false)
       setPosting(false)
@@ -1478,12 +1565,9 @@ export default function TikTokStudioClient() {
 
   // ── Derived ─────────────────────────────────────────────────────────────────
 
-  // Disclosure is incomplete if switched on with neither box ticked, and TikTok
-  // rejects branded content that only the creator can see.
-  const disclosureIncomplete = commercial && !yourBrand && !brandedContent
-  const brandedAndPrivate    = brandedContent && privacyLevel === 'SELF_ONLY'
-  const canPost = !!privacyLevel && !disclosureIncomplete && !brandedAndPrivate
-
+  // What may still block a post (disclosure, audience, schedule time) is
+  // decided in one place, postBlocker in lib/tiktok-studio.ts, which the
+  // panel reads. This file used to keep a second copy that nothing used.
   const isWorking  = uploading || posting
   // The same string the routes send, so the counter can't disagree with TikTok.
   const charCount  = fullTikTokCaption(postCaption, hashtags).length
@@ -1501,11 +1585,20 @@ export default function TikTokStudioClient() {
     disableComment, setDisableComment,
     scheduleMode, setScheduleMode,
     scheduledAt, setScheduledAt,
-    postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting,
+    postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, uploadPercent,
     accountName: creator?.account_name ?? null,
     // Wrapped: the panel passes this straight to onClick, and the click event
     // must not arrive as handlePost's mode override.
     handlePost: () => { void handlePost() },
+  }
+
+  // Phones: the post form is a tab under the video, and the editor opens on
+  // Filters. This takes the creator there from the "Next" bar.
+  const openPostTab = () => {
+    setToolTab('post')
+    requestAnimationFrame(() => {
+      document.getElementById('studio-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   // ── Loading / not-connected / success screens ───────────────────────────────
@@ -1642,7 +1735,9 @@ export default function TikTokStudioClient() {
     <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-3 px-4 py-3 bg-[#fe2c55] text-white text-sm font-semibold shadow-lg">
       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
       {uploading
-        ? (scheduleMode === 'schedule' ? 'Saving your video…' : 'Uploading your video to TikTok…')
+        ? (scheduleMode === 'schedule'
+            ? 'Saving your video. Keep this screen open.'
+            : `Uploading your video to TikTok${uploadPercent !== null ? ` (${uploadPercent}%)` : ''}. Keep this screen open.`)
         : (scheduleMode === 'schedule' ? 'Scheduling your post…' : 'Publishing your post…')}
     </div>
   ) : null
@@ -1756,7 +1851,14 @@ export default function TikTokStudioClient() {
                         TikTok Studio
                       </p>
                       <h2 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-ink-high leading-tight">
-                        {dragOver ? 'Let go' : 'Drop a video to start'}
+                        {/* Nobody drags a file on a phone: touch screens are
+                            asked to choose one instead. */}
+                        {dragOver ? 'Let go' : (
+                          <>
+                            <span className="[@media(pointer:coarse)]:hidden">Drop a video to start</span>
+                            <span className="hidden [@media(pointer:coarse)]:inline">Choose a video to start</span>
+                          </>
+                        )}
                       </h2>
                       <p className="mt-2 text-sm text-ink-muted max-w-sm">
                         Trim it on a real timeline, pick the frame people see first, and publish
@@ -1765,12 +1867,13 @@ export default function TikTokStudioClient() {
                     </div>
 
                     <div className="flex flex-col items-center gap-3">
-                      <button className="bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
-                        Browse files
+                      <button className="min-h-[48px] bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
+                        <span className="[@media(pointer:coarse)]:hidden">Browse files</span>
+                        <span className="hidden [@media(pointer:coarse)]:inline">Choose a video</span>
                       </button>
                       <button
                         onClick={e => { e.stopPropagation(); setComposerOpen(true) }}
-                        className="text-xs font-semibold text-ink-muted hover:text-ink-high underline underline-offset-4 decoration-edge-lit transition-colors"
+                        className="min-h-[44px] px-3 text-xs font-semibold text-ink-muted hover:text-ink-high underline underline-offset-4 decoration-edge-lit transition-colors"
                       >
                         or build one from photos
                       </button>
@@ -2002,7 +2105,7 @@ export default function TikTokStudioClient() {
 
             {/* Tool tabs */}
             {videoUrl && (
-              <div className="border-t border-edge/80">
+              <div id="studio-tools" className="border-t border-edge/80 scroll-mt-16">
 
                 {/* Tab bar — pill style */}
                 <div className="flex gap-1 p-2 bg-panel/60">
@@ -2025,25 +2128,32 @@ export default function TikTokStudioClient() {
                       <button
                         key={tab}
                         onClick={() => setToolTab(tab)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold transition-all ${
+                        className={`flex-1 min-h-[44px] flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1.5 sm:px-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
                           // On wide screens the panel on the right is the post
                           // form; a second copy here read as two captions.
                           tab === 'post' ? 'lg:hidden ' : ''
                         }${
                           isActive
                             ? 'bg-[#fe2c55] text-white shadow-sm shadow-[#fe2c55]/30'
+                            : tab === 'post'
+                            ? 'text-[#fe2c55] hover:bg-[#fe2c55]/10'
                             : 'text-ink-muted hover:text-ink-body hover:bg-raised/50'
                         }`}
                       >
                         <TabIcon size={14} strokeWidth={2} />
-                        <span className="hidden sm:inline">{labels[tab]}</span>
+                        {/* Named at every width. On phones these were bare icons,
+                            and the only way to post was the one that looked like
+                            a phone. */}
+                        <span>{labels[tab]}</span>
                       </button>
                     )
                   })}
                 </div>
 
-                {/* Tab content */}
-                <div className="p-4 max-h-72 overflow-y-auto">
+                {/* Tab content. The tools scroll in a short box; the post form
+                    gets the full page, because inside the box its Post button
+                    sat at the bottom of a scroller within a scrolling page. */}
+                <div className={`p-4 ${toolTab === 'post' ? '' : 'max-h-72 overflow-y-auto'}`}>
 
                   {/* Filters tab */}
                   {toolTab === 'filters' && (
@@ -2347,6 +2457,26 @@ export default function TikTokStudioClient() {
           </div>
 
         </div>
+
+        {/* Phones and tablets: the next step, always in reach. Between Oct 5
+            and Nov 18, 2026 half the phone users who added a video never
+            pressed Post: it lived in an unlabeled tab, inside a small scroll
+            box, below the editor. */}
+        {videoUrl && toolTab !== 'post' && (
+          <>
+            <div className="h-24 lg:hidden" aria-hidden="true" />
+            {!typing && !isWorking && (
+              <div className="lg:hidden fixed inset-x-0 bottom-0 md:left-56 z-30 border-t border-edge bg-void/95 backdrop-blur px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <button
+                  onClick={openPostTab}
+                  className="w-full min-h-[48px] rounded-2xl bg-[#fe2c55] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#fe2c55]/20 hover:opacity-90 transition-opacity"
+                >
+                  Next: caption and post <ArrowRight size={16} strokeWidth={2.5} />
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

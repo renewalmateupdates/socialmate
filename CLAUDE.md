@@ -463,6 +463,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   counted it the moment TikTok accepted the upload, before TikTok pulled the
   file and decided. Only PUBLISH_COMPLETE from the status endpoint means live.
 
+**From: November 19, 2026: posting from TikTok Studio was hard to find on a phone**
+
+- **A reason in a tooltip is no reason on a phone.** Studio's Post button was
+  greyed out until an audience was picked, with the reason in a `title`
+  tooltip, in a tab shown as a bare phone icon, at the bottom of a 288 px
+  scroll box inside a scrolling page. Half the phone users who added a video in
+  the 45 days to Nov 18 never pressed it. Put what is missing on screen, and
+  let a press take the person to it.
+- **Look at the phone layout before deciding people lost interest.** "Connected
+  but never posted" was 92 of 99 accounts, 62 of them TikTok only, and it read
+  like motivation. The funnel by device pointed at the screen instead.
+
 **From: November 18, 2026: the update email's audience missed an opt-out**
 
 - **An email audience honors every opt-out the product offers, not just the one
@@ -491,7 +503,27 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 18, 2026).** #786 through #810 are merged.
+**Pick up here (updated Nov 19, 2026).** #786 through #812 are merged.
+
+**Nov 19:** #812 deployed at 02:30 UTC and Inngest was resynced (its API lists
+`settle-tiktok-publishes`). The 3 stuck TikTok rows were settled through the
+follow-up at 02:50 UTC: 2 published and mirrored into posts with their TikTok
+links, 1 in drafts, each with a notification. Still to see live: the first
+scheduled video after the deploy (Nov 19, 17:00 UTC) going `publishing`, then
+`published`. Branch `feat/tiktok-post-unblock-nov19` (one PR) attacks where
+people stop: of 99 outside accounts that connected a platform, 7 ever
+published and 82 never tried; 62 connected TikTok only. In TikTok Studio, 16
+added a video and 10 never pressed Post. On a phone the tab names were hidden,
+the editor opened on Filters, and the post form sat in a small scroll box with
+a greyed-out button that explained itself only in a tooltip. Now the tabs are
+named, a "Next: caption and post" bar is pinned to the bottom on phones, the
+form gets the full page, and a press with something missing says what and
+jumps to it (`postBlocker` in `lib/tiktok-studio.ts`; `tiktok_post_blocked`
+says which choice stops people on `/admin/funnel`). Drafts no longer need an
+audience or disclosure, which TikTok's inbox upload ignores. Uploads: 10 MB
+pieces from 20 MB (was 64 MB), a dropped or 5xx piece is sent again, with a
+percentage and the screen kept awake (`lib/tiktok-upload.ts`, tested), and a
+scheduled video's save says what storage objected to.
 
 **Nov 17-18:** #805 to #809 built Instagram, Facebook Pages, Threads and YouTube
 posting, gated to the admin and the reviewer logins until Meta App Review and
@@ -513,10 +545,7 @@ posts, notifies the creator, and sweeps daily at 08:15 UTC, giving up a week
 after the send. Scheduled videos used to be marked published the moment TikTok
 accepted them; now they read "Sending" for a few minutes until TikTok confirms.
 The check and the write are one module (`lib/tiktok-publish-status.ts`,
-tested) shared with the Studio's route. After it deploys, resync Inngest (Apps,
-Resync) at once: until then nothing listens for `tiktok/uploaded`, and a
-scheduled video waits on "Sending" until a sweep. The next sweep settles the 3
-rows. Still open: phone uploads to TikTok sometimes cut off ("Load failed").
+tested) shared with the Studio's route. Deployed and resynced Nov 19 (above).
 #793 (batches 1 and 2) rebuilt Queue and Calendar (range picker, collapsible
 days, red Failed section, TikTok posts in the day lists, week view, Calendar
 opens on today), delivered webhooks with `after()` and from Post Now too, added
@@ -563,7 +592,9 @@ their strings in all nine locales (#803). Then the 52 direct
 `logIfRejected(label, ...)` (`lib/mail.ts`), which logs a rejection and
 returns the result unchanged, so no route behaves differently. A test fails if
 a new direct call skips it. **Still open:** the Stripe webhook's two sends
-(lines ~524 and ~821) still ignore the error; it needs Joshua's OK first. The first reply came from someone who signed
+(lines ~524 and ~821) still ignore the error; it needs Joshua's OK first, by
+name: on Nov 19 a session's safety check refused the edit under a general "do
+all of it", and it was reverted untouched. The first reply came from someone who signed
 up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
 pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
 posts each issue automatically (it imports drafts by hand). Fixed in #800
