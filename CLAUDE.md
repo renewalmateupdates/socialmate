@@ -503,14 +503,14 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 19, 2026).** #786 through #812 are merged.
+**Pick up here (updated Nov 19, 2026).** #786 through #813 are merged.
 
 **Nov 19:** #812 deployed at 02:30 UTC and Inngest was resynced (its API lists
 `settle-tiktok-publishes`). The 3 stuck TikTok rows were settled through the
 follow-up at 02:50 UTC: 2 published and mirrored into posts with their TikTok
 links, 1 in drafts, each with a notification. Still to see live: the first
-scheduled video after the deploy (Nov 19, 17:00 UTC) going `publishing`, then
-`published`. Branch `feat/tiktok-post-unblock-nov19` (one PR) attacks where
+scheduled video after the deploy (Nov 19, 17:00 UTC; another at 23:00 UTC)
+going `publishing`, then `published`. #813 (merged, deployed 13:25 UTC) attacks where
 people stop: of 99 outside accounts that connected a platform, 7 ever
 published and 82 never tried; 62 connected TikTok only. In TikTok Studio, 16
 added a video and 10 never pressed Post. On a phone the tab names were hidden,
@@ -523,7 +523,12 @@ says which choice stops people on `/admin/funnel`). Drafts no longer need an
 audience or disclosure, which TikTok's inbox upload ignores. Uploads: 10 MB
 pieces from 20 MB (was 64 MB), a dropped or 5xx piece is sent again, with a
 percentage and the screen kept awake (`lib/tiktok-upload.ts`, tested), and a
-scheduled video's save says what storage objected to.
+scheduled video's save says what storage objected to. Checked live at phone
+size (375 px, touch) on the admin account: the empty Studio says "Choose a
+video", the Next bar opens the full form, and Post with no audience jumps to
+"Who can see this" and records `tiktok_post_blocked` (reason `privacy`). The
+same check found the feedback button covering the Next bar's right end; it now
+sits above the bar on `/tiktok/studio` below `lg` (`components/FeedbackWidget.tsx`).
 
 **Nov 17-18:** #805 to #809 built Instagram, Facebook Pages, Threads and YouTube
 posting, gated to the admin and the reviewer logins until Meta App Review and
