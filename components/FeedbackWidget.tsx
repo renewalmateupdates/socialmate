@@ -29,6 +29,11 @@ export default function FeedbackWidget() {
   // Compose pins its Post bar to the bottom of the screen, full width below
   // the desktop layout, where this button would cover its right-hand button.
   const onCompose = pathname === '/compose'
+  // TikTok Studio pins a "Next: caption and post" bar (73 px plus the safe
+  // area) to the bottom below the desktop layout, and this button sat on its
+  // right end, so a tap there opened feedback. There it moves up above the bar
+  // rather than hiding: Studio is where people get stuck most (Nov 19, 2026).
+  const onStudio = pathname === '/tiktok/studio'
 
   // Try to pre-fill email from Supabase session
   useEffect(() => {
@@ -177,7 +182,7 @@ export default function FeedbackWidget() {
       {/* Floating trigger button — bottom right */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors items-center justify-center ${onAuthPage ? 'hidden md:flex' : onCompose ? 'hidden lg:flex' : 'flex'}`}
+        className={`fixed right-6 z-50 w-12 h-12 bg-panel border border-edge hover:border-edge-lit text-ink-muted hover:text-ink-high rounded-full shadow-lg transition-colors items-center justify-center ${onStudio ? 'bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]' : 'bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]'} ${onAuthPage ? 'hidden md:flex' : onCompose ? 'hidden lg:flex' : 'flex'}`}
         title="Send feedback"
         aria-label="Send feedback">
         {open ? <CloseIcon size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}

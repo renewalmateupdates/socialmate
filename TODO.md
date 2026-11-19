@@ -47,9 +47,8 @@ replies expired long ago.)
 4. **Creator Hub tips and Twitch go-live alerts stay unannounced.** Next step is
    to onboard one streamer to use them for real (an alert on a real stream, a real
    tip), and announce after that works.
-5. **Enki code gets deleted from SocialMate later**, when Joshua says go:
-   `app/enki/` (13 files), `app/api/enki/` (16), `lib/enki/` (9) and the Enki
-   functions in `lib/inngest.ts`. `/enki` still serves the waitlist until then.
+5. **Enki code is out of SocialMate.** Removed Nov 9 (#775), saved at the tag
+   `archive/enki-2026-11-09`; `docs/archive/enki.md` says how to restore it.
 6. **No one is identified in this public repo.** Customer, partner, contractor,
    family and commenter details were redacted from the docs, the roadmap page and
    a code comment on Nov 5. Git history still has the old text.
