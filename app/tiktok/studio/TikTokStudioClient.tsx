@@ -1851,7 +1851,14 @@ export default function TikTokStudioClient() {
                         TikTok Studio
                       </p>
                       <h2 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-ink-high leading-tight">
-                        {dragOver ? 'Let go' : 'Drop a video to start'}
+                        {/* Nobody drags a file on a phone: touch screens are
+                            asked to choose one instead. */}
+                        {dragOver ? 'Let go' : (
+                          <>
+                            <span className="[@media(pointer:coarse)]:hidden">Drop a video to start</span>
+                            <span className="hidden [@media(pointer:coarse)]:inline">Choose a video to start</span>
+                          </>
+                        )}
                       </h2>
                       <p className="mt-2 text-sm text-ink-muted max-w-sm">
                         Trim it on a real timeline, pick the frame people see first, and publish
@@ -1860,12 +1867,13 @@ export default function TikTokStudioClient() {
                     </div>
 
                     <div className="flex flex-col items-center gap-3">
-                      <button className="bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
-                        Browse files
+                      <button className="min-h-[48px] bg-[#fe2c55] text-white font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-[0_10px_30px_-8px_rgba(254,44,85,0.7)]">
+                        <span className="[@media(pointer:coarse)]:hidden">Browse files</span>
+                        <span className="hidden [@media(pointer:coarse)]:inline">Choose a video</span>
                       </button>
                       <button
                         onClick={e => { e.stopPropagation(); setComposerOpen(true) }}
-                        className="text-xs font-semibold text-ink-muted hover:text-ink-high underline underline-offset-4 decoration-edge-lit transition-colors"
+                        className="min-h-[44px] px-3 text-xs font-semibold text-ink-muted hover:text-ink-high underline underline-offset-4 decoration-edge-lit transition-colors"
                       >
                         or build one from photos
                       </button>
