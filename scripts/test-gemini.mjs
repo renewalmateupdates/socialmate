@@ -27,7 +27,7 @@ const { outputText } = ts.transpileModule(read('lib/gemini.ts'), {
 })
 const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
-const { GEMINI_MODEL, GEMINI_TIMEOUT_MS, geminiModel, isGeminiTimeout, aiFailureMessage, redactKeys } = mod.exports
+const { GEMINI_MODEL, GEMINI_TIMEOUT_MS, geminiModel, isGeminiTimeout, aiFailureMessage, redactKeys, stableFlashModels } = mod.exports
 const { GoogleGenerativeAIAbortError, GoogleGenerativeAIFetchError } = require('@google/generative-ai')
 
 function walk(dir, out = []) {
@@ -70,6 +70,31 @@ test('a 40 second limit leaves the 60 second routes time to refund', () => {
   assert.match(GEMINI_MODEL, /^gemini-/)
 })
 
+// What /api/admin/health listed for the production key on Nov 19, 2026.
+const NOV19_FLASH_MODELS = [
+  'gemini-2.5-flash', 'gemini-2.5-flash-image', 'gemini-2.5-flash-lite', 'gemini-2.5-flash-native-audio-latest',
+  'gemini-2.5-flash-native-audio-preview-09-2025', 'gemini-2.5-flash-native-audio-preview-12-2025',
+  'gemini-2.5-flash-preview-tts', 'gemini-3-flash-preview', 'gemini-3.1-flash-image', 'gemini-3.1-flash-image-preview',
+  'gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-image', 'gemini-3.1-flash-lite-preview', 'gemini-3.1-flash-live-preview',
+  'gemini-3.1-flash-tts-preview', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.7-flash',
+  'gemini-3.8-flash', 'gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-flash-latest',
+  'gemini-flash-lite-latest', 'gemini-omni-1.1-flash', 'gemini-omni-1.2-flash', 'gemini-omni-flash-preview',
+]
+
+test('the fallback list is the stable text Flash models: no previews, aliases, image, speech or live ones', () => {
+  assert.deepEqual(stableFlashModels(NOV19_FLASH_MODELS), [
+    'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash',
+    'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash',
+  ])
+})
+
+test('the app runs on a stable Flash model the key lists, not a preview or an alias Google re-points', () => {
+  assert.deepEqual(stableFlashModels([GEMINI_MODEL]), [GEMINI_MODEL])
+  assert.ok(NOV19_FLASH_MODELS.includes(GEMINI_MODEL))
+  // gemini-3.6-flash stopped answering on Nov 19, 2026, the day Google Cloud retired it.
+  assert.notEqual(GEMINI_MODEL, 'gemini-3.6-flash')
+})
+
 test('anything shaped like an API key is removed from text shown to an admin', () => {
   const msg = "Permission denied: Consumer 'api_key:AIzaSyA1b2C3d4E5f6G7h8I9j0KlMnOpQrStUvW' has been suspended."
   assert.equal(redactKeys(msg).includes('AIza'), false)
@@ -103,16 +128,32 @@ test('Compose shows the route message when Write with AI fails', () => {
 
 test('the admin health check asks Gemini for real and never returns the key', () => {
   const src = read('app/api/admin/health/route.ts')
-  assert.match(src, /models\/\$\{GEMINI_MODEL\}:generateContent/)
+  assert.match(src, /models\/\$\{model\}:generateContent/)
+  assert.match(src, /askGemini\(GEMINI_MODEL, headers\)/)
   assert.match(src, /redactKeys\(/)
   assert.match(src, /AbortSignal\.timeout\(/)
-  // The key goes in the request header and nowhere else: not into the probe it returns.
+  // The key goes in the request header and nowhere else: not into what it returns.
   const code = src.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
   assert.match(code, /'x-goog-api-key': key\b/)
-  assert.doesNotMatch(code, /probe\.\w+\s*=[^\n]*\bkey\b/, 'a probe field is built from the key')
-  assert.doesNotMatch(code, /\{ \.\.\.probe,[^}]*\bkey\b/, 'the key is spread into the probe')
-  assert.match(code, /type GeminiProbe = \{[^}]*\}/)
-  assert.doesNotMatch(code.match(/type GeminiProbe = \{[^}]*\}/)[0], /\bkey\b/, 'the probe type has no key field')
+  assert.doesNotMatch(code, /(probe|answer)\.\w+\s*=[^\n]*\bkey\b/, 'a returned field is built from the key')
+  assert.doesNotMatch(code, /\{ \.\.\.(probe|answer),[^}]*\bkey\b/, 'the key is spread into the result')
+  for (const type of [/type GeminiAnswer = \{[^}]*\}/, /type GeminiProbe = GeminiAnswer & \{[^}]*\}/]) {
+    assert.match(code, type)
+    assert.doesNotMatch(code.match(type)[0], /\bkey\b/, 'a returned type has a key field')
+  }
+})
+
+test('the health check asks the other stable Flash models when the main one fails, and ?try= names only models', () => {
+  const src = read('app/api/admin/health/route.ts')
+  assert.match(src, /answer\.ok \? \[\] : stableFlashModels\(names \?\? \[\]\)/)
+  assert.match(src, /filter\(s => MODEL_NAME\.test\(s\)\)/)
+  const literal = src.match(/const MODEL_NAME = \/(.+)\/\r?$/m)
+  assert.ok(literal, 'MODEL_NAME is a regex literal')
+  const MODEL_NAME = new RegExp(literal[1])
+  for (const ok of ['gemini-3.8-flash', 'gemini-3.5-flash-lite']) assert.ok(MODEL_NAME.test(ok), ok)
+  for (const bad of ['../models', 'gemini-3.8-flash:generateContent', 'gemini-x?key=1', 'gemini-a/b', 'GEMINI-3', '']) {
+    assert.equal(MODEL_NAME.test(bad), false, bad)
+  }
 })
 
 console.log(`checked ${relative(root, join(root, 'lib/gemini.ts'))}`)

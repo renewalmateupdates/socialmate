@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { GEMINI_MODEL, redactKeys } from '@/lib/gemini'
+import { GEMINI_MODEL, redactKeys, stableFlashModels } from '@/lib/gemini'
 
 // Which features are actually switched on in this environment.
 //
@@ -34,59 +34,101 @@ import { GEMINI_MODEL, redactKeys } from '@/lib/gemini'
 // Google answered: the HTTP status, Google's own error text with anything
 // key-shaped removed, how long it took, and which flash models the key can
 // use. Still never the key.
+//
+// The model list alone did not say which model to move to: on Nov 19 the old
+// model was still listed and simply never answered. So when the main model
+// fails, the check asks every stable Flash model the key lists (no previews,
+// aliases, image, speech or live variants) and reports which ones replied.
+// `?try=gemini-a,gemini-b` asks those instead, whether or not the main one
+// failed.
 
-type GeminiProbe = {
+type GeminiAnswer = {
   model: string
   ok: boolean
   status?: number
   ms?: number
   error?: string
+  /** the start of what the model said, to show it really answered */
+  reply?: string
+}
+
+type GeminiProbe = GeminiAnswer & {
   /** whether GEMINI_MODEL is in the key's model list */
   modelListed?: boolean
   flashModels?: string[]
+  /** other models asked the same question: the ones that answered come first */
+  alternatives?: GeminiAnswer[]
 }
 
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta'
+const PROBE_TIMEOUT_MS = 20_000
+const MAX_ALTERNATIVES = 10
 
-async function probeGemini(): Promise<GeminiProbe> {
-  const key = process.env.GEMINI_API_KEY?.trim()
-  const probe: GeminiProbe = { model: GEMINI_MODEL, ok: false }
-  if (!key) return { ...probe, error: 'GEMINI_API_KEY is not set' }
-  const headers = { 'x-goog-api-key': key, 'Content-Type': 'application/json' }
+/** A model name that is safe to put in the request path. */
+const MODEL_NAME = /^gemini-[a-z0-9.-]{1,60}$/
 
+async function askGemini(model: string, headers: Record<string, string>): Promise<GeminiAnswer> {
+  const answer: GeminiAnswer = { model, ok: false }
   const started = Date.now()
   try {
-    const res = await fetch(`${GEMINI_API}/models/${GEMINI_MODEL}:generateContent`, {
+    const res = await fetch(`${GEMINI_API}/models/${model}:generateContent`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with the single word OK.' }] }] }),
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
       cache: 'no-store',
     })
-    probe.status = res.status
-    probe.ok = res.ok
-    const body = (await res.json().catch(() => null)) as { error?: { status?: string; message?: string } } | null
-    if (!res.ok) {
-      probe.error = redactKeys([body?.error?.status, body?.error?.message].filter(Boolean).join(': ') || `HTTP ${res.status}`)
+    answer.status = res.status
+    answer.ok = res.ok
+    const body = (await res.json().catch(() => null)) as {
+      error?: { status?: string; message?: string }
+      candidates?: { content?: { parts?: { text?: string }[] } }[]
+    } | null
+    if (res.ok) {
+      answer.reply = (body?.candidates?.[0]?.content?.parts ?? []).map(p => p.text ?? '').join('').trim().slice(0, 40)
+    } else {
+      answer.error = redactKeys([body?.error?.status, body?.error?.message].filter(Boolean).join(': ') || `HTTP ${res.status}`)
     }
   } catch (err) {
-    probe.error = err instanceof Error && err.name === 'TimeoutError'
-      ? 'No answer within 20 seconds'
+    answer.error = err instanceof Error && err.name === 'TimeoutError'
+      ? `No answer within ${PROBE_TIMEOUT_MS / 1000} seconds`
       : redactKeys(err instanceof Error ? err.message : String(err))
   }
-  probe.ms = Date.now() - started
+  answer.ms = Date.now() - started
+  return answer
+}
 
-  // Which models this key can call, so a retired model shows up as one.
+/** Every model this key can call, or null when the list could not be read. */
+async function listModels(headers: Record<string, string>): Promise<string[] | null> {
   try {
     const res = await fetch(`${GEMINI_API}/models?pageSize=200`, { headers, signal: AbortSignal.timeout(10_000), cache: 'no-store' })
-    if (res.ok) {
-      const body = (await res.json()) as { models?: { name?: string }[] }
-      const names = (body.models ?? []).map(m => (m.name ?? '').replace(/^models\//, '')).filter(Boolean)
-      probe.modelListed = names.includes(GEMINI_MODEL)
-      probe.flashModels = names.filter(n => n.includes('flash')).sort()
-    }
-  } catch { /* the answer to the one-word request above is what matters */ }
+    if (!res.ok) return null
+    const body = (await res.json()) as { models?: { name?: string }[] }
+    return (body.models ?? []).map(m => (m.name ?? '').replace(/^models\//, '')).filter(Boolean)
+  } catch {
+    return null
+  }
+}
 
+async function probeGemini(tryModels: string[]): Promise<GeminiProbe> {
+  const key = process.env.GEMINI_API_KEY?.trim()
+  if (!key) return { model: GEMINI_MODEL, ok: false, error: 'GEMINI_API_KEY is not set' }
+  const headers = { 'x-goog-api-key': key, 'Content-Type': 'application/json' }
+
+  const [answer, names] = await Promise.all([askGemini(GEMINI_MODEL, headers), listModels(headers)])
+  const probe: GeminiProbe = { ...answer }
+  if (names) {
+    probe.modelListed = names.includes(GEMINI_MODEL)
+    probe.flashModels = names.filter(n => n.includes('flash')).sort()
+  }
+
+  const others = (tryModels.length > 0 ? tryModels : answer.ok ? [] : stableFlashModels(names ?? []))
+    .filter(m => m !== GEMINI_MODEL)
+    .slice(0, MAX_ALTERNATIVES)
+  if (others.length > 0) {
+    const answers = await Promise.all(others.map(m => askGemini(m, headers)))
+    probe.alternatives = answers.sort((a, b) => Number(b.ok) - Number(a.ok) || (a.ms ?? 0) - (b.ms ?? 0))
+  }
   return probe
 }
 
@@ -131,9 +173,13 @@ function present(name: string): boolean {
   return typeof v === 'string' && v.trim().length > 0
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const tryModels = Array.from(new Set(
+    (new URL(req.url).searchParams.get('try') ?? '').split(',').map(s => s.trim()).filter(s => MODEL_NAME.test(s)),
+  ))
 
   const results = CHECKS.map(c => {
     const missing = c.vars.filter(v => !present(v))
@@ -148,7 +194,7 @@ export async function GET() {
   })
 
   const broken = results.filter(r => !r.ok)
-  const gemini = await probeGemini()
+  const gemini = await probeGemini(tryModels)
 
   return NextResponse.json({
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'unknown',

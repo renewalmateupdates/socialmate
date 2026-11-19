@@ -489,6 +489,13 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 - **A flex column with no `min-w-0` takes the width of its longest line.** One
   row of post previews made the Queue 801 px wide on a 375 px phone.
   `scripts/test-layout-columns.mjs` holds every main column to it.
+- **A listed model is not a working model.** The key still listed
+  `gemini-3.6-flash` and Google's status page was green while every request
+  hung with no answer; Google Cloud retired 3.6 Flash that day (Nov 19) and
+  named 3.8 Flash. A model retirement has now taken all AI down twice (July:
+  2.5 Flash, a 404; November: 3.6 Flash, a silent hang). When AI fails, read
+  `/api/admin/health` first: if the main model fails it asks every stable
+  Flash model the key lists and shows which ones answered.
 
 **From: November 18, 2026: the update email's audience missed an opt-out**
 
@@ -518,38 +525,35 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 19, 2026).** #786 through #814 are merged.
+**Pick up here (updated Nov 19, 2026).** #786 through #815 are merged.
 
-**Nov 19, later: AI is down in production.** A walk of Schedule, Compose and
-Bulk on the admin account found every Write with AI request either hanging for
-300 seconds or failing ("AI generation failed — credits refunded"). The last AI
-result saved anywhere was Nov 17, 02:12 UTC (an SM-Pulse scan). The production
-key is not the one in socialmatehq's AI Studio (that project shows no requests in
-28 days), and the local `.env.local` key is still dead, so the cause can't be
-seen from here. Branch `fix/ai-timeouts-and-walk-nov19` (one PR):
-`lib/gemini.ts` holds the model name for all 25 call sites and a 40 s limit for
-the seven `/api/ai` routes (maxDuration 60, refund, "took too long" message);
-`/api/admin/health` makes one real Gemini request and reports Google's status,
-error text (keys removed), latency and the flash models the key can use. **After
-it deploys, open `/api/admin/health` signed in as admin: the `gemini` block says
-why AI fails.** If the model is gone, change `GEMINI_MODEL`; if the key or its
-project is refused, Joshua replaces `GEMINI_API_KEY` in Vercel. The same walk
-found and this PR fixes: the Queue's Scheduled card made the page 801 px wide
-on a phone (`min-w-0` on every main column), a reopened draft lost its poll
-and the next save erased it (`lib/compose-poll.ts`), and Bulk rejected Google
-Sheets times with seconds ("9:00:00 AM"). Checked and fine: the List range
-survives a reload, the three summary cards open, a draft with tags opens in
-Full, a bad CSV row clears when fixed. Not checked: the red Failed section
-(the admin has no failure in 30 days) and Bulk's Save (it schedules real
-posts). A test draft from the walk (tag `claude-test`, X, Yes/No poll) is on
-the admin account until the poll fix is checked, then gets deleted.
+**Nov 19, evening: AI was down; the fix is branch `fix/gemini-3-8-flash-nov19`.**
+A walk of Schedule, Compose and Bulk on the admin account found every Write
+with AI request hanging for 300 seconds or failing; the last AI result saved
+was Nov 17, 02:12 UTC. #815 (deployed 14:45 UTC) put a 40 s limit and a refund
+on the seven `/api/ai` routes, one model name in `lib/gemini.ts`, and a real
+Gemini request in `/api/admin/health`. That check showed the key is fine (it
+lists 27 Flash models) but `gemini-3.6-flash` never answers within 20 s.
+Google Cloud retired 3.6 Flash on Nov 19 and names 3.8 Flash, the stable Flash
+model on the Gemini API since Sept 2. The branch sets `GEMINI_MODEL` to
+`gemini-3.8-flash` (no call site sets a parameter 3.8 rejects), and the health
+check now asks every stable Flash model the key lists whenever the main one
+fails (`?try=a,b` names others). **After it deploys:** open
+`/api/admin/health` as admin (`gemini.ok` true, a reply of "OK"), then run one
+Write with AI in Compose. If 3.8 also fails, `alternatives` lists the models
+that answered: set `GEMINI_MODEL` to one of them. Also from #815, checked live:
+a reopened draft keeps its poll (the walk's test draft is deleted), and the
+Queue's Scheduled card stays 375 px wide on a phone (it was 801 px). Not
+checked: the red Failed section (the admin has no failure in 30 days) and
+Bulk's Save (it schedules real posts).
 
 **Nov 19:** #812 deployed at 02:30 UTC and Inngest was resynced (its API lists
 `settle-tiktok-publishes`). The 3 stuck TikTok rows were settled through the
 follow-up at 02:50 UTC: 2 published and mirrored into posts with their TikTok
-links, 1 in drafts, each with a notification. Still to see live: the first
-scheduled video after the deploy (Nov 19, 17:00 UTC; another at 23:00 UTC)
-going `publishing`, then `published`. #813 (merged, deployed 13:25 UTC) attacks where
+links, 1 in drafts, each with a notification. The first scheduled video after
+the deploy went out at 17:00 UTC and the follow-up settled it at 17:03:
+published, mirrored into posts, with a "Your TikTok video is live"
+notification. The 23:00 UTC one is still to see. #813 (merged, deployed 13:25 UTC) attacks where
 people stop: of 99 outside accounts that connected a platform, 7 ever
 published and 82 never tried; 62 connected TikTok only. In TikTok Studio, 16
 added a video and 10 never pressed Post. On a phone the tab names were hidden,

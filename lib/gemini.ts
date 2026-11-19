@@ -4,8 +4,20 @@ import { GoogleGenerativeAI, GoogleGenerativeAIAbortError, type ModelParams } fr
  * The Gemini model every AI feature uses, in one place. It used to be written
  * out at 25 call sites in 20 files, so a retired model meant editing all of
  * them (July 2026, PR #530). Change it here and nowhere else.
+ *
+ * gemini-3.8-flash since Nov 19, 2026. That week gemini-3.6-flash stopped
+ * answering: requests hung with no reply while the key still listed the model
+ * and Google's status page said all was well. Google Cloud retired 3.6 Flash
+ * on Nov 19, 2026 and names 3.8 Flash as the replacement; on the Gemini API,
+ * 3.8 Flash is the stable Flash model (GA since Sept 2) and requests for 3.7
+ * Flash are already routed to it. No call site sets temperature, topP, topK or
+ * a thinking setting, the parameters Google's 3.8 migration guide says to
+ * remove or change, so the swap needs nothing else.
+ *
+ * When this stops answering, /api/admin/health asks every stable Flash model
+ * the key can use and lists the ones that replied: pick one of those.
  */
-export const GEMINI_MODEL = 'gemini-3.6-flash'
+export const GEMINI_MODEL = 'gemini-3.8-flash'
 
 /**
  * How long a request a person is waiting on gives Gemini to answer. A normal
@@ -51,4 +63,14 @@ export function aiFailureMessage(err: unknown): string {
  */
 export function redactKeys(text: string): string {
   return text.replace(/AIza[0-9A-Za-z_-]{20,}/g, '[key removed]')
+}
+
+/**
+ * The stable text Flash models in a model list, e.g. gemini-3.8-flash or
+ * gemini-3.5-flash-lite: no previews, no aliases Google re-points
+ * (gemini-flash-latest), no image, speech or live variants. The admin health
+ * check asks these when GEMINI_MODEL fails, and GEMINI_MODEL is one of them.
+ */
+export function stableFlashModels(names: string[]): string[] {
+  return names.filter(n => /^gemini-\d+(\.\d+)?-flash(-lite)?$/.test(n))
 }
