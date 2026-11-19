@@ -23,7 +23,12 @@ import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { repairSentPost, sentPlatformIds } from '@/lib/publish/repair-sent'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
-import { getValidAccessToken } from '@/lib/tiktok-auth'
+import { getValidAccessToken, type TikTokAuth } from '@/lib/tiktok-auth'
+import {
+  FOLLOW_UP_DELAYS_MS, SWEEP_MIN_AGE_MS, NEVER_CONFIRMED,
+  fetchTiktokPublishStatus, recordTiktokPublishCheck, settledNotice, shouldGiveUp, sentAt, dueForSweep,
+  type PublishingRow, type SettledStatus,
+} from '@/lib/tiktok-publish-status'
 import { createNotification } from '@/lib/notify'
 import { sendScheduledTiktok, draftsNotice, stagedFilesToClean, isStagedVideoUrl, type TiktokSendOutcome, type StagedTiktokRow } from '@/lib/tiktok-scheduled'
 import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
@@ -2446,6 +2451,14 @@ export const postPerformanceAlerts = inngest.createFunction(
 //     Inngest Hobby plan's 50,000 monthly executions. The hourly cron stays as
 //     a backstop for a post whose event was lost; the claim below means the
 //     two can never both send the same video.
+//   - Nov 18, 2026: TikTok accepting a video is not TikTok publishing it. A
+//     direct post used to be recorded 'published' (mirrored into posts,
+//     counted for the first-post bonus and the streak) the moment TikTok
+//     accepted the upload, before it pulled and processed the file, so a video
+//     TikTok rejected afterwards still showed as live. Now the row stays
+//     'publishing' with its publish id, and settleTiktokPublishes (below)
+//     records what TikTok decides, mirrors a published video and tells the
+//     creator either way.
 
 export const publishScheduledTiktokPosts = inngest.createFunction(
   { id: 'publish-scheduled-tiktok-posts', concurrency: { limit: 3 } },
@@ -2468,7 +2481,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
       return data ?? []
     })
 
-    const counts = { published: 0, in_drafts: 0, failed: 0, skipped: 0 }
+    const counts = { sent: 0, in_drafts: 0, failed: 0, skipped: 0 }
 
     for (const post of due) {
       // Its own step, so a retry of anything below can never claim or send again.
@@ -2487,7 +2500,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
       })
       if (!claimed) { counts.skipped++; continue }
 
-      const outcome = await step.run(`send-tiktok-${post.id}`, async (): Promise<TiktokSendOutcome & { openId: string | null }> => {
+      const sendResult = await step.run(`send-tiktok-${post.id}`, async (): Promise<TiktokSendOutcome & { openId: string | null }> => {
         try {
           const auth = await getValidAccessToken(post.user_id)
           if (!auth.ok) return { kind: 'failed', code: auth.reason, message: auth.message, openId: null }
@@ -2502,24 +2515,28 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
         }
       })
 
+      // A run that straddled the Nov 18, 2026 deploy may replay a send that
+      // was memoized as { kind: 'published', postId }. That meant TikTok
+      // accepted the video, which is what 'sent' means now.
+      const legacy = sendResult as unknown as { kind: string; postId?: string }
+      const outcome: TiktokSendOutcome & { openId: string | null } = legacy.kind === 'published'
+        ? { kind: 'sent', publishId: String(legacy.postId ?? ''), openId: sendResult.openId }
+        : sendResult
+
       // Separate from the send: if a write here fails, Inngest retries only
       // this step, and TikTok is not asked a second time.
       await step.run(`record-tiktok-${post.id}`, async () => {
         const db = getSupabaseAdmin()
 
-        if (outcome.kind === 'published') {
+        if (outcome.kind === 'sent') {
+          // Accepted, not yet published. The row stays 'publishing' with the
+          // publish id, and settleTiktokPublishes records what TikTok decides.
           const { error } = await db
             .from('tiktok_posts')
-            .update({ status: 'published', tiktok_post_id: outcome.postId, tiktok_account_open_id: outcome.openId, error_message: null })
+            .update({ tiktok_post_id: outcome.publishId, tiktok_account_open_id: outcome.openId, error_message: null })
             .eq('id', post.id)
-          if (error) throw new Error(`[tiktok-scheduled] could not record published ${post.id}: ${error.message}`)
-          recordFunnel(db, post.user_id, 'tiktok_post_done', { mode: 'scheduled_fire', result: 'published' })
-          await syncTiktokPublishToPosts({
-            id:           post.id,
-            user_id:      post.user_id,
-            workspace_id: post.workspace_id ?? null,
-            post_caption: post.post_caption ?? null,
-          })
+          if (error) throw new Error(`[tiktok-scheduled] could not record the send of ${post.id}: ${error.message}`)
+          recordFunnel(db, post.user_id, 'tiktok_post_done', { mode: 'scheduled_fire', result: 'sent' })
           return
         }
 
@@ -2578,10 +2595,172 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
         })
       })
 
+      // Its own step, so a retry never sends the follow-up twice.
+      if (outcome.kind === 'sent' && outcome.publishId) {
+        await step.sendEvent(`follow-up-tiktok-${post.id}`, {
+          name: 'tiktok/uploaded',
+          data: { publishId: outcome.publishId, userId: post.user_id },
+        })
+      }
+
       counts[outcome.kind]++
     }
 
     return { ...counts, total: due.length }
+  }
+)
+
+// ── TikTok publish follow-up ──────────────────────────────────────────────────
+// Uploading a video is not publishing it (lib/tiktok-publish-status.ts). The
+// Studio asks TikTok for two minutes while the creator watches; this keeps
+// asking after they leave. tiktok/uploaded comes from every path that hands a
+// video to TikTok: confirm-upload (Post Now and Send to drafts), the scheduled
+// publisher above, and /api/tiktok/post. The run checks at FOLLOW_UP_DELAYS_MS,
+// stopping at the first settled answer. The daily cron is the backstop for a
+// lost event or a slow video: it checks every row still on 'publishing', and a
+// week after the video was sent marks one nobody could settle as failed
+// (NEVER_CONFIRMED), so nothing reads "Sending" forever.
+//
+// Whichever check moves a row off 'publishing' here notifies the creator. If
+// the Studio got there first, they saw it on screen and the row is skipped.
+//
+// Budget: each check is two steps (the sleep and the check), so usually two
+// per upload and at most eight, plus one step a day for the sweep.
+
+type TiktokPublishingRow = PublishingRow & {
+  status: string
+  tiktok_post_id: string
+  scheduled_at: string | null
+  created_at: string
+}
+type TiktokSettleResult = { settled: boolean; status: string; changed?: boolean; note?: string }
+
+const TIKTOK_PUBLISHING_COLUMNS = 'id, user_id, workspace_id, post_caption, status, tiktok_post_id, scheduled_at, created_at'
+
+async function notifyTiktokSettled(
+  db: ReturnType<typeof getSupabaseAdmin>,
+  row: PublishingRow,
+  outcome: SettledStatus | 'unconfirmed',
+  reason: string | null,
+): Promise<void> {
+  const notice = settledNotice(outcome, reason, row.post_caption)
+  await createNotification(db, {
+    userId:  row.user_id,
+    type:    notice.type,
+    title:   notice.title,
+    message: notice.message,
+    href:    '/tiktok/studio',
+    data:    { tiktok_post_id: row.id, outcome },
+  })
+}
+
+async function settleTiktokRow(
+  db: ReturnType<typeof getSupabaseAdmin>,
+  row: TiktokPublishingRow,
+  auth: TikTokAuth,
+  now: number,
+): Promise<TiktokSettleResult> {
+  if (auth.ok) {
+    const check = await fetchTiktokPublishStatus(row.tiktok_post_id, auth.token)
+    const result = await recordTiktokPublishCheck(db, row, check, auth.openId, syncTiktokPublishToPosts)
+    if (result.settled) {
+      if (result.changed && result.status !== 'publishing') {
+        await notifyTiktokSettled(db, row, result.status, result.reason)
+        // The Studio records this itself when it is the one watching; nobody
+        // was, so the funnel hears it from here.
+        if (result.status === 'failed') {
+          recordFunnel(db, row.user_id, 'tiktok_post_failed', {
+            mode: 'follow_up', stage: 'tiktok_processing', code: (result.reason ?? 'no_reason').slice(0, 60),
+          })
+        }
+      }
+      return { settled: true, status: result.status, changed: result.changed }
+    }
+  }
+
+  if (shouldGiveUp(sentAt(row), now)) {
+    const result = await recordTiktokPublishCheck(
+      db, row, { kind: 'failed', reason: NEVER_CONFIRMED }, null, syncTiktokPublishToPosts,
+    )
+    if (result.changed) {
+      await notifyTiktokSettled(db, row, 'unconfirmed', null)
+      recordFunnel(db, row.user_id, 'tiktok_post_failed', { mode: 'follow_up', stage: 'tiktok_processing', code: 'never_confirmed' })
+    }
+    return { settled: result.settled, status: result.status, changed: result.changed, note: 'gave up after a week' }
+  }
+
+  return { settled: false, status: 'publishing', note: auth.ok ? 'still processing' : auth.reason }
+}
+
+/** One upload, looked up fresh each time: the Studio may have settled it meanwhile. */
+async function settleTiktokUpload(publishId: string, userId: string): Promise<TiktokSettleResult> {
+  const db = getSupabaseAdmin()
+  const { data: row, error } = await db
+    .from('tiktok_posts')
+    .select(TIKTOK_PUBLISHING_COLUMNS)
+    .eq('tiktok_post_id', publishId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  // Nothing has been written yet, so letting Inngest retry the read is safe.
+  if (error) throw new Error(`[tiktok-settle] could not read upload ${publishId}: ${error.message}`)
+  if (!row) return { settled: true, status: 'missing' }
+  if (row.status !== 'publishing') return { settled: true, status: row.status }
+  return settleTiktokRow(db, row as TiktokPublishingRow, await getValidAccessToken(userId), Date.now())
+}
+
+/** Every row still on 'publishing' that the follow-up should have settled by now. */
+async function sweepStaleTiktokPublishes() {
+  const db = getSupabaseAdmin()
+  const now = Date.now()
+  const { data: rows, error } = await db
+    .from('tiktok_posts')
+    .select(TIKTOK_PUBLISHING_COLUMNS)
+    .eq('status', 'publishing')
+    // A scheduled post mid-send has no publish id yet; the scheduled publisher owns it.
+    .not('tiktok_post_id', 'is', null)
+    .lte('created_at', new Date(now - SWEEP_MIN_AGE_MS).toISOString())
+    .order('created_at', { ascending: true })
+    .limit(20)
+  if (error) throw new Error(`[tiktok-settle] could not read rows still publishing: ${error.message}`)
+
+  const tokens = new Map<string, TikTokAuth>()
+  const counts = { checked: 0, settled: 0, gaveUp: 0, stillOpen: 0 }
+  for (const row of (rows ?? []) as TiktokPublishingRow[]) {
+    // A scheduled post made days ago may have gone to TikTok a minute ago.
+    if (!dueForSweep(sentAt(row), now)) continue
+    let auth = tokens.get(row.user_id)
+    if (!auth) {
+      auth = await getValidAccessToken(row.user_id)
+      tokens.set(row.user_id, auth)
+    }
+    const result = await settleTiktokRow(db, row, auth, now)
+    counts.checked++
+    if (result.note === 'gave up after a week') counts.gaveUp++
+    else if (result.settled) counts.settled++
+    else counts.stillOpen++
+  }
+  return counts
+}
+
+export const settleTiktokPublishes = inngest.createFunction(
+  { id: 'settle-tiktok-publishes', concurrency: { limit: 3 } },
+  [{ event: 'tiktok/uploaded' }, { cron: '15 8 * * *' }],
+  async ({ event, step }) => {
+    if (event.name === 'tiktok/uploaded') {
+      const data = (event.data ?? {}) as { publishId?: unknown; userId?: unknown }
+      const publishId = typeof data.publishId === 'string' ? data.publishId : ''
+      const userId    = typeof data.userId === 'string' ? data.userId : ''
+      if (!publishId || !userId) return { skipped: 'missing publishId or userId' }
+
+      for (let i = 0; i < FOLLOW_UP_DELAYS_MS.length; i++) {
+        await step.sleep(`wait-${i + 1}`, FOLLOW_UP_DELAYS_MS[i])
+        const result = await step.run(`check-${i + 1}`, () => settleTiktokUpload(publishId, userId))
+        if (result.settled) return result
+      }
+      return { settled: false, note: 'still processing; the daily sweep keeps checking' }
+    }
+
+    return step.run('sweep-tiktok-publishing', () => sweepStaleTiktokPublishes())
   }
 )
 

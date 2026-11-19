@@ -5,7 +5,6 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
-import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
 import { buildTikTokCaption } from '@/lib/tiktok-studio'
 import { inngest } from '@/lib/inngest'
 
@@ -243,35 +242,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: friendlyMsg, code: errCode }, { status: 502 })
   }
 
-  const publishId   = tikData?.data?.publish_id
-  const tiktokPostId = tikData?.data?.publicaly_available_post_id?.[0] || publishId
+  const publishId: string = tikData?.data?.publish_id ?? ''
 
-  await getSupabaseAdmin()
+  // TikTok accepted the video; it has not published it. It still has to pull
+  // the file and process it, and can reject it then. Until Nov 18, 2026 this
+  // wrote 'published' (and mirrored the post) right here. The row now stays
+  // 'publishing' with its publish id, and settleTiktokPublishes in
+  // lib/inngest.ts records what TikTok decides and tells the creator.
+  const { error: sentErr } = await getSupabaseAdmin()
     .from('tiktok_posts')
-    .update({
-      status:               'published',
-      tiktok_post_id:       tiktokPostId,
-      tiktok_account_open_id: auth.openId,
-    })
+    .update({ tiktok_post_id: publishId, tiktok_account_open_id: auth.openId })
     .eq('id', tikPost.id)
+  if (sentErr) console.error('[tiktok/post] could not record the publish id:', sentErr.message)
 
-  void syncTiktokPublishToPosts({
-    id:           tikPost.id,
-    user_id:      user.id,
-    workspace_id: workspace_id || null,
-    post_caption: fullCaption,
-  })
+  if (!sentErr && publishId) {
+    try {
+      await inngest.send({ name: 'tiktok/uploaded', data: { publishId, userId: user.id } })
+    } catch (err) {
+      console.warn('[tiktok/post] follow-up event failed; the daily sweep will settle it:', err)
+    }
+  }
 
   // Increment quota usage
-  await getSupabaseAdmin()
+  const { error: quotaErr } = await getSupabaseAdmin()
     .from('workspaces')
     .update({ tiktok_videos_this_month: videosThisMonth + 1 })
     .eq('owner_id', user.id)
     .eq('is_personal', true)
+  if (quotaErr) console.warn('[tiktok/post] quota increment failed:', quotaErr.message)
 
   return NextResponse.json({
     success:        true,
-    tiktok_post_id: tiktokPostId,
+    tiktok_post_id: publishId,
     publish_id:     publishId,
   })
 }

@@ -73,8 +73,8 @@ export const FUNNEL_EVENTS = [
   'tiktok_video_rejected',  // { reason: format | too_large | too_short | too_long }
   'tiktok_video_added',     // { seconds, mb } a usable video is loaded
   'tiktok_post_attempted',  // { mode: now | schedule | drafts }
-  'tiktok_post_done',       // { mode } handed to TikTok, or scheduled; server: { mode: scheduled_fire, result }
-  'tiktok_post_failed',     // { mode, stage, code }
+  'tiktok_post_done',       // { mode } handed to TikTok, or scheduled; server: { mode: scheduled_fire, result: sent | in_drafts }
+  'tiktok_post_failed',     // { mode, stage, code }; server: { mode: follow_up, stage: tiktok_processing, code } when TikTok rejects a video nobody was watching
 
   // ── Money ────────────────────────────────────────────────────────────────
   'upgrade_viewed',       // reached /pricing or the plan tab

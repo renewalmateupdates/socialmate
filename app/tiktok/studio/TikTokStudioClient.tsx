@@ -15,6 +15,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { track } from '@/lib/analytics'
 import { tiktokChunkRanges } from '@/lib/tiktok-chunks'
+import { STUDIO_POLL_MS } from '@/lib/tiktok-publish-status'
 import { defaultCoverTime, fullTikTokCaption, tagsToAppend } from '@/lib/tiktok-studio'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -1423,8 +1424,10 @@ export default function TikTokStudioClient() {
         const started = Date.now()
         const poll = async (): Promise<void> => {
           // Two minutes is well past normal processing. Beyond that, saying we
-          // do not know yet is honest; claiming success is not.
-          if (Date.now() - started > 120_000) { setPublishState('unknown'); return }
+          // do not know yet is honest; claiming success is not. The server
+          // keeps checking from here (settleTiktokPublishes) and notifies the
+          // creator when TikTok answers.
+          if (Date.now() - started > STUDIO_POLL_MS) { setPublishState('unknown'); return }
           try {
             const r = await fetch('/api/tiktok/publish-status', {
               method: 'POST',
@@ -1594,7 +1597,7 @@ export default function TikTokStudioClient() {
                       ? `TikTok gave this reason: ${publishReason}`
                       : 'TikTok rejected it without giving a reason. Common causes are length, an unsupported format, or copyrighted audio.')
                 : publishState === 'unknown'
-                  ? 'TikTok has not finished processing yet. It will usually still appear. Check your TikTok notifications, or the post in your queue.'
+                  ? "TikTok has not finished processing yet. It will usually still appear. You can leave this page: we'll keep checking and send you a notification here when TikTok answers."
                   : 'The upload finished.'
               return (
                 <>

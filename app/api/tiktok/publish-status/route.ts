@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
 import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
+import { fetchTiktokPublishStatus, recordTiktokPublishCheck } from '@/lib/tiktok-publish-status'
 
 /**
  * Did TikTok actually publish it?
@@ -20,15 +21,12 @@ import { syncTiktokPublishToPosts } from '@/lib/tiktok-post-sync'
  * length, format, copyrighted audio or anything else, the creator was never
  * told and neither were we. The row stayed 'publishing' forever.
  *
+ * The Studio polls this for two minutes while the creator watches. The check
+ * and the write live in lib/tiktok-publish-status.ts, shared with the Inngest
+ * follow-up that keeps checking after they leave (settleTiktokPublishes).
+ *
  * POST { publish_id } — checks once, writes the outcome through, returns it.
  */
-
-// TikTok's documented terminal and in-flight states.
-const TERMINAL_OK   = 'PUBLISH_COMPLETE'
-const TERMINAL_FAIL = 'FAILED'
-// For an inbox upload this is the finish line, not a staging step: the video is
-// sitting in the creator's TikTok drafts waiting for them to open the app.
-const TERMINAL_INBOX = 'SEND_TO_USER_INBOX'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -64,7 +62,8 @@ export async function POST(request: NextRequest) {
   }
   if (!row) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
 
-  // Already settled — no reason to ask TikTok again.
+  // Already settled (by an earlier poll or by the follow-up job): no reason to
+  // ask TikTok again.
   if (row.status === 'published' || row.status === 'failed' || row.status === 'in_drafts') {
     return NextResponse.json({ status: row.status, settled: true })
   }
@@ -72,92 +71,39 @@ export async function POST(request: NextRequest) {
   const auth = await getValidAccessToken(user.id)
   if (!auth.ok) return NextResponse.json({ error: auth.message }, { status: 400 })
 
-  const res = await fetch('https://open.tiktokapis.com/v2/post/publish/status/fetch/', {
-    method: 'POST',
-    headers: {
-      Authorization:  `Bearer ${auth.token}`,
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({ publish_id }),
-  })
+  const check = await fetchTiktokPublishStatus(publish_id, auth.token)
 
-  const payload = await res.json().catch(() => null)
-  if (!res.ok || !payload) {
-    console.warn('[tiktok/publish-status] fetch failed:', res.status)
+  if (check.kind === 'unchecked') {
+    console.warn('[tiktok/publish-status] fetch failed:', check.httpStatus)
     // Deliberately does not mark the post failed. A status check that could not
     // run says nothing about whether the video published.
     return NextResponse.json({ status: row.status, settled: false, checked: false }, { status: 200 })
   }
 
-  const tikTokStatus: string | undefined = payload?.data?.status
-  const failReason:  string | undefined = payload?.data?.fail_reason
-  const publiclyAvailable: string[] | undefined = payload?.data?.publicaly_available_post_id
-    ?? payload?.data?.publicly_available_post_id
-
-  // Each write is checked. tiktok_posts.status carries a CHECK constraint, and
-  // an unlisted value is rejected with 23514 — which, discarded, produced a
-  // route that told the client the post had settled while the row stayed on
-  // 'publishing' forever. That is the same shape as the bug this endpoint was
-  // written to fix, reintroduced one layer up.
-  if (tikTokStatus === TERMINAL_OK) {
-    const { error: e } = await getSupabaseAdmin()
-      .from('tiktok_posts')
-      .update({
-        status: 'published',
-        error_message: null,
-        // TikTok returns the real post id here once it exists. Keep it — it is
-        // the only link between our row and the video on their side.
-        tiktok_account_open_id: auth.openId,
-        video_url: Array.isArray(publiclyAvailable) && publiclyAvailable.length
-          ? `https://www.tiktok.com/@/video/${publiclyAvailable[0]}`
-          : undefined,
-      })
-      .eq('id', row.id)
-    if (e) console.error('[tiktok/publish-status] could not record published:', e.message)
-    if (!e) {
-      void syncTiktokPublishToPosts({
-        id:           row.id,
-        user_id:      user.id,
-        workspace_id: row.workspace_id ?? null,
-        post_caption: row.post_caption ?? null,
-      })
-    }
-    return NextResponse.json({ status: 'published', settled: true, recorded: !e })
-  }
-
-  if (tikTokStatus === TERMINAL_FAIL) {
-    const { error: e } = await getSupabaseAdmin()
-      .from('tiktok_posts')
-      .update({
-        status: 'failed',
-        error_message: failReason || 'TikTok rejected the video without giving a reason.',
-      })
-      .eq('id', row.id)
-    if (e) console.error('[tiktok/publish-status] could not record failure:', e.message)
+  // Still processing (PROCESSING_UPLOAD, PROCESSING_DOWNLOAD).
+  if (check.kind === 'processing') {
     return NextResponse.json({
-      status: 'failed',
-      settled: true,
-      reason: failReason || null,
-      recorded: !e,
+      status: 'publishing',
+      settled: false,
+      checked: true,
+      tiktokStatus: check.tiktokStatus,
     })
   }
 
-  if (tikTokStatus === TERMINAL_INBOX) {
-    const { error: e } = await getSupabaseAdmin()
-      .from('tiktok_posts')
-      .update({ status: 'in_drafts', error_message: null })
-      .eq('id', row.id)
-    if (e) console.error('[tiktok/publish-status] could not record in_drafts:', e.message)
-    // Reported to the creator either way: the video really is in their drafts,
-    // whether or not our own bookkeeping accepted the value.
-    return NextResponse.json({ status: 'in_drafts', settled: true, recorded: !e })
-  }
+  const result = await recordTiktokPublishCheck(
+    getSupabaseAdmin(),
+    { id: row.id, user_id: user.id, workspace_id: row.workspace_id ?? null, post_caption: row.post_caption ?? null },
+    check,
+    auth.openId,
+    syncTiktokPublishToPosts,
+  )
 
-  // Still processing (PROCESSING_UPLOAD, PROCESSING_DOWNLOAD).
+  // Reported to the creator either way: TikTok's answer stands even if our own
+  // bookkeeping refused the write (recorded: false).
   return NextResponse.json({
-    status: 'publishing',
-    settled: false,
-    checked: true,
-    tiktokStatus: tikTokStatus ?? null,
+    status: result.status,
+    settled: true,
+    recorded: result.recorded,
+    ...(result.status === 'failed' ? { reason: result.reason } : {}),
   })
 }
