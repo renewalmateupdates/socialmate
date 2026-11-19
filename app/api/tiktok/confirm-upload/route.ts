@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
+import { inngest } from '@/lib/inngest'
 
 const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
   free:   20,
@@ -132,6 +133,18 @@ export async function POST(request: NextRequest) {
   // studio can never say whether TikTok accepted it. Say so.
   if (insertError) {
     console.error('[tiktok/confirm-upload] could not record the post:', insertError.message)
+  }
+
+  // The Studio asks TikTok whether the video published for two minutes, and
+  // only while the creator keeps the page open. This keeps asking after they
+  // leave (settleTiktokPublishes in lib/inngest.ts). Until Nov 18, 2026 nothing
+  // did, and a creator who closed the tab left the post on "Sending" for good.
+  if (!insertError && !scheduled_at) {
+    try {
+      await inngest.send({ name: 'tiktok/uploaded', data: { publishId: publish_id, userId: user.id } })
+    } catch (err) {
+      console.warn('[tiktok/confirm-upload] follow-up event failed; the daily sweep will settle it:', err)
+    }
   }
 
   const { error: quotaError } = await getSupabaseAdmin()
