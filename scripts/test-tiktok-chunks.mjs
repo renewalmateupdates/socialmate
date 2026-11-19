@@ -18,15 +18,22 @@ const { outputText } = ts.transpileModule(readFileSync(join(root, 'lib/tiktok-ch
 })
 const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
-const { tiktokChunkPlan, tiktokChunkRanges } = mod.exports
+const { tiktokChunkPlan, tiktokChunkRanges, TIKTOK_PIECES_FROM } = mod.exports
 
 const MB = 1_000_000
 
-test('a video up to 64 MB goes up as one piece, as before', () => {
-  for (const size of [4_194_304, 20 * MB, 64 * MB]) {
+test('a video under 20 MB goes up as one piece', () => {
+  for (const size of [4_194_304, 7_200_000, TIKTOK_PIECES_FROM - 1]) {
     assert.deepEqual(tiktokChunkPlan(size), { chunk_size: size, total_chunk_count: 1 })
     assert.deepEqual(tiktokChunkRanges(size, tiktokChunkPlan(size)), [{ start: 0, end: size - 1 }])
   }
+})
+
+test('from 20 MB a video goes in 10 MB pieces, so a dropped connection costs one piece (Nov 19, 2026)', () => {
+  assert.deepEqual(tiktokChunkPlan(20 * MB), { chunk_size: 10 * MB, total_chunk_count: 2 })
+  assert.deepEqual(tiktokChunkPlan(43_200_000), { chunk_size: 10 * MB, total_chunk_count: 4 })
+  // 64 MB used to be one piece; TikTok allows either.
+  assert.deepEqual(tiktokChunkPlan(64 * MB), { chunk_size: 10 * MB, total_chunk_count: 6 })
 })
 
 test("TikTok's own example: 50,000,123 bytes in 10,000,000-byte pieces is 5 pieces", () => {
@@ -35,8 +42,8 @@ test("TikTok's own example: 50,000,123 bytes in 10,000,000-byte pieces is 5 piec
   assert.deepEqual(ranges.at(-1), { start: 40_000_000, end: 50_000_122 })
 })
 
-test('any size up to the 500 MB Studio limit splits within TikTok rules', () => {
-  for (let size = 64 * MB + 1; size <= 500 * 1024 * 1024; size += 7_777_777) {
+test('any size from 20 MB to the 500 MB Studio limit splits within TikTok rules', () => {
+  for (let size = 20 * MB; size <= 500 * 1024 * 1024; size += 7_777_777) {
     const plan = tiktokChunkPlan(size)
     const ranges = tiktokChunkRanges(size, plan)
     assert.equal(ranges.length, plan.total_chunk_count)

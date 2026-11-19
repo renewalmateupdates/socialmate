@@ -367,7 +367,7 @@ const NEW_EVENTS_SINCE = 'Sep 24, 2026'
 // Where TikTok-only users stop. Most people who connect anything connect only TikTok.
 const TIKTOK_EVENTS = [
   'tiktok_studio_opened', 'tiktok_video_rejected', 'tiktok_video_added',
-  'tiktok_post_attempted', 'tiktok_post_done', 'tiktok_post_failed',
+  'tiktok_post_attempted', 'tiktok_post_blocked', 'tiktok_post_done', 'tiktok_post_failed',
 ]
 const TIKTOK_EVENTS_SINCE = 'Oct 15, 2026'
 

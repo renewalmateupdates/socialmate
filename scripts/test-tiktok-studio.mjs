@@ -26,7 +26,7 @@ const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
 const {
   TIKTOK_CAPTION_MAX, captionHashtags, tagsToAppend, fullTikTokCaption, buildTikTokCaption,
-  frameLight, isDarkFrame, defaultCoverTime,
+  frameLight, isDarkFrame, defaultCoverTime, postBlocker, cannotPostDirect,
 } = mod.exports
 
 // The Nov 11 promo caption, hashtags typed straight into it.
@@ -106,4 +106,44 @@ test('the default cover is the first lit sampled frame', () => {
   assert.equal(defaultCoverTime([{ time: 0.9, light: dark }]), null)
   assert.equal(defaultCoverTime([{ time: 0.9 }, { time: 2.8 }]), null)
   assert.equal(defaultCoverTime([]), null)
+})
+
+// ── What still blocks a post (Nov 19, 2026) ─────────────────────────────────
+
+const READY = {
+  mode: 'now', privacyLevel: 'PUBLIC_TO_EVERYONE', privacyOptionCount: 3,
+  commercial: false, yourBrand: false, brandedContent: false, scheduledAt: '',
+}
+
+test('a direct post needs an audience picked: TikTok forbids a default', () => {
+  assert.equal(postBlocker(READY), null)
+  assert.equal(postBlocker({ ...READY, privacyLevel: '' }), 'privacy')
+  assert.equal(postBlocker({ ...READY, mode: 'schedule', privacyLevel: '', scheduledAt: '2026-11-20T12:00' }), 'privacy')
+})
+
+test('disclosure switched on needs a box ticked, and branded content cannot be private', () => {
+  assert.equal(postBlocker({ ...READY, commercial: true }), 'disclosure')
+  assert.equal(postBlocker({ ...READY, commercial: true, yourBrand: true }), null)
+  assert.equal(postBlocker({ ...READY, commercial: true, brandedContent: true, privacyLevel: 'SELF_ONLY' }), 'branded_private')
+  // Disclosure is reported first, the way TikTok's guidelines order it.
+  assert.equal(postBlocker({ ...READY, commercial: true, privacyLevel: '' }), 'disclosure')
+})
+
+test('a scheduled post needs a time', () => {
+  assert.equal(postBlocker({ ...READY, mode: 'schedule' }), 'schedule')
+  assert.equal(postBlocker({ ...READY, mode: 'schedule', scheduledAt: '2026-11-20T12:00' }), null)
+})
+
+test("drafts need none of it: TikTok's inbox upload takes no audience or disclosure", () => {
+  const draft = { ...READY, mode: 'drafts', privacyLevel: '', commercial: true }
+  assert.equal(postBlocker(draft), null)
+  assert.equal(postBlocker({ ...draft, brandedContent: true, privacyLevel: 'SELF_ONLY' }), null)
+  assert.equal(cannotPostDirect('drafts', 0), false)
+})
+
+test('no audience on offer at all is not something the creator can pick: it is reported apart', () => {
+  assert.equal(postBlocker({ ...READY, privacyLevel: '', privacyOptionCount: 0 }), null)
+  assert.equal(cannotPostDirect('now', 0), true)
+  assert.equal(cannotPostDirect('schedule', 0), true)
+  assert.equal(cannotPostDirect('now', 2), false)
 })

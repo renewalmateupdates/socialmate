@@ -13,13 +13,23 @@
 export const TIKTOK_SINGLE_PIECE_MAX = 64_000_000
 export const TIKTOK_CHUNK_BYTES = 10_000_000
 
+/**
+ * From this size up a video goes in 10 MB pieces, although TikTok would take
+ * anything up to 64 MB whole. A piece is the unit TikTok Studio resends when a
+ * phone's connection drops (lib/tiktok-upload.ts), so a smaller piece means a
+ * dropped connection costs seconds instead of the whole video. Multi-piece
+ * uploads have worked in production since Nov 9, 2026 (68 to 182 MB videos).
+ * Below this a video is one piece of under 20 MB.
+ */
+export const TIKTOK_PIECES_FROM = 20_000_000
+
 export interface TiktokChunkPlan {
   chunk_size: number
   total_chunk_count: number
 }
 
 export function tiktokChunkPlan(videoSize: number): TiktokChunkPlan {
-  if (videoSize <= TIKTOK_SINGLE_PIECE_MAX) return { chunk_size: videoSize, total_chunk_count: 1 }
+  if (videoSize < TIKTOK_PIECES_FROM) return { chunk_size: videoSize, total_chunk_count: 1 }
   return { chunk_size: TIKTOK_CHUNK_BYTES, total_chunk_count: Math.floor(videoSize / TIKTOK_CHUNK_BYTES) }
 }
 

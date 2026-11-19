@@ -96,3 +96,40 @@ export function defaultCoverTime(frames: { time: number; light?: FrameLight }[])
   }
   return null
 }
+
+/** A choice the creator still has to make before TikTok Studio can post. */
+export type PostBlocker = 'disclosure' | 'branded_private' | 'privacy' | 'schedule'
+
+/**
+ * What still has to be chosen before this can post, or null when nothing is.
+ *
+ * A direct or scheduled post needs an audience picked by the creator (TikTok's
+ * guidelines forbid a default) and a complete disclosure. A draft does not:
+ * it goes through TikTok's inbox upload, which takes no post_info, and the
+ * creator sets both in the TikTok app. Until Nov 19, 2026 drafts were held to
+ * the same rules, and the reason only ever showed as a hover tooltip, which a
+ * phone never shows: 4 of the 8 phone users who added a video in the 45 days
+ * to Nov 18 never pressed Post.
+ */
+export function postBlocker(s: {
+  mode: 'now' | 'schedule' | 'drafts'
+  privacyLevel: string
+  /** How many audiences TikTok offers this account; none means it cannot post. */
+  privacyOptionCount: number
+  commercial: boolean
+  yourBrand: boolean
+  brandedContent: boolean
+  scheduledAt: string
+}): PostBlocker | null {
+  const direct = s.mode !== 'drafts'
+  if (direct && s.commercial && !s.yourBrand && !s.brandedContent) return 'disclosure'
+  if (direct && s.brandedContent && s.privacyLevel === 'SELF_ONLY') return 'branded_private'
+  if (direct && !s.privacyLevel && s.privacyOptionCount > 0) return 'privacy'
+  if (s.mode === 'schedule' && !s.scheduledAt) return 'schedule'
+  return null
+}
+
+/** TikTok offered no audience at all, so nothing the creator picks here lets a direct post go out. */
+export function cannotPostDirect(mode: 'now' | 'schedule' | 'drafts', privacyOptionCount: number): boolean {
+  return mode !== 'drafts' && privacyOptionCount === 0
+}
