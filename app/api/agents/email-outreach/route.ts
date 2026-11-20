@@ -3,10 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from '@/lib/usage'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiLongModel } from '@/lib/gemini'
 
 const CREDIT_COST = 5
 
@@ -93,8 +92,7 @@ Return ONLY valid JSON:
   "body": "the full email body (use \\n for line breaks)"
 }`
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+    const model = geminiLongModel(apiKey)
 
     // Credits are already spent, so any failure past this point refunds them
     // rather than charging for nothing.

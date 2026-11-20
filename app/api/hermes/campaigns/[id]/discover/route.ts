@@ -4,10 +4,9 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getHermesAccess, HERMES_LIMITS, discoverRunsThisMonth, prospectsAddedThisMonth } from '@/lib/hermes-access'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage } from '@/lib/hermes-send'
 import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiLongModel } from '@/lib/gemini'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -58,10 +57,9 @@ Instructions:
 `
 
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    const model = geminiLongModel(process.env.GOOGLE_GENERATIVE_AI_API_KEY
       || process.env.GEMINI_API_KEY
       || process.env.GOOGLE_AI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
     const result = await model.generateContent(prompt)
     const raw = result.response.text().trim()
     const json = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()

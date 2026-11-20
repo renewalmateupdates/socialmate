@@ -23,7 +23,6 @@
 // caller passes `enqueue` to queue posts with the scheduler.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { SOMA_COSTS } from './soma-costs'
 import { SOMA_MODE_LIMITS, capSchedule, effectiveSomaMode, isSomaPlatform, type SomaMode, type PlatformSchedule } from './soma-mode'
 import { nextRunCount } from './soma-runs'
@@ -31,9 +30,8 @@ import { planGapSlots, utcDayKey, windowDayKeys, type PlannedSlot } from './soma
 import { fetchUnsplashImage, usedPhotoKeys } from './soma-images'
 import { MAX_DOC_CHARS, fetchDocText } from './soma-fetch-doc'
 import { cleanExamples, houseRules } from './soma-voice'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiModel } from '@/lib/gemini'
 
-export const SOMA_MODEL = GEMINI_MODEL
 export const GENERATE_COST = SOMA_COSTS.generate_week
 /** Reading a new master doc version, pasted or pulled from a saved link. */
 export const INGEST_COST = SOMA_COSTS.ingest_weekly
@@ -512,7 +510,7 @@ export async function latestInsights(
 
   let insights: SomaInsights
   try {
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: SOMA_MODEL }, { timeout: GEMINI_TIMEOUT_MS })
+    const model = geminiModel(apiKey, {}, GEMINI_TIMEOUT_MS, GEMINI_TIMEOUT_MS)
     insights = parseGeminiJson((await model.generateContent(prompt)).response.text()) as SomaInsights
   } catch (err) {
     console.warn(`[SOMA] reading the master doc failed for project ${project.id}:`, errorMessage(err, 'unknown error'))
@@ -687,8 +685,10 @@ ${insightContext(project, insights)}${campaignContext(project)}${videoContext(pr
 Today's date is ${utcDayKey(now)}. Do not put dates or times in the posts: publish times are assigned separately.
 Never state a price, plan limit or feature count unless it appears in the insights or project description above.`
 
-  // One hung request must not eat the function's whole time limit.
-  const model = new GoogleGenerativeAI(opts.apiKey).getGenerativeModel({ model: SOMA_MODEL }, { timeout: GEMINI_TIMEOUT_MS })
+  // One hung request must not eat the function's whole time limit. Each call
+  // writes about 14 posts, so a slow model is not cut off for the next one;
+  // only a quick failure (503, 429, 404) moves down GEMINI_MODELS.
+  const model = geminiModel(opts.apiKey, {}, GEMINI_TIMEOUT_MS, GEMINI_TIMEOUT_MS)
   const overBudget = () => Date.now() - started > budgetMs
   const usedImages = usedPhotoKeys(pictured ?? [])
   const seen = new Set<string>()

@@ -5,11 +5,9 @@
 // message had, add none, and fit the shortest platform the campaign posts to.
 // A message whose rewrites all fail the check rotates as written.
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { VARIANTS_PER_MESSAGE, acceptRewrite, charLimitFor, type CampaignMessage } from './campaigns'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiModel } from '@/lib/gemini'
 
-const MODEL = GEMINI_MODEL
 const TIMEOUT_MS = 30_000
 
 export type VariantResult =
@@ -38,7 +36,8 @@ Return ONLY valid JSON in this shape:
 
   let parsed: unknown
   try {
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: MODEL }, { timeout: TIMEOUT_MS })
+    // One call writes every message's rewrites, so only a quick failure moves to the next model.
+    const model = geminiModel(apiKey, {}, TIMEOUT_MS, TIMEOUT_MS)
     const text = (await model.generateContent(prompt)).response.text()
     parsed = JSON.parse(text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim())
   } catch (err) {

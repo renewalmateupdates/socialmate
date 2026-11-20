@@ -27,7 +27,10 @@ const { outputText } = ts.transpileModule(read('lib/gemini.ts'), {
 })
 const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
-const { GEMINI_MODEL, GEMINI_TIMEOUT_MS, geminiModel, isGeminiTimeout, aiFailureMessage, redactKeys, stableFlashModels } = mod.exports
+const {
+  GEMINI_MODEL, GEMINI_MODELS, GEMINI_TIMEOUT_MS, GEMINI_ATTEMPT_MS, GEMINI_LONG_MS, GEMINI_LONG_ATTEMPT_MS,
+  geminiModel, shouldTryNextModel, describeGeminiError, isGeminiTimeout, aiFailureMessage, redactKeys, stableFlashModels,
+} = mod.exports
 const { GoogleGenerativeAIAbortError, GoogleGenerativeAIFetchError } = require('@google/generative-ai')
 
 function walk(dir, out = []) {
@@ -68,6 +71,106 @@ test('timeouts are told apart from other Gemini failures', () => {
 test('a 40 second limit leaves the 60 second routes time to refund', () => {
   assert.equal(GEMINI_TIMEOUT_MS, 40_000)
   assert.match(GEMINI_MODEL, /^gemini-/)
+  // The first two models' shares leave the last one time to answer.
+  assert.ok(GEMINI_ATTEMPT_MS * 2 < GEMINI_TIMEOUT_MS - 5_000)
+  // Longer answers still finish inside the 60 second Inngest and SOMA ingest functions.
+  assert.ok(GEMINI_LONG_MS <= 45_000 && GEMINI_LONG_ATTEMPT_MS < GEMINI_LONG_MS)
+})
+
+// A fake Gemini API: each model answers as `behave[model]` says ('ok', 'hang',
+// { delay: ms } before answering, or an HTTP error status; 503 by default), and
+// every model asked is recorded in order.
+function fakeGemini(behave) {
+  const asked = []
+  const realFetch = globalThis.fetch
+  globalThis.fetch = (url, init) => {
+    const model = String(url).match(/models\/([^:]+):generateContent/)?.[1]
+    asked.push(model)
+    const how = behave[model] ?? 503
+    const ok = () => new Response(JSON.stringify({
+      candidates: [{ content: { role: 'model', parts: [{ text: `hello from ${model}` }] }, finishReason: 'STOP', index: 0 }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    if (how === 'ok') return Promise.resolve(ok())
+    if (typeof how === 'object') {
+      return new Promise((resolve, reject) => {
+        const t = setTimeout(() => resolve(ok()), how.delay)
+        init?.signal?.addEventListener('abort', () => { clearTimeout(t); reject(Object.assign(new Error('This operation was aborted'), { name: 'AbortError' })) })
+      })
+    }
+    if (how === 'hang') {
+      return new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(Object.assign(new Error('This operation was aborted'), { name: 'AbortError' })))
+      })
+    }
+    const status = how
+    const body = { error: { code: status, status: status === 503 ? 'UNAVAILABLE' : 'PERMISSION_DENIED', message: status === 503 ? 'This model is currently experiencing high demand.' : 'Your project has been denied access.' } }
+    return Promise.resolve(new Response(JSON.stringify(body), { status, statusText: status === 503 ? 'Service Unavailable' : 'Forbidden', headers: { 'Content-Type': 'application/json' } }))
+  }
+  return { asked, restore: () => { globalThis.fetch = realFetch } }
+}
+
+test('a busy model hands the request to the next one, as on the evening of Nov 19', async () => {
+  const [first, second] = GEMINI_MODELS
+  const fake = fakeGemini({ [first]: 503, [second]: 'ok' })
+  try {
+    const result = await geminiModel('test-key').generateContent('hi')
+    assert.equal(result.response.text(), `hello from ${second}`)
+    assert.deepEqual(fake.asked, [first, second])
+  } finally {
+    fake.restore()
+  }
+})
+
+test('a model that says nothing within its share of the time hands over, as 3.6 Flash did all day Nov 19', async () => {
+  const [first, second] = GEMINI_MODELS
+  const fake = fakeGemini({ [first]: 'hang', [second]: 'ok' })
+  try {
+    const started = Date.now()
+    const result = await geminiModel('test-key', {}, 3_000, 200).generateContent('hi')
+    assert.equal(result.response.text(), `hello from ${second}`)
+    assert.ok(Date.now() - started < 1_500, 'it moved on after the first model\'s share, not the whole limit')
+    assert.deepEqual(fake.asked, [first, second])
+  } finally {
+    fake.restore()
+  }
+})
+
+test('a slow answer inside the model\'s share is kept, not thrown away for the next model', async () => {
+  const [first] = GEMINI_MODELS
+  const fake = fakeGemini({ [first]: { delay: 150 } })
+  try {
+    const result = await geminiModel('test-key', {}, 3_000, 1_000).generateContent('hi')
+    assert.equal(result.response.text(), `hello from ${first}`)
+    assert.deepEqual(fake.asked, [first])
+  } finally {
+    fake.restore()
+  }
+})
+
+test('a refused key is not asked of every model, and every model failing still reaches the refund', async () => {
+  const refused = fakeGemini({ [GEMINI_MODELS[0]]: 403 })
+  try {
+    const err = await geminiModel('test-key').generateContent('hi').then(() => null, e => e)
+    assert.equal(err?.status, 403)
+    assert.deepEqual(refused.asked, [GEMINI_MODELS[0]])
+    assert.equal(shouldTryNextModel(err), false)
+  } finally {
+    refused.restore()
+  }
+
+  const allBusy = fakeGemini({})
+  try {
+    const err = await geminiModel('test-key').generateContent('hi').then(() => null, e => e)
+    assert.equal(err?.status, 503)
+    assert.deepEqual(allBusy.asked, [...GEMINI_MODELS])
+    assert.equal(aiFailureMessage(err), 'AI generation failed — credits refunded')
+    // The log line keeps Google's reason, not the SDK's prefix and the URL.
+    const said = describeGeminiError(err)
+    assert.match(said, /^\[503 Service Unavailable\] This model is currently experiencing high demand/)
+    assert.doesNotMatch(said, /googleapis|GoogleGenerativeAI/)
+  } finally {
+    allBusy.restore()
+  }
 })
 
 // What /api/admin/health listed for the production key on Nov 19, 2026.
@@ -88,10 +191,15 @@ test('the fallback list is the stable text Flash models: no previews, aliases, i
   ])
 })
 
-test('the app runs on a stable Flash model the key lists, not a preview or an alias Google re-points', () => {
-  assert.deepEqual(stableFlashModels([GEMINI_MODEL]), [GEMINI_MODEL])
-  assert.ok(NOV19_FLASH_MODELS.includes(GEMINI_MODEL))
-  // gemini-3.6-flash stopped answering on Nov 19, 2026, the day Google Cloud retired it.
+test('the app runs on stable Flash models the key lists, not previews or aliases Google re-points', () => {
+  assert.equal(GEMINI_MODEL, GEMINI_MODELS[0])
+  assert.equal(new Set(GEMINI_MODELS).size, GEMINI_MODELS.length, 'a model is listed twice')
+  assert.ok(GEMINI_MODELS.length >= 2, 'one model is not enough: see lib/gemini.ts')
+  assert.deepEqual(stableFlashModels([...GEMINI_MODELS]), [...GEMINI_MODELS])
+  for (const m of GEMINI_MODELS) assert.ok(NOV19_FLASH_MODELS.includes(m), m)
+  // gemini-3.6-flash hung all day on Nov 19, 2026 (Google Cloud retired it that
+  // day), so it is not the first choice; it answered that evening, so it stays
+  // in the chain.
   assert.notEqual(GEMINI_MODEL, 'gemini-3.6-flash')
 })
 
@@ -106,7 +214,16 @@ test('the model name is written in one place: lib/gemini.ts', () => {
   const offenders = [...walk('app'), ...walk('lib')]
     .filter(f => f !== 'lib/gemini.ts')
     .filter(f => /['"`]gemini-\d/.test(read(f)))
-  assert.deepEqual(offenders, [], 'import GEMINI_MODEL from @/lib/gemini instead')
+  assert.deepEqual(offenders, [], 'models are named in GEMINI_MODELS in lib/gemini.ts')
+})
+
+test('every Gemini call goes through the chain in lib/gemini.ts', () => {
+  // A model built anywhere else asks one model with no fallback, and usually
+  // no time limit: the two ways all AI went down on Nov 19, 2026.
+  const offenders = [...walk('app'), ...walk('lib')]
+    .filter(f => f !== 'lib/gemini.ts')
+    .filter(f => /getGenerativeModel\(|new GoogleGenerativeAI\(/.test(read(f)))
+  assert.deepEqual(offenders, [], 'use geminiModel() or geminiLongModel() from @/lib/gemini')
 })
 
 test('every /api/ai route that calls Gemini has the time limit, maxDuration and the refund message', () => {
@@ -129,7 +246,8 @@ test('Compose shows the route message when Write with AI fails', () => {
 test('the admin health check asks Gemini for real and never returns the key', () => {
   const src = read('app/api/admin/health/route.ts')
   assert.match(src, /models\/\$\{model\}:generateContent/)
-  assert.match(src, /askGemini\(GEMINI_MODEL, headers\)/)
+  // Every model requests can fall back to is asked, not only the first.
+  assert.match(src, /GEMINI_MODELS\.map\(m => askGemini\(m, headers\)\)/)
   assert.match(src, /redactKeys\(/)
   assert.match(src, /AbortSignal\.timeout\(/)
   // The key goes in the request header and nowhere else: not into what it returns.
@@ -137,15 +255,15 @@ test('the admin health check asks Gemini for real and never returns the key', ()
   assert.match(code, /'x-goog-api-key': key\b/)
   assert.doesNotMatch(code, /(probe|answer)\.\w+\s*=[^\n]*\bkey\b/, 'a returned field is built from the key')
   assert.doesNotMatch(code, /\{ \.\.\.(probe|answer),[^}]*\bkey\b/, 'the key is spread into the result')
-  for (const type of [/type GeminiAnswer = \{[^}]*\}/, /type GeminiProbe = GeminiAnswer & \{[^}]*\}/]) {
+  for (const type of [/type GeminiAnswer = \{[^}]*\}/, /type GeminiProbe = \{[^}]*\}/]) {
     assert.match(code, type)
     assert.doesNotMatch(code.match(type)[0], /\bkey\b/, 'a returned type has a key field')
   }
 })
 
-test('the health check asks the other stable Flash models when the main one fails, and ?try= names only models', () => {
+test('the health check asks the other stable Flash models when the whole chain fails, and ?try= names only models', () => {
   const src = read('app/api/admin/health/route.ts')
-  assert.match(src, /answer\.ok \? \[\] : stableFlashModels\(names \?\? \[\]\)/)
+  assert.match(src, /answered \? \[\] : stableFlashModels\(names \?\? \[\]\)/)
   assert.match(src, /filter\(s => MODEL_NAME\.test\(s\)\)/)
   const literal = src.match(/const MODEL_NAME = \/(.+)\/\r?$/m)
   assert.ok(literal, 'MODEL_NAME is a regex literal')

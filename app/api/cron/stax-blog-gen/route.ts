@@ -1,16 +1,14 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Resend } from 'resend'
 import { REPLY_TO, logIfRejected } from '@/lib/mail'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiLongModel } from '@/lib/gemini'
 
 const BLOG_INTERVAL_DAYS = 90  // First article at 3 months; repeat every 3 months while active
 
 function getGemini() {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-  return genAI.getGenerativeModel({ model: GEMINI_MODEL })
+  return geminiLongModel(process.env.GEMINI_API_KEY!)
 }
 
 async function generateBlogPost(tool: {
