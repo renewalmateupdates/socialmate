@@ -160,10 +160,33 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       // A bare `owner_id = user.id` query here (the previous version) meant
       // an invited Editor/Viewer/Client could accept an invite and never see
       // the workspace they were invited into anywhere in the app.
-      const ws: Workspace[] = await fetch('/api/workspaces/accessible')
-        .then(r => r.ok ? r.json() : { workspaces: [] })
-        .then(d => d.workspaces ?? [])
-        .catch(() => [])
+      //
+      // Four reads that need nothing from each other, so all at once. They ran
+      // one after another until Nov 20, 2026, which made the plan (the sidebar
+      // badge, the plan box on /accounts, every upgrade prompt) wait for the
+      // workspace list first, on every app page.
+      const [ws, settingsRes, teamRes, accountsRes] = await Promise.all([
+        fetch('/api/workspaces/accessible')
+          .then(r => r.ok ? r.json() : { workspaces: [] })
+          .then(d => (d.workspaces ?? []) as Workspace[])
+          .catch(() => [] as Workspace[]),
+        supabase
+          .from('user_settings')
+          .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total, monthly_credits_remaining, earned_credits, paid_credits')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('team_members')
+          .select('id')
+          .eq('owner_id', user.id),
+        supabase
+          .from('connected_accounts')
+          .select('platform')
+          .eq('user_id', user.id),
+      ])
+      if (settingsRes.error) console.warn('[workspace] settings lookup failed', settingsRes.error)
+      if (teamRes.error) console.warn('[workspace] team lookup failed', teamRes.error)
+      if (accountsRes.error) console.warn('[workspace] accounts lookup failed', accountsRes.error)
 
       if (ws && ws.length > 0) {
         setWorkspaces(ws)
@@ -203,12 +226,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspaceState(fallback)
       }
 
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total, monthly_credits_remaining, earned_credits, paid_credits')
-        .eq('user_id', user.id)
-        .single()
-
+      const settings = settingsRes.data
       if (settings) {
         const p = normalizePlan(settings.plan)
         setPlan(p)
@@ -222,19 +240,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setCreditsUsed(settings.ai_credits_used ?? 0)
       }
 
-      const { data: teamData } = await supabase
-        .from('team_members')
-        .select('id')
-        .eq('owner_id', user.id)
+      setSeatsUsed((teamRes.data?.length || 0) + 1)
 
-      setSeatsUsed((teamData?.length || 0) + 1)
-
-      const { data: accountsData } = await supabase
-        .from('connected_accounts')
-        .select('platform')
-        .eq('user_id', user.id)
-
-      const uniquePlatforms = new Set(accountsData?.map((a: any) => a.platform) || [])
+      const uniquePlatforms = new Set((accountsRes.data ?? []).map((a: { platform: string }) => a.platform))
       setPlatformsConnected(uniquePlatforms.size)
 
       setLoading(false)

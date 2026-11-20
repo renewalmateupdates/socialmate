@@ -1347,9 +1347,36 @@ function SidebarContent({
   )
 }
 
+// The rail's own colors with nothing in it yet, so the space is not blank while
+// the contents load.
+function SidebarPlaceholder() {
+  return (
+    <div
+      className="sm-sidebar h-full w-full"
+      style={{ backgroundColor: 'var(--sidebar-bg)', borderRight: '1px solid var(--sidebar-border)' }}
+      aria-hidden="true"
+    />
+  )
+}
+
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen]             = useState(false)
   const [desktopCollapsed, setDesktopCollapsed] = useState(false)
+
+  // Which copy of the contents to build: the phone drawer or the desktop rail.
+  // Until Nov 20, 2026 both were always built and only one was ever on screen,
+  // so every page did the sidebar's work twice. Decided after mount, which also
+  // keeps the contents (they read the saved language, collapsed sections and
+  // customized items) out of server-rendered HTML: everything outside them here
+  // is position: fixed, so the page underneath never moves when they arrive.
+  const [screen, setScreen] = useState<'phone' | 'desktop' | null>(null)
+  useEffect(() => {
+    const wide = window.matchMedia('(min-width: 768px)')
+    const pick = () => setScreen(wide.matches ? 'desktop' : 'phone')
+    pick()
+    wide.addEventListener('change', pick)
+    return () => wide.removeEventListener('change', pick)
+  }, [])
 
   // Load persisted collapsed state on mount + sync body class for layout offset
   useEffect(() => {
@@ -1436,12 +1463,14 @@ export default function Sidebar() {
           <CloseIcon className="w-4 h-4" strokeWidth={2} />
         </button>
         {/* Mobile always gets full sidebar (no collapse) */}
-        <SidebarContent onNavClick={() => setMobileOpen(false)} />
+        {screen === 'phone' && <SidebarContent onNavClick={() => setMobileOpen(false)} />}
       </div>
 
       {/* Desktop sidebar — width transitions with desktopCollapsed state */}
       <div className={`hidden md:block fixed left-0 top-0 h-screen z-40 overflow-y-auto transition-all duration-200 ${desktopCollapsed ? 'w-14' : 'w-56'}`}>
-        <SidebarContent desktopCollapsed={desktopCollapsed} onToggleDesktop={toggleDesktop} />
+        {screen === 'desktop'
+          ? <SidebarContent desktopCollapsed={desktopCollapsed} onToggleDesktop={toggleDesktop} />
+          : <SidebarPlaceholder />}
       </div>
     </>
   )
