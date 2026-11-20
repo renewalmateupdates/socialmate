@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { shopHomeUrl } from '@/lib/shop/guide-products'
+import { shopHomeUrl } from '@/lib/shop/merch-shop'
 
 // Single source of truth for the public footer. Rendered by PublicLayout (which
 // wraps most public pages), by the home page, and by the handful of pages that

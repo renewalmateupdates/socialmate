@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 // client component and had been falling back to the site-wide default.
 export const metadata: Metadata = {
   title: "Gilgamesh's Guides — Free Playbooks for Building From Nothing",
-  description: 'Free long-form guides on starting a business, marketing on zero budget, business credit, building software with AI, creator monetization and more.',
+  description: 'Free long-form guides on starting a business, marketing on zero budget, business credit, building software with AI, creator monetization and more, with free PDF downloads.',
   // No canonical here: a guide that does not set its own would inherit it and
   // point search engines at the hub instead of itself.
 }

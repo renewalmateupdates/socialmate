@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES, localeFromPath } from '@/lib/i18n'
-import { shopHomeUrl } from '@/lib/shop/guide-products'
+import { shopHomeUrl } from '@/lib/shop/merch-shop'
 import { Check, Handshake, X as CloseIcon } from 'lucide-react'
 
 // Locale-prefixed landing pages — switching language navigates to the locale URL

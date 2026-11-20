@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
-import GuideShopCard from '@/components/GuideShopCard'
+import GuidePdfCard from '@/components/GuidePdfCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -590,7 +590,7 @@ export default function RedditMarketingPage() {
                 </div>
               </section>
 
-              <GuideShopCard guide="reddit-marketing" />
+              <GuidePdfCard guide="reddit-marketing" />
               <GuideEmailCapture />
               <GuidePDFDownload title="Reddit Marketing Without Getting Banned" />
 

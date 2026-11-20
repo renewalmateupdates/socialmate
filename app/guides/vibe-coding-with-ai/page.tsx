@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
-import GuideShopCard from '@/components/GuideShopCard'
+import GuidePdfCard from '@/components/GuidePdfCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -698,7 +698,7 @@ export default function VibeCodingGuidePage() {
                 </div>
               </section>
 
-              <GuideShopCard guide="vibe-coding-with-ai" />
+              <GuidePdfCard guide="vibe-coding-with-ai" />
               <GuideEmailCapture />
               <GuidePDFDownload title="Vibe Coding — Building Software with AI" />
 

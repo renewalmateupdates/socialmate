@@ -2532,12 +2532,12 @@
     "footer_cta_desc": "SocialMate is the tool he built while writing these guides — a full social media OS for creators and businesses. Free plan, always. Because power to the people isn't just a tagline.",
     "about_guide_cta": "About Gilgamesh's Guide",
     "footer_copy": "© Gilgamesh Enterprise LLC — Written by Joshua Bostic. All guides are free, forever.",
-    "shop_badge": "Take them offline",
-    "shop_title": "All 14 guides in one PDF",
-    "shop_desc": "The guides stay free to read here. The Complete Edition collects all fourteen in one 192-page PDF, corrected for late 2026, with 10 printable worksheets added.",
-    "shop_cta": "Get the Complete Edition, {price}",
-    "shop_browse": "Browse the Gilgamesh shop",
-    "shop_note": "Instant PDF download, in English. 25% of every sale goes to SM-Give."
+    "pdfs_badge": "Free PDFs",
+    "pdfs_title": "Take them offline, free",
+    "pdfs_desc": "Every guide in one PDF, plus the worksheets, the 2027 content planner and four kits. No sign-up, no email.",
+    "pdfs_download": "Download PDF",
+    "pdfs_note": "The PDFs are in English. Print as many copies as you need for your own use.",
+    "pdfs_jump": "Free PDFs: every guide, the 2027 planner and four kits"
   },
   "about": {
     "hero_title": "Built by one person.",
@@ -2560,7 +2560,7 @@
     "vision_para2": "Beyond scheduling: SOMA generates a week of content from your ideas. 8 AI agents run your outreach, newsletter, and community on autopilot. SocialMate isn't just a scheduler. It's a Creator OS — the home base for every creator, streamer, business, and person building online.",
     "give_title": "2% of every subscription\ngoes to charity.",
     "give_para1": "SM-Give is built into every subscription. 2% of every payment goes to charitable causes: homeless care, school supplies for underprivileged students, and support for single parents. Not as a future feature. Not as a marketing promise. Right now, on every transaction.",
-    "give_para2": "25% of guide sales and merch profit from the Gilgamesh shop goes to SM-Give too. When you buy a shirt or a guide, you're funding the give fund. It's the simplest version of \"business as a force for good\" we could build.",
+    "give_para2": "25% of merch profit from the Gilgamesh shop goes to SM-Give too. When you buy a shirt or a mug, you're funding the give fund. It's the simplest version of \"business as a force for good\" we could build.",
     "give_cta": "See SM-Give tracker →",
     "founder_badge": "The founder",
     "founder_role": "Founder & CEO · Gilgamesh Enterprise LLC · Wyoming",
@@ -2633,7 +2633,7 @@
     "shop_strip": {
       "badge": "New",
       "lead": "The Gilgamesh shop is open:",
-      "give": "25% of guide sales and merch profit goes to SM-Give.",
+      "give": "25% of merch profit goes to SM-Give.",
       "cta": "Shop now"
     },
     "platforms": {

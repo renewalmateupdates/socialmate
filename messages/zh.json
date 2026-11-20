@@ -2532,12 +2532,12 @@
     "footer_cta_desc": "SocialMate 是他在撰写这些指南时构建的工具——为创作者和企业提供完整的社交 OS。免费计划，永远如此。因为权力归于人民不只是一句口号。",
     "about_guide_cta": "关于吉尔伽美什指南",
     "footer_copy": "© Gilgamesh Enterprise LLC——由 Joshua Bostic 撰写。所有指南永久免费。",
-    "shop_badge": "离线阅读",
-    "shop_title": "全部 14 本指南，一个 PDF",
-    "shop_desc": "指南在这里依然免费阅读。Complete Edition 将全部十四本汇集成一个 192 页的 PDF，更新至 2026 年底，并附 10 份可打印的练习表。",
-    "shop_cta": "获取 Complete Edition，{price}",
-    "shop_browse": "浏览 Gilgamesh 商店",
-    "shop_note": "即时下载 PDF，英文版。每笔销售的 25% 捐给 SM-Give。"
+    "pdfs_badge": "免费 PDF",
+    "pdfs_title": "离线阅读，免费",
+    "pdfs_desc": "全部指南合成一个 PDF，另有练习表、2027 内容规划手册和四套工具包。无需注册，无需邮箱。",
+    "pdfs_download": "下载 PDF",
+    "pdfs_note": "PDF 为英文版。供个人使用可随意打印。",
+    "pdfs_jump": "免费 PDF：全部指南、2027 规划手册和四套工具包"
   },
   "about": {
     "hero_title": "由一个人构建。",
@@ -2560,7 +2560,7 @@
     "vision_para2": "除了调度：SOMA 从您的想法生成一周的内容。8个 AI 代理自动驾驶运行您的外联、时事通讯和社区。SocialMate 不仅仅是调度器。它是一个创作者 OS——每个在网上建设的创作者、主播、企业和个人的家园。",
     "give_title": "每次订阅的 2%\n捐给慈善机构。",
     "give_para1": "SM-Give 内置于每次订阅中。每笔付款的 2% 用于慈善目的：无家者关爱、为贫困学生提供学习用品，以及支持单亲父母。不是作为未来功能。不是作为营销承诺。就在现在，在每一笔交易中。",
-    "give_para2": "Gilgamesh 商店指南销售额和周边利润的 25% 也归入 SM-Give。当您购买一件衬衫或一本指南时，您在为捐赠基金提供资金。这是我们所能构建的「商业作为善的力量」的最简单版本。",
+    "give_para2": "Gilgamesh 商店周边利润的 25% 也归入 SM-Give。当您购买一件衬衫或一个马克杯时，您在为捐赠基金提供资金。这是我们所能构建的「商业作为善的力量」的最简单版本。",
     "give_cta": "查看 SM-Give 追踪器 →",
     "founder_badge": "创始人",
     "founder_role": "创始人兼 CEO · Gilgamesh Enterprise LLC · 怀俄明州",
@@ -2633,7 +2633,7 @@
     "shop_strip": {
       "badge": "新",
       "lead": "Gilgamesh 商店现已开业：",
-      "give": "指南销售额和周边利润的 25% 将捐给 SM-Give。",
+      "give": "周边利润的 25% 将捐给 SM-Give。",
       "cta": "去逛逛"
     },
     "platforms": {

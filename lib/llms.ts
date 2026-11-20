@@ -21,6 +21,7 @@ import { HERMES_LIMITS } from './hermes-access'
 import { SOMA_COSTS, SOMA_MONTHLY_CREDITS } from './soma-costs'
 import { SOMA_MODE_LIMITS, SOMA_PROJECT_LIMITS } from './soma-mode'
 import { MAX_MESSAGES, MAX_TIMES, MAX_WEEKS, VARIANTS_PER_MESSAGE, CAMPAIGN_PLATFORMS } from './campaigns'
+import { ALL_PDFS } from './guide-pdfs'
 import {
   ADDONS, AFFILIATE, AI_TOOLS, BILLING, BRAND, FEATURES, PLANS, PLAN_ORDER, PLATFORMS,
   SENTENCES, THREADS_NOTE, UNAVAILABLE_PLATFORMS, listWords, planLine, priceLine, usd,
@@ -187,6 +188,7 @@ function guidesSection(): string[] {
     '## Guides (free, long-form)',
     '',
     link('/guides', 'All guides'),
+    link('/guides#downloads', 'Free PDF downloads', `${listWords(ALL_PDFS.map(p => p.name))}; no sign-up`),
     ...routesUnder('/guides').map(p => {
       const slug = p.split('/').pop()!
       return link(p, GUIDE_TITLES[slug] ?? titleCase(slug))

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
-import GuideShopCard from '@/components/GuideShopCard'
+import GuidePdfCard from '@/components/GuidePdfCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -663,7 +663,7 @@ export default function SeoForBeginnersPage() {
                 </div>
               </section>
 
-              <GuideShopCard guide="seo-for-beginners" />
+              <GuidePdfCard guide="seo-for-beginners" />
               <GuideEmailCapture />
               <GuidePDFDownload title="SEO for Normal People" />
 

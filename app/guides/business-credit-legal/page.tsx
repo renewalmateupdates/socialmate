@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
-import GuideShopCard from '@/components/GuideShopCard'
+import GuidePdfCard from '@/components/GuidePdfCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -783,7 +783,7 @@ export default function BusinessCreditLegalGuidePage() {
                 </div>
               </section>
 
-              <GuideShopCard guide="business-credit-legal" />
+              <GuidePdfCard guide="business-credit-legal" />
               <GuideEmailCapture />
               <GuidePDFDownload title="Business Credit, Legal Foundations & Tax Breaks" />
 
