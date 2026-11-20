@@ -559,7 +559,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   sends still leaves nothing for app mail. Start a big send right after the
   reset and keep it well under 100.
 
-**From: November 20, 2026: app pages were a spinner until their JavaScript ran (PR #820)**
+**From: November 20, 2026: app pages were a spinner until their JavaScript ran (PRs #820, #821)**
 
 - **`useSearchParams()` in a page sends the whole page as a spinner.** Next
   renders everything up to the nearest Suspense in the browser instead, so the
@@ -580,6 +580,11 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   removed it for everyone who had one: a 0.37 layout shift on every visit by a
   returning user. Render what doesn't depend on the data at once, and put what
   does where its arrival moves nothing on the first screen.
+- **A skeleton with no text is not a paint.** Gray boxes and spinners don't
+  count as a first contentful paint, so a phone shown only those records
+  nothing until the JavaScript runs. Put the page's real title in the skeleton
+  (`components/AppPageSkeleton.tsx`), and keep the sidebar at the same place in
+  the loading tree and the loaded one, or it is rebuilt when the data arrives.
 
 ## Pending / In Progress
 
@@ -588,7 +593,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #819 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #820 are merged.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -613,18 +618,31 @@ on the server (the build's `accounts.html` now holds the page) with the connect
 cards first and nothing waiting on the list, no stat cards on phones (the line
 under the title says the same), the title clear of the menu button, one read of
 the accounts per visit instead of two, and the Pinterest and Reddit "coming
-soon" copy corrected (both declined). Checked locally: no hydration errors, and
-a phone's first paint shows four Connect buttons before any JavaScript runs.
-/onboarding already rendered on the server and loads its connect forms lazily;
-it gains from the shared fixes. **After it deploys:** open /accounts signed in
-on a desktop and a phone (the list fills in below the connect cards), and
-compare /accounts in Speed Insights a week later. **Next:** the same treatment
-for /dashboard, /settings, /compose, /queue and /drafts, still spinner-only;
-the menu button covers the start of the title on phones on about 37 app pages
-(`p-4 md:p-8`; /accounts has the fix); and a Speed Insights `beforeSend` that
-drops our own accounts (Nov 20's desktop `/accounts` row, RES 6 with a 45.6 s
-paint, was Claude's own visit in a pane that opened hidden). Small extra:
-`/studio-stax` rebuilds every minute (`revalidate = 60`).
+soon" copy corrected (both declined). /onboarding already rendered on the
+server and loads its connect forms lazily; it gains from the shared fixes.
+**Checked live after #820 deployed (12:56 UTC), signed in as the admin on a
+desktop, with Speed Insights' beacons blocked in that tab:** one
+`auth/v1/user` request instead of nine, every query starting together, the
+account list in at 0.9 s on a reload (HTML 41 ms from Vercel's cache), layout
+shift 0.065 on a cold load and 0.03 on a reload, no console errors, and the
+list below the connect cards. Not checked on a phone in production, since
+phone emulation lands in the mobile numbers (see the Nov 19-20 rules).
+
+**Nov 20: the other app pages (PR #821).** /dashboard, /settings, /compose,
+/queue and /drafts still render in the browser (their content needs the
+signed-in user's data), but their HTML and their own loading states now show
+the page's title and a skeleton (`components/AppPageSkeleton.tsx`) instead of a
+bare spinner, so a phone paints something before the JavaScript runs. A rule in
+`app/globals.css` gives every `md:ml-56 p-4` main column room for the phone
+menu button, which covered the start of the title on about 37 pages. Compose's
+column is built differently and is not covered yet. **Next:** compare these
+pages in Speed Insights a week after #820 and #821 deploy (Nov 27). Rendering
+/settings' forms and /compose's editor on the server would be the next big
+step, but both read the URL (`?tab=`, `?draft=`) and need care for hydration.
+Also open: a Speed Insights `beforeSend` that drops our own accounts (Nov 20's
+desktop `/accounts` row, RES 6 with a 45.6 s paint, was Claude's own visit in
+a pane that opened hidden). Small extra: `/studio-stax` rebuilds every minute
+(`revalidate = 60`).
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402

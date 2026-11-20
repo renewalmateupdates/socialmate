@@ -5,6 +5,7 @@ import { setScheduledTime } from '@/lib/post-schedule'
 import { countWorkspaceDrafts, deletePosts, loadWorkspacePosts, unschedulePosts } from '@/lib/workspace-posts'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import AppPageSkeleton from '@/components/AppPageSkeleton'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
@@ -1643,11 +1644,9 @@ function QueueInner() {
 
 export default function Queue() {
   return (
-    <Suspense fallback={
-      <div className="min-h-dvh bg-theme flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
-      </div>
-    }>
+    // The fallback is what the server sends: the page's shape and title rather
+    // than a spinner, so a phone paints something real before the JavaScript runs.
+    <Suspense fallback={<AppPageSkeleton title="Queue" />}>
       <QueueInner />
     </Suspense>
   )
