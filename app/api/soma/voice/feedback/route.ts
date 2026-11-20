@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiLongModel } from '@/lib/gemini'
 
 async function getUser() {
   const cookieStore = await cookies()
@@ -69,9 +69,7 @@ export async function POST(req: NextRequest) {
 
     if (allFeedback?.length && (process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY)) {
       try {
-        const { GoogleGenerativeAI } = await import('@google/generative-ai')
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY!)
-        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+        const model = geminiLongModel(process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY!)
 
         const { data: existingProfile } = await admin
           .from('soma_identity_profiles')

@@ -1,7 +1,6 @@
 import { Inngest } from 'inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { SOMA_MONTHLY_CREDITS } from '@/lib/soma-costs'
 import { buildIrisEmailHtml } from '@/lib/iris-email'
 import { lifecycleEmail, getActivationState } from '@/lib/lifecycle-emails'
@@ -32,7 +31,7 @@ import {
 import { createNotification } from '@/lib/notify'
 import { sendScheduledTiktok, draftsNotice, stagedFilesToClean, isStagedVideoUrl, type TiktokSendOutcome, type StagedTiktokRow } from '@/lib/tiktok-scheduled'
 import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiLongModel } from '@/lib/gemini'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -3065,8 +3064,7 @@ export const irisAutoDispatch = inngest.createFunction(
     })
 
     const draft = await step.run('generate-draft', async () => {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-      const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+      const model = geminiLongModel(process.env.GEMINI_API_KEY!)
       const result = await model.generateContent(`You are writing the IRIS Dispatch — a weekly creator newsletter from SocialMate. Write in Joshua's authentic voice: bootstrapped solo founder, genuinely cares about creators, no corporate fluff.
 
 Platform stats this week:

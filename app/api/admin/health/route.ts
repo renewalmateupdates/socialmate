@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { GEMINI_MODEL, redactKeys, stableFlashModels } from '@/lib/gemini'
+import { GEMINI_MODEL, GEMINI_MODELS, redactKeys, stableFlashModels } from '@/lib/gemini'
 
 // Which features are actually switched on in this environment.
 //
@@ -36,11 +36,12 @@ import { GEMINI_MODEL, redactKeys, stableFlashModels } from '@/lib/gemini'
 // use. Still never the key.
 //
 // The model list alone did not say which model to move to: on Nov 19 the old
-// model was still listed and simply never answered. So when the main model
-// fails, the check asks every stable Flash model the key lists (no previews,
-// aliases, image, speech or live variants) and reports which ones replied.
-// `?try=gemini-a,gemini-b` asks those instead, whether or not the main one
-// failed.
+// model was still listed and simply never answered. Requests now try the
+// models in GEMINI_MODELS in order (lib/gemini.ts), so the check asks each of
+// them and says which one requests are getting their answer from
+// (`answeredBy`). When none answers, it asks every other stable Flash model the
+// key lists (no previews, aliases, image, speech or live variants) and reports
+// which ones replied. `?try=gemini-a,gemini-b` asks those too, either way.
 
 type GeminiAnswer = {
   model: string
@@ -52,9 +53,20 @@ type GeminiAnswer = {
   reply?: string
 }
 
-type GeminiProbe = GeminiAnswer & {
+type GeminiProbe = {
+  /** the model we want, first in GEMINI_MODELS */
+  model: string
+  /** true when some model in GEMINI_MODELS answered, so AI requests work */
+  ok: boolean
+  /** the first model in GEMINI_MODELS that answered: the one requests get their answer from now */
+  answeredBy?: string
+  /** each model in GEMINI_MODELS, in the order requests try them */
+  chain: GeminiAnswer[]
+  error?: string
   /** whether GEMINI_MODEL is in the key's model list */
   modelListed?: boolean
+  /** models in GEMINI_MODELS that the key's model list does not have */
+  missingFromList?: string[]
   flashModels?: string[]
   /** other models asked the same question: the ones that answered come first */
   alternatives?: GeminiAnswer[]
@@ -112,18 +124,24 @@ async function listModels(headers: Record<string, string>): Promise<string[] | n
 
 async function probeGemini(tryModels: string[]): Promise<GeminiProbe> {
   const key = process.env.GEMINI_API_KEY?.trim()
-  if (!key) return { model: GEMINI_MODEL, ok: false, error: 'GEMINI_API_KEY is not set' }
+  if (!key) return { model: GEMINI_MODEL, ok: false, chain: [], error: 'GEMINI_API_KEY is not set' }
   const headers = { 'x-goog-api-key': key, 'Content-Type': 'application/json' }
 
-  const [answer, names] = await Promise.all([askGemini(GEMINI_MODEL, headers), listModels(headers)])
-  const probe: GeminiProbe = { ...answer }
+  const [chain, names] = await Promise.all([
+    Promise.all(GEMINI_MODELS.map(m => askGemini(m, headers))),
+    listModels(headers),
+  ])
+  const answered = chain.find(a => a.ok)
+  const probe: GeminiProbe = { model: GEMINI_MODEL, ok: !!answered, answeredBy: answered?.model, chain }
+  if (!answered) probe.error = 'No model in GEMINI_MODELS answered; see chain and alternatives'
   if (names) {
     probe.modelListed = names.includes(GEMINI_MODEL)
+    probe.missingFromList = GEMINI_MODELS.filter(m => !names.includes(m))
     probe.flashModels = names.filter(n => n.includes('flash')).sort()
   }
 
-  const others = (tryModels.length > 0 ? tryModels : answer.ok ? [] : stableFlashModels(names ?? []))
-    .filter(m => m !== GEMINI_MODEL)
+  const others = (tryModels.length > 0 ? tryModels : answered ? [] : stableFlashModels(names ?? []))
+    .filter(m => !GEMINI_MODELS.includes(m))
     .slice(0, MAX_ALTERNATIVES)
   if (others.length > 0) {
     const answers = await Promise.all(others.map(m => askGemini(m, headers)))

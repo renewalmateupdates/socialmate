@@ -5,12 +5,11 @@ export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
 import { requireAdmin } from '@/lib/admin-auth'
 import { MAX_DOC_CHARS as MAX_CHARS, fetchDocText } from '@/lib/soma-fetch-doc'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiModel } from '@/lib/gemini'
 
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
 
@@ -199,19 +198,20 @@ Do NOT repeat or re-extract themes, wins, or angles that are already in SOMA's m
       '| sentToGemini:', prevDoc ? newOnly.length : Math.min(trimmedContent.length, MAX_PROMPT_CHARS)
     )
 
-    const genAI = new GoogleGenerativeAI(apiKey)
     // responseMimeType JSON forces raw parseable JSON (no fences, no preamble),
     // which is what parseGeminiJson expects. The gemini-2.5-era temperature and
     // thinkingConfig were dropped: gemini-3 deprecates the sampling params and
     // controls reasoning differently, and the real cause of the earlier failures
     // was a dead API key + a retired model, not a thinking budget.
-    const model = genAI.getGenerativeModel({
-      model: GEMINI_MODEL,
+    // Up to 50 s across the models in GEMINI_MODELS, leaving the 60 s function
+    // time to save. Only a quick failure (503, 429, 404) moves to the next
+    // model: a long document can take a while to write.
+    const model = geminiModel(apiKey, {
       generationConfig: {
         responseMimeType: 'application/json',
         maxOutputTokens: 65536,
       },
-    })
+    }, 50_000, 50_000)
 
     const prompt = prevDoc
       ? `You are SOMA, a Self-Optimizing Media Agent acting as a professional social media manager.

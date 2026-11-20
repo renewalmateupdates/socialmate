@@ -1,12 +1,11 @@
 import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from './usage'
 import { createNotification } from './notify'
 import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { resolveWorkspacePlan } from '@/lib/plan'
-import { GEMINI_MODEL } from '@/lib/gemini'
+import { geminiLongModel } from '@/lib/gemini'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -74,8 +73,7 @@ export const newsletterAgent = inngest.createFunction(
           const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
           if (!apiKey) return
 
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+          const model = geminiLongModel(apiKey)
 
           const postBlock = posts.map((p: any, i: number) =>
             `${i + 1}. [${(p.platforms ?? []).join(', ')}] ${p.content}`
@@ -323,8 +321,7 @@ export const repurposeAgent = inngest.createFunction(
           const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
           if (!apiKey) return
 
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+          const model = geminiLongModel(apiKey)
 
           const formats: string[] = Array.isArray(cfg.formats) ? cfg.formats : ['thread', 'caption']
 
@@ -478,8 +475,7 @@ export const captionAgent = inngest.createFunction(
           const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
           if (!apiKey) return
 
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+          const model = geminiLongModel(apiKey)
 
           const maxDrafts = cfg.max_per_day ?? 3
           const platforms: string[] = Array.isArray(cfg.platforms) ? cfg.platforms : []
@@ -670,8 +666,7 @@ ${postBlock ? '' : 'No competitor data yet — generate evergreen creator/busine
 Return ONLY valid JSON array:
 [{"topic":"...","why_now":"...","angle":"...","sample_caption":"..."}]`
 
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+          const model = geminiLongModel(apiKey)
 
           const result = await model.generateContent(prompt)
           const text   = result.response.text().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
@@ -791,8 +786,7 @@ export const inboxAgent = inngest.createFunction(
 
           if (!mentions.length) return
 
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
+          const model = geminiLongModel(apiKey)
           const toneHint = cfg.tone_hint ? ` Tone: ${cfg.tone_hint}.` : ''
 
           for (const n of mentions.slice(0, 5)) {

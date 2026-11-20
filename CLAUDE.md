@@ -494,8 +494,17 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   hung with no answer; Google Cloud retired 3.6 Flash that day (Nov 19) and
   named 3.8 Flash. A model retirement has now taken all AI down twice (July:
   2.5 Flash, a 404; November: 3.6 Flash, a silent hang). When AI fails, read
-  `/api/admin/health` first: if the main model fails it asks every stable
-  Flash model the key lists and shows which ones answered.
+  `/api/admin/health` first: it asks every model in `GEMINI_MODELS`, says which
+  one requests are getting answers from (`answeredBy`), and when none answers,
+  asks every other stable Flash model the key lists.
+- **One model is not enough.** The evening the fix moved to `gemini-3.8-flash`,
+  3.8 Flash answered 503 "high demand", then took 12 s for one word, then said
+  nothing for 20 s, while 3.6 Flash (the model that hung all day) answered in
+  about a second. Google sheds load per model, free tier first. Every Gemini
+  call now goes through `GEMINI_MODELS` in `lib/gemini.ts`, tried in order:
+  `geminiModel()` for a person waiting (15 s a model, 40 s in all) and
+  `geminiLongModel()` for longer answers and background work. `scripts/test-gemini.mjs`
+  fails if anything builds its own model.
 
 **From: November 19-20, 2026: Vercel paused the whole site for CPU**
 
@@ -520,6 +529,12 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 - **The proxy is billed for every request it matches.** It ran 8.1K times in a
   window where every function together ran about 4.5K. Its matcher covers
   pages only; API routes check their own session.
+- **Our own test traffic is in Vercel's numbers.** The built-in browser's phone
+  emulation sends a phone user agent, so Speed Insights files it under Mobile,
+  and a hidden browser pane renders slowly. The Nov 19 checks of `/queue` and
+  `/tiktok/studio` at phone size were most of that day's mobile data and gave
+  a Real Experience Score of 13 (first paint 7.8 s). Discount a day with those
+  checks in it before reading mobile scores.
 
 **From: November 18, 2026: the update email's audience missed an opt-out**
 
@@ -549,7 +564,32 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #816 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #817 are merged.
+
+**Nov 20: AI still failed after #816 deployed; branch `fix/gemini-fallback-nov20`.**
+#817's merge deployed #816 at 02:15 UTC. `/api/admin/health` then showed
+`gemini-3.8-flash` answering 503 "high demand", then 12 s for one word, then
+nothing for 20 s, while `gemini-3.6-flash` answered in 1.1 to 1.7 s and
+`gemini-3.5-flash-lite` in about 0.5 s. The branch makes every Gemini call try
+`GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order: a person
+waiting gets 15 s a model and 40 s in all; SOMA generate, campaign rewrites and
+SOMA ingest move on only after a quick failure (their answers are long); the
+Inngest jobs, HERMES, IRIS, the agents and the Stax blog cron use
+`geminiLongModel()` (45 s, 25 s a model), where before they had no time limit
+at all. The health check asks the whole chain and reports `answeredBy`.
+**After it deploys:** `/api/admin/health` as admin (`gemini.ok` true and an
+`answeredBy`), then one Write with AI in Compose; Vercel's logs show
+`[gemini] ... asking ...` lines whenever a model hands over. If Google keeps
+shedding the free tier, a billed Gemini project is Joshua's call (Flash costs
+cents at this volume).
+
+**Nov 20: what Speed Insights says.** Marketing pages are fast on phones (7
+days: `/` 95, `/blog/[slug]` 99, `/signup` 99). App pages are not: `/settings`
+42, `/tiktok/studio` 49 (37 visits), `/onboarding` 51, `/dashboard` 54,
+`/accounts` 55, `/compose` 66; `/queue`'s 12 is mostly our own phone-emulation
+checks (see the Nov 19-20 rules). Worth its own pass: onboarding and accounts
+are where people activate. Small extra: `/studio-stax` rebuilds every minute
+(`revalidate = 60`).
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402
@@ -557,8 +597,8 @@ DEPLOYMENT_DISABLED` until Joshua upgraded, about 01:45 UTC Nov 20. The three
 posts due during the outage went out once it was back: the admin's 23:00 post
 and an outside user's 01:00 LinkedIn post through the backstop workflow (run by
 hand, 01:49 UTC, every platform), and the admin's 23:00 TikTok video on the
-02:01 hourly run, settled published at 02:06. Branch `fix/cpu-cuts-nov19` (one
-PR) cuts what Vercel's Observability showed: the unread count is one shared
+02:01 hourly run, settled published at 02:06. #817 (merged, deployed 02:15
+UTC Nov 20) cuts what Vercel's Observability showed: the unread count is one shared
 request a minute per tab and none from a hidden tab
 (`hooks/useUnreadNotifications.ts`), the bell fetches its list only when
 opened, the sidebar's other fetches are shared (`lib/shared-fetch.ts`), the
@@ -568,16 +608,20 @@ read and wrote a `read` column while the bell, the badges and
 `/api/notifications` use `is_read` (257 read from the bell still showed unread
 there; 5 read there, all the admin's, still counted in the badge), and showed
 `body`, which the table does not have, instead of `message`. The `read`
-column is now unused. **After it deploys** (it also deploys #816): the build's
-route table shows `/` as cached; on a signed-in page the bell and the
-sidebar's Notifications count agree, and marking one read on `/notifications`
-lowers both; "Mark all read" there once clears the admin's 5 rows; Vercel
-Observability's Functions view shows the two notification routes far below
-2K calls each. Joshua's side: Spend Management (an on-demand budget with email
-alerts, pausing off, since a pause is what took the site down).
+column is now unused. **Checked live after deploy:** `/` answers from the
+cache (`x-vercel-cache: PRERENDER`, then `HIT`) and `?ref=` still sets
+`sm_ref`; logged-out `/compose` still redirects to sign-in; API calls no longer
+pass through the proxy; `/notifications` says "12 unread", the same as the
+count route, with each notification's text showing; a page load fetches the
+count, X quota, SOMA credits and approvals once each. **Not yet:** marking one
+read lowering both badges (a click on the admin's own notifications), "Mark all
+read" once for the admin's 5 old rows, and Observability a day later (the two
+notification routes should be far below 2K calls each). Joshua's side: Spend
+Management (an on-demand budget with email alerts, pausing off, since a pause
+is what took the site down).
 
-**Nov 19, evening: AI was down; the fix is #816 (merged; deploys with the next
-merge to main, since Vercel refused its own deploy while the team was paused).**
+**Nov 19, evening: AI was down; #816 moved to 3.8 Flash (deployed Nov 20 with
+#817, since Vercel refused its own deploy while the team was paused).**
 A walk of Schedule, Compose and Bulk on the admin account found every Write
 with AI request hanging for 300 seconds or failing; the last AI result saved
 was Nov 17, 02:12 UTC. #815 (deployed 14:45 UTC) put a 40 s limit and a refund
@@ -588,10 +632,8 @@ Google Cloud retired 3.6 Flash on Nov 19 and names 3.8 Flash, the stable Flash
 model on the Gemini API since Sept 2. The branch sets `GEMINI_MODEL` to
 `gemini-3.8-flash` (no call site sets a parameter 3.8 rejects), and the health
 check now asks every stable Flash model the key lists whenever the main one
-fails (`?try=a,b` names others). **After it deploys:** open
-`/api/admin/health` as admin (`gemini.ok` true, a reply of "OK"), then run one
-Write with AI in Compose. If 3.8 also fails, `alternatives` lists the models
-that answered: set `GEMINI_MODEL` to one of them. Also from #815, checked live:
+fails (`?try=a,b` names others). Once deployed, 3.8 Flash turned out to be
+overloaded too; the chain above replaces picking one model. Also from #815, checked live:
 a reopened draft keeps its poll (the walk's test draft is deleted), and the
 Queue's Scheduled card stays 375 px wide on a phone (it was 801 px). Not
 checked: the red Failed section (the admin has no failure in 30 days) and
