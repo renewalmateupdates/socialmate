@@ -35,7 +35,8 @@ export const FUNNEL_EVENTS = [
   'signup_viewed',        // reached /signup
   'signup_started',       // typed into the form or clicked an OAuth button
   'blog_cta_clicked',     // clicked through from a blog post
-  'shop_clicked',         // { from, guide, product } left for shop.gilgameshenterprise.com
+  'shop_clicked',         // { from } left for the merch shop at shop.gilgameshenterprise.com
+  'guide_pdf_downloaded', // { from: guide | hub, guide, pdf } a free guide PDF; these were shop products until Nov 20, 2026
 
   // ── Account created ──────────────────────────────────────────────────────
   'signup_completed',     // first successful sign-in on a new account

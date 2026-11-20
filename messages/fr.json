@@ -2532,12 +2532,12 @@
     "footer_cta_desc": "SocialMate est l'outil qu'il a construit en écrivant ces guides — un OS social media complet pour créateurs et entreprises. Plan gratuit, toujours.",
     "about_guide_cta": "À propos de Gilgamesh's Guide",
     "footer_copy": "© Gilgamesh Enterprise LLC — Écrit par Joshua Bostic. Tous les guides sont gratuits, pour toujours.",
-    "shop_badge": "À lire hors ligne",
-    "shop_title": "Les 14 guides en un seul PDF",
-    "shop_desc": "Les guides restent gratuits ici. La Complete Edition réunit les quatorze dans un PDF de 192 pages, mis à jour fin 2026, avec 10 fiches pratiques à imprimer.",
-    "shop_cta": "Obtenir la Complete Edition, {price}",
-    "shop_browse": "Voir la boutique Gilgamesh",
-    "shop_note": "Téléchargement PDF immédiat, en anglais. 25 % de chaque vente vont à SM-Give."
+    "pdfs_badge": "PDF gratuits",
+    "pdfs_title": "À lire hors ligne, gratuitement",
+    "pdfs_desc": "Tous les guides en un seul PDF, plus les fiches pratiques, le planificateur de contenu 2027 et quatre kits. Sans inscription, sans e-mail.",
+    "pdfs_download": "Télécharger le PDF",
+    "pdfs_note": "Les PDF sont en anglais. Imprimez autant d'exemplaires que nécessaire pour votre usage personnel.",
+    "pdfs_jump": "PDF gratuits : tous les guides, le planificateur 2027 et quatre kits"
   },
   "about": {
     "hero_title": "Construit par une personne.",
@@ -2560,7 +2560,7 @@
     "vision_para2": "Au-delà de la planification : SOMA génère une semaine de contenu à partir de vos idées. 8 agents IA gèrent votre prospection, newsletter et communauté en autopilote.",
     "give_title": "2% de chaque abonnement\nvont à des œuvres caritatives.",
     "give_para1": "SM-Give est intégré à chaque abonnement. 2% de chaque paiement vont à des causes caritatives : aide aux sans-abri, fournitures scolaires pour les élèves défavorisés, et soutien aux parents seuls.",
-    "give_para2": "25 % des ventes de guides et des bénéfices du merch de la boutique Gilgamesh vont également à SM-Give.",
+    "give_para2": "25 % des bénéfices du merch de la boutique Gilgamesh vont également à SM-Give.",
     "give_cta": "Voir le tracker SM-Give →",
     "founder_badge": "Le fondateur",
     "founder_role": "Fondateur & CEO · Gilgamesh Enterprise LLC · Wyoming",
@@ -2633,7 +2633,7 @@
     "shop_strip": {
       "badge": "Nouveau",
       "lead": "La boutique Gilgamesh est ouverte :",
-      "give": "25 % des ventes de guides et des bénéfices du merch vont à SM-Give.",
+      "give": "25 % des bénéfices du merch vont à SM-Give.",
       "cta": "Voir la boutique"
     },
     "platforms": {

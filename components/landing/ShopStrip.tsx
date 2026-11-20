@@ -1,7 +1,7 @@
 'use client'
 import { ArrowRight } from 'lucide-react'
 import { track } from '@/lib/analytics'
-import { shopHomeUrl } from '@/lib/shop/guide-products'
+import { shopHomeUrl } from '@/lib/shop/merch-shop'
 
 /**
  * One line above the nav pointing at the Gilgamesh shop. The landing page is
@@ -10,8 +10,9 @@ import { shopHomeUrl } from '@/lib/shop/guide-products'
  * Copy comes in already translated because Landing is a server component.
  * A client component only so the click is recorded (`shop_clicked`).
  *
- * Keep the claim exact: 25% of guide *sales* and 25% of merch *profit*. Merch
- * has a print cost, so "25% of every sale" would overstate it.
+ * Keep the claim exact: 25% of merch *profit*. Merch has a print cost, so
+ * "25% of every sale" would overstate it. The shop sells merch only since
+ * Nov 20, 2026; the guide PDFs are free on /guides.
  */
 export default function ShopStrip({ badge, lead, give, cta }: {
   badge: string

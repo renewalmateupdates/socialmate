@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
-import GuideShopCard from '@/components/GuideShopCard'
+import GuidePdfCard from '@/components/GuidePdfCard'
 import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
@@ -454,7 +454,7 @@ export default function ContentCreatorBusinessPage() {
                 </div>
               </section>
 
-              <GuideShopCard guide="content-creator-business" />
+              <GuidePdfCard guide="content-creator-business" />
               <GuideEmailCapture />
               <GuidePDFDownload title="The Content Creator's Business Guide" />
 

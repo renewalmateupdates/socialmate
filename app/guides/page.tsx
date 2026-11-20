@@ -2,8 +2,9 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
-import { Coffee, Crown, Heart } from 'lucide-react'
-import { PRODUCTS, shopHomeUrl, shopUrl } from '@/lib/shop/guide-products'
+import { Coffee, Crown, Download, Heart } from 'lucide-react'
+import { track } from '@/lib/analytics'
+import { ALL_PDFS, PDFS } from '@/lib/guide-pdfs'
 
 const GUIDES = [
   {
@@ -315,6 +316,7 @@ const GUIDES = [
 
 export default function GuidesHubPage() {
   const { t } = useI18n()
+  const downloaded = (pdf: string) => () => track('guide_pdf_downloaded', { from: 'hub', pdf })
   return (
     <PublicLayout>
       <main className="min-h-screen bg-void text-white">
@@ -335,6 +337,13 @@ export default function GuidesHubPage() {
               <span className="text-amber-400">Joshua Bostic</span>{' '}
               {t('guides_landing.hero_desc_after')}
             </p>
+            <a
+              href="#downloads"
+              className="mt-8 inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20"
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              {t('guides_landing.pdfs_jump')}
+            </a>
           </div>
         </section>
 
@@ -435,40 +444,67 @@ export default function GuidesHubPage() {
           </div>
         </section>
 
-        {/* The paid edition, for people who want them offline */}
-        <section className="border-t border-[#1f1f1f] px-6 py-16">
-          <div className="mx-auto max-w-3xl">
+        {/* Free PDFs. Sold in the Gilgamesh shop until Nov 20, 2026; see lib/guide-pdfs.ts */}
+        <section id="downloads" className="scroll-mt-24 border-t border-[#1f1f1f] px-6 py-16">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-10 text-center">
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">{t('guides_landing.pdfs_badge')}</p>
+              <h2 className="mb-3 text-2xl font-black text-white md:text-3xl">{t('guides_landing.pdfs_title')}</h2>
+              <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-400">{t('guides_landing.pdfs_desc')}</p>
+            </div>
             <div className="flex flex-col items-center gap-8 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-7 sm:flex-row sm:p-9">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={PRODUCTS.complete.image}
-                alt={`Cover of ${PRODUCTS.complete.name}`}
+                src={PDFS.complete.image}
+                alt={`Cover of ${PDFS.complete.name}`}
                 width={140}
                 height={182}
                 loading="lazy"
                 className="h-auto w-[140px] flex-none rounded-md border border-[#2a2a2a] shadow-lg shadow-black/40"
               />
-              <div className="text-center sm:text-left">
-                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">{t('guides_landing.shop_badge')}</p>
-                <h2 className="mb-3 text-2xl font-black text-white">{t('guides_landing.shop_title')}</h2>
-                <p className="mb-6 text-sm leading-relaxed text-gray-400">{t('guides_landing.shop_desc')}</p>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href={shopUrl(PRODUCTS.complete, 'hub', 'guides_hub')}
-                    className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-amber-500 px-6 text-sm font-bold text-black transition-colors hover:bg-amber-400"
-                  >
-                    {t('guides_landing.shop_cta', { price: PRODUCTS.complete.price })}
-                  </a>
-                  <a
-                    href={shopHomeUrl('guides_hub')}
-                    className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#111111] px-6 text-sm font-bold text-white transition-colors hover:border-amber-500/30"
-                  >
-                    {t('guides_landing.shop_browse')}
-                  </a>
-                </div>
-                <p className="mt-4 text-xs text-gray-600">{t('guides_landing.shop_note')}</p>
+              <div className="min-w-0 text-center sm:text-left">
+                <h3 className="mb-2 text-xl font-black text-white">{PDFS.complete.name}</h3>
+                <p className="mb-6 text-sm leading-relaxed text-gray-400">{PDFS.complete.pitch}</p>
+                <a
+                  href={PDFS.complete.file}
+                  download
+                  onClick={downloaded(PDFS.complete.key)}
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 text-sm font-bold text-black transition-colors hover:bg-amber-400"
+                >
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                  {t('guides_landing.pdfs_download')} <span className="font-semibold text-black/60">({PDFS.complete.size})</span>
+                </a>
               </div>
             </div>
+            <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {ALL_PDFS.filter(pdf => pdf !== PDFS.complete).map(pdf => (
+                <li key={pdf.key} className="flex gap-4 rounded-2xl border border-[#1f1f1f] bg-[#111111] p-5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={pdf.image}
+                    alt={`Cover of ${pdf.name}`}
+                    width={72}
+                    height={93}
+                    loading="lazy"
+                    className="h-auto w-[72px] flex-none self-start rounded border border-[#2a2a2a]"
+                  />
+                  <div className="min-w-0">
+                    <h3 className="text-base font-extrabold leading-snug text-white">{pdf.name}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-gray-400">{pdf.pitch}</p>
+                    <a
+                      href={pdf.file}
+                      download
+                      onClick={downloaded(pdf.key)}
+                      className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-4 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/25"
+                    >
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                      {t('guides_landing.pdfs_download')} <span className="font-semibold text-amber-400/70">({pdf.size})</span>
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-center text-xs text-gray-600">{t('guides_landing.pdfs_note')}</p>
           </div>
         </section>
 

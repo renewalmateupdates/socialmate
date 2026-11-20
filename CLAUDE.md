@@ -596,7 +596,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #823 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #824 are merged.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -730,6 +730,32 @@ TikTok-only people).**
 **After #824 deploys:** nothing to click; the next Studio Stax sale or white
 label request shows a `[mail] stripe webhook: ...` line in Vercel's logs only
 if Resend refuses the email.
+
+**Nov 20: content to Jan 1, the shop sells merch only, and the guide PDFs are
+free (branch `feat/free-guide-pdfs-nov20`).**
+- Content: 60 posts from Nov 21 to Jan 1 in a Bulk CSV (Compose > Bulk >
+  Import CSV; agency imports 100 rows at a time) and an 18-video TikTok plan,
+  in Joshua's `Videos\SocialMate content` folder with the 9 demo clips and the
+  14 promo videos (Desktop shortcut "SocialMate content"). The Dec 27 post
+  links `/guides` for the free 2027 planner.
+- Shopify (Joshua's go-ahead, Nov 20): the 8 PDF products are drafts, so the
+  store sells merch only; streamer and creator gear comes later. Black Friday
+  weekend is an automatic 20% off all merch, Nov 26 12:00 AM to Nov 30 11:59 PM
+  Eastern, and the announcement bar says so. Menu, homepage, search title,
+  FAQ, About and the entrepreneur gift-guide post no longer sell PDFs. The
+  store's own log is Joshua's `Downloads\Gilgamesh Shop\SHOP-LOG.md`.
+- **After Nov 30:** put the shop's announcement bar back (Online Store >
+  Themes > Customize > Announcement bar). The discount ends by itself.
+- The branch: the 7 PDFs download free from `public/downloads`
+  (`lib/guide-pdfs.ts`, checked by `scripts/test-guide-pdfs.mjs`, which fails
+  when a size label stops matching its file). Each guide ends with its PDF
+  (`components/GuidePdfCard.tsx`), `/guides#downloads` lists all seven, and
+  `guide_pdf_downloaded` records each download (GA4 only for signed-out
+  readers). `lib/shop/merch-shop.ts` keeps only the merch shop link; the SM-Give
+  lines say merch profit only. Until it deploys, the guide pages' cards point
+  at the drafted Shopify listings, which answer 404.
+- The PDFs still say "licensed for the buyer's personal use" and end with a
+  pointer to the shop; harmless, but say so if Joshua asks for a re-render.
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402
