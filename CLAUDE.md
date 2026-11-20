@@ -765,10 +765,11 @@ Joshua's `Videos\SocialMate demo` folder, outside the repo. Polls are left out
 of the video on purpose: they save but don't publish yet.
 
 *Claude, after the batch 3 branch deploys:*
-- Compose signed in: opening a draft with a poll or tags shows Full, and each
-  Write with AI tool still works (running one costs credits, so not yet tried).
-  Already seen live Nov 16: the Simple and Full toggle, the Write with AI menu,
-  thread mode in Full.
+- Compose signed in: opening a draft with a poll or tags shows Full. Already
+  seen live Nov 16: the Simple and Full toggle, the Write with AI menu, thread
+  mode in Full. Seen Nov 20: all six Write with AI tools (caption, hook,
+  rewrite, thread, repurpose, hashtags) return real output through the Gemini
+  chain.
 - Bulk: a sheet saved from Google Sheets (M/D/YYYY dates, 12-hour times), and a
   bad row saves once fixed. Seen Nov 16: CSV import, a bad date arrives red
   with the reason.
@@ -776,9 +777,11 @@ of the video on purpose: they save but don't publish yet.
   per-platform how-to videos (each needs that platform's connect flow on
   screen). If the demo is re-rendered, update `DEMO_CHAPTERS` from its
   chapters.txt.
-- Image tools, signed in: "Use in a post" on each tool lands in Compose with
-  the image uploaded and attached; on an iPhone, download saves the file. Then
-  `node scripts/indexnow-submit.mjs` for the two new `/tools` pages.
+- Image tools: on an iPhone, download saves the file. Seen Nov 20, signed in:
+  "Use in a post" on the quote card and on the resizer (a 1600x900 X size)
+  each land on `/compose?from=tool-image` with the image attached and the
+  "Your image from the free ... is attached" banner. IndexNow took the two
+  tool pages and `/tools` the same night.
 
 *Claude, after #793 deployed (Joshua walks these signed in):*
 - Walk Schedule signed in: List keeps its range after a reload; a failed post
