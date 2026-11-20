@@ -502,9 +502,11 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   nothing for 20 s, while 3.6 Flash (the model that hung all day) answered in
   about a second. Google sheds load per model, free tier first. Every Gemini
   call now goes through `GEMINI_MODELS` in `lib/gemini.ts`, tried in order:
-  `geminiModel()` for a person waiting (15 s a model, 40 s in all) and
+  `geminiModel()` for a person waiting (10 s a model, 40 s in all) and
   `geminiLongModel()` for longer answers and background work. `scripts/test-gemini.mjs`
-  fails if anything builds its own model.
+  fails if anything builds its own model. A model that failed is asked last
+  for the next 3 minutes on that function instance, so one busy model costs
+  one slow request, not every request.
 
 **From: November 19-20, 2026: Vercel paused the whole site for CPU**
 
@@ -564,22 +566,24 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #817 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #818 are merged.
 
-**Nov 20: AI still failed after #816 deployed; branch `fix/gemini-fallback-nov20`.**
-#817's merge deployed #816 at 02:15 UTC. `/api/admin/health` then showed
-`gemini-3.8-flash` answering 503 "high demand", then 12 s for one word, then
-nothing for 20 s, while `gemini-3.6-flash` answered in 1.1 to 1.7 s and
-`gemini-3.5-flash-lite` in about 0.5 s. The branch makes every Gemini call try
-`GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order: a person
-waiting gets 15 s a model and 40 s in all; SOMA generate, campaign rewrites and
-SOMA ingest move on only after a quick failure (their answers are long); the
-Inngest jobs, HERMES, IRIS, the agents and the Stax blog cron use
-`geminiLongModel()` (45 s, 25 s a model), where before they had no time limit
-at all. The health check asks the whole chain and reports `answeredBy`.
-**After it deploys:** `/api/admin/health` as admin (`gemini.ok` true and an
-`answeredBy`), then one Write with AI in Compose; Vercel's logs show
-`[gemini] ... asking ...` lines whenever a model hands over. If Google keeps
+**Nov 20: AI works again (#818), and branch `fix/gemini-cooldown-nov20` makes it
+quick.** #817's merge deployed #816 at 02:15 UTC; `/api/admin/health` then
+showed `gemini-3.8-flash` answering 503 "high demand", then 12 s for one word,
+then nothing for 20 s, while `gemini-3.6-flash` answered in about a second.
+#818 (deployed 02:43 UTC) makes every Gemini call try `GEMINI_MODELS` (3.8
+Flash, 3.6 Flash, 3.5 Flash-Lite) in order; SOMA generate, campaign rewrites
+and SOMA ingest move on only after a quick failure (their answers are long);
+the Inngest jobs, HERMES, IRIS, the agents and the Stax blog cron use
+`geminiLongModel()` (45 s, 25 s a model), where before they had no time limit.
+**Checked live after #818:** the health check says `answeredBy`
+gemini-3.6-flash; all six Compose tools returned real output (caption, hook,
+rewrite, thread, repurpose, hashtags), but in 10 to 32 s, each waiting out 3.8
+first. The cooldown branch asks a model that just failed last for 3 minutes
+and gives each model 10 s, not 15. **After it deploys:** run two Write with AI
+requests in a row; the second should take a few seconds. Vercel's logs show
+`[gemini] ... asking ...` lines when a model hands over. If Google keeps
 shedding the free tier, a billed Gemini project is Joshua's call (Flash costs
 cents at this volume).
 
