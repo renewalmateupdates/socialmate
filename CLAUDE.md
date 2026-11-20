@@ -559,14 +559,17 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   sends still leaves nothing for app mail. Start a big send right after the
   reset and keep it well under 100.
 
-**From: November 20, 2026: app pages were a spinner until their JavaScript ran (PRs #820, #821)**
+**From: November 20, 2026: app pages were a spinner until their JavaScript ran (PRs #820 to #822)**
 
 - **`useSearchParams()` in a page sends the whole page as a spinner.** Next
   renders everything up to the nearest Suspense in the browser instead, so the
   HTML of /accounts, /dashboard, /settings, /compose, /queue and /drafts held
   only a spinner, and a phone painted nothing useful until about 1.2 MB of
   JavaScript had run. Read a callback's params from `window.location` in a mount
-  effect, or keep the hook in a small child with its own Suspense. After a
+  effect, or keep the hook in a small child with its own Suspense. When the
+  first screen itself depends on the URL (settings' `?tab=`), render the route
+  per request instead (`export const dynamic = 'force-dynamic'` in its layout):
+  then the hook reads the real URL on the server and nothing bails out. After a
   build, `grep -o BAILOUT_TO_CLIENT_SIDE_RENDERING .next/server/app/<page>.html`
   says which pages still do it (every page has a few from the cookie banner,
   install prompt and feedback button, which are client-only on purpose).
@@ -593,7 +596,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #820 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #821 are merged.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -628,21 +631,47 @@ shift 0.065 on a cold load and 0.03 on a reload, no console errors, and the
 list below the connect cards. Not checked on a phone in production, since
 phone emulation lands in the mobile numbers (see the Nov 19-20 rules).
 
-**Nov 20: the other app pages (PR #821).** /dashboard, /settings, /compose,
-/queue and /drafts still render in the browser (their content needs the
-signed-in user's data), but their HTML and their own loading states now show
-the page's title and a skeleton (`components/AppPageSkeleton.tsx`) instead of a
-bare spinner, so a phone paints something before the JavaScript runs. A rule in
-`app/globals.css` gives every `md:ml-56 p-4` main column room for the phone
-menu button, which covered the start of the title on about 37 pages. Compose's
-column is built differently and is not covered yet. **Next:** compare these
-pages in Speed Insights a week after #820 and #821 deploy (Nov 27). Rendering
-/settings' forms and /compose's editor on the server would be the next big
-step, but both read the URL (`?tab=`, `?draft=`) and need care for hydration.
-Also open: a Speed Insights `beforeSend` that drops our own accounts (Nov 20's
-desktop `/accounts` row, RES 6 with a 45.6 s paint, was Claude's own visit in
-a pane that opened hidden). Small extra: `/studio-stax` rebuilds every minute
-(`revalidate = 60`).
+**Nov 20: the other app pages (#821, checked live) and PR #822.** #821:
+/dashboard, /settings, /compose, /queue and /drafts send the page's title and a
+skeleton (`components/AppPageSkeleton.tsx`) instead of a bare spinner, as do
+their own loading states and, since #822, the `loading.tsx` of those pages and
+/accounts (shown when moving between pages); a rule in
+`app/globals.css` gives every `md:ml-56 p-4` main column (and `phone-menu-room`,
+which compose uses) room for the phone menu button, which covered the start of
+the title on about 37 pages. Checked live after it deployed (13:29 UTC): all
+five render, each server HTML carries its title, no console errors. #822:
+- **/tiktok/studio** (49 on phones, 37 visits in 7 days, the busiest app page
+  there) showed a full-screen "Checking TikTok connection…" spinner until
+  TikTok answered creator_info, about 1.5 s into a desktop load. The server
+  page now also reads whether a TikTok row exists in `connected_accounts`
+  (`initialConnected`), so the first HTML is the studio or the connect screen;
+  only the account name in the header waits for TikTok, and the post form says
+  "Checking your TikTok account…" until it has answered. TikTok's answer still
+  wins if it disagrees.
+- **/settings** renders per request (`app/settings/layout.tsx`), so it arrives
+  as the real page with the `?tab=` tab open; its sign-in gate is gone (it
+  already filled the fields in as data arrived), and credit counts format as
+  en-US so the server and a German browser agree.
+- **/compose** asks for the workspace's accounts, the saved default platforms
+  and a reopened draft at once instead of one after another. Its editor is
+  still drawn after that data arrives, on purpose: typing into it earlier
+  would race a draft or default platforms loading over the person's input.
+- **Our own visits leave Vercel's numbers.** `/api/workspaces/accessible` says
+  `internal: true` for our accounts (`isInternalEmail`, reviewer logins
+  included), the workspace provider marks the browser
+  (`lib/internal-device.ts`), and `components/VercelInsights.tsx` drops its
+  Speed Insights and Web Analytics events. Each of our browsers is excluded
+  from its first signed-in app page on; checked locally (Analytics logs "Page
+  view would be ignored by `beforeSend`").
+- `/studio-stax` stays at `revalidate = 60`: it only rebuilds when visited, and
+  an hour would hide a newly paid listing for up to an hour. Refreshing it from
+  the Stripe webhook when a slot activates would be the clean fix, and the
+  webhook is on the ask-first list.
+
+**After #822 deploys:** open /settings?tab=Plan, /tiktok/studio and /compose
+signed in (beacons blocked), and check there's no console error. **Next:**
+compare the app pages in Speed Insights on Nov 27 (from Nov 21 on, without our
+own visits).
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402

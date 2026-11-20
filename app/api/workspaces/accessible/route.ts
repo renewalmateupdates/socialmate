@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getTeamOwnerRoles } from '@/lib/team-workspaces'
+import { isInternalEmail } from '@/lib/internal-accounts'
 
 /**
  * GET /api/workspaces/accessible
@@ -89,5 +90,7 @@ export async function GET() {
     })),
   ]
 
-  return NextResponse.json({ workspaces })
+  // `internal`: one of our own accounts, so the browser keeps its visits out of
+  // Vercel's numbers (lib/internal-device.ts). Only ever a boolean.
+  return NextResponse.json({ workspaces, internal: isInternalEmail(user.email) })
 }

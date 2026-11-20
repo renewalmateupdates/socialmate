@@ -488,15 +488,38 @@ function ComposeInner() {
       // side, because in a workspace someone else owns the accounts are the
       // owner's: a browser query on `user_id = me` listed the team member's
       // own accounts (usually none) and RLS hides the owner's rows anyway.
-      const scope: {
+      //
+      // The saved default platforms and the draft being reopened need nothing
+      // from that answer, so all three are asked at once. They used to run one
+      // after another, and the page showed nothing until the last came back.
+      const draftId     = searchParams.get('draft') || searchParams.get('id')
+      const hasTemplate = !!(searchParams.get('template') || searchParams.get('starterTemplate'))
+      type ScopeAnswer = {
         role?: string
         canPost?: boolean
         requiresApproval?: boolean
         accounts?: ConnectedAccount[]
         destinations?: Destination[]
-      } = await fetch(`/api/workspaces/accounts?workspaceId=${encodeURIComponent(wsId ?? '')}`)
-        .then(r => r.ok ? r.json() : {})
-        .catch(() => ({}))
+      }
+      const [scope, settingsRes, ownDraftRes] = await Promise.all([
+        fetch(`/api/workspaces/accounts?workspaceId=${encodeURIComponent(wsId ?? '')}`)
+          .then(r => r.ok ? r.json() : {})
+          .catch(() => ({})) as Promise<ScopeAnswer>,
+        // .maybeSingle(), not .single(): a user with no user_settings row is a
+        // zero-row lookup, which .single() reports as PGRST116 and which the
+        // discarded-error pattern would then swallow.
+        hasTemplate ? null : supabase
+          .from('user_settings')
+          .select('default_platforms')
+          .eq('user_id', data.user.id)
+          .maybeSingle(),
+        draftId ? supabase
+          .from('posts')
+          .select('*')
+          .eq('id', draftId)
+          .eq('user_id', data.user.id)
+          .maybeSingle() : null,
+      ])
 
       setUserRole((scope.role as typeof userRole) ?? 'owner')
       setCanPost(scope.canPost !== false)
@@ -549,18 +572,9 @@ function ComposeInner() {
       //   3. otherwise nothing, and the empty state takes over
       // Drafts and templates carry their own selection, so skip both here
       // rather than racing the effect that applies them.
-      const draftId     = searchParams.get('draft') || searchParams.get('id')
-      const hasTemplate = !!(searchParams.get('template') || searchParams.get('starterTemplate'))
       let defaultSelection: string[] = []
-      if (!hasTemplate) {
-        // .maybeSingle(), not .single(): a user with no user_settings row is a
-        // zero-row lookup, which .single() reports as PGRST116 and which the
-        // discarded-error pattern would then swallow.
-        const { data: uSettings, error: settingsErr } = await supabase
-          .from('user_settings')
-          .select('default_platforms')
-          .eq('user_id', data.user.id)
-          .maybeSingle()
+      if (settingsRes) {
+        const { data: uSettings, error: settingsErr } = settingsRes
         if (settingsErr) console.warn('[compose] default_platforms lookup failed', settingsErr)
 
         const live     = new Set(PLATFORMS.filter(p => p.live).map(p => p.id))
@@ -572,13 +586,8 @@ function ComposeInner() {
       }
 
       // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
-      if (draftId) {
-        const { data: ownDraft, error: draftErr } = await supabase
-          .from('posts')
-          .select('*')
-          .eq('id', draftId)
-          .eq('user_id', data.user.id)
-          .maybeSingle()
+      if (draftId && ownDraftRes) {
+        const { data: ownDraft, error: draftErr } = ownDraftRes
         if (draftErr) console.warn('[compose] draft lookup failed', draftErr)
         // Not the viewer's own: a teammate's draft in this workspace, which the
         // owner or an admin may send. RLS hides it from the query above, so it
@@ -1785,7 +1794,8 @@ function ComposeInner() {
           size. clip keeps wide content from scrolling the page sideways without
           capturing sticky. */}
       <div className="md:ml-56 flex-1 flex flex-col min-w-0 overflow-x-clip">
-        <div className="flex-1 p-4 md:p-8">
+        {/* phone-menu-room: clear of the fixed menu button on phones (app/globals.css). */}
+        <div className="flex-1 p-4 md:p-8 phone-menu-room">
         <div className="max-w-5xl mx-auto">
 
           <div className="flex items-center justify-between mb-6">

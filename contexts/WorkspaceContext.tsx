@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
+import { markInternalDevice } from '@/lib/internal-device'
 import {
   normalizePlan as normalizePlanShared,
   PLAN_ACCOUNTS_PER_PLATFORM,
@@ -168,7 +169,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const [ws, settingsRes, teamRes, accountsRes] = await Promise.all([
         fetch('/api/workspaces/accessible')
           .then(r => r.ok ? r.json() : { workspaces: [] })
-          .then(d => (d.workspaces ?? []) as Workspace[])
+          .then(d => {
+            // One of our own accounts: keep this browser out of Vercel's
+            // numbers from now on (lib/internal-device.ts).
+            if (d.internal === true) markInternalDevice()
+            return (d.workspaces ?? []) as Workspace[]
+          })
           .catch(() => [] as Workspace[]),
         supabase
           .from('user_settings')
