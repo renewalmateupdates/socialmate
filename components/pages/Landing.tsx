@@ -182,10 +182,8 @@ export function generateLocaleMetadata(locale: string): Metadata {
 
 export default function Landing({
   locale = 'en',
-  refCode = '',
 }: {
   locale?: string
-  refCode?: string
 }) {
   const t = createT(locale)
 
@@ -196,7 +194,9 @@ export default function Landing({
       <EmberField />
 
       <div className="relative z-10">
-      {refCode && <ReferralBanner refCode={refCode} />}
+      {/* Reads ?ref= in the browser and shows nothing without one, so the
+          page stays cacheable (see app/page.tsx). English only, as before. */}
+      {locale === 'en' && <ReferralBanner />}
       <ShopStrip
         badge={t('landing.shop_strip.badge')}
         lead={t('landing.shop_strip.lead')}

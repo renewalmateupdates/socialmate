@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { notificationsChanged } from '@/hooks/useUnreadNotifications'
 import { Bell, CheckCircle2, Gift, Megaphone, Users, XCircle, Zap, X as CloseIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -25,13 +26,13 @@ const PLACEHOLDER_NOTIFS = [
   {
     id: 'p1', type: 'system', read: false,
     title: 'Welcome to SocialMate!',
-    body: 'Your account is set up and ready to go. Connect a platform to activate your 50 AI credits.',
+    message: 'Your account is set up and ready to go. Connect a platform to activate your 50 AI credits.',
     created_at: new Date().toISOString(),
   },
   {
     id: 'p2', type: 'credit_low', read: false,
     title: 'Activate your AI credits',
-    body: 'Connect one platform and publish your first post to unlock 50 monthly AI credits.',
+    message: 'Connect one platform and publish your first post to unlock 50 monthly AI credits.',
     created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
   },
 ]
@@ -52,13 +53,21 @@ export default function Notifications() {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50)
-      const real = data || []
+      if (error) console.warn('[notifications] load failed:', error.message)
+      // is_read is the flag the bell, the badges and /api/notifications use.
+      // The table also has a `read` column that only this page read and wrote,
+      // so a notification read in one place stayed unread in the other: on
+      // Nov 20, 2026, 257 read from the bell still showed unread here, and 5
+      // read here still counted in the badge. The text is in `message`; this
+      // page showed `body`, which the table does not have, so every
+      // notification here showed its title over an empty line.
+      const real = (data || []).map(n => ({ ...n, read: n.is_read === true }))
       // Only show placeholders if user has no real notifications yet
       const combined = real.length > 0 ? real : [...real, ...PLACEHOLDER_NOTIFS]
       setNotifications(combined)
@@ -72,24 +81,34 @@ export default function Notifications() {
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
       return
     }
-    await supabase.from('notifications').update({ read: true }).eq('id', id)
+    const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id)
+    if (error) { console.warn('[notifications] mark read failed:', error.message); return }
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    notificationsChanged()
   }
 
   const markAllRead = async () => {
     const ids = notifications.filter(n => !n.read && !n.id.startsWith('p')).map(n => n.id)
     if (ids.length) {
-      await supabase.from('notifications').update({ read: true }).in('id', ids)
+      const { error } = await supabase.from('notifications').update({ is_read: true }).in('id', ids)
+      if (error) {
+        console.warn('[notifications] mark all read failed:', error.message)
+        showToast('Could not mark them read. Please try again.')
+        return
+      }
     }
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     showToast('All marked as read')
+    notificationsChanged()
   }
 
   const deleteNotif = async (id: string) => {
     if (!id.startsWith('p')) {
-      await supabase.from('notifications').delete().eq('id', id)
+      const { error } = await supabase.from('notifications').delete().eq('id', id)
+      if (error) { console.warn('[notifications] delete failed:', error.message); return }
     }
     setNotifications(prev => prev.filter(n => n.id !== id))
+    notificationsChanged()
   }
 
   const formatTime = (ts: string) => {
@@ -189,7 +208,7 @@ export default function Notifications() {
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{n.body}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{n.message}</p>
                       </div>
                     </div>
                   </div>

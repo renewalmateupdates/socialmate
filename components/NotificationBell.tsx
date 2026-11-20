@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { AlertTriangle, Bell, CheckCircle2, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { notificationsChanged, useUnreadNotifications } from '@/hooks/useUnreadNotifications'
 
 interface Notification {
   id: string
@@ -38,6 +39,10 @@ export default function NotificationBell() {
   const [panelPos, setPanelPos]           = useState({ top: 0, left: 0 })
   const buttonRef                         = useRef<HTMLButtonElement>(null)
 
+  // The badge reads the shared count. The list is fetched only when the panel
+  // opens: it used to be fetched every minute, in both copies of the sidebar,
+  // just to count it.
+  const unread      = useUnreadNotifications()
   const unreadCount = notifications.filter(n => !n.read).length
 
   const load = useCallback(async () => {
@@ -52,13 +57,6 @@ export default function NotificationBell() {
       setLoading(false)
     }
   }, [])
-
-  // Load on mount, then every 60 s
-  useEffect(() => {
-    load()
-    const id = setInterval(load, 60_000)
-    return () => clearInterval(id)
-  }, [load])
 
   // Close panel on outside click
   useEffect(() => {
@@ -98,6 +96,7 @@ export default function NotificationBell() {
         body: JSON.stringify({ markAllRead: true }),
       })
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      notificationsChanged()
     } catch { /* silent */ } finally {
       setMarking(false)
     }
@@ -109,7 +108,7 @@ export default function NotificationBell() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
-    }).catch(() => {})
+    }).then(() => notificationsChanged()).catch(() => {})
   }
 
   return (
@@ -125,9 +124,9 @@ export default function NotificationBell() {
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
-        {unreadCount > 0 && (
+        {unread > 0 && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[10px] font-extrabold text-white px-1" style={{ background: '#ef4444' }}>
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
