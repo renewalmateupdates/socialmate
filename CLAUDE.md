@@ -559,6 +559,28 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   sends still leaves nothing for app mail. Start a big send right after the
   reset and keep it well under 100.
 
+**From: November 20, 2026: app pages were a spinner until their JavaScript ran (PR #820)**
+
+- **`useSearchParams()` in a page sends the whole page as a spinner.** Next
+  renders everything up to the nearest Suspense in the browser instead, so the
+  HTML of /accounts, /dashboard, /settings, /compose, /queue and /drafts held
+  only a spinner, and a phone painted nothing useful until about 1.2 MB of
+  JavaScript had run. Read a callback's params from `window.location` in a mount
+  effect, or keep the hook in a small child with its own Suspense. After a
+  build, `grep -o BAILOUT_TO_CLIENT_SIDE_RENDERING .next/server/app/<page>.html`
+  says which pages still do it (every page has a few from the cookie banner,
+  install prompt and feedback button, which are client-only on purpose).
+- **supabase-js asks for the user one request at a time.** `getUser()` waits on
+  the client's auth lock, so nine callers on one page (providers, sidebar, page)
+  were nine round trips in a row before any of the page's own data. The browser
+  client now shares one check per page load (`lib/shared-user.ts`, applied in
+  `lib/supabase.ts`); don't add a second cache on top of it.
+- **A loading state has the shape of the loaded page.** /accounts showed
+  "Connect your first social account" while its list was still empty, then
+  removed it for everyone who had one: a 0.37 layout shift on every visit by a
+  returning user. Render what doesn't depend on the data at once, and put what
+  does where its arrival moves nothing on the first screen.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -566,34 +588,43 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #818 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #819 are merged.
 
-**Nov 20: AI works again (#818), and branch `fix/gemini-cooldown-nov20` makes it
-quick.** #817's merge deployed #816 at 02:15 UTC; `/api/admin/health` then
-showed `gemini-3.8-flash` answering 503 "high demand", then 12 s for one word,
-then nothing for 20 s, while `gemini-3.6-flash` answered in about a second.
-#818 (deployed 02:43 UTC) makes every Gemini call try `GEMINI_MODELS` (3.8
-Flash, 3.6 Flash, 3.5 Flash-Lite) in order; SOMA generate, campaign rewrites
-and SOMA ingest move on only after a quick failure (their answers are long);
-the Inngest jobs, HERMES, IRIS, the agents and the Stax blog cron use
-`geminiLongModel()` (45 s, 25 s a model), where before they had no time limit.
-**Checked live after #818:** the health check says `answeredBy`
-gemini-3.6-flash; all six Compose tools returned real output (caption, hook,
-rewrite, thread, repurpose, hashtags), but in 10 to 32 s, each waiting out 3.8
-first. The cooldown branch asks a model that just failed last for 3 minutes
-and gives each model 10 s, not 15. **After it deploys:** run two Write with AI
-requests in a row; the second should take a few seconds. Vercel's logs show
-`[gemini] ... asking ...` lines when a model hands over. If Google keeps
-shedding the free tier, a billed Gemini project is Joshua's call (Flash costs
-cents at this volume).
+**Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
+`GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
+and a model that just failed is asked last for 3 minutes. Checked live after
+#819 deployed (03:24 UTC): three rewrites in a row took 17.1 s, 4.8 s and
+10.9 s, all with real output, and Vercel's `[gemini]` log lines showed 3.8
+skipped after its failure and 3.5 Flash-Lite answering when 3.6 stalled too.
+Google sheds the free tier per model. Joshua said not now to a billed Gemini
+project (Nov 20): raise it again only if every model in the chain refuses,
+not when AI is merely slow.
 
-**Nov 20: what Speed Insights says.** Marketing pages are fast on phones (7
-days: `/` 95, `/blog/[slug]` 99, `/signup` 99). App pages are not: `/settings`
-42, `/tiktok/studio` 49 (37 visits), `/onboarding` 51, `/dashboard` 54,
-`/accounts` 55, `/compose` 66; `/queue`'s 12 is mostly our own phone-emulation
-checks (see the Nov 19-20 rules). Worth its own pass: onboarding and accounts
-are where people activate. Small extra: `/studio-stax` rebuilds every minute
-(`revalidate = 60`).
+**Nov 20: app pages on phones (PR #820).** Speed Insights (7 days) had
+marketing pages fast on phones and app pages slow: `/settings` 42,
+`/tiktok/studio` 49, `/onboarding` 51, `/dashboard` 54, `/accounts` 55,
+`/compose` 66. Measured on /accounts: its HTML was a spinner (see the Nov 20
+rules), nine `auth/v1/user` requests ran back to back, and the layout shifted
+0.37 to 0.40 when the list arrived. #820: one shared sign-in check per page
+load (`lib/shared-user.ts`, tested); the sidebar builds only the copy on screen
+(phone drawer or desktop rail), after mount, which also lets pages render on
+the server; the workspace provider's four reads run at once; /accounts renders
+on the server (the build's `accounts.html` now holds the page) with the connect
+cards first and nothing waiting on the list, no stat cards on phones (the line
+under the title says the same), the title clear of the menu button, one read of
+the accounts per visit instead of two, and the Pinterest and Reddit "coming
+soon" copy corrected (both declined). Checked locally: no hydration errors, and
+a phone's first paint shows four Connect buttons before any JavaScript runs.
+/onboarding already rendered on the server and loads its connect forms lazily;
+it gains from the shared fixes. **After it deploys:** open /accounts signed in
+on a desktop and a phone (the list fills in below the connect cards), and
+compare /accounts in Speed Insights a week later. **Next:** the same treatment
+for /dashboard, /settings, /compose, /queue and /drafts, still spinner-only;
+the menu button covers the start of the title on phones on about 37 app pages
+(`p-4 md:p-8`; /accounts has the fix); and a Speed Insights `beforeSend` that
+drops our own accounts (Nov 20's desktop `/accounts` row, RES 6 with a 45.6 s
+paint, was Claude's own visit in a pane that opened hidden). Small extra:
+`/studio-stax` rebuilds every minute (`revalidate = 60`).
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402

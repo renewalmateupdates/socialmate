@@ -1,6 +1,5 @@
 'use client'
-import { Suspense, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { markActivated } from '@/lib/activation'
 import { useRouter } from 'next/navigation'
@@ -29,10 +28,6 @@ function PlatformGlyph({ id, size = 20, className = '' }: { id: string; size?: n
   return <PlatformIcon name={id} size={size} className={className} />
 }
 
-function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
-}
-
 type Account = {
   id: string
   platform: string
@@ -59,8 +54,8 @@ const PLATFORM_META: Record<string, {
   mastodon:  { color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'live'        },
   linkedin:  { color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'live' },
   youtube:   { color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Awaiting Google review' },
-  pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'planned',     statusNote: 'Not approved by Pinterest yet' },
-  reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'planned',     statusNote: 'Not approved by Reddit yet' },
+  pinterest: { color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'planned',     statusNote: 'Pinterest declined our application' },
+  reddit:    { color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'planned',     statusNote: 'Reddit declined our application' },
   instagram: { color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Built, waiting on Meta app review'          },
   facebook:  { color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Pages. Built, waiting on Meta app review'   },
   tiktok:    { color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
@@ -299,8 +294,12 @@ function AccountsInner() {
       })
   }, [])
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { plan, activeWorkspace } = useWorkspace()
+  // The scope the account list is read for: a client workspace's id, or null
+  // for the personal one. activeWorkspace starts null and resolves a moment
+  // later, which used to re-run the load below with the same answer, so every
+  // visit read the accounts, the destinations and the X quota twice.
+  const scopeId = activeWorkspace && !activeWorkspace.is_personal ? activeWorkspace.id : null
   const { t } = useI18n()
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
@@ -349,7 +348,13 @@ function AccountsInner() {
     setAccounts(data || [])
   }
 
+  // Read once, from the address bar, on arrival. Every connect callback lands
+  // here with a full page load, so there is nothing to re-read later. This was
+  // useSearchParams(), which made Next send this whole page as a bare spinner
+  // until all of its JavaScript had run (Nov 20, 2026: the page scored 55 on
+  // phones); reading it here lets the page itself come in the first HTML.
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
     const success = searchParams.get('success')
     const error = searchParams.get('error')
     // Every OAuth callback redirects back here as `<platform>_connected` or
@@ -383,8 +388,8 @@ function AccountsInner() {
     if (success || error) {
       const cleaned = new URL(window.location.href)
       ;['success', 'error', 'limit', 'plan', 'until'].forEach(k => cleaned.searchParams.delete(k))
-      // `searchParams` above is this render's snapshot, so the plan-limit toast
-      // below still reads the values it needs.
+      // `searchParams` above was read before this, so the plan-limit toast
+      // below still has the values it needs.
       window.history.replaceState(null, '', cleaned.pathname + cleaned.search)
     }
     // The cap is now enforced server-side in every connect callback, so a user
@@ -415,7 +420,7 @@ function AccountsInner() {
     if (error && !error.endsWith('_plan_limit')) {
       showToast(connectErrorMessage(error, searchParams.get('until')), 'error')
     }
-  }, [searchParams, router])
+  }, [router])
 
   // Record the view exactly once per mount.
   //
@@ -487,45 +492,43 @@ function AccountsInner() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      if (cancelled) return
       if (!user) { router.push('/login'); return }
       let q = supabase
         .from('connected_accounts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-      if (activeWorkspace && !activeWorkspace.is_personal) {
-        q = q.eq('workspace_id', activeWorkspace.id) as typeof q
-      } else {
-        q = q.is('workspace_id', null) as typeof q
-      }
-      const { data } = await q
-      setAccounts(data || [])
-      setLoading(false)
-
+      q = (scopeId ? q.eq('workspace_id', scopeId) : q.is('workspace_id', null)) as typeof q
       let dq = supabase
         .from('post_destinations')
         .select('platform')
         .eq('user_id', user.id)
-      dq = (activeWorkspace && !activeWorkspace.is_personal
-        ? dq.eq('workspace_id', activeWorkspace.id)
-        : dq.is('workspace_id', null)) as typeof dq
-      const { data: destRows, error: destErr } = await dq
+      dq = (scopeId ? dq.eq('workspace_id', scopeId) : dq.is('workspace_id', null)) as typeof dq
+      // Both at once: neither needs the other's answer.
+      const [{ data, error }, { data: destRows, error: destErr }] = await Promise.all([q, dq])
+      if (cancelled) return
+      if (error) console.warn('[accounts] accounts lookup failed', error)
       if (destErr) console.warn('[accounts] destinations lookup failed', destErr)
+      setAccounts(data || [])
       setDestinationPlatforms(new Set((destRows || []).map((d: { platform: string }) => d.platform)))
+      setLoading(false)
 
       // Fetch Twitter quota if Twitter is connected
       const twitterConnected = (data || []).some((a: Account) => a.platform === 'twitter')
       if (twitterConnected) {
         fetch('/api/accounts/twitter/quota')
           .then(r => r.json())
-          .then(d => { if (!d.error) setTwitterQuota(d) })
+          .then(d => { if (!cancelled && !d.error) setTwitterQuota(d) })
           .catch(() => {})
       }
     }
     getData()
-  }, [router, activeWorkspace])
+    return () => { cancelled = true }
+  }, [router, scopeId])
 
   const handleDisconnect = async (id: string, platform: string) => {
     setDisconnecting(id)
@@ -621,7 +624,9 @@ function AccountsInner() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
+      {/* Extra room at the top on phones: the menu button is fixed there and
+          used to sit on top of the start of the page title. */}
+      <div className="md:ml-56 flex-1 min-w-0 p-4 pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] md:p-8">
         <div className="max-w-5xl mx-auto">
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -635,7 +640,7 @@ function AccountsInner() {
               </p>
             </div>
             <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-surface border border-theme rounded-xl px-4 py-2.5 self-start sm:self-auto">
-              {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}
+              {loading ? '…' : accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}
             </div>
           </div>
 
@@ -760,7 +765,7 @@ function AccountsInner() {
                 {plan === 'agency' && <><Building2 className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} /> Agency plan — up to 10 accounts per platform, client workspaces included</>}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                {plan === 'free'   ? 'YouTube, Pinterest & Reddit are coming very soon. Upgrade to Pro for more accounts per platform.' :
+                {plan === 'free'   ? 'Upgrade to Pro for up to 5 accounts per platform.' :
                  plan === 'pro'    ? 'Upgrade to Agency for 10 accounts per platform and client workspaces.' :
                  "You're on the highest tier — full access across all platforms as they go live."}
               </p>
@@ -773,48 +778,55 @@ function AccountsInner() {
             )}
           </div>
 
-          {/* FIRST-TIME EMPTY STATE */}
-          {accounts.length === 0 && (
-            <div className="mb-8 bg-gradient-to-r from-black to-gray-800 rounded-2xl p-6 text-white">
-              <div className="flex items-start gap-4">
-                <Plug className="w-8 h-8 flex-shrink-0" strokeWidth={1.5} />
-                <div className="flex-1">
-                  <p className="font-extrabold text-lg tracking-tight mb-1">Connect your first social account</p>
-                  <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                    Pick one of the live platforms below to get started. You can connect as many as you want — all free.
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    {livePlatforms.map(platform => {
-                      const meta = PLATFORM_META[platform]
-                      return (
-                        <div key={platform} className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm font-semibold">
-                          <PlatformGlyph id={platform} size={16} /> {meta.label}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* No "connect your first account" banner here any more. It showed
+              while the accounts were still loading (the list starts empty) and
+              then vanished for everyone who had one, moving the whole page up by
+              its height: most of this page's 0.37 layout shift, measured live on
+              Nov 20, 2026. The connect cards below say the same thing and sit
+              higher now. */}
 
-          {/* STAT CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
-              [
-                { label: 'Connected',            value: accounts.length,                                               icon: CheckCircle2, color: 'text-green-600' },
-                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${livePlatforms.length} live`, icon: Smartphone, color: 'text-gray-700' },
-                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                 icon: Unlock, color: 'text-blue-600' },
-              ].map(stat => (
-                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{stat.label}</span>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} strokeWidth={1.75} />
-                  </div>
-                  <div className={`text-2xl font-extrabold tracking-tight dark:text-gray-100 ${stat.color}`}>{stat.value}</div>
+          {/* STAT CARDS — always the real cards, so nothing changes size when
+              the numbers arrive. Not on phones, where they stacked three deep
+              and pushed every Connect button off the first screen; the line
+              under the title already says how many are connected and the cap. */}
+          <div className="hidden sm:grid grid-cols-3 gap-4 mb-8">
+            {[
+              { label: 'Connected',            value: loading ? '…' : accounts.length,                                               icon: CheckCircle2, color: 'text-green-600' },
+              { label: 'Platforms Used',        value: loading ? '…' : `${connectedPlatforms.size} / ${livePlatforms.length} live`, icon: Smartphone, color: 'text-gray-700' },
+              { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                                  icon: Unlock, color: 'text-blue-600' },
+            ].map(stat => (
+              <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{stat.label}</span>
+                  <stat.icon className={`w-4 h-4 ${stat.color}`} strokeWidth={1.75} />
                 </div>
-              ))
-            )}
+                <div className={`text-2xl font-extrabold tracking-tight dark:text-gray-100 ${stat.color}`}>{stat.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* LIVE INTEGRATIONS — before the connected list, and never waiting on
+              it: the cards are the same for everyone, only their counts fill in.
+              On a phone the connect buttons used to start below the first
+              screen, under a banner and three stat cards. */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-sm font-bold tracking-tight">{t('app_accounts.add_account')}</h2>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{livePlatforms.length} available now</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {livePlatforms.map(platform => (
+                <PlatformCard
+                  key={platform}
+                  platform={platform}
+                  connectable={true}
+                  accountsPerPlatform={accountsPerPlatform}
+                  accountsByPlatform={accountsByPlatform}
+                  connectingPlatform={connectingPlatform}
+                  onConnect={handleConnect}
+                />
+              ))}
+            </div>
           </div>
 
           {/* CONNECTED ACCOUNTS */}
@@ -1025,33 +1037,6 @@ function AccountsInner() {
             </div>
           )}
 
-          {/* LIVE INTEGRATIONS */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-bold tracking-tight">{t('app_accounts.add_account')}</h2>
-              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{livePlatforms.length} available now</span>
-            </div>
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[1,2,3,4].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {livePlatforms.map(platform => (
-                  <PlatformCard
-                    key={platform}
-                    platform={platform}
-                    connectable={true}
-                    accountsPerPlatform={accountsPerPlatform}
-                    accountsByPlatform={accountsByPlatform}
-                    connectingPlatform={connectingPlatform}
-                    onConnect={handleConnect}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* COMING SOON */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
@@ -1100,9 +1085,8 @@ function AccountsInner() {
               <div>
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  YouTube is waiting on Google&apos;s review. Pinterest and Reddit have not approved our apps yet.
-                  Instagram, Facebook, and Threads are planned but not started, because they need a long app review from Meta.
-                  We'll notify you on your dashboard the moment each one goes live.
+                  YouTube is built and waiting on Google&apos;s review, and Instagram, Facebook and Threads are built
+                  and waiting on Meta&apos;s. Pinterest and Reddit declined our applications, so they are not coming soon.
                 </p>
               </div>
             </div>
@@ -1176,14 +1160,9 @@ function AccountsInner() {
   )
 }
 
+// No Suspense spinner around the page any more: nothing in it waits on the
+// request, so the build renders the whole page (header, plan, connect cards)
+// into its HTML, and a phone shows it before any JavaScript has run.
 export default function Accounts() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-dvh bg-theme flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
-      </div>
-    }>
-      <AccountsInner />
-    </Suspense>
-  )
+  return <AccountsInner />
 }
