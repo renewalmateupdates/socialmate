@@ -596,7 +596,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #824 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #825 are merged.
+
+**Nov 20: Joshua's 500 autonomy questions.** He asked what Claude should do
+on its own to take SocialMate toward a billion-dollar company and the shop
+toward six or seven figures. The page is
+https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA; answers land in its
+`answers` collection (ArtifactData `list`, `query.limit` 1000; one doc per
+question, `q001` to `q500`, with `value` and `note`). When he says he's done:
+read them all, list his yeses back once in chat, and treat them as standing
+orders only after he confirms there. Per-action OKs still apply (money,
+sign-ins, new accounts, terms, anything sent or posted in his name from a
+browser), and so does the ask-first list below.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -732,7 +743,7 @@ label request shows a `[mail] stripe webhook: ...` line in Vercel's logs only
 if Resend refuses the email.
 
 **Nov 20: content to Jan 1, the shop sells merch only, and the guide PDFs are
-free (branch `feat/free-guide-pdfs-nov20`).**
+free (#825, merged and checked live Nov 20).**
 - Content: 60 posts from Nov 21 to Jan 1 in a Bulk CSV (Compose > Bulk >
   Import CSV; agency imports 100 rows at a time) and an 18-video TikTok plan,
   in Joshua's `Videos\SocialMate content` folder with the 9 demo clips and the
@@ -746,16 +757,35 @@ free (branch `feat/free-guide-pdfs-nov20`).**
   store's own log is Joshua's `Downloads\Gilgamesh Shop\SHOP-LOG.md`.
 - **After Nov 30:** put the shop's announcement bar back (Online Store >
   Themes > Customize > Announcement bar). The discount ends by itself.
-- The branch: the 7 PDFs download free from `public/downloads`
+- #825: the 7 PDFs download free from `public/downloads`
   (`lib/guide-pdfs.ts`, checked by `scripts/test-guide-pdfs.mjs`, which fails
   when a size label stops matching its file). Each guide ends with its PDF
   (`components/GuidePdfCard.tsx`), `/guides#downloads` lists all seven, and
   `guide_pdf_downloaded` records each download (GA4 only for signed-out
   readers). `lib/shop/merch-shop.ts` keeps only the merch shop link; the SM-Give
-  lines say merch profit only. Until it deploys, the guide pages' cards point
-  at the drafted Shopify listings, which answer 404.
+  lines say merch profit only. Checked live after it deployed: all seven files
+  answer 200 `application/pdf` (the Complete Edition downloads in full, 3,089,539
+  bytes), `/guides` has the downloads section, and the first-30-days guide
+  carries the free card with no shop listing links (the test covers the rest).
 - The PDFs still say "licensed for the buyer's personal use" and end with a
   pointer to the shop; harmless, but say so if Joshua asks for a re-render.
+- Joshua ended the "Gilgamesh Shop" campaign himself. Checked in production:
+  status `ended`, its 20 sent posts kept, no queued posts left on that account,
+  and no scheduled or draft post anywhere links a drafted PDF listing. The empty
+  "Guides and Digital Downloads" collection is unpublished from all four
+  channels (its page answers 404); the storefront lists 24 products, all merch.
+- gilgameshenterprise.com still sold the PDFs (its /guides card, its homepage
+  shop card and its llms.txt): renewalmateupdates/gilgameshenterprise#25
+  points them at the free downloads. renewalmate.com had nothing to change.
+- **Found, not fixed (the publish job is on the ask-first list):** when a
+  queued post is deleted (ending a campaign, a user deleting from the Queue),
+  its `post/scheduled` run still wakes at the post's time. `check-post-status`
+  uses `.single()` and only skips when a row exists, so a missing row falls
+  through to `/api/posts/publish`, which answers 404, and the step throws and
+  retries three times. Nothing is posted; it is four wasted publish calls and
+  a failed run in Inngest per deleted post. The fix is `.maybeSingle()` with
+  "no error and no row" returning skipped, while a real read error still
+  throws so a database hiccup can't drop a live post.
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402
