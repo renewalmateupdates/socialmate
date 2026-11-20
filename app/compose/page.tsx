@@ -72,14 +72,17 @@ const REVIEW_GATED: Record<string, boolean> = {
 // /tiktok/studio rather than this page. Labelling it "Soon" told seven people
 // the thing they had just connected did not work yet. It is rendered below as
 // a link to the Studio instead.
+//
+// Only platforms that are built and waiting on a review. Snapchat, Lemon8 and
+// BeReal were listed as "Soon" with nothing planned, and Pinterest and Reddit
+// (PLATFORMS, live: false) as "Soon" after both declined our applications; on
+// a phone those chips were a screen of things nobody could pick, between the
+// top of the page and the box to write in (Nov 20, 2026).
 const COMING_SOON_PLATFORMS = [
   { id: 'instagram', name: 'Instagram' },
   { id: 'facebook',  name: 'Facebook' },
   { id: 'threads',   name: 'Threads' },
   { id: 'youtube',   name: 'YouTube' },
-  { id: 'snapchat',  name: 'Snapchat' },
-  { id: 'lemon8',    name: 'Lemon8' },
-  { id: 'bereal',    name: 'BeReal' },
 ]
 
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
@@ -233,6 +236,8 @@ function ComposeInner() {
   const [approvalRequired, setApprovalRequired] = useState(false)
   const [canPost, setCanPost] = useState(true)
   const [showPostingDisclaimer, setShowPostingDisclaimer] = useState(false)
+  // The template strip, folded on phones (it sat above the box to write in).
+  const [templatesOpen, setTemplatesOpen] = useState(false)
   // Starts empty and is filled from the user's real connections once they load.
   // This used to default to ['discord'] for everybody. Measured 2026-09-01: all
   // sixteen external accounts that had connected a platform still had
@@ -719,7 +724,6 @@ function ComposeInner() {
   // thread.
   const threadCapablePlatforms = ['bluesky', 'mastodon', 'twitter']
   const threadPlatformChoices = livePlatforms.filter(p => threadCapablePlatforms.includes(p.id))
-  const soonPlatforms = PLATFORMS.filter(p => !p.live)
   // Connected platforms this composer can actually post to. TikTok takes video
   // (TikTok Studio) and X is only postable on Pro, so someone whose only
   // connections are those has nothing to select and, until now, no explanation.
@@ -1862,9 +1866,18 @@ function ComposeInner() {
               <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" strokeWidth={2} />
               <div className="flex-1">
                 <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Heads up on automated posting</p>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
+                {/* On a phone the full note took a third of the first screen, above
+                    the box to write in, every session. One line there, the rest
+                    one tap away; unchanged on larger screens. */}
+                <p className="hidden sm:block text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
                   Scheduled and bulk posting can trigger spam detection on some platforms — especially Mastodon, Bluesky, and X. Space out your posts, vary your content, and stay within each platform&apos;s rate limits. We&apos;re not responsible for account actions taken by third-party platforms.
                 </p>
+                <details className="sm:hidden text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
+                  <summary className="cursor-pointer">Space out scheduled posts so platforms don&apos;t flag them as spam. <span className="font-bold underline">More</span></summary>
+                  <p className="mt-1">
+                    Scheduled and bulk posting can trigger spam detection on some platforms — especially Mastodon, Bluesky, and X. Vary your content, and stay within each platform&apos;s rate limits. We&apos;re not responsible for account actions taken by third-party platforms.
+                  </p>
+                </details>
               </div>
               <button onClick={dismissDisclaimer} className="text-amber-400 hover:text-amber-600 text-lg leading-none shrink-0">×</button>
             </div>
@@ -2063,13 +2076,6 @@ function ComposeInner() {
                     )}
                     <span className="text-[10px] font-extrabold ml-0.5">Studio →</span>
                   </Link>
-                  {soonPlatforms.map(p => (
-                    <div key={p.id} title={`${p.name} — coming soon`}
-                      className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
-                      <PlatformGlyph id={p.id} size={14} className="text-blue-300" /><span>{p.name}</span>
-                      <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
-                    </div>
-                  ))}
                   {COMING_SOON_PLATFORMS.filter(p => !livePlatforms.some(l => l.id === p.id)).map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
@@ -2209,8 +2215,18 @@ function ComposeInner() {
               {/* STARTER TEMPLATES QUICK STRIP — only shown when textarea is empty */}
               {!content && !searchParams.get('draft') && !searchParams.get('id') && !searchParams.get('starterTemplate') && !searchParams.get('template') && (
                 <div className="bg-surface border border-theme rounded-2xl p-4">
-                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">{t('app_compose.template')}</p>
-                  <div className="flex flex-wrap gap-2">
+                  {/* Fifteen buttons stacked seven rows deep on a phone, above the
+                      box to write in. Folded there, open on larger screens. */}
+                  <button
+                    type="button"
+                    onClick={() => setTemplatesOpen(o => !o)}
+                    aria-expanded={templatesOpen}
+                    className="md:hidden w-full min-h-[44px] flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {t('app_compose.template')}
+                    <span className="normal-case font-semibold">{templatesOpen ? 'Hide' : 'Start from one'}</span>
+                  </button>
+                  <p className="hidden md:block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">{t('app_compose.template')}</p>
+                  <div className={`${templatesOpen ? 'flex mt-2' : 'hidden'} md:flex flex-wrap gap-2`}>
                     {[
                       { id: 'starter-1',  label: 'Product Launch',         icon: Rocket },
                       { id: 'starter-2',  label: 'Tips & Tricks',          icon: Lightbulb },

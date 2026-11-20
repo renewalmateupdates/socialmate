@@ -13,7 +13,7 @@ import {
   MessageCircle, Palette, XCircle, Zap,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { track } from '@/lib/analytics'
+import { track, type TrackParams } from '@/lib/analytics'
 import { tiktokChunkRanges } from '@/lib/tiktok-chunks'
 import { STUDIO_POLL_MS } from '@/lib/tiktok-publish-status'
 import { putStagedVideo, uploadToTiktok } from '@/lib/tiktok-upload'
@@ -877,6 +877,26 @@ export default function TikTokStudioClient({ initialConnected }: {
   const videoRef    = useRef<HTMLVideoElement>(null)
   const canvasRef   = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // When the video picker was opened, to tell "never tried" from "the picker
+  // came back empty" (tiktok_picker_opened / _cancelled) and to time the pick.
+  const pickerOpenedAt = useRef<number | null>(null)
+  const openPicker = () => {
+    pickerOpenedAt.current = Date.now()
+    track('tiktok_picker_opened', { has_video: !!videoFile })
+    fileInputRef.current?.click()
+  }
+  const pickerCancelled = useCallback(() => {
+    const ms = pickerOpenedAt.current !== null ? Date.now() - pickerOpenedAt.current : null
+    pickerOpenedAt.current = null
+    track('tiktok_picker_cancelled', ms !== null ? { ms } : {})
+  }, [])
+  // The picker closing with nothing chosen fires the input's native `cancel`
+  // event, which React has no prop for on <input>, so it is bound here. Both
+  // file inputs (empty stage, editor) use this ref; one is mounted at a time.
+  const bindFileInput = useCallback((el: HTMLInputElement | null) => {
+    fileInputRef.current = el
+    el?.addEventListener('cancel', pickerCancelled)
+  }, [pickerCancelled])
   const animRef     = useRef<number | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
   const audioSrcRef = useRef<MediaElementAudioSourceNode | null>(null)
@@ -1189,30 +1209,42 @@ export default function TikTokStudioClient({ initialConnected }: {
   const maxDurationSec = limits.maxDurationSec
   const handleFile = useCallback((file: File) => {
     setFileError(null)
+    // How long the picker took to hand the file over (a phone may spend a while
+    // preparing a large video), when it was our picker and not a drop.
+    const pick: TrackParams = pickerOpenedAt.current !== null ? { pick_ms: Date.now() - pickerOpenedAt.current } : {}
+    pickerOpenedAt.current = null
     if (!ACCEPTED_FORMATS.includes(file.type)) {
       setFileError('Only MP4 and MOV files are supported.')
-      track('tiktok_video_rejected', { reason: 'format', type: file.type || 'unknown' })
+      track('tiktok_video_rejected', { reason: 'format', type: file.type || 'unknown', ...pick })
       return
     }
     if (file.size > MAX_FILE_BYTES) {
       setFileError(`File too large. Max 500 MB (yours: ${formatBytes(file.size)}).`)
-      track('tiktok_video_rejected', { reason: 'too_large', mb: Math.round(file.size / 1e6) })
+      track('tiktok_video_rejected', { reason: 'too_large', mb: Math.round(file.size / 1e6), ...pick })
       return
     }
 
     const url = URL.createObjectURL(file)
     const tempVideo = document.createElement('video')
     tempVideo.src = url
+    // A file this browser cannot decode (an iPhone's HEVC video in some Android
+    // browsers, say) used to do nothing at all: no error, no video, the same
+    // empty stage, because only the success path was handled.
+    tempVideo.onerror = () => {
+      setFileError('This browser could not open that video. Try another one, or save it as an MP4.')
+      track('tiktok_video_rejected', { reason: 'unreadable', type: file.type || 'unknown', mb: Math.round(file.size / 1e6), ...pick })
+      URL.revokeObjectURL(url)
+    }
     tempVideo.onloadedmetadata = () => {
       if (tempVideo.duration < MIN_DURATION_S) {
         setFileError(`Video too short. Minimum ${MIN_DURATION_S} seconds.`)
-        track('tiktok_video_rejected', { reason: 'too_short', seconds: Math.round(tempVideo.duration) })
+        track('tiktok_video_rejected', { reason: 'too_short', seconds: Math.round(tempVideo.duration), ...pick })
         URL.revokeObjectURL(url)
         return
       }
       if (tempVideo.duration > maxDurationSec) {
         setFileError(`Video too long. Your TikTok account allows up to ${formatTime(maxDurationSec)} (yours: ${formatTime(tempVideo.duration)}).`)
-        track('tiktok_video_rejected', { reason: 'too_long', seconds: Math.round(tempVideo.duration), limit: maxDurationSec })
+        track('tiktok_video_rejected', { reason: 'too_long', seconds: Math.round(tempVideo.duration), limit: maxDurationSec, ...pick })
         URL.revokeObjectURL(url)
         return
       }
@@ -1227,7 +1259,7 @@ export default function TikTokStudioClient({ initialConnected }: {
       setFrames([])
       setCoverTime(null)
       setCoverAuto(false)
-      track('tiktok_video_added', { seconds: Math.round(tempVideo.duration), mb: Math.round(file.size / 1e6) })
+      track('tiktok_video_added', { seconds: Math.round(tempVideo.duration), mb: Math.round(file.size / 1e6), ...pick })
     }
   }, [maxDurationSec])
 
@@ -1771,8 +1803,8 @@ export default function TikTokStudioClient({ initialConnected }: {
 
       <div className="md:ml-56 flex-1 min-w-0 flex flex-col">
 
-        {/* ── Header ── */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-4 md:px-6 py-3 bg-void/95 backdrop-blur border-b border-edge/80">
+        {/* ── Header ── pl-16 on phones clears the fixed menu button, which covered the logo. */}
+        <div className="sticky top-0 z-20 flex items-center justify-between pl-16 pr-4 md:px-6 py-3 bg-void/95 backdrop-blur border-b border-edge/80">
           <div className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0"
@@ -1839,7 +1871,7 @@ export default function TikTokStudioClient({ initialConnected }: {
                   onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={openPicker}
                   className="relative w-full h-full min-h-[60vh] flex items-center justify-center cursor-pointer group"
                 >
                   {/* Ambient field. The stage used to be an unbroken black
@@ -1920,7 +1952,7 @@ export default function TikTokStudioClient({ initialConnected }: {
                   </div>
 
                   <input
-                    ref={fileInputRef}
+                    ref={bindFileInput}
                     type="file"
                     accept=".mp4,.mov,video/mp4,video/quicktime"
                     className="hidden"
@@ -2016,14 +2048,14 @@ export default function TikTokStudioClient({ initialConnected }: {
                       Guides
                     </button>
                     <button
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={openPicker}
                       className="font-mono text-[10px] uppercase tracking-[0.14em] bg-void/80 text-ink-muted px-2.5 py-1.5 rounded-xl hover:text-ink-high border border-edge transition-colors backdrop-blur-sm"
                     >
                       Change
                     </button>
                   </div>
                   <input
-                    ref={fileInputRef}
+                    ref={bindFileInput}
                     type="file"
                     accept=".mp4,.mov,video/mp4,video/quicktime"
                     className="hidden"

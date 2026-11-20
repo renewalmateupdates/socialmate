@@ -596,7 +596,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #821 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #822 are merged.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -668,10 +668,46 @@ five render, each server HTML carries its title, no console errors. #822:
   the Stripe webhook when a slot activates would be the clean fix, and the
   webhook is on the ask-first list.
 
-**After #822 deploys:** open /settings?tab=Plan, /tiktok/studio and /compose
-signed in (beacons blocked), and check there's no console error. **Next:**
-compare the app pages in Speed Insights on Nov 27 (from Nov 21 on, without our
-own visits).
+**Checked live after #822 deployed (14:05 UTC):** /settings?tab=Plan arrives
+with the Plan tab in its HTML; /tiktok/studio arrives with "Choose a video to
+start" and no spinner, and the header fills in when TikTok answers (0.6 s; one
+first answer was slower); compose's accounts and default-platform reads start
+together (0.92 s); no console errors; `/api/workspaces/accessible` says
+`internal: true` for the admin and the browser is marked. **Next:** compare the
+app pages in Speed Insights on Nov 27 (from Nov 21 on, without our own visits).
+
+**Nov 20: where connected people stop, and PR #823.** Read-only, 30 days,
+outside accounts: 99 have a connection, 65 of them TikTok only. TikTok-only: 23
+opened Studio, 12 added a video, 5 pressed Post, 3 got one out, 4 hit a failure
+(phone uploads cut off, an upload 500, a staging error; all before #813, and no
+outside attempt since). Text platforms: 13 connected, 8 opened Compose, 3
+tried, 3 to 4 published. Compose's "TikTok takes video" card works: of 20
+Compose exits by TikTok-only people with nothing to pick, 14 opened Studio
+within 10 minutes. The biggest drop is Studio's first step: 11 of 23 never
+added a video, and nothing said why. #823:
+- **Studio:** `tiktok_picker_opened` and `tiktok_picker_cancelled`
+  (`lib/analytics.ts`), and `pick_ms` on `tiktok_video_added` and
+  `_rejected` (opening the picker to getting a file, which includes an iPhone
+  preparing a big video). A video the browser cannot decode used to do nothing
+  at all (only success was handled); it now says so and records
+  `tiktok_video_rejected` with reason `unreadable`. The header clears the phone
+  menu button.
+- **Compose on a phone:** the box to write in started 1.68 screens down, under
+  the automated-posting note, a platform list with five unusable "Soon" chips
+  and fifteen template buttons. The note is one line on phones (the rest behind
+  "More"), the templates fold behind "Start from one", and the Pinterest,
+  Reddit (both declined), Snapchat, Lemon8 and BeReal "Soon" chips are gone;
+  Instagram, Facebook, Threads and YouTube stay "Soon" (built, in review).
+- **The unread badge** is shared between a person's tabs
+  (`lib/unread-cache.ts`, tested): the tab that asks stores the answer in
+  localStorage, the others use it while fresh and hear it at once, so about one
+  request a minute per person, not per open tab (two Reddit commenters'
+  suggestion).
+
+**After #823 deploys:** open /compose and /tiktok/studio at phone size signed in
+(the box to write in near the top; the Studio header clear of the menu). From
+Nov 21, `/admin/funnel` shows how many open the picker, cancel it, or hit
+`unreadable`; read it around Nov 27 to decide Studio's next fix.
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402
@@ -695,9 +731,10 @@ cache (`x-vercel-cache: PRERENDER`, then `HIT`) and `?ref=` still sets
 `sm_ref`; logged-out `/compose` still redirects to sign-in; API calls no longer
 pass through the proxy; `/notifications` says "12 unread", the same as the
 count route, with each notification's text showing; a page load fetches the
-count, X quota, SOMA credits and approvals once each. **Not yet:** marking one
-read lowering both badges (a click on the admin's own notifications), "Mark all
-read" once for the admin's 5 old rows, and Observability a day later (the two
+count, X quota, SOMA credits and approvals once each. Checked Nov 20: opening
+one notification from the bell took the count route and `/notifications` from
+12 unread to 11 (the bell shows "9+" above 9). **Not yet:** "Mark all read"
+once for the admin's 5 old rows, and Observability a day later (the two
 notification routes should be far below 2K calls each). Joshua's side: Spend
 Management (an on-demand budget with email alerts, pausing off, since a pause
 is what took the site down).
