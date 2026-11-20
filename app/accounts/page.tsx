@@ -624,9 +624,9 @@ function AccountsInner() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      {/* Extra room at the top on phones: the menu button is fixed there and
-          used to sit on top of the start of the page title. */}
-      <div className="md:ml-56 flex-1 min-w-0 p-4 pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] md:p-8">
+      {/* On phones this column gets room for the fixed menu button from the
+          `.md\:ml-56.p-4` rule in app/globals.css. */}
+      <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

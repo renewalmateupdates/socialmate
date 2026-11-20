@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import AppPageSkeleton, { AppSkeletonBody } from '@/components/AppPageSkeleton'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import UpgradeNudge from '@/components/UpgradeNudge'
@@ -606,11 +607,13 @@ function SettingsInner() {
   }
 
   if (authLoading) {
+    // The page's title and a skeleton instead of a spinner
+    // (components/AppPageSkeleton.tsx); the sidebar stays mounted after.
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <div className="md:ml-56 flex-1 min-w-0 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
+          <AppSkeletonBody title={tSettings('app_settings.title')} />
         </div>
       </div>
     )
@@ -2273,11 +2276,9 @@ function LanguageTab() {
 
 export default function Settings() {
   return (
-    <Suspense fallback={
-      <div className="min-h-dvh bg-theme flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    // The fallback is what the server sends: the page's shape and title rather
+    // than a spinner, so a phone paints something real before the JavaScript runs.
+    <Suspense fallback={<AppPageSkeleton title="Settings" />}>
       <SettingsInner />
     </Suspense>
   )

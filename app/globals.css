@@ -1156,3 +1156,16 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .tap:active { transform: translateY(1px); }
 }
+
+/* ── Room for the phone menu button ─────────────────────────────────────────
+   On phones the sidebar is a drawer, opened by a 44px button fixed at the top
+   left (components/Sidebar.tsx). The app pages' main column (md:ml-56 with
+   p-4) started right under it, so the button covered the first letters of
+   every page title. Found on /accounts, Nov 20, 2026; about 37 pages share
+   that column, so the room is made here once. 4.5rem = the button's 12px top
+   offset + its 44px + a gap. */
+@media (max-width: 767.98px) {
+  .md\:ml-56.p-4 {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4.5rem);
+  }
+}

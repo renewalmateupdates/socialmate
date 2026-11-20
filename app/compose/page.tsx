@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
+import AppPageSkeleton, { AppSkeletonBody } from '@/components/AppPageSkeleton'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import UpgradeNudge from '@/components/UpgradeNudge'
@@ -1749,9 +1750,15 @@ function ComposeInner() {
     : 'bg-red-50 border-red-100' : ''
 
   if (loading) {
+    // The page's own layout with a skeleton in it, not a full-screen spinner
+    // (components/AppPageSkeleton.tsx). The sidebar is first in both trees, so
+    // it stays mounted when the page finishes loading.
     return (
-      <div className="flex h-screen items-center justify-center bg-theme">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
+      <div className="min-h-dvh bg-theme flex">
+        <Sidebar />
+        <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
+          <AppSkeletonBody title={t('app_compose.title')} />
+        </div>
       </div>
     )
   }
@@ -3979,12 +3986,10 @@ function ComposeInner() {
 }
 
 export default function Compose() {
+  // The fallback is what the server sends: the page's shape and title rather
+  // than a spinner, so a phone paints something real before the JavaScript runs.
   return (
-    <Suspense fallback={
-      <div className="flex h-screen items-center justify-center bg-theme">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
-      </div>
-    }>
+    <Suspense fallback={<AppPageSkeleton title="Compose" />}>
       <ComposeInner />
     </Suspense>
   )

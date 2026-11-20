@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import AppPageSkeleton, { AppSkeletonBody } from '@/components/AppPageSkeleton'
 import BehaviorSurvey from '@/components/BehaviorSurvey'
 import DashboardTour from '@/components/DashboardTour'
 import DidYouKnow from '@/components/DidYouKnow'
@@ -377,9 +378,18 @@ function DashboardInner() {
   }, [router])
 
   if (loading) {
+    // The page's own layout with a skeleton in it, not a full-screen spinner
+    // (components/AppPageSkeleton.tsx). The two empty slots hold the places of
+    // the modal and the tour below, so the sidebar sits at the same position in
+    // both trees and stays mounted when the data arrives.
     return (
-      <div className="flex h-screen items-center justify-center bg-theme">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500" />
+      <div className="flex min-h-dvh bg-theme">
+        {null}
+        {null}
+        <Sidebar />
+        <main className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
+          <AppSkeletonBody title={t('app_dashboard.title')} wide />
+        </main>
       </div>
     )
   }
@@ -1087,12 +1097,10 @@ function DashboardInner() {
 }
 
 export default function DashboardPage() {
+  // The fallback is what the server sends: the page's shape and title rather
+  // than a spinner, so a phone paints something real before the JavaScript runs.
   return (
-    <Suspense fallback={
-      <div className="flex h-screen items-center justify-center bg-theme">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500" />
-      </div>
-    }>
+    <Suspense fallback={<AppPageSkeleton title="Dashboard" wide />}>
       <DashboardInner />
     </Suspense>
   )
