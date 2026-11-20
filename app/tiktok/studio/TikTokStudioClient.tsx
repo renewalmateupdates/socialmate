@@ -705,9 +705,11 @@ export default function TikTokStudioClient({ initialConnected }: {
   const viaConnect = useRef(searchParams.get('connected') === '1')
   // From the Dashboard's "post your first video" card (Nov 13, 2026).
   const viaDashboard = useRef(searchParams.get('from') === 'dashboard')
+  // From onboarding's last step, for someone who connected only TikTok (Nov 20, 2026).
+  const viaOnboarding = useRef(searchParams.get('from') === 'onboarding')
   const [connectedToast, setConnectedToast] = useState('')
   useEffect(() => {
-    if (viaDashboard.current) {
+    if (viaDashboard.current || viaOnboarding.current) {
       const cleaned = new URL(window.location.href)
       cleaned.searchParams.delete('from')
       window.history.replaceState(null, '', cleaned.pathname + cleaned.search)
@@ -730,7 +732,7 @@ export default function TikTokStudioClient({ initialConnected }: {
     openedTracked.current = true
     track('tiktok_studio_opened', {
       connected: !!creator?.connected,
-      ...(viaConnect.current ? { via: 'connect' } : viaDashboard.current ? { via: 'dashboard' } : {}),
+      ...(viaConnect.current ? { via: 'connect' } : viaDashboard.current ? { via: 'dashboard' } : viaOnboarding.current ? { via: 'onboarding' } : {}),
     })
   }, [creatorLoading, creator?.connected])
 

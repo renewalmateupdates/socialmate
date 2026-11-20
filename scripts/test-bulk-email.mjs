@@ -171,9 +171,9 @@ test('logIfRejected logs a rejection and passes every result through unchanged',
 })
 
 test('no direct resend.emails.send call ignores its error', () => {
-  // The Stripe webhook is left alone until Joshua says otherwise (CLAUDE.md,
-  // "What NOT to Touch"); lib/mail.ts is where sendMail itself calls Resend.
-  const ALLOWED = new Set(['app/api/stripe/webhook/route.ts', 'lib/mail.ts'])
+  // lib/mail.ts is where sendMail itself calls Resend. The Stripe webhook was
+  // exempt until Joshua okayed wrapping its two sends (Nov 20, 2026).
+  const ALLOWED = new Set(['lib/mail.ts'])
   const files = []
   const walk = (dir) => {
     for (const e of readdirSync(join(root, dir), { withFileTypes: true })) {

@@ -555,6 +555,8 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
   // skipped entirely.
   const didSchedule = saveResult?.kind === 'scheduled'
   const didDraft    = saveResult?.kind === 'draft'
+  // Connected only TikTok: the last step goes to TikTok Studio, not Compose.
+  const tiktokFirst = connectionDetected && selectedPlatform === 'tiktok'
 
   return (
     <div className="min-h-dvh bg-theme flex flex-col">
@@ -868,6 +870,27 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
             // starter post can only be saved as a draft for a TikTok-only user.
             const tiktokOnly = connectionDetected && selectedPlatform === 'tiktok'
             const canScheduleText = connectionDetected && !tiktokOnly
+            // Someone who connected only TikTok used to be handed a text post
+            // here that could only become a draft, then sent to Compose to open
+            // it, where nothing they had connected could take it. Most people
+            // who connect anything connect only TikTok (65 of 99, Nov 20, 2026),
+            // and their first post is a video, so say that and go to the Studio.
+            if (tiktokOnly) return (
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
+              <div className="text-center mb-6">
+                <Smartphone className="w-12 h-12 mx-auto mb-4" strokeWidth={1.5} />
+                <h2 className="font-display text-2xl font-semibold tracking-tight mb-2">Your first TikTok is a video</h2>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">
+                  In TikTok Studio you pick a video from your phone or computer, trim it, choose who can
+                  see it, and post it now or schedule it.
+                </p>
+              </div>
+              <button onClick={() => { setStarterPost(''); setStep(5) }}
+                className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 active:scale-[0.98] transition-all duration-150">
+                Next →
+              </button>
+            </div>
+            )
             return (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/[0.03] dark:shadow-black/30 animate-step-in">
               <div className="text-center mb-6">
@@ -1086,7 +1109,8 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
                 // platform is connected. /drafts could only list it.
                 <Link href={didSchedule ? '/calendar'
                   : didDraft ? (saveResult?.postId ? `/compose?draft=${saveResult.postId}` : '/drafts')
-                  : toolDraftWaiting ? '/compose?from=tool' : '/compose'}
+                  : toolDraftWaiting ? '/compose?from=tool'
+                  : tiktokFirst ? '/tiktok/studio?from=onboarding' : '/compose'}
                   className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
                   {didSchedule
                     ? <><CalendarDays size={14} strokeWidth={2} /> View Your Scheduled Post →</>
@@ -1094,6 +1118,8 @@ export default function OnboardingInner({ initialReferralCode, leadWithTiktok }:
                     ? <><FileText size={14} strokeWidth={2} /> Open Your Draft →</>
                     : toolDraftWaiting
                     ? <><PenLine size={14} strokeWidth={2} /> Schedule Your Post →</>
+                    : tiktokFirst
+                    ? <><Smartphone size={14} strokeWidth={2} /> Make Your First TikTok →</>
                     : <><PenLine size={14} strokeWidth={2} /> Write Your First Post →</>}
                 </Link>
               )}

@@ -5,7 +5,8 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
-import { REPLY_TO } from '@/lib/mail'
+import { REPLY_TO, logIfRejected } from '@/lib/mail'
+import { revalidatePath } from 'next/cache'
 import { creditPartnerCommission, invoiceCommissionBase } from '@/lib/partner-commission'
 import { partnerRate } from '@/lib/partner-rate'
 
@@ -502,7 +503,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Update listing — mark live (idempotent; already live on renewal)
-        await supabase
+        const { error: liveErr } = await supabase
           .from('curated_listings')
           .update({
             status:                   'live',
@@ -511,6 +512,16 @@ export async function POST(req: NextRequest) {
             stripe_payment_intent_id: paymentIntentId,
           })
           .eq('id', listing_id)
+        if (liveErr) console.error('[StaxWebhook] marking the listing live failed:', listing_id, liveErr.message)
+
+        // The directory is cached (revalidate = 60 in app/studio-stax/page.tsx).
+        // Refresh it now, so the link in the email below shows the new listing
+        // the first time it is opened. Never allowed to fail the webhook.
+        try {
+          revalidatePath('/studio-stax')
+        } catch (e) {
+          console.warn('[StaxWebhook] refreshing /studio-stax failed:', e)
+        }
 
         // Send confirmation/renewal email
         if (listing?.applicant_email) {
@@ -521,7 +532,9 @@ export async function POST(req: NextRequest) {
             // Renewal = 20% off what they paid. $100 founder → $80. $150 standard → $120.
             const paidCents    = session.amount_total ?? 0
             const renewalPrice = Math.round(paidCents * 0.80 / 100)
-            await resend.emails.send({
+            // logIfRejected: Resend reports a refused send in its return value
+            // without throwing, so the catch below never saw one (Nov 20, 2026).
+            await logIfRejected('stripe webhook: Studio Stax confirmation', resend.emails.send({
               from:    'SocialMate <hello@socialmate.studio>',
               replyTo: REPLY_TO,
               to:      listing.applicant_email,
@@ -572,7 +585,7 @@ export async function POST(req: NextRequest) {
   </div>
 </body>
 </html>`,
-            })
+            }))
           } catch (emailErr) {
             console.error('[StaxWebhook] Confirmation email failed:', emailErr)
           }
@@ -818,14 +831,14 @@ export async function POST(req: NextRequest) {
         // Fetch user email for the notification
         const { data: authUser } = await supabase.auth.admin.getUserById(userId)
         const userEmail = authUser?.user?.email ?? userId
-        await resend.emails.send({
+        await logIfRejected('stripe webhook: white label request notice', resend.emails.send({
           from: 'SocialMate <hello@socialmate.studio>',
           replyTo: REPLY_TO,
           to:   'socialmatehq@gmail.com',
           subject: `New White Label Request — ${whiteLabelTier} — ${userEmail}`,
           html: `<p>New White Label <strong>${whiteLabelTier}</strong> request from <strong>${userEmail}</strong>.</p>
 <p><a href="${appUrl}/admin/white-label">Review &amp; approve at /admin/white-label →</a></p>`,
-        })
+        }))
       } catch (emailErr) {
         console.warn('[WhiteLabel] Admin notification email failed (non-fatal):', emailErr)
       }

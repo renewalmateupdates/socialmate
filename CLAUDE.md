@@ -596,7 +596,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #822 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #823 are merged.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -663,10 +663,10 @@ five render, each server HTML carries its title, no console errors. #822:
   Speed Insights and Web Analytics events. Each of our browsers is excluded
   from its first signed-in app page on; checked locally (Analytics logs "Page
   view would be ignored by `beforeSend`").
-- `/studio-stax` stays at `revalidate = 60`: it only rebuilds when visited, and
-  an hour would hide a newly paid listing for up to an hour. Refreshing it from
-  the Stripe webhook when a slot activates would be the clean fix, and the
-  webhook is on the ask-first list.
+- `/studio-stax` stays at `revalidate = 60`: it only rebuilds when visited,
+  and approvals, featuring, renewals and SM-Give donations all change it, so an
+  hour would need a refresh in each of those. Since #824 the Stripe webhook
+  refreshes it the moment a paid listing goes live.
 
 **Checked live after #822 deployed (14:05 UTC):** /settings?tab=Plan arrives
 with the Plan tab in its HTML; /tiktok/studio arrives with "Choose a video to
@@ -704,10 +704,32 @@ added a video, and nothing said why. #823:
   request a minute per person, not per open tab (two Reddit commenters'
   suggestion).
 
-**After #823 deploys:** open /compose and /tiktok/studio at phone size signed in
-(the box to write in near the top; the Studio header clear of the menu). From
-Nov 21, `/admin/funnel` shows how many open the picker, cancel it, or hit
-`unreadable`; read it around Nov 27 to decide Studio's next fix.
+**Checked live after #823 deployed (17:46 UTC), signed in at 375 px:** Compose's
+box to write in starts at 0.97 screens (was 1.68), with the note on one line,
+the templates folded and no "Soon" chips; the Studio header clears the menu
+button. From Nov 21, `/admin/funnel` shows how many open the picker, cancel it,
+or hit `unreadable`; read it around Nov 27 to decide Studio's next fix.
+
+**Nov 20: PR #824 (Stripe webhook okayed by Joshua by name, and onboarding for
+TikTok-only people).**
+- The webhook's two email sends (the Studio Stax "you're live" email to a
+  paying customer, and the white-label request notice to the admin) now go
+  through `logIfRejected`: Resend reports a refused send without throwing, so
+  their catch blocks never saw one. `scripts/test-bulk-email.mjs` no longer
+  exempts the webhook.
+- When a paid listing goes live, the webhook logs a failed write to
+  `curated_listings` and refreshes `/studio-stax` (`revalidatePath`, in a
+  try/catch so it can never fail the webhook). No payment logic changed.
+- Onboarding: someone who connected only TikTok was given a text starter at
+  step 4 that could only become a draft, then sent to Compose to open it,
+  where nothing they had connected could take it. Step 4 now says their first
+  TikTok is a video, and step 5's main button is "Make Your First TikTok →"
+  to `/tiktok/studio?from=onboarding` (`tiktok_studio_opened` with `via:
+  onboarding`).
+
+**After #824 deploys:** nothing to click; the next Studio Stax sale or white
+label request shows a `[mail] stripe webhook: ...` line in Vercel's logs only
+if Resend refuses the email.
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402
@@ -851,10 +873,9 @@ their strings in all nine locales (#803). Then the 52 direct
 `resend.emails.send` calls that ignored Resend's error were wrapped in
 `logIfRejected(label, ...)` (`lib/mail.ts`), which logs a rejection and
 returns the result unchanged, so no route behaves differently. A test fails if
-a new direct call skips it. **Still open:** the Stripe webhook's two sends
-(lines ~524 and ~821) still ignore the error; it needs Joshua's OK first, by
-name: on Nov 19 a session's safety check refused the edit under a general "do
-all of it", and it was reverted untouched. The first reply came from someone who signed
+a new direct call skips it. The Stripe webhook's two sends followed on Nov
+20 (#824), once Joshua okayed it by name; on Nov 19 a session's safety check
+had refused the edit under a general "do all of it". The first reply came from someone who signed
 up expecting "Substack for paid subscribers", which led to `/vs/substack`: it
 pitched Creator Hub fan subs (unannounced since Nov 5) and said RSS import
 posts each issue automatically (it imports drafts by hand). Fixed in #800
@@ -1080,7 +1101,7 @@ these are the decoys that make a blind find-and-replace dangerous.
 
 ## What NOT to Touch Without Asking
 
-- Stripe webhook handler — live payments depend on it. The coupon affiliate commission block (added April 2026) is the only intentional addition; don't touch the rest
+- Stripe webhook handler — live payments depend on it. The intentional additions are the coupon affiliate commission block (April 2026) and, okayed by Joshua on Nov 20, 2026, `logIfRejected` on its two emails and the `/studio-stax` refresh when a listing goes live (#824). Don't touch the rest without his OK by name
 - RLS policies — they're in place for security, don't remove or bypass
 - Inngest publish jobs — idempotency guards are critical, don't remove them
 - The three-pool credit system logic — complex, tested, working. As of July 26, 2026 (PR #535) deduction is atomic via the `deduct_ai_credits` / `refund_ai_credits` Postgres RPCs (`lib/ai-credits.ts`); keep the pool/preference math in sync with the RPC if you ever change either
