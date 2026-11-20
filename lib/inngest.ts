@@ -105,15 +105,27 @@ export const publishScheduledPost = inngest.createFunction(
 
     // Idempotency guard: check post hasn't already been published before sleeping ends
     const postCheck = await step.run('check-post-status', async () => {
-      const { data: post } = await getSupabaseAdmin()
+      const { data: post, error } = await getSupabaseAdmin()
         .from('posts')
         .select('id, status, published_at')
         .eq('id', postId)
-        .single()
+        .maybeSingle()
+      // A failed read is not a deleted post: throw so the step retries,
+      // rather than skipping a post that is still due.
+      if (error) throw new Error(`Could not read post ${postId}: ${error.message}`)
       return post
     })
 
-    if (postCheck && postCheck.status !== 'scheduled') {
+    // Deleted while it waited (a campaign ended, someone removed it from the
+    // Queue). Until Nov 20, 2026 this fell through to the publish route, got
+    // a 404 and retried three times: four wasted calls and a failed run per
+    // deleted post, though nothing was ever sent.
+    if (!postCheck) {
+      console.log(`[PUBLISH-GUARD] Post ${postId} no longer exists, skipping publish`)
+      return { skipped: true, reason: 'post_deleted' }
+    }
+
+    if (postCheck.status !== 'scheduled') {
       console.log(`[PUBLISH-GUARD] Post ${postId} already has status="${postCheck.status}" — skipping publish`)
       return { skipped: true, reason: 'already_processed', status: postCheck.status }
     }
@@ -123,11 +135,21 @@ export const publishScheduledPost = inngest.createFunction(
       // ── IDEMPOTENCY GUARD ─────────────────────────────────────────────────
       // Check DB state before doing ANYTHING. If Inngest retries after a
       // transient error, this guard prevents the post from being sent twice.
-      const { data: innerPostCheck } = await getSupabaseAdmin()
+      const { data: innerPostCheck, error: innerReadErr } = await getSupabaseAdmin()
         .from('posts')
         .select('user_id, workspace_id, status, published_at, platform_post_ids, platforms, content, media_urls, destinations, scheduled_at, is_recurring, recurrence_rule, recurrence_end_date, recurrence_parent_id, metadata')
         .eq('id', postId)
-        .single()
+        .maybeSingle()
+
+      // Deleted in the moment between the two steps: nothing to send. A read
+      // error carries on as before and lets the publish route decide, so a
+      // database hiccup can never drop a post that is still due.
+      if (innerReadErr) {
+        console.warn(`[PUBLISH-GUARD] Could not read post ${postId} before publishing: ${innerReadErr.message}`)
+      } else if (!innerPostCheck) {
+        console.log(`[PUBLISH-GUARD] Post ${postId} was deleted before publishing, skipping`)
+        return { skipped: true, reason: 'post_deleted' }
+      }
 
       const alreadyTerminal =
         innerPostCheck?.status === 'published' ||

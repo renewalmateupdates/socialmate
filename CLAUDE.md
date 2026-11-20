@@ -589,6 +589,15 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   (`components/AppPageSkeleton.tsx`), and keep the sidebar at the same place in
   the loading tree and the loaded one, or it is rebuilt when the data arrives.
 
+**From: November 20, 2026: deleted posts kept their queued jobs**
+
+- **A job that wakes up later treats a missing row as done, and only a failed
+  read as a reason to retry.** `.single()` turns zero rows into an error, so
+  "deleted" and "the database hiccuped" look the same. Use `.maybeSingle()`
+  and check `error` separately. Ending a campaign deleted its queued posts,
+  and each one's `post/scheduled` run would still have called the publish
+  route, got a 404 and retried three times.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -777,15 +786,17 @@ free (#825, merged and checked live Nov 20).**
 - gilgameshenterprise.com still sold the PDFs (its /guides card, its homepage
   shop card and its llms.txt): renewalmateupdates/gilgameshenterprise#25
   points them at the free downloads. renewalmate.com had nothing to change.
-- **Found, not fixed (the publish job is on the ask-first list):** when a
-  queued post is deleted (ending a campaign, a user deleting from the Queue),
-  its `post/scheduled` run still wakes at the post's time. `check-post-status`
-  uses `.single()` and only skips when a row exists, so a missing row falls
-  through to `/api/posts/publish`, which answers 404, and the step throws and
-  retries three times. Nothing is posted; it is four wasted publish calls and
-  a failed run in Inngest per deleted post. The fix is `.maybeSingle()` with
-  "no error and no row" returning skipped, while a real read error still
-  throws so a database hiccup can't drop a live post.
+- **Fixed Nov 20, okayed by Joshua by name ("Yes, fix it"):** a queued post
+  deleted while it waited (a campaign ended, a Queue delete) used to fall
+  through `.single()` to a 404 publish call and three retries. Both reads in
+  `publishScheduledPost` now use `.maybeSingle()`: no row ends the run as
+  skipped (`post_deleted`); a failed first read throws so the step retries; a
+  failed second read carries on to the publish route as before, so a hiccup
+  can't drop a live post. `scripts/test-publish-guard.mjs` covers it and fails
+  on the old code. **After it deploys:** resync Inngest (Apps > Resync), then
+  look at the next run for one of the ended campaign's deleted posts (they
+  were due daily at 15:00 UTC through about Nov 27): it should end as
+  skipped, not failed.
 
 **Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
 Hobby team went over its 4 CPU-hours and every route answered `402
@@ -1159,7 +1170,7 @@ these are the decoys that make a blind find-and-replace dangerous.
 
 - Stripe webhook handler — live payments depend on it. The intentional additions are the coupon affiliate commission block (April 2026) and, okayed by Joshua on Nov 20, 2026, `logIfRejected` on its two emails and the `/studio-stax` refresh when a listing goes live (#824). Don't touch the rest without his OK by name
 - RLS policies — they're in place for security, don't remove or bypass
-- Inngest publish jobs — idempotency guards are critical, don't remove them
+- Inngest publish jobs — idempotency guards are critical, don't remove them. The deleted-post skip in `publishScheduledPost` (Nov 20, 2026) was okayed by Joshua by name
 - The three-pool credit system logic — complex, tested, working. As of July 26, 2026 (PR #535) deduction is atomic via the `deduct_ai_credits` / `refund_ai_credits` Postgres RPCs (`lib/ai-credits.ts`); keep the pool/preference math in sync with the RPC if you ever change either
 - Any env vars — don't suggest hardcoding these
 
