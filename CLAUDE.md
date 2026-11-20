@@ -497,6 +497,30 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   `/api/admin/health` first: if the main model fails it asks every stable
   Flash model the key lists and shows which ones answered.
 
+**From: November 19-20, 2026: Vercel paused the whole site for CPU**
+
+- **Hobby's limits are a switch, not a bill.** Hobby includes 4 hours of Fluid
+  Active CPU a month. Going over paused every route at once (pages, API,
+  `/api/inngest`, the crons) with `402 DEPLOYMENT_DISABLED` for the rest of the
+  cycle, and refused deploys ("Account is blocked", which is how #816 merged
+  without deploying). The team is on Pro since Nov 20: $20 a month with $20 of
+  usage included, and the first day used $0.17 of it.
+- **A poll in a shared component runs in every open tab, hidden or not.** The
+  bell and the sidebar's unread badge each polled every minute, in both copies
+  of the sidebar (the phone drawer only slides off screen), so one open tab
+  sent four requests a minute all day: Vercel's two busiest routes and two
+  thirds of all Active CPU. A session's own browser tab left on `/queue` was
+  one of those tabs. Poll through `hooks/useVisiblePoll.ts` and share answers
+  through `lib/shared-fetch.ts`; `scripts/test-cpu-budget.mjs` fails on a
+  plain timer that calls the API from components, contexts or hooks.
+- **A page that reads the request renders on every visit.** Awaiting
+  `searchParams` (or `cookies()`, `headers()`) makes a page dynamic, and its
+  `revalidate` does nothing. The homepage did this from March to Nov 20. The
+  build's route table says which: ƒ renders per request, ○ and ● are cached.
+- **The proxy is billed for every request it matches.** It ran 8.1K times in a
+  window where every function together ran about 4.5K. Its matcher covers
+  pages only; API routes check their own session.
+
 **From: November 18, 2026: the update email's audience missed an opt-out**
 
 - **An email audience honors every opt-out the product offers, not just the one
@@ -525,9 +549,35 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 19, 2026).** #786 through #815 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #816 are merged.
 
-**Nov 19, evening: AI was down; the fix is branch `fix/gemini-3-8-flash-nov19`.**
+**Nov 19-20: Vercel paused the site; the team is on Pro now.** On Nov 19 the
+Hobby team went over its 4 CPU-hours and every route answered `402
+DEPLOYMENT_DISABLED` until Joshua upgraded, about 01:45 UTC Nov 20. The three
+posts due during the outage went out once it was back: the admin's 23:00 post
+and an outside user's 01:00 LinkedIn post through the backstop workflow (run by
+hand, 01:49 UTC, every platform), and the admin's 23:00 TikTok video on the
+02:01 hourly run, settled published at 02:06. Branch `fix/cpu-cuts-nov19` (one
+PR) cuts what Vercel's Observability showed: the unread count is one shared
+request a minute per tab and none from a hidden tab
+(`hooks/useUnreadNotifications.ts`), the bell fetches its list only when
+opened, the sidebar's other fetches are shared (`lib/shared-fetch.ts`), the
+proxy matches pages only, and the homepage is cached again (`ReferralBanner`
+reads `?ref=` in the browser). The same PR fixes the notifications page, which
+read and wrote a `read` column while the bell, the badges and
+`/api/notifications` use `is_read` (257 read from the bell still showed unread
+there; 5 read there, all the admin's, still counted in the badge), and showed
+`body`, which the table does not have, instead of `message`. The `read`
+column is now unused. **After it deploys** (it also deploys #816): the build's
+route table shows `/` as cached; on a signed-in page the bell and the
+sidebar's Notifications count agree, and marking one read on `/notifications`
+lowers both; "Mark all read" there once clears the admin's 5 rows; Vercel
+Observability's Functions view shows the two notification routes far below
+2K calls each. Joshua's side: Spend Management (an on-demand budget with email
+alerts, pausing off, since a pause is what took the site down).
+
+**Nov 19, evening: AI was down; the fix is #816 (merged; deploys with the next
+merge to main, since Vercel refused its own deploy while the team was paused).**
 A walk of Schedule, Compose and Bulk on the admin account found every Write
 with AI request hanging for 300 seconds or failing; the last AI result saved
 was Nov 17, 02:12 UTC. #815 (deployed 14:45 UTC) put a 40 s limit and a refund
@@ -553,7 +603,8 @@ follow-up at 02:50 UTC: 2 published and mirrored into posts with their TikTok
 links, 1 in drafts, each with a notification. The first scheduled video after
 the deploy went out at 17:00 UTC and the follow-up settled it at 17:03:
 published, mirrored into posts, with a "Your TikTok video is live"
-notification. The 23:00 UTC one is still to see. #813 (merged, deployed 13:25 UTC) attacks where
+notification. The 23:00 UTC one was held by the outage and went out on the
+02:01 UTC hourly run, settled published at 02:06. #813 (merged, deployed 13:25 UTC) attacks where
 people stop: of 99 outside accounts that connected a platform, 7 ever
 published and 82 never tried; 62 connected TikTok only. In TikTok Studio, 16
 added a video and 10 never pressed Post. On a phone the tab names were hidden,

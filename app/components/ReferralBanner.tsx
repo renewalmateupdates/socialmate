@@ -1,20 +1,30 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Gift } from 'lucide-react'
 
-export default function ReferralBanner({ refCode }: { refCode: string }) {
+// The code comes from the address bar, read in the browser. The homepage used
+// to pass it in from searchParams, which stopped the page from being cached
+// (app/page.tsx). The server render and hydration see no code, then the
+// browser's answer replaces it, so there is no hydration mismatch.
+const noSubscription = () => () => {}
+const refFromUrl = () => new URLSearchParams(window.location.search).get('ref')?.trim() ?? ''
+const noRefOnServer = () => ''
+
+export default function ReferralBanner() {
+  const refCode = useSyncExternalStore(noSubscription, refFromUrl, noRefOnServer)
   const [dismissed, setDismissed] = useState(false)
   const [isAffiliate, setIsAffiliate] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/affiliate/check-code?ref=${refCode}`)
+    if (!refCode) return
+    fetch(`/api/affiliate/check-code?ref=${encodeURIComponent(refCode)}`)
       .then(r => r.json())
       .then(d => setIsAffiliate(d.isAffiliate))
       .catch(() => {})
   }, [refCode])
 
-  if (dismissed) return null
+  if (!refCode || dismissed) return null
 
   return (
     <div className="w-full bg-black text-white text-sm py-2.5 px-4 flex items-center justify-center gap-3 relative">

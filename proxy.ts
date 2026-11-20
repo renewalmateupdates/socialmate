@@ -81,8 +81,16 @@ export async function proxy(request: NextRequest) {
   return captureRefCode(request, supabaseResponse)
 }
 
+// Pages only. Every request this matches is a billed invocation of its own,
+// before the route runs. On Nov 19, 2026, the day Vercel paused the Hobby team
+// for CPU, Observability showed it running 8.1K times, more than every function
+// together in the same window (about 4.5K). It used to match /api/* too, where
+// it did nothing (no API route is a protected path, so each passed straight
+// through, the ?ref= check its only work), and files such as the demo video
+// (fetched in ranges, one request per piece), sw.js, manifest.json, robots.txt
+// and sitemap.xml. API routes check their own session.
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm|mp3|txt|xml|json|js|css|map|woff2?|pdf)$).*)',
   ],
 }

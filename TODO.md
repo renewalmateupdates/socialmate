@@ -6,9 +6,15 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
 
 ## Needs Joshua (a click or a query, not a decision)
 
-Nothing waiting. (`supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old
-$5 price is gone. The November update email finished Nov 18; Resend's Receiving
-tab no longer needs a look, because Resend keeps mail only 30 days and the Aug 30
+1. **Vercel Spend Management (Nov 20).** The team is on Pro since the Nov 19
+   pause: $20 a month with $20 of usage included, and the first day used $0.17
+   of it. Vercel's "Set Budget" sets an on-demand budget with email alerts. Set
+   the alerts, and leave pausing off: a pause is what took the whole site down
+   on Nov 19.
+
+(`supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old $5 price is
+gone. The November update email finished Nov 18; Resend's Receiving tab no
+longer needs a look, because Resend keeps mail only 30 days and the Aug 30
 replies expired long ago.)
 
 ## Waiting on a decision

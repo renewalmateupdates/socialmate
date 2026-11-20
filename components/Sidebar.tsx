@@ -9,6 +9,8 @@ import { useWorkspace, PLAN_CONFIG, isOwnWorkspace, type Workspace } from '@/con
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
 import NotificationBell from '@/components/NotificationBell'
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications'
+import { fetchJsonShared } from '@/lib/shared-fetch'
 import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
@@ -316,7 +318,7 @@ function SidebarContent({
   const [statsVisible, setStatsVisible]         = useState(true)
   const [scheduledCount, setScheduledCount]     = useState(0)
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0)
-  const [unreadNotifs, setUnreadNotifs]         = useState(0)
+  const unreadNotifs                            = useUnreadNotifications()
   const [xQuota, setXQuota]                     = useState<{ used: number; limit: number } | null>(null)
   const [somaCredits, setSomaCredits]           = useState<{ monthly: number; remaining: number } | null>(null)
   const pathname = usePathname()
@@ -553,46 +555,33 @@ function SidebarContent({
     return () => { supabase.removeChannel(channel) }
   }, [])
 
+  // The three fetches below run in both copies of the sidebar and again on
+  // every page change (each page renders its own sidebar), so they share one
+  // request through fetchJsonShared for as long as the answer is fresh enough.
+  // The unread badge comes from useUnreadNotifications above, shared with the
+  // bell. lib/shared-fetch.ts has the Nov 19, 2026 numbers.
+
   // X/Twitter monthly quota
   useEffect(() => {
-    fetch('/api/accounts/twitter/quota')
-      .then(r => r.ok ? r.json() : null)
+    fetchJsonShared<{ used: number; limit: number }>('/api/accounts/twitter/quota', 5 * 60_000)
       .then(d => { if (d && typeof d.used === 'number') setXQuota({ used: d.used, limit: d.limit }) })
-      .catch(() => {})
   }, [])
 
   // SOMA credits — only shown if user has a monthly allocation
   useEffect(() => {
-    fetch('/api/soma/credits')
-      .then(r => r.ok ? r.json() : null)
+    fetchJsonShared<{ monthly: number; remaining: number }>('/api/soma/credits', 5 * 60_000)
       .then(d => {
         if (d && typeof d.monthly === 'number' && d.monthly > 0) {
           setSomaCredits({ monthly: d.monthly, remaining: d.remaining })
         }
       })
-      .catch(() => {})
   }, [])
 
   // Pending approval count badge for Approvals nav link
   useEffect(() => {
-    fetch('/api/posts/pending-approvals')
-      .then(r => r.ok ? r.json() : null)
+    fetchJsonShared<{ count: number }>('/api/posts/pending-approvals', 60_000)
       .then(d => { if (d && typeof d.count === 'number') setPendingApprovalCount(d.count) })
-      .catch(() => {})
   }, [])
-
-  // Unread notification badge — poll every 60s, refresh on nav to /notifications
-  useEffect(() => {
-    const load = () => {
-      fetch('/api/notifications/count')
-        .then(r => r.ok ? r.json() : null)
-        .then(d => { if (d && typeof d.unread === 'number') setUnreadNotifs(d.unread) })
-        .catch(() => {})
-    }
-    load()
-    const id = setInterval(load, 60_000)
-    return () => clearInterval(id)
-  }, [pathname])
 
   const handleSignOut = async () => {
     if (!window.confirm('Sign out of SocialMate?')) return
