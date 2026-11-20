@@ -70,8 +70,12 @@ export const FUNNEL_EVENTS = [
   // not text, so their first post happens here rather than in Compose. These
   // say where they stop. Flags and sizes only, never the video or caption.
   'tiktok_studio_opened',   // { connected } once per visit
-  'tiktok_video_rejected',  // { reason: format | too_large | too_short | too_long }
-  'tiktok_video_added',     // { seconds, mb } a usable video is loaded
+  // Nov 20, 2026: 11 of the 23 people who opened Studio in 30 days never added
+  // a video, and nothing said whether they never tried or the picker failed.
+  'tiktok_picker_opened',   // { has_video } the video picker was opened
+  'tiktok_picker_cancelled', // { ms } it closed with no video chosen
+  'tiktok_video_rejected',  // { reason: format | too_large | too_short | too_long | unreadable, pick_ms }
+  'tiktok_video_added',     // { seconds, mb, pick_ms } a usable video is loaded; pick_ms = picker open to file, which includes an iPhone "preparing" a big video
   'tiktok_post_attempted',  // { mode: now | schedule | drafts }
   'tiktok_post_blocked',    // { reason: privacy | disclosure | branded_private | schedule, mode } Post pressed with a choice missing
   'tiktok_post_done',       // { mode } handed to TikTok, or scheduled; server: { mode: scheduled_fire, result: sent | in_drafts }
