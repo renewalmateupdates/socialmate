@@ -502,9 +502,11 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   nothing for 20 s, while 3.6 Flash (the model that hung all day) answered in
   about a second. Google sheds load per model, free tier first. Every Gemini
   call now goes through `GEMINI_MODELS` in `lib/gemini.ts`, tried in order:
-  `geminiModel()` for a person waiting (15 s a model, 40 s in all) and
+  `geminiModel()` for a person waiting (10 s a model, 40 s in all) and
   `geminiLongModel()` for longer answers and background work. `scripts/test-gemini.mjs`
-  fails if anything builds its own model.
+  fails if anything builds its own model. A model that failed is asked last
+  for the next 3 minutes on that function instance, so one busy model costs
+  one slow request, not every request.
 
 **From: November 19-20, 2026: Vercel paused the whole site for CPU**
 
@@ -564,22 +566,24 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #817 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #818 are merged.
 
-**Nov 20: AI still failed after #816 deployed; branch `fix/gemini-fallback-nov20`.**
-#817's merge deployed #816 at 02:15 UTC. `/api/admin/health` then showed
-`gemini-3.8-flash` answering 503 "high demand", then 12 s for one word, then
-nothing for 20 s, while `gemini-3.6-flash` answered in 1.1 to 1.7 s and
-`gemini-3.5-flash-lite` in about 0.5 s. The branch makes every Gemini call try
-`GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order: a person
-waiting gets 15 s a model and 40 s in all; SOMA generate, campaign rewrites and
-SOMA ingest move on only after a quick failure (their answers are long); the
-Inngest jobs, HERMES, IRIS, the agents and the Stax blog cron use
-`geminiLongModel()` (45 s, 25 s a model), where before they had no time limit
-at all. The health check asks the whole chain and reports `answeredBy`.
-**After it deploys:** `/api/admin/health` as admin (`gemini.ok` true and an
-`answeredBy`), then one Write with AI in Compose; Vercel's logs show
-`[gemini] ... asking ...` lines whenever a model hands over. If Google keeps
+**Nov 20: AI works again (#818), and branch `fix/gemini-cooldown-nov20` makes it
+quick.** #817's merge deployed #816 at 02:15 UTC; `/api/admin/health` then
+showed `gemini-3.8-flash` answering 503 "high demand", then 12 s for one word,
+then nothing for 20 s, while `gemini-3.6-flash` answered in about a second.
+#818 (deployed 02:43 UTC) makes every Gemini call try `GEMINI_MODELS` (3.8
+Flash, 3.6 Flash, 3.5 Flash-Lite) in order; SOMA generate, campaign rewrites
+and SOMA ingest move on only after a quick failure (their answers are long);
+the Inngest jobs, HERMES, IRIS, the agents and the Stax blog cron use
+`geminiLongModel()` (45 s, 25 s a model), where before they had no time limit.
+**Checked live after #818:** the health check says `answeredBy`
+gemini-3.6-flash; all six Compose tools returned real output (caption, hook,
+rewrite, thread, repurpose, hashtags), but in 10 to 32 s, each waiting out 3.8
+first. The cooldown branch asks a model that just failed last for 3 minutes
+and gives each model 10 s, not 15. **After it deploys:** run two Write with AI
+requests in a row; the second should take a few seconds. Vercel's logs show
+`[gemini] ... asking ...` lines when a model hands over. If Google keeps
 shedding the free tier, a billed Gemini project is Joshua's call (Flash costs
 cents at this volume).
 
@@ -761,10 +765,11 @@ Joshua's `Videos\SocialMate demo` folder, outside the repo. Polls are left out
 of the video on purpose: they save but don't publish yet.
 
 *Claude, after the batch 3 branch deploys:*
-- Compose signed in: opening a draft with a poll or tags shows Full, and each
-  Write with AI tool still works (running one costs credits, so not yet tried).
-  Already seen live Nov 16: the Simple and Full toggle, the Write with AI menu,
-  thread mode in Full.
+- Compose signed in: opening a draft with a poll or tags shows Full. Already
+  seen live Nov 16: the Simple and Full toggle, the Write with AI menu, thread
+  mode in Full. Seen Nov 20: all six Write with AI tools (caption, hook,
+  rewrite, thread, repurpose, hashtags) return real output through the Gemini
+  chain.
 - Bulk: a sheet saved from Google Sheets (M/D/YYYY dates, 12-hour times), and a
   bad row saves once fixed. Seen Nov 16: CSV import, a bad date arrives red
   with the reason.
@@ -772,9 +777,11 @@ of the video on purpose: they save but don't publish yet.
   per-platform how-to videos (each needs that platform's connect flow on
   screen). If the demo is re-rendered, update `DEMO_CHAPTERS` from its
   chapters.txt.
-- Image tools, signed in: "Use in a post" on each tool lands in Compose with
-  the image uploaded and attached; on an iPhone, download saves the file. Then
-  `node scripts/indexnow-submit.mjs` for the two new `/tools` pages.
+- Image tools: on an iPhone, download saves the file. Seen Nov 20, signed in:
+  "Use in a post" on the quote card and on the resizer (a 1600x900 X size)
+  each land on `/compose?from=tool-image` with the image attached and the
+  "Your image from the free ... is attached" banner. IndexNow took the two
+  tool pages and `/tools` the same night.
 
 *Claude, after #793 deployed (Joshua walks these signed in):*
 - Walk Schedule signed in: List keeps its range after a reload; a failed post

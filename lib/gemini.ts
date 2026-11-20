@@ -45,9 +45,13 @@ export const GEMINI_TIMEOUT_MS = 40_000
 
 /**
  * The longest one model gets on a request a person is waiting on before the
- * next one is asked. A normal answer takes 2 to 6 seconds.
+ * next one is asked. A normal answer takes 2 to 6 seconds; a model that has
+ * said nothing after 10 is overloaded. It was 15 s until Nov 20, 2026, when
+ * every Write with AI tool took 10 to 32 s because each waited out 3.8 Flash
+ * first (the cool-down below spares later requests, but at our traffic Vercel
+ * starts fresh instances often, and each one learns on its first request).
  */
-export const GEMINI_ATTEMPT_MS = 15_000
+export const GEMINI_ATTEMPT_MS = 10_000
 
 /**
  * Longer answers (newsletters, blog posts, HERMES emails, SOMA documents) and
@@ -61,6 +65,33 @@ export const GEMINI_LONG_ATTEMPT_MS = 25_000
 /** With less time than this left, another model is not worth starting. */
 const MIN_ATTEMPT_MS = 1_000
 
+/**
+ * How long a model that just failed is asked last instead of first. Without
+ * this, every request waited out the same busy model: on Nov 20, 2026, with
+ * 3.8 Flash saying nothing, each Write with AI took 19 s (15 s on 3.8, then
+ * 3.6 answered). Vercel runs many requests on one function instance (Fluid
+ * compute), so once a request on an instance finds a model failing, the next
+ * requests there go straight to one that answers. After the cool-down the
+ * model is first again; if it is still failing, one request pays the wait and
+ * it goes back to last.
+ */
+export const GEMINI_COOLDOWN_MS = 3 * 60_000
+
+/** Model name to the time it may be asked first again. Per function instance. */
+const coolingUntil = new Map<string, number>()
+
+/** GEMINI_MODELS in the order to ask them now: any that failed in the last few minutes go last, in their usual order. */
+export function modelsInOrder(now: number = Date.now()): string[] {
+  const ready = GEMINI_MODELS.filter(m => (coolingUntil.get(m) ?? 0) <= now)
+  const cooling = GEMINI_MODELS.filter(m => (coolingUntil.get(m) ?? 0) > now)
+  return ready.concat(cooling)
+}
+
+/** Forget every recent failure (tests, and nothing else, need this). */
+export function forgetGeminiFailures(): void {
+  coolingUntil.clear()
+}
+
 type GenerateArgs = Parameters<GenerativeModel['generateContent']>
 
 /** What the call sites use: generateContent, answered by the first model in GEMINI_MODELS that can. */
@@ -71,9 +102,10 @@ export type GeminiModel = {
 /**
  * A model handle for a request a person is waiting on. Each model in
  * GEMINI_MODELS gets up to `attemptMs`, all of them together `timeoutMs`, and a
- * quick failure (503, 429, 404) moves on at once. When every model fails, the
- * last error is thrown, so the routes' catch blocks (refund, aiFailureMessage)
- * work as before.
+ * quick failure (503, 429, 404) moves on at once. A model that failed in the
+ * last GEMINI_COOLDOWN_MS is asked last. When every model fails, the last error
+ * is thrown, so the routes' catch blocks (refund, aiFailureMessage) work as
+ * before.
  */
 export function geminiModel(
   apiKey: string,
@@ -85,18 +117,22 @@ export function geminiModel(
   return {
     async generateContent(...args: GenerateArgs) {
       const started = Date.now()
+      const order = modelsInOrder(started)
       let lastErr: unknown = new Error('No Gemini model was asked')
-      for (let i = 0; i < GEMINI_MODELS.length; i++) {
-        const model = GEMINI_MODELS[i]
+      for (let i = 0; i < order.length; i++) {
+        const model = order[i]
         const left = timeoutMs - (Date.now() - started)
-        const isLast = i === GEMINI_MODELS.length - 1
+        const isLast = i === order.length - 1
         const limit = Math.max(1, isLast ? left : Math.min(attemptMs, left))
         try {
-          return await client.getGenerativeModel({ ...params, model }, { timeout: limit }).generateContent(...args)
+          const result = await client.getGenerativeModel({ ...params, model }, { timeout: limit }).generateContent(...args)
+          coolingUntil.delete(model)
+          return result
         } catch (err) {
           lastErr = err
           if (!shouldTryNextModel(err)) throw err
-          const next = GEMINI_MODELS[i + 1]
+          coolingUntil.set(model, Date.now() + GEMINI_COOLDOWN_MS)
+          const next = order[i + 1]
           if (!next || timeoutMs - (Date.now() - started) < MIN_ATTEMPT_MS) break
           console.warn(`[gemini] ${model} did not answer (${describeGeminiError(err)}); asking ${next}`)
         }

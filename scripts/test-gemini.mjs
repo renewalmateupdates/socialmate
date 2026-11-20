@@ -28,8 +28,9 @@ const { outputText } = ts.transpileModule(read('lib/gemini.ts'), {
 const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
 const {
-  GEMINI_MODEL, GEMINI_MODELS, GEMINI_TIMEOUT_MS, GEMINI_ATTEMPT_MS, GEMINI_LONG_MS, GEMINI_LONG_ATTEMPT_MS,
-  geminiModel, shouldTryNextModel, describeGeminiError, isGeminiTimeout, aiFailureMessage, redactKeys, stableFlashModels,
+  GEMINI_MODEL, GEMINI_MODELS, GEMINI_TIMEOUT_MS, GEMINI_ATTEMPT_MS, GEMINI_LONG_MS, GEMINI_LONG_ATTEMPT_MS, GEMINI_COOLDOWN_MS,
+  geminiModel, modelsInOrder, forgetGeminiFailures, shouldTryNextModel, describeGeminiError, isGeminiTimeout, aiFailureMessage,
+  redactKeys, stableFlashModels,
 } = mod.exports
 const { GoogleGenerativeAIAbortError, GoogleGenerativeAIFetchError } = require('@google/generative-ai')
 
@@ -48,6 +49,7 @@ test('a Gemini call that never answers gives up at the time limit with an error 
   globalThis.fetch = (_url, init) => new Promise((_resolve, reject) => {
     init?.signal?.addEventListener('abort', () => reject(Object.assign(new Error('This operation was aborted'), { name: 'AbortError' })))
   })
+  forgetGeminiFailures()
   try {
     const started = Date.now()
     const err = await geminiModel('test-key', {}, 60).generateContent('hi').then(() => null, e => e)
@@ -81,6 +83,7 @@ test('a 40 second limit leaves the 60 second routes time to refund', () => {
 // { delay: ms } before answering, or an HTTP error status; 503 by default), and
 // every model asked is recorded in order.
 function fakeGemini(behave) {
+  forgetGeminiFailures()
   const asked = []
   const realFetch = globalThis.fetch
   globalThis.fetch = (url, init) => {
@@ -135,6 +138,28 @@ test('a model that says nothing within its share of the time hands over, as 3.6 
   }
 })
 
+test('a model that just failed is asked last for a few minutes, then first again', async () => {
+  const [first, second] = GEMINI_MODELS
+  const fake = fakeGemini({ [first]: 503, [second]: 'ok' })
+  try {
+    await geminiModel('test-key').generateContent('hi')
+    assert.deepEqual(fake.asked, [first, second])
+
+    // The next request skips the busy model, so it takes as long as the one
+    // that answers: on Nov 20, 2026 every Write with AI waited 15 s on 3.8 first.
+    fake.asked.length = 0
+    const result = await geminiModel('test-key').generateContent('hi again')
+    assert.equal(result.response.text(), `hello from ${second}`)
+    assert.deepEqual(fake.asked, [second])
+    assert.equal(modelsInOrder().at(-1), first)
+
+    // After the cool-down it is asked first again.
+    assert.deepEqual(modelsInOrder(Date.now() + GEMINI_COOLDOWN_MS + 1), [...GEMINI_MODELS])
+  } finally {
+    fake.restore()
+  }
+})
+
 test('a slow answer inside the model\'s share is kept, not thrown away for the next model', async () => {
   const [first] = GEMINI_MODELS
   const fake = fakeGemini({ [first]: { delay: 150 } })
@@ -154,6 +179,8 @@ test('a refused key is not asked of every model, and every model failing still r
     assert.equal(err?.status, 403)
     assert.deepEqual(refused.asked, [GEMINI_MODELS[0]])
     assert.equal(shouldTryNextModel(err), false)
+    // A refused key is not the model's fault, so it stays first.
+    assert.equal(modelsInOrder()[0], GEMINI_MODELS[0])
   } finally {
     refused.restore()
   }
