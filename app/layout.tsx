@@ -5,8 +5,8 @@ import './globals.css'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { I18nProvider } from '@/contexts/I18nContext'
-import { Analytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
+// Vercel's Analytics and Speed Insights, without our own visits.
+import VercelInsights from '@/components/VercelInsights'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 // ssr:false dynamic imports must live in a 'use client' module — see LazyClientComponents
 import LazyClientComponents from '@/components/LazyClientComponents'
@@ -242,8 +242,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </WorkspaceProvider>
         </ThemeProvider>
         <LazyClientComponents />
-        <Analytics />
-        <SpeedInsights />
+        <VercelInsights />
         <GoogleAnalytics />
       </body>
     </html>

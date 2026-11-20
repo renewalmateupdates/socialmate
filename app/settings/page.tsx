@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
-import AppPageSkeleton, { AppSkeletonBody } from '@/components/AppPageSkeleton'
+import AppPageSkeleton from '@/components/AppPageSkeleton'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import UpgradeNudge from '@/components/UpgradeNudge'
@@ -81,7 +81,6 @@ function SettingsInner() {
   const [displayName, setDisplayName]   = useState('')
   const [username, setUsername]         = useState('')
   const [bio, setBio]                   = useState('')
-  const [authLoading, setAuthLoading]   = useState(true)
 
   const tabFromUrl  = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(
@@ -212,8 +211,8 @@ function SettingsInner() {
       setUserEmail(user.email || '')
       setUserId(user.id)
       if (searchParams.get('white_label') === 'activated') setWlActivated(true)
-      // Show page immediately — settings fill in as data arrives
-      setAuthLoading(false)
+      // The page is already on screen (rendered on the server since Nov 20,
+      // 2026); the settings fill in as the data arrives.
 
       // Fetch user_settings + profile in parallel (was 3 sequential round-trips)
       const [{ data: settings }, { data: profile }] = await Promise.all([
@@ -606,19 +605,6 @@ function SettingsInner() {
     setMfaEnabled(false); setMfaFactorId(null); setMfaStep('idle'); setMfaLoading(false)
   }
 
-  if (authLoading) {
-    // The page's title and a skeleton instead of a spinner
-    // (components/AppPageSkeleton.tsx); the sidebar stays mounted after.
-    return (
-      <div className="min-h-dvh bg-theme flex">
-        <Sidebar />
-        <div className="md:ml-56 flex-1 min-w-0 p-4 md:p-8">
-          <AppSkeletonBody title={tSettings('app_settings.title')} />
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
@@ -841,7 +827,7 @@ function SettingsInner() {
                           <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">{tSettings('app_settings.plan_tab.popular_badge')}</span>
                         )}
                         <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{pack.credits.toLocaleString()} credits</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{pack.credits.toLocaleString('en-US')} credits</p>
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-extrabold">{pack.price}</span>
                           <button onClick={() => handleCreditPack(pack.priceId)} disabled={creditPackLoading === pack.priceId}

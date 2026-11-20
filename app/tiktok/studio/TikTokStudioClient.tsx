@@ -116,6 +116,8 @@ export interface CreatorLimits {
   infoOk: boolean
   /** TikTok's reason for refusing posts right now, when it gave one. */
   infoErrorCode: string | null
+  /** Still waiting on TikTok's answer, so nothing above is known yet. */
+  infoLoading: boolean
 }
 
 type CreatorInfo = {
@@ -356,7 +358,9 @@ function PostSettingsPanel({
           </label>
           {limits.privacyOptions.length === 0 ? (
             <p className="text-xs text-amber">
-              {limits.infoErrorCode && CANT_POST_NOW.has(limits.infoErrorCode)
+              {limits.infoLoading
+                ? 'Checking your TikTok account…'
+                : limits.infoErrorCode && CANT_POST_NOW.has(limits.infoErrorCode)
                 ? 'TikTok is not accepting new posts from this account right now. Try again later.'
                 : limits.infoOk
                 ? 'TikTok reports no available privacy settings for this account.'
@@ -665,9 +669,19 @@ function PostSettingsPanel({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function TikTokStudioClient() {
+export default function TikTokStudioClient({ initialConnected }: {
+  /**
+   * Whether our own database has a TikTok connection for this person, read by
+   * the server page. Lets the first HTML be the studio itself (or the connect
+   * screen) instead of a full-screen spinner held until TikTok answers
+   * creator_info, which on a phone took seconds (Nov 20, 2026: this page
+   * scored 49 on phones, the busiest app page there).
+   */
+  initialConnected?: boolean
+} = {}) {
   // Connection state
   const [creator, setCreator]         = useState<CreatorInfo | null>(null)
+  const [creatorLoading, setCreatorLoading] = useState(true)
 
   // What this account actually permits, straight from TikTok. Falls back to the
   // most restrictive reading rather than an optimistic one, so a failed lookup
@@ -681,9 +695,8 @@ export default function TikTokStudioClient() {
     maxDurationSec:  typeof ci.max_video_post_duration_sec === 'number' ? ci.max_video_post_duration_sec : MAX_DURATION_S,
     infoOk:          creator?.info_ok === true,
     infoErrorCode:   creator?.info_error_code ?? null,
+    infoLoading:     creatorLoading,
   }
-
-  const [creatorLoading, setCreatorLoading] = useState(true)
 
   // Arriving straight from connecting TikTok: /accounts records the connect and
   // forwards here with ?connected=1. Read once, then dropped from the address so
@@ -1603,7 +1616,13 @@ export default function TikTokStudioClient() {
 
   // ── Loading / not-connected / success screens ───────────────────────────────
 
-  if (creatorLoading) {
+  // Until TikTok answers creator_info, go by what our database said on the
+  // server (initialConnected). If TikTok then disagrees (a token it revoked),
+  // the answer wins and the screen switches. The spinner is only for a caller
+  // that gave no hint.
+  const connectedNow = creatorLoading ? initialConnected : !!creator?.connected
+
+  if (connectedNow === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-void">
         <div className="flex flex-col items-center gap-3">
@@ -1614,7 +1633,7 @@ export default function TikTokStudioClient() {
     )
   }
 
-  if (!creator?.connected) {
+  if (!connectedNow) {
     return (
       <div className="min-h-dvh bg-void flex">
         <Sidebar />
@@ -1774,14 +1793,17 @@ export default function TikTokStudioClient() {
             )}
           </div>
           <div className="flex items-center gap-2 md:gap-3">
-            {creator.avatar_url && (
+            {creator?.avatar_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full ring-2 ring-edge" />
             )}
             {/* Visible at every width: the guidelines want the creator to see
-                which account the post goes to. It was hidden on phones. */}
-            <span className="max-w-32 truncate text-xs text-ink-muted">{creator.account_name}</span>
-            <button
+                which account the post goes to. It was hidden on phones. Until
+                TikTok answers, a placeholder of about the same width. */}
+            {creator
+              ? <span className="max-w-32 truncate text-xs text-ink-muted">{creator.account_name}</span>
+              : <span className="h-3 w-20 rounded-full bg-panel animate-pulse" aria-label="Checking your TikTok account" />}
+            {creator?.connected && <button
               onClick={() => {
                 // One tap used to disconnect at once, from a small link beside
                 // the account name, and a disconnect also starts the 45-day
@@ -1792,7 +1814,7 @@ export default function TikTokStudioClient() {
               className="text-xs text-ink-faint hover:text-ink-muted transition-colors"
             >
               Disconnect
-            </button>
+            </button>}
           </div>
         </div>
 
