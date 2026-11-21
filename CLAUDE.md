@@ -770,11 +770,15 @@ free (#825, merged and checked live Nov 20).**
   rule, used by the publisher and inbox replies; tested in
   `scripts/test-bluesky-facets.mjs`. The scheduled posts carry hashtags from
   Nov 21, so it should deploy before 15:00 UTC that day.
-- **Joshua's side, bios:** the shop's Bluesky bio has no link (its X website
-  field and Mastodon Shop field do), so its "Link in bio." posts need the shop
-  link added there before Mon Nov 23. Both shop bios still say "Business,
-  marketing and AI guides", and SocialMate's X and Bluesky bios list only four
+- **Bios:** every account behind a "Link in bio." post shows its link (the
+  shop's Bluesky has profile link buttons, its X a website field, its Mastodon
+  a Shop field). The shop's Bluesky bio was rewritten merch-only on Nov 20 with
+  Joshua's OK. Still old: the shop's X and Mastodon bios ("Business, marketing
+  and AI guides") and SocialMate's X and Bluesky bios, which list four
   platforms ("More platforms coming").
+- **Still live:** 6 published shop campaign posts (Nov 4 to Nov 20, each on X,
+  Bluesky and Mastodon) advertise PDFs with prices and links to the drafted
+  listings, which answer 404. Deleting them is Joshua's call.
 - Shopify (Joshua's go-ahead, Nov 20): the 8 PDF products are drafts, so the
   store sells merch only; streamer and creator gear comes later. Black Friday
   weekend is an automatic 20% off all merch, Nov 26 12:00 AM to Nov 30 11:59 PM
