@@ -46,6 +46,54 @@ function utf8Bytes(s: string): number {
   return new TextEncoder().encode(s).length
 }
 
+export interface TagFacet {
+  index: { byteStart: number; byteEnd: number }
+  features: { $type: 'app.bsky.richtext.facet#tag'; tag: string }[]
+}
+
+export type Facet = LinkFacet | TagFacet
+
+// Bluesky's own hashtag rule, from @atproto/api's RichText.detectFacets: a #
+// (or the full-width ＃) at the start or after whitespace, then a tag that is
+// not all digits. Trailing punctuation is dropped and a tag is at most 64
+// characters. Kept as a string so TypeScript leaves the Unicode classes alone.
+const TAG_SOURCE =
+  '(^|\\s)[#\\uFF03]((?!\\uFE0F)[^\\s\\u00AD\\u2060\\u200A\\u200B\\u200C\\u200D\\u20E2]*' +
+  '[^\\d\\s\\p{P}\\u00AD\\u2060\\u200A\\u200B\\u200C\\u200D\\u20E2]+' +
+  '[^\\s\\u00AD\\u2060\\u200A\\u200B\\u200C\\u200D\\u20E2]*)?'
+
+/**
+ * Tag facets for every hashtag in the text, in order. Until Nov 2026 Bluesky
+ * posts carried link facets only, so a #hashtag sent from SocialMate showed as
+ * plain text: not clickable, and not in Bluesky's tag search.
+ */
+export function tagFacets(text: string): TagFacet[] {
+  const facets: TagFacet[] = []
+  const re = new RegExp(TAG_SOURCE, 'gu')
+  let m: RegExpExecArray | null
+  while ((m = re.exec(text)) !== null) {
+    if (m[0].length === 0) { re.lastIndex++; continue }
+    const tag = (m[2] || '').trim().replace(new RegExp('\\p{P}+$', 'u'), '')
+    if (!tag || tag.length > 64) continue
+    const start = m.index + m[1].length
+    const byteStart = utf8Bytes(text.slice(0, start))
+    facets.push({
+      index: { byteStart, byteEnd: byteStart + utf8Bytes(text.slice(start, start + 1 + tag.length)) },
+      features: [{ $type: 'app.bsky.richtext.facet#tag', tag }],
+    })
+  }
+  return facets
+}
+
+/** Every facet a post needs: its links, and its hashtags outside any link, in order. */
+export function postFacets(text: string): Facet[] {
+  const links = linkFacets(text)
+  const insideLink = (f: TagFacet) =>
+    links.some(l => f.index.byteStart < l.index.byteEnd && f.index.byteEnd > l.index.byteStart)
+  const tags = tagFacets(text).filter(f => !insideLink(f))
+  return [...links, ...tags].sort((a, b) => a.index.byteStart - b.index.byteStart)
+}
+
 /** Link facets for every link in the text, in order. */
 export function linkFacets(text: string): LinkFacet[] {
   const facets: LinkFacet[] = []
