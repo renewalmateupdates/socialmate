@@ -753,11 +753,28 @@ if Resend refuses the email.
 
 **Nov 20: content to Jan 1, the shop sells merch only, and the guide PDFs are
 free (#825, merged and checked live Nov 20).**
-- Content: 60 posts from Nov 21 to Jan 1 in a Bulk CSV (Compose > Bulk >
-  Import CSV; agency imports 100 rows at a time) and an 18-video TikTok plan,
-  in Joshua's `Videos\SocialMate content` folder with the 9 demo clips and the
-  14 promo videos (Desktop shortcut "SocialMate content"). The Dec 27 post
-  links `/guides` for the free 2027 planner.
+- Content: 60 posts from Nov 21 to Jan 1 are scheduled in socialmatehq (42
+  X+Bluesky, 12 LinkedIn, 6 Discord+Telegram) and 10 shop Black Friday posts
+  in the Gilgamesh account (X+Bluesky+Mastodon, Nov 23 to Dec 4), both
+  imported through Bulk on Nov 20 with Joshua's yes. The same night, at his
+  ask, every post was made platform-native: no links in any post ("Link in
+  bio." instead), 1 to 2 CamelCase hashtags on X and Bluesky, 2 on the shop
+  posts, CamelCase on LinkedIn, none on Discord or Telegram, and BDAY31
+  worded as "31% off your first payment" (the Stripe coupon is "Once").
+  Rules in memory (`feedback_native_posts`). The CSVs in Joshua's
+  `Videos\SocialMate content` folder match what is scheduled; the 18-video
+  TikTok plan is still his to post in Studio.
+- **Bluesky hashtags (Nov 20, this branch):** SocialMate sent Bluesky link
+  facets only, so every #hashtag posted to Bluesky was plain text, not a tag.
+  `postFacets()` in `lib/bluesky-facets.ts` adds tag facets by Bluesky's own
+  rule, used by the publisher and inbox replies; tested in
+  `scripts/test-bluesky-facets.mjs`. The scheduled posts carry hashtags from
+  Nov 21, so it should deploy before 15:00 UTC that day.
+- **Joshua's side, bios:** the shop's Bluesky bio has no link (its X website
+  field and Mastodon Shop field do), so its "Link in bio." posts need the shop
+  link added there before Mon Nov 23. Both shop bios still say "Business,
+  marketing and AI guides", and SocialMate's X and Bluesky bios list only four
+  platforms ("More platforms coming").
 - Shopify (Joshua's go-ahead, Nov 20): the 8 PDF products are drafts, so the
   store sells merch only; streamer and creator gear comes later. Black Friday
   weekend is an automatic 20% off all merch, Nov 26 12:00 AM to Nov 30 11:59 PM

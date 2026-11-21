@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { linkFacets } from '@/lib/bluesky-facets'
+import { postFacets } from '@/lib/bluesky-facets'
 import { VIDEO_WAIT_MS, VideoStillProcessing, fetchVideo, firstVideo, mp4Info, sleep, type FetchedVideo } from './video'
 
 
@@ -267,10 +267,11 @@ export async function publishToBluesky(
     }
   }
 
-  // Bluesky shows a link as clickable only when the record marks it with a
-  // facet; until Nov 2026 every link in these posts was plain text. Measured
-  // on the final (possibly truncated) text, since offsets are in bytes.
-  const facets = linkFacets(content)
+  // Bluesky shows a link as clickable, and a #hashtag as a real tag, only when
+  // the record marks it with a facet; until Nov 2026 links and hashtags in
+  // these posts were plain text. Measured on the final (possibly truncated)
+  // text, since offsets are in bytes.
+  const facets = postFacets(content)
 
   // Create the post
   const postRes = await fetch('https://bsky.social/xrpc/com.atproto.repo.createRecord', {

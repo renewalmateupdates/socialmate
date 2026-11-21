@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { linkFacets } from '@/lib/bluesky-facets'
+import { postFacets } from '@/lib/bluesky-facets'
 
 type ReplyBody = {
   platform: 'bluesky' | 'mastodon'
@@ -141,8 +141,8 @@ export async function POST(request: NextRequest) {
           record: {
             $type: 'app.bsky.feed.post',
             text: reply_text,
-            // Links are only clickable on Bluesky with a facet (lib/bluesky-facets.ts).
-            ...(linkFacets(reply_text).length ? { facets: linkFacets(reply_text) } : {}),
+            // Links and hashtags only work on Bluesky with a facet (lib/bluesky-facets.ts).
+            ...(postFacets(reply_text).length ? { facets: postFacets(reply_text) } : {}),
             reply: {
               root: effectiveRoot,
               parent: { uri: parent_uri, cid: parent_cid },
