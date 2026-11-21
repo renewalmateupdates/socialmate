@@ -605,7 +605,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #825 are merged.
+**Pick up here (updated Nov 20, 2026).** #786 through #828 are merged.
 
 **Nov 20: Joshua's 500 autonomy questions.** He asked what Claude should do
 on its own to take SocialMate toward a billion-dollar company and the shop
@@ -754,9 +754,10 @@ if Resend refuses the email.
 **Nov 20: content to Jan 1, the shop sells merch only, and the guide PDFs are
 free (#825, merged and checked live Nov 20).**
 - Content: 60 posts from Nov 21 to Jan 1 are scheduled in socialmatehq (42
-  X+Bluesky, 12 LinkedIn, 6 Discord+Telegram) and 10 shop Black Friday posts
-  in the Gilgamesh account (X+Bluesky+Mastodon, Nov 23 to Dec 4), both
-  imported through Bulk on Nov 20 with Joshua's yes. The same night, at his
+  X+Bluesky, 12 LinkedIn, 6 Discord+Telegram) and 22 shop posts in the
+  Gilgamesh account (X+Bluesky+Mastodon, Nov 23 to Jan 1: 10 for Black
+  Friday, then 12 merch posts Mon/Wed/Fri from Dec 7), all imported through
+  Bulk on Nov 20 with Joshua's yes. The same night, at his
   ask, every post was made platform-native: no links in any post ("Link in
   bio." instead), 1 to 2 CamelCase hashtags on X and Bluesky, 2 on the shop
   posts, CamelCase on LinkedIn, none on Discord or Telegram, and BDAY31
@@ -764,21 +765,22 @@ free (#825, merged and checked live Nov 20).**
   Rules in memory (`feedback_native_posts`). The CSVs in Joshua's
   `Videos\SocialMate content` folder match what is scheduled; the 18-video
   TikTok plan is still his to post in Studio.
-- **Bluesky hashtags (Nov 20, this branch):** SocialMate sent Bluesky link
-  facets only, so every #hashtag posted to Bluesky was plain text, not a tag.
-  `postFacets()` in `lib/bluesky-facets.ts` adds tag facets by Bluesky's own
-  rule, used by the publisher and inbox replies; tested in
-  `scripts/test-bluesky-facets.mjs`. The scheduled posts carry hashtags from
-  Nov 21, so it should deploy before 15:00 UTC that day.
+- **Bluesky hashtags (#828, deployed 02:26 UTC Nov 21):** SocialMate sent
+  Bluesky link facets only, so every #hashtag posted to Bluesky was plain
+  text, not a tag. `postFacets()` in `lib/bluesky-facets.ts` adds tag facets
+  by Bluesky's own rule, used by the publisher and inbox replies; tested in
+  `scripts/test-bluesky-facets.mjs`. **Next:** the first scheduled Bluesky
+  post with hashtags (Nov 21, 15:00 UTC) should carry `#tag` facets
+  (`app.bsky.feed.getPosts` on its URI).
 - **Bios:** every account behind a "Link in bio." post shows its link (the
   shop's Bluesky has profile link buttons, its X a website field, its Mastodon
   a Shop field). The shop's Bluesky bio was rewritten merch-only on Nov 20 with
   Joshua's OK. Still old: the shop's X and Mastodon bios ("Business, marketing
   and AI guides") and SocialMate's X and Bluesky bios, which list four
   platforms ("More platforms coming").
-- **Still live:** 6 published shop campaign posts (Nov 4 to Nov 20, each on X,
-  Bluesky and Mastodon) advertise PDFs with prices and links to the drafted
-  listings, which answer 404. Deleting them is Joshua's call.
+- **Deleted Nov 20 (Joshua's yes):** the 6 shop campaign posts from Nov 4 to
+  Nov 20 that sold PDFs, on X, Bluesky and Mastodon (18 copies); each answers
+  404 now.
 - Shopify (Joshua's go-ahead, Nov 20): the 8 PDF products are drafts, so the
   store sells merch only; streamer and creator gear comes later. Black Friday
   weekend is an automatic 20% off all merch, Nov 26 12:00 AM to Nov 30 11:59 PM
