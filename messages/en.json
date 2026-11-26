@@ -2753,5 +2753,14 @@
       "headline": "Start posting everywhere.",
       "body": "Free plan, no card, set up in about a minute. Upgrade to Pro for $8 whenever it earns it."
     }
+  },
+  "promo": {
+    "bf_title": "Black Friday: {percent}% off your first {months} months",
+    "bf_pricing_body": "Pro is {proMonthly} a month for your first {months} months, or {proAnnual} for the first year on annual. Agency is {agencyMonthly} a month, or {agencyAnnual} for the first year. Ends {date}.",
+    "bf_apply": "Apply {code}",
+    "bf_applied": "{code} applied",
+    "bf_dash_title": "Black Friday: {percent}% off Pro for your first {months} months",
+    "bf_dash_body": "Code {code} makes Pro {monthly} a month for your first {months} months, or {annual} for the first year on annual. Ends {date}.",
+    "bf_cta": "See the deal"
   }
 }

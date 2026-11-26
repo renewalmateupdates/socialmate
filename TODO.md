@@ -19,7 +19,16 @@ replies expired long ago.)
 
 ## Waiting on a decision
 
-1. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
+1. **NONPROFIT50 and STUDENT25 (found Nov 26).** /discount, /for/nonprofits and
+   all nine locale files advertise them, but neither has a Stripe promotion
+   code, so from May to Nov 26 the pricing page said "50% off applied" and
+   Stripe would have charged the full price (nobody tried). Since Nov 26 the
+   code box refuses them and gives the support email. To make them work,
+   decide: how long each discount lasts (every payment, the first 12 months,
+   or the first payment), and whether the honor system stays (in May Joshua
+   wanted a verification step: .edu for students). Then a session creates the
+   two Stripe codes, links them in the `coupons` table and updates the pages.
+2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it

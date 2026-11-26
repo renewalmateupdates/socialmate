@@ -11,10 +11,11 @@ import DashboardTour from '@/components/DashboardTour'
 import DidYouKnow from '@/components/DidYouKnow'
 import DashboardWidgets from '@/components/DashboardWidgets'
 import WelcomeOfferBanner from '@/components/WelcomeOfferBanner'
+import BlackFridayBanner from '@/components/BlackFridayBanner'
 import WhatsNewBanner from '@/components/WhatsNewBanner'
 import PlatformIcon from '@/components/landing/PlatformIcon'
 import { useWorkspace, PLAN_CONFIG, isOwnWorkspace } from '@/contexts/WorkspaceContext'
-import { streakTimeOf, unconnectedForPost, type ConnectionRow } from '@/lib/connected-platforms'
+import { platformDisplayName, streakTimeOf, unconnectedForPost, type ConnectionRow } from '@/lib/connected-platforms'
 import { useI18n } from '@/contexts/I18nContext'
 import { localeToBCP47 } from '@/lib/i18n'
 import {
@@ -42,6 +43,10 @@ import { CSS } from '@dnd-kit/utilities'
    value stored in connected_accounts; PlatformIcon indexes that mark as `x`. */
 const PLAN_CARD_PLATFORMS = ['bluesky', 'discord', 'telegram', 'mastodon', 'twitter', 'linkedin', 'tiktok'] as const
 const ICON_KEY: Record<string, string> = { twitter: 'x' }
+
+/* The "Coming very soon" card: built, gated, and waiting on Meta App Review or
+   Google's verification (Nov 17, 2026). Not Pinterest or Reddit: both declined. */
+const COMING_SOON_PLATFORMS = ['instagram', 'facebook', 'threads', 'youtube'] as const
 
 const LS_CARD_ORDER_KEY = 'dashboard_card_order'
 const DEFAULT_CARD_ORDER = ['scheduled', 'drafts', 'published', 'this-week']
@@ -607,11 +612,14 @@ function DashboardInner() {
           <WhatsNewBanner />
 
           {user && plan === 'free' && (
-            <WelcomeOfferBanner
-              createdAt={user.created_at}
-              plan={plan}
-              onApplyOffer={() => window.location.href = '/pricing'}
-            />
+            <>
+              <BlackFridayBanner plan={plan} />
+              <WelcomeOfferBanner
+                createdAt={user.created_at}
+                plan={plan}
+                onApplyOffer={() => window.location.href = '/pricing?code=WELCOME50'}
+              />
+            </>
           )}
 
           {/* ── PENDING APPROVALS ──────────────────────────────────────── */}
@@ -1145,11 +1153,13 @@ function DashboardInner() {
                   <Clock className="w-3.5 h-3.5 text-app-faint" />
                   <Label>{t('app_dashboard.coming_very_soon')}</Label>
                 </div>
+                {/* Built and waiting on each platform's review (Nov 17, 2026).
+                    Pinterest and Reddit declined, so they aren't coming. */}
                 <div className="grid grid-cols-2 gap-2.5">
-                  {['youtube', 'pinterest', 'reddit', 'instagram'].map(p => (
+                  {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p} className="flex items-center gap-2 text-xs text-app-muted">
                       <PlatformIcon name={p} size={12} mono className="text-app-faint" />
-                      <span className="capitalize">{p}</span>
+                      <span>{platformDisplayName(p)}</span>
                     </div>
                   ))}
                 </div>

@@ -2753,5 +2753,14 @@
       "headline": "Commencez à publier partout.",
       "body": "Plan gratuit, sans carte, configuré en une minute environ. Passez à Pro pour $8 quand il l’aura mérité."
     }
+  },
+  "promo": {
+    "bf_title": "Black Friday : {percent} % de réduction sur vos {months} premiers mois",
+    "bf_pricing_body": "Pro coûte {proMonthly} par mois pendant vos {months} premiers mois, ou {proAnnual} la première année en paiement annuel. Agency coûte {agencyMonthly} par mois, ou {agencyAnnual} la première année. Se termine le {date}.",
+    "bf_apply": "Appliquer {code}",
+    "bf_applied": "{code} appliqué",
+    "bf_dash_title": "Black Friday : {percent} % de réduction sur Pro pendant vos {months} premiers mois",
+    "bf_dash_body": "Avec le code {code}, Pro coûte {monthly} par mois pendant vos {months} premiers mois, ou {annual} la première année en paiement annuel. Se termine le {date}.",
+    "bf_cta": "Voir l'offre"
   }
 }

@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { PLAN_PRICES } from '@/lib/plan'
+import { discountedPrice } from '@/lib/promos'
 import { Banknote, Bot, CalendarDays, Gift, Heart, Link2, MessageCircle, Users } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Globe } from 'lucide-react'
@@ -141,7 +143,7 @@ const FAQ = [
   },
   {
     q: 'Do you offer a nonprofit discount?',
-    a: "Yes. We have a NONPROFIT50 code that gets you 50% off the Pro plan — that's $2.50/month. It's an honor-system discount. Visit socialmate.studio/discount to apply it.",
+    a: `Yes. We have a NONPROFIT50 code that gets you 50% off the Pro plan, which makes it ${discountedPrice(PLAN_PRICES.pro.monthly, 50)}/month. It's an honor-system discount. Visit socialmate.studio/discount to apply it.`,
   },
   {
     q: 'Can we post to Discord and Telegram from SocialMate?',
@@ -333,7 +335,7 @@ export default function NonprofitsPage() {
           </div>
           <div className="bg-alert/10 border border-alert/40 rounded-2xl p-4 max-w-md mx-auto">
             <p className="text-sm font-bold text-alert mb-1 flex items-center gap-1.5"><Gift className="w-4 h-4" strokeWidth={2} /> Nonprofit discount</p>
-            <p className="text-xs text-ink-body">Use code <span className="font-mono font-bold text-ink-high">NONPROFIT50</span> at checkout for 50% off Pro — that&apos;s $2.50/month. Honor system. No verification required.</p>
+            <p className="text-xs text-ink-body">Use code <span className="font-mono font-bold text-ink-high">NONPROFIT50</span> at checkout for 50% off Pro, which makes it {discountedPrice(PLAN_PRICES.pro.monthly, 50)}/month. Honor system. No verification required.</p>
             <Link href="/discount" className="text-xs text-alert hover:text-alert underline mt-2 block">
               See all discounts →
             </Link>
