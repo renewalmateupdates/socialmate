@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Sked Social starts at $25/month. SocialMate starts at $0. Compare features, platforms, and pricing for social media scheduling.',
   openGraph: {
     title:       'SocialMate vs Sked Social (2026)',
-    description: 'Sked Social charges $25–$135+/month. SocialMate is free with 7 platforms and 15+ AI tools.',
+    description: 'Sked Social charges $25–$135+/month. SocialMate is free on 6 platforms (X needs Pro), with 15+ AI tools.',
     url:         'https://socialmate.studio/vs/sked-social',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/sked-social' },

@@ -37,6 +37,9 @@ const NEGATION = /\b(not|no|never|isn't|aren't|doesn't|don't|can't|cannot|won't|
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
+/** "X needs Pro", "X/Twitter (Pro)", "X on Pro": a note on X's plan, not a plan the sentence describes. */
+const X_PLAN_NOTE = /\b(?:posting to )?X(?:\/Twitter)?(?: threads)?\s*(?:\(\s*(?:on )?Pro\s*\)|(?:needs|is on|on|with) (?:the )?Pro(?: plan)?\b)/g
+
 /** Text as a reader sees it: tags, code fences and markup noise removed. */
 export function plainText(text) {
   return text
@@ -150,6 +153,10 @@ export function buildRules(facts) {
       id: 'plan-limit',
       why: 'A plan limit that is not the one the server enforces',
       check(s) {
+        // "X needs Pro" and "X on Pro" say which plan X is on. They do not make
+        // the sentence's other numbers Pro's: "250 posts a month, 6 platforms
+        // (X needs Pro)" is still the free plan.
+        s = s.replace(X_PLAN_NOTE, ' ')
         const names = Array.from(new Set(Array.from(s.matchAll(/\b(Free|Pro|Agency|free(?= (?:plan|tier|account|users?)))\b(?! (?:tools?|to |and easy|trial))/g))
           .filter(m => !isOtherProductsPlan(s, m.index)).map(m => m[1].charAt(0).toUpperCase() + m[1].slice(1))))
         if (names.length !== 1) return []

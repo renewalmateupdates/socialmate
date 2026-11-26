@@ -45,7 +45,7 @@ export default function VsRepurposePage() {
         { q: 'Can I use both?', a: 'Yes, they barely overlap. You could post TikTok videos from SocialMate\'s TikTok Studio and use Repurpose.io to copy them to YouTube Shorts and Reels.' },
         { q: 'How much is Repurpose.io?', a: `Starter is $35 a month ($349 a year) with up to 3 accounts per network, Pro is $79 and Agency $179, after a 14-day trial. SocialMate is free for ${SM.freePosts} posts a month; Pro is $${SM.proPrice}.` },
       ]}
-      closing={{ title: 'Schedule what you write.', body: `Text, images and TikTok video to 7 platforms. ${SM.freePosts} posts a month free, no card.` }}
+      closing={{ title: 'Schedule what you write.', body: `Text, images and TikTok video to 7 platforms. ${SM.freePosts} posts a month free on 6 of them, no card.` }}
     />
   )
 }

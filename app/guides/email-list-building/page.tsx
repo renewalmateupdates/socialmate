@@ -650,7 +650,7 @@ export default function EmailListBuildingPage() {
                     SocialMate has an email newsletter system built in — IRIS Dispatch — that
                     handles the scheduling and delivery side. If you&apos;re building an audience
                     and want to pair your email strategy with a real social media presence,
-                    try SocialMate free. Schedule your content across 7 platforms while your
+                    try SocialMate free. Schedule your content across 6 platforms (X needs Pro) while your
                     email list grows in parallel.
                   </p>
                   <Link href="/signup"

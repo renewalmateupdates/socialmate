@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'NapoleonCat starts at $32/month for 1 user and 3 profiles. SocialMate starts at $0. See the full feature and pricing comparison.',
   openGraph: {
     title:       'SocialMate vs NapoleonCat (2026)',
-    description: 'NapoleonCat charges $32–$76+/month. SocialMate is free with 7 platforms and 15+ AI tools.',
+    description: 'NapoleonCat charges $32–$76+/month. SocialMate is free on 6 platforms (X needs Pro), with 15+ AI tools.',
     url:         'https://socialmate.studio/vs/napoleon-cat',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/napoleon-cat' },

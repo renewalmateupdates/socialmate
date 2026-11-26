@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Restaurants & Food Businesses — SocialMate',
-  description: 'Free social media scheduling for restaurants, cafes, and food businesses. Schedule daily menu posts, generate food captions with AI, and reach hungry customers on TikTok and 7 platforms — free forever.',
+  description: 'Free social media scheduling for restaurants, cafes, and food businesses. Schedule daily menu posts, generate food captions with AI, and reach hungry customers on TikTok and 5 more platforms, free forever (X needs Pro).',
   openGraph: {
     title: 'Social Media for Restaurants & Food Businesses — SocialMate',
-    description: 'Schedule your daily specials, menu drops, and behind-the-kitchen content across 7 platforms without leaving the kitchen. Free forever.',
+    description: 'Schedule your daily specials, menu drops, and behind-the-kitchen content across 7 platforms without leaving the kitchen. Free forever on 6 of them.',
     url: 'https://socialmate.studio/for/restaurants',
     images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Restaurants' }],
   },

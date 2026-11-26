@@ -47,7 +47,7 @@ export default function BlogInlineCTA({
         You can schedule everything in this article from one place.
       </p>
       <p className="mt-1.5 text-sm text-gray-400">
-        Seven platforms, 15+ AI tools, free forever. No card, about a minute to set up.
+        Six platforms free (X on Pro), 15+ AI tools. No card, about a minute to set up.
       </p>
       <Link
         href="/signup"

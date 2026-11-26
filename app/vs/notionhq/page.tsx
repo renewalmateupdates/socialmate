@@ -186,7 +186,7 @@ export default function VsNotionhqPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Stop planning. Start publishing.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate connects to 7 platforms and publishes on schedule. Free forever — no credit card required.
+            SocialMate connects to 7 platforms and publishes on schedule. Free forever on 6 of them, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

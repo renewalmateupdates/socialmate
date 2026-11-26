@@ -1,4 +1,4 @@
-import { AI_TOOLS, LIVE_PLATFORM_NAMES, PLANS, UNAVAILABLE_PLATFORM_NAMES, listWords } from '@/lib/site-facts'
+import { AI_TOOLS, LIVE_PLATFORM_NAMES, PAID_ONLY_PLATFORM_NAMES, PLANS, UNAVAILABLE_PLATFORM_NAMES, listWords } from '@/lib/site-facts'
 
 /**
  * SocialMate's own side of the comparison pages built from
@@ -26,6 +26,7 @@ export const SM = {
   proCredits:    PLANS.pro.aiCreditsPerMonth,
   freeTikTok:    PLANS.free.tiktokVideosPerMonth,
   livePlatforms: LIVE_PLATFORM_NAMES,
+  proOnly:       PAID_ONLY_PLATFORM_NAMES,
   notYet:        UNAVAILABLE_PLATFORM_NAMES,
 } as const
 
@@ -35,7 +36,7 @@ export { listWords }
 export const SM_POINTS: string[] = [
   `✅ Free plan: ${SM.freePosts} posts a month, no card`,
   `✅ Pro: $${SM.proPrice}/month with ${SM.proSeats} seats`,
-  `✅ Posts to ${listWords(SM.livePlatforms)}`,
+  `✅ Posts to ${listWords(SM.livePlatforms)} (${listWords(SM.proOnly)} ${SM.proOnly.length === 1 ? 'needs' : 'need'} Pro)`,
   `✅ ${AI_TOOLS.length} AI writing tools, ${SM.freeCredits} credits a month free`,
   `❌ No ${listWords(SM.notYet.slice(0, 5), 'or')} yet`,
 ]

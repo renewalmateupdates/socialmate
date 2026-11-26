@@ -191,7 +191,7 @@ export default function VsVistaSocialPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Why pay $39 when $0 gets you started?</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — TikTok included, 15+ AI tools, 7 platforms, 2 team seats. No trial. No expiry. No credit card.
+            SocialMate is free forever — TikTok included, 15+ AI tools, 6 platforms (X needs Pro), 2 team seats. No trial. No expiry. No credit card.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

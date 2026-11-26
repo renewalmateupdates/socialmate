@@ -56,7 +56,7 @@ const PAIN_POINTS = [
 const FEATURES = [
   {
     title: 'Episode Launch Scheduler',
-    desc:  'Schedule episode drop announcements to all 7 platforms at once. Set it before you publish and it fires automatically when your episode goes live.',
+    desc:  'Schedule episode drop announcements to all 7 platforms at once (X needs Pro). Set it before you publish and it fires automatically when your episode goes live.',
     icon:  Rocket,
     badge: 'Free',
   },
@@ -157,7 +157,7 @@ const FAQ = [
   },
   {
     q: 'How much does it cost?',
-    a: 'Free forever on the free plan (50 AI credits, all 7 platforms, full scheduler). Pro is $8/month (500 AI credits, SOMA access, Smart Queue, A/B testing). No credit card required to start.',
+    a: 'Free forever on the free plan (50 AI credits, 6 platforms, full scheduler; X needs Pro). Pro is $8/month (500 AI credits, SOMA access, Smart Queue, A/B testing). No credit card required to start.',
   },
 ]
 

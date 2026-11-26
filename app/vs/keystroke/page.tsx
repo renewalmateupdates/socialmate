@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'Why pay $29/month for LinkedIn when SocialMate is free?',
-    a: "Keystroke's pricing makes sense if LinkedIn is your only publishing channel and you need every LinkedIn-specific feature possible. For most creators who post to LinkedIn among other platforms, paying $29/month for a single-platform tool is hard to justify when SocialMate schedules to 7 platforms for free. The Pro upgrade at $8/month adds SOMA, 500 AI credits, and 8 agents — still less than Keystroke's base price.",
+    a: "Keystroke's pricing makes sense if LinkedIn is your only publishing channel and you need every LinkedIn-specific feature possible. For most creators who post to LinkedIn among other platforms, paying $29/month for a single-platform tool is hard to justify when SocialMate schedules to 6 platforms for free (X needs Pro). The Pro upgrade at $8/month adds SOMA, 500 AI credits, and 8 agents — still less than Keystroke's base price.",
   },
   {
     q: 'Does SocialMate have AI for LinkedIn content?',
@@ -160,7 +160,7 @@ export default function VsKeystrokePage() {
               {
                 n: '1',
                 title: '$29/month for one platform when SocialMate is free for seven',
-                desc: "Keystroke's minimum is $29/month for LinkedIn-only scheduling. SocialMate's free plan schedules LinkedIn plus Bluesky, Discord, Telegram, TikTok, X/Twitter, and Mastodon — at zero cost. For $8/month Pro, you get SOMA, 500 AI credits, and 8 agents. Keystroke's pricing is hard to justify when the alternative covers 7x the platforms for less.",
+                desc: "Keystroke's minimum is $29/month for LinkedIn-only scheduling. SocialMate's free plan schedules LinkedIn plus Bluesky, Discord, Telegram, TikTok, and Mastodon — at zero cost. X/Twitter needs Pro. For $8/month Pro, you get SOMA, 500 AI credits, and 8 agents. Keystroke's pricing is hard to justify when the alternative covers 7x the platforms for less.",
               },
               {
                 n: '2',

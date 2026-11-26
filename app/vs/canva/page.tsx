@@ -113,7 +113,7 @@ export default function VsCanvaPage() {
             <p className="text-xs font-bold text-ink-high uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Purpose-built Creator OS. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-high">
-              <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
+              <li>✅ 7 live platforms including Discord, Telegram + LinkedIn (X needs Pro)</li>
               <li>✅ 15 AI content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Full analytics, inbox, and link in bio</li>
@@ -155,7 +155,7 @@ export default function VsCanvaPage() {
               {
                 n: '2',
                 title: 'No Discord, Telegram, or Bluesky — major platforms left out',
-                desc: "If your community lives on Discord, Telegram, or Bluesky, Canva cannot help you post there at all. SocialMate supports all three on the free plan alongside TikTok, Mastodon, and X/Twitter.",
+                desc: "If your community lives on Discord, Telegram, or Bluesky, Canva cannot help you post there at all. SocialMate supports all three on the free plan alongside TikTok and Mastodon, with X/Twitter on Pro.",
               },
               {
                 n: '3',
@@ -196,7 +196,7 @@ export default function VsCanvaPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready for a scheduling platform — not a design tool?</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is purpose-built for social media. 7 platforms, 15 AI tools, SOMA autonomous content — all starting at $0.
+            SocialMate is purpose-built for social media. 7 platforms (6 free, X on Pro), 15 AI tools, SOMA autonomous content — all starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs TikTok Native Scheduler (2026) — Full Comparison',
-  description: "TikTok's built-in scheduler only posts to TikTok. SocialMate schedules TikTok plus 6 other platforms — Discord, LinkedIn, Bluesky, Telegram, Mastodon, X — free.",
+  description: "TikTok's built-in scheduler only posts to TikTok. SocialMate schedules TikTok plus 6 other platforms — Discord, LinkedIn, Bluesky, Telegram, Mastodon, X — all free except X.",
   openGraph: {
     title:       'SocialMate vs TikTok Scheduler (2026)',
     description: "TikTok native scheduler = TikTok only. SocialMate = TikTok + 6 more platforms + 15 AI tools. Free.",

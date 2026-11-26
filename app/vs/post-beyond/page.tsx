@@ -91,7 +91,7 @@ export default function VsPostBeyondPage() {
             SocialMate vs PostBeyond
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            PostBeyond is enterprise employee advocacy at $1,000+/month. SocialMate is purpose-built for creators and small teams — 7 platforms, 15+ AI tools, free to start.
+            PostBeyond is enterprise employee advocacy at $1,000+/month. SocialMate is purpose-built for creators and small teams — 7 platforms (6 free, X on Pro), 15+ AI tools.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -121,7 +121,7 @@ export default function VsPostBeyondPage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Built for creators and teams. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ 7 platforms: Discord, Telegram, Bluesky, TikTok, LinkedIn, X, Mastodon</li>
+              <li>✅ 7 platforms: Discord, Telegram, Bluesky, TikTok, LinkedIn, Mastodon, and X on Pro</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Team approval workflows free</li>
@@ -206,7 +206,7 @@ export default function VsPostBeyondPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Built for creators, not enterprises</p>
           <h2 className="text-3xl font-extrabold mb-4">Schedule posts. Generate content. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate is a full creator OS. 7 platforms, 15+ AI tools, SOMA, and 8 agents — all for $0 to start.
+            SocialMate is a full creator OS. 7 platforms (6 free, X on Pro), 15+ AI tools, SOMA, and 8 agents — all for $0 to start.
             Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

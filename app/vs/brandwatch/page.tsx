@@ -32,7 +32,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate replace Brandwatch for small businesses?',
-    a: "For most small businesses and creators, yes. SocialMate's competitor tracking lets you follow up to 3 competitor accounts on the free plan, monitor their posting patterns, and get alerts when they publish. You also get a full scheduler, 15+ AI tools, and 7-platform support. Brandwatch's deep NLP sentiment analysis and firehose data are overkill unless you're running a major brand.",
+    a: "For most small businesses and creators, yes. SocialMate's competitor tracking lets you follow up to 3 competitor accounts on the free plan, monitor their posting patterns, and get alerts when they publish. You also get a full scheduler, 15+ AI tools, and 6 platforms (X needs Pro). Brandwatch's deep NLP sentiment analysis and firehose data are overkill unless you're running a major brand.",
   },
   {
     q: 'Does SocialMate track mentions?',
@@ -80,7 +80,7 @@ export default function VsBrandwatchPage() {
             SocialMate vs Brandwatch
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Brandwatch costs $1,000+/month and does not even include a post scheduler. SocialMate gives you competitor tracking, scheduling, 15+ AI tools, and 7 platforms — free to start.
+            Brandwatch costs $1,000+/month and does not even include a post scheduler. SocialMate gives you competitor tracking, scheduling, 15+ AI tools, and 7 platforms, 6 of them free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -111,7 +111,7 @@ export default function VsBrandwatchPage() {
             <p className="font-extrabold text-lg mb-2">Schedule + track competitors. All in one. Starts free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Competitor tracking built in (free)</li>
-              <li>✅ Full post scheduler — all 7 platforms</li>
+              <li>✅ Full post scheduler for 7 platforms (X needs Pro)</li>
               <li>✅ 15+ AI writing tools included</li>
               <li>✅ Discord, Telegram, Bluesky, Mastodon</li>
               <li>✅ No credit card required</li>
@@ -193,7 +193,7 @@ export default function VsBrandwatchPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">All-in-one beats one expensive slice</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            Get scheduling, competitor tracking, 15+ AI tools, and 7 platforms in one product. Starts free — no credit card required.
+            Get scheduling, competitor tracking, 15+ AI tools, and 7 platforms in one product, 6 of them free. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

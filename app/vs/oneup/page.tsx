@@ -92,7 +92,7 @@ export default function VsOneUpPage() {
             SocialMate vs OneUp
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            OneUp is $18/month with no AI tools and no Discord or Telegram support. SocialMate is free — with 15+ AI tools and all 7 platforms.
+            OneUp is $18/month with no AI tools and no Discord or Telegram support. SocialMate is free, with 15+ AI tools and 6 of its 7 platforms (X needs Pro).
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -120,7 +120,7 @@ export default function VsOneUpPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>

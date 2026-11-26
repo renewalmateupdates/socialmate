@@ -10,7 +10,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         onlypult: '$25/month',               socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              onlypult: '7-day trial only',        socialmate: '✅ Genuinely free'        },
-  { feature: 'Profiles on entry plan', onlypult: '3 profiles',              socialmate: '1 per platform, all 7 free' },
+  { feature: 'Profiles on entry plan', onlypult: '3 profiles',              socialmate: '1 per platform, 6 free (X on Pro)' },
   { feature: 'Platforms supported',    onlypult: '12 (paid)',               socialmate: '7 live (free)'               },
   { feature: 'Team seats',             onlypult: '1 on Start plan',         socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       onlypult: '❌ No AI tools',          socialmate: '15+ tools free'           },
@@ -48,7 +48,7 @@ const FAQ = [
   },
   {
     q: 'Why should I choose SocialMate over Onlypult?',
-    a: 'SocialMate is free to start, includes 15+ AI tools, supports 7 platforms (including Bluesky, Mastodon, Discord, Telegram), and offers features like competitor tracking, evergreen recycling, and hashtag collections that Onlypult doesn\'t have at any price point.',
+    a: 'SocialMate is free to start, includes 15+ AI tools, supports 7 platforms (6 of them free, including Bluesky, Mastodon, Discord, Telegram), and offers features like competitor tracking, evergreen recycling, and hashtag collections that Onlypult doesn\'t have at any price point.',
   },
 ]
 
@@ -131,7 +131,7 @@ export default function VsOnlypult() {
           <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
-            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
+            <p className="text-xs text-jade">6 platforms free · X on Pro · 15+ AI tools</p>
           </div>
         </div>
 
@@ -182,7 +182,7 @@ export default function VsOnlypult() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
+            6 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking, all free (X needs Pro). No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

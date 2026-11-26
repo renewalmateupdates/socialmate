@@ -47,7 +47,7 @@ export default function VsPredisPage() {
         { q: 'Does SocialMate generate images like Predis.ai?', a: 'No. SocialMate\'s AI tools write: captions, hooks, threads, rewrites, hashtags and post scores. Predis.ai generates images, carousels and videos.' },
         { q: 'Can I post automatically on Predis.ai\'s cheapest plan?', a: 'Not on Core ($19/month). Predis.ai\'s pricing page lists auto posting from Rise ($40/month). Every SocialMate plan posts automatically.' },
       ]}
-      closing={{ title: 'Write it once, post it everywhere.', body: `${SM.freePosts} posts a month free on 7 platforms, with 15+ AI writing tools. No card, no trial clock.` }}
+      closing={{ title: 'Write it once, post it everywhere.', body: `${SM.freePosts} posts a month free on 6 platforms (X needs Pro), with 15+ AI writing tools. No card, no trial clock.` }}
     />
   )
 }

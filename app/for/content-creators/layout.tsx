@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Content Creators — SocialMate',
-  description: 'Manage all your social media from one place. Post to 7 platforms at once, use AI to write content faster, and never burn out from daily posting pressure — free forever or $8/month.',
+  description: 'Manage all your social media from one place. Post to 7 platforms at once (6 free, X on Pro), use AI to write content faster, and never burn out from daily posting pressure — free forever or $8/month.',
   openGraph: {
     title: 'Social Media for Content Creators — SocialMate',
     description: 'One dashboard for Bluesky, X, TikTok, LinkedIn, Discord, Telegram, and Mastodon. SOMA generates a week of content from your ideas automatically.',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Social Media for Content Creators — SocialMate',
-    description: 'Manage 7 platforms from one dashboard. AI writes content in your voice. Free to start.',
+    description: 'Manage 7 platforms from one dashboard, 6 of them free. AI writes content in your voice.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/content-creators' },

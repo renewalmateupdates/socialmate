@@ -29,7 +29,7 @@ const FAQ = [
   },
   {
     q: 'Why are creators comparing beehiiv and SocialMate?',
-    a: 'Many creators use both: beehiiv to build an email newsletter list, and SocialMate to post across social media and drive traffic to that newsletter. They serve different channels. However, if you are on a tight budget and choosing your first tool, SocialMate is free and gets you distribution across 7 platforms immediately.',
+    a: 'Many creators use both: beehiiv to build an email newsletter list, and SocialMate to post across social media and drive traffic to that newsletter. They serve different channels. However, if you are on a tight budget and choosing your first tool, SocialMate is free and gets you distribution across 6 platforms immediately (X needs Pro).',
   },
   {
     q: 'Can SocialMate replace beehiiv?',
@@ -78,7 +78,7 @@ export default function VsBeehiivPage() {
             SocialMate vs beehiiv
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            beehiiv is a newsletter platform at $42+/month. SocialMate is a 7-platform social media scheduler with 15+ AI tools — free to start. Different jobs, clear winner for social.
+            beehiiv is a newsletter platform at $42+/month. SocialMate is a 7-platform social media scheduler with 15+ AI tools, free to start on 6 platforms (X needs Pro). Different jobs, clear winner for social.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -105,7 +105,7 @@ export default function VsBeehiivPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7-platform social OS. Starts free.</p>
+            <p className="font-extrabold text-lg mb-2">7-platform social OS. 6 platforms free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule to 7 platforms simultaneously</li>
               <li>✅ 15+ AI writing tools free</li>
@@ -142,12 +142,12 @@ export default function VsBeehiivPage() {
               {
                 n: '1',
                 title: 'Social comes before email in most creator funnels',
-                desc: 'You cannot build an email list from nobody. Most successful newsletter creators first build an audience on social — then convert followers to subscribers. SocialMate helps you build that social foundation across 7 platforms for free.',
+                desc: 'You cannot build an email list from nobody. Most successful newsletter creators first build an audience on social — then convert followers to subscribers. SocialMate helps you build that social foundation across 6 platforms for free (X needs Pro).',
               },
               {
                 n: '2',
                 title: 'beehiiv at $42/month vs SocialMate at $0',
-                desc: "beehiiv's Scale plan costs $42/month. SocialMate's free plan covers 250 posts a month across 7 platforms, 50 AI credits/month, bulk scheduling, and link in bio. If you are just getting started, start with what is free.",
+                desc: "beehiiv's Scale plan costs $42/month. SocialMate's free plan covers 250 posts a month across 6 platforms (X needs Pro), 50 AI credits/month, bulk scheduling, and link in bio. If you are just getting started, start with what is free.",
               },
               {
                 n: '3',
@@ -186,7 +186,7 @@ export default function VsBeehiivPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Build your social audience first — free</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, bulk scheduling. Completely free to start. No credit card required.
+            6 platforms (X needs Pro), 15+ AI tools, bulk scheduling. Completely free to start. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

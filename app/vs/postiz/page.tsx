@@ -52,7 +52,7 @@ export default function VsPostizPage() {
         { q: 'Which is cheaper for a small team?', a: `Postiz Standard ($29/month) has no team members, and Team is $39/month. SocialMate Pro is $${SM.proPrice}/month with ${SM.proSeats} seats, and the free plan includes ${SM.freeSeats}.` },
         { q: 'Does SocialMate have unlimited posts like Postiz?', a: `No. Every SocialMate plan is capped: ${SM.freePosts} posts a month on Free, ${SM.proPosts.toLocaleString('en-US')} on Pro and ${SM.agencyPosts.toLocaleString('en-US')} on Agency.` },
       ]}
-      closing={{ title: 'Skip the server.', body: `${SM.freePosts} posts a month on 7 platforms, 15+ AI writing tools, and nothing to install. SocialMate's free plan needs no card.` }}
+      closing={{ title: 'Skip the server.', body: `${SM.freePosts} posts a month on 6 platforms (X needs Pro), 15+ AI writing tools, and nothing to install. SocialMate's free plan needs no card.` }}
     />
   )
 }

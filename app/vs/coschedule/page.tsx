@@ -201,7 +201,7 @@ export default function VsCoSchedulePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done posting manually? Start auto-publishing free.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate auto-publishes on the free plan — bulk scheduling, 15+ AI tools, 7 platforms, no per-user fees. No credit card required.
+            SocialMate auto-publishes on the free plan — bulk scheduling, 15+ AI tools, 6 platforms (X needs Pro), no per-user fees. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

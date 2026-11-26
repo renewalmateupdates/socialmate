@@ -25,7 +25,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Why would I pay Linktree when SocialMate's SIGIL is free?",
-    a: "Linktree's free plan is barebones — no analytics, limited links, Linktree branding on your page. Their Pro plan ($8/month) removes the branding and adds analytics. SocialMate's SIGIL link in bio is completely free, includes click analytics and a QR code, and lives alongside a full post scheduler, 15+ AI tools, and 7-platform support. You get more for less.",
+    a: "Linktree's free plan is barebones — no analytics, limited links, Linktree branding on your page. Their Pro plan ($8/month) removes the branding and adds analytics. SocialMate's SIGIL link in bio is completely free, includes click analytics and a QR code, and lives alongside a full post scheduler, 15+ AI tools, and 7-platform support (X needs Pro). You get more for less.",
   },
   {
     q: 'What is SIGIL?',
@@ -78,7 +78,7 @@ export default function VsLinktreePage() {
             SocialMate vs Linktree
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Linktree charges $5-9/month for a link page. SocialMate's SIGIL link in bio is completely free — and you also get a full social media scheduler with 15+ AI tools and 7 platforms.
+            Linktree charges $5-9/month for a link page. SocialMate's SIGIL link in bio is completely free — and you also get a full social media scheduler with 15+ AI tools and 7 platforms (6 free, X on Pro).
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -108,7 +108,7 @@ export default function VsLinktreePage() {
             <p className="font-extrabold text-lg mb-2">SIGIL link in bio + full Creator OS. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ SIGIL link in bio — free with analytics + QR</li>
-              <li>✅ Schedule to 7 platforms simultaneously</li>
+              <li>✅ Schedule to 7 platforms simultaneously (X needs Pro)</li>
               <li>✅ 15+ AI writing tools on free tier</li>
               <li>✅ No Linktree branding — your page, your brand</li>
               <li>✅ Competitor tracking, bulk scheduling, inbox</li>
@@ -147,7 +147,7 @@ export default function VsLinktreePage() {
               {
                 n: '2',
                 title: 'A link page alone does not grow your audience',
-                desc: 'Linktree is a destination, not a growth engine. To drive traffic to that destination, you still need to post content. SocialMate gives you the link page and the scheduler to keep posting across 7 platforms simultaneously — both in one free product.',
+                desc: 'Linktree is a destination, not a growth engine. To drive traffic to that destination, you still need to post content. SocialMate gives you the link page and the scheduler to keep posting across 6 platforms simultaneously (X needs Pro) — both in one free product.',
               },
               {
                 n: '3',
@@ -186,7 +186,7 @@ export default function VsLinktreePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Stop paying for a link page when you can get it free</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SIGIL link in bio, 7-platform scheduler, 15+ AI tools, analytics — all free. No credit card required.
+            SIGIL link in bio, a scheduler for 6 platforms (X needs Pro), 15+ AI tools, analytics, all free. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

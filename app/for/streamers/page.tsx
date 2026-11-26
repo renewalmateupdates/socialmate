@@ -342,7 +342,7 @@ export default function StreamersPage() {
                 <ul className="text-xs text-ink-body space-y-2 mb-6 text-left">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.clips}</li>
-                  <li>✓ {t('for_streamers.pricing_feature_platforms')}</li>
+                  <li>✓ {tier.plan === 'Free' ? t('common.free_plan_platforms') : t('for_streamers.pricing_feature_platforms')}</li>
                   <li>✓ {t('for_streamers.pricing_feature_ai_caption')}</li>
                   <li>✓ {t('for_streamers.pricing_feature_calendar')}</li>
                 </ul>

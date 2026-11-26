@@ -83,7 +83,7 @@ export default function VsPlannPage() {
             SocialMate vs Plann
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Plann is a visual planner built around Instagram. SocialMate is a full Creator OS covering 7 platforms — including Discord and Telegram — starting completely free.
+            Plann is a visual planner built around Instagram. SocialMate is a full Creator OS covering 7 platforms — including Discord and Telegram — and 6 of them are completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -111,7 +111,7 @@ export default function VsPlannPage() {
           </div>
           <div className="bg-amber/10 text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-high uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms, 6 free. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok, LinkedIn</li>
               <li>✅ 15 AI writing and content tools</li>
@@ -196,7 +196,7 @@ export default function VsPlannPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Beyond Instagram — reach every platform from one place</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers Bluesky, Discord, Telegram, TikTok, Mastodon, and X. 15 AI tools. SOMA autonomous content. All starting at $0.
+            SocialMate covers Bluesky, Discord, Telegram, TikTok, Mastodon, and X (on Pro). 15 AI tools. SOMA autonomous content. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Postoplan (2026) — Full Comparison',
-  description: 'Postoplan charges $19/month for social scheduling with no Discord or Telegram. SocialMate gives you 7 platforms, 15+ AI tools, and autonomous content generation — starting free.',
+  description: 'Postoplan charges $19/month for social scheduling with no Discord or Telegram. SocialMate gives you 7 platforms (6 free, X on Pro), 15+ AI tools, and autonomous content generation — starting free.',
   openGraph: {
     title:       'SocialMate vs Postoplan (2026)',
-    description: 'Postoplan is $19/month with no Discord, Telegram, or Bluesky. SocialMate covers all 7 platforms with AI built in — free to start.',
+    description: 'Postoplan is $19/month with no Discord, Telegram, or Bluesky. SocialMate covers all 7 platforms with AI built in, 6 of them free.',
     url:         'https://socialmate.studio/vs/postoplan',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/postoplan' },

@@ -32,7 +32,7 @@ const FAQ = [
   },
   {
     q: 'Why would someone use Mailchimp and SocialMate together?',
-    a: "Mailchimp owns email. SocialMate owns social. Many creators use both: Mailchimp to send newsletters to their list, SocialMate to schedule content across 7 social platforms. They solve different problems. If you're currently using Mailchimp as your only content tool and relying on its social tab, SocialMate is a free upgrade for the social side.",
+    a: "Mailchimp owns email. SocialMate owns social. Many creators use both: Mailchimp to send newsletters to their list, SocialMate to schedule content across 7 social platforms (X needs Pro). They solve different problems. If you're currently using Mailchimp as your only content tool and relying on its social tab, SocialMate is a free upgrade for the social side.",
   },
   {
     q: 'How much does Mailchimp actually cost for small businesses?',
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate replace Mailchimp?',
-    a: "No — SocialMate does not send email campaigns. Mailchimp is the right tool for email marketing: list management, campaigns, automations, A/B testing. SocialMate is the right tool for scheduling social posts across 7 platforms. Use both. Start SocialMate free alongside your Mailchimp account.",
+    a: "No — SocialMate does not send email campaigns. Mailchimp is the right tool for email marketing: list management, campaigns, automations, A/B testing. SocialMate is the right tool for scheduling social posts across 7 platforms (X needs Pro). Use both. Start SocialMate free alongside your Mailchimp account.",
   },
   {
     q: 'Which platforms does SocialMate support that Mailchimp does not?',
@@ -88,7 +88,7 @@ export default function VsMailchimpPage() {
             SocialMate vs Mailchimp
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Mailchimp is an email marketing tool. SocialMate is a dedicated social media scheduler for 7 platforms — Discord, TikTok, Bluesky, LinkedIn, and more. Free to start.
+            Mailchimp is an email marketing tool. SocialMate is a dedicated social media scheduler for 7 platforms — Discord, TikTok, Bluesky, LinkedIn, and more. Free to start on all but X.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -116,7 +116,7 @@ export default function VsMailchimpPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Built for social. 7 platforms. 15+ AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Built for social. 7 platforms, 6 free. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule to 7 platforms simultaneously</li>
               <li>✅ Discord + Telegram + Bluesky + Mastodon + TikTok</li>
@@ -170,7 +170,7 @@ export default function VsMailchimpPage() {
               {
                 n: '4',
                 title: 'Use both — they solve different problems',
-                desc: "The right setup for most creators and small businesses: Mailchimp for email marketing to your list, SocialMate for scheduling across 7 social platforms. SocialMate's free plan costs nothing to add alongside your Mailchimp subscription.",
+                desc: "The right setup for most creators and small businesses: Mailchimp for email marketing to your list, SocialMate for scheduling across 7 social platforms (X needs Pro). SocialMate's free plan costs nothing to add alongside your Mailchimp subscription.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-raised border border-edge rounded-2xl hover:border-edge transition-all">
@@ -201,7 +201,7 @@ export default function VsMailchimpPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Add social scheduling to your Mailchimp stack — free</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate schedules to 7 platforms: Discord, TikTok, Bluesky, LinkedIn, Telegram, Mastodon, and X. 15+ AI tools. Free forever — no credit card required.
+            SocialMate schedules to 7 platforms: Discord, TikTok, Bluesky, LinkedIn, Telegram, Mastodon, and X. 15+ AI tools. Free forever on all but X. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

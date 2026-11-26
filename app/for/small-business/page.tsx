@@ -42,7 +42,7 @@ const PAIN_POINTS = [
 const FEATURES = [
   {
     title: 'Schedule to 7 Platforms',
-    desc:  'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn — all live today. Write once, post everywhere.',
+    desc:  'Bluesky, Mastodon, Discord, Telegram, TikTok, and LinkedIn free, plus X/Twitter on Pro. Write once, post everywhere.',
     icon:  Satellite,
     badge: 'Free',
   },
@@ -287,7 +287,7 @@ export default function SmallBusinessPage() {
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
                   <li>✓ {tier.window}</li>
-                  <li>✓ {t('for_small_biz.pricing_feature_platforms')}</li>
+                  <li>✓ {tier.plan === 'Free' ? t('common.free_plan_platforms') : t('for_small_biz.pricing_feature_platforms')}</li>
                   <li>✓ {t('for_small_biz.pricing_feature_bio')}</li>
                 </ul>
                 <Link href={tier.href}

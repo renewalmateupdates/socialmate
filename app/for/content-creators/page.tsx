@@ -57,7 +57,7 @@ const PAIN_POINTS = [
 const FEATURES = [
   {
     title: '7 Platforms, One Dashboard',
-    desc:  'Bluesky, X, TikTok, LinkedIn, Discord, Telegram, Mastodon — all connected. Write once, publish everywhere. No switching apps.',
+    desc:  'Bluesky, TikTok, LinkedIn, Discord, Telegram and Mastodon free, plus X on Pro. Write once, publish everywhere. No switching apps.',
     icon:  Satellite,
     badge: 'Free',
   },
@@ -93,7 +93,7 @@ const FEATURES = [
   },
   {
     title: 'Free Plan That Actually Works',
-    desc:  '50 AI credits, all 7 platforms, full scheduling calendar, link in bio, drafts, evergreen recycling. Not a demo. A real tool you can run your whole presence on.',
+    desc:  '50 AI credits, 6 platforms (X needs Pro), full scheduling calendar, link in bio, drafts, evergreen recycling. Not a demo. A real tool you can run your whole presence on.',
     icon:  Gift,
     badge: 'Free',
   },
@@ -121,7 +121,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'Is the free plan actually useful or is it a bait-and-switch?',
-    a: 'It\'s genuinely useful. 50 AI credits, all 7 platforms, scheduling calendar, link in bio, drafts, evergreen recycling. The free plan isn\'t a demo — it\'s a real tool. You\'ll outgrow it at some point, but it\'s not stripped down to force upgrades.',
+    a: 'It\'s genuinely useful. 50 AI credits, 6 platforms (X needs Pro), scheduling calendar, link in bio, drafts, evergreen recycling. The free plan isn\'t a demo — it\'s a real tool. You\'ll outgrow it at some point, but it\'s not stripped down to force upgrades.',
   },
   {
     q: 'Do I need to be on all 7 platforms?',
@@ -133,7 +133,7 @@ const FAQ = [
   },
   {
     q: 'Can I use this if I\'m just starting out with zero followers?',
-    a: 'Yes, and it\'s actually more valuable early on when you need consistency to build an audience. The free plan covers everything you need to stay consistent across all platforms while you grow.',
+    a: 'Yes, and it\'s actually more valuable early on when you need consistency to build an audience. The free plan covers everything you need to stay consistent across 6 platforms (X needs Pro) while you grow.',
   },
   {
     q: 'What platforms are actually live today?',

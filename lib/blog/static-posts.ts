@@ -48,7 +48,7 @@ These are real people with real needs. The existing tools weren't built for them
 
 ## What Makes SocialMate Different
 
-We're live with 7 platforms — Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn. YouTube, Pinterest, Instagram, Facebook, and Threads are on the active roadmap. Every platform you can connect is included on the free plan at no extra cost.
+We're live with 7 platforms — Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn. YouTube, Pinterest, Instagram, Facebook, and Threads are on the active roadmap. Every platform except X is included on the free plan at no extra cost; X needs Pro, because X charges per post.
 
 We built 15+ AI tools into the platform — caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and AI image generation. All tools are accessible on the free tier through a monthly credit allowance (50 credits/month free, more on paid plans). Credits reset monthly so you always have access — the system is designed to be generous, not to wall things off.
 
@@ -106,7 +106,7 @@ Anything less than that is a trial with a free label on it.
 
 SocialMate's free plan includes:
 
-- 7 live platforms now: Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn (YouTube is waiting on Google's review; Instagram, Facebook, Threads and Pinterest aren't available yet)
+- 6 of the 7 live platforms: Bluesky, Discord, Mastodon, Telegram, TikTok, and LinkedIn (X/Twitter needs Pro; YouTube is waiting on Google's review; Instagram, Facebook, Threads and Pinterest aren't available yet)
 - 250 scheduled posts per month
 - 2 team seats
 - 50 AI credits per month (caption generation, hashtag sets, post scoring, and more — credits reset monthly)
@@ -293,7 +293,7 @@ Buffer Team plan: 6 channels × $10/month = $60/month. That's $720/year.
 
 Hootsuite Standard: $99/month for up to 10 accounts, 1 user. Add a second user and you're negotiating with their sales team.
 
-SocialMate: $0/month. All 7 platforms, both team members, bulk scheduler, analytics, link in bio, hashtag collections, AI credits — included.
+SocialMate: $0/month. 6 of the 7 platforms (X needs Pro), both team members, bulk scheduler, analytics, link in bio, hashtag collections, AI credits — included.
 
 The $8/month Pro plan would cover 5 accounts per platform and 5 team members. The $29/month Agency plan covers 10 accounts per platform and 15 team members.
 
@@ -647,7 +647,7 @@ Check your analytics once per week — not daily. What got engagement? What got 
 
 SocialMate's free plan covers most of what a small business needs:
 
-- 7 live platforms (Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, LinkedIn) — more shipping throughout 2026
+- 6 of the 7 live platforms (Bluesky, Discord, Mastodon, Telegram, TikTok, LinkedIn; X/Twitter needs Pro) — more shipping throughout 2026
 - 250 posts per month
 - Bulk scheduler
 - 50 AI credits/month for captions and hashtags
@@ -1572,7 +1572,7 @@ Hootsuite's core value was multi-platform management in one dashboard. The alter
 
 The most genuinely free option available in 2026. SocialMate's free plan includes:
 
-- 7 live platforms (Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, LinkedIn) with more coming throughout 2026
+- 6 of the 7 live platforms (Bluesky, Discord, Mastodon, Telegram, TikTok, LinkedIn; X/Twitter needs Pro) with more coming throughout 2026
 - 250 scheduled posts per month
 - 2 team seats
 - 50 AI credits/month (caption generation, hashtags, post rewriting, and more)
@@ -1608,7 +1608,7 @@ Later's free plan gives you 14 posts per month per social profile. That's extrem
 
 ## Who Should Use What
 
-**Use SocialMate** if you're on Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, or LinkedIn and need a multi-platform free tool with AI features and team access.
+**Use SocialMate** if you're on Bluesky, Discord, Telegram, Mastodon, TikTok, or LinkedIn and need a multi-platform free tool with AI features and team access (X/Twitter is on Pro).
 
 **Use Buffer's free plan** if you're primarily on Instagram or Facebook and just starting out with very low posting volume.
 
@@ -3019,7 +3019,7 @@ Creators who struggle with content creation almost always have an idea problem, 
 
 You don't. You need a handful of good ideas, explored thoroughly, expressed in the format each platform rewards.
 
-One idea this week. [Schedule it across every platform with SocialMate](/signup) — free, no credit card required.
+One idea this week. [Schedule it with SocialMate](/signup), free on 6 platforms with no credit card required.
     `,
   },
 
@@ -3052,7 +3052,7 @@ If you're still committed to X but watching what's happening with Bluesky and Ma
 
 This protects you if X continues to restrict free tool access or if the platform continues shifting in directions you don't like. Your audience exists on both networks, and growing both in parallel costs no extra time if you're using a scheduler.
 
-## Setting Up a Free X Scheduling Workflow
+## Setting Up an X Scheduling Workflow
 
 Here's a simple workflow:
 
@@ -3067,7 +3067,7 @@ The key insight: batching + scheduling removes the daily decision fatigue of "wh
 
 X Premium ($8-22/month depending on tier) does restore some scheduling access and adds other features like longer posts and reduced ads. If X is your primary platform and you post frequently, it might be worth the cost.
 
-But for most creators who use X as one platform among several, paying separately for X Premium plus a separate scheduler doesn't make financial sense. A free multi-platform tool that includes X scheduling is the better path.
+But for most creators who use X as one platform among several, paying separately for X Premium plus a separate scheduler doesn't make financial sense. One multi-platform scheduler that includes X, like SocialMate Pro at $8/month, is the better path.
 
 [Schedule your X posts alongside Bluesky, Discord, Mastodon, Telegram, and LinkedIn on SocialMate](/signup).
     `,
@@ -3121,7 +3121,7 @@ Threads work well. Bluesky's threading format encourages multi-post ideas develo
 
 One of the practical challenges for Bluesky creators: the platform doesn't have a native scheduler. To post consistently without being online every day, you need a third-party tool.
 
-SocialMate supports Bluesky scheduling on its free plan. You can write and queue posts, set specific times, and maintain a consistent publishing schedule without manual daily effort. Since SocialMate also handles Mastodon, Discord, Telegram, X, and LinkedIn, you can run a multi-platform strategy from one place.
+SocialMate supports Bluesky scheduling on its free plan. You can write and queue posts, set specific times, and maintain a consistent publishing schedule without manual daily effort. Since SocialMate also handles Mastodon, Discord, Telegram, LinkedIn, and X (on Pro), you can run a multi-platform strategy from one place.
 
 ## Building an Audience on Bluesky in 2026
 
@@ -3945,7 +3945,7 @@ The goal isn't to avoid AI. It's to use AI as a starting point, not a finished p
 
 AI helps you create content faster. Scheduling ensures that content actually gets published consistently. The combination — batch creation with AI assistance followed by scheduled publishing — is how solo creators in 2026 maintain presence across 5 platforms without burning out.
 
-SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, X, and LinkedIn from one interface. [Start for free — no credit card required](/signup).
+SocialMate lets you schedule to Bluesky, Mastodon, Discord, Telegram, LinkedIn, and X (on Pro) from one interface. [Start for free — no credit card required](/signup).
     `,
   },
 
@@ -4381,7 +4381,7 @@ The usual way a VA posts for a client is the client's LinkedIn password in a sha
 
 The client connects LinkedIn to their own SocialMate account once. The assistant posts from their own login. Nobody shares a password.
 
-1. The client creates a free SocialMate account and connects LinkedIn, plus any of Bluesky, X, Discord, Telegram, Mastodon or TikTok.
+1. The client creates a free SocialMate account and connects LinkedIn, plus any of Bluesky, Discord, Telegram, Mastodon or TikTok (posting to X needs Pro).
 
 2. The client opens Team and invites the assistant as an Editor.
 

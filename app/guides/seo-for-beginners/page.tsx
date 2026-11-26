@@ -653,7 +653,7 @@ export default function SeoForBeginnersPage() {
                     If you&apos;re doing SEO for a product or brand, social media presence is
                     part of the signal. Content distributed across platforms drives branded
                     searches, generates social proof, and indirectly supports your rankings.
-                    SocialMate handles the distribution side — schedule across 7 platforms
+                    SocialMate handles the distribution side — schedule across 7 platforms (6 free, X on Pro)
                     from one place, free to start.
                   </p>
                   <Link href="/signup"

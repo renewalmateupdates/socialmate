@@ -70,7 +70,7 @@ export async function generateMetadata(
   return {
     title: `${name} invites you to SocialMate`,
     description:
-      'What competitors charge $99/mo for, we give for $8. Schedule to 7 platforms, 15+ AI tools, and analytics — free forever or Pro from $8/mo.',
+      'What competitors charge $99/mo for, we give for $8. Schedule to 7 platforms (6 free, X on Pro), 15+ AI tools, and analytics — free forever or Pro from $8/mo.',
   }
 }
 

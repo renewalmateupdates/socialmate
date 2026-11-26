@@ -116,7 +116,7 @@ export default function VsPlanablePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">250 posts / month. All platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. 6 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 250 posts every month, no lifetime cap</li>
               <li>✅ Flat-rate workspaces ($29/mo for 5 clients)</li>
@@ -202,7 +202,7 @@ export default function VsPlanablePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">50 posts is not enough. SocialMate is.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            250 posts a month, 15+ AI tools, 7 platforms — free forever. No lifetime caps, no credit card required.
+            250 posts a month, 15+ AI tools, 6 platforms (X needs Pro), free forever. No lifetime caps, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

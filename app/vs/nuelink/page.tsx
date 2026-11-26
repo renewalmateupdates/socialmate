@@ -115,7 +115,7 @@ export default function VsNuelinkPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">More features. All platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">More features. 6 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -201,7 +201,7 @@ export default function VsNuelinkPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $15/month — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, competitor tracking. No credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 6 platforms (X needs Pro), competitor tracking. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

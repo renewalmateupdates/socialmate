@@ -26,7 +26,7 @@ const STATS = [
   { value: '480+', label: 'Published blog posts',           note: 'SEO-targeted content library' },
   { value: '8',    label: 'Autonomous AI agents',           note: 'Newsletter, repurpose, caption, outreach, and more' },
   { value: '$8',   label: 'Pro plan — per month',           note: 'What competitors charge $99 for' },
-  { value: '$0',   label: 'Free plan — forever',            note: '50 AI credits, all 7 platforms, no credit card' },
+  { value: '$0',   label: 'Free plan — forever',            note: '50 AI credits, 6 platforms (X needs Pro), no credit card' },
   { value: '20+',  label: 'Built-in AI tools',              note: 'Caption, hook, thread, hashtag, repurpose, score, and more' },
 ]
 
@@ -76,7 +76,7 @@ export default function PressPage() {
           <p className="text-gray-300 text-base leading-relaxed mb-6">
             That&apos;s the pitch. And it&apos;s real. SocialMate is a full-featured social media scheduler
             with built-in AI tools, an autonomous content generation system (SOMA),
-            8 AI agents, and 7 live platforms — starting at $0.
+            8 AI agents, and 7 live platforms (6 on the free plan) — starting at $0.
           </p>
           <p className="text-gray-400 text-sm">
             The story: solo founder, bootstrapped, no VC, no co-founder, working day jobs while building nights and weekends.

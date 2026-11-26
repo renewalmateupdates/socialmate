@@ -11,7 +11,7 @@ const COMPARISON = [
   { feature: 'Starting price',         tweetdeck: '$8/month (X Premium)',  socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              tweetdeck: '❌ Requires X Premium',  socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    tweetdeck: 'X/Twitter only',         socialmate: '7 platforms'            },
-  { feature: 'Post scheduling',        tweetdeck: 'X only',                 socialmate: '✅ All platforms'        },
+  { feature: 'Post scheduling',        tweetdeck: 'X only',                 socialmate: '✅ All platforms (X on Pro)'        },
   { feature: 'Team seats',             tweetdeck: '❌ No team features',    socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       tweetdeck: '❌ None',                socialmate: '15+ tools free'           },
   { feature: 'Bulk scheduling',        tweetdeck: '❌',                     socialmate: '✅ Free'                  },
@@ -128,7 +128,7 @@ export default function VsTweetdeck() {
           <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
-            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
+            <p className="text-xs text-jade">6 platforms free · X on Pro · 15+ AI tools</p>
           </div>
         </div>
 
@@ -179,7 +179,7 @@ export default function VsTweetdeck() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
+            6 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking, all free (X needs Pro). No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

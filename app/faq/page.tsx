@@ -20,7 +20,7 @@ const sections = [
       },
       {
         q: 'Is there a free plan?',
-        a: 'Yes. The free plan includes 50 AI credits/month, 2 seats, post scheduling on all connected platforms, drafts, a content calendar, a Link in Bio builder, competitor tracking (3 accounts), and evergreen recycling. No credit card required to sign up.',
+        a: 'Yes. The free plan includes 50 AI credits/month, 2 seats, post scheduling on 6 platforms (X needs Pro), drafts, a content calendar, a Link in Bio builder, competitor tracking (3 accounts), and evergreen recycling. No credit card required to sign up.',
       },
       {
         q: 'What does "credits" mean?',

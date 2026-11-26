@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',               competitor: '$79/month',                  socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                    competitor: '⚠️ Very limited free tier',   socialmate: '✅ 50 credits/month'     },
-  { feature: 'Post scheduling',              competitor: '❌ No scheduling at all',     socialmate: '✅ Free across 7 platforms'},
+  { feature: 'Post scheduling',              competitor: '❌ No scheduling at all',     socialmate: '✅ Free on 6 platforms, X on Pro'},
   { feature: 'Twitter audience insights',    competitor: '✅ Enterprise-grade',         socialmate: '✅ Engagement tracking'  },
   { feature: 'TikTok scheduling',             competitor: '❌',                          socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: 'Does Audiense support post scheduling?',
-    a: 'No. Audiense does not schedule posts. It\'s audience analytics only. If you\'re using Audiense, you\'re already paying for a separate scheduling tool on top of it. SocialMate combines scheduling across 7 platforms with analytics and best-times insights in one dashboard — free to start.',
+    a: 'No. Audiense does not schedule posts. It\'s audience analytics only. If you\'re using Audiense, you\'re already paying for a separate scheduling tool on top of it. SocialMate combines scheduling across 7 platforms with analytics and best-times insights in one dashboard. Six of the platforms are free; X needs Pro.',
   },
   {
     q: 'Who should use Audiense vs SocialMate?',
@@ -45,7 +45,7 @@ const FAQ = [
   },
   {
     q: 'What makes SocialMate a better value than Audiense for most creators?',
-    a: 'Audiense costs $79+/month for analytics only — no scheduling, no AI tools, Twitter-only. SocialMate is free to start and covers scheduling + analytics + AI across 7 platforms including TikTok and LinkedIn. For 99% of creators, the content performance data SocialMate provides is everything they actually need. Audiense\'s enterprise-level audience intelligence is overkill for individual creators and small teams.',
+    a: 'Audiense costs $79+/month for analytics only — no scheduling, no AI tools, Twitter-only. SocialMate covers scheduling + analytics + AI across 7 platforms including TikTok and LinkedIn, and 6 of them are free (X needs Pro). For 99% of creators, the content performance data SocialMate provides is everything they actually need. Audiense\'s enterprise-level audience intelligence is overkill for individual creators and small teams.',
   },
 ]
 
@@ -89,7 +89,7 @@ export default function VsAudiensePage() {
             SocialMate vs Audiense
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Audiense charges $79+/month for Twitter audience analytics with zero scheduling. SocialMate schedules 7 platforms and includes analytics — free to start.
+            Audiense charges $79+/month for Twitter audience analytics with zero scheduling. SocialMate schedules 7 platforms, 6 of them free, and includes analytics.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -117,7 +117,7 @@ export default function VsAudiensePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Schedule + analyze across 7 platforms. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Schedule + analyze. 6 platforms free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule across X, TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon</li>
               <li>✅ Content performance analytics built in</li>
@@ -205,7 +205,7 @@ export default function VsAudiensePage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule + analyze across 7 platforms</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate gives you scheduling and performance analytics in one platform.
-            Free plan available. Pro is $8/month — no separate analytics tool needed.
+            Free plan available for 6 of them. Pro is $8/month — no separate analytics tool needed.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

@@ -117,7 +117,7 @@ export default function VsSubstackPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Social scheduling for 7 platforms. 15+ AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Social scheduling for 7 platforms, 6 free. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule to 7 social platforms simultaneously</li>
               <li>✅ Import each Substack issue as a draft post</li>

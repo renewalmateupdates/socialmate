@@ -92,7 +92,7 @@ export default function VsTalkwalkerPage() {
             SocialMate vs Talkwalker
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Talkwalker charges $9,600+/year for enterprise listening — and cannot schedule a single post. SocialMate schedules across 7 platforms, monitors competitors, and creates content with AI. Starts free.
+            Talkwalker charges $9,600+/year for enterprise listening — and cannot schedule a single post. SocialMate schedules across 7 platforms, monitors competitors, and creates content with AI. 6 of the platforms are free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -207,7 +207,7 @@ export default function VsTalkwalkerPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Monitor and publish from one place</p>
           <h2 className="text-3xl font-extrabold mb-4">Stop listening. Start creating. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate schedules to 7 platforms, tracks competitors, and uses AI to generate what to post next.
+            SocialMate schedules to 7 platforms (X needs Pro), tracks competitors, and uses AI to generate what to post next.
             Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

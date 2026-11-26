@@ -78,7 +78,7 @@ const FEATURES = [
   },
   {
     title: 'Batch Your Week in 30 Minutes',
-    desc:  'Schedule all 7 platforms in one sitting. Use templates, bulk-upload content ideas, or let Smart Queue fill optimal time slots automatically.',
+    desc:  'Schedule all 7 platforms in one sitting (X needs Pro). Use templates, bulk-upload content ideas, or let Smart Queue fill optimal time slots automatically.',
     icon:  CalendarDays,
     badge: 'Free',
   },

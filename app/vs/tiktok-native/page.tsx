@@ -88,7 +88,7 @@ export default function VsTikTokNativePage() {
             SocialMate vs TikTok&apos;s Native Scheduler
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            TikTok Studio lets you schedule TikTok posts. SocialMate schedules TikTok plus 6 other platforms simultaneously — LinkedIn, Discord, Bluesky, Telegram, Mastodon, and X. Free.
+            TikTok Studio lets you schedule TikTok posts. SocialMate schedules TikTok plus 6 other platforms simultaneously — LinkedIn, Discord, Bluesky, Telegram, Mastodon, and X. Free on all but X.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

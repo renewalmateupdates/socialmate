@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Does Postoplan have a free plan?',
-    a: "Postoplan has a limited free plan, but it's restricted to one connected account and a small number of scheduled posts. In practice it's more of a trial than a genuinely free tier. SocialMate's free plan includes 7 platforms, 50 AI credits/month, and 250 posts a month — it's actually usable as a long-term free tier.",
+    a: "Postoplan has a limited free plan, but it's restricted to one connected account and a small number of scheduled posts. In practice it's more of a trial than a genuinely free tier. SocialMate's free plan includes 6 platforms (X needs Pro), 50 AI credits/month, and 250 posts a month — it's actually usable as a long-term free tier.",
   },
   {
     q: 'Why does SocialMate support Discord and Telegram?',
@@ -91,7 +91,7 @@ export default function VsPostoplanPage() {
             SocialMate vs Postoplan
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Postoplan is $19/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms with 15+ AI tools built in — starting completely free.
+            Postoplan is $19/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms (6 free, X on Pro) with 15+ AI tools built in — starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -119,7 +119,7 @@ export default function VsPostoplanPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -159,7 +159,7 @@ export default function VsPostoplanPage() {
               {
                 n: '1',
                 title: 'SocialMate is genuinely free — not a 1-account trial',
-                desc: "Postoplan's free plan restricts you to one account and a handful of posts. It's a trial, not a real free tier. SocialMate's free plan allows 250 posts a month, supports 7 platforms, and includes 50 AI credits per month. The free tier is intentionally usable — not a funnel.",
+                desc: "Postoplan's free plan restricts you to one account and a handful of posts. It's a trial, not a real free tier. SocialMate's free plan allows 250 posts a month, supports 6 platforms (X needs Pro), and includes 50 AI credits per month. The free tier is intentionally usable — not a funnel.",
               },
               {
                 n: '2',
@@ -206,7 +206,7 @@ export default function VsPostoplanPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">More platforms. More AI. Actually free.</p>
           <h2 className="text-3xl font-extrabold mb-4">Switch from Postoplan today</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
+            SocialMate covers 7 platforms including Discord and Telegram (X needs Pro) — with 15+ AI tools and SOMA built in.
             Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

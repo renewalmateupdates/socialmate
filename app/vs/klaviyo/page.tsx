@@ -33,11 +33,11 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate replace Klaviyo?',
-    a: "No — and that is the honest answer. SocialMate is a social media tool. Klaviyo is an email tool. They are complementary. However, if you are a creator just getting started and wondering whether to invest in email marketing or social media scheduling first, SocialMate's free plan lets you build an audience across 7 platforms at zero cost.",
+    a: "No — and that is the honest answer. SocialMate is a social media tool. Klaviyo is an email tool. They are complementary. However, if you are a creator just getting started and wondering whether to invest in email marketing or social media scheduling first, SocialMate's free plan lets you build an audience across 6 platforms at zero cost (X needs Pro).",
   },
   {
     q: 'What does SocialMate do that Klaviyo does not?',
-    a: 'Schedule posts to Discord, Telegram, Bluesky, Mastodon, TikTok, LinkedIn, and X/Twitter. Generate captions, threads, hooks, and hashtags with 15+ AI tools. Track competitors, manage link in bio (SIGIL), view analytics, manage a team, and import RSS feeds — all in one product starting at free.',
+    a: 'Schedule posts to Discord, Telegram, Bluesky, Mastodon, TikTok, LinkedIn, and X/Twitter (on Pro). Generate captions, threads, hooks, and hashtags with 15+ AI tools. Track competitors, manage link in bio (SIGIL), view analytics, manage a team, and import RSS feeds — all in one product starting at free.',
   },
 ]
 
@@ -78,7 +78,7 @@ export default function VsKlaviyoPage() {
             SocialMate vs Klaviyo
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Klaviyo is an email platform, not a social media scheduler. SocialMate covers 7 platforms with bulk scheduling, 15+ AI tools, and competitor tracking — free to start.
+            Klaviyo is an email platform, not a social media scheduler. SocialMate covers 7 platforms (6 free, X on Pro) with bulk scheduling, 15+ AI tools, and competitor tracking — free to start.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -105,7 +105,7 @@ export default function VsKlaviyoPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Social media, AI tools, 7 platforms. Starts free.</p>
+            <p className="font-extrabold text-lg mb-2">Social media, AI tools, 7 platforms. 6 of them free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule to 7 platforms simultaneously</li>
               <li>✅ 15+ AI writing tools on free tier</li>
@@ -142,7 +142,7 @@ export default function VsKlaviyoPage() {
               {
                 n: '1',
                 title: 'Klaviyo is for email. SocialMate is for social.',
-                desc: 'This is not a battle — they serve different channels. Klaviyo helps you email your list. SocialMate helps you schedule posts across Discord, Telegram, Bluesky, Mastodon, TikTok, LinkedIn, and X. If you need both, use both. If you are starting out, SocialMate is free.',
+                desc: 'This is not a battle — they serve different channels. Klaviyo helps you email your list. SocialMate helps you schedule posts across Discord, Telegram, Bluesky, Mastodon, TikTok, LinkedIn, and X (on Pro). If you need both, use both. If you are starting out, SocialMate is free.',
               },
               {
                 n: '2',
@@ -186,7 +186,7 @@ export default function VsKlaviyoPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready to build your social presence?</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms, 15+ AI tools, and bulk scheduling — completely free to start. No credit card required.
+            SocialMate covers 7 platforms (6 free, X on Pro), 15+ AI tools, and bulk scheduling. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

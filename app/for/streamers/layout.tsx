@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media Tools for Streamers & Clippers — SocialMate',
-  description: 'Schedule Twitch clips and YouTube videos to every social platform in seconds. Free tools built for streamers, clippers, and content creators. No $99/month nonsense.',
+  description: 'Schedule Twitch clips and YouTube videos to 7 social platforms in seconds, 6 of them free. Free tools built for streamers, clippers, and content creators. No $99/month nonsense.',
   openGraph: {
     title: 'Social Media Tools for Streamers & Clippers — SocialMate',
     description: 'Browse your Twitch VODs and YouTube videos, pick the best moments, and schedule them to every platform — Bluesky, X, Mastodon, Discord, Telegram — in one click.',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Social Media Tools for Streamers & Clippers — SocialMate',
-    description: 'Schedule Twitch clips to every platform in seconds. Free on all plans.',
+    description: 'Schedule Twitch clips to 7 platforms in seconds. Free on all plans; X needs Pro.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/streamers' },

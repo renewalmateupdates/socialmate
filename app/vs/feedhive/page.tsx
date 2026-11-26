@@ -86,7 +86,7 @@ export default function VsFeedHivePage() {
             SocialMate vs FeedHive
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            FeedHive has AI features but no free plan, no Discord or Telegram, and misses TikTok and Bluesky entirely. SocialMate covers all 7 platforms — starting free.
+            FeedHive has AI features but no free plan, no Discord or Telegram, and misses TikTok and Bluesky entirely. SocialMate covers all 7 platforms, and 6 of them are free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -114,7 +114,7 @@ export default function VsFeedHivePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -198,7 +198,7 @@ export default function VsFeedHivePage() {
 
         {/* CTA */}
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">7 platforms. 15+ AI tools. Free forever.</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">6 platforms. 15+ AI tools. Free forever.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
             SocialMate covers everything FeedHive does — plus Discord, Telegram, Mastodon, Bluesky, TikTok, and SOMA. No credit card required.
           </p>

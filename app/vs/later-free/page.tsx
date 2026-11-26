@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Free plan price',              competitor: '$0 (severely limited)',       socialmate: '$0 — genuinely useful'   },
-  { feature: 'Platforms on free plan',        competitor: '1 social set only',           socialmate: 'All 7 platforms'         },
+  { feature: 'Platforms on free plan',        competitor: '1 social set only',           socialmate: '6 of 7 (X needs Pro)'         },
   { feature: 'Posts per month (free)',        competitor: '5 posts/month',               socialmate: '50 credits/month'        },
   { feature: 'TikTok scheduling (free)',       competitor: '❌ Not on free plan',         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling (free)',     competitor: '❌ Not on free plan',         socialmate: '✅ Free'                  },
@@ -34,7 +34,7 @@ const FAQ = [
   },
   {
     q: 'How is SocialMate\'s free plan different from Later\'s free plan?',
-    a: "SocialMate's free plan gives you 50 credits/month across all 7 platforms — that's 50 posts, not 5. Plus 12 AI writing tools, a content calendar, basic analytics, and link in bio. No social set restriction — connect multiple accounts per platform. You can build a real publishing habit on SocialMate's free plan. Later's free plan is a preview; SocialMate's is a working product.",
+    a: "SocialMate's free plan gives you 50 credits/month across 6 platforms (X needs Pro) — that's 50 posts, not 5. Plus 12 AI writing tools, a content calendar, basic analytics, and link in bio. No social set restriction — connect multiple accounts per platform. You can build a real publishing habit on SocialMate's free plan. Later's free plan is a preview; SocialMate's is a working product.",
   },
   {
     q: 'Does Later support TikTok on the free plan?',
@@ -90,7 +90,7 @@ export default function VsLaterFreePage() {
             SocialMate vs Later Free Plan
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Later&apos;s free plan limits you to 1 social set and 5 posts per month. SocialMate&apos;s free plan covers all 7 platforms with 50 AI credits and no social set cap.
+            Later&apos;s free plan limits you to 1 social set and 5 posts per month. SocialMate&apos;s free plan covers 6 of the 7 platforms (X needs Pro) with 50 AI credits and no social set cap.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -118,10 +118,10 @@ export default function VsLaterFreePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate Free Plan</p>
-            <p className="font-extrabold text-lg mb-2">50 credits. 7 platforms. 15+ AI tools. All free.</p>
+            <p className="font-extrabold text-lg mb-2">50 credits. 6 platforms. 15+ AI tools. All free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 50 credits/month — 10x more than Later</li>
-              <li>✅ All 7 platforms on free (TikTok + LinkedIn included)</li>
+              <li>✅ 6 platforms on free, TikTok + LinkedIn included (X needs Pro)</li>
               <li>✅ 15+ AI tools free — Later has none on free</li>
               <li>✅ Calendar, analytics, link in bio all free</li>
               <li>✅ No social set restriction</li>
@@ -158,7 +158,7 @@ export default function VsLaterFreePage() {
               {
                 n: '1',
                 title: '5 posts/month isn\'t a free plan — it\'s a preview',
-                desc: 'Posting once a week is not a content strategy. 5 posts/month on Later\'s free plan barely covers Monday through Friday. SocialMate\'s free tier gives 50 credits/month across all 7 platforms — enough to post daily on multiple platforms, test what works, and build a real presence before spending anything.',
+                desc: 'Posting once a week is not a content strategy. 5 posts/month on Later\'s free plan barely covers Monday through Friday. SocialMate\'s free tier gives 50 credits/month across 6 platforms (X needs Pro) — enough to post daily on multiple platforms, test what works, and build a real presence before spending anything.',
               },
               {
                 n: '2',
@@ -203,9 +203,9 @@ export default function VsLaterFreePage() {
         {/* BOTTOM CTA */}
         <div className="text-center py-12 bg-void text-ink-high rounded-3xl px-8">
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">A free plan that actually works</p>
-          <h2 className="text-3xl font-extrabold mb-4">50 credits. 7 platforms. 15+ AI tools. Free.</h2>
+          <h2 className="text-3xl font-extrabold mb-4">50 credits. 6 platforms. 15+ AI tools. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate&apos;s free plan includes TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon, and X.
+            SocialMate&apos;s free plan includes TikTok, LinkedIn, Bluesky, Discord, Telegram, and Mastodon. X needs Pro.
             When you&apos;re ready to scale, Pro is $8/month — not $18.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

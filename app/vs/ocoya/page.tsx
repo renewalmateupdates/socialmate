@@ -8,7 +8,7 @@ export default function VsOcoyaPage() {
     <VsComparison
       competitor="Ocoya"
       checked="Ocoya facts checked against ocoya.com/pricing, ocoya.com/integrations and ocoya.com on Nov 11, 2026."
-      intro={`Ocoya is an AI content suite: a design studio, AI images and video, 18+ social networks and blogs, from $29 a month. SocialMate is a scheduler for 7 platforms that is free to start, with Pro at $${SM.proPrice} a month.`}
+      intro={`Ocoya is an AI content suite: a design studio, AI images and video, 18+ social networks and blogs, from $29 a month. SocialMate is a scheduler for 7 platforms, free to start on 6 of them, with Pro at $${SM.proPrice} a month.`}
       them={{
         title: 'A big AI suite, from $29/month',
         points: [
@@ -44,7 +44,7 @@ export default function VsOcoyaPage() {
         { q: 'Does Ocoya support more platforms than SocialMate?', a: 'Yes. Ocoya lists 18+ social networks, including Instagram, Facebook, Threads, Pinterest and YouTube Shorts, plus blogs. SocialMate posts to 7.' },
         { q: 'Which is cheaper?', a: `SocialMate. Pro is $${SM.proPrice} a month ($${SM.proAnnual} a year) and the free plan is $0. Ocoya Starter is $29 a month ($290 a year).` },
       ]}
-      closing={{ title: 'The scheduler, without the suite price.', body: `${SM.freePosts} posts a month on 7 platforms and 15+ AI writing tools, free. Pro is $${SM.proPrice}.` }}
+      closing={{ title: 'The scheduler, without the suite price.', body: `${SM.freePosts} posts a month on 6 platforms and 15+ AI writing tools, free. Pro is $${SM.proPrice} and adds X.` }}
     />
   )
 }
