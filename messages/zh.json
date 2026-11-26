@@ -827,7 +827,8 @@
     "x_live": "X / Twitter 已上线 —",
     "tiktok_first_title": "你的 TikTok 已连接。发布你的第一个视频吧。",
     "tiktok_first_body": "在 TikTok Studio 中添加视频、写好文案，然后立即发布或选择时间。",
-    "tiktok_first_cta": "打开 TikTok Studio"
+    "tiktok_first_cta": "打开 TikTok Studio",
+    "not_connected": "未连接"
   },
   "app_queue": {
     "title": "队列",
@@ -892,7 +893,12 @@
     "scheduled_success": "帖子已排期！",
     "draft_saved": "草稿已保存",
     "ai_tools_label": "AI 工具",
-    "credits_remaining": "积分剩余"
+    "credits_remaining": "积分剩余",
+    "not_connected_warning": "{platform} 未连接，所以这条帖子发不出去。",
+    "connect_in_accounts": "去账号页连接",
+    "untick_platform": "取消勾选 {platform}",
+    "connect_to_schedule": "连接 {platforms} 后才能排期",
+    "connect_to_post": "连接 {platforms} 后才能发布"
   },
   "app_settings": {
     "title": "设置",
@@ -2641,7 +2647,9 @@
       "headline": "七个已上线，包括别人都不支持排程的那几个。",
       "body": "能给 Discord 和 Telegram 排程的工具确实少见。Bluesky 和 Mastodon 在这里是一等公民，不是顺手加的。Twitch 剪辑和 YouTube 视频可以直接在应用内排程。",
       "live": "已上线",
-      "soon": "即将推出"
+      "soon": "即将推出",
+      "pro": "Pro",
+      "x_note": "六个平台免费。X 按每条帖子收费，所以需要 Pro。"
     },
     "soma": {
       "headline": "你睡觉的时候，SOMA 用你的语气写作。",

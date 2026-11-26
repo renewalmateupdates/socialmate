@@ -827,7 +827,8 @@
     "x_live": "X / Twitter ist live —",
     "tiktok_first_title": "Dein TikTok ist verbunden. Poste dein erstes Video.",
     "tiktok_first_body": "Füge in TikTok Studio ein Video hinzu, schreib eine Beschreibung und poste es sofort oder wähle eine Uhrzeit.",
-    "tiktok_first_cta": "TikTok Studio öffnen"
+    "tiktok_first_cta": "TikTok Studio öffnen",
+    "not_connected": "Nicht verbunden"
   },
   "app_queue": {
     "title": "Warteschlange",
@@ -892,7 +893,12 @@
     "scheduled_success": "Beitrag geplant!",
     "draft_saved": "Entwurf gespeichert",
     "ai_tools_label": "AI Tools",
-    "credits_remaining": "credits remaining"
+    "credits_remaining": "credits remaining",
+    "not_connected_warning": "{platform} ist nicht verbunden, daher kann dieser Beitrag nicht rausgehen.",
+    "connect_in_accounts": "In Konten verbinden",
+    "untick_platform": "{platform} abwählen",
+    "connect_to_schedule": "{platforms} verbinden, um zu planen",
+    "connect_to_post": "{platforms} verbinden, um zu posten"
   },
   "app_settings": {
     "title": "Einstellungen",
@@ -2641,7 +2647,9 @@
       "headline": "Sieben live. Auch die, die sonst niemand plant.",
       "body": "Discord und Telegram zu planen ist wirklich selten. Bluesky und Mastodon sind vollwertig und kein Nachgedanke. Twitch-Clips und YouTube-Videos planst du direkt in der App.",
       "live": "Live",
-      "soon": "Bald"
+      "soon": "Bald",
+      "pro": "Pro",
+      "x_note": "Sechs sind kostenlos. X braucht Pro, weil X für jeden Beitrag Geld verlangt."
     },
     "soma": {
       "headline": "SOMA schreibt in deiner Stimme, während du schläfst.",

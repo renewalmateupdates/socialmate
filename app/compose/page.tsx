@@ -24,6 +24,7 @@ import { readToolDraft, TOOL_LABELS } from '@/lib/tool-draft'
 import { clearToolImage, readToolImage, IMAGE_TOOL_LABELS, type ToolImageMeta } from '@/lib/tool-image'
 import { uploadMediaFile } from '@/lib/media-upload'
 import { draftPoll } from '@/lib/compose-poll'
+import { listPlatformNames, missingConnections, platformDisplayName } from '@/lib/connected-platforms'
 
 function PlatformGlyph({ id, size = 14, className = '' }: { id: string; size?: number; className?: string }) {
   if (!hasPlatformIcon(id)) return <Globe size={size} className={className} strokeWidth={1.75} />
@@ -481,6 +482,56 @@ function ComposeInner() {
       .catch(() => {})
   }, [])
 
+  // Accounts and Discord/Telegram destinations from /api/workspaces/accounts,
+  // into the picker's state; returns the platforms that are connected. 'replace'
+  // on load and on a workspace change. 'merge' when someone comes back from
+  // connecting a platform in Accounts: the account and channel they already
+  // picked for other platforms stay picked.
+  const applyConnections = (
+    scope: { accounts?: ConnectedAccount[]; destinations?: Destination[] },
+    mode: 'replace' | 'merge',
+  ): Set<string> => {
+    const destData: Destination[] = scope.destinations ?? []
+
+    if (destData.length > 0) {
+      const grouped = destData.reduce((acc: Record<string, Destination[]>, d: Destination) => {
+        if (!acc[d.platform]) acc[d.platform] = []
+        acc[d.platform].push(d)
+        return acc
+      }, {})
+      setDestinations(grouped)
+      const autoSelected: Record<string, string> = {}
+      Object.entries(grouped).forEach(([platform, list]) => {
+        if ((list as Destination[]).length > 0) autoSelected[platform] = (list as Destination[])[0].id
+      })
+      setSelectedDestinations(prev => (mode === 'merge' ? { ...autoSelected, ...prev } : autoSelected))
+    }
+
+    const accountsData: ConnectedAccount[] = scope.accounts ?? []
+
+    // Group accounts by platform
+    const byPlatform: Record<string, ConnectedAccount[]> = {}
+    accountsData.forEach((acc: ConnectedAccount) => {
+      if (!byPlatform[acc.platform]) byPlatform[acc.platform] = []
+      byPlatform[acc.platform].push(acc)
+    })
+    setConnectedAccounts(byPlatform)
+
+    // Auto-select first account for each platform
+    const autoSelected: Record<string, string> = {}
+    Object.entries(byPlatform).forEach(([platform, accounts]) => {
+      if (accounts.length > 0) autoSelected[platform] = accounts[0].id
+    })
+    setSelectedAccountIds(prev => (mode === 'merge' ? { ...autoSelected, ...prev } : autoSelected))
+
+    // Build connected platforms set
+    const platformsSet = new Set<string>(Object.keys(byPlatform))
+    // Discord/Telegram are connected via post_destinations
+    destData.forEach((d: Destination) => platformsSet.add(d.platform))
+    setConnectedPlatforms(platformsSet)
+    return platformsSet
+  }
+
   // Reload data whenever active workspace changes
   useEffect(() => {
     if (!activeWorkspace) return
@@ -530,46 +581,7 @@ function ComposeInner() {
       setCanPost(scope.canPost !== false)
       setApprovalRequired(!!scope.requiresApproval)
 
-      const destData: Destination[] = scope.destinations ?? []
-
-      if (destData.length > 0) {
-        const grouped = destData.reduce((acc: Record<string, Destination[]>, d: Destination) => {
-          if (!acc[d.platform]) acc[d.platform] = []
-          acc[d.platform].push(d)
-          return acc
-        }, {})
-        setDestinations(grouped)
-        const autoSelected: Record<string, string> = {}
-        Object.entries(grouped).forEach(([platform, list]) => {
-          if ((list as Destination[]).length > 0) autoSelected[platform] = (list as Destination[])[0].id
-        })
-        setSelectedDestinations(autoSelected)
-      }
-
-      const accountsData: ConnectedAccount[] = scope.accounts ?? []
-
-      // Group accounts by platform
-      const byPlatform: Record<string, ConnectedAccount[]> = {}
-      accountsData.forEach((acc: ConnectedAccount) => {
-        if (!byPlatform[acc.platform]) byPlatform[acc.platform] = []
-        byPlatform[acc.platform].push(acc)
-      })
-      setConnectedAccounts(byPlatform)
-
-      // Auto-select first account for each platform
-      const autoSelected: Record<string, string> = {}
-      Object.entries(byPlatform).forEach(([platform, accounts]) => {
-        if (accounts.length > 0) autoSelected[platform] = accounts[0].id
-      })
-      setSelectedAccountIds(autoSelected)
-
-      // Build connected platforms set
-      const platformsSet = new Set<string>(Object.keys(byPlatform))
-      // Discord/Telegram are connected via post_destinations
-      if (destData.length > 0) {
-        destData.forEach((d: Destination) => platformsSet.add(d.platform))
-      }
-      setConnectedPlatforms(platformsSet)
+      const platformsSet = applyConnections(scope, 'replace')
 
       // Decide what to tick, in order of intent:
       //   1. an explicit saved default, kept only where it is still connected
@@ -731,6 +743,44 @@ function ComposeInner() {
   const selectableConnected = livePlatforms.filter(
     p => connectedPlatforms.has(p.id) && !(p.id === 'twitter' && plan === 'free')
   )
+
+  // Ticked platforms with nothing connected. Schedule and Post refuse while
+  // there are any: the post used to save as Scheduled and fail at its time
+  // (lib/connected-platforms.ts, which /api/posts/create checks too). A press
+  // scrolls to the warning, which says why and offers Connect or Untick.
+  const unconnectedSelected = missingConnections(selectedPlatforms, connectedPlatforms)
+  const unconnectedKey = unconnectedSelected.join(',')
+  const connectWarningRef = useRef<HTMLDivElement>(null)
+  const [flashConnectWarning, setFlashConnectWarning] = useState(false)
+  const showConnectWarning = () => {
+    connectWarningRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setFlashConnectWarning(true)
+    window.setTimeout(() => setFlashConnectWarning(false), 1600)
+  }
+
+  // Back from connecting it in Accounts (the warning opens it in a new tab so
+  // the post isn't lost): read the connections again so the warning and the
+  // button catch up. Only while something ticked is unconnected.
+  useEffect(() => {
+    if (!unconnectedKey || !activeWorkspace) return
+    const wsId = activeWorkspace.id || null
+    let busy = false
+    const refresh = () => {
+      if (busy || document.visibilityState !== 'visible') return
+      busy = true
+      fetch(`/api/workspaces/accounts?workspaceId=${encodeURIComponent(wsId ?? '')}`)
+        .then(r => (r.ok ? r.json() : null))
+        .then(scope => { if (scope) applyConnections(scope, 'merge') })
+        .catch(() => {})
+        .finally(() => { busy = false })
+    }
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', refresh)
+    }
+  }, [unconnectedKey, activeWorkspace?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const activePlatform = selectedPlatforms.length > 0
     ? (PLATFORMS.find(p => selectedPlatforms[0] === p.id) || PLATFORMS[0])
@@ -1268,6 +1318,11 @@ function ComposeInner() {
   const handlePublishThread = async () => {
     const parts = threadParts.filter(p => p.trim())
     if (parts.length === 0 || selectedPlatforms.length === 0 || mediaStillUploading) return
+    if (unconnectedSelected.some(p => threadCapablePlatforms.includes(p))) {
+      track('post_failed', { reason: 'not_connected' })
+      showConnectWarning()
+      return
+    }
     setPublishing(true)
     setPublishResults(null)
     try {
@@ -1402,6 +1457,11 @@ function ComposeInner() {
 
   const handlePublishAB = async () => {
     if (!content.trim() || !contentB.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    if (unconnectedSelected.length > 0) {
+      track('post_failed', { reason: 'not_connected' })
+      showConnectWarning()
+      return
+    }
     setAbPublishing(true)
     setPublishResults(null)
     try {
@@ -1479,6 +1539,11 @@ function ComposeInner() {
     // "a post was actually created," and could fire on an attempt that
     // returned early and never called the API at all.
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    if (unconnectedSelected.length > 0) {
+      track('post_failed', { reason: 'not_connected' })
+      showConnectWarning()
+      return
+    }
     track('post_attempted', { platforms: selectedPlatforms.length, scheduled: !!scheduleDate })
     setPublishing(true)
     setPublishResults(null)
@@ -1548,6 +1613,7 @@ function ComposeInner() {
 
   const handleSubmitForApproval = async () => {
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    if (unconnectedSelected.length > 0) { showConnectWarning(); return }
     setPublishing(true)
     try {
       let scheduledAt: string | undefined
@@ -1730,6 +1796,7 @@ function ComposeInner() {
       : selectedPlatforms.length === 0 ? (selectableConnected.length === 0 ? 'nothing_connected_to_post_to' : 'no_platform_selected')
       : charOver ? 'over_limit'
       : scheduleError ? 'schedule_error'
+      : unconnectedSelected.length > 0 ? 'not_connected'
       : missingDestinations.length > 0 ? 'missing_destination'
       : mediaStillUploading ? 'media_uploading'
       : '',
@@ -2122,19 +2189,34 @@ function ComposeInner() {
                 return null
               })()}
 
-              {/* UNCONNECTED PLATFORM WARNINGS */}
-              {selectedPlatforms
-                .filter(id => !connectedPlatforms.has(id))
-                .map(id => {
-                  const p = PLATFORMS.find(pl => pl.id === id)
-                  if (!p) return null
-                  return (
-                    <div key={id} className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg flex items-center gap-2 border border-amber-200 dark:border-amber-800">
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
-                      <span>No {p.name} account connected — <Link href="/accounts" className="underline font-semibold">Connect one in Accounts →</Link></span>
-                    </div>
-                  )
-                })}
+              {/* UNCONNECTED PLATFORM WARNINGS. Schedule and Post refuse while
+                  any show, and a press on either scrolls here. Accounts opens
+                  in a new tab so the post being written isn't lost; coming back
+                  reads the connections again. */}
+              {unconnectedSelected.length > 0 && (
+                <div ref={connectWarningRef}
+                  className={`space-y-1.5 rounded-lg transition-shadow ${flashConnectWarning ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-transparent' : ''}`}>
+                  {unconnectedSelected.map(id => {
+                    const name = platformDisplayName(id)
+                    return (
+                      <div key={id} className="text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg flex items-center gap-x-3 gap-y-1 flex-wrap border border-red-200 dark:border-red-800">
+                        <span className="flex items-center gap-2 flex-1 min-w-0">
+                          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
+                          <span>{t('app_compose.not_connected_warning', { platform: name })}</span>
+                        </span>
+                        <a href="/accounts" target="_blank" rel="noopener"
+                          className="inline-flex items-center min-h-[44px] sm:min-h-0 underline font-semibold hover:opacity-80">
+                          {t('app_compose.connect_in_accounts')}
+                        </a>
+                        <button type="button" onClick={() => togglePlatform(id)}
+                          className="inline-flex items-center min-h-[44px] sm:min-h-0 font-semibold hover:opacity-80">
+                          {t('app_compose.untick_platform', { platform: name })}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
               {/* DESTINATION SELECTOR */}
               {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
@@ -3568,7 +3650,10 @@ function ComposeInner() {
                             mediaStillUploading
                           }
                           className="flex-1 bg-blue-600 text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                          {publishing ? 'Submitting...' : 'Submit for approval'}
+                          {publishing ? 'Submitting...'
+                            : unconnectedSelected.length > 0
+                              ? t('app_compose.connect_to_post', { platforms: listPlatformNames(unconnectedSelected) })
+                              : 'Submit for approval'}
                         </button>
                         <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
                           className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
@@ -3591,7 +3676,9 @@ function ComposeInner() {
                           className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                           {publishing
                             ? (scheduleDate ? t('app_compose.publishing') : t('app_compose.publishing'))
-                            : (scheduleDate ? t('app_compose.schedule') : t('app_compose.schedule_now'))}
+                            : unconnectedSelected.length > 0
+                              ? t(scheduleDate ? 'app_compose.connect_to_schedule' : 'app_compose.connect_to_post', { platforms: listPlatformNames(unconnectedSelected) })
+                              : (scheduleDate ? t('app_compose.schedule') : t('app_compose.schedule_now'))}
                         </button>
                         <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
                           className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">

@@ -13,7 +13,8 @@ import DashboardWidgets from '@/components/DashboardWidgets'
 import WelcomeOfferBanner from '@/components/WelcomeOfferBanner'
 import WhatsNewBanner from '@/components/WhatsNewBanner'
 import PlatformIcon from '@/components/landing/PlatformIcon'
-import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { useWorkspace, PLAN_CONFIG, isOwnWorkspace } from '@/contexts/WorkspaceContext'
+import { streakTimeOf, unconnectedForPost, type ConnectionRow } from '@/lib/connected-platforms'
 import { useI18n } from '@/contexts/I18nContext'
 import { localeToBCP47 } from '@/lib/i18n'
 import {
@@ -121,6 +122,8 @@ type Post = {
   status: string
   scheduled_at: string
   created_at: string
+  published_at?: string | null
+  workspace_id?: string | null
 }
 
 type DashStats = {
@@ -177,7 +180,11 @@ function DashboardInner() {
   const [seatMembers, setSeatMembers] = useState<{ email: string; role: string }[]>([])
   // Drag-and-drop card order
   const [cardOrder, setCardOrder] = useState<string[]>(DEFAULT_CARD_ORDER)
-  const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
+  const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits, workspaces } = useWorkspace()
+  // Accounts and Discord/Telegram destinations with their workspace, so a
+  // scheduled post can be checked against the scope it will post from. null
+  // until loaded: nothing is flagged before we know.
+  const [connectionRows, setConnectionRows] = useState<ConnectionRow[] | null>(null)
   const { t, locale } = useI18n()
   const bcp47 = localeToBCP47(locale)
 
@@ -255,7 +262,7 @@ function DashboardInner() {
     const loadPosts = async (uid: string) => {
       const { data: posts } = await supabase
         .from('posts')
-        .select('id, content, platforms, status, scheduled_at, created_at, platform_post_ids')
+        .select('id, content, platforms, status, scheduled_at, created_at, published_at, workspace_id, platform_post_ids')
         .eq('user_id', uid)
         .order('scheduled_at', { ascending: true })
       if (posts) applyPosts(posts as Post[])
@@ -306,13 +313,20 @@ function DashboardInner() {
       const dismissed = localStorage.getItem('sm-welcome-dismissed')
       if (!dismissed) setWelcomeDismissed(false)
 
-      // Load connected platforms for X banner AND plan card platform icons
-      const { data: accounts } = await supabase
-        .from('connected_accounts')
-        .select('platform')
-        .eq('user_id', user.id)
+      // Load connected platforms for X banner AND plan card platform icons,
+      // plus Discord/Telegram destinations for the "can this go out?" check
+      // on Coming up and the streak (lib/connected-platforms.ts).
+      const [{ data: accounts, error: accountsErr }, { data: dests, error: destsErr }] = await Promise.all([
+        supabase.from('connected_accounts').select('platform, workspace_id').eq('user_id', user.id),
+        supabase.from('post_destinations').select('platform, workspace_id').eq('user_id', user.id),
+      ])
+      if (accountsErr) console.warn('[dashboard] connected_accounts lookup failed:', accountsErr.message)
+      if (destsErr) console.warn('[dashboard] post_destinations lookup failed:', destsErr.message)
       const platforms = (accounts || []).map((a: { platform: string }) => a.platform)
       setConnectedPlatforms(platforms)
+      if (!accountsErr && !destsErr) {
+        setConnectionRows(((accounts || []) as ConnectionRow[]).concat((dests || []) as ConnectionRow[]))
+      }
 
       // TikTok connected, nothing ever posted or scheduled from TikTok Studio:
       // show the first-post card. Most people who connect TikTok connect only
@@ -412,23 +426,40 @@ function DashboardInner() {
   const fmtDate = (d: Date) => new Intl.DateTimeFormat(bcp47, { month: 'short', day: 'numeric' }).format(d)
   const fmtTime = (d: Date) => new Intl.DateTimeFormat(bcp47, { hour: 'numeric', minute: '2-digit' }).format(d)
 
-  // Streak calculation from posts
+  // A scheduled post that names a platform with nothing connected can't go out.
+  // Coming up marks it, and it doesn't keep the streak (lib/connected-platforms.ts).
+  // Nothing is flagged until the connections have loaded.
+  const ownedWorkspaces = workspaces.filter(isOwnWorkspace)
+  const unconnectedFor = (post: Post): string[] =>
+    connectionRows ? unconnectedForPost(post, connectionRows, ownedWorkspaces) : []
+
+  // Streak calculation from posts. A day counts when a post went out that day,
+  // or a post that can go out is due that day. This used to count every post
+  // by the day it was created, whatever happened to it, so a failed Post Now
+  // read "Posted today, streak safe" (an outside tester, Nov 21, 2026).
+  const streakDays = new Set<number>()
+  for (const p of allPosts) {
+    const at = streakTimeOf(p, unconnectedFor(p).length === 0)
+    if (!at) continue
+    const d = new Date(at); d.setHours(0, 0, 0, 0)
+    streakDays.add(d.getTime())
+  }
   const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0)
-  const postedToday = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === todayMidnight.getTime() })
+  const postedToday = streakDays.has(todayMidnight.getTime())
   // If not posted today, start streak scan from yesterday so an active streak
   // stays visible as "X days — post today to keep it going!"
   const streakStartOffset = postedToday ? 0 : 1
   let currentStreak = 0, tempStreak = 0, currentStreakDone = false
   for (let i = streakStartOffset; i < 365 + streakStartOffset; i++) {
     const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
-    const hasPost = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() })
+    const hasPost = streakDays.has(d.getTime())
     if (hasPost) { tempStreak++; if (!currentStreakDone) currentStreak = tempStreak }
     else { if (!currentStreakDone) currentStreakDone = true; tempStreak = 0 }
   }
   const trailDays: boolean[] = []
   for (let i = 13; i >= 0; i--) {
     const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
-    trailDays.push(allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() }))
+    trailDays.push(streakDays.has(d.getTime()))
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -925,8 +956,12 @@ function DashboardInner() {
                   </div>
                 ) : (
                   <div className="space-y-1.5">
-                    {upcomingPosts.map(post => (
-                      <Link key={post.id} href="/queue"
+                    {upcomingPosts.map(post => {
+                      // Can't go out: a platform it names has nothing connected.
+                      // Red, and the row opens Accounts instead of the Queue.
+                      const blocked = unconnectedFor(post).length > 0
+                      return (
+                      <Link key={post.id} href={blocked ? '/accounts' : '/queue'}
                         className="flex items-start gap-3 p-3 rounded-xl border border-transparent hover:border-theme hover:bg-app-raised transition-all">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-app-ink line-clamp-1">
@@ -941,11 +976,18 @@ function DashboardInner() {
                             </span>
                           </div>
                         </div>
-                        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-amber-ink bg-amber/10 border border-amber/20 px-2 py-1 rounded-md flex-shrink-0">
-                          {t('app_common.status_scheduled')}
-                        </span>
+                        {blocked ? (
+                          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-1 rounded-md flex-shrink-0">
+                            {t('app_dashboard.not_connected')}
+                          </span>
+                        ) : (
+                          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-amber-ink bg-amber/10 border border-amber/20 px-2 py-1 rounded-md flex-shrink-0">
+                            {t('app_common.status_scheduled')}
+                          </span>
+                        )}
                       </Link>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </Panel>

@@ -827,7 +827,8 @@
     "x_live": "X / Twitter is live —",
     "tiktok_first_title": "Your TikTok is connected. Post your first video.",
     "tiktok_first_body": "Add a video in TikTok Studio, write a caption, then post it now or pick a time.",
-    "tiktok_first_cta": "Open TikTok Studio"
+    "tiktok_first_cta": "Open TikTok Studio",
+    "not_connected": "Not connected"
   },
   "app_queue": {
     "title": "Queue",
@@ -892,7 +893,12 @@
     "scheduled_success": "Post scheduled!",
     "draft_saved": "Draft saved",
     "ai_tools_label": "AI Tools",
-    "credits_remaining": "credits remaining"
+    "credits_remaining": "credits remaining",
+    "not_connected_warning": "{platform} isn't connected, so this post can't go out.",
+    "connect_in_accounts": "Connect in Accounts",
+    "untick_platform": "Untick {platform}",
+    "connect_to_schedule": "Connect {platforms} to schedule",
+    "connect_to_post": "Connect {platforms} to post"
   },
   "app_settings": {
     "title": "Settings",
@@ -2641,7 +2647,9 @@
       "headline": "Seven live. Including the ones nobody else schedules.",
       "body": "Discord and Telegram scheduling is genuinely rare. Bluesky and Mastodon are first-class, not afterthoughts. Twitch clips and YouTube videos schedule straight from inside the app.",
       "live": "Live",
-      "soon": "Soon"
+      "soon": "Soon",
+      "pro": "Pro",
+      "x_note": "Six are free. X needs Pro, because X charges for every post."
     },
     "soma": {
       "headline": "SOMA writes in your voice while you’re asleep.",

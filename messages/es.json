@@ -827,7 +827,8 @@
     "x_live": "X / Twitter ya está activo —",
     "tiktok_first_title": "Tu TikTok está conectado. Publica tu primer video.",
     "tiktok_first_body": "Añade un video en TikTok Studio, escribe una descripción y publícalo ahora o elige una hora.",
-    "tiktok_first_cta": "Abrir TikTok Studio"
+    "tiktok_first_cta": "Abrir TikTok Studio",
+    "not_connected": "No conectado"
   },
   "app_queue": {
     "title": "Cola",
@@ -892,7 +893,12 @@
     "scheduled_success": "¡Publicación programada!",
     "draft_saved": "Borrador guardado",
     "ai_tools_label": "AI Tools",
-    "credits_remaining": "credits remaining"
+    "credits_remaining": "credits remaining",
+    "not_connected_warning": "{platform} no está conectado, así que esta publicación no puede salir.",
+    "connect_in_accounts": "Conectar en Cuentas",
+    "untick_platform": "Desmarcar {platform}",
+    "connect_to_schedule": "Conecta {platforms} para programar",
+    "connect_to_post": "Conecta {platforms} para publicar"
   },
   "app_settings": {
     "title": "Configuración",
@@ -2641,7 +2647,9 @@
       "headline": "Siete activas. Incluidas las que nadie más programa.",
       "body": "Programar en Discord y Telegram es algo genuinamente raro. Bluesky y Mastodon son ciudadanos de primera, no un añadido. Los clips de Twitch y los vídeos de YouTube se programan desde dentro de la app.",
       "live": "Activa",
-      "soon": "Pronto"
+      "soon": "Pronto",
+      "pro": "Pro",
+      "x_note": "Seis son gratis. X requiere Pro, porque X cobra por cada publicación."
     },
     "soma": {
       "headline": "SOMA escribe con tu voz mientras duermes.",
