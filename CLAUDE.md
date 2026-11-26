@@ -672,10 +672,15 @@ show it on `/admin/funnel`. Found while wiring it, fixed in the same PR:
   works it out from `PLAN_PRICES`.
 - The Dashboard's "Coming very soon" card named Pinterest and Reddit (both
   declined); it lists Instagram, Facebook, Threads and YouTube.
-- **Waiting on Joshua's yes:** two socialmatehq posts in the window still push
-  BDAY31 at 31% (Nov 27 14:00 UTC "Black Friday: code BDAY31...", post
-  c6669da2; Nov 30 14:00 UTC "Cyber Monday...", post 56757161, both X and
-  Bluesky). Swapping them and adding BLACKFRIDAY posts are public posts.
+- **Announced, with Joshua's yes (Nov 26, "Yes, schedule them"):** four
+  socialmatehq posts carry BLACKFRIDAY, all 9 or 10 AM Eastern: Nov 27 X and
+  Bluesky (c6669da2) and Nov 30 X and Bluesky (56757161), whose text was
+  swapped from BDAY31 in place (time and platforms kept; the publish job reads
+  the text when it fires), plus two made in Compose so they queued the normal
+  way: Nov 27 Discord and Telegram (5c06cc2d) and Dec 4 X and Bluesky, the
+  last day (dcdd6add). All four show on the Schedule page with no "Not
+  connected" badge. The BDAY31 posts from Dec 6 on stay as they are.
+  **After Nov 27, 14:00 UTC:** check the first one went out on X and Bluesky.
 
 **Nov 25: Joshua's 500 autonomy answers are standing orders** (confirmed in
 chat Nov 25; the page is https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA,
