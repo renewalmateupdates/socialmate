@@ -8,6 +8,8 @@ import { FlipCard } from '@/components/pricing/FlipCard'
 import { track, trackOnce } from '@/lib/analytics'
 import { CreditCard, Flame, Gift, Heart, Lock, RotateCcw, Tornado, Waves, X as CloseIcon, Zap } from 'lucide-react'
 import { PLAN_X_POSTS } from '@/lib/plan'
+import { localeToBCP47 } from '@/lib/i18n'
+import { BLACK_FRIDAY, BLACK_FRIDAY_PRICES, COUPON_LENGTH, blackFridayEndLabel, isBlackFridayLive } from '@/lib/promos'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -265,7 +267,7 @@ interface AppliedCoupon {
 }
 
 export default function Pricing() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [interval, setInterval] = useState<Interval>('monthly')
   // Reaching /pricing at all is a step nothing was counting. Paired with
   // checkout_started below, it separates "nobody looks" from "they look and
@@ -285,6 +287,20 @@ export default function Pricing() {
   // Welcome offer banner state
   const [showWelcomeOffer, setShowWelcomeOffer] = useState(false)
   const [welcomeDaysLeft, setWelcomeDaysLeft]   = useState(14)
+
+  // Black Friday (lib/promos.ts). Decided in the browser, after mount: this
+  // page is prerendered, so a date read while rendering would be the build's.
+  const [bfLive, setBfLive] = useState(false)
+
+  // A link can carry a code (/pricing?code=BLACKFRIDAY from the Dashboard or
+  // a post): apply it on arrival. Read from window.location, not
+  // useSearchParams, which would send this whole page as a spinner.
+  useEffect(() => {
+    setBfLive(isBlackFridayLive())
+    const fromLink = new URLSearchParams(window.location.search).get('code')
+    if (fromLink) validateAndApply(fromLink.trim().toUpperCase(), false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     // Fetch live user count
@@ -340,27 +356,30 @@ export default function Pricing() {
     return `${floored}`
   }
 
-  function applyWelcomeOffer() {
-    setCouponInput('WELCOME50')
+  // Fill the box with a code, check it, and (from a banner) scroll to the plans.
+  function validateAndApply(code: string, scrollToPlans: boolean) {
+    setCouponInput(code)
     setCouponError(null)
     setCouponApplied(null)
-    // Auto-validate and then scroll to Pro card
     fetch('/api/coupons/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: 'WELCOME50' }),
+      body: JSON.stringify({ code }),
     })
       .then(r => r.json())
       .then(json => {
         if (json.valid) {
           setCouponApplied(json.coupon)
-          // Scroll to plan cards
-          document.querySelector('[data-plan-cards]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          if (scrollToPlans) document.querySelector('[data-plan-cards]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         } else {
           setCouponError(json.error || 'Code not valid')
         }
       })
       .catch(() => { setCouponError('Could not validate code') })
+  }
+
+  function applyWelcomeOffer() {
+    validateAndApply('WELCOME50', true)
   }
 
   const annual = interval === 'annual'
@@ -396,14 +415,16 @@ export default function Pricing() {
   }
 
   function formatCouponDiscount(c: AppliedCoupon) {
-    if (c.discount_type === 'percent') return `${c.discount_value}% off`
+    // "50% off" alone reads as forever; say how long it lasts when we know.
+    const length = COUPON_LENGTH[c.code.toUpperCase()]
+    if (c.discount_type === 'percent') return length ? `${c.discount_value}% off ${length}` : `${c.discount_value}% off`
     if (c.discount_type === 'fixed') return `$${c.discount_value} off`
     if (c.discount_type === 'trial_extension') return `+${c.discount_value} free trial days`
     return ''
   }
 
   const handleCheckout = async (priceId: string, planName: string) => {
-    track('checkout_started', { plan: planName })
+    track('checkout_started', { plan: planName, ...(couponApplied ? { code: couponApplied.code } : {}) })
     setLoading(planName)
     try {
       const res = await fetch('/api/stripe/checkout', {
@@ -520,8 +541,36 @@ export default function Pricing() {
           )}
         </div>
 
+        {/* BLACK FRIDAY BANNER: Nov 26 to Dec 4, 2026 (lib/promos.ts). While it
+            runs it replaces the welcome and birthday offers, which it beats. */}
+        {bfLive && (
+          <div className="mb-8 rounded-2xl p-5 border text-center bg-amber/10 dark:bg-amber/10 border-amber dark:border-amber">
+            <p className="text-sm font-extrabold text-amber dark:text-amber mb-1">
+              {t('promo.bf_title', { percent: BLACK_FRIDAY.percentOff, months: BLACK_FRIDAY.months })}
+            </p>
+            <p className="text-xs text-amber dark:text-amber mb-3 leading-relaxed max-w-xl mx-auto">
+              {t('promo.bf_pricing_body', {
+                ...BLACK_FRIDAY_PRICES,
+                months: BLACK_FRIDAY.months,
+                date: blackFridayEndLabel(localeToBCP47(locale)),
+              })}
+            </p>
+            {couponApplied?.code.toUpperCase() === BLACK_FRIDAY.code ? (
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-jade">
+                {t('promo.bf_applied', { code: BLACK_FRIDAY.code })}
+              </span>
+            ) : (
+              <button
+                onClick={() => { track('promo_clicked', { code: BLACK_FRIDAY.code, from: 'pricing' }); validateAndApply(BLACK_FRIDAY.code, true) }}
+                className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] sm:min-h-0 bg-amber hover:bg-amber-bright text-void text-xs font-bold rounded-xl transition-all">
+                {t('promo.bf_apply', { code: BLACK_FRIDAY.code })} →
+              </button>
+            )}
+          </div>
+        )}
+
         {/* WELCOME OFFER BANNER — free users, 14+ days old, offer valid 14 days */}
-        {showWelcomeOffer && (
+        {showWelcomeOffer && !bfLive && (
           <div className="relative flex items-start gap-3 bg-amber/10 dark:bg-amber/10 border border-amber dark:border-amber rounded-2xl px-5 py-4 mb-8">
             <Gift className="w-6 h-6 flex-shrink-0 text-amber" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
@@ -558,6 +607,7 @@ export default function Pricing() {
           const end = new Date('2026-12-16')
           const isActive = now >= start && now < end
           const isTeaser = now < start
+          if (bfLive) return null
           if (!isActive && !isTeaser) return null
           return (
             <div className={`mb-8 rounded-2xl p-5 border text-center ${
@@ -569,13 +619,13 @@ export default function Pricing() {
               {isActive ? (
                 <>
                   <p className="text-sm font-extrabold text-amber dark:text-amber mb-1">
-                    Birthday Deal — 31% off any plan
+                    Birthday Deal: 31% off your first payment on any plan
                   </p>
                   <p className="text-xs text-amber dark:text-amber mb-3 leading-relaxed">
-                    Joshua's turning 31. Six months of savings. Runs through Dec 15, 2026.
+                    Joshua&apos;s turning 31. The code runs through Dec 15, 2026.
                   </p>
                   <button
-                    onClick={() => { setCouponInput('BDAY31'); setCouponError(null) }}
+                    onClick={() => validateAndApply('BDAY31', true)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-amber hover:bg-amber-bright text-void text-xs font-bold rounded-xl transition-all">
                     Apply code BDAY31 →
                   </button>

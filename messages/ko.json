@@ -2753,5 +2753,14 @@
       "headline": "어디에나 게시하기 시작하세요.",
       "body": "무료 플랜, 카드 불필요, 설정은 1분 남짓. 그럴 만한 가치가 생기면 $8로 Pro로 올리세요."
     }
+  },
+  "promo": {
+    "bf_title": "블랙 프라이데이: 처음 {months}개월 {percent}% 할인",
+    "bf_pricing_body": "Pro는 처음 {months}개월 동안 월 {proMonthly}, 연간 결제 시 첫해 {proAnnual}입니다. Agency는 월 {agencyMonthly}, 연간 결제 시 첫해 {agencyAnnual}입니다. {date}에 종료됩니다.",
+    "bf_apply": "{code} 적용",
+    "bf_applied": "{code} 적용됨",
+    "bf_dash_title": "블랙 프라이데이: 처음 {months}개월 동안 Pro {percent}% 할인",
+    "bf_dash_body": "{code} 코드를 쓰면 Pro가 처음 {months}개월 동안 월 {monthly}, 연간 결제 시 첫해 {annual}입니다. {date}에 종료됩니다.",
+    "bf_cta": "혜택 보기"
   }
 }

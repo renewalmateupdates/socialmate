@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Gift, X } from 'lucide-react'
 import { useI18n } from '@/contexts/I18nContext'
+import { isBlackFridayLive } from '@/lib/promos'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_FIRST_SHOWN_KEY = 'welcome_offer_first_shown'
@@ -22,6 +23,8 @@ export default function WelcomeOfferBanner({ createdAt, plan, onApplyOffer }: Pr
 
   useEffect(() => {
     if (plan !== 'free') return
+    // Black Friday's banner beats this offer while it runs (lib/promos.ts).
+    if (isBlackFridayLive()) return
 
     const accountAge = Date.now() - new Date(createdAt).getTime()
     if (accountAge < FOURTEEN_DAYS_MS) return

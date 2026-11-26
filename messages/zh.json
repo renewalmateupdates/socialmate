@@ -2753,5 +2753,14 @@
       "headline": "开始发布到所有平台。",
       "body": "免费版，无需绑卡，大约一分钟就能设置好。等它值得的时候，再用 $8 升级到 Pro。"
     }
+  },
+  "promo": {
+    "bf_title": "黑色星期五：前 {months} 个月立减 {percent}%",
+    "bf_pricing_body": "Pro 前 {months} 个月每月 {proMonthly}，按年付费则第一年 {proAnnual}。Agency 每月 {agencyMonthly}，按年付费则第一年 {agencyAnnual}。{date} 截止。",
+    "bf_apply": "使用 {code}",
+    "bf_applied": "已使用 {code}",
+    "bf_dash_title": "黑色星期五：Pro 前 {months} 个月立减 {percent}%",
+    "bf_dash_body": "使用代码 {code}，Pro 前 {months} 个月每月 {monthly}，按年付费则第一年 {annual}。{date} 截止。",
+    "bf_cta": "查看优惠"
   }
 }

@@ -85,7 +85,8 @@ export const FUNNEL_EVENTS = [
   // ── Money ────────────────────────────────────────────────────────────────
   'upgrade_viewed',       // reached /pricing or the plan tab
   'upgrade_clicked',      // { plan }
-  'checkout_started',     // { plan }
+  'checkout_started',     // { plan, code? } code when one is applied on /pricing
+  'promo_clicked',        // { code, from } a deal banner's button (lib/promos.ts)
 
   'ai_tool_used',         // { tool }
 

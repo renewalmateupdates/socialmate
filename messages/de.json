@@ -2753,5 +2753,14 @@
       "headline": "Fang an, überall zu posten.",
       "body": "Kostenloser Plan, keine Karte, in etwa einer Minute eingerichtet. Wechsle für $8 zu Pro, sobald es sich lohnt."
     }
+  },
+  "promo": {
+    "bf_title": "Black Friday: {percent} % Rabatt auf deine ersten {months} Monate",
+    "bf_pricing_body": "Pro kostet in deinen ersten {months} Monaten {proMonthly} im Monat oder {proAnnual} für das erste Jahr bei jährlicher Zahlung. Agency kostet {agencyMonthly} im Monat oder {agencyAnnual} für das erste Jahr. Endet am {date}.",
+    "bf_apply": "{code} anwenden",
+    "bf_applied": "{code} angewendet",
+    "bf_dash_title": "Black Friday: {percent} % Rabatt auf Pro für deine ersten {months} Monate",
+    "bf_dash_body": "Mit dem Code {code} kostet Pro in deinen ersten {months} Monaten {monthly} im Monat oder {annual} für das erste Jahr bei jährlicher Zahlung. Endet am {date}.",
+    "bf_cta": "Zum Angebot"
   }
 }

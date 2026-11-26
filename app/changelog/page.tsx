@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 26, 2026',
+    version: 'Black Friday',
+    changes: [
+      { type: 'New',      text: 'Black Friday: code BLACKFRIDAY takes 50% off your first 12 months of Pro or Agency, monthly or annual, through December 4 (Eastern time). Pro is $4 a month for your first 12 months, or $40 for the first year on annual. Apply it on the pricing page, or from the banner on your Dashboard.' },
+      { type: 'Fixed',    text: 'Backing out of the checkout page no longer uses up a promo code. Before, the pricing page then said you had already used it.' },
+      { type: 'Fixed',    text: 'The pricing page now says how long a discount lasts, for example "50% off your first 12 months" or "31% off your first payment", instead of just "50% off".' },
+      { type: 'Fixed',    text: 'The Dashboard\'s "Coming very soon" list no longer names Pinterest or Reddit. Both turned down our applications.' },
+    ],
+  },
+  {
     date: 'November 25, 2026',
     version: 'Only What Will Go Out',
     changes: [

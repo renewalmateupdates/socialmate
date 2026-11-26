@@ -6,6 +6,8 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 import { recordCodeReferral } from '@/lib/partner-commission'
+import { SUPPORT_EMAIL } from '@/lib/contact'
+import { paidWithCode, worksAtCheckout } from '@/lib/coupon-redemption'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -62,13 +64,19 @@ export async function POST(req: NextRequest) {
     stripe_promo_id: string | null
   } | null = null
 
+  // A redemption row is written below when the session is created, before
+  // anyone pays. One already there from a checkout they backed out of is
+  // reused, not added again (lib/coupon-redemption.ts).
+  let alreadyRecorded = false
+
   if (coupon_code) {
     const db = getSupabaseAdmin()
-    const { data: found } = await db
+    const { data: found, error: findError } = await db
       .from('coupons')
       .select('id, code, affiliate_id, discount_type, discount_value, max_redemptions, current_redemptions, expires_at, active, stripe_promo_id')
       .ilike('code', (coupon_code as string).trim())
-      .single()
+      .maybeSingle()
+    if (findError) console.warn('[Checkout] coupon lookup failed:', findError.message)
 
     if (!found || !found.active) {
       return NextResponse.json({ error: 'Invalid or inactive coupon code' }, { status: 400 })
@@ -79,14 +87,21 @@ export async function POST(req: NextRequest) {
     if (found.max_redemptions != null && found.current_redemptions >= found.max_redemptions) {
       return NextResponse.json({ error: 'Coupon has reached its redemption limit' }, { status: 400 })
     }
-    // Prevent double redemption per user
-    const { data: prior } = await db
+    // A percent or fixed code with no Stripe promotion code would reach
+    // Stripe with no discount and charge the full price.
+    if (!worksAtCheckout(found)) {
+      return NextResponse.json({ error: `This code isn't set up at checkout yet. Email ${SUPPORT_EMAIL} and we'll sort it out.` }, { status: 400 })
+    }
+    // Prevent double redemption per user: only a finished checkout counts.
+    const { data: prior, error: priorError } = await db
       .from('coupon_redemptions')
       .select('id')
       .eq('coupon_id', found.id)
       .eq('user_id', user.id)
-      .maybeSingle()
-    if (prior) {
+      .limit(1)
+    if (priorError) console.warn('[Checkout] redemption lookup failed:', priorError.message)
+    alreadyRecorded = Boolean(prior?.length)
+    if (alreadyRecorded && await paidWithCode(stripe, user.email, found.code)) {
       return NextResponse.json({ error: 'You have already used this coupon' }, { status: 400 })
     }
 
@@ -137,17 +152,25 @@ export async function POST(req: NextRequest) {
     cancel_url: fromOnboarding ? `${appUrl}/onboarding?step=2` : `${appUrl}/pricing`,
   })
 
-  // ── Record redemption + increment counter (fire-and-forget, non-blocking) ─
+  // ── Record redemption + increment counter (once per person) ─────────────
   if (couponRecord) {
     const db = getSupabaseAdmin()
-    await Promise.all([
-      db.from('coupon_redemptions').insert({
-        coupon_id:         couponRecord.id,
-        user_id:           user.id,
-        stripe_customer_id: user.email ?? null,  // customer_id not yet known pre-checkout
-      }),
-      db.rpc('increment_coupon_redemptions', { coupon_id: couponRecord.id }),
-    ]).catch(err => console.error('[Checkout] Coupon redemption record error:', err))
+    if (!alreadyRecorded) {
+      try {
+        const [inserted, counted] = await Promise.all([
+          db.from('coupon_redemptions').insert({
+            coupon_id:         couponRecord.id,
+            user_id:           user.id,
+            stripe_customer_id: user.email ?? null,  // customer_id not yet known pre-checkout
+          }),
+          db.rpc('increment_coupon_redemptions', { coupon_id: couponRecord.id }),
+        ])
+        if (inserted.error) console.warn('[Checkout] redemption insert failed:', inserted.error.message)
+        if (counted.error) console.warn('[Checkout] redemption count failed:', counted.error.message)
+      } catch (err) {
+        console.error('[Checkout] Coupon redemption record error:', err)
+      }
+    }
 
     // A partner's code makes this buyer their referral, so the partner earns
     // on every invoice the same way their link does (lib/partner-commission.ts).

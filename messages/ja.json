@@ -2753,5 +2753,14 @@
       "headline": "どこにでも投稿を始めましょう。",
       "body": "無料プラン、カード不要、設定は 1 分ほど。価値を感じたときに $8 で Pro へ。"
     }
+  },
+  "promo": {
+    "bf_title": "ブラックフライデー：最初の{months}か月間 {percent}%オフ",
+    "bf_pricing_body": "Proは最初の{months}か月間 月額{proMonthly}、年払いなら初年度{proAnnual}。Agencyは月額{agencyMonthly}、年払いなら初年度{agencyAnnual}。{date}まで。",
+    "bf_apply": "{code}を適用",
+    "bf_applied": "{code}を適用済み",
+    "bf_dash_title": "ブラックフライデー：Proが最初の{months}か月間 {percent}%オフ",
+    "bf_dash_body": "コード{code}で、Proは最初の{months}か月間 月額{monthly}、年払いなら初年度{annual}になります。{date}まで。",
+    "bf_cta": "詳細を見る"
   }
 }

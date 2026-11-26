@@ -611,6 +611,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   Free sidebar showed X at "0 / 0, Limit reached". Which platforms are
   Pro-only comes from `PAID_ONLY_PLATFORM_NAMES` in `lib/site-facts.ts`.
 
+**From: November 26, 2026: wiring the Black Friday code**
+
+- **A code is used when it is paid for, not when checkout opens.** The
+  checkout route recorded a redemption before Stripe's page loaded, so one
+  click on Back burned the code. Check a completed Checkout Session.
+- **A code the box accepts must exist where the money is taken.** NONPROFIT50
+  and STUDENT25 said "applied" for six months with nothing in Stripe behind
+  them. A discount is real only when a Stripe promotion code carries it.
+- **Prove a discount's length on a test clock before it goes live.** Stripe's
+  docs don't say whether a 12-month coupon touches a yearly renewal; a test
+  clock answered in a minute (it doesn't).
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -618,7 +630,40 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 25, 2026).** #786 through #829 are merged.
+**Pick up here (updated Nov 26, 2026).** #786 through #831 are merged.
+
+**Nov 26: Black Friday, BLACKFRIDAY through Dec 4.** Joshua set the dates
+(Nov 26 to Dec 4) and left the amount to Claude: 50% off the first 12 months
+of Pro or Agency, monthly or annual (Pro $4 a month for 12 months, or $40 for
+the first year; Agency $14.50 or $145). Live Stripe: coupon `XYLnid2Q`
+(repeating, 12 months, limited to the four Pro and Agency products, redeem_by
+Dec 5 04:59:59 UTC, 11:59:59 PM Eastern Dec 4) behind promotion code
+`promo_1Ug43u7OMwDowUuUMJGVIkwh`, and a `coupons` row so the pricing page's
+box takes it; live `/api/coupons/validate` accepted it right away. Stripe test
+clocks proved the length first: monthly bills $4 twelve times, then $8; yearly
+bills $40, then $80 at the renewal. `lib/promos.ts` holds the dates and the
+math. The /pricing banner (it replaces the welcome and birthday offers while it
+runs) and a dismissible Dashboard banner for Free hide themselves when it ends,
+as the code expires on its own: nothing to undo on Dec 5. `/pricing?code=X`
+applies a code on arrival. `promo_clicked` and `checkout_started { code }`
+show it on `/admin/funnel`. Found while wiring it, fixed in the same PR:
+- Backing out of Stripe's page burned a code: `/api/stripe/checkout` writes
+  `coupon_redemptions` when it opens the page, and both routes refused anyone
+  with a row. A row now counts only when one of the person's completed Checkout
+  Sessions carried the code (`lib/coupon-redemption.ts`). No pricing-page code
+  had ever reached that table (0 rows; the August customer typed BDAY31 on
+  Stripe's own page).
+- NONPROFIT50 and STUDENT25 never had a Stripe promotion code, so the box said
+  "50% off applied" and Stripe would charge the full price. The box now refuses
+  such a code and gives the support email; how long they should last is in
+  `TODO.md`. /for/nonprofits said "$2.50/month" (half of the old $5) and now
+  works it out from `PLAN_PRICES`.
+- The Dashboard's "Coming very soon" card named Pinterest and Reddit (both
+  declined); it lists Instagram, Facebook, Threads and YouTube.
+- **Waiting on Joshua's yes:** two socialmatehq posts in the window still push
+  BDAY31 at 31% (Nov 27 14:00 UTC "Black Friday: code BDAY31...", post
+  c6669da2; Nov 30 14:00 UTC "Cyber Monday...", post 56757161, both X and
+  Bluesky). Swapping them and adding BLACKFRIDAY posts are public posts.
 
 **Nov 25: Joshua's 500 autonomy answers are standing orders** (confirmed in
 chat Nov 25; the page is https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA,
@@ -663,7 +708,9 @@ with at most 1,000 rows and the Dashboard ordered by `scheduled_at` ascending,
 so the admin (1,828 posts) saw "Scheduled 0", an empty Coming up and a zero
 streak with 53 posts queued. It now reads the newest 1,000 by `created_at`,
 sorts Coming up by due time, and takes the Published total from a count when
-the page is full. Outside accounts were never near the cap.
+the page is full. Outside accounts were never near the cap. Merged as #831 and
+checked live Nov 26: the admin's Dashboard shows 52 scheduled, Coming up in
+due order and a 13-day streak.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -1140,6 +1187,8 @@ their complaints are all fixed (Sept 11). Do not re-litigate the refund.
 - **Apple App Store (SocialMate).** Deferred.
 - **Cofounder search.** Marketing cofounder, ~10% sweat equity over a 24-month
   vest, 2-week trial, real contract.
+- **Black Friday BLACKFRIDAY.** 50% off the first 12 months, through Dec 4,
+  2026 (`promo_1Ug43u7OMwDowUuUMJGVIkwh`; see Pick up here).
 - **Birthday promo BDAY31.** Active through Dec 15, 2026
   (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`).
 - **Discord community** at discord.gg/2se6FGrbRU, as a tester and feedback pool.

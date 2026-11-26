@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { stripe } from '@/lib/stripe'
+import { SUPPORT_EMAIL } from '@/lib/contact'
+import { paidWithCode, worksAtCheckout } from '@/lib/coupon-redemption'
 
 export async function POST(req: NextRequest) {
   const { code } = await req.json()
@@ -21,10 +24,11 @@ export async function POST(req: NextRequest) {
 
   const { data: coupon, error } = await db
     .from('coupons')
-    .select('id, code, discount_type, discount_value, max_redemptions, current_redemptions, expires_at, active')
+    .select('id, code, discount_type, discount_value, max_redemptions, current_redemptions, expires_at, active, stripe_promo_id')
     .ilike('code', code.trim())
     .maybeSingle()
 
+  if (error) console.warn('[coupons/validate] lookup failed:', error.message)
   if (error || !coupon) return NextResponse.json({ valid: false, error: 'Code not found' })
   if (!coupon.active) return NextResponse.json({ valid: false, error: 'Code is no longer active' })
   if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
@@ -33,17 +37,25 @@ export async function POST(req: NextRequest) {
   if (coupon.max_redemptions != null && coupon.current_redemptions >= coupon.max_redemptions) {
     return NextResponse.json({ valid: false, error: 'Code has reached its redemption limit' })
   }
+  // Never say "applied" for a discount Stripe won't give (lib/coupon-redemption.ts).
+  if (!worksAtCheckout(coupon)) {
+    return NextResponse.json({ valid: false, error: `This code isn't set up at checkout yet. Email ${SUPPORT_EMAIL} and we'll sort it out.` })
+  }
 
-  // Check if this user already used this coupon
+  // Only a checkout this person finished counts as using the code. Backing
+  // out of Stripe's page used to burn it.
   if (user) {
-    const { data: existing } = await db
+    const { data: prior, error: priorError } = await db
       .from('coupon_redemptions')
       .select('id')
       .eq('coupon_id', coupon.id)
       .eq('user_id', user.id)
-      .maybeSingle()
+      .limit(1)
+    if (priorError) console.warn('[coupons/validate] redemption lookup failed:', priorError.message)
 
-    if (existing) return NextResponse.json({ valid: false, error: 'You have already used this code' })
+    if (prior?.length && await paidWithCode(stripe, user.email, coupon.code)) {
+      return NextResponse.json({ valid: false, error: 'You have already used this code' })
+    }
   }
 
   return NextResponse.json({
