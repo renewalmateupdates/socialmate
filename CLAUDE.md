@@ -635,6 +635,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   docs don't say whether a 12-month coupon touches a yearly renewal; a test
   clock answered in a minute (it doesn't).
 
+**From: November 26, 2026: what Free covers, everywhere (#PRNUM)**
+
+- **Fixing the pages people see first is not fixing the claim.** #830 fixed
+  the homepage, /pricing and nine /for pages; about 600 more sentences said
+  the same thing in comparison pages, audience answers, locale files in eight
+  other languages and database blog posts. Grep the meaning in `app`, `lib`,
+  `messages` and `blog_posts`, in every language, before calling it done.
+- **A list of items is read as one claim.** "7 platforms · 15+ AI tools · Free
+  forever" says all seven are free even though no single phrase does.
+  `scripts/test-free-platform-claims.mjs` reads a whole sentence, so it sees
+  these; it cannot see a card headed "Free" over a "7 platforms" list item.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -701,9 +713,28 @@ streak counted any post made that day (a failed one too), Coming up gave no
 warning, the homepage grid marked X "Live" with the free six, the Free sidebar
 read "0 / 0, Limit reached", and /pricing's Pro list never mentioned X. Fixed
 together, plus the same "7 live platforms" claim on the Free plan of nine
-`/for` pages. **Still to do:** the same claim on about 20 `/vs` pages and meta
-descriptions ("7 platforms free", "free across 7 platforms"). The Queue badge
-and the /streak page followed in #832 (Nov 26, below).
+`/for` pages. The Queue badge and the /streak page followed in #832 (Nov 26,
+below).
+
+**Nov 26: the rest of the "7 platforms free" claim (#PRNUM).** Done: it was
+far more than 20 `/vs` pages. About 600 sentences said Free covers all seven
+or that X is free: every `/vs` page and layout (the comparison CTAs, "free with
+7 platforms" meta descriptions, and the X-tool pages, which said X itself was
+free), 30 audience answers in `lib/audiences.ts`, 45 `/for` locale strings in
+all nine languages plus the Free pricing card (`common.free_plan_platforms`),
+/faq, /support, /press, guides, static blog posts, `ai-plugin.json` and
+`BRAND.summary`. Statusbrew's page also put Instagram, Facebook, Pinterest and
+Reddit on the free plan. `scripts/test-free-platform-claims.mjs` (in
+`npm test`) now fails on a sentence that ties the live count to free without
+saying X needs Pro (559 hits on the old code, 0 now). **Joshua's yes needed:**
+`supabase/blog_free_platforms_nov26.sql` fixes the same claim in 20 sentences
+of 19 database posts (checked read-only against the live rows; then
+revalidate and IndexNow). **Seen, not fixed:** /pricing's FAQ and the features
+page note say Pinterest and Reddit are "coming very soon" (both declined);
+/vs/later-free says 50 credits are 50 posts and Free connects several accounts
+per platform; several pages call SOMA or "all tools" free (SOMA is Pro); the
+/for/linkedin-creators FAQ says LinkedIn images and video are on the roadmap
+(they are live); the /for pages' "Coming soon" tiles still list Pinterest.
 
 **Checked live after #830 deployed (Nov 26, 01:50 UTC), signed in as the
 admin:** the homepage grid shows X as Pro with the "Six are free" line (served
