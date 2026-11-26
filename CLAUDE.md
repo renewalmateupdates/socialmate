@@ -607,7 +607,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   The check now sits in `/api/posts/create` and the thread route, and Compose
   and the Dashboard use the same helper (`lib/connected-platforms.ts`).
 - **Copy about Free names what Free gets.** "7 live platforms" sat on the Free
-  card, eight `/for` pages and the homepage grid while X needs Pro, and the
+  card, nine `/for` pages and the homepage grid while X needs Pro, and the
   Free sidebar showed X at "0 / 0, Limit reached". Which platforms are
   Pro-only comes from `PAID_ONLY_PLATFORM_NAMES` in `lib/site-facts.ts`.
 
@@ -643,7 +643,7 @@ Compose scheduled to a platform with nothing connected (his two posts in
 streak counted any post made that day (a failed one too), Coming up gave no
 warning, the homepage grid marked X "Live" with the free six, the Free sidebar
 read "0 / 0, Limit reached", and /pricing's Pro list never mentioned X. Fixed
-together, plus the same "7 live platforms" claim on the Free plan of eight
+together, plus the same "7 live platforms" claim on the Free plan of nine
 `/for` pages. **Still to do:** the same claim on about 20 `/vs` pages and meta
 descriptions ("7 platforms free", "free across 7 platforms"); a Queue badge for
 posts that can't go out; `/api/streak` (the /streak page) still counts a
