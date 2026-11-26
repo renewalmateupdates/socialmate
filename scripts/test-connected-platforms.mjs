@@ -126,6 +126,20 @@ test('the Dashboard streak no longer counts every post by the day it was made', 
   assert.match(dash, /app_dashboard\.not_connected/)
 })
 
+test('the Dashboard reads the newest posts, not the oldest 1,000', () => {
+  // PostgREST caps a response at 1,000 rows. Ordered oldest first, an account
+  // past that (the admin's, 1,828 posts) saw nothing scheduled and a zero
+  // streak while 53 posts were queued (Nov 25, 2026).
+  const dash = code(read('app/dashboard/page.tsx'))
+  const load = dash.slice(dash.indexOf('const loadPosts = async'), dash.indexOf('const init = async'))
+  assert.match(load, /\.order\('created_at', \{ ascending: false \}\)/)
+  assert.match(load, /\.limit\(POSTS_READ_LIMIT\)/)
+  assert.doesNotMatch(load, /\.order\('scheduled_at', \{ ascending: true \}\)/)
+  assert.match(load, /count: 'exact', head: true/, 'a full page gets the Published total from a count')
+  assert.match(dash, /\.sort\(\(a, b\) => new Date\(a\.scheduled_at\)\.getTime\(\) - new Date\(b\.scheduled_at\)\.getTime\(\)\)/,
+    'Coming up shows the soonest posts')
+})
+
 test('X reads as Pro wherever Free is described', () => {
   const sidebar = code(read('components/Sidebar.tsx'))
   assert.match(sidebar, /xQuota\.limit === 0/, 'Free gets its own X card')

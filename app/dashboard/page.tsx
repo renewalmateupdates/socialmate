@@ -126,6 +126,9 @@ type Post = {
   workspace_id?: string | null
 }
 
+// The most posts one PostgREST request returns.
+const POSTS_READ_LIMIT = 1000
+
 type DashStats = {
   scheduled: number
   drafts: number
@@ -240,7 +243,13 @@ function DashboardInner() {
     })
 
     setAllPosts(normalised)
-    setUpcomingPosts(normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).slice(0, 4))
+    // Soonest first: the list arrives newest-created first (loadPosts).
+    setUpcomingPosts(
+      normalised
+        .filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now)
+        .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+        .slice(0, 4)
+    )
     setRecentPosts(
       normalised
         .filter(p => p.status === 'draft' || p.status === 'published')
@@ -260,12 +269,31 @@ function DashboardInner() {
     let currentUserId: string | null = null
 
     const loadPosts = async (uid: string) => {
-      const { data: posts } = await supabase
+      // Newest first, and said out loud: PostgREST answers with at most 1,000
+      // rows. This read the OLDEST 1,000 by scheduled_at, so an account past
+      // that (the admin's: 1,828 posts in Nov 2026) saw "Scheduled 0", an
+      // empty Coming up and a zero streak while 53 posts were queued.
+      const { data: posts, error } = await supabase
         .from('posts')
         .select('id, content, platforms, status, scheduled_at, created_at, published_at, workspace_id, platform_post_ids')
         .eq('user_id', uid)
-        .order('scheduled_at', { ascending: true })
-      if (posts) applyPosts(posts as Post[])
+        .order('created_at', { ascending: false })
+        .limit(POSTS_READ_LIMIT)
+      if (error) console.warn('[dashboard] posts lookup failed:', error.message)
+      if (!posts) return
+      applyPosts(posts as Post[])
+
+      // A full page means older posts were left out, so the Published total
+      // comes from a count instead of the list.
+      if (posts.length >= POSTS_READ_LIMIT) {
+        const { count, error: countError } = await supabase
+          .from('posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', uid)
+          .eq('status', 'published')
+        if (countError) console.warn('[dashboard] published count failed:', countError.message)
+        else if (count !== null) setStats(s => ({ ...s, published: count }))
+      }
     }
 
     const init = async () => {
