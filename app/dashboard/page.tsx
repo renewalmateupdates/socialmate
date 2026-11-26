@@ -466,8 +466,9 @@ function DashboardInner() {
   const unconnectedFor = (post: Post): string[] =>
     connectionRows ? unconnectedForPost(post, connectionRows, ownedWorkspaces) : []
 
-  // Streak calculation from posts. A day counts when a post went out that day,
-  // or a post that can go out is due that day. This used to count every post
+  // Streak calculation from posts. A day counts when a post was due that day
+  // and went out, or can go out (a Post Now post: the day it went out), as on
+  // /streak (streakTimeOf). This used to count every post
   // by the day it was created, whatever happened to it, so a failed Post Now
   // read "Posted today, streak safe" (an outside tester, Nov 21, 2026).
   const streakDays = new Set<number>()

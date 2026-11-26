@@ -10,8 +10,9 @@
  * and a Pro list on /pricing that never mentioned X.
  *
  * lib/connected-platforms.ts answers "can this go out?" once; the post routes,
- * Compose and the Dashboard all use it. This covers the helpers and checks
- * that each place still asks.
+ * Compose and the Dashboard all use it, and since Nov 26 the Queue (the red
+ * "Not connected" badge) and /api/streak (the /streak page) do too. This
+ * covers the helpers and checks that each place still asks.
  *
  *   node scripts/test-connected-platforms.mjs
  */
@@ -35,7 +36,8 @@ const mod = { exports: {} }
 new Function('module', 'exports', 'require', outputText)(mod, mod.exports, require)
 const {
   platformDisplayName, listPlatformNames, missingConnections, notConnectedMessage,
-  connectedInScope, unconnectedForPost, streakTimeOf,
+  connectedInScope, unconnectedForPost, streakTimeOf, streakDayMap, tiktokStudioConnected,
+  connectionRowsFor,
 } = mod.exports
 
 test('platform names read the way people know them', () => {
@@ -86,13 +88,97 @@ test('a post is flagged only when we know it cannot go out', () => {
 
 test('the streak counts posts that went out or can go out, nothing else', () => {
   const base = { scheduled_at: '2026-11-20T15:00:00Z', created_at: '2026-11-18T09:00:00Z' }
-  assert.equal(streakTimeOf({ ...base, status: 'published', published_at: '2026-11-20T15:00:04Z' }, true), '2026-11-20T15:00:04Z')
+  assert.equal(streakTimeOf({ ...base, status: 'published', published_at: '2026-11-20T15:00:04Z' }, true), '2026-11-20T15:00:00Z')
+  // Held up by an outage and sent days later, it keeps the day it was due.
+  assert.equal(streakTimeOf({ ...base, status: 'published', published_at: '2026-11-23T02:36:00Z' }, true), '2026-11-20T15:00:00Z')
+  // Post Now has no scheduled_at: the time it went out.
+  assert.equal(streakTimeOf({ status: 'published', scheduled_at: null, published_at: '2026-11-21T08:00:00Z', created_at: '2026-11-21T08:00:00Z' }, true), '2026-11-21T08:00:00Z')
   assert.equal(streakTimeOf({ ...base, status: 'partial', published_at: null }, true), '2026-11-20T15:00:00Z')
   assert.equal(streakTimeOf({ ...base, status: 'scheduled' }, true), '2026-11-20T15:00:00Z')
   assert.equal(streakTimeOf({ ...base, status: 'scheduled' }, false), null, 'a post that cannot go out never counts')
   assert.equal(streakTimeOf({ ...base, status: 'failed' }, true), null, 'a failed Post Now is not "streak safe"')
   assert.equal(streakTimeOf({ ...base, status: 'draft' }, true), null)
   assert.equal(streakTimeOf({ ...base, status: 'pending_approval' }, true), null)
+})
+
+test('/api/streak counts the UTC days posts went out, or can go out, from the window on', () => {
+  const since = new Date('2026-01-01T00:00:00Z')
+  const posts = [
+    // Post Now leaves scheduled_at empty. The route filtered on it, so these never counted.
+    { status: 'published', platforms: ['bluesky'], workspace_id: null, published_at: '2026-11-20T23:30:00Z', scheduled_at: null, created_at: '2026-11-20T23:30:00Z' },
+    // Scheduled and connected: the day it is due.
+    { status: 'scheduled', platforms: ['bluesky'], workspace_id: 'ws-personal', scheduled_at: '2026-11-21T15:00:00Z' },
+    // Scheduled to a platform with nothing connected: never.
+    { status: 'scheduled', platforms: ['mastodon'], workspace_id: 'ws-personal', scheduled_at: '2026-11-22T15:00:00Z' },
+    // A client workspace posts from its own accounts, not the personal ones.
+    { status: 'scheduled', platforms: ['bluesky'], workspace_id: 'ws-client', scheduled_at: '2026-11-23T15:00:00Z' },
+    { status: 'scheduled', platforms: ['linkedin'], workspace_id: 'ws-client', scheduled_at: '2026-11-23T16:00:00Z' },
+    // Someone else's workspace posts from their accounts, which we can't read: counts.
+    { status: 'scheduled', platforms: ['bluesky'], workspace_id: 'ws-theirs', scheduled_at: '2026-11-24T15:00:00Z' },
+    // A time with an offset lands on its UTC day (20:30 UTC on the 24th).
+    { status: 'partial', platforms: ['bluesky'], published_at: '2026-11-25T01:30:00+05:00' },
+    // Before the window, and posts that never count.
+    { status: 'published', platforms: ['bluesky'], published_at: '2025-12-31T23:59:59Z' },
+    { status: 'failed', platforms: ['bluesky'], created_at: '2026-11-25T10:00:00Z' },
+    { status: 'draft', platforms: ['bluesky'], created_at: '2026-11-25T11:00:00Z' },
+  ]
+  assert.deepEqual(streakDayMap(posts, rows, owned, since), {
+    '2026-11-20': 1, '2026-11-21': 1, '2026-11-23': 1, '2026-11-24': 2,
+  })
+  // A failed read of the connections or the workspaces: scheduled posts count, as before the check.
+  const unchecked = { '2026-11-20': 1, '2026-11-21': 1, '2026-11-22': 1, '2026-11-23': 2, '2026-11-24': 2 }
+  assert.deepEqual(streakDayMap(posts, null, owned, since), unchecked)
+  assert.deepEqual(streakDayMap(posts, rows, null, since), unchecked)
+  assert.deepEqual(streakDayMap([], rows, owned, since), {})
+})
+
+test('a TikTok Studio post can go out from any TikTok row of its author', () => {
+  assert.equal(tiktokStudioConnected(rows), false)
+  assert.equal(tiktokStudioConnected([...rows, { platform: 'tiktok', workspace_id: 'ws-client' }]), true)
+  assert.equal(tiktokStudioConnected([]), false)
+})
+
+// Just enough of a Supabase client for connectionRowsFor: from().select().eq().
+function fakeClient(results) {
+  const calls = []
+  return {
+    calls,
+    from: table => ({
+      select: cols => ({
+        eq: (col, val) => { calls.push([table, cols, col, val]); return Promise.resolve(results[table]) },
+      }),
+    }),
+  }
+}
+
+test('the connections are two reads with their workspace, and a failed read flags nothing', async () => {
+  const client = fakeClient({
+    connected_accounts: { data: [{ platform: 'bluesky', workspace_id: null }], error: null },
+    post_destinations:  { data: [{ platform: 'telegram', workspace_id: 'ws-client' }], error: null },
+  })
+  assert.deepEqual(await connectionRowsFor(client, 'u1'), [
+    { platform: 'bluesky', workspace_id: null },
+    { platform: 'telegram', workspace_id: 'ws-client' },
+  ])
+  assert.deepEqual(client.calls, [
+    ['connected_accounts', 'platform, workspace_id', 'user_id', 'u1'],
+    ['post_destinations',  'platform, workspace_id', 'user_id', 'u1'],
+  ])
+
+  const warn = console.warn
+  console.warn = () => {}
+  try {
+    for (const failing of ['connected_accounts', 'post_destinations']) {
+      const results = {
+        connected_accounts: { data: [], error: null },
+        post_destinations:  { data: [], error: null },
+        [failing]: { data: null, error: { message: 'column does not exist' } },
+      }
+      assert.equal(await connectionRowsFor(fakeClient(results), 'u1'), null, `${failing} failing`)
+    }
+  } finally {
+    console.warn = warn
+  }
 })
 
 test('both post routes refuse an unconnected platform before saving or sending', () => {
@@ -138,6 +224,27 @@ test('the Dashboard reads the newest posts, not the oldest 1,000', () => {
   assert.match(load, /count: 'exact', head: true/, 'a full page gets the Published total from a count')
   assert.match(dash, /\.sort\(\(a, b\) => new Date\(a\.scheduled_at\)\.getTime\(\) - new Date\(b\.scheduled_at\)\.getTime\(\)\)/,
     'Coming up shows the soonest posts')
+})
+
+test('the Queue marks a post that cannot go out, with two reads for the whole page', () => {
+  const queue = code(read('app/queue/page.tsx'))
+  assert.match(queue, /connectionRowsFor\(supabase, user\.id\)/)
+  assert.equal(queue.match(/connectionRowsFor\(/g).length, 1, 'read once per load, not once per post')
+  // Only in a workspace the viewer owns: anywhere else posts go out from the owner's accounts.
+  assert.match(queue, /viewerOwnsThis\s*=\s*!!activeWorkspace && isOwnWorkspace\(activeWorkspace\)/)
+  assert.match(queue, /connectionRows && viewerOwnsThis \? unconnectedForPost\(post, connectionRows, ownedWorkspaces\)/)
+  assert.match(queue, /unconnected=\{unconnectedFor\(post\)\}/)
+  assert.match(queue, /app_dashboard\.not_connected/)
+  assert.match(queue, /tiktokStudioConnected\(connectionRows\)/)
+})
+
+test('/api/streak counts with streakTimeOf and the connection check, past 1,000 rows', () => {
+  const streak = code(read('app/api/streak/route.ts'))
+  assert.match(streak, /connectionRowsFor\(admin, user\.id\)/)
+  assert.match(streak, /from\('workspaces'\)\.select\('id, is_personal'\)\.eq\('owner_id', user\.id\)/)
+  assert.match(streak, /streakDayMap\(posts, rows, owned, since\)/)
+  assert.match(streak, /selectAll</, 'paged: PostgREST returns 1,000 rows a request')
+  assert.doesNotMatch(streak, /\.gte\('scheduled_at'/, 'a Post Now post has no scheduled_at')
 })
 
 test('X reads as Pro wherever Free is described', () => {
