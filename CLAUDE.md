@@ -611,6 +611,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   Free sidebar showed X at "0 / 0, Limit reached". Which platforms are
   Pro-only comes from `PAID_ONLY_PLATFORM_NAMES` in `lib/site-facts.ts`.
 
+**From: November 26, 2026: the Queue and the /streak page (#832)**
+
+- **A query's window covers every time it counts by.** /api/streak counted a
+  post on the day it went out but only read posts by `scheduled_at`, which
+  Post Now leaves empty, so no Post Now post ever reached the /streak page.
+- **One person's posts can pass 1,000 rows.** The admin has over 1,700 in a
+  year, and PostgREST stops at 1,000 a request. Page with `selectAll`
+  (`lib/admin-metrics.ts`), or read the newest first (#831).
+- **A streak day is the day a post was due.** 274 of 1,712 published posts
+  went out on a later day than planned, held up by our outages. Counting by
+  `published_at` broke people's streaks over our own delays.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -618,7 +630,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 25, 2026).** #786 through #829 are merged.
+**Pick up here (updated Nov 26, 2026).** #786 through #832 are merged.
 
 **Nov 25: Joshua's 500 autonomy answers are standing orders** (confirmed in
 chat Nov 25; the page is https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA,
@@ -645,9 +657,8 @@ warning, the homepage grid marked X "Live" with the free six, the Free sidebar
 read "0 / 0, Limit reached", and /pricing's Pro list never mentioned X. Fixed
 together, plus the same "7 live platforms" claim on the Free plan of nine
 `/for` pages. **Still to do:** the same claim on about 20 `/vs` pages and meta
-descriptions ("7 platforms free", "free across 7 platforms"); a Queue badge for
-posts that can't go out; `/api/streak` (the /streak page) still counts a
-scheduled post whose platform isn't connected.
+descriptions ("7 platforms free", "free across 7 platforms"). The Queue badge
+and the /streak page followed in #832 (Nov 26, below).
 
 **Checked live after #830 deployed (Nov 26, 01:50 UTC), signed in as the
 admin:** the homepage grid shows X as Pro with the "Six are free" line (served
@@ -664,6 +675,23 @@ so the admin (1,828 posts) saw "Scheduled 0", an empty Coming up and a zero
 streak with 53 posts queued. It now reads the newest 1,000 by `created_at`,
 sorts Coming up by due time, and takes the Published total from a count when
 the page is full. Outside accounts were never near the cap.
+
+**Nov 26: the Queue and /streak (#832).** In the Queue, a scheduled post that
+names a platform with nothing connected gets the Dashboard's red "Not
+connected" badge (a press opens Accounts) and its platform chip turns red,
+only in a workspace the viewer owns; a TikTok Studio post gets it when its
+author has no TikTok account at all. Two reads per page load
+(`connectionRowsFor`), none per post. `/api/streak` counts through
+`streakDayMap` (`streakTimeOf` plus the same check, server-side). Moving it
+over found two more: it windowed on `scheduled_at`, which Post Now leaves
+empty, so no Post Now post ever counted (9 people's /streak page was empty),
+and it read one page of 1,000 rows, so the admin (1,733 posts in the year)
+saw a current streak of 0 (it is 13). `streakTimeOf` now counts a published
+post on the day it was due, as /streak always had: 274 of 1,712 published
+posts went out on a later day than planned, and counting them by
+`published_at` piled them onto the day each backlog flushed. Checked
+read-only before merging: no owner's Queue flags a post today (78 scheduled
+posts in 4 Queues), and nobody's /streak numbers drop.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
