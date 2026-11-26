@@ -50,7 +50,7 @@ const PAIN_POINTS = [
 const FEATURES = [
   {
     title: 'Free Plan — No Credit Card Required',
-    desc:  '50 AI credits, 7 live platforms, post calendar, drafts, link in bio, and 2 team seats. No payment information required. Free forever — not a trial.',
+    desc:  '50 AI credits, 6 platforms (X needs Pro), post calendar, drafts, link in bio, and 2 team seats. No payment information required. Free forever — not a trial.',
     icon:  Gift,
     badge: 'Free',
   },
@@ -96,7 +96,7 @@ const PRICING = [
     href:    '/signup',
     perks: [
       '50 AI credits/month',
-      '7 live platforms',
+      '6 platforms free (X needs Pro)',
       'Post calendar & drafts',
       'Link in Bio page',
       '2 volunteer seats',
@@ -137,7 +137,7 @@ const PRICING = [
 const FAQ = [
   {
     q: 'Is the free plan really free with no credit card?',
-    a: "Yes. The free plan requires no payment information at all. 50 AI credits/month, 7 live platforms, post calendar, drafts, link in bio, and 2 team seats. Free forever — not a trial that expires.",
+    a: "Yes. The free plan requires no payment information at all. 50 AI credits/month, 6 platforms (X needs Pro), post calendar, drafts, link in bio, and 2 team seats. Free forever — not a trial that expires.",
   },
   {
     q: 'Do you offer a nonprofit discount?',

@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 25, 2026',
+    version: 'Only What Will Go Out',
+    changes: [
+      { type: 'Fixed',    text: 'Compose no longer schedules a post to a platform you have not connected. The button says which platform to connect, and the warning offers Connect (in a new tab, so your post stays) or Untick. Before, the post was saved as Scheduled and failed when its time came.' },
+      { type: 'Fixed',    text: 'Your posting streak counts only posts that went out, or scheduled posts that can go out. A failed post no longer marks the day as safe.' },
+      { type: 'Improved', text: 'The Dashboard marks an upcoming post red, "Not connected", when a platform it is going to has no account connected.' },
+      { type: 'Fixed',    text: 'X is shown as a Pro platform everywhere Free is described: the homepage platform list, the Free plan on the pricing page and the sidebar, which used to read "0 / 0, Limit reached" on a new free account. Six platforms are free; X needs Pro because X charges for every post.' },
+    ],
+  },
+  {
     date: 'November 13, 2026',
     version: 'Free Image Tools',
     changes: [

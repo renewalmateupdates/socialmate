@@ -13,6 +13,7 @@ import ShopStrip from '@/components/landing/ShopStrip'
 import TestimonialRail from '@/components/landing/TestimonialRail'
 import { Section, Eyebrow, Display, Body, Button } from '@/components/instrument/primitives'
 import { PLAN_POST_LIMITS } from '@/lib/post-limits'
+import { PAID_ONLY_PLATFORM_NAMES } from '@/lib/site-facts'
 import {
   PenLine, Hash, RefreshCw, TrendingUp, MessagesSquare, Recycle, Zap, Flame,
   Radar, Search, CalendarDays, ImagePlus, CalendarClock, BarChart3, Link2,
@@ -85,6 +86,10 @@ function createT(locale: string) {
 
 const LIVE_PLATFORMS = ['Bluesky', 'Discord', 'Telegram', 'Mastodon', 'X', 'TikTok', 'LinkedIn']
 const SOON_PLATFORMS = ['YouTube']
+// Live, but only on a paid plan (X bills for every post). Read from
+// lib/site-facts.ts so the grid can't call it free again: it marked all seven
+// "Live" and onboarding then told an outside tester X needs Pro (Nov 21, 2026).
+const PRO_ONLY_PLATFORMS = new Set(PAID_ONLY_PLATFORM_NAMES)
 
 // Tool names are product names and stay English in every locale, exactly as they
 // did before. Only the credit cost is data.
@@ -327,10 +332,17 @@ export default function Landing({
             <div key={p} className="flex items-center gap-3 border-b border-edge py-3.5">
               <PlatformIcon name={p} size={17} mono />
               <span className="flex-1 text-small text-ink-body">{p}</span>
-              {/* jade = live. Its only job on this page. */}
-              <span className="font-mono text-eyebrow uppercase text-jade">
-                {t('landing.platforms.live')}
-              </span>
+              {/* jade = live. Its only job on this page. A Pro-only platform
+                  is live too, but says Pro so it doesn't pass as free. */}
+              {PRO_ONLY_PLATFORMS.has(p) ? (
+                <span className="font-mono text-eyebrow uppercase text-amber">
+                  {t('landing.platforms.pro')}
+                </span>
+              ) : (
+                <span className="font-mono text-eyebrow uppercase text-jade">
+                  {t('landing.platforms.live')}
+                </span>
+              )}
             </div>
           ))}
           {/* No opacity-50 here. Dimming a whole row drags real, readable content
@@ -346,6 +358,9 @@ export default function Landing({
             </div>
           ))}
         </div>
+        <Body className="mt-6 max-w-xl text-small text-ink-muted">
+          {t('landing.platforms.x_note')}
+        </Body>
       </Section>
 
       {/* ══ SOMA / AI ══════════════════════════════════════════════════════

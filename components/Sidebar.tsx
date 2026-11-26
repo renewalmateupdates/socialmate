@@ -319,7 +319,7 @@ function SidebarContent({
   const [scheduledCount, setScheduledCount]     = useState(0)
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0)
   const unreadNotifs                            = useUnreadNotifications()
-  const [xQuota, setXQuota]                     = useState<{ used: number; limit: number } | null>(null)
+  const [xQuota, setXQuota]                     = useState<{ used: number; limit: number; boosterBalance: number } | null>(null)
   const [somaCredits, setSomaCredits]           = useState<{ monthly: number; remaining: number } | null>(null)
   const pathname = usePathname()
   const router   = useRouter()
@@ -563,8 +563,8 @@ function SidebarContent({
 
   // X/Twitter monthly quota
   useEffect(() => {
-    fetchJsonShared<{ used: number; limit: number }>('/api/accounts/twitter/quota', 5 * 60_000)
-      .then(d => { if (d && typeof d.used === 'number') setXQuota({ used: d.used, limit: d.limit }) })
+    fetchJsonShared<{ used: number; limit: number; boosterBalance?: number }>('/api/accounts/twitter/quota', 5 * 60_000)
+      .then(d => { if (d && typeof d.used === 'number') setXQuota({ used: d.used, limit: d.limit, boosterBalance: d.boosterBalance ?? 0 }) })
   }, [])
 
   // SOMA credits — only shown if user has a monthly allocation
@@ -1263,7 +1263,26 @@ function SidebarContent({
                 </p>
               </div>
 
-              {xQuota !== null && (
+              {/* Free has no monthly X allowance (X bills per post), so the
+                  card read "0 / 0", red, "Limit reached" on a brand-new
+                  account, right above the upgrade button. It looked like a bug
+                  or a pressure tactic to an outside tester (Nov 21, 2026). */}
+              {xQuota !== null && xQuota.limit === 0 && (
+                <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
+                  {xQuota.boosterBalance > 0 ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>𝕏 Booster posts</span>
+                      <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>{xQuota.boosterBalance} left</span>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>𝕏 posting is a Pro feature</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>X charges for every post, so it starts on Pro.</p>
+                    </>
+                  )}
+                </div>
+              )}
+              {xQuota !== null && xQuota.limit > 0 && (
                 <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>𝕏 Posts this month</span>

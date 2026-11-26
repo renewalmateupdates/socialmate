@@ -96,7 +96,7 @@ const PRICING = [
     href:    '/signup',
     perks: [
       '50 AI credits/month',
-      '7 live platforms',
+      '6 platforms free (X needs Pro)',
       'Post calendar & drafts',
       'Link in Bio page',
       '2 team seats',
@@ -141,7 +141,7 @@ const FAQ = [
   },
   {
     q: 'Is the free plan actually useful for a small restaurant?',
-    a: "Absolutely. 50 AI credits, 7 live platforms, post calendar, link in bio, and no credit card required. Most single-location restaurants can run their whole social presence on the free plan.",
+    a: "Absolutely. 50 AI credits, 6 platforms (X needs Pro), post calendar, link in bio, and no credit card required. Most single-location restaurants can run their whole social presence on the free plan.",
   },
   {
     q: 'Can my manager or front-of-house staff post too?',

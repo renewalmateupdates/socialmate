@@ -133,7 +133,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'Is the free plan actually useful, or is it a bait-and-switch?',
-    a: 'Genuinely useful. 50 AI credits, 250 posts/month, 7 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
+    a: 'Genuinely useful. 50 AI credits, 250 posts/month, 6 platforms (X needs Pro), link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
   },
   {
     q: 'Do I need a credit card to start?',

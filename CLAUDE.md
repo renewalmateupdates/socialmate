@@ -10,8 +10,9 @@
 Work happens in local sessions on Joshua's PC, in `C:\Users\jbost\socialmate`.
 Cloud sessions were retired on Nov 5, 2026.
 
-1. `git status` and `git pull` on `main` first. One branch and one PR per fix;
-   Joshua merges PRs unless he says otherwise.
+1. `git status` and `git pull` on `main` first. One branch and one PR per fix.
+   Since Nov 25, 2026 Claude merges its own PRs once checks pass and the
+   preview checks out; a feature it isn't sure about waits for Joshua.
 2. `gh auth status`: pushes and PRs here need the `renewalmateupdates` account
    (`gh auth switch --hostname github.com --user renewalmateupdates`). HereNow
    needs `gilgameshenterprisellc-pixel`; the active one drifts between sessions.
@@ -598,6 +599,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   and each one's `post/scheduled` run would still have called the publish
   route, got a 404 and retried three times.
 
+**From: November 25, 2026: an outside tester's walkthrough**
+
+- **A warning is not a guard.** Compose said "No Bluesky account connected"
+  and let Schedule through anyway. The post saved as Scheduled, the Queue and
+  the Dashboard listed it, the streak counted it, and it failed at its time.
+  The check now sits in `/api/posts/create` and the thread route, and Compose
+  and the Dashboard use the same helper (`lib/connected-platforms.ts`).
+- **Copy about Free names what Free gets.** "7 live platforms" sat on the Free
+  card, eight `/for` pages and the homepage grid while X needs Pro, and the
+  Free sidebar showed X at "0 / 0, Limit reached". Which platforms are
+  Pro-only comes from `PAID_ONLY_PLATFORM_NAMES` in `lib/site-facts.ts`.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -605,18 +618,36 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 20, 2026).** #786 through #828 are merged.
+**Pick up here (updated Nov 25, 2026).** #786 through #829 are merged.
 
-**Nov 20: Joshua's 500 autonomy questions.** He asked what Claude should do
-on its own to take SocialMate toward a billion-dollar company and the shop
-toward six or seven figures. The page is
-https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA; answers land in its
-`answers` collection (ArtifactData `list`, `query.limit` 1000; one doc per
-question, `q001` to `q500`, with `value` and `note`). When he says he's done:
-read them all, list his yeses back once in chat, and treat them as standing
-orders only after he confirms there. Per-action OKs still apply (money,
-sign-ins, new accounts, terms, anything sent or posted in his name from a
-browser), and so does the ask-first list below.
+**Nov 25: Joshua's 500 autonomy answers are standing orders** (confirmed in
+chat Nov 25; the page is https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA,
+answers in its `answers` collection; Claude's local memory holds the distilled
+list). His rule on about 300 of them: if it costs us nothing, do it ("if it's
+free for me it's free for them"); if it costs money, later or Claude's
+judgment. What changed for sessions:
+- Claude merges its own PRs once checks pass and the preview checks out.
+- Additive SQL on production (new tables, columns, indexes) runs from a
+  session once both audits pass, and Claude may publish blog posts itself.
+- Claude may resync Inngest and do Joshua's to-do items in his Chrome, except
+  sign-ins, payments, tax forms and accepting terms.
+
+Still Joshua's yes first: changing what a plan includes or costs, removing a
+feature, money, emailing or messaging users, anything posted publicly in his
+name, deleting data, dashboard settings, and the ask-first list below.
+
+**Nov 25: what an outside tester found.** A builder from r/vibecoding walked a
+fresh account on Nov 21 and reported five things, all confirmed in code:
+Compose scheduled to a platform with nothing connected (his two posts in
+`/admin/failure-log` failed "No Bluesky account connected"), the Dashboard
+streak counted any post made that day (a failed one too), Coming up gave no
+warning, the homepage grid marked X "Live" with the free six, the Free sidebar
+read "0 / 0, Limit reached", and /pricing's Pro list never mentioned X. Fixed
+together, plus the same "7 live platforms" claim on the Free plan of eight
+`/for` pages. **Still to do:** the same claim on about 20 `/vs` pages and meta
+descriptions ("7 platforms free", "free across 7 platforms"); a Queue badge for
+posts that can't go out; `/api/streak` (the /streak page) still counts a
+scheduled post whose platform isn't connected.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
@@ -1049,7 +1080,8 @@ of the video on purpose: they save but don't publish yet.
 
 *Joshua's side:*
 - Numbers: local sessions can read production with the keys in `.env.local`
-  (read-only queries only; any production write needs Joshua's yes). Screenshots
+  (read-only queries; since Nov 25 also additive schema SQL once both audits
+  pass, and blog post inserts; any other production write needs Joshua's yes). Screenshots
   of `/admin/funnel`, `/admin/overview` and `/admin/feedback` also work.
 - Inbox (socialmatehq@gmail.com): replies to the TikTok-live email (Oct 23), the
   Sept 25 emails to the 38, the Oct 15 confirmation resends, and the November
@@ -1063,7 +1095,7 @@ of the video on purpose: they save but don't publish yet.
 - Creator Hub tips and Twitch go-live alerts stay unannounced until a streamer
   uses them for real (Joshua's plan, Nov 5: onboard one streamer to try both).
 - Run `supabase/blog_accuracy_nov5.sql` (blog accuracy pass, in `TODO.md`).
-  Sessions don't write production data; Joshua runs SQL by hand.
+  It updates existing rows, which sessions don't do without his yes.
 - Search Console for renewalmate.com (DNS TXT at GoDaddy, then `sitemap.xml`),
   Indiana sales tax for the shop, Google Merchant approvals in the Shopify Google &
   YouTube app, the Wyoming LLC annual report.
