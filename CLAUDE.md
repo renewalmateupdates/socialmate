@@ -635,7 +635,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   docs don't say whether a 12-month coupon touches a yearly renewal; a test
   clock answered in a minute (it doesn't).
 
-**From: November 26, 2026: what Free covers, everywhere (#PRNUM)**
+**From: November 26, 2026: what Free covers, everywhere (#835)**
 
 - **Fixing the pages people see first is not fixing the claim.** #830 fixed
   the homepage, /pricing and nine /for pages; about 600 more sentences said
@@ -716,7 +716,7 @@ together, plus the same "7 live platforms" claim on the Free plan of nine
 `/for` pages. The Queue badge and the /streak page followed in #832 (Nov 26,
 below).
 
-**Nov 26: the rest of the "7 platforms free" claim (#PRNUM).** Done: it was
+**Nov 26: the rest of the "7 platforms free" claim (#835).** Done: it was
 far more than 20 `/vs` pages. About 600 sentences said Free covers all seven
 or that X is free: every `/vs` page and layout (the comparison CTAs, "free with
 7 platforms" meta descriptions, and the X-tool pages, which said X itself was
