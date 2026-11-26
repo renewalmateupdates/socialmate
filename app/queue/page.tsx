@@ -7,8 +7,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import AppPageSkeleton from '@/components/AppPageSkeleton'
 import Link from 'next/link'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useWorkspace, isOwnWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
+import {
+  connectionRowsFor, listPlatformNames, platformDisplayName, tiktokStudioConnected, unconnectedForPost,
+  type ConnectionRow,
+} from '@/lib/connected-platforms'
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
   useSensor, useSensors, DragEndEvent,
@@ -139,8 +143,26 @@ function shortDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle, isSelected, onToggleSelect, onDuplicate, duplicating }: {
+/**
+ * The Dashboard's red "Not connected" badge: this scheduled post names a
+ * platform with nothing connected, so it will fail at its time. A press opens
+ * Accounts, where it gets fixed; the platform is also marked red on the card.
+ */
+function NotConnectedBadge({ platforms }: { platforms: string[] }) {
+  const { t } = useI18n()
+  return (
+    <Link href="/accounts"
+      title={t('app_dashboard.platform_not_connected', { platform: listPlatformNames(platforms) })}
+      className="font-mono text-[10px] uppercase tracking-[0.12em] text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/30 hover:border-red-500/60 px-2 py-0.5 rounded-md transition-colors">
+      {t('app_dashboard.not_connected')}
+    </Link>
+  )
+}
+
+function SortablePostCard({ post, unconnected, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle, isSelected, onToggleSelect, onDuplicate, duplicating }: {
   post: any
+  // The platforms it names that have nothing connected (lib/connected-platforms.ts).
+  unconnected: string[]
   isHighlighted: boolean
   confirmCancel: string | null
   setConfirmCancel: (id: string | null) => void
@@ -204,6 +226,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
               <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full">
                 {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
               </span>
+              {unconnected.length > 0 && <NotConnectedBadge platforms={unconnected} />}
               {/* Still scheduled, but the last attempt failed and the publisher
                   will try again. Without this it looked like any other post. */}
               {post.platform_errors && Object.keys(post.platform_errors).length > 0 && (
@@ -220,7 +243,14 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
           </p>
           <UnsplashCredit mediaUrls={post.media_urls} size="sm" />
           <div className="flex items-center gap-1.5 flex-wrap mt-3">
-            {(post.platforms || []).map((p: string) => (
+            {(post.platforms || []).map((p: string) => unconnected.includes(p) ? (
+              <span key={p}
+                title={t('app_dashboard.platform_not_connected', { platform: platformDisplayName(p) })}
+                className="flex items-center gap-1 text-xs font-semibold text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-full">
+                <PlatformGlyph id={p} size={12} />
+                <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
+              </span>
+            ) : (
               <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                 <PlatformGlyph id={p} size={12} />
                 <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
@@ -378,6 +408,11 @@ function QueueInner() {
   const [tiktokScheduled, setTiktokScheduled] = useState<any[]>([])
   const [cancellingTiktok, setCancellingTiktok] = useState<string | null>(null)
   const [failedPosts, setFailedPosts]   = useState<any[]>([])
+  // The viewer's accounts and Discord/Telegram destinations with their
+  // workspace, so each scheduled post can be checked against the scope it
+  // posts from. null until loaded, or if the read failed: nothing is flagged
+  // before we know.
+  const [connectionRows, setConnectionRows] = useState<ConnectionRow[] | null>(null)
   // Range, window and collapsed sections (see RANGE_OPTIONS)
   const [range, setRange]               = useState<RangeKey>('14')
   const [windowStart, setWindowStart]   = useState<Date>(() => startOfDay(new Date()))
@@ -404,7 +439,7 @@ function QueueInner() {
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const { activeWorkspace, plan } = useWorkspace()
+  const { activeWorkspace, plan, workspaces } = useWorkspace()
   const { t } = useI18n()
 
   // Auto-schedule state
@@ -544,6 +579,9 @@ function QueueInner() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
+      // Two reads for the whole page, alongside the posts, not one per post.
+      const connections = connectionRowsFor(supabase, user.id).catch(() => null)
+
       // Through the API, so an owner sees what their team scheduled too
       // (lib/workspace-posts.ts). RLS hides other authors' rows from the browser.
       try {
@@ -562,6 +600,7 @@ function QueueInner() {
         console.warn('[queue] load failed:', err)
         showToast('Could not load your queue. Refresh to try again.', 'error')
       }
+      setConnectionRows(await connections)
 
       // TikTok posts scheduled via TikTok Studio — separate table, separate
       // query, not merged into `posts` (see tiktokScheduled comment above).
@@ -818,6 +857,19 @@ function QueueInner() {
   // Determine if any filter is active
   const hasActiveFilter = searchQuery.trim() !== '' || platformFilter !== 'all' || tagFilter !== 'all'
   const hasAnything     = posts.length + tiktokScheduled.length > 0
+
+  // A scheduled post that names a platform with nothing connected fails at its
+  // time; it gets the Dashboard's red "Not connected" badge. Only in a
+  // workspace the viewer owns: anywhere else posts go out from the owner's
+  // accounts, which the viewer can't read, so nothing there is flagged
+  // (lib/connected-platforms.ts).
+  const ownedWorkspaces   = workspaces.filter(isOwnWorkspace)
+  const viewerOwnsThis    = !!activeWorkspace && isOwnWorkspace(activeWorkspace)
+  const unconnectedFor    = (post: Parameters<typeof unconnectedForPost>[0]): string[] =>
+    connectionRows && viewerOwnsThis ? unconnectedForPost(post, connectionRows, ownedWorkspaces) : []
+  // TikTok Studio posts are always the viewer's own and go out from their
+  // TikTok account in any workspace.
+  const tiktokUnconnected = connectionRows !== null && !tiktokStudioConnected(connectionRows)
 
   // The window on screen (RANGE_OPTIONS). "All" has no end.
   const rangeDays = RANGE_OPTIONS.find(r => r.key === range)?.days ?? 0
@@ -1504,6 +1556,7 @@ function QueueInner() {
                             <SortablePostCard
                               key={post.id}
                               post={post}
+                              unconnected={unconnectedFor(post)}
                               isHighlighted={isHighlighted}
                               confirmCancel={confirmCancel}
                               setConfirmCancel={setConfirmCancel}
@@ -1534,6 +1587,7 @@ function QueueInner() {
                                       <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full">
                                         {new Date(tp.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                       </span>
+                                      {tiktokUnconnected && <NotConnectedBadge platforms={['tiktok']} />}
                                       <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400">TikTok Studio</span>
                                     </div>
                                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">
