@@ -60,8 +60,8 @@ export async function GET() {
   if (ownedRes.error) console.warn('[streak] workspaces lookup failed:', ownedRes.error.message)
   const owned = ownedRes.error ? null : ((ownedRes.data ?? []) as ScopeWorkspace[])
 
-  // Posts per UTC day (YYYY-MM-DD): the day a post went out, or the day a
-  // scheduled post that can go out is due.
+  // Posts per UTC day (YYYY-MM-DD): the day a post was due (a scheduled one
+  // only if it can go out), or the day a Post Now post went out.
   const dayMap = streakDayMap(posts, rows, owned, since)
 
   // Calculate current streak (consecutive days going back from today)
