@@ -636,7 +636,7 @@ Still Joshua's yes first: changing what a plan includes or costs, removing a
 feature, money, emailing or messaging users, anything posted publicly in his
 name, deleting data, dashboard settings, and the ask-first list below.
 
-**Nov 25: what an outside tester found.** A builder from r/vibecoding walked a
+**Nov 25: what an outside tester found (#830, merged by Claude).** A builder from r/vibecoding walked a
 fresh account on Nov 21 and reported five things, all confirmed in code:
 Compose scheduled to a platform with nothing connected (his two posts in
 `/admin/failure-log` failed "No Bluesky account connected"), the Dashboard
@@ -648,6 +648,22 @@ together, plus the same "7 live platforms" claim on the Free plan of nine
 descriptions ("7 platforms free", "free across 7 platforms"); a Queue badge for
 posts that can't go out; `/api/streak` (the /streak page) still counts a
 scheduled post whose platform isn't connected.
+
+**Checked live after #830 deployed (Nov 26, 01:50 UTC), signed in as the
+admin:** the homepage grid shows X as Pro with the "Six are free" line (served
+from cache); a zero-write request to `/api/posts/create` naming Mastodon (not
+connected on the admin) with a past time came back 400 "No Mastodon account
+connected..." before the old past-time check; ticking Mastodon in Compose
+shows the red warning and "Connect Mastodon to post", and Untick clears both;
+every Dashboard request answers 200. The Free sidebar card was not seen live
+(the admin's X allowance is unlimited).
+
+**Same night: the Dashboard read the oldest 1,000 posts.** PostgREST answers
+with at most 1,000 rows and the Dashboard ordered by `scheduled_at` ascending,
+so the admin (1,828 posts) saw "Scheduled 0", an empty Coming up and a zero
+streak with 53 posts queued. It now reads the newest 1,000 by `created_at`,
+sorts Coming up by due time, and takes the Published total from a count when
+the page is full. Outside accounts were never near the cap.
 
 **Nov 20: AI works, and quickly (#818, #819).** Every Gemini call tries
 `GEMINI_MODELS` (3.8 Flash, 3.6 Flash, 3.5 Flash-Lite) in order, 10 s a model,
