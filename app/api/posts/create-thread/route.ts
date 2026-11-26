@@ -12,6 +12,7 @@ import { publishToBluesky, type BlueskyPostRef } from '@/lib/publish/bluesky'
 import { publishToMastodon } from '@/lib/publish/mastodon'
 import { publishToTwitter } from '@/lib/publish/twitter'
 import { canCreatePosts, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
+import { connectedPlatformsFor, missingConnections, notConnectedMessage } from '@/lib/connected-platforms'
 
 // Real sequential thread publishing -- Post Now only. Thread Builder used to
 // submit each part as an independent scheduled post 30 seconds apart via
@@ -130,6 +131,13 @@ export async function POST(request: NextRequest) {
     }
     const accountWorkspaceId = access.accountWorkspaceId
     const accountOwnerId     = access.ownerId
+
+    // Same connection check as /api/posts/create (lib/connected-platforms.ts).
+    const connected = await connectedPlatformsFor(getSupabaseAdmin(), access)
+    const missing = connected ? missingConnections(threadPlatforms, connected) : []
+    if (missing.length > 0) {
+      return NextResponse.json({ error: notConnectedMessage(missing), notConnected: missing }, { status: 400 })
+    }
 
     const plan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, resolvedWorkspaceId)
 

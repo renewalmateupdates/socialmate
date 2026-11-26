@@ -298,7 +298,7 @@ export default function CoachesPage() {
                 <ul className="text-xs text-ink-body space-y-2 mb-6">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.seats}</li>
-                  <li>✓ All 7 live platforms</li>
+                  <li>✓ {tier.plan === 'Free' ? '6 platforms (X needs Pro)' : 'All 7 live platforms'}</li>
                   <li>✓ LinkedIn scheduling</li>
                   <li>✓ AI caption writer</li>
                   <li>✓ Link in Bio page</li>

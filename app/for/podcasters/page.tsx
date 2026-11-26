@@ -341,7 +341,7 @@ export default function PodcastersPage() {
                 </div>
                 <ul className="text-xs text-ink-body space-y-2 mb-6 text-left">
                   <li>✓ {tier.credits}</li>
-                  <li>✓ All 7 live platforms</li>
+                  <li>✓ {tier.plan === 'Free' ? '6 platforms (X needs Pro)' : 'All 7 live platforms'}</li>
                   <li>✓ AI caption writer</li>
                   <li>✓ Scheduling calendar</li>
                   <li>✓ Discord & Telegram scheduling</li>

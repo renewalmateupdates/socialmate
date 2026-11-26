@@ -827,7 +827,8 @@
     "x_live": "X / Twitter está no ar —",
     "tiktok_first_title": "Seu TikTok está conectado. Publique seu primeiro vídeo.",
     "tiktok_first_body": "Adicione um vídeo no TikTok Studio, escreva uma legenda e publique agora ou escolha um horário.",
-    "tiktok_first_cta": "Abrir o TikTok Studio"
+    "tiktok_first_cta": "Abrir o TikTok Studio",
+    "not_connected": "Não conectado"
   },
   "app_queue": {
     "title": "Fila",
@@ -892,7 +893,12 @@
     "scheduled_success": "Publicação agendada!",
     "draft_saved": "Rascunho salvo",
     "ai_tools_label": "AI Tools",
-    "credits_remaining": "créditos restantes"
+    "credits_remaining": "créditos restantes",
+    "not_connected_warning": "{platform} não está conectado, então esta publicação não pode sair.",
+    "connect_in_accounts": "Conectar em Contas",
+    "untick_platform": "Desmarcar {platform}",
+    "connect_to_schedule": "Conecte {platforms} para agendar",
+    "connect_to_post": "Conecte {platforms} para publicar"
   },
   "app_settings": {
     "title": "Configurações",
@@ -2641,7 +2647,9 @@
       "headline": "Sete no ar. Incluindo as que mais ninguém agenda.",
       "body": "Agendar no Discord e no Telegram é algo genuinamente raro. Bluesky e Mastodon são cidadãos de primeira classe, não um detalhe. Clipes da Twitch e vídeos do YouTube você agenda de dentro do app.",
       "live": "No ar",
-      "soon": "Em breve"
+      "soon": "Em breve",
+      "pro": "Pro",
+      "x_note": "Seis são gratuitas. O X exige o Pro, porque o X cobra por cada publicação."
     },
     "soma": {
       "headline": "O SOMA escreve com a sua voz enquanto você dorme.",

@@ -7,6 +7,7 @@ import { useI18n } from '@/contexts/I18nContext'
 import { FlipCard } from '@/components/pricing/FlipCard'
 import { track, trackOnce } from '@/lib/analytics'
 import { CreditCard, Flame, Gift, Heart, Lock, RotateCcw, Tornado, Waves, X as CloseIcon, Zap } from 'lucide-react'
+import { PLAN_X_POSTS } from '@/lib/plan'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -36,7 +37,7 @@ const PLANS = [
     headerText: 'text-ink-high',
     subText: 'text-ink-muted',
     features: [
-      { label: '7 live platforms now',             note: 'X needs Pro'        },
+      { label: '6 platforms free',                 note: 'X needs Pro'        },
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
       { label: '250 posts / month'                                             },
@@ -64,8 +65,11 @@ const PLANS = [
     flipLabel: "What's actually free? →",
     backTitle: 'Free, with no asterisk',
     backIntro: 'No trial clock, no card on file, no feature that quietly stops working.',
+    // X is the one platform Free leaves out, and this face is headed "no
+    // asterisk", so it says so here rather than in a note on the front.
     unlocks: [
-      { label: '7 live platforms, including Discord and Telegram' },
+      { label: '6 platforms, including Discord and Telegram' },
+      { label: 'X starts on Pro, because X charges for every post' },
       { label: '250 posts every month' },
       { label: '50 AI credits every month, banking up to 75' },
       { label: 'Link in Bio page' },
@@ -90,6 +94,7 @@ const PLANS = [
     subText: 'text-ink-muted',
     features: [
       { label: 'Everything in Free'                                             },
+      { label: 'X / Twitter posting',              note: `${PLAN_X_POSTS.pro} posts / month` },
       { label: '5 connected accounts per platform'                             },
       { label: '5 team seats'                                                  },
       { label: '1 client workspace'                                            },
@@ -110,7 +115,10 @@ const PLANS = [
     ctaStyle: 'bg-gradient-to-b from-amber-bright to-amber text-void hover:from-amber-bright hover:to-amber-bright',
     flipLabel: 'What Pro adds over Free →',
     backTitle: 'What you get that Free does not',
+    // X first: it is the one platform Free can't post to, and the likeliest
+    // reason to upgrade. This list never mentioned it (Nov 21, 2026).
     unlocks: [
+      { label: `X / Twitter posting, ${PLAN_X_POSTS.pro} posts / month`, from: 'none' },
       { label: '5 connected accounts per platform', from: '1' },
       { label: '1,000 posts / month',               from: '250' },
       { label: '500 AI credits / month',            from: '50' },
@@ -159,6 +167,7 @@ const PLANS = [
     flipLabel: 'What Agency adds over Pro →',
     backTitle: 'What you get that Pro does not',
     unlocks: [
+      { label: `X / Twitter posting, ${PLAN_X_POSTS.agency} posts / month`, from: `${PLAN_X_POSTS.pro}` },
       { label: '10 connected accounts per platform', from: '5' },
       { label: '5,000 posts / month',                from: '1,000' },
       { label: '2,000 AI credits / month',           from: '500' },

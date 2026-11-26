@@ -18,6 +18,7 @@ import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { recordFunnel } from '@/lib/usage'
 import { handleFirstPostCredits, updateStreak } from '@/lib/post-activation'
 import { canCreatePosts, canManagePost, realWorkspaceId, requiresApproval, resolveWorkspaceAccess } from '@/lib/team-workspaces'
+import { connectedPlatformsFor, missingConnections, notConnectedMessage } from '@/lib/connected-platforms'
 
 
 export async function POST(request: NextRequest) {
@@ -115,6 +116,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'You have view-only access to this workspace.' }, { status: 403 })
     }
     const accountWorkspaceId = access.accountWorkspaceId
+
+    // Every platform needs a connected account before anything is saved or
+    // sent. This accepted a platform nothing was connected to, saved the post
+    // as Scheduled and let it fail at its time (lib/connected-platforms.ts).
+    const connected = await connectedPlatformsFor(getSupabaseAdmin(), access)
+    const missing = connected ? missingConnections(platforms, connected) : []
+    if (missing.length > 0) {
+      return NextResponse.json({ error: notConnectedMessage(missing), notConnected: missing }, { status: 400 })
+    }
 
     // Get plan — resolved through the workspace this post is going into, not
     // the calling user's own user_settings. A team member posting into a

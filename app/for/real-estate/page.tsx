@@ -96,7 +96,7 @@ const PRICING = [
     href:    '/signup',
     perks: [
       '50 AI credits/month',
-      '7 live platforms including LinkedIn',
+      '6 platforms free, including LinkedIn (X needs Pro)',
       'Post calendar & drafts',
       'Link in Bio page',
       '2 team seats',

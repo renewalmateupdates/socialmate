@@ -326,7 +326,7 @@ export default function BloggersPage() {
                 </div>
                 <ul className="text-xs text-ink-body space-y-2 mb-6">
                   <li>✓ {tier.credits}</li>
-                  <li>✓ All 7 live platforms</li>
+                  <li>✓ {tier.plan === 'Free' ? '6 platforms (X needs Pro)' : 'All 7 live platforms'}</li>
                   <li>✓ RSS import</li>
                   <li>✓ AI caption writer</li>
                   <li>✓ Evergreen recycling</li>

@@ -827,7 +827,8 @@
     "x_live": "X / Twitter が利用可能です —",
     "tiktok_first_title": "TikTokが接続されました。最初の動画を投稿しましょう。",
     "tiktok_first_body": "TikTok Studioで動画を追加し、キャプションを書いて、今すぐ投稿するか時間を選びましょう。",
-    "tiktok_first_cta": "TikTok Studioを開く"
+    "tiktok_first_cta": "TikTok Studioを開く",
+    "not_connected": "未接続"
   },
   "app_queue": {
     "title": "キュー",
@@ -892,7 +893,12 @@
     "scheduled_success": "投稿がスケジュールされました！",
     "draft_saved": "下書きを保存しました",
     "ai_tools_label": "AIツール",
-    "credits_remaining": "残りクレジット"
+    "credits_remaining": "残りクレジット",
+    "not_connected_warning": "{platform}が接続されていないため、この投稿は送信できません。",
+    "connect_in_accounts": "アカウントで接続",
+    "untick_platform": "{platform}の選択を外す",
+    "connect_to_schedule": "予約するには{platforms}を接続",
+    "connect_to_post": "投稿するには{platforms}を接続"
   },
   "app_settings": {
     "title": "設定",
@@ -2641,7 +2647,9 @@
       "headline": "7つが稼働中。他のどこも予約投稿できないものも含めて。",
       "body": "Discord と Telegram の予約投稿ができるツールは本当に稀です。Bluesky と Mastodon も後付けではなく、最初から一級市民として扱っています。Twitch のクリップと YouTube の動画は、アプリ内から直接スケジュールできます。",
       "live": "稼働中",
-      "soon": "近日対応"
+      "soon": "近日対応",
+      "pro": "Pro",
+      "x_note": "6つは無料です。Xは投稿ごとに料金がかかるため、Proが必要です。"
     },
     "soma": {
       "headline": "あなたが眠っている間に、SOMA があなたの声で書きます。",

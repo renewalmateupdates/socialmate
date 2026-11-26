@@ -827,7 +827,8 @@
     "x_live": "X / Twitter уже работает —",
     "tiktok_first_title": "Ваш TikTok подключён. Опубликуйте первое видео.",
     "tiktok_first_body": "Добавьте видео в TikTok Studio, напишите подпись и опубликуйте сразу или выберите время.",
-    "tiktok_first_cta": "Открыть TikTok Studio"
+    "tiktok_first_cta": "Открыть TikTok Studio",
+    "not_connected": "Не подключено"
   },
   "app_queue": {
     "title": "Очередь",
@@ -892,7 +893,12 @@
     "scheduled_success": "Пост запланирован!",
     "draft_saved": "Черновик сохранён",
     "ai_tools_label": "AI Tools",
-    "credits_remaining": "кредитов осталось"
+    "credits_remaining": "кредитов осталось",
+    "not_connected_warning": "{platform} не подключён, поэтому этот пост не может выйти.",
+    "connect_in_accounts": "Подключить в аккаунтах",
+    "untick_platform": "Снять отметку: {platform}",
+    "connect_to_schedule": "Подключите {platforms}, чтобы запланировать",
+    "connect_to_post": "Подключите {platforms}, чтобы опубликовать"
   },
   "app_settings": {
     "title": "Настройки",
@@ -2641,7 +2647,9 @@
       "headline": "Семь работают. Включая те, что не планирует больше никто.",
       "body": "Планирование в Discord и Telegram — действительно редкость. Bluesky и Mastodon здесь полноценные платформы, а не довесок. Клипы Twitch и видео с YouTube планируются прямо в приложении.",
       "live": "Работает",
-      "soon": "Скоро"
+      "soon": "Скоро",
+      "pro": "Pro",
+      "x_note": "Шесть бесплатны. Для X нужен Pro, потому что X берёт плату за каждый пост."
     },
     "soma": {
       "headline": "SOMA пишет вашим голосом, пока вы спите.",

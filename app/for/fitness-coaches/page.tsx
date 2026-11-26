@@ -97,7 +97,7 @@ const PRICING = [
     href:    '/signup',
     perks: [
       '50 AI credits/month',
-      '7 live platforms',
+      '6 platforms free (X needs Pro)',
       'Post calendar & drafts',
       'Link in Bio page',
       '2 team seats',
@@ -146,7 +146,7 @@ const FAQ = [
   },
   {
     q: 'I only post 3 times a week. Is the free plan enough?',
-    a: "Definitely. The free plan includes 50 AI credits/month and full access to the scheduling calendar and all 7 live platforms. Most solo trainers with 3 posts/week will stay on free forever.",
+    a: "Definitely. The free plan includes 50 AI credits/month and full access to the scheduling calendar and 6 of the 7 live platforms (X needs Pro). Most solo trainers with 3 posts/week will stay on free forever.",
   },
   {
     q: 'Can I manage social media for my fitness studio and clients?',
