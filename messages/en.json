@@ -2365,6 +2365,8 @@
     "apply_instructions_before": "Apply this code at checkout on the",
     "pricing_link": "pricing page",
     "honor_system": "Honor system — we trust you.",
+
+    "school_email_note": "Your SocialMate account has to use your school email (.edu).",
     "unsure_title": "Not sure if you qualify?",
     "unsure_desc": "Reach out directly and we'll figure it out. We want to help."
   },

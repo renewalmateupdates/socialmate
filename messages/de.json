@@ -2365,6 +2365,8 @@
     "apply_instructions_before": "Diesen Code beim Bezahlen auf der",
     "pricing_link": "Preisseite",
     "honor_system": "Ehrensystem — wir vertrauen Ihnen.",
+
+    "school_email_note": "Ihr SocialMate-Konto muss Ihre Schul- oder Hochschul-E-Mail (.edu) verwenden.",
     "unsure_title": "Nicht sicher, ob Sie qualifiziert sind?",
     "unsure_desc": "Kontaktieren Sie uns direkt und wir finden es heraus. Wir möchten helfen."
   },

@@ -14,15 +14,21 @@ replies expired long ago.)
 
 ## Waiting on a decision
 
-1. **NONPROFIT50 and STUDENT25 (found Nov 26).** /discount, /for/nonprofits and
-   all nine locale files advertise them, but neither has a Stripe promotion
-   code, so from May to Nov 26 the pricing page said "50% off applied" and
-   Stripe would have charged the full price (nobody tried). Since Nov 26 the
-   code box refuses them and gives the support email. To make them work,
-   decide: how long each discount lasts (every payment, the first 12 months,
-   or the first payment), and whether the honor system stays (in May Joshua
-   wanted a verification step: .edu for students). Then a session creates the
-   two Stripe codes, links them in the `coupons` table and updates the pages.
+1. **NONPROFIT50 and STUDENT25: decided Nov 27, waiting on Joshua's Stripe
+   step.** Joshua: "students should verify with a .edu email" and "however
+   long you think it should last". Both last every payment while subscribed,
+   which is what the pages already promise ("makes it $4/month"). NONPROFIT50
+   stays on the honor system. STUDENT25 needs a school email on the account
+   (`schoolEmailProblem` in `lib/coupon-redemption.ts`, checked by the code box
+   and again at checkout; #849). Left to do:
+   - **Joshua, in Stripe (live):** two coupons, 50% and 25%, duration
+     Forever, applied to the four Pro and Agency products (like BLACKFRIDAY).
+     The 50% one gets promotion code `NONPROFIT50`. The 25% one gets a private
+     code nobody can guess (not `STUDENT25`), so it can't be typed on Stripe's
+     own page past the email check. Send the two `promo_...` IDs.
+   - **Then a session:** set `stripe_promo_id` on the two `coupons` rows (both
+     exist, active), try each code in the pricing page's box, and check that
+     STUDENT25 refuses a non-school account.
 2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users

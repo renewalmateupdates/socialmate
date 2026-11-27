@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { SUPPORT_EMAIL } from '@/lib/contact'
-import { paidWithCode, worksAtCheckout } from '@/lib/coupon-redemption'
+import { paidWithCode, schoolEmailProblem, worksAtCheckout } from '@/lib/coupon-redemption'
 
 export async function POST(req: NextRequest) {
   const { code } = await req.json()
@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
   if (!worksAtCheckout(coupon)) {
     return NextResponse.json({ valid: false, error: `This code isn't set up at checkout yet. Email ${SUPPORT_EMAIL} and we'll sort it out.` })
   }
+  // STUDENT25 needs a school email on the account (the same check runs at checkout).
+  const school = schoolEmailProblem(coupon.code, user?.email)
+  if (school) return NextResponse.json({ valid: false, error: school })
 
   // Only a checkout this person finished counts as using the code. Backing
   // out of Stripe's page used to burn it.

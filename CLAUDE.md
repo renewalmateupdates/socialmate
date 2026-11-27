@@ -716,6 +716,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 
 **Pick up here (updated Nov 27, 2026).** #786 through #846 are merged.
 
+**Nov 27: STUDENT25 checks for a school email (#849).** Joshua decided the
+two discount codes (TODO.md item 1): both last every payment while
+subscribed, NONPROFIT50 stays on the honor system, and STUDENT25 needs a
+school email on the account. `schoolEmailProblem` in
+`lib/coupon-redemption.ts` (accepts `.edu`, `.edu.xx` and `.ac.xx`) runs in
+the code box and again at checkout, since a request can skip the box. The
+/discount page's student card says the account needs a school email instead of
+"Honor system" (new key `discount.school_email_note`, all nine languages).
+`scripts/test-promos.mjs` covers it; its two new tests fail on the old code.
+**Not live until Joshua creates the two Stripe codes** (TODO.md item 1); the
+code box keeps refusing both until their `stripe_promo_id` is set.
+
 **Nov 27: the site claims check, cleared and in `npm test` (#846).**
 - **Before:** `verify:content` had 146 open findings. It wasn't in `npm test`
   and took 143 s. Building the competitor-name patterns once instead of per

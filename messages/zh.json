@@ -2365,6 +2365,8 @@
     "apply_instructions_before": "在结账时将此代码应用于",
     "pricing_link": "定价页面",
     "honor_system": "荣誉制度——我们信任您。",
+
+    "school_email_note": "您的 SocialMate 账户需要使用学校邮箱（.edu）。",
     "unsure_title": "不确定您是否符合条件？",
     "unsure_desc": "直接联系我们，我们会解决的。我们想要帮助。"
   },

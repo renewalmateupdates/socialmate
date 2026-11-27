@@ -7,7 +7,7 @@ import { cookies } from 'next/headers'
 import { FINAL_SALE_CHECKOUT_TEXT } from '@/lib/refund-policy'
 import { recordCodeReferral } from '@/lib/partner-commission'
 import { SUPPORT_EMAIL } from '@/lib/contact'
-import { paidWithCode, worksAtCheckout } from '@/lib/coupon-redemption'
+import { paidWithCode, schoolEmailProblem, worksAtCheckout } from '@/lib/coupon-redemption'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -92,6 +92,10 @@ export async function POST(req: NextRequest) {
     if (!worksAtCheckout(found)) {
       return NextResponse.json({ error: `This code isn't set up at checkout yet. Email ${SUPPORT_EMAIL} and we'll sort it out.` }, { status: 400 })
     }
+    // STUDENT25 needs a school email on the account. The code box checks this
+    // too, but a request can skip the box, so checkout checks again.
+    const school = schoolEmailProblem(found.code, user.email)
+    if (school) return NextResponse.json({ error: school }, { status: 400 })
     // Prevent double redemption per user: only a finished checkout counts.
     const { data: prior, error: priorError } = await db
       .from('coupon_redemptions')
