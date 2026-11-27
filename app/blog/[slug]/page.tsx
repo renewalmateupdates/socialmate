@@ -10,6 +10,7 @@ import { CalendarDays, Clock, Heart, PenLine } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { POSTS } from '@/lib/blog/static-posts'
 import { describePost } from '@/lib/blog/describe'
+import { htmlToBlocks, looksLikeHtml, type Inline } from '@/lib/blog/html-blocks'
 
 // Revalidate every 24h — blog posts rarely change; shorter TTL caused hourly ISR cache misses
 // that hit the origin server, causing 3s+ FCP for international visitors on each cache expiry.
@@ -363,7 +364,7 @@ function autoLink(text: string): React.ReactNode {
   return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : <>{parts}</>
 }
 
-function renderContent(content: string, slug?: string) {
+function renderLines(content: string): React.ReactNode[] {
   const lines = content.trim().split('\n')
   const elements: React.ReactNode[] = []
   let key = 0
@@ -398,6 +399,81 @@ function renderContent(content: string, slug?: string) {
       )
     }
   }
+  return elements
+}
+
+const LINK_CLASS = 'text-amber-400 hover:underline font-medium'
+
+// `plain` skips the automatic internal links: none inside bold text, code or an existing link.
+function renderInlines(nodes: Inline[], plain = false): React.ReactNode[] {
+  return nodes.map((n, i) => {
+    switch (n.kind) {
+      case 'text':   return <Fragment key={i}>{plain ? n.text : autoLink(n.text)}</Fragment>
+      case 'br':     return <br key={i} />
+      case 'strong': return <strong key={i} className="font-semibold text-gray-100">{renderInlines(n.children, true)}</strong>
+      case 'em':     return <em key={i}>{renderInlines(n.children, plain)}</em>
+      case 'code':   return <code key={i} className="font-mono text-[0.85em] text-gray-200 bg-white/5 px-1 py-0.5 rounded">{renderInlines(n.children, true)}</code>
+      case 'link': {
+        const external = /^https?:\/\//i.test(n.href)
+        return (
+          <a key={i} href={n.href} className={LINK_CLASS} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+            {renderInlines(n.children, true)}
+          </a>
+        )
+      }
+      default: return null
+    }
+  })
+}
+
+// Posts whose body is HTML (200 rows, published March to May 2026). Until Nov 27
+// they printed their tags as text. Nothing here inserts database HTML into the page:
+// lib/blog/html-blocks.ts reads it into blocks, and these are the page's own elements.
+function renderHtml(content: string): React.ReactNode[] {
+  return htmlToBlocks(content).map((b, i) => {
+    switch (b.kind) {
+      case 'h2':
+        return <h2 key={i} className="text-xl font-extrabold tracking-tight mt-8 mb-3 text-gray-100">{renderInlines(b.children, true)}</h2>
+      case 'h3':
+        return <h3 key={i} className="text-base font-bold tracking-tight mt-6 mb-2 text-gray-100">{renderInlines(b.children, true)}</h3>
+      case 'p':
+        return <p key={i} className="text-sm text-gray-400 leading-relaxed mb-3">{renderInlines(b.children)}</p>
+      case 'quote':
+        return <blockquote key={i} className="border-l-2 border-amber-500/60 pl-4 my-4 text-sm text-gray-300 italic leading-relaxed">{renderInlines(b.children)}</blockquote>
+      case 'ul':
+      case 'ol': {
+        const List = b.kind
+        return (
+          <List key={i} className={`${b.kind === 'ol' ? 'list-decimal' : 'list-disc'} ml-5 mb-3 space-y-1.5`}>
+            {b.items.map((item, j) => <li key={j} className="text-sm text-gray-400 leading-relaxed pl-1">{renderInlines(item)}</li>)}
+          </List>
+        )
+      }
+      case 'table':
+        return (
+          <div key={i} className="overflow-x-auto mb-4">
+            <table className="w-full text-sm border-collapse">
+              {b.head.length > 0 && (
+                <thead>
+                  <tr>{b.head.map((cell, j) => <th key={j} className="text-left font-semibold text-gray-100 border-b border-gray-700 py-2 pr-4 align-bottom">{renderInlines(cell, true)}</th>)}</tr>
+                </thead>
+              )}
+              <tbody>
+                {b.rows.map((row, r) => (
+                  <tr key={r}>{row.map((cell, j) => <td key={j} className="text-gray-400 border-b border-gray-800 py-2 pr-4 align-top">{renderInlines(cell)}</td>)}</tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      default:
+        return null
+    }
+  })
+}
+
+function renderContent(content: string, slug?: string) {
+  const elements = looksLikeHtml(content) ? renderHtml(content) : renderLines(content)
   // Drop the CTA roughly a third of the way in, snapped to the nearest
   // heading so it never lands mid-sentence. Below a certain length there is no
   // sensible midpoint, so short posts keep the footer CTA only.

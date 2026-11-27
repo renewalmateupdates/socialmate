@@ -686,6 +686,16 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   for 288 of 297 people, and nothing reported it. Put the normalizing in one
   helper (`lib/referral-code.ts`), never at each call site.
 
+**From: November 27, 2026: 200 blog posts printed their HTML (#844)**
+
+- **A page that answers 200 can still be broken.** A third of the blog showed
+  raw `<h2>` and `<p>` tags for six months while every crawl and audit
+  passed, because they check status codes and claims, not how a page reads.
+  Open one page from each content source the way a reader does.
+- **Content and renderer have to agree on a format.** The batch SQL wrote
+  HTML and the page read lines. When adding a content source, render one row
+  before inserting the rest.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -693,7 +703,26 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #843 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #844 are merged.
+
+**Nov 27: 200 blog posts printed their HTML (#844).**
+- **What was wrong:** every `blog_posts` row published March to May 2026 (200
+  of 648) stores its body as HTML, and the post page only read the line format.
+  Each of those pages showed its tags as text from the day it went up.
+- **How it was found:** while adding ClipTalk to
+  /blog/best-tools-tiktok-creators-2026. Joshua okayed that edit by sending
+  ClipTalk the reply that promised it.
+  - The entry sits in Video Creation and Editing, after DaVinci Resolve, with
+    no link (like the others there).
+  - It lists ClipTalk at $39 a month, the lowest plan on their pricing page.
+    Their toolkit says $19, and the reply asked them which is right.
+- **The fix:** `lib/blog/html-blocks.ts` reads the HTML into blocks that the
+  page draws with its own elements, never as inserted HTML.
+  - A dry run over all 200 rows left no tags and dropped no words.
+  - HTML posts without an excerpt no longer put tags in their meta description.
+  - `scripts/test-blog-html.mjs` covers it.
+- **After it deploys:** check a few posts live, then submit the 200 URLs to
+  IndexNow.
 
 **Nov 27: the slow pages Speed Insights Plus showed, and the sign-in callback
 (#842).** Read before Plus ends on Dec 19, for the 7 days to Nov 27:
