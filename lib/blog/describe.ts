@@ -4,12 +4,16 @@
  * out with no description at all and search engines wrote their own.
  */
 
+import { blocksToText, htmlToBlocks, looksLikeHtml } from './html-blocks'
+
 export const DESCRIPTION_MAX = 155
 
 export function describePost(post: { excerpt?: string | null; content?: string | null }): string {
   const own = (post.excerpt || '').trim()
   if (own) return own
-  const text = plainOpening(post.content || '')
+  // A post stored as HTML would otherwise lend its tags to the description.
+  const content = post.content || ''
+  const text = plainOpening(looksLikeHtml(content) ? blocksToText(htmlToBlocks(content)) : content)
   if (text.length <= DESCRIPTION_MAX) return text
   // End on a full sentence inside the limit when one is long enough, else on a word.
   const window = text.slice(0, DESCRIPTION_MAX + 1)
