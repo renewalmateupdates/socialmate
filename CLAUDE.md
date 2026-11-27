@@ -833,8 +833,10 @@ questions nothing covered yet:
   ClipTalk the reply that promised it.
   - The entry sits in Video Creation and Editing, after DaVinci Resolve, with
     no link (like the others there).
-  - It lists ClipTalk at $39 a month, the lowest plan on their pricing page.
-    Their toolkit says $19, and the reply asked them which is right.
+  - It lists ClipTalk at $19 a month. Their pricing page showed $39; their
+    founder confirmed $19 by email the same day, and the post says $19 since
+    that evening. We owe ClipTalk an email when Instagram Reels and YouTube
+    Shorts go live (both setup guides list it under "after approval").
 - **The fix:** `lib/blog/html-blocks.ts` reads the HTML into blocks that the
   page draws with its own elements, never as inserted HTML.
   - A dry run over all 200 rows left no tags and dropped no words.

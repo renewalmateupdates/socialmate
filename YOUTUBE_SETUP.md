@@ -109,3 +109,5 @@ Passing it lifts the Private lock and is where to ask for more quota.
 - Remove the reviewer logins from `YOUTUBE_REVIEWER_EMAILS`.
 - YouTube moves from `SOON_PLATFORMS` to live in `lib/site-facts.ts`; update
   the pages that count platforms in the same PR.
+- Email ClipTalk that Shorts are live: their creator toolkit lists SocialMate,
+  and they asked to be told (Nov 2026).
