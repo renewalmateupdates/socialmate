@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate better than Tailwind App for creators?',
-    a: 'For most creators, yes. SocialMate covers 7 platforms with real auto-publishing on the free plan, includes 12 AI writing tools, and adds features like bulk scheduling, link in bio, and evergreen recycling — all free. Tailwind App is useful if Pinterest is your primary and almost exclusive platform. For anyone posting across multiple channels, SocialMate is the better fit.',
+    a: 'For most creators, yes. SocialMate covers 7 platforms, with real auto-publishing to 6 of them on the free plan, includes 12 AI writing tools, and adds features like bulk scheduling, link in bio, and evergreen recycling — all free. Tailwind App is useful if Pinterest is your primary and almost exclusive platform. For anyone posting across multiple channels, SocialMate is the better fit.',
   },
 ]
 
@@ -88,7 +88,7 @@ export default function VsTailwindSocialPage() {
             SocialMate vs Tailwind App
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Tailwind App (tailwindapp.com) is a Pinterest-focused scheduler with no free auto-publish. SocialMate covers 7 platforms and is free forever.
+            Tailwind App (tailwindapp.com) is a Pinterest-focused scheduler with no free auto-publish. SocialMate covers 7 platforms and is free forever on 6 of them.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -116,7 +116,7 @@ export default function VsTailwindSocialPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever with real auto-publishing</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -202,7 +202,7 @@ export default function VsTailwindSocialPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">More than Pinterest — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 7 platforms, bulk scheduling, 15+ AI tools, real auto-publishing. No credit card required.
+            SocialMate is free forever — 6 platforms (X needs Pro), bulk scheduling, 15+ AI tools, real auto-publishing. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

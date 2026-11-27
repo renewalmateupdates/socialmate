@@ -186,7 +186,7 @@ export default function VsTiktokSchedulerPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">TikTok is just one platform. Reach all 7.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            TikTok + 6 more platforms, AI Script Generator, bulk scheduling — completely free to start.
+            TikTok + 6 more platforms (X needs Pro), AI Script Generator, bulk scheduling — completely free to start.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Onlypult starts at $25/month for 3 profiles. SocialMate starts at $0. See the full feature and pricing comparison.',
   openGraph: {
     title:       'SocialMate vs Onlypult (2026)',
-    description: 'Onlypult charges $25–$97+/month. SocialMate is free with 7 platforms and 15+ AI tools.',
+    description: 'Onlypult charges $25–$97+/month. SocialMate is free on 6 platforms (X needs Pro), with 15+ AI tools.',
     url:         'https://socialmate.studio/vs/onlypult',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/onlypult' },

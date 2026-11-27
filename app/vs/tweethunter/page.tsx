@@ -31,11 +31,11 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'Is TweetHunter worth $49/month for X/Twitter only?',
-    a: 'TweetHunter has strong X-specific features — viral tweet inspiration, engagement analytics, and DM automation. But at $49/month minimum, you\'re paying nearly $600/year for a single-platform tool. SocialMate covers X plus 6 other platforms starting free. If X is your only channel, TweetHunter has depth. If you post anywhere else, you\'ll need a second tool.',
+    a: 'TweetHunter has strong X-specific features — viral tweet inspiration, engagement analytics, and DM automation. But at $49/month minimum, you\'re paying nearly $600/year for a single-platform tool. SocialMate covers X on its $8/month Pro plan, plus 6 other platforms that are free. If X is your only channel, TweetHunter has depth. If you post anywhere else, you\'ll need a second tool.',
   },
   {
     q: 'Can SocialMate replace TweetHunter for X/Twitter scheduling?',
-    a: 'For scheduling X/Twitter posts and threads, yes. SocialMate posts directly to X via the official API and supports multi-part threads. The main TweetHunter-specific feature SocialMate doesn\'t replicate is its viral tweet database (inspiration from top-performing tweets). For core scheduling, thread queuing, and evergreen recycling, SocialMate handles it free.',
+    a: 'For scheduling X/Twitter posts and threads, yes. SocialMate posts directly to X via the official API and supports multi-part threads. The main TweetHunter-specific feature SocialMate doesn\'t replicate is its viral tweet database (inspiration from top-performing tweets). For core scheduling, thread queuing, and evergreen recycling, SocialMate handles it on Pro ($8/month), which posting to X needs.',
   },
   {
     q: 'Does SocialMate support Twitter threads?',
@@ -91,7 +91,7 @@ export default function VsTweetHunterPage() {
             SocialMate vs TweetHunter
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            TweetHunter charges $49/month for X/Twitter-only scheduling. SocialMate covers X plus 6 other platforms — starting completely free.
+            TweetHunter charges $49/month for X/Twitter-only scheduling. SocialMate covers X on its $8/month Pro plan, plus 6 other platforms that are completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -119,7 +119,7 @@ export default function VsTweetHunterPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">X + 6 more platforms. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">X on Pro + 6 more platforms free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ X + LinkedIn + TikTok + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ Thread builder across multiple platforms</li>
@@ -159,7 +159,7 @@ export default function VsTweetHunterPage() {
               {
                 n: '1',
                 title: '$49/month for one platform is hard to justify',
-                desc: 'TweetHunter\'s entry price is $49/month — nearly $600/year — locked to X/Twitter alone. SocialMate schedules X posts free, and for $8/month you unlock Pro features across 7 platforms. If you post anywhere besides X, TweetHunter forces you to pay for a second tool on top.',
+                desc: 'TweetHunter\'s entry price is $49/month — nearly $600/year — locked to X/Twitter alone. SocialMate schedules X posts on its $8/month Pro plan, alongside 6 other platforms that are free. If you post anywhere besides X, TweetHunter forces you to pay for a second tool on top.',
               },
               {
                 n: '2',

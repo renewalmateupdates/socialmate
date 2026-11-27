@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',               combin: '$15/month',                    socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                    combin: '❌ No free plan',               socialmate: '✅ 50 credits/month'     },
   { feature: 'Platforms supported',           combin: 'Instagram only',               socialmate: '7 platforms'             },
-  { feature: 'Post scheduling',              combin: '✅ (Instagram only)',           socialmate: '✅ 7 platforms free'      },
+  { feature: 'Post scheduling',              combin: '✅ (Instagram only)',           socialmate: '✅ 6 platforms free, X on Pro'      },
   { feature: 'Discord scheduling',            combin: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           combin: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Bluesky scheduling',            combin: '❌',                            socialmate: '✅ Free'                  },
@@ -20,7 +20,7 @@ const COMPARISON = [
   { feature: 'AI writing tools',              combin: '❌',                            socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     combin: '❌',                            socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        combin: '❌',                            socialmate: '✅ Pro+'                  },
-  { feature: 'Content calendar',             combin: '✅ (Instagram only)',           socialmate: '✅ Free — all platforms'  },
+  { feature: 'Content calendar',             combin: '✅ (Instagram only)',           socialmate: '✅ Free'  },
   { feature: 'Bulk scheduling',              combin: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             combin: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Link in bio (SIGIL)',           combin: '❌',                            socialmate: '✅ Built in free'         },
@@ -91,7 +91,7 @@ export default function VsCombinPage() {
             SocialMate vs Combin
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Combin is Instagram-only at $15/month. SocialMate schedules to 7 platforms with 15+ AI tools and autonomous content generation — starting free.
+            Combin is Instagram-only at $15/month. SocialMate schedules to 7 platforms (6 free, X on Pro) with 15+ AI tools and autonomous content generation — starting free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -119,7 +119,7 @@ export default function VsCombinPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. AI. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms, 6 free. AI. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -159,7 +159,7 @@ export default function VsCombinPage() {
               {
                 n: '1',
                 title: 'Instagram is one platform. Your audience is on seven.',
-                desc: "Combin bets everything on Instagram. In 2026, creators live across Discord, Telegram, TikTok, LinkedIn, Bluesky, X, and Mastodon simultaneously. Paying $15/month for a single-platform tool when SocialMate covers all 7 for free makes the choice straightforward.",
+                desc: "Combin bets everything on Instagram. In 2026, creators live across Discord, Telegram, TikTok, LinkedIn, Bluesky, X, and Mastodon simultaneously. Paying $15/month for a single-platform tool when SocialMate covers 6 of them for free, and X on Pro, makes the choice straightforward.",
               },
               {
                 n: '2',
@@ -206,7 +206,7 @@ export default function VsCombinPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Beyond Instagram</p>
           <h2 className="text-3xl font-extrabold mb-4">Schedule everywhere. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
+            SocialMate covers 7 platforms including Discord and Telegram (X needs Pro) — with 15+ AI tools and SOMA built in.
             Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

@@ -99,7 +99,7 @@ export default function VsSocialRailsPage() {
             </Link>
           </div>
           <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
-            {['7 platforms', 'Discord + Telegram', '15+ AI tools free', 'Free forever'].map((pill) => (
+            {['7 platforms (X on Pro)', 'Discord + Telegram', '15+ AI tools free', 'Free forever'].map((pill) => (
               <span key={pill} className="text-xs font-semibold bg-raised text-ink-muted px-3 py-1 rounded-full">
                 {pill}
               </span>
@@ -123,7 +123,7 @@ export default function VsSocialRailsPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">All platforms. All tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ Mastodon, Bluesky, Discord, and Telegram</li>
@@ -209,7 +209,7 @@ export default function VsSocialRailsPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $29/month — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 7 platforms including Discord and Telegram, 15+ AI tools, link in bio, hashtag manager. No credit card required.
+            SocialMate is free forever — 6 platforms including Discord and Telegram (X needs Pro), 15+ AI tools, link in bio, hashtag manager. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

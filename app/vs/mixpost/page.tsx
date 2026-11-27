@@ -22,7 +22,7 @@ export default function VsMixpostPage() {
       }}
       us={{ title: 'Hosted, so you don\'t have to', points: SM_POINTS }}
       rows={[
-        { feature: 'Free option',         them: 'Lite (self-hosted): Facebook Pages, X and Mastodon only',  us: `Free plan (hosted): ${SM.freePosts} posts/month on 7 platforms` },
+        { feature: 'Free option',         them: 'Lite (self-hosted): Facebook Pages, X and Mastodon only',  us: `Free plan (hosted): ${SM.freePosts} posts/month on 6 platforms (X needs Pro)` },
         { feature: 'Pricing',             them: 'Pro $299 one-time (1 year of updates), Enterprise $1,199', us: `Free, Pro $${SM.proPrice}/mo, Agency $${SM.agencyPrice}/mo` },
         { feature: 'Cheapest hosted plan', them: 'Cloud Spark $29/mo: 100 scheduled posts, 1 member',       us: `Pro $${SM.proPrice}/mo: ${SM.proPosts.toLocaleString('en-US')} posts, ${SM.proSeats} seats` },
         { feature: 'Running it yourself', them: 'PHP 8.3+, MySQL, Redis and a web server; you handle updates', us: 'Not needed' },
@@ -37,7 +37,7 @@ export default function VsMixpostPage() {
         'You need Instagram, Facebook, Threads, YouTube, Pinterest or Pixelfed.',
       ]}
       weWin={[
-        { title: 'No server to look after', desc: 'Mixpost Lite is free but self-hosted, and it only posts to Facebook Pages, X and Mastodon. SocialMate\'s free plan is hosted and covers 7 platforms.' },
+        { title: 'No server to look after', desc: 'Mixpost Lite is free but self-hosted, and it only posts to Facebook Pages, X and Mastodon. SocialMate\'s free plan is hosted and covers 6 platforms; X needs Pro.' },
         { title: 'Cheaper hosted', desc: `Mixpost Cloud starts at $29 a month for 100 scheduled posts and 1 team member. SocialMate Pro is $${SM.proPrice} a month for ${SM.proPosts.toLocaleString('en-US')} posts and ${SM.proSeats} seats.` },
         { title: 'Discord and Telegram', desc: 'Mixpost does not list them. SocialMate posts to both on the free plan.' },
       ]}
@@ -46,7 +46,7 @@ export default function VsMixpostPage() {
         { q: 'What do I need to self-host Mixpost?', a: 'Mixpost lists PHP 8.3+, MySQL, Redis and a web server such as Nginx or Apache, installed with Docker or Composer. Updates and backups are yours to manage.' },
         { q: 'Can I self-host SocialMate?', a: `No. SocialMate is hosted only: nothing to install, and the free plan has ${SM.freePosts} posts a month.` },
       ]}
-      closing={{ title: 'Hosted, so you don\'t have to.', body: `${SM.freePosts} posts a month on 7 platforms. No server, no license, no card.` }}
+      closing={{ title: 'Hosted, so you don\'t have to.', body: `${SM.freePosts} posts a month on 6 platforms (X needs Pro). No server, no license, no card.` }}
     />
   )
 }

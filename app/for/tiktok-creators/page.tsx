@@ -360,7 +360,7 @@ export default function TikTokCreatorsPage() {
                 <ul className="text-xs text-ink-body space-y-2 mb-6 text-left">
                   <li>✓ {tier.tiktok}</li>
                   <li>✓ {tier.credits}</li>
-                  <li>✓ {t('for_tiktok.pricing_feature_platforms')}</li>
+                  <li>✓ {tier.plan === 'Free' ? t('common.free_plan_platforms') : t('for_tiktok.pricing_feature_platforms')}</li>
                   <li>✓ {t('for_tiktok.pricing_feature_ai')}</li>
                   <li>✓ {t('for_tiktok.pricing_feature_script')}</li>
                   <li>✓ {t('for_tiktok.pricing_feature_calendar')}</li>

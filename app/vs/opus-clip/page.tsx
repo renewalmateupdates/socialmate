@@ -48,7 +48,7 @@ export default function VsOpusClipPage() {
         { q: 'Does SocialMate make clips?', a: 'No. SocialMate schedules and posts. Many creators clip in another tool and schedule the clips in SocialMate.' },
         { q: 'Can SocialMate post to YouTube Shorts or Instagram Reels?', a: `Not yet. SocialMate posts to ${SM.livePlatforms.join(', ')}.` },
       ]}
-      closing={{ title: 'Clip anywhere. Schedule here.', body: `${SM.freePosts} posts a month on 7 platforms, free. Pro is $${SM.proPrice} a month.` }}
+      closing={{ title: 'Clip anywhere. Schedule here.', body: `${SM.freePosts} posts a month on 6 platforms, free. Pro is $${SM.proPrice} a month and adds X.` }}
     />
   )
 }

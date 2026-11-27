@@ -78,7 +78,7 @@ export default function VsCreatorstudioPage() {
             SocialMate vs Meta Creator Studio
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Creator Studio only covers Instagram and Facebook. SocialMate covers 7 platforms — Discord, TikTok, Telegram, Bluesky, LinkedIn, Mastodon, and X — with 15+ AI tools. Also free.
+            Creator Studio only covers Instagram and Facebook. SocialMate covers 7 platforms — Discord, TikTok, Telegram, Bluesky, LinkedIn, Mastodon, and X — with 15+ AI tools. Free on all but X.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -105,7 +105,7 @@ export default function VsCreatorstudioPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. AI tools. Actually free.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms, 6 of them free. AI tools.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok, Discord, Telegram, Bluesky, LinkedIn</li>
               <li>✅ Mastodon, X/Twitter, and more coming</li>
@@ -186,7 +186,7 @@ export default function VsCreatorstudioPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Post beyond Meta. Reach your full audience.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, bulk scheduling — free to start. No credit card required.
+            7 platforms (6 free, X on Pro), 15+ AI tools, bulk scheduling. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

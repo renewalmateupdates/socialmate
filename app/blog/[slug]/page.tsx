@@ -554,10 +554,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         <div className="bg-amber-500 text-gray-950 rounded-3xl p-8 text-center mb-16">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Try SocialMate free</h2>
           <p className="text-gray-950/70 text-sm mb-6 max-w-md mx-auto">
-            Schedule to 7 platforms, get 15+ AI tools, and grow your audience — all for free. No credit card required.
+            Schedule to 6 platforms, get 15+ AI tools, and grow your audience, all for free (X needs Pro). No credit card required.
           </p>
           <BlogInlineCTA slug={slug} position="footer" />
-          <p className="text-gray-950/50 text-xs mt-3">7 platforms · 15+ AI tools · Free forever</p>
+          <p className="text-gray-950/50 text-xs mt-3">6 platforms free · X on Pro · 15+ AI tools</p>
         </div>
 
         {/* ── Compare tools strip ── */}

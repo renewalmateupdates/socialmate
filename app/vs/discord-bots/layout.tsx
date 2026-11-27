@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "Discord bots require server admin access, API tokens, and technical setup just to post scheduled messages. SocialMate schedules Discord plus 6 other platforms — no coding required. Free.",
   openGraph: {
     title:       'SocialMate vs Discord Bots (2026)',
-    description: "Discord bots = technical setup, Discord only. SocialMate = 7 platforms, no code, AI tools, free.",
+    description: "Discord bots = technical setup, Discord only. SocialMate = 7 platforms (6 free), no code, AI tools.",
     url:         'https://socialmate.studio/vs/discord-bots',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/discord-bots' },

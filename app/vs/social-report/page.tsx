@@ -91,7 +91,7 @@ export default function VsSocialReportPage() {
             SocialMate vs Social Report
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Social Report is $49/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms with 15+ AI tools and SOMA — starting completely free.
+            Social Report is $49/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms (6 free, X on Pro) with 15+ AI tools and SOMA — starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -206,7 +206,7 @@ export default function VsSocialReportPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">More AI. More platforms. Less money.</p>
           <h2 className="text-3xl font-extrabold mb-4">Switch from Social Report today</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
+            SocialMate covers 7 platforms including Discord and Telegram (X needs Pro) — with 15+ AI tools and SOMA built in.
             Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

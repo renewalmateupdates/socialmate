@@ -105,7 +105,7 @@ export default function VsDiscordBotsPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">No code. 7 platforms. AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">No code. 7 platforms, 6 free. AI tools.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Connect Discord in 2 clicks — no bot setup</li>
               <li>✅ Schedule to 6 other platforms simultaneously</li>
@@ -186,7 +186,7 @@ export default function VsDiscordBotsPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Discord scheduling without the developer headache</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            Connect Discord in 2 clicks. Schedule to 7 platforms. 15+ AI tools. Free forever — no credit card required.
+            Connect Discord in 2 clicks. Schedule to 7 platforms, 6 of them free. 15+ AI tools. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

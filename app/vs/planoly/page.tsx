@@ -21,7 +21,7 @@ export default function VsPlanolyPage() {
           '❌ Starter ($14/month) has 1 user',
         ],
       }}
-      us={{ title: 'Seven platforms, free to start', points: SM_POINTS }}
+      us={{ title: 'Seven platforms, six of them free', points: SM_POINTS }}
       rows={[
         { feature: 'Cheapest paid plan',   them: '$14/mo Starter: 1 social set, 1 user',                     us: `$${SM.proPrice}/mo Pro: ${SM.proAccounts} per platform, ${SM.proSeats} seats` },
         { feature: 'Free option',          them: 'Mobile app, 10 uploads/month; 14-day trial of paid plans',  us: `Free plan on the web, ${SM.freePosts} posts/month` },

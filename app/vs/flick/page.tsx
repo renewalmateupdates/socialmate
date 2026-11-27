@@ -32,7 +32,7 @@ const FAQ = [
   },
   {
     q: 'Does Flick have a free plan?',
-    a: "No. Flick offers a 14-day free trial, after which you must pay £14/month (~$18) or higher. There is no permanent free plan. SocialMate offers a free plan with no expiry — TikTok scheduling included, 50 AI credits per month, link in bio, bulk scheduling, and all 7 live platforms. No credit card required to start.",
+    a: "No. Flick offers a 14-day free trial, after which you must pay £14/month (~$18) or higher. There is no permanent free plan. SocialMate offers a free plan with no expiry — TikTok scheduling included, 50 AI credits per month, link in bio, bulk scheduling, and 6 of the 7 live platforms (X needs Pro). No credit card required to start.",
   },
   {
     q: 'Is SocialMate better than Flick for TikTok?',
@@ -192,7 +192,7 @@ export default function VsFlickPage() {
 
         {/* CTA */}
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">TikTok free. 7 platforms. 15+ AI tools. Forever.</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">TikTok free. 6 free platforms. 15+ AI tools. Forever.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
             SocialMate is free forever — TikTok Production API included, Bluesky, Discord, Telegram, link in bio, TikTok Script Generator, and 15+ AI tools. No trial clock.
           </p>

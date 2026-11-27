@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Podcasters — SocialMate',
-  description: 'Stop promoting your podcast across 5 different apps. Schedule episode drops to all 7 platforms at once, generate AI captions for audiogram posts, and grow your listener community — free forever or $8/month.',
+  description: 'Stop promoting your podcast across 5 different apps. Schedule episode drops to all 7 platforms at once (6 free, X on Pro), generate AI captions for audiogram posts, and grow your listener community — free forever or $8/month.',
   openGraph: {
     title: 'Social Media for Podcasters — SocialMate',
     description: 'Schedule podcast episode announcements to Bluesky, X, LinkedIn, Discord, Telegram, TikTok, and Mastodon in one click. SOMA generates your episode promos automatically.',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Social Media for Podcasters — SocialMate',
-    description: 'Promote your podcast on 7 platforms at once. Free tools built for podcasters.',
+    description: 'Promote your podcast on 7 platforms at once (6 free, X on Pro). Free tools built for podcasters.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/podcasters' },

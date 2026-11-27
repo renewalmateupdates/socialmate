@@ -119,7 +119,7 @@ export default function VsShieldAppPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Scheduling + analytics. 7 platforms. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Scheduling + analytics. 7 platforms, 6 free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedules LinkedIn posts via official API</li>
               <li>✅ Content DNA analytics dashboard</li>

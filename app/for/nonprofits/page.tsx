@@ -34,7 +34,7 @@ const COMING_PLATFORMS = [
 const PAIN_POINTS = [
   {
     before: 'Hootsuite wants $99/month. Buffer wants $18. You have $0 in your marketing budget.',
-    after:  'SocialMate free plan: 50 AI credits, 7 platforms, post calendar. No credit card. No trial. Free forever.',
+    after:  'SocialMate free plan: 50 AI credits, 6 platforms (X needs Pro), post calendar. No credit card. No trial. Free forever.',
     icon: Banknote,
   },
   {

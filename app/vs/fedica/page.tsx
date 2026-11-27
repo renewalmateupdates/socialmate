@@ -21,7 +21,7 @@ const COMPARISON = [
   { feature: 'AI writing tools',          fedica: '❌',                           socialmate: '15+ tools included'       },
   { feature: 'AI credits free tier',      fedica: 'N/A (no free plan)',           socialmate: '50/month free'           },
   { feature: 'Link in bio',               fedica: '❌',                           socialmate: '✅ Free'                 },
-  { feature: 'Hashtag manager',           fedica: 'Twitter/X hashtags only',     socialmate: '✅ Free, all platforms'  },
+  { feature: 'Hashtag manager',           fedica: 'Twitter/X hashtags only',     socialmate: '✅ Free'  },
   { feature: 'Evergreen recycling',       fedica: '❌',                           socialmate: '✅ Free'                 },
   { feature: 'Audience analytics',        fedica: '✅ Deep Twitter/X analytics', socialmate: '✅ Free multi-platform'  },
   { feature: 'Competitor tracking',       fedica: 'Twitter/X only',              socialmate: '✅ Free (3 accounts)'   },
@@ -38,7 +38,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate a good Fedica alternative for multi-platform creators?',
-    a: 'Yes. SocialMate gives you scheduling, analytics, AI tools, bulk scheduling, evergreen recycling, and competitor tracking across 7 platforms — all free. Fedica charges $15/month and focuses primarily on Twitter/X analytics.',
+    a: 'Yes. SocialMate gives you scheduling, analytics, AI tools, bulk scheduling, evergreen recycling, and competitor tracking across 6 platforms (X needs Pro), all free. Fedica charges $15/month and focuses primarily on Twitter/X analytics.',
   },
   {
     q: 'What if I just want Twitter/X analytics?',
@@ -87,7 +87,7 @@ export default function VsFedicaPage() {
             SocialMate vs Fedica
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Fedica is a Twitter/X analytics tool — not a multi-platform scheduler. If you post beyond Twitter, it cannot help. SocialMate covers 7 platforms for free.
+            Fedica is a Twitter/X analytics tool — not a multi-platform scheduler. If you post beyond Twitter, it cannot help. SocialMate covers 6 platforms for free, and X on Pro.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -115,7 +115,7 @@ export default function VsFedicaPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. All tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -201,7 +201,7 @@ export default function VsFedicaPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Go beyond Twitter/X — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 7 platforms, bulk scheduling, 15+ AI tools, analytics. No credit card required.
+            SocialMate is free forever — 6 platforms (X needs Pro), bulk scheduling, 15+ AI tools, analytics. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

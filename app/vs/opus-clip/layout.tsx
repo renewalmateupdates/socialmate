@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs OpusClip (2026): Clipping Tool vs Scheduler',
-  description: 'OpusClip cuts long videos into clips with AI and auto-posts from $15/month. SocialMate schedules text, images and TikTok video to 7 platforms, free to start, Pro $8.',
+  description: 'OpusClip cuts long videos into clips with AI and auto-posts from $15/month. SocialMate schedules text, images and TikTok video to 7 platforms, free on 6 of them, Pro $8.',
   openGraph: {
     title:       'SocialMate vs OpusClip (2026)',
     description: 'OpusClip makes clips. SocialMate schedules every kind of post, free to start.',

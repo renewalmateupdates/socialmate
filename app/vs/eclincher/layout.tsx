@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'eClincher starts at $65/month. SocialMate starts at $0. Compare features, pricing, and platforms side by side.',
   openGraph: {
     title:       'SocialMate vs eClincher (2026)',
-    description: 'eClincher charges $65–$425/month. SocialMate is free with 7 platforms and 15+ AI tools.',
+    description: 'eClincher charges $65–$425/month. SocialMate is free on 6 platforms (X needs Pro), with 15+ AI tools.',
     url:         'https://socialmate.studio/vs/eclincher',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/eclincher' },

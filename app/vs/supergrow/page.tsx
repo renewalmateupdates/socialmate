@@ -20,7 +20,7 @@ export default function VsSupergrowPage() {
           '❌ Teams is $199/month for 5 accounts',
         ],
       }}
-      us={{ title: 'LinkedIn plus 6 platforms, free to start', points: SM_POINTS }}
+      us={{ title: 'LinkedIn and 5 more platforms free, X on Pro', points: SM_POINTS }}
       rows={[
         { feature: 'Cheapest paid plan',       them: '$39/mo Pro ($31/mo billed yearly), 1 account', us: `$${SM.proPrice}/mo Pro ($${SM.proAnnual}/yr)` },
         { feature: 'Free option',              them: '7-day free trial',                            us: `Free plan: ${SM.freePosts} posts a month, no card` },
@@ -46,7 +46,7 @@ export default function VsSupergrowPage() {
         { q: 'Is SocialMate a LinkedIn scheduler?', a: 'Yes, for personal profiles, alongside X, TikTok, Bluesky, Mastodon, Discord and Telegram. LinkedIn company pages are not available yet.' },
         { q: 'Which is better for a LinkedIn ghostwriter?', a: `If LinkedIn is all you do and you want AI tuned to it, Supergrow. If your clients post on other platforms too, or you want to start free, SocialMate: Pro is $${SM.proPrice} with ${SM.proSeats} seats.` },
       ]}
-      closing={{ title: 'LinkedIn and everywhere else.', body: `${SM.freePosts} posts a month on 7 platforms, free. Pro is $${SM.proPrice} a month.` }}
+      closing={{ title: 'LinkedIn and everywhere else.', body: `${SM.freePosts} posts a month on 6 platforms, free. Pro is $${SM.proPrice} a month and adds X.` }}
     />
   )
 }

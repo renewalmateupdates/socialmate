@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs SocialOomph (2026) — Full Comparison',
-  description: 'SocialOomph starts at $15/month with no TikTok or LinkedIn support. SocialMate covers 7 platforms including TikTok and LinkedIn — free to start.',
+  description: 'SocialOomph starts at $15/month with no TikTok or LinkedIn support. SocialMate covers 7 platforms including TikTok and LinkedIn, all free except X.',
   openGraph: {
     title:       'SocialMate vs SocialOomph (2026)',
-    description: 'SocialOomph is an old-school scheduler at $15+/month. SocialMate is modern, free, and covers 7 platforms.',
+    description: 'SocialOomph is an old-school scheduler at $15+/month. SocialMate is modern and covers 7 platforms, 6 of them free.',
     url:         'https://socialmate.studio/vs/socialoomph',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/socialoomph' },

@@ -200,7 +200,7 @@ export default function First30DaysSocialMediaPage() {
                 </Callout>
 
                 <p className="leading-relaxed text-gray-300">
-                  Tools like SocialMate let you schedule and cross-post once you&apos;re ready to expand — it&apos;s free and handles Bluesky, Mastodon, Discord, Telegram, X/Twitter, TikTok, and LinkedIn all in one dashboard. But don&apos;t think about multi-platform yet. Master one first. Then distribute.
+                  Tools like SocialMate let you schedule and cross-post once you&apos;re ready to expand — it&apos;s free for Bluesky, Mastodon, Discord, Telegram, TikTok, and LinkedIn, adds X/Twitter on Pro, and keeps them all in one dashboard. But don&apos;t think about multi-platform yet. Master one first. Then distribute.
                 </p>
               </section>
 

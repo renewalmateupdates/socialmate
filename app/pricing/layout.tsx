@@ -5,14 +5,14 @@ export const metadata: Metadata = {
   description: 'SocialMate starts free forever. Pro is $8/month. Agency is $29/month. No hidden fees, no per-channel pricing. Includes AI tools, bulk scheduling, and multi-platform support.',
   openGraph: {
     title: 'SocialMate Pricing — Free Social Media Scheduler',
-    description: 'Free forever. Pro at $8/mo. Agency at $29/mo. 15+ AI tools, 7 live platforms, bulk scheduling — no credit card required to start.',
+    description: 'Free forever. Pro at $8/mo. Agency at $29/mo. 15+ AI tools, 7 live platforms (6 on Free), bulk scheduling — no credit card required to start.',
     url: 'https://socialmate.studio/pricing',
     images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate Pricing' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SocialMate Pricing — Free Social Media Scheduler',
-    description: 'Free forever. Pro at $8/mo. Agency at $29/mo. 15+ AI tools, 7 live platforms.',
+    description: 'Free forever. Pro at $8/mo. Agency at $29/mo. 15+ AI tools, 7 live platforms (6 on Free).',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/pricing' },

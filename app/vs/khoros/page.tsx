@@ -118,7 +118,7 @@ export default function VsKhorosPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Self-serve. 7 platforms. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Self-serve. 7 platforms, 6 free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -206,7 +206,7 @@ export default function VsKhorosPage() {
           <h2 className="text-3xl font-extrabold mb-4">No demo. No contract. Just free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is self-serve, free to start, and ready in minutes.
-            7 platforms, 15+ AI tools, SOMA. Pro is $8/month.
+            7 platforms (X needs Pro), 15+ AI tools, SOMA. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

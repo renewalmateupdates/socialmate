@@ -14,7 +14,7 @@ import AuthShell from '@/components/instrument/AuthShell'
 import { Label, Input, ErrorNote, Submit } from '@/components/instrument/form'
 
 const PERKS = [
-  '7 live platforms — more coming',
+  '7 live platforms (X needs Pro), more coming',
   '250 posts/month free forever',
   'Bulk scheduler and calendar',
   'SIGIL link in bio builder',

@@ -355,7 +355,7 @@ export default function AIToolsForCreatorsPage() {
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Scheduling and distribution with AI</h3>
                 <p className="mb-4 leading-relaxed text-gray-300">
-                  SocialMate — free for open platforms (Bluesky, Mastodon, Discord, Telegram), $8/month Pro for all 7 platforms including X/Twitter, TikTok, and LinkedIn. AI caption generation, hashtag suggestions, smart queue scheduling, content repurposing, post scoring, Voice DNA via SOMA, and 8 autonomous agents. This is what I built because the alternatives charge $99/month for the same things.
+                  SocialMate — free for 6 platforms (Bluesky, Mastodon, Discord, Telegram, TikTok and LinkedIn), $8/month Pro for all 7, adding X/Twitter. AI caption generation, hashtag suggestions, smart queue scheduling, content repurposing, post scoring, Voice DNA via SOMA, and 8 autonomous agents. This is what I built because the alternatives charge $99/month for the same things.
                 </p>
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">AI image generation</h3>

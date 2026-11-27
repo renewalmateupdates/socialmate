@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Shield App is LinkedIn analytics only — no scheduling. SocialMate schedules LinkedIn posts free and includes analytics, AI tools, and 6 more platforms.',
   openGraph: {
     title:       'SocialMate vs Shield App (2026)',
-    description: 'Shield App tracks LinkedIn analytics but can\'t schedule posts. SocialMate does both — and covers 7 platforms starting free.',
+    description: 'Shield App tracks LinkedIn analytics but can\'t schedule posts. SocialMate does both — and covers 7 platforms, 6 of them free.',
     url:         'https://socialmate.studio/vs/shield-app',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/shield-app' },

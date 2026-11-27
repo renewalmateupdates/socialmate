@@ -90,7 +90,7 @@ export default function VsEmplifPage() {
             SocialMate vs Emplifi
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Emplifi is $200+/month enterprise pricing — built for large social teams. SocialMate covers 7 platforms with AI built in. Starts free.
+            Emplifi is $200+/month enterprise pricing — built for large social teams. SocialMate covers 7 platforms with AI built in, 6 of them free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -206,7 +206,7 @@ export default function VsEmplifPage() {
           <h2 className="text-3xl font-extrabold mb-4">Start scheduling in minutes. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is self-serve, free to start, and built for the creator workflow.
-            7 platforms, 15+ AI tools, SOMA. No demo required.
+            7 platforms (X needs Pro), 15+ AI tools, SOMA. No demo required.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

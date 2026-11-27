@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate\'s free plan compare to Postly\'s pricing?',
-    a: 'Postly has no free plan — you start at $18/month. SocialMate gives you 50 credits/month free, scheduling across all 7 platforms with no credit card required. Pro is $8/month, Agency is $29/month. You get more platforms and pay less at every tier.',
+    a: 'Postly has no free plan — you start at $18/month. SocialMate gives you 50 credits/month free, scheduling across 6 platforms with no credit card required (X needs Pro). Pro is $8/month, Agency is $29/month. You get more platforms and pay less at every tier.',
   },
   {
     q: 'Does SocialMate have bulk scheduling like Postly?',
@@ -90,7 +90,7 @@ export default function VsPostlyPage() {
             SocialMate vs Postly
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Postly starts at $18/month with limited TikTok support and no Discord or Telegram. SocialMate covers 7 platforms with proper TikTok direct publishing — free to start.
+            Postly starts at $18/month with limited TikTok support and no Discord or Telegram. SocialMate covers 7 platforms with proper TikTok direct publishing, all free except X.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -163,7 +163,7 @@ export default function VsPostlyPage() {
               {
                 n: '2',
                 title: 'Free tier that actually works',
-                desc: 'Postly has no free plan. SocialMate gives you 50 credits/month free across all 7 platforms — enough to test the tool thoroughly, build habits, and schedule real content before committing to paid. Pro is $8/month when you\'re ready to scale.',
+                desc: 'Postly has no free plan. SocialMate gives you 50 credits/month free across 6 platforms (X needs Pro) — enough to test the tool thoroughly, build habits, and schedule real content before committing to paid. Pro is $8/month when you\'re ready to scale.',
               },
               {
                 n: '3',

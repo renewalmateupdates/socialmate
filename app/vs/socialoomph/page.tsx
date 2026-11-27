@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate\'s pricing compare to SocialOomph?',
-    a: 'SocialOomph starts at $15/month with no free plan. SocialMate has a genuine free tier (50 credits/month across all 7 platforms) and Pro is $8/month. SocialMate is cheaper at every tier while covering dramatically more platforms and including AI tools that SocialOomph doesn\'t have at any price.',
+    a: 'SocialOomph starts at $15/month with no free plan. SocialMate has a genuine free tier (50 credits/month across 6 platforms; X needs Pro) and Pro is $8/month. SocialMate is cheaper at every tier while covering dramatically more platforms and including AI tools that SocialOomph doesn\'t have at any price.',
   },
 ]
 
@@ -91,7 +91,7 @@ export default function VsSocialOomphPage() {
             SocialMate vs SocialOomph
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            SocialOomph is a legacy scheduler with no TikTok, no LinkedIn, and no AI tools. SocialMate covers 7 modern platforms with 15+ AI tools — starting free.
+            SocialOomph is a legacy scheduler with no TikTok, no LinkedIn, and no AI tools. SocialMate covers 7 modern platforms (6 free, X on Pro) with 15+ AI tools — starting free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -206,7 +206,7 @@ export default function VsSocialOomphPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Modern + cheaper + more platforms</p>
           <h2 className="text-3xl font-extrabold mb-4">Upgrade from SocialOomph for free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate is free to start. 7 platforms, 15+ AI tools, SOMA content system.
+            SocialMate is free to start. 7 platforms (6 free, X on Pro), 15+ AI tools, SOMA content system.
             Pro is $8/month — less than SocialOomph&apos;s entry price.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

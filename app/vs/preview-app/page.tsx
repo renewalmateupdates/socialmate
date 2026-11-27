@@ -31,7 +31,7 @@ const FAQ = [
   },
   {
     q: "Does Preview App support TikTok, Discord, or Telegram?",
-    a: "No. Preview App is focused on Instagram and Pinterest. It does not support TikTok, Discord, Telegram, Bluesky, or X/Twitter. If your audience extends beyond Instagram, you would need additional tools. SocialMate supports all of these on the free plan.",
+    a: "No. Preview App is focused on Instagram and Pinterest. It does not support TikTok, Discord, Telegram, Bluesky, or X/Twitter. If your audience extends beyond Instagram, you would need additional tools. SocialMate supports all of these, and all but X/Twitter on the free plan.",
   },
   {
     q: "Is SocialMate cheaper than Preview App?",
@@ -83,7 +83,7 @@ export default function VsPreviewAppPage() {
             SocialMate vs Preview App
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Preview App is an Instagram/Pinterest visual planner. SocialMate is a full Creator OS covering 7 platforms — including TikTok, Discord, and Telegram — starting completely free.
+            Preview App is an Instagram/Pinterest visual planner. SocialMate is a full Creator OS covering 7 platforms — including TikTok, Discord, and Telegram — and 6 of them are completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -111,7 +111,7 @@ export default function VsPreviewAppPage() {
           </div>
           <div className="bg-amber/10 text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-high uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. Full Creator OS. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms, 6 free. Full Creator OS.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ TikTok, Discord, Telegram, Bluesky, Mastodon, X, LinkedIn</li>
               <li>✅ 15 AI writing and content tools</li>
@@ -196,7 +196,7 @@ export default function VsPreviewAppPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Beyond Instagram — schedule everywhere for free</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers TikTok, Discord, Telegram, Bluesky, Mastodon, and X — with 15 AI tools and SOMA autonomous content. All starting at $0.
+            SocialMate covers TikTok, Discord, Telegram, Bluesky, Mastodon, and X (on Pro) — with 15 AI tools and SOMA autonomous content. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

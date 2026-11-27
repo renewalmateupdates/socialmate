@@ -95,7 +95,7 @@ export const AUDIENCES: Audience[] = [
       'Posting to X needs the Pro plan.',
     ],
     faq: [
-      { q: 'Can I schedule posts to a Telegram channel for free?', a: 'Yes. SocialMate\'s free plan schedules posts to a Telegram channel through one bot, up to 250 posts a month across all platforms, up to 2 weeks ahead.' },
+      { q: 'Can I schedule posts to a Telegram channel for free?', a: 'Yes. SocialMate\'s free plan schedules posts to a Telegram channel through one bot, up to 250 posts a month in total, up to 2 weeks ahead.' },
       { q: 'Why do I need my own bot?', a: 'Telegram channels only accept posts from admins, and a bot you create can be made an admin of your channel. It takes about two minutes with @BotFather and keeps your channel under your control.' },
       { q: 'Can it post images?', a: 'Yes. Attach images in Compose and they post with the message.' },
       { q: 'Can I post the same thing to Discord and X too?', a: 'Yes. Pick every platform you want in Compose and SocialMate posts to each one. X needs the Pro plan.' },
@@ -131,7 +131,7 @@ export const AUDIENCES: Audience[] = [
       'Posting to X needs the Pro plan.',
     ],
     faq: [
-      { q: 'Is there a free Bluesky scheduler?', a: 'Yes. SocialMate\'s free plan schedules posts to one Bluesky account, up to 250 posts a month across all platforms, up to 2 weeks ahead.' },
+      { q: 'Is there a free Bluesky scheduler?', a: 'Yes. SocialMate\'s free plan schedules posts to one Bluesky account, up to 250 posts a month in total, up to 2 weeks ahead.' },
       { q: 'Is it safe to connect my Bluesky account?', a: 'SocialMate connects with an app password, which Bluesky made for exactly this. You can revoke it in Bluesky\'s settings at any time, and your main password is never shared.' },
       { q: 'Can I schedule a Bluesky thread?', a: 'You can write a thread in the thread builder and post it now as a proper reply chain. Scheduled posts go out one at a time.' },
       { q: 'Can I post to Bluesky and X at the same time?', a: 'Yes. Choose both in Compose. X needs the Pro plan; Bluesky is free.' },
@@ -167,7 +167,7 @@ export const AUDIENCES: Audience[] = [
     ],
     faq: [
       { q: 'Does SocialMate work with my Mastodon instance?', a: 'It works with Mastodon instances that allow apps to sign in, which is the standard setup. You type your instance and sign in there.' },
-      { q: 'Is Mastodon scheduling free?', a: 'Yes. The free plan schedules posts to one Mastodon account, up to 250 posts a month across all platforms, up to 2 weeks ahead.' },
+      { q: 'Is Mastodon scheduling free?', a: 'Yes. The free plan schedules posts to one Mastodon account, up to 250 posts a month in total, up to 2 weeks ahead.' },
       { q: 'Can I post to Mastodon and Bluesky together?', a: 'Yes. Choose both in Compose and the same post goes to each.' },
     ],
     related: [
@@ -216,10 +216,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'indie-hackers',
     title: 'Build in Public on X, Bluesky, LinkedIn and Mastodon',
-    description: 'A free scheduler for solo founders building in public: write once, post to X, Bluesky, LinkedIn, Mastodon, Discord and Telegram, with real threads and launch campaigns.',
+    description: 'A free scheduler for solo founders building in public: write once, post to Bluesky, LinkedIn, Mastodon, Discord and Telegram (and X on Pro), with real threads and launch campaigns.',
     eyebrow: 'For solo founders building in public',
     h1: 'Build in public everywhere, from one place',
-    answer: 'SocialMate lets a solo founder write an update once and post it to Bluesky, LinkedIn, Mastodon, Discord, Telegram and X on a schedule. Plan a launch as a campaign, post threads as real reply chains, and keep going on the free plan until the product pays for Pro.',
+    answer: 'SocialMate lets a solo founder write an update once and post it to Bluesky, LinkedIn, Mastodon, Discord and Telegram on a schedule, and to X on Pro. Plan a launch as a campaign, post threads as real reply chains, and keep going on the free plan until the product pays for Pro.',
     features: [
       { icon: 'send', title: 'One update, every network', body: 'Write your progress update once and post it to every platform you use, at the time each audience is awake.' },
       { icon: 'thread', title: 'Threads that stay threads', body: 'The thread builder posts each part as a reply to the last on Bluesky, Mastodon and X.' },
@@ -253,7 +253,7 @@ export const AUDIENCES: Audience[] = [
     description: 'Schedule the posts that send fans to your OnlyFans: previews, links and updates on X, Telegram, Bluesky, Mastodon and Discord. For chefs, trainers, musicians and every other creator.',
     eyebrow: 'For OnlyFans creators',
     h1: 'Schedule the posts that bring fans to your OnlyFans',
-    answer: 'SocialMate schedules the promo posts that point people to your OnlyFans, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to OnlyFans itself, because OnlyFans has no official way for outside apps to post. Chefs, trainers, musicians and coaches sell subscriptions there too, and the free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the promo posts that point people to your OnlyFans, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to OnlyFans itself, because OnlyFans has no official way for outside apps to post. Chefs, trainers, musicians and coaches sell subscriptions there too, and the free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'Promo posts on a schedule', body: 'Write a week of previews and link posts in one sitting and pick the times. They go out while you are filming, training or cooking.' },
       { icon: 'repeat', title: 'Rotate your offers', body: 'Campaign mode cycles up to 20 messages, like your subscription link, a new recipe drop or a trial offer, on the days and times you pick until an end date.' },
@@ -287,10 +287,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'patreon-creators',
     title: 'Free Post Scheduler for Patreon Creators',
-    description: 'Schedule the posts that bring in new patrons: previews, launch posts and reminders on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. Free plan included.',
+    description: 'Schedule the posts that bring in new patrons: previews, launch posts and reminders on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. Free plan included; X needs Pro.',
     eyebrow: 'For Patreon creators',
     h1: 'Schedule the posts that bring in new patrons',
-    answer: 'SocialMate schedules the public posts that send people to your Patreon, on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. It does not post to Patreon itself. Write your previews and reminders once and they go out on their own. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the public posts that send people to your Patreon, on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. It does not post to Patreon itself. Write your previews and reminders once and they go out on their own. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'Previews on a schedule', body: 'Queue a preview for every new episode, chapter or track, timed to go out when it drops.' },
       { icon: 'repeat', title: 'Reminders that rotate', body: 'Campaign mode cycles your tier perks, goals and join link on the days and times you choose until an end date.' },
@@ -323,7 +323,7 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'clippers',
     title: 'Free Scheduler for Twitch Clippers and Clip Channels',
-    description: 'Find the top clips on any public Twitch channel, schedule clip posts to X, Bluesky, Discord and more, and post clip videos to TikTok, across several channels. Free plan included.',
+    description: 'Find the top clips on any public Twitch channel, schedule clip posts to X, Bluesky, Discord and more, and post clip videos to TikTok, across several channels. Free plan included; X needs Pro.',
     eyebrow: 'For clippers and clip channels',
     h1: 'Find clips and schedule clip posts, free',
     answer: 'SocialMate shows the most-viewed clips on any public Twitch channel and turns one into a scheduled post with the clip link, for X, Bluesky, Mastodon, Discord, Telegram and LinkedIn. Clip videos you edit yourself go to TikTok through TikTok Studio, posted publicly or scheduled. Paid plans connect several accounts on each platform, so one queue can run several clip channels.',
@@ -360,10 +360,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'vtubers',
     title: 'Free Post Scheduler and Go-Live Alerts for VTubers',
-    description: 'Schedule stream announcements, post a go-live alert the moment your Twitch stream starts, and share clips on X, Bluesky, Discord and TikTok. Free plan included.',
+    description: 'Schedule stream announcements, post a go-live alert the moment your Twitch stream starts, and share clips on X, Bluesky, Discord and TikTok. Free plan included; X needs Pro.',
     eyebrow: 'For VTubers',
     h1: 'Schedule your stream posts and go-live alerts, free',
-    answer: 'SocialMate schedules your stream announcements to X, Bluesky, Discord, Telegram, Mastodon and LinkedIn, posts an alert when your Twitch stream starts, and sends clip videos to TikTok. Write the week\'s posts in one sitting and get back to your model and your stream. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules your stream announcements to X, Bluesky, Discord, Telegram, Mastodon and LinkedIn, posts an alert when your Twitch stream starts, and sends clip videos to TikTok. Write the week\'s posts in one sitting and get back to your model and your stream. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'radio', title: 'Go-live alerts', body: 'When your Twitch stream starts, SocialMate posts your alert to Discord, Bluesky, Telegram, Mastodon, LinkedIn and X, once per stream, in your own words.' },
       { icon: 'calendar', title: 'Announcements ahead of time', body: 'Post your weekly schedule, debut reminders and birthday stream countdowns days before they happen.' },
@@ -396,10 +396,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'fansly-creators',
     title: 'Promote Your Fansly on X, Telegram and Bluesky',
-    description: 'Schedule the posts that send fans to your Fansly: previews, links and updates on X, Telegram, Bluesky, Mastodon and Discord. Free plan included.',
+    description: 'Schedule the posts that send fans to your Fansly: previews, links and updates on X, Telegram, Bluesky, Mastodon and Discord. Free plan included; X needs Pro.',
     eyebrow: 'For Fansly creators',
     h1: 'Schedule the posts that bring fans to your Fansly',
-    answer: 'SocialMate schedules the promo posts that point people to your Fansly page, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to Fansly or connect to your Fansly account. Write a week of previews and link posts in one sitting and they go out on time while you create. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the promo posts that point people to your Fansly page, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to Fansly or connect to your Fansly account. Write a week of previews and link posts in one sitting and they go out on time while you create. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'Promo posts on a schedule', body: 'Queue your teasers, link posts and new-content announcements for the times your fans are online.' },
       { icon: 'repeat', title: 'Rotate your offers', body: 'Campaign mode cycles up to 20 messages, like your page link, a free trial or a new bundle, on the days and times you pick until an end date.' },
@@ -433,10 +433,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'fanvue-creators',
     title: 'Promote Your Fanvue on X, Telegram and Bluesky',
-    description: 'Schedule the posts that send fans to your Fanvue: previews, links and updates on X, Telegram, Bluesky, Mastodon and Discord. Free plan included.',
+    description: 'Schedule the posts that send fans to your Fanvue: previews, links and updates on X, Telegram, Bluesky, Mastodon and Discord. Free plan included; X needs Pro.',
     eyebrow: 'For Fanvue creators',
     h1: 'Schedule the posts that bring fans to your Fanvue',
-    answer: 'SocialMate schedules the promo posts that point people to your Fanvue page, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to Fanvue or connect to your Fanvue account. Set up a week of link posts once and they go out on their own. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the promo posts that point people to your Fanvue page, on X, Telegram, Bluesky, Mastodon and Discord. It does not post to Fanvue or connect to your Fanvue account. Set up a week of link posts once and they go out on their own. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'Promo posts on a schedule', body: 'Queue previews, link posts and announcements for the hours your fans are awake, wherever they live.' },
       { icon: 'repeat', title: 'Rotate your offers', body: 'Campaign mode cycles up to 20 messages on the days and times you pick until an end date, and can reword them with AI so they do not read the same each time.' },
@@ -469,10 +469,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'ko-fi-creators',
     title: 'Free Post Scheduler for Ko-fi and Buy Me a Coffee Creators',
-    description: 'Schedule the posts that bring in supporters: new work, shop drops and thank-yous on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. Free plan included.',
+    description: 'Schedule the posts that bring in supporters: new work, shop drops and thank-yous on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. Free plan included; X needs Pro.',
     eyebrow: 'For Ko-fi and Buy Me a Coffee creators',
     h1: 'Schedule the posts that bring in supporters',
-    answer: 'SocialMate schedules the public posts that send people to your Ko-fi or Buy Me a Coffee page, on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. It does not post to either site. Share new work, shop drops and commission slots on a schedule, and keep making things. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the public posts that send people to your Ko-fi or Buy Me a Coffee page, on Bluesky, X, Discord, Telegram, Mastodon, LinkedIn and TikTok. It does not post to either site. Share new work, shop drops and commission slots on a schedule, and keep making things. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'New work, on time', body: 'Queue a post for every finished piece, chapter or episode, timed for when your audience is online.' },
       { icon: 'repeat', title: 'Shop and commission reminders', body: 'Campaign mode rotates your shop items, commission status and support link on the days you choose until an end date.' },
@@ -504,10 +504,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'cosplayers',
     title: 'Free Post Scheduler for Cosplayers',
-    description: 'Schedule build progress, photo sets and con plans to Bluesky, X, TikTok, Discord and Mastodon in one go. Free plan included.',
+    description: 'Schedule build progress, photo sets and con plans to Bluesky, X, TikTok, Discord and Mastodon in one go. Free plan included; X needs Pro.',
     eyebrow: 'For cosplayers',
     h1: 'Schedule your cosplay posts, free',
-    answer: 'SocialMate schedules your build progress, photo sets and convention plans to Bluesky, X, Mastodon, Discord, Telegram and LinkedIn, and posts videos to TikTok. Write a week of posts after a shoot and they go out while you sew. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules your build progress, photo sets and convention plans to Bluesky, X, Mastodon, Discord, Telegram and LinkedIn, and posts videos to TikTok. Write a week of posts after a shoot and they go out while you sew. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'image', title: 'Photo posts', body: 'Attach photos to a post and send it to Bluesky, X, Mastodon, Discord and Telegram at once.' },
       { icon: 'send', title: 'Transformation videos to TikTok', body: 'Upload a video and post it to TikTok publicly, or schedule it. The free plan includes 20 TikTok videos a month.' },
@@ -542,7 +542,7 @@ export const AUDIENCES: Audience[] = [
     description: 'Schedule posts to your clients\' accounts without their passwords. Each client invites you to their own SocialMate account, free, and you switch between them in one click.',
     eyebrow: 'For virtual assistants and social media managers',
     h1: 'Post for your clients without their passwords',
-    answer: 'With SocialMate, each client connects their own accounts and invites you as an Editor. You schedule to their LinkedIn, Bluesky, X, Discord, Telegram, Mastodon and TikTok from your own login, and switch between clients in the sidebar. On the free plan, which has 2 seats, your posts go straight to the queue; on Pro and Agency the owner can approve them first.',
+    answer: 'With SocialMate, each client connects their own accounts and invites you as an Editor. You schedule to their LinkedIn, Bluesky, X (on Pro), Discord, Telegram, Mastodon and TikTok from your own login, and switch between clients in the sidebar. On the free plan, which has 2 seats, your posts go straight to the queue; on Pro and Agency the owner can approve them first.',
     features: [
       { icon: 'users', title: 'No shared passwords', body: 'Your client connects their accounts once. You post from your own login, and they can remove you any time.' },
       { icon: 'globe', title: 'Every client, one login', body: 'Each client who invites you shows up under "Shared with you" in the workspace switcher. Pick one and you are posting to their accounts.' },
@@ -576,10 +576,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'artists',
     title: 'Free Post Scheduler for Artists and Illustrators',
-    description: 'Schedule art posts, commission openings and shop drops to Bluesky, X, Mastodon, Discord, Telegram and TikTok. Free plan included.',
+    description: 'Schedule art posts, commission openings and shop drops to Bluesky, X, Mastodon, Discord, Telegram and TikTok. Free plan included; X needs Pro.',
     eyebrow: 'For artists and illustrators',
     h1: 'Schedule your art posts, free',
-    answer: 'SocialMate schedules your finished pieces, works in progress and commission openings to Bluesky, X, Mastodon, Discord, Telegram and LinkedIn, and posts process videos to TikTok. Post when your audience is awake, not when you finally put the pen down. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules your finished pieces, works in progress and commission openings to Bluesky, X, Mastodon, Discord, Telegram and LinkedIn, and posts process videos to TikTok. Post when your audience is awake, not when you finally put the pen down. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'image', title: 'Image posts everywhere', body: 'Attach your art and send it to Bluesky, X, Mastodon, Discord and Telegram at once.' },
       { icon: 'clock', title: 'Post while you sleep', body: 'Schedule for the hours your followers are online, in any time zone.' },
@@ -611,10 +611,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'authors',
     title: 'Free Book Promotion Scheduler for Authors',
-    description: 'Schedule book launch posts, preorder reminders and newsletter links to Bluesky, X, Mastodon, LinkedIn, Discord and Telegram. Free plan included.',
+    description: 'Schedule book launch posts, preorder reminders and newsletter links to Bluesky, X, Mastodon, LinkedIn, Discord and Telegram. Free plan included; X needs Pro.',
     eyebrow: 'For authors and writers',
     h1: 'Schedule your book promotion, free',
-    answer: 'SocialMate schedules your launch posts, preorder reminders and newsletter links to Bluesky, X, Mastodon, LinkedIn, Discord and Telegram. Campaign mode keeps your buy links going out on a schedule until an end date, so promotion keeps running while you write the next book. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules your launch posts, preorder reminders and newsletter links to Bluesky, X, Mastodon, LinkedIn, Discord and Telegram. Campaign mode keeps your buy links going out on a schedule until an end date, so promotion keeps running while you write the next book. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'repeat', title: 'A launch that runs itself', body: 'Campaign mode rotates up to 20 messages, like your buy link, a review quote and a preorder bonus, for up to 26 weeks.' },
       { icon: 'globe', title: 'Blog or newsletter to drafts', body: 'Import your blog or newsletter feed and each new piece becomes a draft post to edit and schedule.' },
@@ -646,10 +646,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'newsletter-writers',
     title: 'Free Social Scheduler for Newsletter Writers',
-    description: 'Turn each issue into posts for Bluesky, LinkedIn, X, Mastodon, Discord and Telegram. Import from your Substack, Beehiiv or Ghost feed. Free plan included.',
+    description: 'Turn each issue into posts for Bluesky, LinkedIn, X, Mastodon, Discord and Telegram. Import from your Substack, Beehiiv or Ghost feed. Free plan included; X needs Pro.',
     eyebrow: 'For newsletter writers',
     h1: 'Turn every issue into social posts',
-    answer: 'SocialMate imports new issues from your newsletter\'s RSS feed (Substack, Beehiiv, Ghost and most others have one) as drafts, and schedules them to Bluesky, LinkedIn, X, Mastodon, Discord and Telegram. Post the issue, a thread of its best lines and a reminder later in the week, from one place. The free plan covers 250 posts a month.',
+    answer: 'SocialMate imports new issues from your newsletter\'s RSS feed (Substack, Beehiiv, Ghost and most others have one) as drafts, and schedules them to Bluesky, LinkedIn, X, Mastodon, Discord and Telegram. Post the issue, a thread of its best lines and a reminder later in the week, from one place. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'globe', title: 'Your feed to drafts', body: 'Paste your feed address and pick the issues to import. Each becomes a draft with its link.' },
       { icon: 'thread', title: 'Threads from an issue', body: 'Turn the best lines into a thread and post it to Bluesky, Mastodon or X right away, each part replying to the one before.' },
@@ -681,10 +681,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'open-source-maintainers',
     title: 'Announce Open Source Releases on Mastodon, Bluesky and Discord',
-    description: 'Turn GitHub releases into scheduled posts for Mastodon, Bluesky, Discord, LinkedIn and X, and keep your project\'s community in the loop. Free plan included.',
+    description: 'Turn GitHub releases into scheduled posts for Mastodon, Bluesky, Discord, LinkedIn and X, and keep your project\'s community in the loop. Free plan included; X needs Pro.',
     eyebrow: 'For open source maintainers',
     h1: 'Announce every release without copying it five times',
-    answer: 'SocialMate imports your project\'s GitHub releases from their Atom feed as drafts, and schedules the announcement to Mastodon, Bluesky, Discord, Telegram, LinkedIn and X. Write the release post once, add a thread of highlights, and get back to the code. The free plan covers 250 posts a month.',
+    answer: 'SocialMate imports your project\'s GitHub releases from their Atom feed as drafts, and schedules the announcement to Mastodon, Bluesky, Discord, Telegram, LinkedIn and X. Write the release post once, add a thread of highlights, and get back to the code. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'globe', title: 'Releases to drafts', body: 'Every GitHub repository has a releases feed at /releases.atom. Import it and each release becomes a draft with its link.' },
       { icon: 'send', title: 'Mastodon and Bluesky first', body: 'Post to any Mastodon instance and to Bluesky at once, where much of the open source crowd now reads.' },
@@ -717,10 +717,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'educators',
     title: 'Free Announcement Scheduler for Teachers, Tutors and Course Creators',
-    description: 'Schedule reminders and announcements to your class Discord or Telegram group, and promote your course on LinkedIn, Bluesky and X. Free plan included.',
+    description: 'Schedule reminders and announcements to your class Discord or Telegram group, and promote your course on LinkedIn, Bluesky and X. Free plan included; X needs Pro.',
     eyebrow: 'For teachers, tutors and course creators',
     h1: 'Schedule class reminders and course posts, free',
-    answer: 'SocialMate schedules reminders to a Discord server or Telegram group, and course promotion to LinkedIn, Bluesky, Mastodon and X. Set up a term\'s worth of reminders once and they go out on time. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules reminders to a Discord server or Telegram group, and course promotion to LinkedIn, Bluesky, Mastodon and X. Set up a term\'s worth of reminders once and they go out on time. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'repeat', title: 'Reminders that repeat', body: 'Campaign mode posts weekly reminders, like office hours or a due date, on the days and times you pick until the term ends.' },
       { icon: 'users', title: 'Discord and Telegram groups', body: 'Post to a Discord channel through the SocialMate bot, or to a Telegram group through your own bot.' },
@@ -752,10 +752,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'event-organizers',
     title: 'Free Event Promotion Scheduler',
-    description: 'Run an event countdown across Discord, Telegram, Bluesky, LinkedIn, Mastodon and X, with start times that show in every attendee\'s time zone. Free plan included.',
+    description: 'Run an event countdown across Discord, Telegram, Bluesky, LinkedIn, Mastodon and X, with start times that show in every attendee\'s time zone. Free plan included; X needs Pro.',
     eyebrow: 'For event organizers, meetups and conventions',
     h1: 'Run your event countdown on autopilot',
-    answer: 'SocialMate runs your event promotion as a campaign: up to 20 messages, like the date, the speakers and the ticket link, posted in turn on the days you pick until the event, to Discord, Telegram, Bluesky, LinkedIn, Mastodon and X. Campaigns keep going past your plan\'s scheduling window, up to 26 weeks. The free plan covers 250 posts a month.',
+    answer: 'SocialMate runs your event promotion as a campaign: up to 20 messages, like the date, the speakers and the ticket link, posted in turn on the days you pick until the event, to Discord, Telegram, Bluesky, LinkedIn, Mastodon and X. Campaigns keep going past your plan\'s scheduling window, up to 26 weeks. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'repeat', title: 'A countdown that runs itself', body: 'Set the messages, days and times once. Campaign mode posts them in turn until the end date.' },
       { icon: 'clock', title: 'Times in every zone', body: 'The free Discord timestamp generator makes start times that show in each attendee\'s own time zone.' },
@@ -787,10 +787,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'journalists',
     title: 'Free Scheduler for Journalists on Bluesky, Mastodon and LinkedIn',
-    description: 'Share your stories on Bluesky, Mastodon, LinkedIn and X, with real threads and posts timed for when readers are online. Free plan included.',
+    description: 'Share your stories on Bluesky, Mastodon, LinkedIn and X, with real threads and posts timed for when readers are online. Free plan included; X needs Pro.',
     eyebrow: 'For journalists and reporters',
     h1: 'Share your stories where readers moved to',
-    answer: 'SocialMate schedules links to your stories on Bluesky, Mastodon, LinkedIn and X, and posts real threads that reply part by part. Share a piece when it goes live, then again for readers in other time zones, from one place. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules links to your stories on Bluesky, Mastodon, LinkedIn and X, and posts real threads that reply part by part. Share a piece when it goes live, then again for readers in other time zones, from one place. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'send', title: 'Bluesky and Mastodon together', body: 'Post the same story to Bluesky and any Mastodon instance at once, and to LinkedIn.' },
       { icon: 'thread', title: 'Real threads', body: 'Post a thread of key findings right away, each part replying to the one before, on Bluesky, Mastodon or X.' },
@@ -822,10 +822,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'game-developers',
     title: 'Free Social Media Scheduler for Indie Game Developers',
-    description: 'Schedule devlogs, screenshot-day posts and wishlist reminders to Bluesky, Mastodon, X, Discord and Telegram, and post gameplay clips to TikTok. Free plan included.',
+    description: 'Schedule devlogs, screenshot-day posts and wishlist reminders to Bluesky, Mastodon, X, Discord and Telegram, and post gameplay clips to TikTok. Free plan included; X needs Pro.',
     eyebrow: 'For indie game developers',
     h1: 'Schedule your devlogs and wishlist pushes, free',
-    answer: 'SocialMate schedules your devlogs, screenshots and wishlist reminders to Bluesky, Mastodon, X, Discord, Telegram and LinkedIn, and posts trailers and gameplay clips to TikTok. Write a week of posts after a build and get back to the game. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules your devlogs, screenshots and wishlist reminders to Bluesky, Mastodon, X, Discord, Telegram and LinkedIn, and posts trailers and gameplay clips to TikTok. Write a week of posts after a build and get back to the game. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'image', title: 'Screenshot days, on time', body: 'Queue a screenshot for #screenshotsaturday and the other weekly tags the night before, so it goes out while you sleep.' },
       { icon: 'thread', title: 'Devlogs as real threads', body: 'Post a devlog as a thread to Bluesky, Mastodon or X right away, each part replying to the one before.' },
@@ -858,10 +858,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'youtubers',
     title: 'Promote Your YouTube Videos on Bluesky, X, LinkedIn and Discord',
-    description: 'Share every new upload to Bluesky, X, LinkedIn, Mastodon, Discord and Telegram on a schedule, and post vertical clips to TikTok. Free plan included.',
+    description: 'Share every new upload to Bluesky, X, LinkedIn, Mastodon, Discord and Telegram on a schedule, and post vertical clips to TikTok. Free plan included; X needs Pro.',
     eyebrow: 'For YouTubers',
     h1: 'Share every upload everywhere your audience is',
-    answer: 'SocialMate lists your latest YouTube videos and turns one into a scheduled post with its link, for Bluesky, X, LinkedIn, Mastodon, Discord and Telegram. Vertical clips go to TikTok through TikTok Studio. It does not upload to YouTube itself. The free plan covers 250 posts a month.',
+    answer: 'SocialMate lists your latest YouTube videos and turns one into a scheduled post with its link, for Bluesky, X, LinkedIn, Mastodon, Discord and Telegram. Vertical clips go to TikTok through TikTok Studio. It does not upload to YouTube itself. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'radio', title: 'Your uploads, one click from a post', body: 'Paste your channel address in Clips and your latest videos show up with thumbnails. Pick one and Compose opens with its title and link.' },
       { icon: 'users', title: 'New-video posts in Discord', body: 'Announce each upload in your Discord server through the SocialMate bot, at the time you choose.' },
@@ -894,10 +894,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'ugc-creators',
     title: 'Social Media Scheduler for UGC Creators',
-    description: 'Keep your own TikTok, LinkedIn, X and Bluesky active while you film for brands. Schedule a week of posts in one sitting. Free plan included.',
+    description: 'Keep your own TikTok, LinkedIn, X and Bluesky active while you film for brands. Schedule a week of posts in one sitting. Free plan included; X needs Pro.',
     eyebrow: 'For UGC creators',
     h1: 'Keep your own channels busy while you film for brands',
-    answer: 'SocialMate schedules your own posts to TikTok, LinkedIn, X, Bluesky, Mastodon, Discord and Telegram, so your profile keeps showing brands fresh work while you deliver theirs. Plan a week in one sitting. The free plan covers 250 posts a month, including 20 TikTok videos.',
+    answer: 'SocialMate schedules your own posts to TikTok, LinkedIn, X, Bluesky, Mastodon, Discord and Telegram, so your profile keeps showing brands fresh work while you deliver theirs. Plan a week in one sitting. The free plan covers 250 posts a month, including 20 TikTok videos; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'A week of posts in one sitting', body: 'Write and schedule your posts in one go, then get back to filming. The bulk scheduler takes several at once.' },
       { icon: 'send', title: 'TikTok from your computer', body: 'Upload a finished video in TikTok Studio, set who can see it and TikTok\'s content disclosure, and post it now or schedule it.' },
@@ -930,10 +930,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'affiliate-marketers',
     title: 'Social Media Scheduler for Affiliate Marketers',
-    description: 'Schedule affiliate posts to X, Telegram channels, Discord servers, Bluesky and Mastodon, rotate offers with campaigns and count clicks per message. Free plan included.',
+    description: 'Schedule affiliate posts to X, Telegram channels, Discord servers, Bluesky and Mastodon, rotate offers with campaigns and count clicks per message. Free plan included; X needs Pro.',
     eyebrow: 'For affiliate marketers',
     h1: 'Schedule your affiliate posts everywhere your audience reads',
-    answer: 'SocialMate schedules your affiliate posts to X, Telegram, Discord, Bluesky, Mastodon, LinkedIn and TikTok from one place. Campaign mode rotates your offers on the days you pick and can count the clicks on each message, and the free UTM builder tags your links. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules your affiliate posts to X, Telegram, Discord, Bluesky, Mastodon, LinkedIn and TikTok from one place. Campaign mode rotates your offers on the days you pick and can count the clicks on each message, and the free UTM builder tags your links. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'bot', title: 'Deal channels on a schedule', body: 'Post to your Telegram channel through your own bot and to your Discord server through the SocialMate bot, at the times you pick.' },
       { icon: 'repeat', title: 'Offers that rotate', body: 'Campaign mode cycles up to 20 messages on the days and times you choose until an end date, so the same link never goes out twice in a row.' },
@@ -966,10 +966,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'course-creators',
     title: 'Social Media Scheduler for Course Creators',
-    description: 'Promote your course on LinkedIn, X, Bluesky and TikTok, and keep your student community going on Discord and Telegram, all on a schedule. Free plan included.',
+    description: 'Promote your course on LinkedIn, X, Bluesky and TikTok, and keep your student community going on Discord and Telegram, all on a schedule. Free plan included; X needs Pro.',
     eyebrow: 'For course creators',
     h1: 'Fill your next cohort without living on social media',
-    answer: 'SocialMate schedules the posts that sell your course on LinkedIn, X, Bluesky, Mastodon and TikTok, and the announcements that keep students engaged in your Discord server or Telegram group. Plan a launch in one sitting and it goes out on time. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the posts that sell your course on LinkedIn, X, Bluesky, Mastodon and TikTok, and the announcements that keep students engaged in your Discord server or Telegram group. Plan a launch in one sitting and it goes out on time. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'repeat', title: 'A launch that runs itself', body: 'Campaign mode posts up to 20 messages on the days and times you pick until an end date: the announcement, the reminders, the last call.' },
       { icon: 'users', title: 'Your student community', body: 'Schedule lesson drops, office hours and reminders to your Discord server or Telegram group.' },
@@ -1037,10 +1037,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'esports-teams',
     title: 'Social Media Scheduler for Esports Teams and Gaming Communities',
-    description: 'Schedule match-day posts to X, Bluesky and TikTok and announcements to your Discord server and Telegram, with start times in every fan\'s time zone. Free plan included.',
+    description: 'Schedule match-day posts to X, Bluesky and TikTok and announcements to your Discord server and Telegram, with start times in every fan\'s time zone. Free plan included; X needs Pro.',
     eyebrow: 'For esports teams and gaming communities',
     h1: 'Match day, posted on time everywhere',
-    answer: 'SocialMate schedules your match announcements, roster news and results to X, Bluesky, Mastodon and TikTok, and to your Discord server and Telegram channel, from one place. Discord timestamps show start times in each fan\'s own time zone. The free plan covers 250 posts a month and 2 seats.',
+    answer: 'SocialMate schedules your match announcements, roster news and results to X, Bluesky, Mastodon and TikTok, and to your Discord server and Telegram channel, from one place. Discord timestamps show start times in each fan\'s own time zone. The free plan covers 250 posts a month and 2 seats; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'Match day, planned ahead', body: 'Schedule the hype post, the lineup and the start-time reminder before the match, so your team can focus on playing.' },
       { icon: 'users', title: 'Your Discord server', body: 'Announcements go to the channel you pick through the SocialMate bot, with images.' },
@@ -1072,10 +1072,10 @@ export const AUDIENCES: Audience[] = [
   {
     slug: 'buy-me-a-coffee-creators',
     title: 'Promote Your Buy Me a Coffee Page on X, Bluesky and Discord',
-    description: 'Schedule the posts that send supporters to your Buy Me a Coffee page, on X, Bluesky, Mastodon, Telegram, Discord and LinkedIn. Free plan included.',
+    description: 'Schedule the posts that send supporters to your Buy Me a Coffee page, on X, Bluesky, Mastodon, Telegram, Discord and LinkedIn. Free plan included; X needs Pro.',
     eyebrow: 'For Buy Me a Coffee creators',
     h1: 'Schedule the posts that bring supporters to your page',
-    answer: 'SocialMate schedules the posts that point people to your Buy Me a Coffee page, on X, Bluesky, Mastodon, Telegram, Discord and LinkedIn, plus TikTok videos. It does not post to Buy Me a Coffee or connect to your account there. The free plan covers 250 posts a month.',
+    answer: 'SocialMate schedules the posts that point people to your Buy Me a Coffee page, on X, Bluesky, Mastodon, Telegram, Discord and LinkedIn, plus TikTok videos. It does not post to Buy Me a Coffee or connect to your account there. The free plan covers 250 posts a month; X needs Pro.',
     features: [
       { icon: 'calendar', title: 'Thank-yous and updates on time', body: 'Queue your new-post announcements and supporter thank-yous for the times your audience is online.' },
       { icon: 'repeat', title: 'Rotate your asks', body: 'Campaign mode cycles up to 20 messages, like your page link, a membership or a new extra, until an end date.' },

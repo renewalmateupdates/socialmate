@@ -10,8 +10,8 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         typefully: '$12.50/month',           socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              typefully: 'Limited free plan',      socialmate: '✅ Genuinely free'        },
-  { feature: 'Platforms supported',    typefully: 'X/Twitter, LinkedIn',    socialmate: '7 live (free)'               },
-  { feature: 'Thread editor',          typefully: '✅ Best-in-class',       socialmate: '✅ Free'                  },
+  { feature: 'Platforms supported',    typefully: 'X/Twitter, LinkedIn',    socialmate: '7 live (6 free, X on Pro)'               },
+  { feature: 'Thread editor',          typefully: '✅ Best-in-class',       socialmate: '✅ Free (X threads on Pro)'                  },
   { feature: 'Team seats',             typefully: '1 on Creator',           socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       typefully: 'AI assist (paid)',       socialmate: '15+ tools free'           },
   { feature: 'Analytics',             typefully: 'Creator+ plan',          socialmate: '✅ Free'                  },
@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate have a thread editor?',
-    a: 'Yes — SocialMate supports X/Twitter thread scheduling with multi-tweet composition. While Typefully\'s dedicated thread editor is more refined for power users, SocialMate covers the core thread workflow for free.',
+    a: 'Yes — SocialMate supports X/Twitter thread scheduling with multi-tweet composition. While Typefully\'s dedicated thread editor is more refined for power users, SocialMate covers the core thread workflow; posting to X needs Pro ($8/month).',
   },
   {
     q: 'Does Typefully support platforms besides X/Twitter?',
@@ -107,7 +107,7 @@ export default function VsTypefully() {
 
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-raised border border-edge-lit text-ink-muted text-xs font-bold px-4 py-2 rounded-full mb-6">
-            <PenLine size={13} strokeWidth={2} /> Typefully is a thread-first editor — SocialMate covers 7 platforms for free
+            <PenLine size={13} strokeWidth={2} /> Typefully is a thread-first editor — SocialMate covers 7 platforms, 6 of them free
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs Typefully (2026)
@@ -128,7 +128,7 @@ export default function VsTypefully() {
           <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
-            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
+            <p className="text-xs text-jade">6 platforms free · X on Pro · 15+ AI tools</p>
           </div>
         </div>
 
@@ -179,7 +179,7 @@ export default function VsTypefully() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
+            6 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking, all free (X needs Pro). No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

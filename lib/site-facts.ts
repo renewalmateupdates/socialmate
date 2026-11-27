@@ -42,7 +42,7 @@ export const BRAND = {
   tagline: 'Free social media scheduler and Creator OS',
   /** One sentence, safe to quote anywhere. */
   summary:
-    'SocialMate is a social media scheduler with built-in AI writing tools. It posts to TikTok, LinkedIn, X, Bluesky, Discord, Telegram and Mastodon, and has a free plan that needs no credit card.',
+    'SocialMate is a social media scheduler with built-in AI writing tools. It posts to TikTok, LinkedIn, X, Bluesky, Discord, Telegram and Mastodon, and its free plan covers all of them except X, with no credit card needed.',
   supportEmail: 'socialmatehq@gmail.com',
   legalEntity: 'Gilgamesh Enterprise LLC',
   entityNote: 'a Wyoming LLC',

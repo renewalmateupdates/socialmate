@@ -120,7 +120,7 @@ export default function VsIconosquarePage() {
             <p className="font-extrabold text-lg mb-2">Schedule + analytics. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ Real scheduling across 7 platforms</li>
+              <li>✅ Real scheduling across 7 platforms (X needs Pro)</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
@@ -203,7 +203,7 @@ export default function VsIconosquarePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $49/month analytics bill — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, analytics included. No credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 6 platforms (X needs Pro), analytics included. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Hypefury (2026) — Full Comparison',
-  description: 'Hypefury starts at $19/month and focuses on X/Twitter and LinkedIn. SocialMate starts at $0 with 7 platforms. See the full comparison.',
+  description: 'Hypefury starts at $19/month and focuses on X/Twitter and LinkedIn. SocialMate starts at $0 on 6 platforms, and X is on Pro. See the full comparison.',
   openGraph: {
     title:       'SocialMate vs Hypefury (2026)',
-    description: 'Hypefury charges $19–$49/month and is X/Twitter-focused. SocialMate is free with 7 platforms and 15+ AI tools.',
+    description: 'Hypefury charges $19–$49/month and is X/Twitter-focused. SocialMate is free on 6 platforms (X needs Pro), with 15+ AI tools.',
     url:         'https://socialmate.studio/vs/hypefury',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/hypefury' },

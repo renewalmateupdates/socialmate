@@ -83,7 +83,7 @@ export default function VsRiplPage() {
             SocialMate vs Ripl
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 7 platforms, 15 AI tools, autonomous content, and a $0 free plan.
+            Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 7 platforms, 15 AI tools, autonomous content, and a $0 free plan on 6 platforms.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -111,7 +111,7 @@ export default function VsRiplPage() {
           </div>
           <div className="bg-amber/10 text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-high uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Full Creator OS. 7 platforms. Starts free.</p>
+            <p className="font-extrabold text-lg mb-2">Full Creator OS. 7 platforms, 6 free.</p>
             <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
               <li>✅ 15 AI writing and content tools</li>
@@ -156,7 +156,7 @@ export default function VsRiplPage() {
               {
                 n: '2',
                 title: "Ripl costs $15/month for platforms SocialMate covers free",
-                desc: "SocialMate's free plan covers 7 live platforms. Ripl costs $15/month for a smaller set of platforms and without Discord, Telegram, or Bluesky. SocialMate Pro at $8/month includes more platforms, more AI tools, and autonomous content.",
+                desc: "SocialMate's free plan covers 6 of the 7 live platforms (X needs Pro). Ripl costs $15/month for a smaller set of platforms and without Discord, Telegram, or Bluesky. SocialMate Pro at $8/month includes more platforms, more AI tools, and autonomous content.",
               },
               {
                 n: '3',
@@ -197,7 +197,7 @@ export default function VsRiplPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Need more than animated videos? Start free.</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms, gives you 15 AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
+            SocialMate covers 7 platforms (6 free, X on Pro), gives you 15 AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

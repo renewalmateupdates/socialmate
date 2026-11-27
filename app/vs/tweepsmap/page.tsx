@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',               competitor: '$12+/month',                 socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                    competitor: '⚠️ Very limited free tier',   socialmate: '✅ 50 credits/month'     },
-  { feature: 'Post scheduling',              competitor: '❌ No scheduling',            socialmate: '✅ Free across 7 platforms'},
+  { feature: 'Post scheduling',              competitor: '❌ No scheduling',            socialmate: '✅ Free on 6 platforms, X on Pro'},
   { feature: 'X / Twitter analytics',        competitor: '✅ Deep audience analytics',  socialmate: '✅ Engagement tracking'  },
   { feature: 'TikTok scheduling',             competitor: '❌',                          socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: 'Why pay for Tweepsmap analytics alone when scheduling costs extra?',
-    a: 'Tweepsmap is analytics-only — you still need Buffer, Hootsuite, or another scheduler on top of it. That\'s two subscriptions, two logins, two tools to manage. SocialMate combines scheduling across 7 platforms and multi-platform analytics in one dashboard for free. Pro is $8/month for advanced features.',
+    a: 'Tweepsmap is analytics-only — you still need Buffer, Hootsuite, or another scheduler on top of it. That\'s two subscriptions, two logins, two tools to manage. SocialMate combines scheduling across 7 platforms and multi-platform analytics in one dashboard, free on all but X. Pro is $8/month for X and advanced features.',
   },
   {
     q: 'Does SocialMate show best posting times for X/Twitter?',
@@ -45,7 +45,7 @@ const FAQ = [
   },
   {
     q: 'What platforms does SocialMate cover beyond Twitter/X?',
-    a: 'SocialMate schedules TikTok (free, 20 videos/mo), LinkedIn, Bluesky, Discord, Telegram, Mastodon, and X/Twitter — 7 platforms total. Tweepsmap only covers Twitter/X. If your audience exists on any other platform, Tweepsmap can\'t help and you need a separate tool for each one.',
+    a: 'SocialMate schedules TikTok (free, 20 videos/mo), LinkedIn, Bluesky, Discord, Telegram, Mastodon, and X/Twitter (Pro) — 7 platforms total. Tweepsmap only covers Twitter/X. If your audience exists on any other platform, Tweepsmap can\'t help and you need a separate tool for each one.',
   },
 ]
 
@@ -89,7 +89,7 @@ export default function VsTweepsmapPage() {
             SocialMate vs Tweepsmap
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Tweepsmap is Twitter/X analytics only — no scheduling at all. SocialMate schedules 7 platforms and includes cross-platform analytics, free to start.
+            Tweepsmap is Twitter/X analytics only — no scheduling at all. SocialMate schedules 7 platforms and includes cross-platform analytics, all free except X.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -117,7 +117,7 @@ export default function VsTweepsmapPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Schedule + analyze. 7 platforms. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Schedule + analyze. 7 platforms, 6 free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule across X, TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon</li>
               <li>✅ Best-times heatmap per platform</li>
@@ -204,7 +204,7 @@ export default function VsTweepsmapPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Schedule + analytics in one</p>
           <h2 className="text-3xl font-extrabold mb-4">Stop paying for analytics without scheduling</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate gives you post scheduling and engagement analytics across 7 platforms.
+            SocialMate gives you post scheduling and engagement analytics across 7 platforms (X needs Pro).
             Free plan available. Pro is $8/month — one tool, not two.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

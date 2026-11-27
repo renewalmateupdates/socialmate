@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: 'Is the free plan actually free?',
-    a: 'Yes. No credit card required. The free plan includes 50 credits per month, 2 seats, and full access to the post scheduling features. You can schedule to all supported platforms without paying anything.',
+    a: 'Yes. No credit card required. The free plan includes 50 credits per month, 2 seats, and full access to the post scheduling features. You can schedule to 6 of the 7 platforms without paying anything (X needs Pro).',
   },
   {
     q: 'How do I connect my social accounts?',

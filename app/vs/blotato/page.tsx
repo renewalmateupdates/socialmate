@@ -52,7 +52,7 @@ export default function VsBlotatoPage() {
         { q: 'Can SocialMate make AI images and videos like Blotato?', a: 'No. SocialMate\'s AI writes captions, hooks, threads and hashtags. Blotato\'s AI credits are for images and video.' },
         { q: 'Does SocialMate post to Instagram or YouTube?', a: `Not yet. SocialMate posts to ${SM.livePlatforms.join(', ')}.` },
       ]}
-      closing={{ title: 'No card. No trial clock.', body: `${SM.freePosts} posts a month on 7 platforms, including Discord and Telegram, free.` }}
+      closing={{ title: 'No card. No trial clock.', body: `${SM.freePosts} posts a month on 6 platforms, including Discord and Telegram, free. X needs Pro.` }}
     />
   )
 }

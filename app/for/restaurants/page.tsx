@@ -68,7 +68,7 @@ const FEATURES = [
   },
   {
     title: 'Cross-Post to 7 Platforms at Once',
-    desc:  'Write one post. Hit schedule. It goes to TikTok, Discord, Telegram, Bluesky, X, Mastodon, and LinkedIn simultaneously. No copy-paste, no switching apps.',
+    desc:  'Write one post. Hit schedule. It goes to TikTok, Discord, Telegram, Bluesky, X, Mastodon, and LinkedIn simultaneously (X needs Pro). No copy-paste, no switching apps.',
     icon:  Satellite,
     badge: 'Free',
   },

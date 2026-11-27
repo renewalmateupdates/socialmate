@@ -89,7 +89,7 @@ export default function VsHubSpotSocialPage() {
             SocialMate vs HubSpot Social
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            HubSpot social scheduling is buried inside an $800+/month marketing platform. SocialMate delivers social scheduling across 7 platforms for $8/month — or completely free.
+            HubSpot social scheduling is buried inside an $800+/month marketing platform. SocialMate delivers social scheduling across 7 platforms for $8/month, or 6 of them completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -204,7 +204,7 @@ export default function VsHubSpotSocialPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Social scheduling without the enterprise price</p>
           <h2 className="text-3xl font-extrabold mb-4">Get the scheduling. Skip the $800/month bill.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate schedules 7 platforms including TikTok and LinkedIn.
+            SocialMate schedules 7 platforms including TikTok and LinkedIn (X needs Pro).
             Free plan available. Pro is $8/month — not $800.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

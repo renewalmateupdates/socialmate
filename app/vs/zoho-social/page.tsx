@@ -100,7 +100,7 @@ export default function VsZohoSocialPage() {
             </Link>
           </div>
           <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
-            {['7 platforms', '15+ AI tools free', 'No Zoho required', 'Free forever'].map((pill) => (
+            {['7 platforms (X on Pro)', '15+ AI tools free', 'No Zoho required', 'Free forever'].map((pill) => (
               <span key={pill} className="text-xs font-semibold bg-raised text-ink-muted px-3 py-1 rounded-full">
                 {pill}
               </span>
@@ -124,10 +124,10 @@ export default function VsZohoSocialPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">All platforms. All tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 7 platforms including Discord and Telegram</li>
+              <li>✅ 6 platforms including Discord and Telegram (X needs Pro)</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Link in bio, hashtag manager, evergreen recycling</li>
               <li>✅ No Zoho account needed</li>
@@ -210,7 +210,7 @@ export default function VsZohoSocialPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $15/month — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 7 platforms, 15+ AI tools, bulk scheduling, link in bio, hashtag manager. No Zoho account. No credit card required.
+            SocialMate is free forever — 6 platforms (X needs Pro), 15+ AI tools, bulk scheduling, link in bio, hashtag manager. No Zoho account. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

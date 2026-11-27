@@ -108,7 +108,7 @@ export default function VsPlanlyPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">TikTok free. 7 platforms. 15+ AI tools.</p>
+            <p className="font-extrabold text-lg mb-2">TikTok free. 6 free platforms. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ 20 TikTok videos/month on free plan</li>
@@ -192,9 +192,9 @@ export default function VsPlanlyPage() {
 
         {/* CTA */}
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Free TikTok scheduling. 7 platforms. Zero cost to start.</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Free TikTok scheduling. 6 free platforms. Zero cost to start.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            TikTok Production API approved. Schedule videos for free — plus Discord, Telegram, Mastodon, Bluesky, and X — all from one dashboard.
+            TikTok Production API approved. Schedule videos for free — plus Discord, Telegram, Mastodon, Bluesky, and X on Pro — all from one dashboard.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -302,7 +302,7 @@ const VIDEO_TOOLS = [
     icon: Gamepad2,
     label: 'Clips Studio',
     credits: 'Free',
-    what: 'Browse your Twitch clips or any YouTube channel videos and schedule them to all 7 platforms in one click.',
+    what: 'Browse your Twitch clips or any YouTube channel videos and schedule them to all 7 platforms in one click (X needs Pro).',
     how: 'Twitch requires OAuth (connect via Accounts). YouTube works via channel URL — no API key needed.',
     href: '/clips',
     available: true,

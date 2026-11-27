@@ -20,7 +20,7 @@ export default function VsAuthoredUpPage() {
           '❌ Scheduling runs through its Chrome extension',
         ],
       }}
-      us={{ title: 'LinkedIn plus 6 platforms, free to start', points: SM_POINTS }}
+      us={{ title: 'LinkedIn and 5 more platforms free, X on Pro', points: SM_POINTS }}
       rows={[
         { feature: 'One person',              them: '$19.95/mo Individual, 1 profile',               us: `$0 Free, or $${SM.proPrice}/mo Pro` },
         { feature: 'Teams',                   them: '$14.95 per profile per month, 3-profile minimum', us: `$${SM.proPrice}/mo Pro with ${SM.proSeats} seats, $${SM.agencyPrice}/mo Agency with ${SM.agencySeats}` },
@@ -46,7 +46,7 @@ export default function VsAuthoredUpPage() {
         { q: 'Can SocialMate schedule LinkedIn posts?', a: 'Yes, to personal profiles, from the web app. Company pages are not available yet.' },
         { q: 'Is there a free LinkedIn text formatter?', a: 'Yes. SocialMate\'s LinkedIn formatter at socialmate.studio/tools/linkedin-formatter is free with no signup.' },
       ]}
-      closing={{ title: 'Your LinkedIn post, everywhere.', body: `Write it once and post it to 7 platforms. ${SM.freePosts} posts a month free.` }}
+      closing={{ title: 'Your LinkedIn post, everywhere.', body: `Write it once and post it to 7 platforms (X needs Pro). ${SM.freePosts} posts a month free.` }}
     />
   )
 }

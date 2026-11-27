@@ -10,7 +10,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         hypefury: '$19/month',               socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              hypefury: '7-day trial only',        socialmate: '✅ Genuinely free'        },
-  { feature: 'Platforms supported',    hypefury: 'X, LinkedIn, Instagram',  socialmate: '7 live (free)'               },
+  { feature: 'Platforms supported',    hypefury: 'X, LinkedIn, Instagram',  socialmate: '7 live (6 free, X on Pro)'               },
   { feature: 'X/Twitter threads',      hypefury: '✅ Core feature',         socialmate: '✅ (Pro+)'                },
   { feature: 'Team seats',             hypefury: '1 on Standard',           socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hypefury: 'AI ghostwriter (paid)',   socialmate: '15+ tools free'           },
@@ -107,7 +107,7 @@ export default function VsHypefury() {
 
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-raised border border-edge-lit text-ink-muted text-xs font-bold px-4 py-2 rounded-full mb-6">
-            <Bird size={13} strokeWidth={2} /> Hypefury is built for X/Twitter — SocialMate covers 7 platforms for free
+            <Bird size={13} strokeWidth={2} /> Hypefury is built for X/Twitter — SocialMate covers 7 platforms, 6 of them free
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs Hypefury (2026)
@@ -128,7 +128,7 @@ export default function VsHypefury() {
           <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
-            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
+            <p className="text-xs text-jade">6 platforms free · X on Pro · 15+ AI tools</p>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export default function VsHypefury() {
             But X/Twitter is increasingly one channel among many. Most creators today need to be on Bluesky, Mastodon, Discord, and other platforms as audiences diversify. Hypefury doesn&#39;t support those.
           </p>
           <p className="text-sm text-ink-muted leading-relaxed">
-            SocialMate covers X/Twitter (threads, scheduling, quota management) plus 15 other platforms, 15+ AI tools, and competitor tracking — for free. If you&#39;re paying $19/month for Hypefury and also managing other platforms, SocialMate consolidates everything.
+            SocialMate covers X/Twitter on Pro (threads, scheduling, quota management) plus 6 other platforms, 15+ AI tools, and competitor tracking for free. If you&#39;re paying $19/month for Hypefury and also managing other platforms, SocialMate consolidates everything.
           </p>
         </div>
 
@@ -179,7 +179,7 @@ export default function VsHypefury() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
+            6 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking, all free (X needs Pro). No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

@@ -115,7 +115,7 @@ export default function VsStatusbrewPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">All platforms. All tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">6 platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -170,7 +170,7 @@ export default function VsStatusbrewPage() {
               {
                 n: '4',
                 title: 'SocialMate covers platforms Statusbrew does not',
-                desc: 'Discord, Telegram, Mastodon, and Bluesky are not supported by Statusbrew. SocialMate covers all four on the free plan — along with Instagram, LinkedIn, Facebook, Twitter/X, Pinterest, Reddit, TikTok, and more.',
+                desc: 'Discord, Telegram, Mastodon, and Bluesky are not supported by Statusbrew. SocialMate covers all four on the free plan, along with LinkedIn and TikTok, and Twitter/X on Pro.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
@@ -201,7 +201,7 @@ export default function VsStatusbrewPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $69/month — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, 2 team seats. No credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 6 platforms (X needs Pro), 2 team seats. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -10,7 +10,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         napoleoncat: '$32/month',             socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              napoleoncat: '14-day trial only',     socialmate: '✅ Genuinely free'        },
-  { feature: 'Profiles on entry plan', napoleoncat: '3 profiles, 1 user',    socialmate: '1 per platform, all 7 free' },
+  { feature: 'Profiles on entry plan', napoleoncat: '3 profiles, 1 user',    socialmate: '1 per platform, 6 free (X on Pro)' },
   { feature: 'Platforms supported',    napoleoncat: '7 (paid)',              socialmate: '7 live (free)'               },
   { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '15+ tools free'           },
   { feature: 'Bulk scheduling',        napoleoncat: '✅',                    socialmate: '✅ Free'                  },
@@ -45,7 +45,7 @@ const FAQ = [
   },
   {
     q: 'Why is SocialMate a better value for small teams?',
-    a: 'At $32/month for just 3 profiles, NapoleonCat\'s entry tier is limiting and expensive for what you get. SocialMate gives you all 7 platforms, AI tools, and analytics for $0. For growing teams, that difference compounds fast.',
+    a: 'At $32/month for just 3 profiles, NapoleonCat\'s entry tier is limiting and expensive for what you get. SocialMate gives you 6 platforms, AI tools, and analytics for $0 (X needs Pro). For growing teams, that difference compounds fast.',
   },
 ]
 
@@ -128,7 +128,7 @@ export default function VsNapoleonCat() {
           <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
-            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
+            <p className="text-xs text-jade">6 platforms free · X on Pro · 15+ AI tools</p>
           </div>
         </div>
 
@@ -179,7 +179,7 @@ export default function VsNapoleonCat() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
+            6 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking, all free (X needs Pro). No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

@@ -115,7 +115,7 @@ const FEATURES = [
   },
   {
     title: 'Cross-Platform Posting',
-    desc:  'LinkedIn is just one of 7 live platforms. Write once and simultaneously schedule to LinkedIn, Bluesky, X/Twitter, Mastodon, Discord, and Telegram from a single compose window.',
+    desc:  'LinkedIn is just one of 7 live platforms. Write once and simultaneously schedule to LinkedIn, Bluesky, X/Twitter, Mastodon, Discord, and Telegram from a single compose window (X/Twitter needs Pro).',
     icon:  Globe,
     badge: 'Free',
     live:  true,

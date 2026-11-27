@@ -55,7 +55,7 @@ export default function VsPostBridgePage() {
         { q: 'Does SocialMate post to Instagram like Post Bridge?', a: `No. SocialMate posts to ${SM.livePlatforms.join(', ')}. If Instagram, Facebook or YouTube is your main channel, Post Bridge is the better fit today.` },
         { q: 'Does SocialMate have an API?', a: 'Not yet. Post Bridge includes an API and an MCP server on its paid plans.' },
       ]}
-      closing={{ title: 'Try it before you pay anything.', body: `${SM.freePosts} posts a month on 7 platforms, including Discord and Telegram. No card, no trial clock.` }}
+      closing={{ title: 'Try it before you pay anything.', body: `${SM.freePosts} posts a month on 6 platforms, including Discord and Telegram (X needs Pro). No card, no trial clock.` }}
     />
   )
 }

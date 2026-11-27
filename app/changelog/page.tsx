@@ -28,6 +28,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'Fixed',    text: 'Backing out of the checkout page no longer uses up a promo code. Before, the pricing page then said you had already used it.' },
       { type: 'Fixed',    text: 'The pricing page now says how long a discount lasts, for example "50% off your first 12 months" or "31% off your first payment", instead of just "50% off".' },
       { type: 'Fixed',    text: 'The Dashboard\'s "Coming very soon" list no longer names Pinterest or Reddit. Both turned down our applications.' },
+      { type: 'Fixed',    text: 'Every page that describes the free plan now says what it covers: six platforms, with X on Pro because X charges for every post. Comparison pages, audience pages, guides, the blog and the /for pages in all nine languages had said all seven were free, and a few comparison pages for X tools said X posting itself was free.' },
     ],
   },
   {

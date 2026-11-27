@@ -45,7 +45,7 @@ const FAQ = [
   },
   {
     q: 'Is SmarterQueue worth the cost over SocialMate?',
-    a: 'SmarterQueue\'s category-based queue system is more structured than SocialMate\'s current evergreen recycling. If that specific workflow is critical to you, it\'s worth considering. But SocialMate offers 15+ AI tools, competitor tracking, 7 platforms, and more — all free — which SmarterQueue can\'t match at any price.',
+    a: 'SmarterQueue\'s category-based queue system is more structured than SocialMate\'s current evergreen recycling. If that specific workflow is critical to you, it\'s worth considering. But SocialMate offers 15+ AI tools, competitor tracking, 6 platforms (X needs Pro), and more — all free — which SmarterQueue can\'t match at any price.',
   },
 ]
 
@@ -115,7 +115,7 @@ export default function VsSmarterqueue() {
           <p className="text-ink-muted max-w-2xl mx-auto text-sm leading-relaxed">
             SmarterQueue built its reputation on category-based evergreen recycling.
             It&#39;s a well-designed tool for content-heavy accounts. But SocialMate now
-            ships evergreen recycling for free — plus 15+ AI tools and 7 platforms SmarterQueue doesn&#39;t support.
+            ships evergreen recycling for free — plus 15+ AI tools and 7 platforms (6 free, X on Pro).
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export default function VsSmarterqueue() {
           <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
-            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
+            <p className="text-xs text-jade">6 platforms free · X on Pro · 15+ AI tools</p>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export default function VsSmarterqueue() {
             But SmarterQueue has no AI writing tools, no link in bio, no competitor tracking, and doesn&#39;t support emerging platforms like Bluesky or Mastodon. In 2026, those gaps matter.
           </p>
           <p className="text-sm text-ink-muted leading-relaxed">
-            SocialMate covers evergreen recycling and then some — plus 15+ AI tools, 7 platforms, and a full feature set at $0. If SmarterQueue&#39;s evergreen system has been your main reason to stay, there&#39;s no longer a reason to pay for it.
+            SocialMate covers evergreen recycling and then some — plus 15+ AI tools, 6 platforms (X needs Pro), and a full feature set at $0. If SmarterQueue&#39;s evergreen system has been your main reason to stay, there&#39;s no longer a reason to pay for it.
           </p>
         </div>
 
@@ -179,7 +179,7 @@ export default function VsSmarterqueue() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
+            6 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking, all free (X needs Pro). No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

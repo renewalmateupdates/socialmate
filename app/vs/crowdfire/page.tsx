@@ -116,7 +116,7 @@ export default function VsCrowdfirePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">250 posts / month. 7 platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. 6 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — 250 posts/month</li>
               <li>✅ Analytics included free (30 days)</li>
@@ -156,7 +156,7 @@ export default function VsCrowdfirePage() {
               {
                 n: '1',
                 title: '10 posts per month is not enough for anyone posting regularly',
-                desc: 'If you post once a day, Crowdfire\'s free plan runs out in 10 days. If you post three times a week, you hit the wall by day 25. The hard cap forces you to either pay or stop scheduling — that is not a free plan, it is a trial with a monthly reset. SocialMate\'s free plan allows 250 posts a month, enough room for daily posting across every platform you connect.',
+                desc: 'If you post once a day, Crowdfire\'s free plan runs out in 10 days. If you post three times a week, you hit the wall by day 25. The hard cap forces you to either pay or stop scheduling — that is not a free plan, it is a trial with a monthly reset. SocialMate\'s free plan allows 250 posts a month, enough room for daily posting across every platform you connect (X needs Pro).',
               },
               {
                 n: '2',
@@ -202,7 +202,7 @@ export default function VsCrowdfirePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No 10-post cap here — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 250 posts/month, bulk scheduling, 15+ AI tools, analytics included, 7 platforms. No credit card required.
+            SocialMate is free forever — 250 posts/month, bulk scheduling, 15+ AI tools, analytics included, 6 platforms (X needs Pro). No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

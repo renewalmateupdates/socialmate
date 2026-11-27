@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'MeetEdgar starts at $29.99/month with no free plan. SocialMate has evergreen recycling free, supports Bluesky/Discord/Telegram/Mastodon, and costs $0 to start.',
   openGraph: {
     title:       'SocialMate vs MeetEdgar (2026)',
-    description: 'MeetEdgar charges $29.99/month and skips Bluesky, Discord, Telegram, and Mastodon. SocialMate does evergreen recycling free on 7 platforms.',
+    description: 'MeetEdgar charges $29.99/month and skips Bluesky, Discord, Telegram, and Mastodon. SocialMate does evergreen recycling free on 6 platforms (X needs Pro).',
     url:         'https://socialmate.studio/vs/meetedgar',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/meetedgar' },

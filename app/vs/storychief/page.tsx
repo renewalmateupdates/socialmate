@@ -92,7 +92,7 @@ export default function VsStoryChiefPage() {
             SocialMate vs StoryChief
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            StoryChief charges $99/month for content marketing. SocialMate covers 7 platforms including Discord and Telegram — starting completely free.
+            StoryChief charges $99/month for content marketing. SocialMate covers 7 platforms including Discord and Telegram, all free except X.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -120,7 +120,7 @@ export default function VsStoryChiefPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. AI built in. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms, 6 free. AI built in.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -205,7 +205,7 @@ export default function VsStoryChiefPage() {
         {/* BOTTOM CTA */}
         <div className="text-center py-12 bg-void text-ink-high rounded-3xl px-8">
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">The obvious choice</p>
-          <h2 className="text-3xl font-extrabold mb-4">Schedule to 7 platforms free</h2>
+          <h2 className="text-3xl font-extrabold mb-4">Schedule to 6 platforms free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate connects to Discord, Telegram, Bluesky, TikTok, LinkedIn, X, and Mastodon.
             Start for free. When you&apos;re ready for AI agents and SOMA, Pro is $8/month.

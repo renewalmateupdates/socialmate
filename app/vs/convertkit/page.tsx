@@ -28,11 +28,11 @@ const FAQ = [
   },
   {
     q: 'Does ConvertKit schedule social media posts?',
-    a: "No. ConvertKit is built around email. It does not schedule posts to Twitter, Bluesky, Discord, Telegram, TikTok, or LinkedIn. You need a separate tool for social — or use SocialMate, which covers all 7 platforms and is free to start.",
+    a: "No. ConvertKit is built around email. It does not schedule posts to Twitter, Bluesky, Discord, Telegram, TikTok, or LinkedIn. You need a separate tool for social — or use SocialMate, which covers all 7 platforms, 6 of them free.",
   },
   {
     q: 'Can SocialMate and ConvertKit work together?',
-    a: "Yes, and many creators use this combo. SocialMate builds your social audience across 7 platforms; your SIGIL link in bio drives followers to your ConvertKit landing page where they subscribe to your email list. Two complementary tools — one costs nothing to start.",
+    a: "Yes, and many creators use this combo. SocialMate builds your social audience across 7 platforms (X needs Pro); your SIGIL link in bio drives followers to your ConvertKit landing page where they subscribe to your email list. Two complementary tools — one costs nothing to start.",
   },
   {
     q: 'What makes SocialMate better for social media than ConvertKit?',
@@ -77,7 +77,7 @@ export default function VsConvertkitPage() {
             SocialMate vs ConvertKit (Kit)
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            ConvertKit (now Kit) is an email platform at $25+/month. SocialMate is a 7-platform social media scheduler with 15+ AI tools — free to start. Complementary tools, not competitors.
+            ConvertKit (now Kit) is an email platform at $25+/month. SocialMate is a 7-platform social media scheduler with 15+ AI tools, free to start on 6 platforms (X needs Pro). Complementary tools, not competitors.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -104,7 +104,7 @@ export default function VsConvertkitPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Social-first. 7 platforms. Starts free.</p>
+            <p className="font-extrabold text-lg mb-2">Social-first. 7 platforms, 6 free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Schedule to 7 platforms in one click</li>
               <li>✅ 15+ AI writing and content tools</li>
@@ -185,7 +185,7 @@ export default function VsConvertkitPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Build your social audience first — it is free</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            Schedule to 7 platforms, use 15+ AI tools, grow your audience — all free. No credit card required.
+            Schedule to 6 platforms, use 15+ AI tools, grow your audience, all free (X needs Pro). No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-amber/10 text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}
