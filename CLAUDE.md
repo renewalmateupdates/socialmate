@@ -721,8 +721,14 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   - A dry run over all 200 rows left no tags and dropped no words.
   - HTML posts without an excerpt no longer put tags in their meta description.
   - `scripts/test-blog-html.mjs` covers it.
-- **After it deploys:** check a few posts live, then submit the 200 URLs to
-  IndexNow.
+- **Checked live after it deployed (Nov 27):** two of the fixed posts show
+  real headings and no escaped tags, the TikTok tools post shows ClipTalk in
+  bold with no sideways scroll, and IndexNow accepted all 200 URLs.
+- **The post page's header at tablet width (same day):** from 768 to about
+  860 px the logo ran into "Features" and every label wrapped onto two lines
+  (the row needs about 810 px). The middle links now show from `lg` (1024 px),
+  the logo never shrinks, and phones get a 16 px gutter, so a 320 px screen
+  keeps the button on one line. Measured at 320, 375, 800, 1024 and 1280 px.
 
 **Nov 27: the slow pages Speed Insights Plus showed, and the sign-in callback
 (#842).** Read before Plus ends on Dec 19, for the 7 days to Nov 27:
@@ -753,13 +759,13 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   makes none (the post routes create one when it is needed).
 - `scripts/test-sign-in.mjs` covers it; its wiring check fails on the old
   callback.
-- **After #842 deploys:** read the next sign-ins in production.
-  - A returning sign-in moves `login_count` and `last_active`.
-  - A new account gets `funnel_signup_completed`, `welcome_email_sent` and its
-    source.
-  - All of that now runs in `after()`, which this app has never been seen to
-    run in production (#793's webhooks were never walked).
-  - Then check Observability's `/auth/callback` p75 (1.31 s before).
+- **Checked after #842 deployed (Nov 27, read-only):** the first two sign-ins,
+  both new outside accounts (Google at 15:08 UTC, email at 15:41 UTC), each got
+  `login_count` 1, `last_active` within a second of the sign-in,
+  `welcome_email_sent` and `funnel_signup_completed`, and the Google one its
+  source (chatgpt.com). So `after()` runs in production. Not checked:
+  Observability's `/auth/callback` p75 (1.31 s before), because Vercel was
+  signed out in Chrome.
 - **Referral links (#843, Joshua: "Yes, fix it").** /refer/CODE credited a
   partner only if the visitor pressed its button, because the page set only
   `ref_code` (7 days, for onboarding's banner). The proxy now sets `sm_ref`
@@ -905,10 +911,13 @@ before #813; since then there have been two failures:
   taps): `input.click()` bubbles to the stage, whose own click opens the
   picker again. The inputs stop the click now. Halve the old picker counts.
 
-**After #836 deploys:** optional, Joshua's or a session's to run (additive,
-both audits clean Nov 27): `supabase/tiktok_posts_publish_id_unique_nov27.sql`,
-one unique index on `tiktok_posts (tiktok_post_id)` that closes the last race
-(a resend reaching the route while the first confirm is still inside it).
+**After #836 deploys:** optional, Joshua's to run (additive):
+`supabase/tiktok_posts_publish_id_unique_nov27.sql`, one unique index on
+`tiktok_posts (tiktok_post_id)` that closes the last race (a resend reaching
+the route while the first confirm is still inside it). Rechecked at 18:20 UTC
+Nov 27: both audits clean, and 51 rows carry a publish id with none used
+twice, so it builds. A session could not run it (see the Nov 25 note below);
+the SQL went to Joshua in chat.
 
 **Nov 26: Black Friday, BLACKFRIDAY through Dec 4.** Joshua set the dates
 (Nov 26 to Dec 4) and left the amount to Claude: 50% off the first 12 months
@@ -958,6 +967,12 @@ judgment. What changed for sessions:
 - Claude merges its own PRs once checks pass and the preview checks out.
 - Additive SQL on production (new tables, columns, indexes) runs from a
   session once both audits pass, and Claude may publish blog posts itself.
+  - In practice a session can't run SQL yet. `.env.local` has no database URL
+    or access token, and on Nov 27 the Supabase dashboard was signed out in
+    both Chrome and the built-in browser.
+  - Until that changes, hand Joshua the SQL in chat.
+  - Blog rows are different: they go in through the service-role key
+    (supabase-js), so they need no SQL.
 - Claude may resync Inngest and do Joshua's to-do items in his Chrome, except
   sign-ins, payments, tax forms and accepting terms.
 
