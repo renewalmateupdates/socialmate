@@ -48,3 +48,27 @@ export function worksAtCheckout(coupon: { discount_type: string | null; stripe_p
   if (coupon.discount_type === 'percent' || coupon.discount_type === 'fixed') return Boolean(coupon.stripe_promo_id)
   return true
 }
+
+/**
+ * 3. Some codes need a school email on the account. Joshua, Nov 27, 2026:
+ *    "students should verify with a .edu email". NONPROFIT50 stays on the
+ *    honor system. Stripe can't restrict a code by email, so this check is the
+ *    gate, and STUDENT25's Stripe promotion code has a private name, so typing
+ *    "STUDENT25" on Stripe's own page (allow_promotion_codes) finds nothing.
+ */
+export const SCHOOL_EMAIL_CODES = new Set(['STUDENT25'])
+
+/** name@school.edu, name@uni.edu.au, name@uni.ac.uk: an academic address. */
+export function isSchoolEmail(email: string | null | undefined): boolean {
+  const domain = (email ?? '').trim().toLowerCase().split('@')[1] ?? ''
+  return /(^|\.)edu$|\.edu\.[a-z]{2}$|\.ac\.[a-z]{2}$/.test(domain)
+}
+
+/** Why this person can't use this code, or null when they can. */
+export function schoolEmailProblem(code: string, email: string | null | undefined): string | null {
+  const wanted = code.trim().toUpperCase()
+  if (!SCHOOL_EMAIL_CODES.has(wanted)) return null
+  if (!email) return `Sign in with your school email to use ${wanted}.`
+  if (isSchoolEmail(email)) return null
+  return `${wanted} is for students, so your SocialMate account needs a school email (like name@school.edu).`
+}

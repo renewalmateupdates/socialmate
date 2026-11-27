@@ -125,7 +125,7 @@ export default function DiscountPage() {
               </div>
 
               <p className="text-xs text-gray-500 mt-3">
-                {t('discount.apply_instructions_before')} <Link href="/pricing" className="underline hover:text-gray-300">{t('discount.pricing_link')}</Link>. {t('discount.honor_system')}
+                {t('discount.apply_instructions_before')} <Link href="/pricing" className="underline hover:text-gray-300">{t('discount.pricing_link')}</Link>. {d.id === 'student' ? t('discount.school_email_note') : t('discount.honor_system')}
               </p>
             </div>
           ))}

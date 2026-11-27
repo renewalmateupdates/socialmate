@@ -42,7 +42,7 @@ function load(path, modules = {}) {
 
 const plan = load('lib/plan.ts')
 const promos = load('lib/promos.ts', { '@/lib/plan': plan })
-const { paidWithCode, worksAtCheckout } = load('lib/coupon-redemption.ts')
+const { paidWithCode, worksAtCheckout, isSchoolEmail, schoolEmailProblem } = load('lib/coupon-redemption.ts')
 const { BLACK_FRIDAY, BLACK_FRIDAY_PRICES, COUPON_LENGTH, discountedPrice, isBlackFridayLive, blackFridayEndLabel } = promos
 
 test('Black Friday runs from midnight Nov 26 to 11:59:59 PM Dec 4, Eastern', () => {
@@ -106,13 +106,33 @@ test('a percent or fixed code needs a Stripe promotion code behind it', () => {
   assert.equal(worksAtCheckout({ discount_type: 'trial_extension', stripe_promo_id: null }), true, 'trial days need no promotion code')
 })
 
-test('both routes apply the same two rules', () => {
+test('STUDENT25 needs a school email; NONPROFIT50 stays on the honor system', () => {
+  // Joshua, Nov 27, 2026: "students should verify with a .edu email".
+  for (const ok of ['sam@school.edu', 'Sam@MAIL.STATE.EDU', 'a@uni.edu.au', 'b@ox.ac.uk', 'c@u-tokyo.ac.jp', ' d@college.edu ']) {
+    assert.equal(isSchoolEmail(ok), true, ok)
+  }
+  for (const no of ['sam@gmail.com', 'edu@gmail.com', 'a@myedu.com', 'b@school.education', 'c@edu.com', 'd@site.ac', '', null, undefined, 'not-an-email']) {
+    assert.equal(isSchoolEmail(no), false, String(no))
+  }
+  assert.equal(schoolEmailProblem('STUDENT25', 'sam@school.edu'), null)
+  assert.equal(schoolEmailProblem(' student25 ', 'sam@school.edu'), null, 'any case, any spaces')
+  assert.match(schoolEmailProblem('STUDENT25', 'sam@gmail.com'), /school email/)
+  assert.match(schoolEmailProblem('STUDENT25', null), /Sign in with your school email/)
+  assert.equal(schoolEmailProblem('NONPROFIT50', 'org@gmail.com'), null, 'honor system')
+  assert.equal(schoolEmailProblem('BLACKFRIDAY', null), null)
+})
+
+test('both routes apply the same three rules', () => {
   const validate = code(read('app/api/coupons/validate/route.ts'))
   assert.match(validate, /worksAtCheckout\(coupon\)/)
   assert.ok(validate.indexOf('worksAtCheckout(coupon)') < validate.indexOf('valid: true'), 'before saying valid')
   assert.match(validate, /prior\?\.length && await paidWithCode\(/)
+  assert.match(validate, /schoolEmailProblem\(coupon\.code, user\?\.email\)/)
+  assert.ok(validate.indexOf('schoolEmailProblem(') < validate.indexOf('valid: true'), 'school email checked before saying valid')
 
   const checkout = code(read('app/api/stripe/checkout/route.ts'))
+  assert.match(checkout, /schoolEmailProblem\(found\.code, user\.email\)/, 'a request that skips the code box is checked too')
+  assert.ok(checkout.indexOf('schoolEmailProblem(') < checkout.indexOf('checkout.sessions.create('), 'before Stripe is asked')
   assert.match(checkout, /worksAtCheckout\(found\)/)
   assert.match(checkout, /alreadyRecorded && await paidWithCode\(/)
   assert.ok(checkout.indexOf('worksAtCheckout(found)') < checkout.indexOf('checkout.sessions.create('), 'before Stripe is asked')
