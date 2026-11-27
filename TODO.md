@@ -29,21 +29,6 @@ replies expired long ago.)
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it
    and proposes cuts and captions (AI credits), the cut happens in the browser
    (ffmpeg.wasm, no server video bills), then schedule it. Say go to plan it properly.
-3. **Three "unlimited" and "coming soon" promises (found Nov 27 by `verify:content`).**
-   Each is accepted in `scripts/verify-content-allow.json` with a reason that
-   points here, so the check passes while it waits. Decide each:
-   - HERMES's Enterprise card says "Unlimited campaigns" and "Unlimited
-     prospects", and the Enterprise page says "unlimited scale". Enterprise is
-     custom-priced, but prospects cost Hunter.io credits. Keep, or change to
-     "custom limits"?
-   - Creator Studio (`/create`) shows six disabled editing buttons (Crop,
-     Filter, Brightness/Contrast, Text Overlay, Stickers, Background) and six
-     image templates, each "Coming soon". Nobody is building them. Keep, label
-     them "planned", or hide them?
-   - `lib/publish/index.ts` (ask-first) tells someone that a platform the
-     publisher can't post to has "support coming soon". Reword it to say the
-     platform isn't available?
-
 ## Decided (Nov 27, 2026)
 
 1. **TikTok Studio's Post now and Send to drafts are never refused at the
@@ -72,6 +57,16 @@ replies expired long ago.)
    and the /z/CODE ZENITH card were a 404 for 288 of the 297 codes, the one
    active partner's included. All lookups go through
    `lib/referral-code.ts` now.
+
+4. **Three promises reworded.** Joshua: "do whatever you think is right and
+   accurate". HERMES's Enterprise card says "Campaign limits sized to your
+   team" and "Prospect limits sized to your team" (prospects cost Hunter.io
+   credits), and the Enterprise page says "limits sized to your team" in all
+   nine languages (it said "unlimited scale"). Creator Studio's disabled
+   editing buttons, image templates and music note say "Planned" (an AI
+   video editor there is item 2 above). The publisher tells someone
+   "SocialMate can't post to X. Remove it from this post." instead of
+   "support is coming soon".
 
 ## Decided (Nov 13, 2026)
 

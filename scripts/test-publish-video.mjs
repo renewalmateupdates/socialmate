@@ -292,5 +292,6 @@ test('an unknown platform still gets its "not yet available" result', async () =
   const { publishToAll } = loadIndex([])
   const [r] = await publishToAll('u', ['myspace'], 'hi')
   assert.equal(r.success, false)
-  assert.match(r.userError, /Myspace support is coming soon/)
+  // Joshua's call, Nov 27, 2026: say what is true now, not that it is coming.
+  assert.match(r.userError, /SocialMate can't post to Myspace\. Remove it from this post\./)
 })

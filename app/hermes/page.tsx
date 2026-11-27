@@ -126,8 +126,8 @@ const TIERS = [
     ctaLabel: 'Contact Us',
     ctaHref: '/enterprise',
     features: [
-      'Unlimited campaigns',
-      'Unlimited prospects',
+      'Campaign limits sized to your team',
+      'Prospect limits sized to your team',
       'All channels + custom integrations',
       'Dedicated onboarding',
       'SLA guarantee',
