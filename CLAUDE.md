@@ -703,7 +703,23 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #844 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #845 are merged.
+
+**Nov 27: two blog posts for what TikTok creators ask AI.** ChatGPT's
+signups land mostly on /for/tiktok-creators (29 since Oct 15), and the blog
+already had ten posts on how to schedule TikToks. So these two answer
+questions nothing covered yet:
+- /blog/tiktok-scheduler-drafts-vs-direct-post: Direct Post vs drafts, why
+  apps TikTok hasn't audited can only post as Only me (5 accounts a day, each
+  set to private), the cap of about 15 posts a day shared across apps, and
+  where SocialMate stands (audited Oct 23).
+- /blog/tiktok-content-disclosure-your-brand-vs-branded-content: Your brand
+  ("Promotional content") vs Branded content ("Paid partnership", never Only
+  me), TikTok's Branded Content Policy, and the FTC's disclosure guide.
+- Every fact was checked that day against developers.tiktok.com, TikTok's
+  Branded Content Policy, the FTC page and our own Studio code.
+- Inserted through the service-role key. /blog, the feed and the sitemap were
+  refreshed and list both, and IndexNow took both URLs.
 
 **Nov 27: 200 blog posts printed their HTML (#844).**
 - **What was wrong:** every `blog_posts` row published March to May 2026 (200
@@ -724,7 +740,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 - **Checked live after it deployed (Nov 27):** two of the fixed posts show
   real headings and no escaped tags, the TikTok tools post shows ClipTalk in
   bold with no sideways scroll, and IndexNow accepted all 200 URLs.
-- **The post page's header at tablet width (same day):** from 768 to about
+- **The post page's header at tablet width (#845, same day):** from 768 to about
   860 px the logo ran into "Features" and every label wrapped onto two lines
   (the row needs about 810 px). The middle links now show from `lg` (1024 px),
   the logo never shrinks, and phones get a 16 px gutter, so a 320 px screen
