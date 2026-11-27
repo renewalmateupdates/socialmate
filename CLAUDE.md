@@ -917,7 +917,8 @@ show it on `/admin/funnel`. Found while wiring it, fixed in the same PR:
   way: Nov 27 Discord and Telegram (5c06cc2d) and Dec 4 X and Bluesky, the
   last day (dcdd6add). All four show on the Schedule page with no "Not
   connected" badge. The BDAY31 posts from Dec 6 on stay as they are.
-  **After Nov 27, 14:00 UTC:** check the first one went out on X and Bluesky.
+  **Checked Nov 27:** the first one (c6669da2) went out at 14:00:04 UTC with
+  both X and Bluesky post ids.
 
 **Nov 25: Joshua's 500 autonomy answers are standing orders** (confirmed in
 chat Nov 25; the page is https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA,
