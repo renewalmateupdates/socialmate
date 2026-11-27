@@ -744,7 +744,12 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   /vs pages, history, Enterprise seats, referral bonuses and partner
   commissions (both uncapped in code), hashtag collections (no cap in code),
   the privacy policy's YouTube section, and labels for SOON_PLATFORMS.
-- **Waiting on Joshua (TODO.md item 3):** HERMES Enterprise "unlimited", the
+- **Decided the same evening (TODO.md, Decided item 4, #848):** Joshua said
+  "do whatever you think is right and accurate". HERMES Enterprise and the
+  Enterprise page say "limits sized to your team" (all nine languages),
+  Creator Studio's stubs say "Planned", and the publisher says "SocialMate
+  can't post to X. Remove it from this post." Their five allow entries are
+  gone. Before that it waited on: HERMES Enterprise "unlimited", the
   Enterprise page's "unlimited scale", Creator Studio's "Coming soon" stubs,
   and the publish pipeline's "support coming soon" message.
 
@@ -1061,10 +1066,11 @@ all nine languages plus the Free pricing card (`common.free_plan_platforms`),
 `BRAND.summary`. Statusbrew's page also put Instagram, Facebook, Pinterest and
 Reddit on the free plan. `scripts/test-free-platform-claims.mjs` (in
 `npm test`) now fails on a sentence that ties the live count to free without
-saying X needs Pro (559 hits on the old code, 0 now). **Joshua's yes needed:**
-`supabase/blog_free_platforms_nov26.sql` fixes the same claim in 20 sentences
-of 19 database posts (checked read-only against the live rows; then
-revalidate and IndexNow). What it saw and left (Pinterest and Reddit "coming",
+saying X needs Pro (559 hits on the old code, 0 now).
+`supabase/blog_free_platforms_nov26.sql` fixed the same claim in 20 sentences
+of 19 database posts: applied Nov 27 with Joshua's yes ("i say yes to the 19
+blog posts") through the service-role key with the same replace() logic, then
+refreshed, checked live and sent to IndexNow (all 19 answered 200). What it saw and left (Pinterest and Reddit "coming",
 SOMA and "all tools" free, /vs/later-free's Free numbers, LinkedIn media "on
 the roadmap") was fixed on Nov 27 in #837 (above).
 

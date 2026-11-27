@@ -95,7 +95,7 @@ export async function publishToAll(
             platform,
             success:   false,
             error:     `${platform} publishing is not yet available`,
-            userError: `${capitalize(platform)} support is coming soon. Remove it from this post for now.`,
+            userError: `SocialMate can't post to ${capitalize(platform)}. Remove it from this post.`,
           }
       }
 

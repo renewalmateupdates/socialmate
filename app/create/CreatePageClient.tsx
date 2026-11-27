@@ -212,7 +212,7 @@ function ComingSoonBtn({ icon: Icon, label }: { icon: LucideIcon; label: string 
         <span className="text-xs whitespace-nowrap">{label}</span>
       </button>
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-xs text-amber-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-        Coming soon
+        Planned
       </div>
     </div>
   )
@@ -1116,7 +1116,7 @@ export default function CreatePageClient() {
                                 <Music size={16} strokeWidth={1.75} />
                                 <div>
                                   <p className="text-xs font-semibold text-gray-400">Background music</p>
-                                  <p className="text-xs text-gray-600">Coming soon — add royalty-free music to your clips</p>
+                                  <p className="text-xs text-gray-600">Planned: royalty-free music for your clips</p>
                                 </div>
                               </div>
                             </div>
@@ -1260,7 +1260,7 @@ export default function CreatePageClient() {
                             <button
                               key={t.name}
                               className="relative flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/40 hover:bg-gray-800 transition-all group"
-                              title="Coming soon"
+                              title="Planned"
                             >
                               <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center group-hover:from-amber-950/30 group-hover:to-gray-800 transition-all">
                                 <ImageIcon className="w-6 h-6 opacity-40" strokeWidth={1.5} />

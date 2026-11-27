@@ -24,12 +24,10 @@
     { "rule": "coming-soon", "file": "app/compose/page.tsx", "contains": "${p.name} — coming soon", "reason": "Tooltip on the chips for SOON_PLATFORMS (built, waiting on Meta and Google)." },
     { "rule": "coming-soon", "file": "app/templates/page.tsx", "contains": "${id} — coming soon", "reason": "Tooltip on the SOON_PLATFORM_IDS chips (built, waiting on Meta and Google)." },
     { "rule": "coming-soon", "file": "app/for/video-creators/page.tsx", "contains": "badge: 'Coming soon'", "reason": "The YouTube posting card. YouTube is in SOON_PLATFORMS (built, waiting on Google)." },
-    { "rule": "coming-soon", "file": "app/create/CreatePageClient.tsx", "reason": "Creator Studio's disabled editing buttons and image templates, labeled as not available yet. Whether they stay planned is a product decision (raised Nov 27, 2026)." },
     { "rule": "coming-soon", "file": "app/gilgamesh/page.tsx", "reason": "A guide waitlist and planned chapters on the Gilgamesh page. Whether they are still coming is a product decision." },
     { "rule": "coming-soon", "file": "app/listings/page.tsx", "contains": "First listings coming soon", "reason": "Empty state, shown only while Studio Stax has no listings." },
     { "rule": "coming-soon", "file": "app/studio-stax/page.tsx", "contains": "First listings coming soon", "reason": "Empty state, shown only while Studio Stax has no listings." },
     { "rule": "coming-soon", "file": "app/roadmap/page.tsx", "reason": "The roadmap's own description of what is coming." },
-    { "rule": "coming-soon", "file": "lib/publish/index.ts", "reason": "The publish pipeline's message for a platform it cannot post to. lib/publish is ask-first, so rewording it waits on Joshua (raised Nov 27, 2026)." },
     { "rule": "coming-soon", "file": "messages/*", "contains": "\": \"Coming soon\"", "reason": "Bare labels for things a page itself marks as not live yet: SOON_PLATFORMS on the /for pages, unbuilt agents on /agents, upcoming guides. The claims behind them are checked in the page source." },
     { "rule": "coming-soon", "file": "messages/*", "contains": "\": \"Coming Soon\"", "reason": "Bare labels for things a page itself marks as not live yet: SOON_PLATFORMS on the /for pages, unbuilt agents on /agents, upcoming guides. The claims behind them are checked in the page source." },
 
@@ -77,8 +75,6 @@
     { "rule": "unlimited", "file": "app/guides/creator-monetization/page.tsx", "contains": "You sell it unlimited times", "reason": "About a creator's digital products, not SocialMate." },
     { "rule": "unlimited", "file": "app/guides/email-list-building/page.tsx", "contains": "unlimited contacts", "reason": "An email platform's free tier." },
     { "rule": "unlimited", "file": "app/guides/vibe-coding-with-ai/page.tsx", "contains": "unlimited personal projects", "reason": "A hosting provider's free tier." },
-    { "rule": "unlimited", "file": "app/hermes/page.tsx", "contains": "Unlimited campaigns", "reason": "HERMES on the custom-priced Enterprise card. Whether to keep 'unlimited' there is Joshua's call (raised Nov 27, 2026)." },
-    { "rule": "unlimited", "file": "app/hermes/page.tsx", "contains": "Unlimited prospects", "reason": "HERMES on the custom-priced Enterprise card. Whether to keep 'unlimited' there is Joshua's call (raised Nov 27, 2026)." },
     { "rule": "unlimited", "file": "app/pricing/page.tsx", "contains": "stacking with no cap", "reason": "Referral bonus credits: 100 per 5 paying referrals, uncapped in the Stripe webhook. Not a post, seat or account claim." },
     { "rule": "unlimited", "file": "app/referral/page.tsx", "contains": "no cap", "reason": "Referral bonus credits: 100 per 5 paying referrals, uncapped in the Stripe webhook. Not a post, seat or account claim." },
     { "rule": "unlimited", "file": "app/settings/page.tsx", "contains": "stacking with no cap", "reason": "Referral bonus credits: 100 per 5 paying referrals, uncapped in the Stripe webhook. Not a post, seat or account claim." },
@@ -99,7 +95,6 @@
     { "rule": "unlimited", "file": "messages/en.json", "contains": "There's no cap.", "reason": "Partner commissions have no cap (lib/partner-rate.ts)." },
     { "rule": "unlimited", "file": "messages/en.json", "contains": "No cap, ever.", "reason": "Partner commissions have no cap (lib/partner-rate.ts)." },
     { "rule": "unlimited", "file": "messages/en.json", "contains": "unlimited seats", "reason": "Enterprise seats are the one exception (CLAUDE.md)." },
-    { "rule": "unlimited", "file": "messages/en.json", "contains": "Unlimited seats", "reason": "Enterprise seats are the one exception (CLAUDE.md)." },
-    { "rule": "unlimited", "file": "messages/en.json", "contains": "plus unlimited scale", "reason": "The Enterprise page; Enterprise is custom-priced. Whether to keep 'unlimited scale' is Joshua's call (raised Nov 27, 2026)." }
+    { "rule": "unlimited", "file": "messages/en.json", "contains": "Unlimited seats", "reason": "Enterprise seats are the one exception (CLAUDE.md)." }
   ]
 }
