@@ -679,6 +679,13 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   spike from two presses on two days. Read the event count and the chart
   before fixing.
 
+**From: November 27, 2026: referral links (#843)**
+
+- **Look a value up the way it was stored.** /refer/CODE and /z/CODE
+  uppercased codes that are generated in lowercase, so both pages were a 404
+  for 288 of 297 people, and nothing reported it. Put the normalizing in one
+  helper (`lib/referral-code.ts`), never at each call site.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -686,7 +693,7 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #842 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #843 are merged.
 
 **Nov 27: the slow pages Speed Insights Plus showed, and the sign-in callback
 (#842).** Read before Plus ends on Dec 19, for the 7 days to Nov 27:
@@ -724,9 +731,19 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   - All of that now runs in `after()`, which this app has never been seen to
     run in production (#793's webhooks were never walked).
   - Then check Observability's `/auth/callback` p75 (1.31 s before).
-- **Found, not changed:** the /refer/CODE page credits a partner only if the
-  visitor presses its button. Every `?ref=` link works. Waiting on a decision
-  in `TODO.md`.
+- **Referral links (#843, Joshua: "Yes, fix it").** /refer/CODE credited a
+  partner only if the visitor pressed its button, because the page set only
+  `ref_code` (7 days, for onboarding's banner). The proxy now sets `sm_ref`
+  (60 days) there too, via `referralCodeFromUrl` in `lib/referral-code.ts`.
+  - The page itself was a 404 for 288 of 297 codes, the one active partner's
+    included: it looked codes up in capitals, and every code is stored in
+    lowercase. The /z/CODE ZENITH card had the same bug.
+  - /refer, /z and the sign-in step now look codes up through
+    `referralCodeCandidates` (as given, in lowercase, in uppercase).
+  - `scripts/test-referral-code.mjs` covers it; 3 of its checks fail on the
+    old code.
+  - Nobody has signed up through a referral link yet (`referral_conversions`
+    has no rows).
 
 **Nov 27: the setup check (#840, docs only).** Joshua let sessions use his
 Chrome ("work on whatever you need to"). What his Chrome is signed in to, and
@@ -900,7 +917,8 @@ show it on `/admin/funnel`. Found while wiring it, fixed in the same PR:
   way: Nov 27 Discord and Telegram (5c06cc2d) and Dec 4 X and Bluesky, the
   last day (dcdd6add). All four show on the Schedule page with no "Not
   connected" badge. The BDAY31 posts from Dec 6 on stay as they are.
-  **After Nov 27, 14:00 UTC:** check the first one went out on X and Bluesky.
+  **Checked Nov 27:** the first one (c6669da2) went out at 14:00:04 UTC with
+  both X and Bluesky post ids.
 
 **Nov 25: Joshua's 500 autonomy answers are standing orders** (confirmed in
 chat Nov 25; the page is https://claude.ai/artifact/SwEPTVSAw1SF6xBxjsnSbA,

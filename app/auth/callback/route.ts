@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { isFirstSignIn } from '@/lib/new-account'
 import { ATTRIBUTION_COOKIES, ATTRIBUTION_DONE_COOKIE, ONBOARDING_LEAD_COOKIE, ONBOARDING_LEAD_MAX_AGE_SECONDS, landedOnTiktok, mergeAttribution, readAttribution } from '@/lib/attribution'
 import { ensurePersonalWorkspace, recordSignIn } from '@/lib/sign-in'
+import { REFERRAL_COOKIE } from '@/lib/referral-code'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse, after } from 'next/server'
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
             user.user_metadata?.attribution,
           )
         : {}
-      const refCode = cookieStore.get('sm_ref')?.value
+      const refCode = cookieStore.get(REFERRAL_COOKIE)?.value
 
       // The only waits before the redirect, side by side: the personal
       // workspace the next page loads, and whether onboarding is done, which
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
       const profile = profileResult.data
 
       // Cookies go out with this response, so they change here, never in after().
-      if (refCode) cookieStore.delete('sm_ref')
+      if (refCode) cookieStore.delete(REFERRAL_COOKIE)
       if (isNewAccount) {
         // The landing page is gone once these cookies are, so tell onboarding
         // now whether to lead with TikTok.

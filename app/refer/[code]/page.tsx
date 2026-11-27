@@ -6,6 +6,7 @@ import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import RefCodeSetter from './RefCodeSetter'
+import { referralCodeCandidates } from '@/lib/referral-code'
 import { BarChart3, CalendarDays, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -21,16 +22,24 @@ interface AffiliateInfo {
 
 async function getAffiliateByCode(code: string): Promise<AffiliateInfo | null> {
   const db = getSupabaseAdmin()
-  const upperCode = code.toUpperCase()
+  const candidates = referralCodeCandidates(code)
+  if (!candidates.length) return null
 
-  // 1. Resolve user_id from user_settings.referral_code
-  const { data: settings } = await db
+  // 1. Resolve user_id from user_settings.referral_code. This was an uppercased
+  // exact match, and codes are stored lowercase, so the page was a 404 for 288
+  // of 297 codes (lib/referral-code.ts).
+  const { data: settings, error: settingsError } = await db
     .from('user_settings')
-    .select('user_id')
-    .eq('referral_code', upperCode)
+    .select('user_id, referral_code')
+    .in('referral_code', candidates)
+    .limit(1)
     .maybeSingle()
+  if (settingsError) console.warn('[refer] code lookup failed:', settingsError.message)
 
   if (!settings?.user_id) return null
+  // The stored spelling: it goes into the signup link and the cookies, and the
+  // auth callback credits the partner from it.
+  const storedCode = settings.referral_code as string
 
   // 2. Confirm affiliate is active
   const { data: affiliate } = await db
@@ -49,10 +58,10 @@ async function getAffiliateByCode(code: string): Promise<AffiliateInfo | null> {
     .eq('user_id', settings.user_id)
     .maybeSingle()
 
-  const displayName = profile?.full_name?.trim() || upperCode
+  const displayName = profile?.full_name?.trim() || storedCode
 
   return {
-    code: upperCode,
+    code: storedCode,
     displayName,
     // affiliate_profiles has no avatar_url column; there is no avatar to show.
     avatarUrl: null as string | null,
