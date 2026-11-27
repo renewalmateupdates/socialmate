@@ -305,7 +305,8 @@ test('notifications say what happened and which video', () => {
 
 test('wiring: every Post Now gets a server follow-up, and both callers share one check', () => {
   const confirm = read('app/api/tiktok/confirm-upload/route.ts')
-  assert.match(confirm, /inngest\.send\(\{ name: 'tiktok\/uploaded'/)
+  // With an id since Nov 27, 2026, so a resent confirm cannot start a second follow-up.
+  assert.match(confirm, /inngest\.send\(\{ (id: `tiktok-uploaded-\$\{publish_id\}`, )?name: 'tiktok\/uploaded'/)
   assert.match(confirm, /!insertError && !scheduled_at/)
 
   const inngestSrc = read('lib/inngest.ts')

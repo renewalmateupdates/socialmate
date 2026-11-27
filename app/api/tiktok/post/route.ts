@@ -117,8 +117,10 @@ export async function POST(request: NextRequest) {
 
   const remaining = quota - videosThisMonth + boosterCredits
   if (remaining <= 0) {
+    // This told people to buy a TikTok booster, and no such product exists.
+    const planName = plan.charAt(0).toUpperCase() + plan.slice(1)
     return NextResponse.json({
-      error: `TikTok video quota reached (${quota}/month on ${plan} plan). Purchase a TikTok Booster pack to continue.`,
+      error: `You have used this month's ${quota} TikTok videos on the ${planName} plan. The count starts over on the 1st.`,
       quota_exhausted: true,
     }, { status: 429 })
   }

@@ -21,6 +21,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'November 27, 2026',
+    version: 'TikTok Studio',
+    changes: [
+      { type: 'Fixed',    text: 'TikTok Studio saves your post even if the page closes or reloads right after the upload finishes. Before, TikTok had the video but SocialMate kept no record of it, so it never told you whether the video went live.' },
+      { type: 'Fixed',    text: 'If TikTok Studio cannot save a post after the upload, it now says the video already reached TikTok and asks you to check your profile before posting again, so the same video does not go up twice.' },
+      { type: 'Fixed',    text: 'A video TikTok already has is never refused afterwards for the monthly TikTok limit. Before, it went out anyway while Studio said the limit was reached, and no record was kept.' },
+    ],
+  },
+  {
     date: 'November 26, 2026',
     version: 'Black Friday',
     changes: [
