@@ -198,3 +198,6 @@ credentials in the submission's testing instructions.
 Set `META_CONNECT_OPEN=true` and `NEXT_PUBLIC_META_CONNECT_OPEN=true` in Vercel and
 redeploy. Instagram, Facebook and Threads then show as live for everyone on
 /accounts and in Compose. Update marketing pages and the platform count separately.
+
+Email ClipTalk that Reels are live: their creator toolkit lists SocialMate, and
+they asked to be told (Nov 2026).
