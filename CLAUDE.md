@@ -673,7 +673,38 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #839 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #840 are merged.
+
+**Nov 27: the setup check (#840, docs only).** Joshua let sessions use his
+Chrome ("work on whatever you need to"). What his Chrome is signed in to, and
+what it showed:
+- **Vercel.** $3.62 of the $20 included in the cycle to Dec 19. The bill is
+  $30 a month because **Speed Insights Plus is a separate $10 a month** (a
+  decision in `TODO.md`). Spend Management: $200 budget, alerts at 50, 75 and
+  100%, pausing off. Functions: 0% errors over 12 hours. **Speed Insights,
+  Mobile, Nov 21 to 26** (289 events, our visits excluded): RES 99, no page
+  poor. App pages since the Nov 20 baseline: /compose 66 to 98,
+  /tiktok/studio 49 to 87, /dashboard 54 to 83, /accounts 55 to 66,
+  /onboarding 51 to 59. /onboarding's TTFB is 3.14 s and /accounts' 2.04 s:
+  most of it is the sign-in and OAuth redirects that land on them, and
+  visitors far from the US (Tajikistan, India, Nigeria, Pakistan lead the
+  mobile list); /onboarding's own server work is two cookie reads.
+  /for/tiktok-creators is 90, with CLS 0.15 at p75 over 30 events; a clean
+  headless phone load and full scroll (`playwright-core` with the installed
+  Chrome, throttled) measured 0, so it could not be reproduced.
+- **Stripe (live).** The webhook listens to exactly the 4 events the handler
+  handles (`checkout.session.completed`, `customer.subscription.updated` and
+  `.deleted`, `invoice.payment_succeeded`), 0% errors, no deliveries this week.
+- **Inngest.** All 36 functions show no failures in 24 hours. The free plan
+  keeps 1 day of run history, so older runs can't be read there; the database
+  says every scheduled admin post since Nov 21 went out within a minute of its
+  time, so the sleeping `post/scheduled` runs exist (72 still ahead).
+- **Auth email works.** Not via the dashboard (Supabase is signed out in
+  Chrome): 19 of 25 email signups in 30 days confirmed, within 0 to 4 minutes;
+  the 6 unconfirmed are 4 to 30 days old. Google is 40 of 65 signups.
+- **Signed out or not on this account:** Supabase, Resend, Meta for
+  Developers, and Search Console (this Google account has no properties;
+  socialmate.studio's is likely under socialmatehq@gmail.com).
 
 **Nov 27: where signups come from, and LinkedIn's false errors (#839).**
 Read-only, outside accounts, since Oct 15 (when sources started being
@@ -963,8 +994,9 @@ with the Plan tab in its HTML; /tiktok/studio arrives with "Choose a video to
 start" and no spinner, and the header fills in when TikTok answers (0.6 s; one
 first answer was slower); compose's accounts and default-platform reads start
 together (0.92 s); no console errors; `/api/workspaces/accessible` says
-`internal: true` for the admin and the browser is marked. **Next:** compare the
-app pages in Speed Insights on Nov 27 (from Nov 21 on, without our own visits).
+`internal: true` for the admin and the browser is marked. **Compared Nov 27**
+(Speed Insights, Mobile, Nov 21 to 26, our visits excluded): see "Nov 27: the
+setup check" at the top of this list.
 
 **Nov 20: where connected people stop, and PR #823.** Read-only, 30 days,
 outside accounts: 99 have a connection, 65 of them TikTok only. TikTok-only: 23
@@ -1115,11 +1147,12 @@ pass through the proxy; `/notifications` says "12 unread", the same as the
 count route, with each notification's text showing; a page load fetches the
 count, X quota, SOMA credits and approvals once each. Checked Nov 20: opening
 one notification from the bell took the count route and `/notifications` from
-12 unread to 11 (the bell shows "9+" above 9). **Not yet:** "Mark all read"
-once for the admin's 5 old rows, and Observability a day later (the two
-notification routes should be far below 2K calls each). Joshua's side: Spend
-Management (an on-demand budget with email alerts, pausing off, since a pause
-is what took the site down).
+12 unread to 11 (the bell shows "9+" above 9). **Checked Nov 27 (Observability,
+last 12 hours):** `/api/notifications/count` 723 calls and `/api/notifications`
+714, about one a minute each (one open tab), 15 s of CPU each, 0% errors. Spend
+Management is set: a $200 budget with alerts at 50, 75 and 100%, and pausing
+off. "Mark all read" is left to Joshua: the admin has 13 unread now, not the 5
+old rows.
 
 **Nov 19, evening: AI was down; #816 moved to 3.8 Flash (deployed Nov 20 with
 #817, since Vercel refused its own deploy while the team was paused).**
@@ -1329,8 +1362,6 @@ of the video on purpose: they save but don't publish yet.
   sets a reply-to. Resend is under `renewalmate.updates@gmail.com`: signing in
   with socialmatehq@gmail.com opens a different, empty team.
 - Run the SOMA removal SQL from Oct 23 if it hasn't run.
-- Supabase dashboard: do auth emails go through custom SMTP (Resend) or the
-  built-in mailer, which delivers worse and caps low?
 - Creator Hub tips and Twitch go-live alerts stay unannounced until a streamer
   uses them for real (Joshua's plan, Nov 5: onboard one streamer to try both).
 - Run `supabase/blog_accuracy_nov5.sql` (blog accuracy pass, in `TODO.md`).
