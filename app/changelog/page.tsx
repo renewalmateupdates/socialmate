@@ -25,6 +25,9 @@ const CHANGELOG: ChangelogEntry[] = [
     version: 'TikTok Studio',
     changes: [
       { type: 'Fixed',    text: 'About 200 older blog posts now show their headings, lists and tables. They were saved in a format the blog page did not read, so since they went up, readers saw their formatting code as text.' },
+      { type: 'Fixed',    text: 'The first two free guides now link to the next volume. Each said the next one was "coming soon", though both were already up.' },
+      { type: 'Fixed',    text: 'AI image generation is marked planned on the AI features page and the roadmap. They said it was being built, and it is not yet.' },
+      { type: 'Fixed',    text: 'Pages that promised more were corrected: the inbox no longer says X is coming (X charges for reading replies), and a blog comparison table now says the free plan covers six platforms, since X needs Pro.' },
       { type: 'Fixed',    text: 'Partner invite pages (/refer/...) and ZENITH share cards (/z/...) now open for everyone. Both looked codes up in capital letters while codes are saved in small letters, so they showed "not found" for almost everyone.' },
       { type: 'Fixed',    text: 'Someone who opens a partner\'s invite page and signs up later, within 60 days, now counts as that partner\'s referral. Before, it only counted if they pressed the page\'s own sign-up button.' },
       { type: 'Improved', text: 'Signing in gets you to your first page sooner. After Google or your email link, SocialMate used to save up to ten records one after another before moving you on. Now it only checks where to send you, and saves the rest (your login count, the welcome emails, where you came from) right after.' },

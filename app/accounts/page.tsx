@@ -578,7 +578,7 @@ function AccountsInner() {
     if (platform === 'threads')   { window.open('/api/accounts/threads/connect', '_blank');   return }
     if (platform === 'tiktok')   { window.location.href = '/api/tiktok/auth';                 return }
     setConnectingPlatform(platform)
-    showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
+    showToast(`Connecting ${PLATFORM_META[platform]?.label || platform} isn't available.`, 'error')
     setTimeout(() => setConnectingPlatform(null), 2000)
   }
 

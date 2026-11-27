@@ -281,7 +281,7 @@ export default function InboxPage() {
                 <span className="flex-1 truncate">X / Twitter</span>
               </div>
               <p className="text-xs text-gray-400 dark:text-gray-500 px-3 pb-1 leading-snug">
-                X requires a paid API upgrade — coming soon.
+                X charges for reading replies through its API, so X isn&apos;t in the inbox.
               </p>
             </div>
 

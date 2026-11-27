@@ -54,7 +54,7 @@ const PLATFORM_SPECS: PlatformSpec[] = [
     name: 'YouTube',
     ratio: '16:9',
     ratioLabel: '16:9 (Landscape)',
-    maxDuration: 'Unlimited',
+    maxDuration: '12 hours',
     maxFileSize: '256 GB',
     resolution: '1920 × 1080',
     type: 'video',
