@@ -99,7 +99,7 @@ export default function VsSocialRailsPage() {
             </Link>
           </div>
           <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
-            {['7 platforms (X on Pro)', 'Discord + Telegram', '15+ AI tools free', 'Free forever'].map((pill) => (
+            {['7 platforms (X on Pro)', 'Discord + Telegram', '15+ AI tools, 50 credits/mo free', 'Free forever'].map((pill) => (
               <span key={pill} className="text-xs font-semibold bg-raised text-ink-muted px-3 py-1 rounded-full">
                 {pill}
               </span>

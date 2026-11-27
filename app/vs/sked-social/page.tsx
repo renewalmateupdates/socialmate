@@ -12,7 +12,7 @@ const COMPARISON = [
   { feature: 'Free plan',              skedsocial: '7-day trial only',       socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    skedsocial: '8 (Instagram-focused)',  socialmate: '7 live (free)'               },
   { feature: 'Team seats',             skedsocial: '1 on Fundamentals',      socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       skedsocial: 'AI Assist (paid)',       socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       skedsocial: 'AI Assist (paid)',       socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Instagram Stories',      skedsocial: '✅',                     socialmate: '❌ Not yet'               },
   { feature: 'Visual content calendar',skedsocial: '✅',                     socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',        skedsocial: '✅ (paid)',              socialmate: '✅ Free'                  },

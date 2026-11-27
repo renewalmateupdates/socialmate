@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Ripl (2026) — Full Comparison',
-  description: "Ripl is a video/animated post tool for small businesses at $15/mo. SocialMate covers 7 platforms, has 15 AI tools, SOMA autonomous content and a free plan on 6 platforms.",
+  description: "Ripl is a video/animated post tool for small businesses at $15/mo. SocialMate covers 7 platforms, has 15 AI tools, SOMA autonomous content on Pro and a free plan on 6 platforms.",
   openGraph: {
     title:       'SocialMate vs Ripl (2026)',
     description: "Ripl: $15/mo, video animations, limited platforms. SocialMate: $8/mo — 7 platforms, 15 AI tools, SOMA, free plan on 6 platforms.",

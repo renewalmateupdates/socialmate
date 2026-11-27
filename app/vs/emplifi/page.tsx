@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            emplifi: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             emplifi: '✅ (enterprise)',              socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           emplifi: '✅ (enterprise)',              socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              emplifi: '✅ (enterprise paid)',         socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              emplifi: '✅ (enterprise paid)',         socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     emplifi: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        emplifi: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Enterprise analytics',          emplifi: '✅ (deep BI-level)',           socialmate: '✅ Multi-platform (creator-level)' },
@@ -121,7 +121,7 @@ export default function VsEmplifPage() {
             <p className="font-extrabold text-lg mb-2">Built for creators. Self-serve. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $8/month total</li>
               <li>✅ 8 autonomous AI agents</li>

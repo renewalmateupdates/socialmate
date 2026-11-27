@@ -17,7 +17,7 @@ const COMPARISON = [
   { feature: 'Discord + Telegram',            competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Mastodon',                      competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Thread scheduling',             competitor: '✅ (X threads only)',           socialmate: '✅ Multi-platform threads'},
-  { feature: 'AI writing tools',              competitor: '✅ (paid — X focused)',         socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '✅ (paid — X focused)',         socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                     socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '❌',                            socialmate: '✅ Free'                  },
@@ -123,7 +123,7 @@ export default function VsTweetHunterPage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ X + LinkedIn + TikTok + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ Thread builder across multiple platforms</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Pro plan for $8/month total</li>
               <li>✅ SOMA AI content system built in</li>
               <li>✅ No credit card required to start</li>

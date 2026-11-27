@@ -17,7 +17,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             keystroke: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'X / Twitter scheduling',        keystroke: '❌',                         socialmate: '✅ (Pro+)'                },
   { feature: 'Mastodon scheduling',           keystroke: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              keystroke: '✅ (basic)',                 socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              keystroke: '✅ (basic)',                 socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     keystroke: '❌',                         socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        keystroke: '❌',                         socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             keystroke: '✅',                         socialmate: '✅ Free'                  },
@@ -123,7 +123,7 @@ export default function VsKeystrokePage() {
             <p className="font-extrabold text-lg mb-2">LinkedIn + 6 more. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ LinkedIn + Discord + Telegram + Bluesky + TikTok + X + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $8/month total</li>
               <li>✅ 8 autonomous AI agents</li>

@@ -100,7 +100,7 @@ export default function VsZohoSocialPage() {
             </Link>
           </div>
           <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
-            {['7 platforms (X on Pro)', '15+ AI tools free', 'No Zoho required', 'Free forever'].map((pill) => (
+            {['7 platforms (X on Pro)', '15+ AI tools, 50 credits/mo free', 'No Zoho required', 'Free forever'].map((pill) => (
               <span key={pill} className="text-xs font-semibold bg-raised text-ink-muted px-3 py-1 rounded-full">
                 {pill}
               </span>
@@ -128,7 +128,7 @@ export default function VsZohoSocialPage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ 6 platforms including Discord and Telegram (X needs Pro)</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Link in bio, hashtag manager, evergreen recycling</li>
               <li>✅ No Zoho account needed</li>
               <li>✅ No credit card required</li>

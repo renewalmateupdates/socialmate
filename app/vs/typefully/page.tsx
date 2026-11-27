@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Platforms supported',    typefully: 'X/Twitter, LinkedIn',    socialmate: '7 live (6 free, X on Pro)'               },
   { feature: 'Thread editor',          typefully: '✅ Best-in-class',       socialmate: '✅ Free (X threads on Pro)'                  },
   { feature: 'Team seats',             typefully: '1 on Creator',           socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       typefully: 'AI assist (paid)',       socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       typefully: 'AI assist (paid)',       socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Analytics',             typefully: 'Creator+ plan',          socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',        typefully: '❌',                     socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            typefully: '❌',                     socialmate: '✅ Free'                  },

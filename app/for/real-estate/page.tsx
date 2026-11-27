@@ -5,6 +5,7 @@ import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { Bot, Briefcase, Building2, Home, PenLine, Satellite, Users } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { SOON_PLATFORMS } from '@/lib/site-facts'
 import { Globe } from 'lucide-react'
 
 
@@ -23,11 +24,7 @@ const LIVE_PLATFORMS = [
   { name: 'TikTok',     icon: 'tiktok', note: 'Live' },
 ]
 
-const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: 'instagram' },
-  { name: 'Facebook',  icon: 'facebook' },
-  { name: 'Pinterest', icon: 'pinterest' },
-]
+const COMING_PLATFORMS = SOON_PLATFORMS
 
 const PAIN_POINTS = [
   {

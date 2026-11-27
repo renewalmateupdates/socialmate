@@ -119,7 +119,7 @@ export default function VsMetricoolPage() {
             <p className="font-extrabold text-lg mb-2">250 posts / month. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 250 posts / month, double Metricool's free cap</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Competitor tracking free</li>

@@ -60,7 +60,7 @@ const FEATURES = [
   },
   {
     title: '7 Live Platforms',
-    desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn today. YouTube, Pinterest, and Instagram are on the active roadmap.',
+    desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn today. Instagram, Facebook, Threads and YouTube come next, once Meta and Google approve SocialMate.',
     icon:  Satellite,
     badge: 'Live now',
   },
@@ -145,7 +145,7 @@ const FAQ = [
   },
   {
     q: 'What platforms can I post to right now?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are live today — 7 platforms. YouTube, Pinterest, and Instagram are on the active roadmap with no fixed ETA. We don\'t vaporware — see the roadmap for honest status.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are live today: 7 platforms. Instagram, Facebook, Threads and YouTube come next, once Meta and Google approve SocialMate, with no fixed date. Pinterest and Reddit declined our applications. The roadmap shows the honest status.',
   },
   {
     q: 'Can I resell SocialMate to my clients?',

@@ -121,7 +121,7 @@ export default function VsPlanablePage() {
               <li>✅ 250 posts every month, no lifetime cap</li>
               <li>✅ Flat-rate workspaces ($29/mo for 5 clients)</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ RSS import, evergreen, link in bio — all free</li>
               <li>✅ No credit card required</li>
             </ul>

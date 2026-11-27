@@ -196,7 +196,7 @@ export default function VsCanvaPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready for a scheduling platform — not a design tool?</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is purpose-built for social media. 7 platforms (6 free, X on Pro), 15 AI tools, SOMA autonomous content — all starting at $0.
+            SocialMate is purpose-built for social media. 7 platforms (6 free, X on Pro), 15 AI tools, and SOMA autonomous content on Pro. Free to start.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             postbeyond: '❌',                           socialmate: '✅ Free (20 videos/mo)' },
   { feature: 'LinkedIn scheduling',           postbeyond: '✅ (advocacy focus)',          socialmate: '✅ Free'               },
   { feature: 'Employee advocacy',             postbeyond: '✅ (core feature)',             socialmate: '❌ Not built for this' },
-  { feature: 'AI writing tools',              postbeyond: '❌',                           socialmate: '15+ tools free'         },
+  { feature: 'AI writing tools',              postbeyond: '❌',                           socialmate: '15+ tools, 50 credits/mo free'         },
   { feature: 'Autonomous content system',     postbeyond: '❌',                           socialmate: '✅ SOMA'               },
   { feature: '8 autonomous AI agents',        postbeyond: '❌',                           socialmate: '✅ Pro+'               },
   { feature: 'Content calendar',             postbeyond: '✅ (enterprise)',              socialmate: '✅ Free'               },
@@ -122,7 +122,7 @@ export default function VsPostBeyondPage() {
             <p className="font-extrabold text-lg mb-2">Built for creators and teams. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 7 platforms: Discord, Telegram, Bluesky, TikTok, LinkedIn, Mastodon, and X on Pro</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Team approval workflows free</li>
               <li>✅ Pro plan for $8/month total</li>
@@ -206,7 +206,7 @@ export default function VsPostBeyondPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Built for creators, not enterprises</p>
           <h2 className="text-3xl font-extrabold mb-4">Schedule posts. Generate content. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate is a full creator OS. 7 platforms (6 free, X on Pro), 15+ AI tools, SOMA, and 8 agents — all for $0 to start.
+            SocialMate is a full creator OS. 7 platforms (6 free, X on Pro), 15+ AI tools, and SOMA and 8 agents on Pro. Free to start.
             Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

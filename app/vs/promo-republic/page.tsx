@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Discord scheduling',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '✅ Template library (paid)',  socialmate: '15+ AI tools free'        },
+  { feature: 'AI writing tools',              competitor: '✅ Template library (paid)',  socialmate: '15+ AI tools, 50 credits/mo free'        },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -122,7 +122,7 @@ export default function VsPromoRepublicPage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok free (20 videos/mo) — PromoRepublic has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 15+ AI tools free</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ White label add-on from $20/month</li>
               <li>✅ Client workspaces on Agency plan</li>
               <li>✅ No credit card required to start</li>

@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Social media scheduling',   beehiiv: '❌ Not included',              socialmate: '✅ 7 platforms'            },
   { feature: 'Newsletter / email',        beehiiv: '✅ Core feature',              socialmate: '❌ Not included'           },
   { feature: 'Free plan',                 beehiiv: 'Up to 2,500 subscribers',      socialmate: '✅ Full free plan'         },
-  { feature: 'AI writing tools',          beehiiv: 'AI writer (paid add-on)',      socialmate: '15+ tools free'            },
+  { feature: 'AI writing tools',          beehiiv: 'AI writer (paid add-on)',      socialmate: '15+ tools, 50 credits/mo free'            },
   { feature: 'Discord scheduling',        beehiiv: '❌',                            socialmate: '✅'                       },
   { feature: 'Telegram scheduling',       beehiiv: '❌',                            socialmate: '✅'                       },
   { feature: 'Bluesky scheduling',        beehiiv: '❌',                            socialmate: '✅'                       },

@@ -117,7 +117,7 @@ export default function VsFeedHivePage() {
             <p className="font-extrabold text-lg mb-2">6 platforms. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky, TikTok</li>
               <li>✅ SOMA: autonomous AI content OS</li>
               <li>✅ Bulk scheduling free</li>

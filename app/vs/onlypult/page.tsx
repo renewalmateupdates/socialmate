@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Profiles on entry plan', onlypult: '3 profiles',              socialmate: '1 per platform, 6 free (X on Pro)' },
   { feature: 'Platforms supported',    onlypult: '12 (paid)',               socialmate: '7 live (free)'               },
   { feature: 'Team seats',             onlypult: '1 on Start plan',         socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       onlypult: '❌ No AI tools',          socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       onlypult: '❌ No AI tools',          socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',        onlypult: '✅',                      socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            onlypult: '❌',                      socialmate: '✅ Free'                  },
   { feature: 'Analytics',             onlypult: 'SMM plan+ ($55/mo)',      socialmate: '✅ Free'                  },

@@ -27,6 +27,10 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'Fixed',    text: 'TikTok Studio saves your post even if the page closes or reloads right after the upload finishes. Before, TikTok had the video but SocialMate kept no record of it, so it never told you whether the video went live.' },
       { type: 'Fixed',    text: 'If TikTok Studio cannot save a post after the upload, it now says the video already reached TikTok and asks you to check your profile before posting again, so the same video does not go up twice.' },
       { type: 'Fixed',    text: 'A video TikTok already has is never refused afterwards for the monthly TikTok limit. Before, it went out anyway while Studio said the limit was reached, and no record was kept.' },
+      { type: 'Fixed',    text: 'Pages that list what is coming now name only Instagram, Facebook, Threads and YouTube, which wait on Meta\'s and Google\'s approval. The pricing FAQ, the features page, the roadmap, the best-times page and several audience pages still called Pinterest and Reddit coming, though both turned down our applications.' },
+      { type: 'Fixed',    text: 'The best-times page lists TikTok and X as live. It had filed them under planned.' },
+      { type: 'Fixed',    text: 'Comparison pages say SOMA comes with Pro and that the free plan\'s AI tools run on 50 credits a month. The Later comparison gives the free plan\'s real numbers: 250 posts a month and one account per platform.' },
+      { type: 'Fixed',    text: 'The LinkedIn creators page says LinkedIn posts can carry images and video. They can: up to 9 images or a video.' },
     ],
   },
   {

@@ -121,7 +121,7 @@ export default function VsIconosquarePage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ Real scheduling across 7 platforms (X needs Pro)</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>

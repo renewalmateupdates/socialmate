@@ -18,7 +18,7 @@ const COMPARISON = [
   { feature: 'LinkedIn scheduling',           mention: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Brand mention monitoring',      mention: '✅ (core feature)',            socialmate: '✅ Competitor tracking'  },
   { feature: 'Sentiment analysis',            mention: '✅',                           socialmate: '✅ SM Radar (AI-powered)' },
-  { feature: 'AI writing tools',              mention: '❌',                           socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              mention: '❌',                           socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     mention: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        mention: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             mention: '❌',                           socialmate: '✅ Free'                  },

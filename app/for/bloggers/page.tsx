@@ -5,6 +5,7 @@ import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { Bot, Briefcase, CalendarDays, Frown, PenLine, Recycle, RefreshCw, Rocket, Satellite, Sparkles, Zap } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { SOON_PLATFORMS } from '@/lib/site-facts'
 import { Globe } from 'lucide-react'
 
 
@@ -23,12 +24,7 @@ const LIVE_PLATFORMS = [
   { name: 'LinkedIn',    icon: 'linkedin', note: 'Live' },
 ]
 
-const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: 'instagram' },
-  { name: 'YouTube',   icon: 'youtube' },
-  { name: 'Facebook',  icon: 'facebook' },
-  { name: 'Pinterest', icon: 'pinterest' },
-]
+const COMING_PLATFORMS = SOON_PLATFORMS
 
 const PAIN_POINTS = [
   {
@@ -148,7 +144,7 @@ const FAQ = [
   },
   {
     q: 'What platforms can I actually use today?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are all live today. Instagram, Facebook, YouTube, and Pinterest are on the roadmap.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are all live today. Instagram, Facebook, Threads and YouTube come next, once Meta and Google approve SocialMate. Pinterest declined our application.',
   },
 ]
 

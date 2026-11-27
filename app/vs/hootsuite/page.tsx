@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: '250 posts / month'                },
   { feature: 'Platforms',              hootsuite: '20+ (paid)',            socialmate: '7 live (free)'               },
   { feature: 'Team seats',             hootsuite: '1 user on Standard',   socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       hootsuite: 'OwlyWriter AI (paid)', socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       hootsuite: 'OwlyWriter AI (paid)', socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'AI credits',            hootsuite: 'Limited/paid',         socialmate: '50/month free'            },
   { feature: 'Bulk scheduling',        hootsuite: 'Advanced plan only',   socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            hootsuite: '❌',                    socialmate: '✅ Free'                  },

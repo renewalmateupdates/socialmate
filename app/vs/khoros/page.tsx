@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             khoros: '✅ (enterprise)',               socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           khoros: '✅ (enterprise)',               socialmate: '✅ Free'                  },
   { feature: 'Enterprise community platform', khoros: '✅ (core product)',             socialmate: '✅ HESTIA community tab'  },
-  { feature: 'AI writing tools',              khoros: '✅ (enterprise paid)',          socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              khoros: '✅ (enterprise paid)',          socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     khoros: '❌',                            socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        khoros: '❌',                            socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             khoros: '✅ (enterprise)',               socialmate: '✅ Free'                  },
@@ -121,7 +121,7 @@ export default function VsKhorosPage() {
             <p className="font-extrabold text-lg mb-2">Self-serve. 7 platforms, 6 free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ HESTIA community tab</li>
               <li>✅ Pro plan for $8/month total</li>

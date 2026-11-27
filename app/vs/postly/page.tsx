@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Discord scheduling',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '✅ (paid)',                  socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '✅ (paid)',                  socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -122,7 +122,7 @@ export default function VsPostlyPage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok direct publish (Production API — approved May 2026)</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Pro plan for $8/month — 72% less than Postly</li>
               <li>✅ SOMA AI content system</li>
               <li>✅ No credit card required to start</li>
@@ -173,7 +173,7 @@ export default function VsPostlyPage() {
               {
                 n: '4',
                 title: 'AI-first workflow from day one',
-                desc: '12 AI writing tools free, SOMA for autonomous weekly content generation, hashtag research, hook writing, and content repurposing. Postly has basic AI assist on paid plans. SocialMate\'s AI stack is deeper, free earlier, and integrated into every workflow.',
+                desc: 'AI writing tools on the free plan\'s 50 monthly credits, SOMA (Pro) for autonomous weekly content generation, hashtag research, hook writing, and content repurposing. Postly has basic AI assist on paid plans. SocialMate\'s AI stack is deeper, free earlier, and integrated into every workflow.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">

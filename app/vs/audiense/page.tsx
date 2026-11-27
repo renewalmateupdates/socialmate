@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Discord + Telegram',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '❌ No AI content tools',     socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '❌ No AI content tools',     socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Audience segmentation',         competitor: '✅ Deep (enterprise)',        socialmate: '🔜 Roadmap'              },
   { feature: 'Evergreen recycling',           competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -123,7 +123,7 @@ export default function VsAudiensePage() {
               <li>✅ Content performance analytics built in</li>
               <li>✅ Best-times heatmap per platform</li>
               <li>✅ Pro plan for $8/month — no second tool needed</li>
-              <li>✅ 15+ AI tools free</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>

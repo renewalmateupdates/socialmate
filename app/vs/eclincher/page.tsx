@@ -12,7 +12,7 @@ const COMPARISON = [
   { feature: 'Free plan',              eclincher: '14-day trial only',      socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    eclincher: '10+ (paid)',              socialmate: '7 live (free)'               },
   { feature: 'Team seats',             eclincher: '1 user on Basic',        socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       eclincher: 'AI Assist (paid)',       socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       eclincher: 'AI Assist (paid)',       socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',        eclincher: '✅ All plans',           socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            eclincher: '❌',                     socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',    eclincher: 'Premier+ only',          socialmate: '✅ Free'                  },

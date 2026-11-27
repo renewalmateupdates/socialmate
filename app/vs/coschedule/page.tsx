@@ -119,7 +119,7 @@ export default function VsCoSchedulePage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Auto-publish on free plan</li>
               <li>✅ Analytics included on free tier</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>

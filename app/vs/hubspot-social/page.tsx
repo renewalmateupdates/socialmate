@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Telegram scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Social-first tool',             competitor: '❌ Social is a secondary feature', socialmate: '✅ Built for social first' },
-  { feature: 'AI writing tools',              competitor: '✅ (enterprise AI add-on)',   socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '✅ (enterprise AI add-on)',   socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'CRM integration',               competitor: '✅ Deep CRM + social',       socialmate: '🔜 Roadmap'              },
   { feature: 'Evergreen recycling',           competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -122,7 +122,7 @@ export default function VsHubSpotSocialPage() {
               <li>✅ Built exclusively for social scheduling</li>
               <li>✅ TikTok free — HubSpot has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 15+ AI tools free</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Pro $8/month — 160x cheaper than HubSpot</li>
               <li>✅ No credit card required to start</li>
             </ul>

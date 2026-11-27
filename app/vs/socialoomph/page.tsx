@@ -17,7 +17,7 @@ const COMPARISON = [
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'X / Twitter scheduling',        competitor: '✅ (paid)',                  socialmate: '✅ (Pro+, 150/mo)'      },
   { feature: 'Facebook scheduling',           competitor: '✅ (paid)',                  socialmate: '❌ Not yet'               },
-  { feature: 'AI writing tools',              competitor: '❌ No AI tools',             socialmate: '15+ AI tools free'        },
+  { feature: 'AI writing tools',              competitor: '❌ No AI tools',             socialmate: '15+ AI tools, 50 credits/mo free'        },
   { feature: 'Content calendar',             competitor: '✅ Basic',                   socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialOomph have AI writing tools?',
-    a: 'No. SocialOomph has no AI writing assistance. SocialMate includes 15+ AI tools free: caption writing, hook generation, thread builder, content repurposing, hashtag research, and the full SOMA autonomous content system. If you\'re still writing every post from scratch with no AI assist, you\'re spending hours that competitors aren\'t.',
+    a: 'No. SocialOomph has no AI writing assistance. SocialMate\'s free plan includes 50 AI credits a month for caption writing, hook generation, the thread builder, content repurposing and hashtag research, and Pro adds the SOMA autonomous content system. If you\'re still writing every post from scratch with no AI assist, you\'re spending hours that competitors aren\'t.',
   },
   {
     q: 'Can SocialMate replace SocialOomph for Twitter/X scheduling?',
@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate\'s pricing compare to SocialOomph?',
-    a: 'SocialOomph starts at $15/month with no free plan. SocialMate has a genuine free tier (50 credits/month across 6 platforms; X needs Pro) and Pro is $8/month. SocialMate is cheaper at every tier while covering dramatically more platforms and including AI tools that SocialOomph doesn\'t have at any price.',
+    a: 'SocialOomph starts at $15/month with no free plan. SocialMate has a genuine free tier (250 posts and 50 AI credits a month across 6 platforms; X needs Pro) and Pro is $8/month. SocialMate is cheaper at every tier while covering dramatically more platforms and including AI tools that SocialOomph doesn\'t have at any price.',
   },
 ]
 
@@ -122,7 +122,7 @@ export default function VsSocialOomphPage() {
             <p className="font-extrabold text-lg mb-2">Modern AI-powered scheduler. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok + LinkedIn + X + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 15+ AI tools free — SocialOomph has zero</li>
+              <li>✅ 15+ AI tools, 50 credits a month free (SocialOomph has none)</li>
               <li>✅ SOMA autonomous content system</li>
               <li>✅ Pro plan for $8/month — cheaper than SocialOomph</li>
               <li>✅ Modern mobile-ready UI</li>
@@ -164,7 +164,7 @@ export default function VsSocialOomphPage() {
               {
                 n: '2',
                 title: 'Zero AI tools vs 15+ free AI tools',
-                desc: 'SocialOomph has no AI writing assistance at any price tier. SocialMate includes 15+ AI tools free: hook writing, caption rewriting, thread generation, content repurposing, hashtag suggestions, and the SOMA system that generates a full week of posts across all your platforms. The time savings alone justify switching.',
+                desc: 'SocialOomph has no AI writing assistance at any price tier. SocialMate\'s free plan includes 50 AI credits a month for hook writing, caption rewriting, thread generation, content repurposing and hashtag suggestions, and Pro adds the SOMA system that generates a full week of posts across all your platforms. The time savings alone justify switching.',
               },
               {
                 n: '3',
@@ -206,7 +206,7 @@ export default function VsSocialOomphPage() {
           <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-3">Modern + cheaper + more platforms</p>
           <h2 className="text-3xl font-extrabold mb-4">Upgrade from SocialOomph for free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
-            SocialMate is free to start. 7 platforms (6 free, X on Pro), 15+ AI tools, SOMA content system.
+            SocialMate is free to start. 7 platforms (6 free, X on Pro), 15+ AI tools, and the SOMA content system on Pro.
             Pro is $8/month — less than SocialOomph&apos;s entry price.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

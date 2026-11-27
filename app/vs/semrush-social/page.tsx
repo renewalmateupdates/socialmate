@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Discord scheduling',            competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                            socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '✅ (SEMrush AI, paid)',         socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '✅ (SEMrush AI, paid)',         socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'SEO / keyword tools',           competitor: '✅ Industry-leading',           socialmate: '🔜 Roadmap'              },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                    socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                    socialmate: '✅ Free'                  },
@@ -123,7 +123,7 @@ export default function VsSEMrushSocialPage() {
               <li>✅ No SEO subscription required</li>
               <li>✅ TikTok free — SEMrush has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 15+ AI tools free</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Pro $8/month — 96% cheaper than SEMrush entry</li>
               <li>✅ No credit card required to start</li>
             </ul>

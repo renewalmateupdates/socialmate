@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Schedule to Mastodon',          tiktoknative: '❌',                              socialmate: '✅ Free'                    },
   { feature: 'Schedule to X / Twitter',       tiktoknative: '❌',                              socialmate: '✅ (Pro+)'                  },
   { feature: 'Cross-post one video to all',   tiktoknative: '❌',                              socialmate: '✅ One publish, 7 platforms'},
-  { feature: 'AI writing tools',              tiktoknative: '❌',                              socialmate: '15+ tools free'             },
+  { feature: 'AI writing tools',              tiktoknative: '❌',                              socialmate: '15+ tools, 50 credits/mo free'             },
   { feature: 'TikTok script generator',       tiktoknative: '❌',                              socialmate: '✅ 5 credits'               },
   { feature: 'Content calendar UI',           tiktoknative: '⚠️ TikTok Studio only',          socialmate: '✅ Full cross-platform view' },
   { feature: 'Bulk scheduling',               tiktoknative: '❌',                              socialmate: '✅ Free'                    },

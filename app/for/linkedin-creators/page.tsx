@@ -198,7 +198,7 @@ const FAQ = [
   },
   {
     q: 'How long does the LinkedIn access token last?',
-    a: 'LinkedIn access tokens last 60 days. After that you\'ll need to reconnect your account at /accounts — takes about 10 seconds. We\'ll add a reminder notification before your token expires.',
+    a: 'LinkedIn access tokens last 60 days. After that you reconnect your account at /accounts, which takes about 10 seconds. SocialMate sends you a notice and an email a week before it expires.',
   },
   {
     q: 'Can I schedule posts for a LinkedIn Company Page?',
@@ -210,7 +210,7 @@ const FAQ = [
   },
   {
     q: 'Can I post images or videos to LinkedIn through SocialMate?',
-    a: 'Text posts are fully supported now. Image and video attachments to LinkedIn are on the roadmap — the API supports them and we\'re building the upload flow.',
+    a: 'Yes. A LinkedIn post can carry up to 9 images or a video. Attach them in Compose the same way as for any other platform.',
   },
   {
     q: 'What other platforms can I post to at the same time?',

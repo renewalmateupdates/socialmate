@@ -120,7 +120,7 @@ export default function VsPublerPage() {
             <p className="font-extrabold text-lg mb-2">250 posts / month. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 250 scheduled posts / month</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ RSS import free</li>
               <li>✅ Bulk scheduling free</li>

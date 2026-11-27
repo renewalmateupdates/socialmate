@@ -5,6 +5,7 @@ import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { Bot, CalendarDays, MessageCircle, Music2, Recycle, Rocket, Sparkles } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { SOON_PLATFORMS } from '@/lib/site-facts'
 import { Globe } from 'lucide-react'
 
 
@@ -23,12 +24,7 @@ const LIVE_PLATFORMS = [
   { name: 'LinkedIn',   icon: 'linkedin', note: 'Live' },
 ]
 
-const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: 'instagram' },
-  { name: 'YouTube',   icon: 'youtube' },
-  { name: 'Threads',   icon: 'threads' },
-  { name: 'Facebook',  icon: 'facebook' },
-]
+const COMING_PLATFORMS = SOON_PLATFORMS
 
 const PAIN_POINTS = [
   {

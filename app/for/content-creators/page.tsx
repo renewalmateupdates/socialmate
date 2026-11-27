@@ -5,6 +5,7 @@ import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { Banknote, Bot, CalendarDays, Clock, Flame, Gift, Mic, PenLine, Recycle, Rocket, Satellite, Zap } from 'lucide-react'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import { SOON_PLATFORMS } from '@/lib/site-facts'
 import { Globe } from 'lucide-react'
 
 
@@ -23,13 +24,7 @@ const LIVE_PLATFORMS = [
   { name: 'LinkedIn',    icon: 'linkedin', note: 'Live' },
 ]
 
-const COMING_PLATFORMS = [
-  { name: 'Instagram', icon: 'instagram' },
-  { name: 'YouTube',   icon: 'youtube' },
-  { name: 'Facebook',  icon: 'facebook' },
-  { name: 'Threads',   icon: 'threads' },
-  { name: 'Pinterest', icon: 'pinterest' },
-]
+const COMING_PLATFORMS = SOON_PLATFORMS
 
 const PAIN_POINTS = [
   {
@@ -137,7 +132,7 @@ const FAQ = [
   },
   {
     q: 'What platforms are actually live today?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are all live. Instagram, Facebook, YouTube, Threads, and Pinterest are on the roadmap — see /roadmap for honest status updates.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are all live. Instagram, Facebook, Threads and YouTube come next, once Meta and Google approve SocialMate; /roadmap has honest status updates. Pinterest declined our application.',
   },
   {
     q: 'Can I schedule TikTok posts?',

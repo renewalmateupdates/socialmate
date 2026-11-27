@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Discord support',          vistasoical: '❌',                         socialmate: '✅'                       },
   { feature: 'Telegram support',         vistasoical: '❌',                         socialmate: '✅'                       },
   { feature: 'Mastodon / Bluesky',       vistasoical: '❌',                         socialmate: '✅'                       },
-  { feature: 'AI writing tools',         vistasoical: 'Basic',                      socialmate: '15+ tools free'            },
+  { feature: 'AI writing tools',         vistasoical: 'Basic',                      socialmate: '15+ tools, 50 credits/mo free'            },
   { feature: 'AI credits free tier',     vistasoical: 'None',                       socialmate: '50/month free'            },
   { feature: 'Bulk scheduling',          vistasoical: '✅',                         socialmate: '✅ Free'                  },
   { feature: 'Link in bio',              vistasoical: '✅ (paid)',                  socialmate: '✅ Free'                  },
@@ -110,7 +110,7 @@ export default function VsVistaSocialPage() {
               <li>✅ Free plan — no trial expiry</li>
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ 2 team seats free</li>
               <li>✅ No credit card required</li>
             </ul>

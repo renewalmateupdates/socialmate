@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             taplio: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'Discord + Telegram',            taplio: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Mastodon',                      taplio: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              taplio: '✅ (paid — carousel gen)',   socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              taplio: '✅ (paid — carousel gen)',   socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             taplio: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              taplio: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             taplio: '❌',                         socialmate: '✅ Free'                  },
@@ -122,7 +122,7 @@ export default function VsTaplioPage() {
             <p className="font-extrabold text-lg mb-2">LinkedIn + 6 more. Free to start.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ LinkedIn + Bluesky + X + TikTok + Discord + Telegram + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Bulk scheduling and RSS import free</li>
               <li>✅ Pro plan for $8/month total</li>
               <li>✅ Creator Monetization Hub built in</li>

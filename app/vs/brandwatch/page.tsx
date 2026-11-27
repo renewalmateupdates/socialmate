@@ -8,7 +8,7 @@ const COMPARISON = [
   { feature: 'Starting price',           brandwatch: '$1,000+/month (enterprise)',  socialmate: '$0 — free forever'       },
   { feature: 'Social scheduling',        brandwatch: '❌ Not included',             socialmate: '✅ Full scheduler included' },
   { feature: 'Competitor tracking',      brandwatch: '✅ Advanced (paid)',           socialmate: '✅ Free (3 accounts)'    },
-  { feature: 'AI writing tools',         brandwatch: '❌',                           socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',         brandwatch: '❌',                           socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Platform coverage',        brandwatch: 'Twitter, Facebook, Instagram', socialmate: '7 platforms incl. Discord/Telegram' },
   { feature: 'Discord monitoring',       brandwatch: '❌',                           socialmate: '✅'                      },
   { feature: 'Telegram monitoring',      brandwatch: '❌',                           socialmate: '✅'                      },

@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Discord + Telegram',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '❌',                          socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '❌',                          socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',           competitor: '❌',                          socialmate: '✅ Free'                  },

@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Schedule to Telegram',       discordbots: '❌',                                 socialmate: '✅'                       },
   { feature: 'Schedule to Mastodon',       discordbots: '❌',                                 socialmate: '✅'                       },
   { feature: 'Schedule to X / Twitter',   discordbots: '❌',                                 socialmate: '✅ (Pro+)'                       },
-  { feature: 'AI writing tools',           discordbots: '❌',                                 socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',           discordbots: '❌',                                 socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Visual content calendar',    discordbots: '❌ Command-line only',               socialmate: '✅ Full calendar UI'      },
   { feature: 'Bulk scheduling',            discordbots: '❌',                                 socialmate: '✅ Free'                   },
   { feature: 'Non-technical users',        discordbots: '❌ Requires developer access',       socialmate: '✅ Anyone can use it'     },

@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Platforms supported',    hopperhq: '8 (Instagram-focused)',    socialmate: '7 live (free)'               },
   { feature: 'Instagram grid preview', hopperhq: '✅ Core feature',          socialmate: '❌ Not yet'               },
   { feature: 'Team seats',             hopperhq: 'Extra cost per user',      socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       hopperhq: 'AI Caption (paid)',        socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       hopperhq: 'AI Caption (paid)',        socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',        hopperhq: '✅',                       socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            hopperhq: '✅ (paid)',                 socialmate: '✅ Free'                  },
   { feature: 'Analytics',             hopperhq: '✅ (paid)',                 socialmate: '✅ Free'                  },
