@@ -28,24 +28,25 @@ replies expired long ago.)
    or the first payment), and whether the honor system stays (in May Joshua
    wanted a verification step: .edu for students). Then a session creates the
    two Stripe codes, links them in the `coupons` table and updates the pages.
-2. **Should TikTok Studio's Post now count against the monthly TikTok cap
-   (found Nov 27)?** The plan table, /tiktok, llms.txt and the /vs pages say
-   Free gets 20 TikTok videos a month (Pro 60, Agency 200). Scheduled videos
-   are checked before they go out, and they cost us storage and egress. Post now
-   and Send to drafts upload from the creator's browser straight to TikTok, so
-   they cost us nothing, and the cap was never enforced there: it was checked
-   after TikTok already had the video. Since #836 every such video is recorded
-   and counted, and none is refused. One outside creator is at 17 this month.
-   Choose one: (a) enforce it before the upload, with the Pro upgrade line
-   (that creator would be stopped at 20 until Dec 1); (b) make Post now and
-   drafts uncapped on every plan (it costs nothing), keep the cap for
-   scheduled, and update the copy; (c) keep things as they are now.
-3. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
+2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it
    and proposes cuts and captions (AI credits), the cut happens in the browser
    (ffmpeg.wasm, no server video bills), then schedule it. Say go to plan it properly.
+
+## Decided (Nov 27, 2026)
+
+1. **TikTok Studio's Post now and Send to drafts are never refused at the
+   monthly TikTok cap.** Asked which way to go, Joshua said "do whatever you
+   think it best moving forward", and Claude kept them unrefused. They upload
+   from the creator's browser straight to TikTok and cost SocialMate nothing,
+   which is his rule for staying free. They are still recorded and counted
+   (#836). Scheduled videos cost storage and egress, and `/api/tiktok/post`
+   still refuses one past the cap. The copy keeps 20 / 60 / 200 a month, which
+   holds for scheduled videos. Past the cap, Post now still works and
+   scheduling stops until the 1st. Revisit if Post now starts costing money,
+   or if the cap should become an upgrade reason.
 
 ## Decided (Nov 13, 2026)
 
