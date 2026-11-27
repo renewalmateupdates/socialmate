@@ -25,6 +25,7 @@ const CHANGELOG: ChangelogEntry[] = [
     version: 'TikTok Studio',
     changes: [
       { type: 'Fixed',    text: 'About 200 older blog posts now show their headings, lists and tables. They were saved in a format the blog page did not read, so since they went up, readers saw their formatting code as text.' },
+      { type: 'Fixed',    text: 'The nonprofit and student discount codes work at checkout. NONPROFIT50 takes 50% off and STUDENT25 takes 25% off Pro or Agency, for as long as you stay subscribed. STUDENT25 needs your SocialMate account to use your school email (.edu). Before, both were advertised but had nothing behind them at checkout.' },
       { type: 'Fixed',    text: 'The first two free guides now link to the next volume. Each said the next one was "coming soon", though both were already up.' },
       { type: 'Fixed',    text: 'AI image generation is marked planned on the AI features page and the roadmap. They said it was being built, and it is not yet.' },
       { type: 'Fixed',    text: 'Pages that promised more were corrected: the inbox no longer says X is coming (X charges for reading replies), and a blog comparison table now says the free plan covers six platforms, since X needs Pro.' },

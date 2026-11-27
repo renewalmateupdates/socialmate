@@ -14,27 +14,13 @@ replies expired long ago.)
 
 ## Waiting on a decision
 
-1. **NONPROFIT50 and STUDENT25: decided Nov 27, waiting on Joshua's Stripe
-   step.** Joshua: "students should verify with a .edu email" and "however
-   long you think it should last". Both last every payment while subscribed,
-   which is what the pages already promise ("makes it $4/month"). NONPROFIT50
-   stays on the honor system. STUDENT25 needs a school email on the account
-   (`schoolEmailProblem` in `lib/coupon-redemption.ts`, checked by the code box
-   and again at checkout; #849). Left to do:
-   - **Joshua, in Stripe (live):** two coupons, 50% and 25%, duration
-     Forever, applied to the four Pro and Agency products (like BLACKFRIDAY).
-     The 50% one gets promotion code `NONPROFIT50`. The 25% one gets a private
-     code nobody can guess (not `STUDENT25`), so it can't be typed on Stripe's
-     own page past the email check. Send the two `promo_...` IDs.
-   - **Then a session:** set `stripe_promo_id` on the two `coupons` rows (both
-     exist, active), try each code in the pricing page's box, and check that
-     STUDENT25 refuses a non-school account.
-2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
+1. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it
    and proposes cuts and captions (AI credits), the cut happens in the browser
    (ffmpeg.wasm, no server video bills), then schedule it. Say go to plan it properly.
+
 ## Decided (Nov 27, 2026)
 
 1. **TikTok Studio's Post now and Send to drafts are never refused at the
@@ -63,16 +49,27 @@ replies expired long ago.)
    and the /z/CODE ZENITH card were a 404 for 288 of the 297 codes, the one
    active partner's included. All lookups go through
    `lib/referral-code.ts` now.
-
 4. **Three promises reworded.** Joshua: "do whatever you think is right and
    accurate". HERMES's Enterprise card says "Campaign limits sized to your
    team" and "Prospect limits sized to your team" (prospects cost Hunter.io
    credits), and the Enterprise page says "limits sized to your team" in all
    nine languages (it said "unlimited scale"). Creator Studio's disabled
    editing buttons, image templates and music note say "Planned" (an AI
-   video editor there is item 2 above). The publisher tells someone
+   video editor there is item 1 above). The publisher tells someone
    "SocialMate can't post to X. Remove it from this post." instead of
    "support is coming soon".
+5. **NONPROFIT50 and STUDENT25 work (Nov 27).** Joshua: students verify with
+   a .edu email, length left to Claude, then "You do it in Chrome". Both last
+   every payment while subscribed (the pages already promised $4/month for
+   nonprofits); NONPROFIT50 stays on the honor system, and STUDENT25 needs a
+   school email on the account (#849, in the code box and at checkout). Two
+   live Stripe coupons, 50% and 25%, Forever, on the four Pro and Agency
+   products: NONPROFIT50 is promotion code `promo_1UgV1H7OMwDowUuUWE6chvtl`,
+   and STUDENT25 is `promo_1UgV307OMwDowUuUnfHcsrA5`, whose code name is
+   private, so it cannot be typed on Stripe's own page past the email check.
+   Checked live: NONPROFIT50 applies in any letter case, STUDENT25 asks a
+   signed-out visitor to sign in with a school email and refuses a Gmail
+   account.
 
 ## Decided (Nov 13, 2026)
 
