@@ -139,7 +139,8 @@ function checkGuardedCopies() {
   expect('lib/publish/twitter.ts', 'const TWITTER_QUOTA', 'xPostsPerMonth')
   expect('app/api/accounts/twitter/quota/route.ts', 'const limits', 'xPostsPerMonth')
   expect('app/api/tiktok/post/route.ts', 'const PLAN_TIKTOK_QUOTA', 'tiktokVideosPerMonth')
-  expect('app/api/tiktok/confirm-upload/route.ts', 'const PLAN_TIKTOK_QUOTA', 'tiktokVideosPerMonth')
+  // confirm-upload has no table since Nov 27, 2026: TikTok already has the
+  // video when it runs, so it records and counts it without checking a cap.
 
   // Checkout screens and the webhook each name the four plan prices.
   const ids = [

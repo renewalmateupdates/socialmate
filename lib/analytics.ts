@@ -79,7 +79,7 @@ export const FUNNEL_EVENTS = [
   'tiktok_video_added',     // { seconds, mb, pick_ms } a usable video is loaded; pick_ms = picker open to file, which includes an iPhone "preparing" a big video
   'tiktok_post_attempted',  // { mode: now | schedule | drafts }
   'tiktok_post_blocked',    // { reason: privacy | disclosure | branded_private | schedule, mode } Post pressed with a choice missing
-  'tiktok_post_done',       // { mode } handed to TikTok, or scheduled; server: { mode: scheduled_fire, result: sent | in_drafts }
+  'tiktok_post_done',       // { mode, resent?, confirm_resent? } handed to TikTok, or scheduled; server: { mode: scheduled_fire, result: sent | in_drafts }
   'tiktok_post_failed',     // { mode, stage, code }; server: { mode: follow_up, stage: tiktok_processing, code } when TikTok rejects a video nobody was watching
 
   // ── Money ────────────────────────────────────────────────────────────────

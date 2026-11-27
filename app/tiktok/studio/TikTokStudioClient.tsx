@@ -16,7 +16,7 @@ import type { LucideIcon } from 'lucide-react'
 import { track, type TrackParams } from '@/lib/analytics'
 import { tiktokChunkRanges } from '@/lib/tiktok-chunks'
 import { STUDIO_POLL_MS } from '@/lib/tiktok-publish-status'
-import { putStagedVideo, uploadToTiktok } from '@/lib/tiktok-upload'
+import { confirmTiktokUpload, putStagedVideo, uploadToTiktok } from '@/lib/tiktok-upload'
 import {
   cannotPostDirect, defaultCoverTime, fullTikTokCaption, postBlocker, tagsToAppend, type PostBlocker,
 } from '@/lib/tiktok-studio'
@@ -892,6 +892,11 @@ export default function TikTokStudioClient({ initialConnected }: {
     pickerOpenedAt.current = null
     track('tiktok_picker_cancelled', ms !== null ? { ms } : {})
   }, [])
+  // `input.click()` sends a click that bubbles. The empty stage's input sits
+  // inside the stage, whose own click opens the picker, so every tap was
+  // recorded as two picker opens (Nov 21 to 26: 66 for 33 taps) and asked the
+  // browser for a second picker. The inputs stop it here.
+  const stopInputClick = useCallback((e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation(), [])
   // The picker closing with nothing chosen fires the input's native `cancel`
   // event, which React has no prop for on <input>, so it is bound here. Both
   // file inputs (empty stage, editor) use this ref; one is mounted at a time.
@@ -1503,12 +1508,12 @@ export default function TikTokStudioClient({ initialConnected }: {
       setUploading(false)
       setPosting(true)
 
-      // Step 3: Record the post in our DB + decrement quota
+      // Step 3: Record the post and count it. TikTok already has the video, so
+      // this finishes even if the page goes away, and is resent if its answer
+      // is lost (lib/tiktok-upload.ts).
       stage = 'confirm'
-      const confirmRes = await fetch('/api/tiktok/confirm-upload', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
+      const confirmed = await confirmTiktokUpload({
+        body: {
           publish_id,
           open_id,
           full_caption,
@@ -1534,15 +1539,16 @@ export default function TikTokStudioClient({ initialConnected }: {
           // scheduleMode === 'schedule' returns before this point, so this call
           // only ever runs for an immediate Post Now or a Send to drafts.
           scheduled_at:           null,
-        }),
+        },
       })
-      const confirmData = await readJson(confirmRes)
-      if (!confirmRes.ok) {
-        tiktokCode = String(confirmData.code ?? `http_${confirmRes.status}`)
-        throw new Error(String(confirmData.error || 'Failed to save post record'))
+      if (!confirmed.ok) {
+        tiktokCode = confirmed.code
+        throw new Error(confirmed.message)
       }
 
-      track('tiktok_post_done', { mode, ...(resent && { resent }) })
+      track('tiktok_post_done', {
+        mode, ...(resent && { resent }), ...(confirmed.resent && { confirm_resent: confirmed.resent }),
+      })
       setPostSuccess(true)
 
       // Uploading the bytes is not publishing. TikTok returns 200 for the
@@ -1958,6 +1964,7 @@ export default function TikTokStudioClient({ initialConnected }: {
                     type="file"
                     accept=".mp4,.mov,video/mp4,video/quicktime"
                     className="hidden"
+                    onClick={stopInputClick}
                     onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
                   />
                 </div>
@@ -2061,6 +2068,7 @@ export default function TikTokStudioClient({ initialConnected }: {
                     type="file"
                     accept=".mp4,.mov,video/mp4,video/quicktime"
                     className="hidden"
+                    onClick={stopInputClick}
                     onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
                   />
                 </div>
