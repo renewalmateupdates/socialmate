@@ -666,6 +666,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   "coming" after it declined. Read a platform's status from
   `lib/site-facts.ts`; never type it into a page.
 
+**From: November 27, 2026: the sign-in callback (#842)**
+
+- **A redirect is part of the page it lands on.** /onboarding's time to first
+  byte runs from the click on Google's consent screen through every hop, so
+  each query the auth callback awaited was time spent on Google's last screen:
+  up to ten in a row, 1.31 s at p75. Await only what decides where the person
+  goes, hand the bookkeeping to `after()`, and change cookies before it:
+  `after()` runs once the response has gone.
+- **A Poor route on two events is a lead, not a finding.** Desktop's Poor list
+  held 45 and 48 s LCPs (a laptop asleep mid-load) and an INP spike from two
+  presses on two days. Read the event count and the chart before fixing.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -673,7 +685,46 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #841 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #842 are merged.
+
+**Nov 27: the slow pages Speed Insights Plus showed, and the sign-in callback
+(#842).** Read before Plus ends on Dec 19, for the 7 days to Nov 27:
+- Phones have no Poor route (RES 99). On desktop (RES 97) /onboarding, 42 on
+  17 events, is the only Poor route with real traffic. The rest have 1 to 6
+  events each. /accounts and /for/agencies had 45 to 48 s LCPs, most likely a
+  laptop asleep mid-load. /soma/dashboard's CLS 2.02 moved `body` on 2 events.
+  /signup's INP of 2.2 s was 2 presses of its submit button between Nov 21 and
+  23, and the chart has been flat since.
+- The desktop homepage's TTFB is 2.0 s at p75 over 43 events. curl from
+  Indiana gets 0.3 to 0.45 s from the cache (`PRERENDER`), so the cause is
+  distant visitors and their networks, not the server.
+- /onboarding's TTFB (6.23 s desktop, 3.14 s phones, p75) counts every hop:
+  Google, Supabase, `/auth/callback` and then the page. Vercel Observability
+  for those 7 days:
+  - `/auth/callback`: 12 calls, p75 1.31 s.
+  - /onboarding itself: 232 ms.
+  - The proxy: 12 ms.
+- The callback awaited up to ten queries in a row. With #842 it waits for the
+  code exchange, then two reads side by side: `ensurePersonalWorkspace` and
+  the onboarding status. Everything else is `recordSignIn` in `lib/sign-in.ts`,
+  run with `after()`: the referral, the welcome sequence and
+  `signup_completed`, the newsletter choice, the login count and the signup
+  source.
+- The workspace check was `.single()`, so two personal workspaces or a failed
+  read made another one. It is now `limit(1).maybeSingle()`, and a failed read
+  makes none (the post routes create one when it is needed).
+- `scripts/test-sign-in.mjs` covers it; its wiring check fails on the old
+  callback.
+- **After #842 deploys:** read the next sign-ins in production.
+  - A returning sign-in moves `login_count` and `last_active`.
+  - A new account gets `funnel_signup_completed`, `welcome_email_sent` and its
+    source.
+  - All of that now runs in `after()`, which this app has never been seen to
+    run in production (#793's webhooks were never walked).
+  - Then check Observability's `/auth/callback` p75 (1.31 s before).
+- **Found, not changed:** the /refer/CODE page credits a partner only if the
+  visitor presses its button. Every `?ref=` link works. Waiting on a decision
+  in `TODO.md`.
 
 **Nov 27: the setup check (#840, docs only).** Joshua let sessions use his
 Chrome ("work on whatever you need to"). What his Chrome is signed in to, and
@@ -688,8 +739,8 @@ what it showed:
   `components/VercelInsights.tsx` stays. Until Dec 19 the detail is still
   there; desktop, 7 days to Nov 27 (RES 97): the Poor routes were /onboarding
   42 (17 events), /forgot-password 36 (4), /for/agencies 35 (3), /accounts 6
-  (6) and /soma/dashboard 1 (6), the small ones possibly our own visits from
-  before #822's exclusion. Spend Management: $200 budget, alerts at 50, 75 and
+  (6) and /soma/dashboard 1 (6); the entry above reads them. Spend Management:
+  $200 budget, alerts at 50, 75 and
   100%, pausing off. Functions: 0% errors over 12 hours. **Speed Insights,
   Mobile, Nov 21 to 26** (289 events, our visits excluded): RES 99, no page
   poor. App pages since the Nov 20 baseline: /compose 66 to 98,
