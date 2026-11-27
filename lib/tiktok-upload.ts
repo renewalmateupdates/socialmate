@@ -8,6 +8,8 @@
  *    should retry submitting this chunk."
  *  - putStagedVideo saves a video to our storage for a scheduled post, resends
  *    once on the same failures, and says what storage actually objected to.
+ *  - confirmTiktokUpload records an upload TikTok already has, and finishes
+ *    even if the page goes away first.
  *
  * Until Nov 19, 2026 one dropped piece failed the whole upload. Between Nov 15
  * and Nov 18 three phone uploads of 68 to 163 MB were cut off ("Load failed")
@@ -101,6 +103,73 @@ export async function uploadToTiktok(opts: {
     opts.onProgress?.(end + 1, total)
   }
   return { ok: true, resent }
+}
+
+/**
+ * Waits before each resend of a confirm whose answer never came back. The first
+ * is longer than a confirm usually takes, so a resend rarely meets the original
+ * still on its way through the route.
+ */
+export const CONFIRM_RETRY_DELAYS_MS = [3000, 8000]
+
+/** What a creator is told when TikTok has the video and we could not record it. */
+export const CONFIRM_LOST =
+  'Your video reached TikTok, but SocialMate could not save the post. Check your TikTok profile before you post it again, so it does not go up twice.'
+
+export type ConfirmOutcome =
+  | { ok: true; data: Record<string, unknown>; resent: number }
+  | { ok: false; code: string; message: string; resent: number }
+
+/**
+ * Records an upload TikTok already has (/api/tiktok/confirm-upload).
+ *
+ * Nov 25, 2026: a creator's upload finished, and the page went away before
+ * this call came back ("Failed to fetch"). TikTok had the video, but SocialMate
+ * kept no record of it, so nothing followed it up or told the creator what
+ * TikTok decided, and the Studio's error read like a reason to post it again.
+ * `keepalive` lets the request finish after the page is gone. The route answers
+ * a confirm it already has as done, so resending one whose answer was lost
+ * (a dropped connection, a 5xx) is safe.
+ */
+export async function confirmTiktokUpload(opts: {
+  body: Record<string, unknown>
+  fetchImpl?: typeof fetch
+  sleep?: Sleep
+  delays?: number[]
+}): Promise<ConfirmOutcome> {
+  const fetchImpl = opts.fetchImpl ?? fetch
+  const sleep = opts.sleep ?? realSleep
+  const delays = opts.delays ?? CONFIRM_RETRY_DELAYS_MS
+  let attempt = 0
+  let resent = 0
+  for (;;) {
+    let res: Response
+    try {
+      res = await fetchImpl('/api/tiktok/confirm-upload', {
+        method:    'POST',
+        headers:   { 'Content-Type': 'application/json' },
+        body:      JSON.stringify(opts.body),
+        keepalive: true,
+      })
+    } catch (err) {
+      if (attempt < delays.length) { await sleep(delays[attempt++]); resent++; continue }
+      const why = err instanceof Error ? err.message : 'network error'
+      return { ok: false, code: 'confirm_network', resent, message: `${CONFIRM_LOST} (${why})` }
+    }
+
+    const text = await res.text().catch(() => '')
+    let data: Record<string, unknown> = {}
+    try {
+      const parsed = text ? JSON.parse(text) : {}
+      if (parsed && typeof parsed === 'object') data = parsed as Record<string, unknown>
+    } catch { /* an error page: the status says enough */ }
+
+    if (res.ok) return { ok: true, data, resent }
+    if (res.status >= 500 && attempt < delays.length) { await sleep(delays[attempt++]); resent++; continue }
+
+    const why = typeof data.error === 'string' && data.error ? data.error : `SocialMate answered ${res.status}`
+    return { ok: false, code: String(data.code ?? `confirm_http_${res.status}`), resent, message: `${CONFIRM_LOST} (${why})` }
+  }
 }
 
 /** Supabase Storage explains a refusal in a JSON body; keep its words. */

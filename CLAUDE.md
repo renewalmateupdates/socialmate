@@ -647,6 +647,18 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   `scripts/test-free-platform-claims.mjs` reads a whole sentence, so it sees
   these; it cannot see a card headed "Free" over a "7 platforms" list item.
 
+**From: November 27, 2026: TikTok Studio's confirm (#836)**
+
+- **Never refuse to record what already happened.** confirm-upload checked the
+  monthly cap after TikTok had the video, so past the cap the video went out,
+  no row was kept, and the error invited posting it again. Check a limit before
+  the action it limits; afterwards, record what the other service did.
+- **The request that records finished work must outlive the page.** Phones drop
+  pages (a reload, an app switch, memory). Send it with `keepalive`, and make
+  the route answer a resend as done, so resending a lost one is safe.
+- **`input.click()` bubbles.** A hidden file input inside an element whose own
+  click opens it runs that handler twice. Stop the click on the input.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -654,7 +666,45 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 26, 2026).** #786 through #832 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #836 are merged.
+
+**Nov 27: TikTok Studio, read and fixed (#836).** Outside accounts, read-only.
+Since Nov 21, 7 people opened Studio (all on phones), 6 added a video, 5
+attempted a post and 5 got one out; nobody's video was rejected, so the first
+step is no longer where people stop. Since Oct 22: 38 attempts by 10 people, 27
+posted, 11 failed. The upload failures (5, plus 1 scheduled save) all came
+before #813; since then there have been two failures:
+- **Nov 25, `confirm`, "Failed to fetch":** the upload finished, the page went
+  away (a reload or the phone dropping it) before `/api/tiktok/confirm-upload`
+  answered, and the creator never came back. TikTok had the video; SocialMate
+  kept no row, so no follow-up, no notification, nothing in Studio, and the
+  error read like a reason to post it again (a duplicate on TikTok). #836: the
+  confirm goes out with `keepalive` (it finishes after the page is gone) and
+  is resent on a dropped connection or a 5xx (`confirmTiktokUpload` in
+  `lib/tiktok-upload.ts`, tested); the route answers a confirm it already has
+  as done (no second row, count or follow-up; the Inngest event carries an
+  id); and when it never lands, the creator is told the video reached TikTok
+  and to check their profile before posting again.
+- **Nov 22, `export`, "The operation was aborted.":** an iPhone (WebKit's
+  wording) applying edits stalled for 2 minutes, then failed; the creator
+  posted a different video 4 minutes later. Not fixed: one case, and the
+  cause (a play() or AudioContext waiting on a tap) needs an iPhone to test.
+- **The quota refused after the fact.** confirm-upload checked the monthly
+  TikTok cap after TikTok already had the video: past the cap, the video went
+  out, Studio said "quota reached", and no row was kept. One outside creator
+  is at 17 of Free's 20 this month. #836 makes confirm record and count every
+  video TikTok has; whether Studio's Post now should be held to the cap before
+  the upload is in `TODO.md`. The scheduled path still checks before sending,
+  and its message no longer tells people to buy a TikTok booster (no such
+  product).
+- **Every picker tap was recorded twice** (66 `tiktok_picker_opened` for 33
+  taps): `input.click()` bubbles to the stage, whose own click opens the
+  picker again. The inputs stop the click now. Halve the old picker counts.
+
+**After #836 deploys:** optional, Joshua's or a session's to run (additive,
+both audits clean Nov 27): `supabase/tiktok_posts_publish_id_unique_nov27.sql`,
+one unique index on `tiktok_posts (tiktok_post_id)` that closes the last race
+(a resend reaching the route while the first confirm is still inside it).
 
 **Nov 26: Black Friday, BLACKFRIDAY through Dec 4.** Joshua set the dates
 (Nov 26 to Dec 4) and left the amount to Claude: 50% off the first 12 months
@@ -886,7 +936,7 @@ added a video, and nothing said why. #823:
 box to write in starts at 0.97 screens (was 1.68), with the note on one line,
 the templates folded and no "Soon" chips; the Studio header clears the menu
 button. From Nov 21, `/admin/funnel` shows how many open the picker, cancel it,
-or hit `unreadable`; read it around Nov 27 to decide Studio's next fix.
+or hit `unreadable`. Read Nov 27 (see "Nov 27" at the top of this list).
 
 **Nov 20: PR #824 (Stripe webhook okayed by Joshua by name, and onboarding for
 TikTok-only people).**
@@ -927,9 +977,9 @@ free (#825, merged and checked live Nov 20).**
   Bluesky link facets only, so every #hashtag posted to Bluesky was plain
   text, not a tag. `postFacets()` in `lib/bluesky-facets.ts` adds tag facets
   by Bluesky's own rule, used by the publisher and inbox replies; tested in
-  `scripts/test-bluesky-facets.mjs`. **Next:** the first scheduled Bluesky
-  post with hashtags (Nov 21, 15:00 UTC) should carry `#tag` facets
-  (`app.bsky.feed.getPosts` on its URI).
+  `scripts/test-bluesky-facets.mjs`. **Checked Nov 27:** all 6 scheduled
+  Bluesky posts with hashtags since the deploy (Nov 21 to 24) carry `#tag`
+  facets matching their text (`app.bsky.feed.getPosts` on each URI).
 - **Bios:** every account behind a "Link in bio." post shows its link (the
   shop's Bluesky has profile link buttons, its X a website field, its Mastodon
   a Shop field). The shop's Bluesky bio was rewritten merch-only on Nov 20 with

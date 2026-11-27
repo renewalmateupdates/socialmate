@@ -3,15 +3,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
 import { inngest } from '@/lib/inngest'
 
-const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
-  free:   20,
-  pro:    60,
-  agency: 200,
-}
-
+/**
+ * Records a video TikTok Studio has just finished uploading to TikTok, counts
+ * it toward the month, and starts the follow-up that asks TikTok what it did
+ * with it (settleTiktokPublishes in lib/inngest.ts).
+ *
+ * By the time this runs, TikTok has the whole video, and a direct post is
+ * already publishing. So it never refuses: it used to answer "quota reached"
+ * after the upload, which kept no record of a video that went out anyway, and
+ * the Studio's error read like a reason to post it again. Whether Studio's
+ * Post now should be held to the monthly cap before the upload is a decision
+ * in TODO.md; the scheduled path (/api/tiktok/post) checks before sending.
+ *
+ * The Studio resends a confirm whose answer never came back
+ * (confirmTiktokUpload in lib/tiktok-upload.ts), so one already recorded is
+ * answered as done, with no second row, count or follow-up.
+ */
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -55,39 +64,38 @@ export async function POST(request: NextRequest) {
 
   if (!publish_id) return NextResponse.json({ error: 'publish_id required' }, { status: 400 })
 
-  // Check quota — resolved through resolveWorkspacePlan, not a bare user_settings
-  // read, so a workspace-specific plan override isn't silently ignored the way
-  // workspaces.plan was for the first paying customer (see lib/plan.ts).
-  const plan  = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, workspace_id || null)
-  const quota = PLAN_TIKTOK_QUOTA[plan] ?? 5
+  const alreadyRecorded = () => NextResponse.json({ success: true, publish_id, recorded: true, duplicate: true })
 
-  const { data: ws } = await getSupabaseAdmin()
+  // A resent confirm whose first try landed: the row is already there.
+  const { data: earlier, error: earlierError } = await getSupabaseAdmin()
+    .from('tiktok_posts')
+    .select('id')
+    .eq('tiktok_post_id', publish_id)
+    .eq('user_id', user.id)
+    .limit(1)
+  if (earlierError) console.warn('[tiktok/confirm-upload] could not check for an earlier confirm:', earlierError.message)
+  if (earlier && earlier.length > 0) return alreadyRecorded()
+
+  const { data: ws, error: wsError } = await getSupabaseAdmin()
     .from('workspaces')
-    .select('tiktok_videos_this_month, tiktok_booster_credits, tiktok_quota_reset_at')
+    .select('tiktok_videos_this_month, tiktok_quota_reset_at')
     .eq('owner_id', user.id)
     .eq('is_personal', true)
     .maybeSingle()
+  if (wsError) console.warn('[tiktok/confirm-upload] could not read this month\'s TikTok count:', wsError.message)
 
   let videosThisMonth = ws?.tiktok_videos_this_month ?? 0
-  const boosterCredits = ws?.tiktok_booster_credits ?? 0
 
   const resetAt = ws?.tiktok_quota_reset_at ? new Date(ws.tiktok_quota_reset_at) : new Date(0)
   const now = new Date()
   if (now.getMonth() !== resetAt.getMonth() || now.getFullYear() !== resetAt.getFullYear()) {
     videosThisMonth = 0
-    await getSupabaseAdmin()
+    const { error: resetError } = await getSupabaseAdmin()
       .from('workspaces')
       .update({ tiktok_videos_this_month: 0, tiktok_quota_reset_at: now.toISOString().slice(0, 10) })
       .eq('owner_id', user.id)
       .eq('is_personal', true)
-  }
-
-  const remaining = quota - videosThisMonth + boosterCredits
-  if (remaining <= 0) {
-    return NextResponse.json({
-      error: `TikTok video quota reached (${quota}/month on ${plan} plan). Purchase a TikTok Booster pack to continue.`,
-      quota_exhausted: true,
-    }, { status: 429 })
+    if (resetError) console.warn('[tiktok/confirm-upload] monthly count reset failed:', resetError.message)
   }
 
   const captionToStore = full_caption || post_caption
@@ -127,6 +135,10 @@ export async function POST(request: NextRequest) {
       tiktok_account_open_id: open_id || null,
     })
 
+  // A resend that met the original in flight, once tiktok_posts has a unique
+  // index on tiktok_post_id (supabase/tiktok_posts_publish_id_unique_nov27.sql).
+  if (insertError?.code === '23505') return alreadyRecorded()
+
   // Deliberately not a 500. The video is already at TikTok by this point, so
   // reporting failure would be a lie in the other direction. But the row is
   // what publish-status polls, so without it the post is untrackable and the
@@ -139,9 +151,10 @@ export async function POST(request: NextRequest) {
   // only while the creator keeps the page open. This keeps asking after they
   // leave (settleTiktokPublishes in lib/inngest.ts). Until Nov 18, 2026 nothing
   // did, and a creator who closed the tab left the post on "Sending" for good.
+  // The id makes Inngest drop a second event for the same upload.
   if (!insertError && !scheduled_at) {
     try {
-      await inngest.send({ name: 'tiktok/uploaded', data: { publishId: publish_id, userId: user.id } })
+      await inngest.send({ id: `tiktok-uploaded-${publish_id}`, name: 'tiktok/uploaded', data: { publishId: publish_id, userId: user.id } })
     } catch (err) {
       console.warn('[tiktok/confirm-upload] follow-up event failed; the daily sweep will settle it:', err)
     }

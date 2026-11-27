@@ -28,7 +28,10 @@ const mod = { exports: {} }
 new Function('module', 'exports', 'require', ts.transpileModule(read('lib/tiktok-upload.ts'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
 }).outputText)(mod, mod.exports, require)
-const { uploadToTiktok, uploadedThrough, putStagedVideo, storageErrorDetail, STAGE_TOO_LARGE, RETRY_DELAYS_MS } = mod.exports
+const {
+  uploadToTiktok, uploadedThrough, putStagedVideo, storageErrorDetail, STAGE_TOO_LARGE, RETRY_DELAYS_MS,
+  confirmTiktokUpload, CONFIRM_LOST, CONFIRM_RETRY_DELAYS_MS,
+} = mod.exports
 
 const blob = new Blob([new Uint8Array(30)])
 const RANGES = [{ start: 0, end: 9 }, { start: 10, end: 19 }, { start: 20, end: 29 }]
@@ -152,6 +155,91 @@ test("storage's refusal is explained in its own words, and too big says what to 
   assert.equal((await putStagedVideo({ url: 's', blob, mimeType: 'video/mp4', ...gone })).code, 'stage_network')
 
   assert.deepEqual(storageErrorDetail('not json at all'), { detail: 'not json at all', tooLarge: false })
+})
+
+/** A fake confirm-upload route: same script format as fakeTiktok. */
+function fakeConfirm(script) {
+  const calls = []
+  const sleeps = []
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, method: init.method, keepalive: init.keepalive, body: JSON.parse(init.body) })
+    const next = script.shift()
+    if (next === undefined) throw new Error('fake route got an unexpected request')
+    if (next === 'drop') throw new TypeError('Failed to fetch')
+    const a = typeof next === 'number' ? { status: next } : next
+    return new Response(a.body ?? null, { status: a.status })
+  }
+  return { fetchImpl, calls, sleeps, sleep: async ms => { sleeps.push(ms) } }
+}
+
+test('confirm: one keepalive POST, so it finishes even if the page goes away', async () => {
+  const t = fakeConfirm([{ status: 200, body: JSON.stringify({ success: true, recorded: true }) }])
+  const r = await confirmTiktokUpload({ body: { publish_id: 'p1', post_caption: 'hi' }, ...t })
+  assert.deepEqual(r, { ok: true, data: { success: true, recorded: true }, resent: 0 })
+  assert.deepEqual(t.calls, [{ url: '/api/tiktok/confirm-upload', method: 'POST', keepalive: true, body: { publish_id: 'p1', post_caption: 'hi' } }])
+  assert.equal(t.sleeps.length, 0)
+})
+
+test('confirm: a lost answer or a 5xx is sent again, and the route answers a repeat as done', async () => {
+  const t = fakeConfirm(['drop', 502, { status: 200, body: JSON.stringify({ success: true, duplicate: true }) }])
+  const r = await confirmTiktokUpload({ body: { publish_id: 'p1' }, ...t })
+  assert.equal(r.ok, true)
+  assert.equal(r.resent, 2)
+  assert.deepEqual(t.sleeps, CONFIRM_RETRY_DELAYS_MS)
+  assert.ok(t.calls.every(c => c.body.publish_id === 'p1' && c.keepalive === true))
+})
+
+test('confirm: when it never lands, the creator is told TikTok has the video, not to try again', async () => {
+  const gone = fakeConfirm(['drop', 'drop', 'drop'])
+  const r1 = await confirmTiktokUpload({ body: { publish_id: 'p1' }, ...gone })
+  assert.equal(r1.ok, false)
+  assert.equal(r1.code, 'confirm_network')
+  assert.equal(r1.message, `${CONFIRM_LOST} (Failed to fetch)`)
+  assert.match(CONFIRM_LOST, /reached TikTok/)
+  assert.match(CONFIRM_LOST, /Check your TikTok profile before you post it again/)
+
+  // A refusal is not resent, and keeps the route's own words and code.
+  const out = fakeConfirm([{ status: 401, body: JSON.stringify({ error: 'Unauthorized' }) }])
+  const r2 = await confirmTiktokUpload({ body: { publish_id: 'p1' }, ...out })
+  assert.equal(out.calls.length, 1)
+  assert.equal(r2.code, 'confirm_http_401')
+  assert.equal(r2.message, `${CONFIRM_LOST} (Unauthorized)`)
+
+  // An error page that is not JSON still says what happened.
+  const page = fakeConfirm([{ status: 500, body: '<html>' }, 500, 500])
+  const r3 = await confirmTiktokUpload({ body: { publish_id: 'p1' }, ...page })
+  assert.equal(r3.code, 'confirm_http_500')
+  assert.match(r3.message, /\(SocialMate answered 500\)$/)
+})
+
+test('wiring: Studio confirms through confirmTiktokUpload, and one tap is one picker open', () => {
+  const s = read('app/tiktok/studio/TikTokStudioClient.tsx')
+  assert.match(s, /await confirmTiktokUpload\(\{/)
+  assert.doesNotMatch(s, /fetch\('\/api\/tiktok\/confirm-upload'/, 'no confirm call without keepalive and resends')
+  // input.click() bubbles to the stage, whose click opens the picker again.
+  assert.match(s, /const stopInputClick = useCallback\(\(e: React\.MouseEvent<HTMLInputElement>\) => e\.stopPropagation\(\), \[\]\)/)
+  const inputs = s.match(/ref=\{bindFileInput\}[\s\S]*?\/>/g) ?? []
+  assert.equal(inputs.length, 2)
+  for (const input of inputs) assert.match(input, /onClick=\{stopInputClick\}/)
+})
+
+test('confirm-upload: records what TikTok already has, once, and never refuses it', () => {
+  const r = read('app/api/tiktok/confirm-upload/route.ts')
+  // A repeat finds the first row before inserting, and a unique-index race counts as done.
+  const check = r.indexOf(".eq('tiktok_post_id', publish_id)")
+  const insert = r.indexOf('.insert({')
+  assert.ok(check > 0 && check < insert, 'looks for an earlier confirm before inserting')
+  assert.match(r, /if \(earlier && earlier\.length > 0\) return alreadyRecorded\(\)/)
+  assert.match(r, /if \(insertError\?\.code === '23505'\) return alreadyRecorded\(\)/)
+  // The video is at TikTok already: no quota refusal after the fact.
+  assert.doesNotMatch(r, /status: 429/)
+  assert.doesNotMatch(r, /quota_exhausted/)
+  // One follow-up per upload.
+  assert.match(r, /inngest\.send\(\{ id: `tiktok-uploaded-\$\{publish_id\}`, name: 'tiktok\/uploaded'/)
+  // No error message sells a product that does not exist.
+  for (const f of ['app/api/tiktok/post/route.ts', 'app/api/tiktok/confirm-upload/route.ts']) {
+    assert.doesNotMatch(read(f), /Booster pack/, f)
+  }
 })
 
 test('wiring: TikTok Studio uses these, and posting is findable on a phone', () => {
