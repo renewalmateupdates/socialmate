@@ -287,8 +287,9 @@ export async function publishToLinkedIn(
  *   - email (user email)
  *   - w_member_social (post on behalf of members)
  *
- * Redirect URI to register:
- *   - https://socialmate.studio/api/accounts/linkedin/callback
+ * Redirect URI to register (the one app/api/accounts/linkedin/connect sends):
+ *   - https://socialmate.studio/api/linkedin/callback
+ * (app/api/accounts/linkedin/callback is an older copy nothing sends people to.)
  *
  * ───────────────────────────────────────────────────────────────────────────
  */
