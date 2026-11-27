@@ -216,6 +216,7 @@ claiming otherwise. Enterprise seats are the single exception.
 | Script tests | `npm test` (runs every `scripts/test-*.mjs`, no network); `python scripts/test-audit-schema-drift.py` for the audit script |
 | Schema drift audit | `python scripts/audit-schema-drift.py` (needs production read keys in `.env.local`) |
 | Upsert target audit | `python scripts/audit-dead-features.py` |
+| Site claims check | `npm run verify:content` (about 5 s, no network; `npm test` runs it and fails on any open finding or stale allow entry). Fix the copy, or add an entry with its reason to `scripts/verify-content-allow.json`. `-- --db` also reads `blog_posts` |
 | Submit URLs to IndexNow | `node scripts/indexnow-submit.mjs` |
 | Redraw the share image | `node scripts/make-og-image.mjs` (after any price, free-cap or platform change; `npm test` fails until it's run) |
 
@@ -696,6 +697,16 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   HTML and the page read lines. When adding a content source, render one row
   before inserting the rest.
 
+**From: November 27, 2026: the site claims check nobody ran (#846)**
+
+- **A check that isn't in `npm test` stops being a check.** `verify:content`
+  was built Nov 13 and had 146 open findings two weeks later, because a
+  two-and-a-half-minute run kept it out of the routine. Make a check fast,
+  then make it part of the tests.
+- **Build a pattern once, not per sentence.** The rules rebuilt about 190
+  competitor-name patterns for every sentence; building them once took the
+  run from 143 s to 5 s with identical findings.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -703,7 +714,39 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #845 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #846 are merged.
+
+**Nov 27: the site claims check, cleared and in `npm test` (#846).**
+- **Before:** `verify:content` had 146 open findings. It wasn't in `npm test`
+  and took 143 s. Building the competitor-name patterns once instead of per
+  sentence took it to about 5 s with identical findings. Now
+  `scripts/test-site-content.mjs` runs it and fails on any open finding or
+  stale allow entry, and each of its six rule tests fails on the old rules.
+- **Copy fixed:**
+  - The first two guides said the next volume was "coming soon"; both were
+    already up, and the guides now link to them.
+  - AI image generation said "In build" (and "in progress" on the roadmap);
+    it is now marked planned.
+  - /inbox said X was "coming soon" (X charges for reading replies), and
+    /social-inbox promised "more platform integrations coming soon"; both are
+    gone. /accounts' fallback toast no longer says "coming soon".
+  - A static post's comparison table gave Free 7 platforms (it's 6; X needs
+    Pro). /create listed YouTube's longest upload as "Unlimited" (12 hours).
+  - The Japanese and Korean "Coming soon" labels were still in English.
+  - `npm run gen:routes` added /meta/data-deletion and refreshed the sitemap
+    dates (last regenerated in August).
+- **Rules:** "Post Planner" is a competitor; "free for 250 posts a month, Pro
+  $8" names two plans; "not coming soon" and "Do not describe ... as
+  unlimited" are negations; "opens once Meta reviews" and "beyond Instagram"
+  are not claims. The eight `blog_posts/` allow entries are `dbOnly`, so a
+  static run no longer tells sessions to delete them.
+- **Accepted with reasons (149 entries):** competitors' prices and limits on
+  /vs pages, history, Enterprise seats, referral bonuses and partner
+  commissions (both uncapped in code), hashtag collections (no cap in code),
+  the privacy policy's YouTube section, and labels for SOON_PLATFORMS.
+- **Waiting on Joshua (TODO.md item 3):** HERMES Enterprise "unlimited", the
+  Enterprise page's "unlimited scale", Creator Studio's "Coming soon" stubs,
+  and the publish pipeline's "support coming soon" message.
 
 **Nov 27: two blog posts for what TikTok creators ask AI.** ChatGPT's
 signups land mostly on /for/tiktok-creators (29 since Oct 15), and the blog

@@ -356,7 +356,7 @@ export default function SocialInbox() {
               {!fetching && notifications.length > 0 && (
                 <div className="mt-6 bg-surface border border-theme rounded-2xl p-4 text-center">
                   <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold">
-                    Showing notifications from connected accounts. More platform integrations coming soon.
+                    Showing notifications from connected accounts.
                   </p>
                 </div>
               )}

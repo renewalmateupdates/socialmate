@@ -970,8 +970,8 @@ export default function StartingABusinessGuidePage() {
               <div className="border-t border-[#1f1f1f] pt-12 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Up next</p>
-                  <p className="font-bold text-white">Vol. 2: Marketing on Zero Budget</p>
-                  <p className="text-sm text-gray-500">Coming soon</p>
+                  <Link href="/guides/marketing-zero-budget" className="font-bold text-white hover:text-amber-400 transition-colors">Vol. 2: Marketing on Zero Budget</Link>
+                  <p className="text-sm text-gray-500">Free to read now</p>
                 </div>
                 <div className="flex flex-col gap-3 sm:items-end">
                   <Link

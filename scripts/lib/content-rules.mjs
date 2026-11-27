@@ -26,7 +26,7 @@ const OTHER_PRODUCTS = [
   'Khoros', 'Talkwalker', 'FeedHive', 'PostPickr', 'Mailchimp', 'Substack', 'Brandwatch', 'Klaviyo',
   'Linktree', 'beehiiv', 'Beehiiv', 'ConvertKit', 'Kit', 'Notion', 'Planoly', 'Predis', 'Ocoya',
   'Repurpose', 'Mixpost', 'Post Bridge', 'Blotato', 'Supergrow', 'AuthoredUp', 'OpusClip', 'Opus Clip',
-  'Social Champ', 'Postpone', 'Twitch', 'YouTube', 'Discord', 'Nitro', 'X Premium', 'LinkedIn', 'Premium',
+  'Social Champ', 'Postpone', 'Post Planner', 'Twitch', 'YouTube', 'Discord', 'Nitro', 'X Premium', 'LinkedIn', 'Premium',
   'ChatGPT', 'Claude', 'Gemini', 'Zapier', 'Shopify', 'Patreon', 'OnlyFans', 'Vercel', 'Supabase',
   'Stripe', 'Dropbox', 'Peloton', 'Tidal', 'Spotify', 'Netflix', 'GitHub', 'Cursor', 'Midjourney',
   'CapCut', 'Descript', 'Riverside', 'Streamlabs', 'StreamElements', 'Restream', 'Vyra', 'Printify',
@@ -72,14 +72,19 @@ const num = (s) => Number(String(s).replace(/,/g, ''))
  * True when "Pro" or "Agency" at `index` belongs to another product:
  * "White Label Pro", "Buffer Pro", "HERMES Pro".
  */
+// Built once. These used to be built per name, per sentence, several times a
+// sentence: about 95% of a 2.5-minute run went to compiling the same patterns.
+const OTHER_PRODUCT_ALTERNATIVES = OTHER_PRODUCTS.map(escapeRe).join('|')
+const OTHER_PRODUCT_BEFORE = new RegExp(`(?:${OTHER_PRODUCT_ALTERNATIVES})('s)?\\s+$`)
+const OTHER_PRODUCT_WORD = new RegExp(`\\b(?:${OTHER_PRODUCT_ALTERNATIVES})\\b`)
+
 function isOtherProductsPlan(sentence, index) {
   const before = sentence.slice(Math.max(0, index - 28), index)
-  return OTHER_PRODUCTS.some(name => new RegExp(`${escapeRe(name)}('s)?\\s+$`).test(before))
+  return OTHER_PRODUCT_BEFORE.test(before)
 }
 
 function mentionsCompetitorOnly(sentence) {
-  return !/SocialMate|\b(we|our|us)\b/i.test(sentence) &&
-    OTHER_PRODUCTS.some(name => new RegExp(`\\b${escapeRe(name)}\\b`).test(sentence))
+  return !/SocialMate|\b(we|our|us)\b/i.test(sentence) && OTHER_PRODUCT_WORD.test(sentence)
 }
 
 /**
@@ -93,6 +98,13 @@ export function ourPart(sentence) {
   if (/\bfeature\s*:/.test(sentence)) return ''
   return mentionsCompetitorOnly(sentence) ? '' : sentence
 }
+
+/** What each AI tool costs, with the pattern that finds a stated cost (built once). */
+const AI_TOOL_COSTS = [
+  ['Hashtag', 5], ['Repurpos', 10], ['Post Score', 5], ['SM-Pulse', 20], ['SM-Radar', 20],
+  ['Bio Writer', 5], ['Profile Optimizer', 5], ['TikTok Script', 5], ['Thread Generator', 10],
+  ['Caption Generator', 5], ['Hook Generator', 5], ['Content Gap', 10], ['Content Calendar', 5],
+].map(([name, cost]) => [name, cost, new RegExp(`${escapeRe(name)}[^.;\\n]{0,70}?\\b(\\d+)[ -]credits?\\b`, 'i')])
 
 /** Wraps a rule so it only ever sees SocialMate's part of a sentence. */
 const ours = (rule) => ({ ...rule, check: (s) => { const part = ourPart(s); return part ? rule.check(part) : [] } })
@@ -157,7 +169,10 @@ export function buildRules(facts) {
         // the sentence's other numbers Pro's: "250 posts a month, 6 platforms
         // (X needs Pro)" is still the free plan.
         s = s.replace(X_PLAN_NOTE, ' ')
-        const names = Array.from(new Set(Array.from(s.matchAll(/\b(Free|Pro|Agency|free(?= (?:plan|tier|account|users?)))\b(?! (?:tools?|to |and easy|trial))/g))
+        // "free for 250 posts a month" and "free to start: 250 posts" name the
+        // free plan too, so "free for 250 posts a month, Pro $8" names two plans
+        // and is not read as Pro with 250 posts.
+        const names = Array.from(new Set(Array.from(s.matchAll(/\b(Free|Pro|Agency|free(?= (?:plan|tier|account|users?|for|to start|up to)\b))\b(?! (?:tools?|to (?!start\b)|and easy|trial))/g))
           .filter(m => !isOtherProductsPlan(s, m.index)).map(m => m[1].charAt(0).toUpperCase() + m[1].slice(1))))
         if (names.length !== 1) return []
         if (mentionsCompetitorOnly(s)) return []
@@ -198,7 +213,9 @@ export function buildRules(facts) {
         if (!/SocialMate|\b(our scheduler|we support|we post)\b/i.test(s)) return []
         if (/\?\s*['"`,]*\s*$|\bq\s*:/.test(s)) return [] // a question is not a claim
         if (NEGATION.test(s)) return []
-        if (/\b(clips?|feed|RSS|link|bio|profile|handle|competitor|alternative|vs\.?|compared|like|such as|whether|native|app itself|subscribers?|channel grid|videos? from|Shorts feed|Twitch)\b/i.test(s)) return []
+        // "open once Meta finishes reviewing SocialMate": a gate, not a claim that it is live.
+        if (/\bonce\b[^.]{0,60}\b(approv\w*|review\w*|verif\w*)\b/i.test(s)) return []
+        if (/\b(clips?|feed|RSS|link|bio|profile|handle|competitor|alternative|vs\.?|compared|like|such as|whether|native|app itself|subscribers?|channel grid|videos? from|Shorts feed|Twitch|beyond)\b/i.test(s)) return []
         const hits = []
         const verb = /\b(schedul\w*|post\w*|publish\w*|cross-?post\w*|connect\w*|supports?|includ\w*|integrat\w*|works with|available (on|for))\b/i
         if (!verb.test(s)) return []
@@ -216,7 +233,8 @@ export function buildRules(facts) {
         if (!m) return []
         if (mentionsCompetitorOnly(s)) return []
         if (/Enterprise/i.test(s) && /seats?/i.test(s)) return []
-        if (/\b(not|never|isn't|aren't|no such|nothing is|none are)\b[^.]{0,40}unlimited/i.test(s)) return []
+        // "Do not describe posts, seats or connected accounts as unlimited" warns against the claim.
+        if (/\b(not|never|isn't|aren't|no such|nothing is|none are)\b[^.]{0,60}unlimited/i.test(s)) return []
         return [m[0]]
       },
     }),
@@ -236,13 +254,7 @@ export function buildRules(facts) {
       why: 'An AI tool credit cost that is not what the route charges',
       check(s) {
         const hits = []
-        const named = [
-          ['Hashtag', 5], ['Repurpos', 10], ['Post Score', 5], ['SM-Pulse', 20], ['SM-Radar', 20],
-          ['Bio Writer', 5], ['Profile Optimizer', 5], ['TikTok Script', 5], ['Thread Generator', 10],
-          ['Caption Generator', 5], ['Hook Generator', 5], ['Content Gap', 10], ['Content Calendar', 5],
-        ]
-        for (const [name, cost] of named) {
-          const re = new RegExp(`${escapeRe(name)}[^.;\\n]{0,70}?\\b(\\d+)[ -]credits?\\b`, 'i')
+        for (const [name, cost, re] of AI_TOOL_COSTS) {
           const m = s.match(re)
           if (m && Number(m[1]) !== cost) hits.push(`${name} at ${m[1]} credits (it is ${cost})`)
         }
@@ -298,7 +310,10 @@ export function buildRules(facts) {
       why: 'A "coming soon" that may describe something already shipped, or never planned',
       check(s) {
         const m = s.match(/\bcoming soon\b|\bapproval pending\b|\bpending approval from\b|\blaunching soon\b/i)
-        return m ? [m[0]] : []
+        if (!m) return []
+        // "Pinterest and Reddit ... are not coming soon" says the opposite.
+        if (/\b(not|never|isn't|aren't|no longer)\s+(?:\w+\s+)?coming soon\b/i.test(s)) return []
+        return [m[0]]
       },
     },
     {

@@ -268,9 +268,9 @@ const AI_TOOLS = [
   {
     icon: Palette,
     label: 'AI Image Generation',
-    credits: 'Coming soon',
+    credits: 'Planned',
     what: 'Generate custom images for your posts directly inside SocialMate.',
-    how: 'In build. Will run on Google Gemini image models, with generated images attachable to a scheduled post. Follow along on the roadmap.',
+    how: 'Planned, not built yet. It would run on Google Gemini image models, with generated images attachable to a scheduled post. Follow along on the roadmap.',
     href: '/roadmap',
     available: false,
     proOnly: true,

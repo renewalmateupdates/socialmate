@@ -3,7 +3,7 @@
   "routes": [
     {
       "path": "/",
-      "lastModified": "2026-08-28"
+      "lastModified": "2026-11-19"
     },
     {
       "path": "/about",
@@ -15,7 +15,7 @@
     },
     {
       "path": "/beta",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/blog",
@@ -23,7 +23,7 @@
     },
     {
       "path": "/changelog",
-      "lastModified": "2026-11-03"
+      "lastModified": "2026-11-27"
     },
     {
       "path": "/discount",
@@ -35,11 +35,11 @@
     },
     {
       "path": "/faq",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/features",
-      "lastModified": "2026-09-24"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for",
@@ -47,63 +47,63 @@
     },
     {
       "path": "/for/agencies",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/bloggers",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/coaches",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/content-creators",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/fitness-coaches",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/linkedin-creators",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/musicians",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/nonprofits",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/podcasters",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/real-estate",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/restaurants",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/small-business",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/streamers",
-      "lastModified": "2026-10-23"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/tiktok-creators",
-      "lastModified": "2026-10-23"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/for/video-creators",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/gilgamesh",
@@ -123,63 +123,63 @@
     },
     {
       "path": "/guides",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/ai-tools-for-creators-2026",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/guides/build-your-brand-from-zero",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/business-credit-legal",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/content-creator-business",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/creator-monetization",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/email-list-building",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/guides/first-30-days-social-media",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/guides/local-business-website",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/marketing-zero-budget",
-      "lastModified": "2026-10-23"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/reddit-marketing",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/seo-for-beginners",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/guides/side-hustle-to-full-time-creator",
-      "lastModified": "2026-10-23"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/starting-a-business",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/guides/vibe-coding-with-ai",
-      "lastModified": "2026-10-21"
+      "lastModified": "2026-11-20"
     },
     {
       "path": "/hermes",
@@ -187,7 +187,11 @@
     },
     {
       "path": "/integrations",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-13"
+    },
+    {
+      "path": "/meta/data-deletion",
+      "lastModified": "2026-11-17"
     },
     {
       "path": "/monetize",
@@ -195,15 +199,15 @@
     },
     {
       "path": "/press",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/pricing",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/privacy",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-17"
     },
     {
       "path": "/referral",
@@ -215,7 +219,7 @@
     },
     {
       "path": "/signup",
-      "lastModified": "2026-11-03"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/soma",
@@ -227,7 +231,7 @@
     },
     {
       "path": "/studio-stax",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/studio-stax/apply",
@@ -235,11 +239,11 @@
     },
     {
       "path": "/support",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/terms",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/tiktok",
@@ -247,7 +251,7 @@
     },
     {
       "path": "/tools",
-      "lastModified": "2026-11-03"
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/tools/bluesky-custom-domain",
@@ -283,35 +287,35 @@
     },
     {
       "path": "/vs",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/agorapulse",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/audiense",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/authoredup",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/beehiiv",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/blotato",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/brand24",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/brandwatch",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/buffer",
@@ -319,367 +323,367 @@
     },
     {
       "path": "/vs/canva",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/circleboom",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/combin",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/contentstudio",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/convertkit",
-      "lastModified": "2026-07-18"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/coschedule",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/creatorstudio",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/crowdfire",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/discord-bots",
-      "lastModified": "2026-08-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/eclincher",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/emplifi",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/fedica",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/feedhive",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/flick",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/gain-app",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/vs/hootsuite",
-      "lastModified": "2026-11-04"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/hopper-hq",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/hubspot-social",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/hypefury",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/iconosquare",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/keystroke",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/khoros",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/klaviyo",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/kontentino",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/vs/later",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/later-free",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/linktree",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/loomly",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/mailchimp",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/meetedgar",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/mention",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/metricool",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/missinglettr",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/mixpost",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/napoleon-cat",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/notionhq",
-      "lastModified": "2026-07-18"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/nuelink",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/ocoya",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/oktopost",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/oneup",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/onlypult",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/opus-clip",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/pallyy",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/planable",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/planly",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/plann",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/planoly",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/post-beyond",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/post-bridge",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/postcron",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/postiz",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/postly",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/postoplan",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/postpickr",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/postplanner",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/predis-ai",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/preview-app",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/promo-republic",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/publer",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/recurpost",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/repurpose-io",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/ripl",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/semrush-social",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/sendible",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/shield-app",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/sked-social",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/smarterqueue",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/social-champ",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-13"
     },
     {
       "path": "/vs/social-report",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/socialbee",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/socialoomph",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/socialpilot",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/socialrails",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/sprinklr",
-      "lastModified": "2026-07-18"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/sprout-social",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/statusbrew",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/storychief",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/substack",
-      "lastModified": "2026-07-18"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/supergrow",
-      "lastModified": "2026-11-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/tailwind-social",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/talkwalker",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/taplio",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/tiktok-native",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/tiktok-scheduler",
-      "lastModified": "2026-08-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/tweepsmap",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/tweetdeck",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/tweethunter",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/typefully",
-      "lastModified": "2026-09-10"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/unum",
-      "lastModified": "2026-10-26"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/vista-social",
-      "lastModified": "2026-08-12"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/vs/zoho-social",
-      "lastModified": "2026-11-11"
+      "lastModified": "2026-11-26"
     },
     {
       "path": "/wall-of-love",

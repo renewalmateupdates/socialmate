@@ -1599,7 +1599,7 @@ Later's free plan gives you 14 posts per month per social profile. That's extrem
 
 | Feature | SocialMate Free | Buffer Free | Hootsuite Standard ($99/mo) |
 |---|---|---|---|
-| Platforms | 7 | 3 | Up to 10 |
+| Platforms | 6 (X needs Pro) | 3 | Up to 10 |
 | Posts per month | 250 | 30 total | Unlimited |
 | Team seats | 2 | 1 | 1 |
 | AI tools | Yes (50 credits) | No | Yes (limited) |
