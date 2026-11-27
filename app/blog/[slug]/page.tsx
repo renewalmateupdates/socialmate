@@ -582,12 +582,14 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   return (
     <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <nav className="border-b border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-gray-950/95 backdrop-blur z-40">
-        <Link href="/" className="flex items-center gap-2">
+      <nav className="border-b border-gray-800 px-4 sm:px-8 py-4 flex items-center justify-between gap-3 sticky top-0 bg-gray-950/95 backdrop-blur z-40">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
           <span className="font-bold text-base tracking-tight text-gray-100">SocialMate</span>
         </Link>
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+        {/* The whole row needs about 810 px, so the middle links wait for lg: from 768 to
+            about 860 px the logo ran into "Features" and every label wrapped onto two lines. */}
+        <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-400 whitespace-nowrap">
           <Link href="/features"    className="hover:text-white transition-colors">Features</Link>
           <Link href="/pricing"     className="hover:text-white transition-colors">Pricing</Link>
           <Link href="/studio-stax" className="hover:text-white transition-colors">Studio Stax</Link>
