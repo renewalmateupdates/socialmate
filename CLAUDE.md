@@ -970,13 +970,14 @@ before #813; since then there have been two failures:
   taps): `input.click()` bubbles to the stage, whose own click opens the
   picker again. The inputs stop the click now. Halve the old picker counts.
 
-**After #836 deploys:** optional, Joshua's to run (additive):
-`supabase/tiktok_posts_publish_id_unique_nov27.sql`, one unique index on
-`tiktok_posts (tiktok_post_id)` that closes the last race (a resend reaching
-the route while the first confirm is still inside it). Rechecked at 18:20 UTC
-Nov 27: both audits clean, and 51 rows carry a publish id with none used
-twice, so it builds. A session could not run it (see the Nov 25 note below);
-the SQL went to Joshua in chat.
+**TikTok index: done (Joshua ran it Nov 27).**
+`supabase/tiktok_posts_publish_id_unique_nov27.sql` added a unique index on
+`tiktok_posts (tiktok_post_id)`, closing the last race in #836 (a resend
+reaching the route while the first confirm is still inside it). Confirmed the
+same evening without writing anything: an empty row posted with
+`on_conflict=tiktok_post_id` came back 23502 (a required column), not 42P10
+(no matching index). That probe is how `scripts/audit-dead-features.py`
+checks upsert targets.
 
 **Nov 26: Black Friday, BLACKFRIDAY through Dec 4.** Joshua set the dates
 (Nov 26 to Dec 4) and left the amount to Claude: 50% off the first 12 months
