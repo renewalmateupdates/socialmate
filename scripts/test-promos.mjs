@@ -142,6 +142,16 @@ test('the Dashboard offers the deal to Free and lists only platforms that are co
   assert.match(banner, /\/pricing\?code=\$\{BLACK_FRIDAY\.code\}/)
 })
 
+test('TikTok Studio offers the deal after a post, never under a rejection', () => {
+  // TikTok creators are most of the people who publish, and they rarely open
+  // the Dashboard, so the deal also shows on Studio's screen after a post.
+  const studio = code(read('app/tiktok/studio/TikTokStudioClient.tsx'))
+  assert.match(studio, /<BlackFridayBanner plan=\{plan\} from="tiktok_studio" \/>/)
+  assert.match(studio, /publishState !== 'rejected' && \(\s*<div data-theme="dark"/, 'dark, like the rest of Studio')
+  const banner = code(read('components/BlackFridayBanner.tsx'))
+  assert.match(banner, /track\('promo_clicked', \{ code: BLACK_FRIDAY\.code, from \}\)/, 'says where it was clicked')
+})
+
 test('every language has the deal strings', () => {
   const en = Object.keys(JSON.parse(read('messages/en.json')).promo).sort()
   for (const locale of ['de', 'es', 'fr', 'ja', 'ko', 'pt', 'ru', 'zh']) {

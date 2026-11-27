@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Toast from '@/components/Toast'
+import BlackFridayBanner from '@/components/BlackFridayBanner'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 import FilmstripTimeline, { type TimelineFrame } from '@/components/tiktok/FilmstripTimeline'
 import SafeAreaOverlay from '@/components/tiktok/SafeAreaOverlay'
 import PhotoComposer from '@/components/tiktok/PhotoComposer'
@@ -702,6 +704,9 @@ export default function TikTokStudioClient({ initialConnected }: {
   // forwards here with ?connected=1. Read once, then dropped from the address so
   // a reload is an ordinary visit.
   const searchParams = useSearchParams()
+  // For the Black Friday line after a post: TikTok creators are most of the
+  // people who publish and rarely open the Dashboard, where the deal showed.
+  const { plan } = useWorkspace()
   const viaConnect = useRef(searchParams.get('connected') === '1')
   // From the Dashboard's "post your first video" card (Nov 13, 2026).
   const viaDashboard = useRef(searchParams.get('from') === 'dashboard')
@@ -1782,6 +1787,14 @@ export default function TikTokStudioClient({ initialConnected }: {
                 Dashboard
               </Link>
             </div>
+            {/* Free plans only, while the deal runs, and never under a rejection.
+                Studio is always dark, so the banner's theme colours are pinned
+                to dark here (it follows the app theme on the Dashboard). */}
+            {publishState !== 'rejected' && (
+              <div data-theme="dark" className="mt-8 text-left">
+                <BlackFridayBanner plan={plan} from="tiktok_studio" />
+              </div>
+            )}
           </div>
         </div>
       </div>

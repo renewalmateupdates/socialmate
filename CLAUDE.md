@@ -673,7 +673,19 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #837 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #838 are merged.
+
+**Nov 27: Black Friday reaches TikTok Studio (#838).** Read-only, from the
+deal's start (Nov 26, 05:00 UTC) to 04:00 UTC Nov 27: one outside person
+opened the Dashboard, where the deal banner was, and nobody viewed /pricing
+or clicked the deal. TikTok creators are most of the people who publish, and
+they live in Studio. Studio's screen after a post now shows the same
+dismissible `BlackFridayBanner` to Free (`promo_clicked` with `from:
+tiktok_studio`), never under a rejection, pinned to dark colours because
+Studio is always dark. It ends with the deal on Dec 4. Also found: nothing
+ever sends `ai_tool_used` (it is only in `FUNNEL_EVENTS`); the `ai_credit`
+event is the real record, and outside accounts spent AI credits 9 times in 30
+days.
 
 **Nov 27: what's coming, and what Free gets, said truthfully (#837).** The
 last of what #835 saw and left, plus what the same search turned up:
@@ -726,10 +738,10 @@ before #813; since then there have been two failures:
   TikTok cap after TikTok already had the video: past the cap, the video went
   out, Studio said "quota reached", and no row was kept. One outside creator
   is at 17 of Free's 20 this month. #836 makes confirm record and count every
-  video TikTok has; whether Studio's Post now should be held to the cap before
-  the upload is in `TODO.md`. The scheduled path still checks before sending,
-  and its message no longer tells people to buy a TikTok booster (no such
-  product).
+  video TikTok has. Decided the same day (`TODO.md`): Post now and drafts are
+  never refused at the cap (they cost us nothing); scheduled videos are, by
+  `/api/tiktok/post`, whose message no longer tells people to buy a TikTok
+  booster (no such product).
 - **Every picker tap was recorded twice** (66 `tiktok_picker_opened` for 33
   taps): `input.click()` bubbles to the stage, whose own click opens the
   picker again. The inputs stop the click now. Halve the old picker counts.
