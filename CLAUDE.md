@@ -673,14 +673,23 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #840 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #841 are merged.
 
 **Nov 27: the setup check (#840, docs only).** Joshua let sessions use his
 Chrome ("work on whatever you need to"). What his Chrome is signed in to, and
 what it showed:
-- **Vercel.** $3.62 of the $20 included in the cycle to Dec 19. The bill is
-  $30 a month because **Speed Insights Plus is a separate $10 a month** (a
-  decision in `TODO.md`). Spend Management: $200 budget, alerts at 50, 75 and
+- **Vercel.** $3.62 of the $20 included in the cycle to Dec 19. **Speed
+  Insights Plus ($10 a month on top of Pro's $20) is off:** Joshua said "Turn
+  it off" (Nov 27, #841), so it runs to Dec 19 and doesn't renew, and the
+  upcoming invoice reads $20 (it was $30). From Dec 19 Speed Insights shows
+  only the Real Experience Score of routes rated Great or Needs Improvement:
+  no Core Web Vitals, no Poor routes, no countries. It keeps collecting within
+  the team's allowance and pauses when that runs out, so
+  `components/VercelInsights.tsx` stays. Until Dec 19 the detail is still
+  there; desktop, 7 days to Nov 27 (RES 97): the Poor routes were /onboarding
+  42 (17 events), /forgot-password 36 (4), /for/agencies 35 (3), /accounts 6
+  (6) and /soma/dashboard 1 (6), the small ones possibly our own visits from
+  before #822's exclusion. Spend Management: $200 budget, alerts at 50, 75 and
   100%, pausing off. Functions: 0% errors over 12 hours. **Speed Insights,
   Mobile, Nov 21 to 26** (289 events, our visits excluded): RES 99, no page
   poor. App pages since the Nov 20 baseline: /compose 66 to 98,

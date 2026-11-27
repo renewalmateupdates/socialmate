@@ -23,14 +23,7 @@ replies expired long ago.)
    or the first payment), and whether the honor system stays (in May Joshua
    wanted a verification step: .edu for students). Then a session creates the
    two Stripe codes, links them in the `coupons` table and updates the pages.
-2. **Keep Speed Insights Plus ($10 a month)? (found Nov 27)** Vercel bills it
-   as its own line on top of Pro's $20, so the bill is $30 a month; the
-   usage itself ($3.62 so far this cycle) fits inside Pro's included $20.
-   It measured the Nov 20 phone fixes (app pages from the 50s to the 80s and
-   90s on phones). Keep it while the app pages are still being worked on, or
-   turn it off in the project's Speed Insights settings and lose the
-   real-visitor numbers.
-3. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
+2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it
@@ -49,6 +42,14 @@ replies expired long ago.)
    holds for scheduled videos. Past the cap, Post now still works and
    scheduling stops until the 1st. Revisit if Post now starts costing money,
    or if the cap should become an upgrade reason.
+2. **Speed Insights Plus is off.** Asked whether to keep it at $10 a month,
+   Joshua said "Turn it off", and its renewal was cancelled the same day in
+   the project's Speed Insights page ("..." menu). Plus runs to Dec 19 (no
+   refund for the cycle already paid); after that Speed Insights shows only
+   the Real Experience Score of routes rated Great or Needs Improvement and
+   keeps collecting within the team's allowance. The Vercel bill goes from
+   $30 to $20 a month. Turn it back on there (Upgrade) if a speed problem
+   needs Core Web Vitals or the Poor routes again.
 
 ## Decided (Nov 13, 2026)
 
