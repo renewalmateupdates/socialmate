@@ -2,6 +2,7 @@ import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { recordFunnel } from '@/lib/usage'
 import { referrerHost, type Attribution } from '@/lib/attribution'
 import { inngest } from '@/lib/inngest'
+import { referralCodeCandidates } from '@/lib/referral-code'
 
 /**
  * What app/auth/callback does around a sign-in, split by whether the next page
@@ -29,7 +30,7 @@ export interface SignInContext {
   isNewAccount: boolean
   /** Where a new account came from; empty for a returning one. */
   attribution: Attribution
-  /** The sm_ref cookie the visit arrived with, if any. */
+  /** The referral cookie the visit arrived with, if any (lib/referral-code.ts). */
   refCode?: string
 }
 
@@ -78,11 +79,16 @@ export async function recordSignIn(admin: SupabaseClient, user: SignInUser, ctx:
 
 /** Credits the partner whose ?ref= link the visit came from (60-day lock). */
 async function recordReferral(admin: SupabaseClient, userId: string, refCode: string): Promise<void> {
+  // A value that cannot be a code (some sites add ?ref=their-name) has
+  // nothing to look up.
+  const candidates = referralCodeCandidates(refCode)
+  if (!candidates.length) return
   try {
     const { data: referrer, error } = await admin
       .from('user_settings')
-      .select('user_id')
-      .eq('referral_code', refCode)
+      .select('user_id, referral_code')
+      .in('referral_code', candidates)
+      .limit(1)
       .maybeSingle()
     if (error) {
       console.warn('[sign-in] referrer lookup failed:', error.message)
@@ -94,7 +100,7 @@ async function recordReferral(admin: SupabaseClient, userId: string, refCode: st
       .upsert({
         affiliate_user_id: referrer.user_id,
         referred_user_id:  userId,
-        referral_code:     refCode,
+        referral_code:     referrer.referral_code ?? refCode,
         status:            'pending',
         converted_at:      new Date().toISOString(),
         lock_expires_at:   new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { referralCodeCandidates } from '@/lib/referral-code'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import { Globe2 } from 'lucide-react'
 
@@ -23,11 +24,17 @@ const PLATFORM_COLORS: Record<string, string> = {
 async function getZenithStats(code: string) {
   const supabase = getSupabaseAdmin()
 
-  const { data: settings } = await supabase
+  // Was an uppercased exact match, and codes are stored lowercase, so the
+  // ZENITH card was a 404 for 288 of 297 codes (lib/referral-code.ts).
+  const candidates = referralCodeCandidates(code)
+  if (!candidates.length) return null
+  const { data: settings, error: settingsError } = await supabase
     .from('user_settings')
     .select('user_id, display_name, referral_code')
-    .eq('referral_code', code.toUpperCase())
+    .in('referral_code', candidates)
+    .limit(1)
     .maybeSingle()
+  if (settingsError) console.warn('[zenith] code lookup failed:', settingsError.message)
 
   if (!settings?.user_id) return null
   const userId = settings.user_id as string

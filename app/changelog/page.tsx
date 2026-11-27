@@ -24,6 +24,8 @@ const CHANGELOG: ChangelogEntry[] = [
     date: 'November 27, 2026',
     version: 'TikTok Studio',
     changes: [
+      { type: 'Fixed',    text: 'Partner invite pages (/refer/...) and ZENITH share cards (/z/...) now open for everyone. Both looked codes up in capital letters while codes are saved in small letters, so they showed "not found" for almost everyone.' },
+      { type: 'Fixed',    text: 'Someone who opens a partner\'s invite page and signs up later, within 60 days, now counts as that partner\'s referral. Before, it only counted if they pressed the page\'s own sign-up button.' },
       { type: 'Improved', text: 'Signing in gets you to your first page sooner. After Google or your email link, SocialMate used to save up to ten records one after another before moving you on. Now it only checks where to send you, and saves the rest (your login count, the welcome emails, where you came from) right after.' },
       { type: 'Fixed',    text: 'TikTok Studio saves your post even if the page closes or reloads right after the upload finishes. Before, TikTok had the video but SocialMate kept no record of it, so it never told you whether the video went live.' },
       { type: 'Fixed',    text: 'If TikTok Studio cannot save a post after the upload, it now says the video already reached TikTok and asks you to check your profile before posting again, so the same video does not go up twice.' },

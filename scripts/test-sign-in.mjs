@@ -58,6 +58,7 @@ function fakeAdmin(answers = {}) {
       const q = {
         select: c => { call.ops.push(['select', c]); return q },
         eq: (c, v) => { call.ops.push(['eq', c, v]); return q },
+        in: (c, v) => { call.ops.push(['in', c, v]); return q },
         limit: n => { call.ops.push(['limit', n]); return q },
         maybeSingle: () => { call.ops.push(['maybeSingle']); return q },
         single: () => { call.ops.push(['single']); return q },
@@ -166,25 +167,32 @@ test('a second first sign-in records no second signup and sends no second welcom
 test('a referral credits the partner, never the person themself', async () => {
   const { mod } = freshSignIn()
 
-  let db = fakeAdmin({ 'user_settings.select': { data: { user_id: 'partner' }, error: null } })
+  // Typed in capitals, stored in lowercase, as every code is.
+  let db = fakeAdmin({ 'user_settings.select': { data: { user_id: 'partner', referral_code: 'pat10' }, error: null } })
   await mod.recordSignIn(db.admin, RETURNING, { isNewAccount: false, attribution: {}, refCode: 'PAT10' })
   assert.deepEqual(db.kinds(), ['user_settings.select', 'referral_conversions.upsert', 'rpc:increment_login_count'])
-  assert.deepEqual(db.calls[0].ops.filter(o => o[0] === 'eq'), [['eq', 'referral_code', 'PAT10']])
+  assert.deepEqual(db.calls[0].ops.find(o => o[0] === 'in'), ['in', 'referral_code', ['PAT10', 'pat10']])
+  assert.ok(db.calls[0].ops.some(o => o[0] === 'limit' && o[1] === 1))
   const row = db.row(1)
   assert.equal(row.affiliate_user_id, 'partner')
   assert.equal(row.referred_user_id, 'u1')
-  assert.equal(row.referral_code, 'PAT10')
+  assert.equal(row.referral_code, 'pat10', 'the stored spelling')
   assert.equal(row.status, 'pending')
   assert.equal(Date.parse(row.lock_expires_at) - Date.parse(row.converted_at) >= 60 * 864e5 - 1000, true, '60-day lock')
   assert.deepEqual(db.opts(1), { onConflict: 'referred_user_id', ignoreDuplicates: true })
 
-  db = fakeAdmin({ 'user_settings.select': { data: { user_id: 'u1' }, error: null } })
+  db = fakeAdmin({ 'user_settings.select': { data: { user_id: 'u1', referral_code: 'mine' }, error: null } })
   await mod.recordSignIn(db.admin, RETURNING, { isNewAccount: false, attribution: {}, refCode: 'MINE' })
   assert.deepEqual(db.kinds(), ['user_settings.select', 'rpc:increment_login_count'])
 
   db = fakeAdmin({ 'user_settings.select': { data: null, error: { message: 'boom' } } })
   await mod.recordSignIn(db.admin, RETURNING, { isNewAccount: false, attribution: {}, refCode: 'PAT10' })
   assert.deepEqual(db.kinds(), ['user_settings.select', 'rpc:increment_login_count'])
+
+  // Some sites add ?ref=their-site; that can never be a code, so nothing is looked up.
+  db = fakeAdmin()
+  await mod.recordSignIn(db.admin, RETURNING, { isNewAccount: false, attribution: {}, refCode: 'chatgpt.com' })
+  assert.deepEqual(db.kinds(), ['rpc:increment_login_count'])
 })
 
 test('without the login-count function, the count is written directly', async () => {

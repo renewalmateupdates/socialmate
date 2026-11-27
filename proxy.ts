@@ -3,19 +3,19 @@ import { NextResponse, type NextRequest } from 'next/server'
 // Routes that require authentication; redirect to /login if no session. The
 // list is shared with the sitemap so the two cannot disagree.
 import { isProtectedPath } from '@/lib/protected-paths'
+import { REFERRAL_COOKIE, REFERRAL_COOKIE_MAX_AGE_SECONDS, referralCodeFromUrl } from '@/lib/referral-code'
 
-// Attach the ?ref=CODE capture to a response. Runs on every route (referral
-// links land on public marketing pages, not just protected ones).
+// Attach the referral capture (?ref=CODE, or the /refer/CODE landing page) to
+// a response. Runs on every route: referral links land on public marketing
+// pages, not just protected ones. auth/callback credits the signup from this
+// cookie.
 function captureRefCode(request: NextRequest, response: NextResponse): NextResponse {
-  const refCode = request.nextUrl.searchParams.get('ref')
+  const refCode = referralCodeFromUrl(request.nextUrl)
   if (refCode) {
-    response.cookies.set('sm_ref', refCode, {
+    response.cookies.set(REFERRAL_COOKIE, refCode, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      // 60 days: /affiliates promises partners "a 60-day cookie window so late
-      // converts still count", and this cookie is what auth/callback attributes
-      // the signup from. It was 30.
-      maxAge: 60 * 60 * 24 * 60,
+      maxAge: REFERRAL_COOKIE_MAX_AGE_SECONDS,
       path: '/',
       sameSite: 'lax',
     })

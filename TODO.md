@@ -23,21 +23,7 @@ replies expired long ago.)
    or the first payment), and whether the honor system stays (in May Joshua
    wanted a verification step: .edu for students). Then a session creates the
    two Stripe codes, links them in the `coupons` table and updates the pages.
-2. **Credit referrals that come through /refer/CODE? (found Nov 27, small)**
-   - **What works.** The auth callback credits a referral from the `sm_ref`
-     cookie (60 days). The proxy sets it from any `?ref=CODE` link, and
-     every link the app hands out is one: `lib/partners.ts`, /affiliate,
-     /referral and Settings.
-   - **What misses.** The /refer/CODE landing page sets only `ref_code` (7
-     days, read by onboarding's banner). A visitor there is credited only if
-     they press its button (to `/signup?ref=CODE`); one who leaves and signs
-     up later is not.
-   - **The fix is small:** the proxy also sets `sm_ref` on /refer/CODE.
-   - **Why it waits.** It decides who earns commission, so it waits for
-     Joshua's go.
-   - Nobody has signed up through any referral link yet:
-     `referral_conversions` has no rows.
-3. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
+2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it
@@ -64,6 +50,14 @@ replies expired long ago.)
    keeps collecting within the team's allowance. The Vercel bill goes from
    $30 to $20 a month. Turn it back on there (Upgrade) if a speed problem
    needs Core Web Vitals or the Poor routes again.
+3. **/refer/CODE credits partners for 60 days, like `?ref=` links (#843).**
+   Joshua said "Yes, fix it". The proxy sets the `sm_ref` cookie on
+   /refer/CODE too, so a visitor who leaves the page and signs up within 60
+   days is credited. Fixing it turned up a bigger bug: the page looked codes
+   up in capitals, while every code is stored in lowercase, so /refer/CODE
+   and the /z/CODE ZENITH card were a 404 for 288 of the 297 codes, the one
+   active partner's included. All lookups go through
+   `lib/referral-code.ts` now.
 
 ## Decided (Nov 13, 2026)
 
