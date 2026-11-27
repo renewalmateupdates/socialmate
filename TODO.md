@@ -6,13 +6,8 @@ done. Engineering follow-ups live in CLAUDE.md under "Pick up here".
 
 ## Needs Joshua (a click or a query, not a decision)
 
-1. **Vercel Spend Management (Nov 20).** The team is on Pro since the Nov 19
-   pause: $20 a month with $20 of usage included, and the first day used $0.17
-   of it. Vercel's "Set Budget" sets an on-demand budget with email alerts. Set
-   the alerts, and leave pausing off: a pause is what took the whole site down
-   on Nov 19.
-
-(`supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old $5 price is
+(Vercel Spend Management is done: checked Nov 27, a $200 budget with alerts at
+50, 75 and 100%, pausing off. `supabase/blog_accuracy_nov5.sql` ran: checked Nov 16, the old $5 price is
 gone. The November update email finished Nov 18; Resend's Receiving tab no
 longer needs a look, because Resend keeps mail only 30 days and the Aug 30
 replies expired long ago.)
@@ -28,7 +23,14 @@ replies expired long ago.)
    or the first payment), and whether the honor system stays (in May Joshua
    wanted a verification step: .edu for students). Then a session creates the
    two Stripe codes, links them in the `coupons` table and updates the pages.
-2. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
+2. **Keep Speed Insights Plus ($10 a month)? (found Nov 27)** Vercel bills it
+   as its own line on top of Pro's $20, so the bill is $30 a month; the
+   usage itself ($3.62 so far this cycle) fits inside Pro's included $20.
+   It measured the Nov 20 phone fixes (app pages from the 50s to the 80s and
+   90s on phones). Keep it while the app pages are still being worked on, or
+   turn it off in the project's Speed Insights settings and lose the
+   real-visitor numbers.
+3. **An AI video editor of our own (Vyra-style).** Joshua wants SocialMate to be the
    one creator OS. Vyra has no public API (only an MCP server with per-person
    sign-in) and its terms forbid reselling access, so integrating it for our users
    is out. A low-cost first step: in Creator Studio, upload a video, Gemini reads it
