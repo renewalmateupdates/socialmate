@@ -673,7 +673,27 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #838 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #839 are merged.
+
+**Nov 27: where signups come from, and LinkedIn's false errors (#839).**
+Read-only, outside accounts, since Oct 15 (when sources started being
+recorded): 67 signups, 7 to 15 a week (15 the week of Nov 16; 4 so far in
+Thanksgiving week). ChatGPT sent 38 (29 connected, 6 published), no referrer
+17, Google 10 (3 connected, 0 published). One page, `/for/tiktok-creators`,
+landed 29 of the 67: 23 connected TikTok and opened Studio, 12 added a video,
+4 pressed Post, 3 have a published video, and only 2 of the 29 did anything
+after their first day. So the first session is the whole chance. Since #813
+(Nov 19), 9 signups: 3 added a video, 2 posted. **LinkedIn:** all four people
+who saw "invalid state" since Oct 1 were connected; the error came 3 to 4
+minutes after a connect that worked, once three times in a row (the one-time
+state cookie was spent). TikTok and the Meta callbacks already answered such a
+repeat with success (`lib/oauth-state.ts`, a 2-minute window); LinkedIn and X
+never did. #839: both use `connectedJustNow` with a 10-minute window
+(`SLOW_REPEAT_WINDOW_MS`), report `state_missing` / `state_mismatch` instead
+of `invalid_state`, and set `updated_at` on a reconnect; LinkedIn's reconnect
+no longer throws away its update error. `app/api/accounts/linkedin/callback`
+is an older copy nothing sends people to (the connect route uses
+`/api/linkedin/callback`); left in place.
 
 **Nov 27: Black Friday reaches TikTok Studio (#838).** Read-only, from the
 deal's start (Nov 26, 05:00 UTC) to 04:00 UTC Nov 27: one outside person

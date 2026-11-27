@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { checkAccountSlot } from '@/lib/account-limits'
+import { SLOW_REPEAT_WINDOW_MS, checkOAuthState, connectedJustNow } from '@/lib/oauth-state'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -19,9 +20,30 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies()
-  const storedState = cookieStore.get('linkedin_oauth_state')?.value
-  if (!storedState || storedState !== state) {
-    return NextResponse.redirect(`${appUrl}/accounts?error=linkedin_invalid_state`)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (s) => s.forEach(({ name, value, options }) =>
+          cookieStore.set(name, value, options)
+        ),
+      },
+    }
+  )
+
+  const stateCheck = checkOAuthState(cookieStore.get('linkedin_oauth_state')?.value, state)
+  if (!stateCheck.ok) {
+    // A second hit on this address after a connect that worked (a reload, or
+    // LinkedIn's app sending the person back) finds the one-time state spent.
+    // That showed an error on a working connection: all four people who saw
+    // one since Oct 1 were connected (lib/oauth-state.ts). Nothing is linked here.
+    const { data: { user: maybeUser } } = await supabase.auth.getUser()
+    if (maybeUser && await connectedJustNow(getSupabaseAdmin(), maybeUser.id, 'linkedin', SLOW_REPEAT_WINDOW_MS)) {
+      return NextResponse.redirect(`${appUrl}/accounts?success=linkedin_connected`)
+    }
+    return NextResponse.redirect(`${appUrl}/accounts?error=linkedin_${stateCheck.reason}`)
   }
 
   // Exchange code for tokens
@@ -64,19 +86,6 @@ export async function GET(request: NextRequest) {
   const avatarUrl      = userInfo.picture || null
   const email          = userInfo.email   || null
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (s) => s.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        ),
-      },
-    }
-  )
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login?redirect=/accounts`)
 
@@ -101,15 +110,22 @@ export async function GET(request: NextRequest) {
   }
 
   if (existing) {
-    await getSupabaseAdmin()
+    // updated_at is set explicitly: it is what tells a repeat hit on this
+    // callback from a real failure. The error was discarded before.
+    const { error: updateError } = await getSupabaseAdmin()
       .from('connected_accounts')
       .update({
         access_token,
         expires_at,
         account_name:       displayName,
         profile_image_url:  avatarUrl,
+        updated_at:         new Date().toISOString(),
       })
       .eq('id', existing.id)
+    if (updateError) {
+      console.error('[LinkedIn OAuth] token update failed:', updateError.message)
+      return NextResponse.redirect(`${appUrl}/accounts?error=linkedin_db_error`)
+    }
   } else {
     const { error: dbError } = await getSupabaseAdmin()
       .from('connected_accounts')

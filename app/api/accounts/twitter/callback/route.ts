@@ -4,6 +4,8 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { checkReconnect, markConnected } from '@/lib/platform-jail'
 import { checkAccountSlot } from '@/lib/account-limits'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { SLOW_REPEAT_WINDOW_MS, checkOAuthState, connectedJustNow } from '@/lib/oauth-state'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -17,11 +19,32 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies()
-  const storedState    = cookieStore.get('twitter_oauth_state')?.value
   const codeVerifier   = cookieStore.get('twitter_code_verifier')?.value
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
 
-  if (!storedState || storedState !== state || !codeVerifier) {
-    return NextResponse.redirect(`${appUrl}/accounts?error=twitter_invalid_state`)
+  // Both one-time cookies are cleared after a connect that worked, so a second
+  // hit on this address (a reload) fails here. When the person's X row was just
+  // written, that is the repeat, not a failure (lib/oauth-state.ts).
+  const stateCheck = checkOAuthState(cookieStore.get('twitter_oauth_state')?.value, state)
+  if (!stateCheck.ok || !codeVerifier) {
+    const { data: { user: maybeUser } } = await supabase.auth.getUser()
+    if (maybeUser && await connectedJustNow(getSupabaseAdmin(), maybeUser.id, 'twitter', SLOW_REPEAT_WINDOW_MS)) {
+      return NextResponse.redirect(`${appUrl}/accounts?success=twitter_connected`)
+    }
+    return NextResponse.redirect(`${appUrl}/accounts?error=twitter_${stateCheck.ok ? 'state_missing' : stateCheck.reason}`)
   }
 
   // Exchange code for tokens
@@ -69,21 +92,6 @@ export async function GET(request: NextRequest) {
   const profile_image_url = twitterUser.profile_image_url?.replace('_normal', '_400x400') || null
   const platform_user_id  = twitterUser.id
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login`)
 
@@ -125,7 +133,8 @@ export async function GET(request: NextRequest) {
       .from('connected_accounts')
       // scope too: reconnecting is how an account gains a new permission
       // (media.write, Nov 2026), and the publisher reads it from this row.
-      .update({ access_token, refresh_token, expires_at, account_name, profile_image_url, ...(scope ? { scope } : {}) })
+      // updated_at too: it is what tells a repeat hit on this callback from a real failure.
+      .update({ access_token, refresh_token, expires_at, account_name, profile_image_url, updated_at: new Date().toISOString(), ...(scope ? { scope } : {}) })
       .eq('id', existing.id)
     if (updateError) {
       console.error('[Twitter OAuth] token update failed:', updateError.message)
