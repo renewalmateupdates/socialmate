@@ -14,7 +14,7 @@ const COMPARISON = [
   { feature: 'Schedule to Mastodon',        tiktoknative: '❌',                         socialmate: '✅'                       },
   { feature: 'Schedule to X / Twitter',     tiktoknative: '❌',                         socialmate: '✅ (Pro+)'                       },
   { feature: 'TikTok Script AI Generator',  tiktoknative: '❌',                         socialmate: '✅ 5 credits'              },
-  { feature: 'AI caption tools',            tiktoknative: '❌',                         socialmate: '15+ tools free'            },
+  { feature: 'AI caption tools',            tiktoknative: '❌',                         socialmate: '15+ tools, 50 credits/mo free'            },
   { feature: 'Bulk scheduling',             tiktoknative: '❌',                         socialmate: '✅ Free'                   },
   { feature: 'Content calendar',            tiktoknative: 'TikTok-only calendar',       socialmate: '✅ All 7 platforms'        },
   { feature: 'Link in bio (SIGIL)',          tiktoknative: '❌',                         socialmate: '✅ Free'                   },

@@ -119,7 +119,7 @@ export default function VsTailwindSocialPage() {
             <p className="font-extrabold text-lg mb-2">6 platforms. AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever with real auto-publishing</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Link in bio included free</li>

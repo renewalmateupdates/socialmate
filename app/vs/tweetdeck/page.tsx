@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Platforms supported',    tweetdeck: 'X/Twitter only',         socialmate: '7 platforms'            },
   { feature: 'Post scheduling',        tweetdeck: 'X only',                 socialmate: '✅ All platforms (X on Pro)'        },
   { feature: 'Team seats',             tweetdeck: '❌ No team features',    socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       tweetdeck: '❌ None',                socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       tweetdeck: '❌ None',                socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',        tweetdeck: '❌',                     socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            tweetdeck: '❌',                     socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',    tweetdeck: 'Streams (X only)',       socialmate: '✅ Free'                  },

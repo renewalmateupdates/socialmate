@@ -48,9 +48,9 @@ These are real people with real needs. The existing tools weren't built for them
 
 ## What Makes SocialMate Different
 
-We're live with 7 platforms — Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn. YouTube, Pinterest, Instagram, Facebook, and Threads are on the active roadmap. Every platform except X is included on the free plan at no extra cost; X needs Pro, because X charges per post.
+We're live with 7 platforms — Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn. YouTube, Instagram, Facebook and Threads come next, once Meta and Google approve SocialMate. Every platform except X is included on the free plan at no extra cost; X needs Pro, because X charges per post.
 
-We built 15+ AI tools into the platform — caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and AI image generation. All tools are accessible on the free tier through a monthly credit allowance (50 credits/month free, more on paid plans). Credits reset monthly so you always have access — the system is designed to be generous, not to wall things off.
+We built 15+ AI tools into the platform: caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection and an AI content calendar. Every one except post scoring (Pro) works on the free tier through a monthly credit allowance (50 credits/month free, more on paid plans). Credits reset monthly so you always have access — the system is designed to be generous, not to wall things off.
 
 We built in features that other tools charge for separately: bulk scheduling, a link in bio page, evergreen content recycling, competitor tracking, RSS import, team collaboration with content approval workflows.
 

@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'X / Twitter scheduling',       shield: '❌',                         socialmate: '✅ (Pro+)'                },
   { feature: 'TikTok scheduling',            shield: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'Discord + Telegram',           shield: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',             shield: '❌',                         socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',             shield: '❌',                         socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',            shield: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',             shield: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'RSS import',                   shield: '❌',                         socialmate: '✅ Free'                  },

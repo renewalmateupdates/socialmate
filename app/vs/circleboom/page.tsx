@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'Telegram scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Bluesky scheduling',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '✅ (paid)',                  socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              competitor: '✅ (paid)',                  socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
@@ -125,7 +125,7 @@ export default function VsCircleboomPage() {
               <li>✅ TikTok free (20 videos/mo) — Circleboom has none</li>
               <li>✅ Discord + Telegram — unique in the market</li>
               <li>✅ Pro plan for $8/month total</li>
-              <li>✅ 15+ AI tools free</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>

@@ -126,7 +126,7 @@ export default function VsPostPickrPage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ TikTok + LinkedIn + Discord + Telegram</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Bulk scheduling and evergreen recycling free</li>
               <li>✅ Link in bio and competitor tracking</li>
               <li>✅ No credit card required</li>

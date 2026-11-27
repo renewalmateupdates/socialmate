@@ -17,7 +17,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             brand24: '❌',                           socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           brand24: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Brand mention monitoring',      brand24: '✅ (core feature)',            socialmate: '✅ Competitor tracking'  },
-  { feature: 'AI writing tools',              brand24: '❌',                           socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              brand24: '❌',                           socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     brand24: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        brand24: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             brand24: '❌',                           socialmate: '✅ Free'                  },

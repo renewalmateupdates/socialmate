@@ -113,7 +113,7 @@ export default function VsPlanlyPage() {
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ 20 TikTok videos/month on free plan</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>
             </ul>

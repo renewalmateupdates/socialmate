@@ -16,7 +16,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             socialreport: '✅ (paid)',                 socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           socialreport: '✅',                        socialmate: '✅ Free'                  },
   { feature: 'Social analytics',              socialreport: '✅ (strength)',             socialmate: '✅ Multi-platform charts' },
-  { feature: 'AI writing tools',              socialreport: '❌',                        socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              socialreport: '❌',                        socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     socialreport: '❌',                        socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        socialreport: '❌',                        socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             socialreport: '✅',                        socialmate: '✅ Free'                  },
@@ -31,7 +31,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'What is Social Report and how does it compare to SocialMate?',
-    a: "Social Report is a social media management tool with scheduling, analytics, and team features for agencies. It supports 35+ networks including the main platforms. Pricing starts at $49/month with a 30-day trial. Key gaps: no Discord, no Telegram, no Bluesky, and no AI writing tools. SocialMate covers fewer total legacy platforms but adds Discord, Telegram, and Bluesky — plus 15+ AI tools and SOMA — starting free.",
+    a: "Social Report is a social media management tool with scheduling, analytics, and team features for agencies. It supports 35+ networks including the main platforms. Pricing starts at $49/month with a 30-day trial. Key gaps: no Discord, no Telegram, no Bluesky, and no AI writing tools. SocialMate covers fewer total legacy platforms but adds Discord, Telegram, and Bluesky — plus 15+ AI tools, and SOMA on Pro, starting free.",
   },
   {
     q: 'Does Social Report have Discord and Telegram scheduling?',
@@ -91,7 +91,7 @@ export default function VsSocialReportPage() {
             SocialMate vs Social Report
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Social Report is $49/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms (6 free, X on Pro) with 15+ AI tools and SOMA — starting completely free.
+            Social Report is $49/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms (6 free, X on Pro) with 15+ AI tools and SOMA on Pro, starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -122,7 +122,7 @@ export default function VsSocialReportPage() {
             <p className="font-extrabold text-lg mb-2">Schedule + AI + analytics. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Client Report Agent for agencies</li>
               <li>✅ Pro plan for $8/month total</li>

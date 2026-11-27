@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Platforms supported',    hypefury: 'X, LinkedIn, Instagram',  socialmate: '7 live (6 free, X on Pro)'               },
   { feature: 'X/Twitter threads',      hypefury: '✅ Core feature',         socialmate: '✅ (Pro+)'                },
   { feature: 'Team seats',             hypefury: '1 on Standard',           socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       hypefury: 'AI ghostwriter (paid)',   socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       hypefury: 'AI ghostwriter (paid)',   socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Auto-retweet',           hypefury: '✅',                      socialmate: '❌'                       },
   { feature: 'Evergreen recycling',    hypefury: '✅ (paid)',               socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',        hypefury: '✅ (paid)',               socialmate: '✅ Free'                  },

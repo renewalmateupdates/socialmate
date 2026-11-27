@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Profiles on free plan',  smarterqueue: '1 profile only',       socialmate: '1 per platform (7 total)' },
   { feature: 'Platforms supported',    smarterqueue: '7 (paid)',              socialmate: '7 live (free)'               },
   { feature: 'Team seats',             smarterqueue: '1 on Solo plan',        socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       smarterqueue: '❌ No AI tools',        socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       smarterqueue: '❌ No AI tools',        socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Evergreen recycling',    smarterqueue: '✅ Core feature',       socialmate: '✅ Free'                  },
   { feature: 'Category-based queues',  smarterqueue: '✅ Core feature',       socialmate: '✅ Drafts + queue'       },
   { feature: 'Bulk scheduling',        smarterqueue: '✅ (paid)',             socialmate: '✅ Free'                  },

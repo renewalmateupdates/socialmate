@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Mastodon scheduling',       creatorstudio: '❌',                      socialmate: '✅'                        },
   { feature: 'LinkedIn scheduling',       creatorstudio: '❌',                      socialmate: '✅'                        },
   { feature: 'X / Twitter scheduling',    creatorstudio: '❌',                      socialmate: '✅ (Pro+)'                        },
-  { feature: 'AI writing tools',          creatorstudio: '❌',                      socialmate: '15+ tools free'            },
+  { feature: 'AI writing tools',          creatorstudio: '❌',                      socialmate: '15+ tools, 50 credits/mo free'            },
   { feature: 'Bulk scheduling',           creatorstudio: '❌',                      socialmate: '✅ Free'                   },
   { feature: 'Link in bio (SIGIL)',        creatorstudio: '❌',                      socialmate: '✅ Free'                   },
   { feature: 'Competitor tracking',       creatorstudio: '❌',                      socialmate: '✅ Free (3 accounts)'     },

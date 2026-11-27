@@ -12,7 +12,7 @@ const COMPARISON = [
   { feature: 'Free plan',              napoleoncat: '14-day trial only',     socialmate: '✅ Genuinely free'        },
   { feature: 'Profiles on entry plan', napoleoncat: '3 profiles, 1 user',    socialmate: '1 per platform, 6 free (X on Pro)' },
   { feature: 'Platforms supported',    napoleoncat: '7 (paid)',              socialmate: '7 live (free)'               },
-  { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',        napoleoncat: '✅',                    socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            napoleoncat: '❌',                    socialmate: '✅ Free'                  },
   { feature: 'Comment moderation',     napoleoncat: '✅ Core feature',       socialmate: '❌'                       },

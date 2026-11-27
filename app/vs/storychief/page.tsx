@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            storychief: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             storychief: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           storychief: '✅',                         socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              storychief: '✅ (paid add-on)',           socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              storychief: '✅ (paid add-on)',           socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     storychief: '❌',                         socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        storychief: '❌',                         socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             storychief: '✅ (paid)',                  socialmate: '✅ Free'                  },
@@ -123,7 +123,7 @@ export default function VsStoryChiefPage() {
             <p className="font-extrabold text-lg mb-2">7 platforms, 6 free. AI built in.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent learns your voice</li>
               <li>✅ Pro plan for $8/month total</li>
               <li>✅ 8 autonomous AI agents</li>

@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Target audience',        oktopost: 'Enterprise B2B teams',     socialmate: 'Creators, SMBs, agencies' },
   { feature: 'Platforms supported',    oktopost: 'LinkedIn-focused',         socialmate: '7 platforms'            },
   { feature: 'Team seats',             oktopost: 'Unlimited (enterprise)',   socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Employee advocacy',      oktopost: '✅ Core feature',          socialmate: '❌'                       },
   { feature: 'B2B analytics',          oktopost: '✅ Deep attribution',      socialmate: 'Basic analytics free'    },
   { feature: 'Bulk scheduling',        oktopost: '✅',                       socialmate: '✅ Free'                  },

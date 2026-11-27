@@ -440,13 +440,14 @@ export default function Features() {
                   { name: 'Mastodon', status: 'live'    },
                   { name: 'X / Twitter', status: 'live'    },
                   { name: 'LinkedIn', status: 'live'    },
-                  { name: 'YouTube', status: 'soon'    },
-                  { name: 'Pinterest', status: 'planned' },
-                  { name: 'Reddit', status: 'planned' },
-                  { name: 'Instagram', status: 'planned' },
                   { name: 'TikTok', status: 'live'    },
-                  { name: 'Facebook', status: 'planned' },
-                  { name: 'Threads', status: 'planned' },
+                  // Waiting on Meta's and Google's approval (SOON_PLATFORMS in
+                  // lib/site-facts.ts). Pinterest and Reddit declined, so they
+                  // are not listed as planned.
+                  { name: 'Instagram', status: 'soon'    },
+                  { name: 'Facebook', status: 'soon'    },
+                  { name: 'Threads', status: 'soon'    },
+                  { name: 'YouTube', status: 'soon'    },
                 ].map(p => (
                   <div key={p.name} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
                     p.status === 'live'    ? 'bg-jade/10 text-jade border border-jade/40' :

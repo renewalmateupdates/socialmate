@@ -120,7 +120,7 @@ export default function VsCrowdfirePage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — 250 posts/month</li>
               <li>✅ Analytics included free (30 days)</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>

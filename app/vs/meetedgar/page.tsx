@@ -119,7 +119,7 @@ export default function VsMeetEdgarPage() {
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Evergreen recycling on free plan</li>
               <li>✅ Bluesky, Discord, Telegram, Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Hashtag manager and competitor tracking</li>
               <li>✅ No credit card required</li>

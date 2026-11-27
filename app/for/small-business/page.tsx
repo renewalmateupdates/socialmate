@@ -141,7 +141,7 @@ const FAQ = [
   },
   {
     q: 'What platforms are supported right now?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, and TikTok are live today. LinkedIn, YouTube, Pinterest, Reddit, Instagram, Facebook, and Threads are on the roadmap. We don\'t lie about ETAs — see the roadmap page for honest status.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok and LinkedIn are live today. Instagram, Facebook, Threads and YouTube come next, once Meta and Google approve SocialMate. Pinterest and Reddit declined our applications. We don\'t promise dates; the roadmap page shows the honest status.',
   },
   {
     q: 'What are AI credits and what can I do with them?',

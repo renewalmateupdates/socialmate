@@ -18,7 +18,7 @@ const COMPARISON = [
   { feature: 'Schedule to X / Twitter',        substack: '❌',                                 socialmate: '✅ (Pro+)'                 },
   { feature: 'Content calendar',               substack: '❌ No scheduling calendar',          socialmate: '✅ Full calendar UI'       },
   { feature: 'Bulk scheduling',                substack: '❌',                                 socialmate: '✅ Free'                   },
-  { feature: 'AI writing tools',               substack: '❌ No AI social tools',             socialmate: '15+ tools free'            },
+  { feature: 'AI writing tools',               substack: '❌ No AI social tools',             socialmate: '15+ tools, 50 credits/mo free'            },
   { feature: 'Analytics',                      substack: 'Email open rate / subscriber stats', socialmate: '✅ Social analytics free'  },
   { feature: 'Link in bio (SIGIL)',             substack: '❌',                                 socialmate: '✅ Free'                   },
   { feature: 'RSS import',                     substack: 'N/A (is the RSS source)',           socialmate: '✅ Import issues as drafts' },

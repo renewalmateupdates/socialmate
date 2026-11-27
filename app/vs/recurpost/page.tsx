@@ -118,7 +118,7 @@ export default function VsRecurPostPage() {
             <p className="font-extrabold text-lg mb-2">No lifetime cap. 6 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no lifetime post limit</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Evergreen recycling free</li>
               <li>✅ Bulk scheduling free</li>

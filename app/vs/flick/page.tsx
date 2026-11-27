@@ -115,7 +115,7 @@ export default function VsFlickPage() {
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X</li>
               <li>✅ TikTok Script Generator included</li>
               <li>✅ Link in bio — free</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
             </ul>
           </div>
         </div>

@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Social media scheduling',   convertkit: '❌ Not included',              socialmate: '✅ 7 platforms'            },
   { feature: 'Email campaigns',           convertkit: '✅ Core feature',              socialmate: '❌ Not included'           },
   { feature: 'Free plan',                 convertkit: 'Up to 1,000 subscribers',      socialmate: '✅ Full free plan'         },
-  { feature: 'AI writing tools',          convertkit: 'Limited AI assist',            socialmate: '15+ tools free'            },
+  { feature: 'AI writing tools',          convertkit: 'Limited AI assist',            socialmate: '15+ tools, 50 credits/mo free'            },
   { feature: 'Discord scheduling',        convertkit: '❌',                            socialmate: '✅'                       },
   { feature: 'Telegram scheduling',       convertkit: '❌',                            socialmate: '✅'                       },
   { feature: 'TikTok scheduling',         convertkit: '❌',                            socialmate: '✅'                       },

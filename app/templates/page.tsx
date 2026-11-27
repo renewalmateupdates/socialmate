@@ -27,7 +27,9 @@ const PLATFORM_LABELS: Record<string, string> = {
 
 // Only show live platforms in the template platform picker
 const LIVE_PLATFORM_IDS = ['discord', 'bluesky', 'telegram', 'mastodon', 'twitter', 'tiktok', 'linkedin']
-const SOON_PLATFORM_IDS = ['youtube', 'pinterest', 'reddit']
+// Waiting on Meta's and Google's approval (SOON_PLATFORMS in lib/site-facts.ts).
+// This named Pinterest and Reddit, which both declined SocialMate.
+const SOON_PLATFORM_IDS = ['instagram', 'facebook', 'threads', 'youtube']
 
 const STARTER_TEMPLATES = [
   // ─── Promotional ───────────────────────────────────────────────

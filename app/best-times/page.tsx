@@ -25,21 +25,23 @@ const PLATFORM_AVERAGES = [
   { platform: 'Bluesky',   id: 'bluesky',   status: 'live', best: 'Mon–Fri, 8am–10am',                        peak: 'Tuesday 9am'    },
   { platform: 'Telegram',  id: 'telegram',  status: 'live', best: 'Mon–Fri, 8am–10am & 6pm–8pm',              peak: 'Wednesday 8am'  },
   { platform: 'Mastodon',  id: 'mastodon',  status: 'live', best: 'Mon–Fri, 9am–11am (local timezone)',        peak: 'Tuesday 10am'   },
-  // Coming soon
   { platform: 'LinkedIn',  id: 'linkedin',  status: 'live', best: 'Tue–Thu, 8am–10am & 12pm–1pm',             peak: 'Tuesday 9am'    },
+  { platform: 'TikTok',    id: 'tiktok',    status: 'live', best: 'Tue, Thu, Fri 7am–9am & 7pm–9pm',          peak: 'Friday 7pm'     },
+  { platform: 'X/Twitter', id: 'twitter',   status: 'live', best: 'Mon–Fri, 8am–10am & 12pm–1pm',             peak: 'Wednesday 9am'  },
+  // Waiting on Meta's and Google's approval (SOON_PLATFORMS in lib/site-facts.ts).
+  // TikTok and X were filed here as "planned" months after both went live.
   { platform: 'YouTube',   id: 'youtube',   status: 'soon', best: 'Thu–Sat, 12pm–4pm',                        peak: 'Saturday 3pm'   },
-  { platform: 'Pinterest', id: 'pinterest', status: 'soon', best: 'Sat & Sun, 8pm–11pm',                      peak: 'Saturday 9pm'   },
-  { platform: 'Reddit',    id: 'reddit',    status: 'soon', best: 'Mon–Fri, 6am–8am & 12pm–1pm (EST)',        peak: 'Monday 8am'     },
-  // Planned
-  { platform: 'Instagram', id: 'instagram', status: 'planned', best: 'Tue–Fri, 9am–11am & 2pm–5pm',          peak: 'Wednesday 11am' },
-  { platform: 'TikTok',    id: 'tiktok',    status: 'planned', best: 'Tue, Thu, Fri 7am–9am & 7pm–9pm',      peak: 'Friday 7pm'     },
-  { platform: 'X/Twitter', id: 'twitter',   status: 'planned', best: 'Mon–Fri, 8am–10am & 12pm–1pm',         peak: 'Wednesday 9am'  },
-  { platform: 'Facebook',  id: 'facebook',  status: 'planned', best: 'Wed–Fri, 9am–1pm',                      peak: 'Wednesday 11am' },
+  { platform: 'Instagram', id: 'instagram', status: 'soon', best: 'Tue–Fri, 9am–11am & 2pm–5pm',              peak: 'Wednesday 11am' },
+  { platform: 'Facebook',  id: 'facebook',  status: 'soon', best: 'Wed–Fri, 9am–1pm',                         peak: 'Wednesday 11am' },
+  // SocialMate does not post here: both declined its applications. Still
+  // useful to know when to post by hand.
+  { platform: 'Pinterest', id: 'pinterest', status: 'unavailable', best: 'Sat & Sun, 8pm–11pm',               peak: 'Saturday 9pm'   },
+  { platform: 'Reddit',    id: 'reddit',    status: 'unavailable', best: 'Mon–Fri, 6am–8am & 12pm–1pm (EST)', peak: 'Monday 8am'     },
 ]
 
-const LIVE_PLATFORMS    = PLATFORM_AVERAGES.filter(p => p.status === 'live')
-const SOON_PLATFORMS    = PLATFORM_AVERAGES.filter(p => p.status === 'soon')
-const PLANNED_PLATFORMS = PLATFORM_AVERAGES.filter(p => p.status === 'planned')
+const LIVE_PLATFORMS        = PLATFORM_AVERAGES.filter(p => p.status === 'live')
+const SOON_PLATFORMS        = PLATFORM_AVERAGES.filter(p => p.status === 'soon')
+const UNAVAILABLE_PLATFORMS = PLATFORM_AVERAGES.filter(p => p.status === 'unavailable')
 
 export default function BestTimes() {
   const [loading, setLoading] = useState(true)
@@ -202,7 +204,7 @@ export default function BestTimes() {
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Live now</p>
-                <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">4 platforms</span>
+                <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{LIVE_PLATFORMS.length} platforms</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {LIVE_PLATFORMS.map(p => <PlatformCard key={p.platform} p={p} />)}
@@ -221,11 +223,11 @@ export default function BestTimes() {
 
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Planned</p>
-                <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">On the roadmap</span>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Post these by hand</p>
+                <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">Not on SocialMate</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PLANNED_PLATFORMS.map(p => <PlatformCard key={p.platform} p={p} />)}
+                {UNAVAILABLE_PLATFORMS.map(p => <PlatformCard key={p.platform} p={p} />)}
               </div>
             </div>
           </div>

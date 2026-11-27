@@ -10,6 +10,7 @@ import { CreditCard, Flame, Gift, Heart, Lock, RotateCcw, Tornado, Waves, X as C
 import { PLAN_X_POSTS } from '@/lib/plan'
 import { localeToBCP47 } from '@/lib/i18n'
 import { BLACK_FRIDAY, BLACK_FRIDAY_PRICES, COUPON_LENGTH, blackFridayEndLabel, isBlackFridayLive } from '@/lib/promos'
+import { LIVE_PLATFORM_NAMES, SENTENCES, listWords } from '@/lib/site-facts'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -251,7 +252,9 @@ const FAQ = [
   },
   {
     q: 'What platforms are live right now?',
-    a: 'Discord, Bluesky, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn are live — 7 platforms in total. YouTube, Pinterest, and Reddit are coming very soon. More on the roadmap.',
+    // From lib/site-facts.ts. This said Pinterest and Reddit were "coming very
+    // soon" long after both declined SocialMate's applications.
+    a: `${LIVE_PLATFORM_NAMES.length}: ${listWords(LIVE_PLATFORM_NAMES)}. ${SENTENCES.freePlatforms} ${SENTENCES.soon}`,
   },
   {
     q: 'Is White Label available on Free?',

@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Custom domain',            linktree: '$9/month (Premium)',          socialmate: 'White Label Pro plan'     },
   { feature: 'Analytics on links',       linktree: 'Paid (Pro+)',                 socialmate: '✅ Free with QR code'     },
   { feature: 'Social media scheduling',  linktree: '❌ Not included',             socialmate: '✅ 7 platforms'            },
-  { feature: 'AI writing tools',         linktree: '❌',                           socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',         linktree: '❌',                           socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',          linktree: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Post calendar',            linktree: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',      linktree: '❌',                           socialmate: '✅ Free (3 accounts)'    },

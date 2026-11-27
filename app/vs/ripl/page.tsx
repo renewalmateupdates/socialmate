@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate better for content scheduling than Ripl?",
-    a: "Yes, if your goal is multi-platform content scheduling. Ripl is designed primarily for creating animated video posts. SocialMate is a full Creator OS with scheduling, 15 AI tools, autonomous content generation (SOMA), an analytics dashboard, social inbox, and link in bio — all starting free.",
+    a: "Yes, if your goal is multi-platform content scheduling. Ripl is designed primarily for creating animated video posts. SocialMate is a full Creator OS with scheduling, 15 AI tools, autonomous content generation (SOMA, on Pro), an analytics dashboard, social inbox, and link in bio, starting free.",
   },
   {
     q: "Can SocialMate create video content like Ripl?",
@@ -197,7 +197,7 @@ export default function VsRiplPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Need more than animated videos? Start free.</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms (6 free, X on Pro), gives you 15 AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
+            SocialMate covers 7 platforms (6 free, X on Pro), gives you 15 AI tools, and on Pro lets SOMA generate your content on autopilot. Free to start.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

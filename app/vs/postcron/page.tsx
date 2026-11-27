@@ -12,7 +12,7 @@ const COMPARISON = [
   { feature: 'Free plan',              postcron: '❌ No free plan',          socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    postcron: '6 platforms',              socialmate: '7 live (free)'           },
   { feature: 'Team seats',             postcron: 'Extra cost',               socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       postcron: '❌ No AI tools',          socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',       postcron: '❌ No AI tools',          socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Bulk scheduling',        postcron: '✅ CSV upload',           socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            postcron: '❌',                      socialmate: '✅ Free'                  },
   { feature: 'Analytics',             postcron: 'Business plan only',      socialmate: '✅ Free'                  },

@@ -18,7 +18,7 @@ const COMPARISON = [
   { feature: 'LinkedIn scheduling',           talkwalker: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Social listening (web-wide)',   talkwalker: '✅ (core strength)',           socialmate: '✅ Competitor tracking'  },
   { feature: 'Sentiment analysis',            talkwalker: '✅ (enterprise AI)',           socialmate: '✅ SM Radar (AI-powered)' },
-  { feature: 'AI writing tools',              talkwalker: '❌',                           socialmate: '15+ tools free'           },
+  { feature: 'AI writing tools',              talkwalker: '❌',                           socialmate: '15+ tools, 50 credits/mo free'           },
   { feature: 'Autonomous content system',     talkwalker: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        talkwalker: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             talkwalker: '❌',                           socialmate: '✅ Free'                  },
@@ -123,7 +123,7 @@ export default function VsTalkwalkerPage() {
             <p className="font-extrabold text-lg mb-2">Schedule + monitor + create. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 15+ AI tools on free tier</li>
+              <li>✅ 15+ AI tools, 50 credits a month free</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ SM Radar: AI content intelligence report</li>
               <li>✅ Pro plan for $8/month total</li>

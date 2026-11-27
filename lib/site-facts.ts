@@ -279,6 +279,23 @@ export const UNAVAILABLE_PLATFORMS: { name: string; why: string }[] = [
 
 export const UNAVAILABLE_PLATFORM_NAMES: string[] = UNAVAILABLE_PLATFORMS.map(p => p.name)
 
+/**
+ * The only platforms a "coming soon" may name: each waits on that platform's
+ * own approval (Meta's app review, Google's verification). Pinterest and Reddit
+ * declined SocialMate's applications, so they are never on it. Eleven /for
+ * pages kept their own copies of this list until Nov 27, 2026, and they still
+ * named Pinterest after it declined, LinkedIn six months after it went live,
+ * and Kick, which nothing supports.
+ */
+export const SOON_PLATFORMS: { name: string; icon: string }[] = [
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Facebook',  icon: 'facebook' },
+  { name: 'Threads',   icon: 'threads' },
+  { name: 'YouTube',   icon: 'youtube' },
+]
+export const SOON_PLATFORM_NAMES: string[] = SOON_PLATFORMS.map(p => p.name)
+export const DECLINED_PLATFORM_NAMES: string[] = ['Pinterest', 'Reddit']
+
 // ─── AI tools ───────────────────────────────────────────────────────────────
 
 export interface AiToolFacts {
@@ -392,6 +409,7 @@ export const SENTENCES = {
   platforms: `SocialMate posts to ${listWords(LIVE_PLATFORM_NAMES)}.`,
   freePlatforms: `The free plan covers ${listWords(FREE_PLATFORM_NAMES)}. ${listWords(PAID_ONLY_PLATFORM_NAMES)} needs Pro or Agency, because X charges for every post made through its API.`,
   notAvailable: `SocialMate does not post to ${listWords(UNAVAILABLE_PLATFORM_NAMES, 'or')}.`,
+  soon: `${listWords(SOON_PLATFORM_NAMES)} come next, once Meta and Google approve SocialMate. ${listWords(DECLINED_PLATFORM_NAMES)} declined SocialMate's applications.`,
   free: `Free: ${PLANS.free.postsPerMonth} posts and ${PLANS.free.aiCreditsPerMonth} AI credits a month, ${PLANS.free.seats} seats, no credit card.`,
   metaDescription: `Schedule posts to ${listWords(LIVE_PLATFORM_NAMES)}. Free plan with ${PLANS.free.postsPerMonth} posts a month and ${AI_TOOLS.length} AI tools. No credit card required.`,
 } as const
