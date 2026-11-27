@@ -659,6 +659,13 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 - **`input.click()` bubbles.** A hidden file input inside an element whose own
   click opens it runs that handler twice. Stop the click on the input.
 
+**From: November 27, 2026: what's coming (#837)**
+
+- **A status list goes stale in both directions.** /best-times filed TikTok
+  and X as planned months after both went live, while Pinterest sat under
+  "coming" after it declined. Read a platform's status from
+  `lib/site-facts.ts`; never type it into a page.
+
 ## Pending / In Progress
 
 > **One "Pick up here", replaced, never stacked.** Until Nov 4 every session added
@@ -666,7 +673,33 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #836 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #837 are merged.
+
+**Nov 27: what's coming, and what Free gets, said truthfully (#837).** The
+last of what #835 saw and left, plus what the same search turned up:
+- **Pinterest and Reddit "coming".** Both declined SocialMate's applications,
+  and /pricing's FAQ, /features (all nine languages), /roadmap, /best-times,
+  /templates, six /for FAQs and a static blog post still called them coming
+  or planned. Eleven /for pages kept their own "Coming soon" lists: they
+  named Pinterest, LinkedIn (live since May) and Kick (nothing supports it).
+  `SOON_PLATFORMS` in `lib/site-facts.ts` (Instagram, Facebook, Threads,
+  YouTube) is now the one list, with `SENTENCES.soon` for prose. /best-times
+  had filed TikTok and X under "Planned" and said "4 platforms" live; it
+  derives the count and lists Pinterest and Reddit under "Post these by hand".
+  /roadmap's "YouTube Community Posts" became "YouTube video uploads" (the
+  API cannot post to the Community tab; uploads are what wait on Google).
+- **SOMA and the AI tools on Free.** About 20 /vs pages listed SOMA with
+  "starting free", and two on /vs/socialoomph listed it among the free AI
+  tools; every /vs page says Pro now. 94 "15+ AI tools free" cells and items
+  on /vs pages say "15+ AI tools, 50 credits a month free" (Post Score is
+  Pro). /vs/later-free said Free was "50 credits, that's 50 posts" with
+  several accounts per platform; it is 250 posts and one account.
+- /for/linkedin-creators said LinkedIn images and video were on the roadmap
+  (a post carries up to 9 images or a video today) and promised expiry
+  reminders that shipped in October. A static blog post listed AI image generation, which
+  does not exist.
+- `scripts/test-platform-status-claims.mjs` (in `npm test`) fails on all of
+  it: on the old code, 6 of its checks fail.
 
 **Nov 27: TikTok Studio, read and fixed (#836).** Outside accounts, read-only.
 Since Nov 21, 7 people opened Studio (all on phones), 6 added a video, 5
@@ -784,12 +817,9 @@ Reddit on the free plan. `scripts/test-free-platform-claims.mjs` (in
 saying X needs Pro (559 hits on the old code, 0 now). **Joshua's yes needed:**
 `supabase/blog_free_platforms_nov26.sql` fixes the same claim in 20 sentences
 of 19 database posts (checked read-only against the live rows; then
-revalidate and IndexNow). **Seen, not fixed:** /pricing's FAQ and the features
-page note say Pinterest and Reddit are "coming very soon" (both declined);
-/vs/later-free says 50 credits are 50 posts and Free connects several accounts
-per platform; several pages call SOMA or "all tools" free (SOMA is Pro); the
-/for/linkedin-creators FAQ says LinkedIn images and video are on the roadmap
-(they are live); the /for pages' "Coming soon" tiles still list Pinterest.
+revalidate and IndexNow). What it saw and left (Pinterest and Reddit "coming",
+SOMA and "all tools" free, /vs/later-free's Free numbers, LinkedIn media "on
+the roadmap") was fixed on Nov 27 in #837 (above).
 
 **Checked live after #830 deployed (Nov 26, 01:50 UTC), signed in as the
 admin:** the homepage grid shows X as Pro with the "Six are free" line (served
