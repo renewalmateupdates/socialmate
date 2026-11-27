@@ -675,8 +675,9 @@ Collected verbatim from the "Rules that follow" in each dated entry of
   goes, hand the bookkeeping to `after()`, and change cookies before it:
   `after()` runs once the response has gone.
 - **A Poor route on two events is a lead, not a finding.** Desktop's Poor list
-  held 45 and 48 s LCPs (a laptop asleep mid-load) and an INP spike from two
-  presses on two days. Read the event count and the chart before fixing.
+  held 45 and 48 s LCPs (our own browser pane, loaded while hidden) and an INP
+  spike from two presses on two days. Read the event count and the chart
+  before fixing.
 
 ## Pending / In Progress
 
@@ -691,8 +692,9 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 (#842).** Read before Plus ends on Dec 19, for the 7 days to Nov 27:
 - Phones have no Poor route (RES 99). On desktop (RES 97) /onboarding, 42 on
   17 events, is the only Poor route with real traffic. The rest have 1 to 6
-  events each. /accounts and /for/agencies had 45 to 48 s LCPs, most likely a
-  laptop asleep mid-load. /soma/dashboard's CLS 2.02 moved `body` on 2 events.
+  events each. /accounts' 45.6 s LCP is our own visit from a built-in browser
+  pane that loaded while hidden (traced Nov 20), and /for/agencies' 48.8 s
+  looks the same. /soma/dashboard's CLS 2.02 moved `body` on 2 events.
   /signup's INP of 2.2 s was 2 presses of its submit button between Nov 21 and
   23, and the chart has been flat since.
 - The desktop homepage's TTFB is 2.0 s at p75 over 43 events. curl from
