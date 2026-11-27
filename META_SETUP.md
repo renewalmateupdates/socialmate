@@ -36,11 +36,101 @@ sees the Instagram, Facebook and Threads cards on /accounts.
   `https://socialmate.studio/api/meta/data-deletion`. Permissions `threads_basic`,
   `threads_content_publish`.
 
-## Still to do by hand
+## Where it stands (Nov 27, 2026)
 
-- **Threads tester**: App roles → Roles → Add people → Threads Tester → your Threads
-  username, then accept in Threads (Settings → Account → Website permissions → Invites).
-- **App secrets into Vercel** (Meta asks for your password to show them).
+- The Threads tester and the app secrets are done: the admin account connected
+  Instagram, Facebook and Threads on Nov 17, and published one post to each.
+  So every permission below has had a real, successful call. Meta's review page
+  shows that per permission; if it says a call is missing or too old, post once
+  more to each platform from the admin account, then submit.
+- The privacy policy names each permission and what it's used for, and
+  `/meta/data-deletion`, `/privacy` and `/terms` all answer 200.
+- **What blocks the submission:** the business portfolio is unverified, and
+  Advanced Access needs Business Verification first. Meta for Developers was
+  signed out in Joshua's Chrome on Nov 27.
+
+## Who does what
+
+**Only Joshua** (sign-ins, legal documents, terms and money stay his):
+1. Sign in at developers.facebook.com: "Continue with Facebook", then his password
+   and two-factor code.
+2. Business Verification (below): enter the business details and upload one
+   document.
+3. Accept any terms Meta shows.
+4. Record the screencast (below; about 10 minutes).
+5. Type the reviewer test login's password into the testing instructions.
+6. Okay the final Submit.
+
+**Claude, in Joshua's Chrome, once he is signed in:**
+- read the App Review page;
+- request Advanced Access for the eight permissions and paste each use case;
+- upload his recording;
+- fill in the data handling answers and the testing instructions (without the
+  password);
+- check App settings → Basic and the app mode;
+- stop before Submit.
+- If Meta offers domain verification by meta tag, Claude adds the tag to
+  socialmate.studio in a PR.
+
+## Business Verification
+
+business.facebook.com/settings → the **Gilgamesh Enterprise LLC** portfolio →
+Security center → Start verification.
+
+- **Legal name:** exactly "Gilgamesh Enterprise LLC", the way it appears on the
+  document. The address and phone you enter should match the document too.
+- **One document** that shows the legal name (and ideally the address):
+  - the Wyoming Articles of Organization;
+  - the IRS EIN letter (CP 575 or 147C);
+  - a Mercury bank statement;
+  - or a utility bill.
+- **How Meta confirms it:** an email at the business's own domain, a phone
+  call or text, or domain verification (a DNS record, or a meta tag Claude can
+  add).
+- Meta usually decides within days, sometimes up to two weeks.
+
+## Data handling answers (drafts; Joshua confirms each)
+
+- **Processors with access to Platform Data:** Yes.
+  - Supabase: the database that stores access tokens, account IDs, usernames,
+    profile pictures and scheduled posts.
+  - Vercel: hosting, and the server functions that call Meta's APIs.
+- **Responsible entity:** Gilgamesh Enterprise LLC, United States.
+- **Platform Data given to public authorities for national security requests
+  in the last 12 months:** No.
+- **Policies on requests from public authorities:** tick only what you will
+  actually do. Suggested:
+  - review a request's legality;
+  - challenge one that isn't lawful;
+  - data minimization (SocialMate keeps only what posting needs);
+  - keep a record of any request.
+
+## Testing instructions for the reviewer (paste, then add the password)
+
+```
+SocialMate (https://socialmate.studio) is a social media scheduler: people write a post once and SocialMate publishes it to their connected accounts at the time they choose.
+
+1. Log in at https://socialmate.studio/login with the test account below.
+2. Open Accounts in the left sidebar. Under Instagram, press Connect, sign in, and choose an Instagram professional account. Do the same for Facebook (pick a Page) and Threads.
+3. Open Compose. Attach a JPG image, write a caption, tick Instagram, the Facebook Page and Threads, and press Post now. Each post appears on its account within about a minute.
+4. Accounts shows each connected account's name and picture, and Disconnect removes it. https://socialmate.studio/meta/data-deletion explains how to delete your data.
+
+Test login: email ______ / password ______
+```
+
+The test login's email must be in `META_REVIEWER_EMAILS` (Vercel), or it can't
+connect before approval.
+
+## Recording the screencast on Windows
+
+- Press Win+Shift+R (Snipping Tool's screen recorder), drag over the browser
+  window, and press Start. It saves an MP4. Xbox Game Bar (Win+Alt+R) also
+  works and records the active window.
+- Follow the script under App Review below. One video covering everything is
+  accepted.
+- Disconnect each account first, so the recording shows the full Meta login and
+  consent.
+- Show each post on Instagram, Facebook and Threads after Post now.
 
 ## Vercel environment variables (Production)
 

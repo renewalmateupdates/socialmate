@@ -714,7 +714,38 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #850 are merged.
+**Pick up here (updated Nov 27, 2026).** #786 through #851 are merged.
+
+**Nov 27: Meta and YouTube review kits (#851, docs only).** `META_SETUP.md`
+now says where the Meta review stands and who does what:
+- **Joshua:** sign-in, Business Verification documents, terms, the
+  screencast, the reviewer password, Submit.
+- **Claude, in his Chrome once he's signed in:** the forms, stopping before
+  Submit.
+- **Drafts ready to paste:** the data handling answers and the testing
+  instructions.
+
+The new `YOUTUBE_SETUP.md` covers Google's OAuth verification (branding,
+scope justifications, a demo video script) and the YouTube API Services audit
+(lifts the Private lock and the roughly 6 uploads a day quota). It's the same
+split: his Google sign-in as socialmatehq@gmail.com, Claude fills the forms.
+The admin account has one published post on each of Instagram, Facebook,
+Threads and YouTube (Nov 17-18), so every permission has had a real call.
+**Waiting on Joshua's sign-ins** (Meta for Developers, and Google as
+socialmatehq@gmail.com in Chrome).
+
+**Nov 27: `verify:content -- --db` over all 650 blog posts:** 56 findings in
+50 posts, none fixed yet.
+- **Mostly not ours:** third-party tools' "unlimited", or history ("in 2021").
+- **Worth a look:**
+  - 9 pairs of posts with the same title (duplicates to a search engine);
+  - five tax posts quoting 2025 figures in 2026-titled posts (bonus
+    depreciation, SEP-IRA, QBI thresholds; check them against irs.gov before
+    changing anything);
+  - a static post says Bluesky crossed 30 million users in 2024, while a
+    database post says 2025, and 2025 is right.
+- Editing existing rows needs Joshua's yes; the `--db` allow entries
+  (`dbOnly`) were not added.
 
 **Nov 27: STUDENT25 checks for a school email (#849).** Joshua decided the
 two discount codes (TODO.md, Decided item 5): both last every payment while
