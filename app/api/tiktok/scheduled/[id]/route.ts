@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { givePackVideoBack } from '@/lib/tiktok-pack'
 
 // Cancels a TikTok post that is still waiting on the scheduled-post cron.
 // Scoped to `scheduled` only -- a post already publishing/published/failed
@@ -25,9 +26,12 @@ export async function DELETE(
 
   const db = getSupabaseAdmin()
 
+  // '*', not a column list: used_pack_video only exists once
+  // supabase/tiktok_pack_nov28.sql has run, and naming it before then would
+  // fail every cancel.
   const { data: row, error: rowErr } = await db
     .from('tiktok_posts')
-    .select('id, status, video_storage_path')
+    .select('*')
     .eq('id', id)
     .eq('user_id', user.id)
     .maybeSingle()
@@ -44,19 +48,27 @@ export async function DELETE(
   // Scheduling incremented tiktok_videos_this_month immediately (before the
   // video was ever actually sent) -- cancelling should give that slot back,
   // or a schedule-then-cancel loop quietly burns a user's monthly quota on
-  // videos that never posted.
-  const { data: ws } = await db
-    .from('workspaces')
-    .select('tiktok_videos_this_month')
-    .eq('owner_id', user.id)
-    .eq('is_personal', true)
-    .maybeSingle()
-  if (ws) {
-    await db
+  // videos that never posted. A video that took a TikTok pack video gives
+  // that back instead (lib/tiktok-pack.ts).
+  if (row.used_pack_video === true) {
+    await givePackVideoBack(db, user.id, 'tiktok/scheduled')
+  } else {
+    const { data: ws, error: wsErr } = await db
       .from('workspaces')
-      .update({ tiktok_videos_this_month: Math.max(0, (ws.tiktok_videos_this_month ?? 0) - 1) })
+      .select('tiktok_videos_this_month')
       .eq('owner_id', user.id)
       .eq('is_personal', true)
+      .limit(1)
+      .maybeSingle()
+    if (wsErr) console.warn('[tiktok/scheduled] quota read failed:', wsErr.message)
+    if (ws) {
+      const { error: refundErr } = await db
+        .from('workspaces')
+        .update({ tiktok_videos_this_month: Math.max(0, (ws.tiktok_videos_this_month ?? 0) - 1) })
+        .eq('owner_id', user.id)
+        .eq('is_personal', true)
+      if (refundErr) console.warn('[tiktok/scheduled] quota refund failed:', refundErr.message)
+    }
   }
 
   // Best-effort storage cleanup -- non-fatal, the row is already gone either way.

@@ -22,6 +22,7 @@ import { confirmTiktokUpload, putStagedVideo, uploadToTiktok } from '@/lib/tikto
 import {
   cannotPostDirect, defaultCoverTime, fullTikTokCaption, postBlocker, tagsToAppend, type PostBlocker,
 } from '@/lib/tiktok-studio'
+import { TIKTOK_PACK, TIKTOK_PACK_PRICE } from '@/lib/tiktok-pack'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -160,6 +161,10 @@ async function keepScreenOn(): Promise<() => void> {
 
 // ── Post settings panel (shared between right panel and mobile Post tab) ──────
 
+/** Where the creator stands for scheduling (GET /api/tiktok/pack). */
+type ScheduleRoom = { monthly: number; used: number; packVideos: number }
+type PostRemedy   = 'drafts_or_private' | 'tiktok_pack'
+
 interface PostSettingsPanelProps {
   postCaption:     string
   setPostCaption:  (v: string) => void
@@ -194,9 +199,17 @@ interface PostSettingsPanelProps {
   postError:       string | null
   /** The creator's TikTok nickname, shown so they know which account gets the post. */
   accountName:     string | null
-  /** Set when TikTok refused a direct post that the creator could still send to drafts. */
-  postRemedy:      'drafts_or_private' | null
+  /** drafts_or_private: TikTok refused a direct post that could still go to drafts.
+   *  tiktok_pack: the month's TikTok videos are used and a pack would schedule it. */
+  postRemedy:      PostRemedy | null
   sendToDraftsInstead: () => void
+  /** Opens the TikTok pack's checkout in a new tab (lib/tiktok-pack.ts). */
+  buyTiktokPack:   () => void
+  packBusy:        boolean
+  /** waiting: checkout is open in another tab. paid: this tab is back from paying. */
+  packNotice:      'waiting' | 'paid' | null
+  /** The month's TikTok videos and the pack, for the line under the date. */
+  scheduleRoom:    ScheduleRoom | null
   videoUrl:        string | null
   isWorking:       boolean
   uploading:       boolean
@@ -227,8 +240,9 @@ function PostSettingsPanel({
   scheduleMode, setScheduleMode,
   scheduledAt, setScheduledAt,
   postError, accountName, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting,
-  uploadPercent, handlePost,
+  uploadPercent, handlePost, buyTiktokPack, packBusy, packNotice, scheduleRoom,
 }: PostSettingsPanelProps) {
+  const roomLeft = scheduleRoom ? Math.max(0, scheduleRoom.monthly - scheduleRoom.used) : 0
   // Computed once, not on every render — it only needs to be "about now",
   // never a precise clock, and calling Date.now() during render is impure.
   const scheduleMin = useMemo(() => localDatetimeInputValue(new Date(Date.now() + 5 * 60_000)), [])
@@ -558,21 +572,56 @@ function PostSettingsPanel({
             </span>
           </button>
           {scheduleMode === 'schedule' && (
-            <input
-              ref={scheduleRef}
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={e => setScheduledAt(e.target.value)}
-              min={scheduleMin}
-              aria-label="Date and time to post"
-              className={`w-full bg-panel border border-edge rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors${ring('schedule')}`}
-            />
+            <>
+              <input
+                ref={scheduleRef}
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={e => setScheduledAt(e.target.value)}
+                min={scheduleMin}
+                aria-label="Date and time to post"
+                className={`w-full bg-panel border border-edge rounded-xl px-3 py-2 text-sm text-white focus:border-[#fe2c55] outline-none transition-colors${ring('schedule')}`}
+              />
+              {/* The count was invisible until a schedule was refused, after
+                  the video had already uploaded. */}
+              {scheduleRoom && (
+                <p className="text-[11px] text-ink-muted mt-1.5 leading-snug">
+                  {roomLeft > 0
+                    ? `You can schedule ${roomLeft} more this month.`
+                    : `This month's ${scheduleRoom.monthly} TikTok videos are used.`}
+                  {scheduleRoom.packVideos > 0 && ` Your TikTok pack has ${scheduleRoom.packVideos} left.`}
+                  {roomLeft === 0 && scheduleRoom.packVideos === 0 && (
+                    <>
+                      {' '}
+                      <button
+                        type="button"
+                        onClick={buyTiktokPack}
+                        disabled={packBusy}
+                        className="underline font-semibold text-ink-high hover:text-white disabled:opacity-50"
+                      >
+                        Add {TIKTOK_PACK.videos} for {TIKTOK_PACK_PRICE}
+                      </button>
+                    </>
+                  )}
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
 
       {/* CTA */}
       <div className="pt-4 mt-4 border-t border-edge space-y-2">
+        {packNotice && (
+          <div className="flex items-start gap-2 p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl">
+            <CheckCircle2 className="text-emerald-400 mt-0.5 shrink-0" size={13} strokeWidth={2} />
+            <p className="text-xs text-emerald-300">
+              {packNotice === 'waiting'
+                ? `Checkout is open in a new tab. Once you've paid, press Schedule again here: your video is still here.`
+                : `Your TikTok pack is paid. Its ${TIKTOK_PACK.videos} scheduled videos are on your account in a moment, and they never expire. If your video is open in another tab, schedule it there.`}
+            </p>
+          </div>
+        )}
         {postError && (
           <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 rounded-xl">
             <AlertTriangle className="text-red-400 mt-0.5 shrink-0" size={13} strokeWidth={2} />
@@ -587,6 +636,18 @@ function PostSettingsPanel({
                   className="w-full min-h-[44px] px-3 rounded-xl bg-[#fe2c55] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 hover:opacity-90 disabled:opacity-40 transition-opacity"
                 >
                   <Music size={13} strokeWidth={2} /> Send to TikTok drafts instead
+                </button>
+              )}
+              {postRemedy === 'tiktok_pack' && (
+                <button
+                  onClick={buyTiktokPack}
+                  disabled={packBusy || isWorking}
+                  className="w-full min-h-[44px] px-3 rounded-xl bg-[#fe2c55] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 hover:opacity-90 disabled:opacity-40 transition-opacity"
+                >
+                  {packBusy
+                    ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
+                    : <Zap size={13} strokeWidth={2} />}
+                  Add {TIKTOK_PACK.videos} scheduled videos for {TIKTOK_PACK_PRICE}
                 </button>
               )}
             </div>
@@ -847,7 +908,12 @@ export default function TikTokStudioClient({ initialConnected }: {
   const [uploadPercent, setUploadPercent] = useState<number | null>(null)
   const [posting, setPosting]       = useState(false)
   const [postError, setPostError]   = useState<string | null>(null)
-  const [postRemedy, setPostRemedy] = useState<'drafts_or_private' | null>(null)
+  const [postRemedy, setPostRemedy] = useState<PostRemedy | null>(null)
+  // The TikTok pack (lib/tiktok-pack.ts): its checkout opening, the notice
+  // around paying, and where the creator stands for scheduling.
+  const [packBusy, setPackBusy]         = useState(false)
+  const [packNotice, setPackNotice]     = useState<'waiting' | 'paid' | null>(null)
+  const [scheduleRoom, setScheduleRoom] = useState<ScheduleRoom | null>(null)
   const [postSuccess, setPostSuccess] = useState(false)
   // TikTok processes asynchronously, so "uploaded" is not "published". Until
   // this settles we are still waiting on their answer, not on ourselves.
@@ -1332,6 +1398,7 @@ export default function TikTokStudioClient({ initialConnected }: {
     const mode = modeOverride ?? scheduleMode
     setPostError(null)
     setPostRemedy(null)
+    setPackNotice(null)
     setUploading(true)
     // A phone that locks its screen mid-upload cuts the upload off.
     const releaseScreen = await keepScreenOn()
@@ -1385,6 +1452,18 @@ export default function TikTokStudioClient({ initialConnected }: {
       // infrastructure that already existed (upload-url + /api/tiktok/post) but
       // was never wired to this button.
       if (mode === 'schedule') {
+        // The month's TikTok videos and the pack, checked before anything
+        // uploads: a refusal used to come after the whole video had gone to
+        // storage. /api/tiktok/post still checks; this only saves the upload.
+        stage = 'room'
+        const roomRes  = await fetch('/api/tiktok/pack')
+        const roomData = await readJson(roomRes)
+        if (roomRes.ok && roomData.canSchedule === false) {
+          tiktokCode = 'quota_exhausted'
+          setPostRemedy('tiktok_pack')
+          throw new Error(String(roomData.message || "This month's TikTok videos are used."))
+        }
+
         stage = 'stage_upload'
         const urlRes  = await fetch('/api/tiktok/upload-url')
         const urlData = await readJson(urlRes)
@@ -1443,6 +1522,7 @@ export default function TikTokStudioClient({ initialConnected }: {
         const scheduleData = await readJson(scheduleRes)
         if (!scheduleRes.ok) {
           tiktokCode = String(scheduleData.code ?? `http_${scheduleRes.status}`)
+          if (scheduleData.quota_exhausted) setPostRemedy('tiktok_pack')
           throw new Error(String(scheduleData.error || 'Failed to schedule TikTok post'))
         }
 
@@ -1621,6 +1701,77 @@ export default function TikTokStudioClient({ initialConnected }: {
     void handlePost('drafts')
   }, [handlePost])
 
+  // ── TikTok pack ─────────────────────────────────────────────────────────────
+
+  // Where the creator stands for scheduling, for the line under the date.
+  const loadScheduleRoom = useCallback(async () => {
+    try {
+      const res = await fetch('/api/tiktok/pack')
+      if (!res.ok) return
+      const d = await readJson(res)
+      if (typeof d.monthly === 'number' && typeof d.used === 'number' && typeof d.packVideos === 'number') {
+        setScheduleRoom({ monthly: d.monthly, used: d.used, packVideos: d.packVideos })
+      }
+    } catch { /* only a hint: the routes still check */ }
+  }, [])
+
+  useEffect(() => {
+    if (scheduleMode === 'schedule') void loadScheduleRoom()
+  }, [scheduleMode, loadScheduleRoom])
+
+  // Coming back from the checkout tab: the pack may be paid now.
+  useEffect(() => {
+    if (packNotice !== 'waiting') return
+    const onFocus = () => { void loadScheduleRoom() }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [packNotice, loadScheduleRoom])
+
+  // Stripe sends the checkout tab back here with ?pack=purchased. Read from
+  // window.location, not useSearchParams, so the page isn't rendered in the
+  // browser only for this.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('pack') !== 'purchased') return
+    setPackNotice('paid')
+    setScheduleMode('schedule')
+    params.delete('pack')
+    const query = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`)
+  }, [])
+
+  // Checkout opens in a new tab: the video being made here lives only in this
+  // tab's memory, and leaving the page would throw it away.
+  const buyTiktokPack = useCallback(async () => {
+    setPackBusy(true)
+    track('tiktok_pack_clicked', { from: postRemedy === 'tiktok_pack' ? 'refusal' : 'schedule_line' })
+    // Opened inside the press, before any await, so pop-up blockers allow it.
+    const checkoutTab = window.open('', '_blank')
+    if (checkoutTab) checkoutTab.opener = null
+    try {
+      const res  = await fetch('/api/tiktok/pack', { method: 'POST' })
+      const data = await readJson(res)
+      if (res.ok && typeof data.url === 'string') {
+        if (checkoutTab) {
+          checkoutTab.location.href = data.url
+          setPostError(null)
+          setPostRemedy(null)
+          setPackNotice('waiting')
+        } else {
+          window.location.href = data.url
+        }
+        return
+      }
+      checkoutTab?.close()
+      setPostError(String(data.error || 'Could not open checkout. Try again in a minute.'))
+    } catch {
+      checkoutTab?.close()
+      setPostError('Could not open checkout. Try again in a minute.')
+    } finally {
+      setPackBusy(false)
+    }
+  }, [postRemedy])
+
   // ── Derived ─────────────────────────────────────────────────────────────────
 
   // What may still block a post (disclosure, audience, schedule time) is
@@ -1644,6 +1795,7 @@ export default function TikTokStudioClient({ initialConnected }: {
     scheduleMode, setScheduleMode,
     scheduledAt, setScheduledAt,
     postError, postRemedy, sendToDraftsInstead, videoUrl, isWorking, uploading, posting, uploadPercent,
+    buyTiktokPack: () => { void buyTiktokPack() }, packBusy, packNotice, scheduleRoom,
     accountName: creator?.account_name ?? null,
     // Wrapped: the panel passes this straight to onClick, and the click event
     // must not arrive as handlePost's mode override.

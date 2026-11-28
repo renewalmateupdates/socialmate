@@ -27,7 +27,8 @@ const read = p => readFileSync(join(root, p), 'utf8')
 
 function load(path) {
   const mod = { exports: {} }
-  const req = id => (id === './plan' ? load('lib/plan.ts') : require(id))
+  // site-facts.ts imports its lib/ siblings (./plan, ./tiktok-pack) relatively.
+  const req = id => (id.startsWith('./') ? load(`lib/${id.slice(2)}.ts`) : require(id))
   new Function('module', 'exports', 'require', ts.transpileModule(read(path), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
   }).outputText)(mod, mod.exports, req)

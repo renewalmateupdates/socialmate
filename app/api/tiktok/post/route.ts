@@ -4,15 +4,12 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getValidAccessToken } from '@/lib/tiktok-auth'
-import { resolveWorkspacePlan, type PlanTier } from '@/lib/plan'
+import { resolveWorkspacePlan, PLAN_TIKTOK_VIDEOS } from '@/lib/plan'
 import { buildTikTokCaption } from '@/lib/tiktok-studio'
 import { inngest } from '@/lib/inngest'
-
-const PLAN_TIKTOK_QUOTA: Record<PlanTier, number> = {
-  free:   20,
-  pro:    60,
-  agency: 200,
-}
+import {
+  TIKTOK_PACK, TIKTOK_PACK_PRICE, givePackVideoBack, packOfferMessage, takePackVideo, tiktokAllowance,
+} from '@/lib/tiktok-pack'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -89,17 +86,20 @@ export async function POST(request: NextRequest) {
   // read, so a workspace-specific plan override isn't silently ignored the way
   // workspaces.plan was for the first paying customer (see lib/plan.ts).
   const plan  = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, workspace_id || null)
-  const quota = PLAN_TIKTOK_QUOTA[plan] ?? 5
+  const quota = PLAN_TIKTOK_VIDEOS[plan] ?? PLAN_TIKTOK_VIDEOS.free
 
-  const { data: ws } = await getSupabaseAdmin()
+  const { data: ws, error: wsErr } = await getSupabaseAdmin()
     .from('workspaces')
-    .select('tiktok_videos_this_month, tiktok_booster_credits, tiktok_quota_reset_at')
+    .select('id, tiktok_videos_this_month, tiktok_booster_credits, tiktok_quota_reset_at')
     .eq('owner_id', user.id)
     .eq('is_personal', true)
+    .limit(1)
     .maybeSingle()
+  if (wsErr) console.warn('[tiktok/post] TikTok count read failed:', wsErr.message)
 
   let videosThisMonth  = ws?.tiktok_videos_this_month ?? 0
-  const boosterCredits   = ws?.tiktok_booster_credits ?? 0
+  // Videos left in the creator's TikTok packs (lib/tiktok-pack.ts).
+  const packVideos     = Math.max(0, ws?.tiktok_booster_credits ?? 0)
 
   // Reset monthly counter if needed
   const resetAt = ws?.tiktok_quota_reset_at
@@ -115,14 +115,25 @@ export async function POST(request: NextRequest) {
       .eq('is_personal', true)
   }
 
-  const remaining = quota - videosThisMonth + boosterCredits
-  if (remaining <= 0) {
-    // This told people to buy a TikTok booster, and no such product exists.
+  // The month's videos first, then the creator's pack. This used to add the
+  // pack to the month's allowance (quota - used + credits) and never take
+  // anything from it, so a pack would have been a free raise every month.
+  const allowance = tiktokAllowance(quota, videosThisMonth, packVideos)
+  if (!allowance.allowed) {
     const planName = plan.charAt(0).toUpperCase() + plan.slice(1)
     return NextResponse.json({
-      error: `You have used this month's ${quota} TikTok videos on the ${planName} plan. The count starts over on the 1st.`,
+      error: packOfferMessage(quota, planName),
       quota_exhausted: true,
+      pack: { videos: TIKTOK_PACK.videos, price: TIKTOK_PACK_PRICE },
     }, { status: 429 })
+  }
+
+  // Taken before the post row exists, so two requests can't spend the same
+  // pack video. Every way this request fails from here gives it back.
+  if (allowance.usesPack && !(ws && await takePackVideo(getSupabaseAdmin(), ws.id, packVideos))) {
+    return NextResponse.json({
+      error: 'Your TikTok pack changed while this was saving. Try again.',
+    }, { status: 409 })
   }
 
   // The caption plus any Hashtags-box tags it doesn't already have.
@@ -154,22 +165,31 @@ export async function POST(request: NextRequest) {
       brand_organic_toggle,
       scheduled_at:          scheduled_at || null,
       status:                scheduled_at ? 'scheduled' : 'publishing',
+      // Named only when true, so the column (supabase/tiktok_pack_nov28.sql)
+      // is needed only by a video that uses a pack.
+      ...(allowance.usesPack && { used_pack_video: true }),
     })
     .select('id')
     .single()
 
   if (insertErr || !tikPost) {
+    if (insertErr) console.error('[tiktok/post] could not save the post:', insertErr.message)
+    if (allowance.usesPack) await givePackVideoBack(getSupabaseAdmin(), user.id, 'tiktok/post')
     return NextResponse.json({ error: 'Failed to create post record' }, { status: 500 })
   }
 
   // If scheduled, return immediately. publishScheduledTiktokPosts sleeps until
   // the scheduled time; its hourly cron is the backstop if this send fails.
+  // A video that took a pack video doesn't count against the month.
   if (scheduled_at) {
-    await getSupabaseAdmin()
-      .from('workspaces')
-      .update({ tiktok_videos_this_month: videosThisMonth + 1 })
-      .eq('owner_id', user.id)
-      .eq('is_personal', true)
+    if (!allowance.usesPack) {
+      const { error: countErr } = await getSupabaseAdmin()
+        .from('workspaces')
+        .update({ tiktok_videos_this_month: videosThisMonth + 1 })
+        .eq('owner_id', user.id)
+        .eq('is_personal', true)
+      if (countErr) console.warn('[tiktok/post] quota increment failed:', countErr.message)
+    }
 
     try {
       await inngest.send({ name: 'tiktok/scheduled', data: { tiktokPostId: tikPost.id, scheduledAt: scheduled_at } })
@@ -187,6 +207,7 @@ export async function POST(request: NextRequest) {
       .from('tiktok_posts')
       .update({ status: 'failed', error_message: auth.message })
       .eq('id', tikPost.id)
+    if (allowance.usesPack) await givePackVideoBack(getSupabaseAdmin(), user.id, 'tiktok/post')
     return NextResponse.json({ error: auth.message }, { status: 400 })
   }
 
@@ -241,6 +262,7 @@ export async function POST(request: NextRequest) {
       .from('tiktok_posts')
       .update({ status: 'failed', error_message: friendlyMsg })
       .eq('id', tikPost.id)
+    if (allowance.usesPack) await givePackVideoBack(getSupabaseAdmin(), user.id, 'tiktok/post')
     return NextResponse.json({ error: friendlyMsg, code: errCode }, { status: 502 })
   }
 
@@ -265,13 +287,15 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Increment quota usage
-  const { error: quotaErr } = await getSupabaseAdmin()
-    .from('workspaces')
-    .update({ tiktok_videos_this_month: videosThisMonth + 1 })
-    .eq('owner_id', user.id)
-    .eq('is_personal', true)
-  if (quotaErr) console.warn('[tiktok/post] quota increment failed:', quotaErr.message)
+  // Increment quota usage, unless it took a pack video.
+  if (!allowance.usesPack) {
+    const { error: quotaErr } = await getSupabaseAdmin()
+      .from('workspaces')
+      .update({ tiktok_videos_this_month: videosThisMonth + 1 })
+      .eq('owner_id', user.id)
+      .eq('is_personal', true)
+    if (quotaErr) console.warn('[tiktok/post] quota increment failed:', quotaErr.message)
+  }
 
   return NextResponse.json({
     success:        true,

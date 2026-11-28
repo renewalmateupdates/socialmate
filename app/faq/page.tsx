@@ -5,6 +5,7 @@ import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import FaqAccordion from './FaqAccordion'
 import { useI18n } from '@/contexts/I18nContext'
+import { TIKTOK_PACK, TIKTOK_PACK_PRICE } from '@/lib/tiktok-pack'
 
 const sections = [
   {
@@ -103,7 +104,7 @@ const sections = [
       },
       {
         q: 'Why is TikTok free (or so cheap)?',
-        a: 'TikTok\'s Content Posting API is free for developers — no per-post charges. We only pay for storage bandwidth (pennies per GB). That means we can offer generous free limits: 20 videos/month on Free, 60 on Pro, 200 on Agency. No catch. Our philosophy is simple: open APIs with no per-post cost → free for users. Gated APIs that charge per post → we pass the cost through.',
+        a: `TikTok's Content Posting API is free for developers — no per-post charges. We only pay for storage bandwidth (pennies per GB). That means we can offer generous free limits: 20 videos/month on Free, 60 on Pro, 200 on Agency. No catch. Past those, Post now keeps working, and a one-time TikTok pack adds ${TIKTOK_PACK.videos} scheduled videos for ${TIKTOK_PACK_PRICE} that never expire. Our philosophy is simple: open APIs with no per-post cost → free for users. Gated APIs that charge per post → we pass the cost through.`,
       },
       {
         q: 'Is TikTok fully live?',

@@ -83,6 +83,7 @@ export const FUNNEL_EVENTS = [
   'tiktok_post_failed',     // { mode, stage, code }; server: { mode: follow_up, stage: tiktok_processing, code } when TikTok rejects a video nobody was watching
 
   // ── Money ────────────────────────────────────────────────────────────────
+  'tiktok_pack_clicked',  // { from: refusal | schedule_line } the TikTok pack's checkout was opened (lib/tiktok-pack.ts)
   'upgrade_viewed',       // reached /pricing or the plan tab
   'upgrade_clicked',      // { plan }
   'checkout_started',     // { plan, code? } code when one is applied on /pricing

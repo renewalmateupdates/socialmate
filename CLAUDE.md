@@ -168,6 +168,9 @@ claiming otherwise. Enterprise seats are the single exception.
 - White Label Basic: $20/mo (custom logo/colors/branding)
 - White Label Pro: $40/mo (everything + custom domain)
 - Credit packs: $1.99 (100cr) / $4.99 (300cr) / $9.99 (750cr) / $19.99 (2,000cr)
+- TikTok pack: 20 scheduled TikTok videos for $1.99, one-time, stacks, never
+  expires (Nov 28, 2026). `lib/tiktok-pack.ts` holds the size and price; there
+  is no Stripe Price, because `/api/tiktok/pack` builds it with `price_data`.
 
 **Affiliate/Partner structure:**
 - 30% recurring on all subscription payments (Pro, Agency, promos, white label)
@@ -181,7 +184,13 @@ claiming otherwise. Enterprise seats are the single exception.
 - Tracked by counting published posts with `platforms @> ['twitter']` this calendar month
 
 **TikTok quota (free API — no per-post charge):**
-- Free: 20 videos/month | Pro: 60/month | Agency: 200/month
+- Free: 20 videos/month | Pro: 60/month | Agency: 200/month (`PLAN_TIKTOK_VIDEOS`)
+- **TikTok is never a Pro feature** (Joshua, Nov 28, 2026). Post now and Send
+  to drafts are never refused at the monthly number (they cost nothing); only
+  scheduling stops there. Past it, a TikTok pack (above) adds scheduled
+  videos. The month is used first, then the pack; a video that took a pack
+  video is marked `tiktok_posts.used_pack_video` and gets it back if it is
+  cancelled or refused.
 - Uses PULL_FROM_URL — TikTok pulls video from Supabase storage. Cost: only egress (~$0.09/GB)
 - Production API approved May 17, 2026. Connect button live on /accounts. TikTok Studio live at /tiktok/studio. Sandbox banner removed.
 - Content sharing audit (Direct Post) approved Oct 23, 2026: videos post to public profiles with the privacy the creator picks. Verified with a public post that day.
@@ -714,7 +723,37 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 27, 2026).** #786 through #851 are merged.
+**Pick up here (updated Nov 28, 2026).** #786 through #852 are merged.
+
+**Nov 28: the TikTok pack (branch `feat/tiktok-pack-nov28`).** Joshua: "I
+dont want to make tiktok a pro feature, but maybe somehow we can make money off
+of it?" TikTok stays free on every plan. A one-time pack adds 20 scheduled
+TikTok videos for $1.99, and packs stack and never expire. Scheduled videos
+are the part that costs storage and egress; Post now and drafts are still never
+refused.
+- **The pieces:** `lib/tiktok-pack.ts` holds the size, the price and the
+  rules. `/api/tiktok/pack` answers GET with where the creator stands, and its
+  POST opens Checkout with `price_data`. The Stripe webhook adds the videos to
+  `workspaces.tiktok_booster_credits`, a column added in May that nothing used.
+- **A bug it fixes:** `/api/tiktok/post` added those credits to the month's
+  allowance and never took any back, so a credit would have been a free raise
+  every month. Now:
+  - the month is used first;
+  - a pack video is taken before the row is saved (a guarded update), and the
+    row is marked `used_pack_video`;
+  - any failure gives it back, and so do cancelling and a refused scheduled
+    send.
+  - The route also reads `PLAN_TIKTOK_VIDEOS` now, not its own copy.
+- **Studio:**
+  - It checks before uploading; a refusal used to come after the whole video
+    had gone to storage.
+  - It says "You can schedule N more this month" under the date.
+  - Checkout opens in a new tab, so the video in memory survives.
+- **Where it's shown:** /pricing, the FAQ, the terms (final sale) and llms.txt.
+  `scripts/test-tiktok-pack.mjs` covers it.
+- **Before it ships:** `supabase/tiktok_pack_nov28.sql` (one additive column)
+  has to run. The webhook block and the scheduled send's failure step need
+  Joshua's OK by name.
 
 **Nov 27: Meta and YouTube review kits (#851, docs only).** `META_SETUP.md`
 now says where the Meta review stands and who does what:
@@ -1708,7 +1747,9 @@ paying customer to free. They are removed from the checkout side only
 **Unchanged by the repricing:** White Label ($20 / $40), all credit packs, all
 donation tiers, X Boosters, SOMA Autopilot ($10) and Full Send ($20), HERMES
 ($12 / $25), Studio Stax, and every Enki tier. When correcting pricing copy,
-these are the decoys that make a blind find-and-replace dangerous.
+these are the decoys that make a blind find-and-replace dangerous. The TikTok
+pack ($1.99, Nov 28) is one more, and it has no Price ID at all:
+`/api/tiktok/pack` builds the price from `TIKTOK_PACK` in `lib/tiktok-pack.ts`.
 | White Label Basic | price_1TFMHt7OMwDowUuU56Fzw4fE | $20.00/mo |
 | White Label Pro | price_1TFMIG7OMwDowUuUcjNNGB0Q | $40.00/mo |
 | Credits Starter (100cr) | price_1TFMI47OMwDowUuUhTrbe3oq | $1.99 |

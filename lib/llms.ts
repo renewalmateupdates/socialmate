@@ -252,6 +252,7 @@ function addonsSection(): string[] {
     ...ADDONS.whiteLabel.map(a => `- ${a.name}: ${usd(a.monthly)}/month, ${a.what}.`),
     `- AI credit packs (one-time, never expire): ${ADDONS.aiCreditPacks.map(p => `${n(p.credits)} for ${usd(p.price)}`).join(', ')}.`,
     `- X Booster packs (one-time, stack and roll over): ${ADDONS.xBoosters.map(p => `${p.name} ${p.posts} posts for ${usd(p.price)}`).join(', ')}.`,
+    `- TikTok pack (one-time, stacks, never expires): ${ADDONS.tiktokPack.videos} scheduled TikTok videos for ${usd(ADDONS.tiktokPack.price)}, for scheduling past the month's TikTok videos. Post now never needs one.`,
     `- ${ADDONS.soma.map(a => `${a.name} ${usd(a.monthly)}/month`).join(', ')}.`,
     `- SOMA credit packs: ${ADDONS.somaCreditPacks.map(p => `${p.credits} for ${usd(p.price)}`).join(', ')}.`,
     `- ${ADDONS.hermes.map(a => `${a.name} ${usd(a.monthly)}/month`).join(', ')}.`,
