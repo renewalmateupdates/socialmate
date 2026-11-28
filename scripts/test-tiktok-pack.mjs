@@ -133,6 +133,33 @@ test('Studio checks before uploading and opens checkout without losing the video
   assert.doesNotMatch(src, /useSearchParams\(\)[^\n]*pack/, 'the return is read from window.location')
 })
 
+test('the webhook credits a paid TikTok pack once, before the subscription branch', () => {
+  const src = read('app/api/stripe/webhook/route.ts')
+  const start = src.indexOf('if (type === TIKTOK_PACK_TYPE && userId) {')
+  const subscription = src.indexOf('// ── Base plan subscription via checkout ──')
+  assert.ok(start > 0 && subscription > start, 'handled before the subscription branch returns early')
+  const block = src.slice(start, subscription)
+  assert.match(block, /packVideosFromMetadata\(session\.metadata\)/, 'credits the size the session bought')
+  assert.match(block, /session\.payment_status !== 'paid'/, 'credits a paid session only')
+  assert.match(block, /\.from\('processed_events'\)\s*\.select\('id'\)/, 'once per payment')
+  assert.match(block, /tiktok_booster_credits: \(ws\.tiktok_booster_credits \?\? 0\) \+ videos/)
+  // Marked processed only after the videos are added, so Stripe's retry of a
+  // failed write still credits it.
+  const add = block.indexOf('tiktok_booster_credits: (ws.tiktok_booster_credits')
+  const mark = block.indexOf('.insert({ event_id: eventKey')
+  assert.ok(add > 0 && mark > add)
+  assert.match(block, /status: 500/)
+})
+
+test('a refused scheduled send gives back what the video took', () => {
+  const src = read('lib/inngest.ts')
+  const i = src.indexOf('sentRow?.used_pack_video === true')
+  assert.ok(i > 0, 'the failure step checks for a pack video')
+  assert.match(src.slice(i - 700, i), /\.from\('tiktok_posts'\)\s*\.select\('\*'\)\s*\.eq\('id', post\.id\)/,
+    "read with '*', not the publisher's column list")
+  assert.match(src.slice(i, i + 200), /givePackVideoBack\(db, post\.user_id, 'tiktok-scheduled'\)/)
+})
+
 test('the click is a recorded funnel step', () => {
   assert.match(read('lib/analytics.ts'), /'tiktok_pack_clicked'/)
 })

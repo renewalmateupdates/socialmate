@@ -9,6 +9,7 @@ import { REPLY_TO, logIfRejected } from '@/lib/mail'
 import { revalidatePath } from 'next/cache'
 import { creditPartnerCommission, invoiceCommissionBase } from '@/lib/partner-commission'
 import { partnerRate } from '@/lib/partner-rate'
+import { TIKTOK_PACK_TYPE, packVideosFromMetadata } from '@/lib/tiktok-pack'
 
 // Aug 2026 pricing: Pro $5 -> $8, Agency $20 -> $29, annual moved to two months
 // free. New prices were created against the same Stripe products, so reporting
@@ -1051,6 +1052,63 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error('[XBooster] Webhook handler failed (non-fatal):', err)
       }
+      return NextResponse.json({ received: true })
+    }
+
+    // ── TikTok pack: scheduled TikTok videos past the month (lib/tiktok-pack.ts) ──
+    // Okayed by Joshua by name, Nov 28, 2026 (#854). Credits a paid session
+    // only (Stripe: fulfil on payment_status), once per payment, with the size
+    // the session bought. A failed read or write answers 500 before anything is
+    // recorded as processed, so Stripe's retry can credit it.
+    if (type === TIKTOK_PACK_TYPE && userId) {
+      const videos = packVideosFromMetadata(session.metadata)
+      if (!videos || session.payment_status !== 'paid') {
+        console.warn(`[TikTokPack] not credited: videos=${session.metadata?.videos ?? ''} payment_status=${session.payment_status}`)
+        return NextResponse.json({ received: true })
+      }
+
+      const eventKey = (session.payment_intent as string | null) || session.id
+      const { data: seen, error: seenErr } = await supabase
+        .from('processed_events')
+        .select('id')
+        .eq('event_id', eventKey)
+        .maybeSingle()
+      if (seenErr) {
+        console.error('[TikTokPack] could not check processed_events:', seenErr.message)
+        return NextResponse.json({ error: 'Could not check this payment; retry' }, { status: 500 })
+      }
+      if (seen) {
+        console.log('[TikTokPack] already credited:', eventKey)
+        return NextResponse.json({ received: true })
+      }
+
+      const { data: ws, error: wsErr } = await supabase
+        .from('workspaces')
+        .select('id, tiktok_booster_credits')
+        .eq('owner_id', userId)
+        .eq('is_personal', true)
+        .limit(1)
+        .maybeSingle()
+      if (wsErr || !ws) {
+        console.error(`[TikTokPack] no personal workspace to credit for ${userId}:`, wsErr?.message ?? 'none found')
+        return NextResponse.json({ error: 'Could not credit this payment; retry' }, { status: 500 })
+      }
+
+      const { error: addErr } = await supabase
+        .from('workspaces')
+        .update({ tiktok_booster_credits: (ws.tiktok_booster_credits ?? 0) + videos })
+        .eq('id', ws.id)
+      if (addErr) {
+        console.error(`[TikTokPack] could not add ${videos} videos for ${userId}:`, addErr.message)
+        return NextResponse.json({ error: 'Could not credit this payment; retry' }, { status: 500 })
+      }
+
+      const { error: markErr } = await supabase
+        .from('processed_events')
+        .insert({ event_id: eventKey, type: TIKTOK_PACK_TYPE, user_id: userId })
+      if (markErr) console.error('[TikTokPack] credited, but could not record the payment as processed:', markErr.message)
+
+      console.log(`[TikTokPack] +${videos} scheduled TikTok videos for ${userId}`)
       return NextResponse.json({ received: true })
     }
 
