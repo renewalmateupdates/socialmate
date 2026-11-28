@@ -1056,7 +1056,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── TikTok pack: scheduled TikTok videos past the month (lib/tiktok-pack.ts) ──
-    // Okayed by Joshua by name, Nov 28, 2026 (#853). Credits a paid session
+    // Okayed by Joshua by name, Nov 28, 2026 (#854). Credits a paid session
     // only (Stripe: fulfil on payment_status), once per payment, with the size
     // the session bought. A failed read or write answers 500 before anything is
     // recorded as processed, so Stripe's retry can credit it.

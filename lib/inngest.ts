@@ -2593,7 +2593,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
         // posted, so give it back, the same as cancelling does. A video that
         // took a TikTok pack video gets that back instead and never counted
         // against the month (lib/tiktok-pack.ts; okayed by Joshua by name,
-        // Nov 28, 2026, #853). Read with '*': the select above names its
+        // Nov 28, 2026, #854). Read with '*': the select above names its
         // columns, and used_pack_video is newer. Nothing after this throws,
         // so a retried step can't give it back twice.
         const { data: sentRow, error: sentRowErr } = await db
