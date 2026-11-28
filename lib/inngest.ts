@@ -29,6 +29,7 @@ import {
   type PublishingRow, type SettledStatus,
 } from '@/lib/tiktok-publish-status'
 import { createNotification } from '@/lib/notify'
+import { givePackVideoBack } from '@/lib/tiktok-pack'
 import { sendScheduledTiktok, draftsNotice, stagedFilesToClean, isStagedVideoUrl, type TiktokSendOutcome, type StagedTiktokRow } from '@/lib/tiktok-scheduled'
 import { listAllAuthUsers, oldestFirst, selectAll } from '@/lib/admin-metrics'
 import { geminiLongModel } from '@/lib/gemini'
@@ -2589,22 +2590,39 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
         recordFunnel(db, post.user_id, 'tiktok_post_failed', { mode: 'scheduled_fire', code: outcome.code })
 
         // The slot was counted when this was scheduled and the video never
-        // posted, so give it back, the same as cancelling does.
-        const { data: ws, error: wsErr } = await db
-          .from('workspaces')
-          .select('tiktok_videos_this_month')
-          .eq('owner_id', post.user_id)
-          .eq('is_personal', true)
+        // posted, so give it back, the same as cancelling does. A video that
+        // took a TikTok pack video gets that back instead and never counted
+        // against the month (lib/tiktok-pack.ts; okayed by Joshua by name,
+        // Nov 28, 2026, #853). Read with '*': the select above names its
+        // columns, and used_pack_video is newer. Nothing after this throws,
+        // so a retried step can't give it back twice.
+        const { data: sentRow, error: sentRowErr } = await db
+          .from('tiktok_posts')
+          .select('*')
+          .eq('id', post.id)
           .maybeSingle()
-        if (wsErr) {
-          console.warn(`[tiktok-scheduled] quota read failed for ${post.user_id}:`, wsErr.message)
-        } else if (ws) {
-          const { error: refundErr } = await db
+        if (sentRowErr) console.warn(`[tiktok-scheduled] could not read ${post.id} for its pack video:`, sentRowErr.message)
+
+        if (sentRow?.used_pack_video === true) {
+          await givePackVideoBack(db, post.user_id, 'tiktok-scheduled')
+        } else {
+          const { data: ws, error: wsErr } = await db
             .from('workspaces')
-            .update({ tiktok_videos_this_month: Math.max(0, (ws.tiktok_videos_this_month ?? 0) - 1) })
+            .select('tiktok_videos_this_month')
             .eq('owner_id', post.user_id)
             .eq('is_personal', true)
-          if (refundErr) console.warn(`[tiktok-scheduled] quota refund failed for ${post.user_id}:`, refundErr.message)
+            .limit(1)
+            .maybeSingle()
+          if (wsErr) {
+            console.warn(`[tiktok-scheduled] quota read failed for ${post.user_id}:`, wsErr.message)
+          } else if (ws) {
+            const { error: refundErr } = await db
+              .from('workspaces')
+              .update({ tiktok_videos_this_month: Math.max(0, (ws.tiktok_videos_this_month ?? 0) - 1) })
+              .eq('owner_id', post.user_id)
+              .eq('is_personal', true)
+            if (refundErr) console.warn(`[tiktok-scheduled] quota refund failed for ${post.user_id}:`, refundErr.message)
+          }
         }
 
         await createNotification(db, {

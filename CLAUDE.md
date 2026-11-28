@@ -723,9 +723,9 @@ Collected verbatim from the "Rules that follow" in each dated entry of
 > in place: remove what is done, add what is new. What happened goes in the dated
 > entries above.
 
-**Pick up here (updated Nov 28, 2026).** #786 through #852 are merged.
+**Pick up here (updated Nov 28, 2026).** #786 through #853 are merged.
 
-**Nov 28: the TikTok pack (branch `feat/tiktok-pack-nov28`).** Joshua: "I
+**Nov 28: the TikTok pack (#853).** Joshua: "I
 dont want to make tiktok a pro feature, but maybe somehow we can make money off
 of it?" TikTok stays free on every plan. A one-time pack adds 20 scheduled
 TikTok videos for $1.99, and packs stack and never expire. Scheduled videos
@@ -751,9 +751,15 @@ refused.
   - Checkout opens in a new tab, so the video in memory survives.
 - **Where it's shown:** /pricing, the FAQ, the terms (final sale) and llms.txt.
   `scripts/test-tiktok-pack.mjs` covers it.
-- **Before it ships:** `supabase/tiktok_pack_nov28.sql` (one additive column)
-  has to run. The webhook block and the scheduled send's failure step need
-  Joshua's OK by name.
+- **Okayed and run (Nov 28):** Joshua ran `supabase/tiktok_pack_nov28.sql`
+  ("sql success") and okayed the webhook block and the scheduled send's
+  failure step by name ("yes"). Both audits were clean after the SQL.
+  - The webhook credits a paid session only, once per payment
+    (`processed_events`), with the size the session bought. A failed write
+    answers 500, so Stripe retries.
+  - A refused scheduled send gives the pack video back.
+  - Checkout was checked in test mode with the route's exact parameters.
+  - The only full proof is one real purchase, which is Joshua's call.
 
 **Nov 27: Meta and YouTube review kits (#851, docs only).** `META_SETUP.md`
 now says where the Meta review stands and who does what:
@@ -1783,9 +1789,9 @@ pack ($1.99, Nov 28) is one more, and it has no Price ID at all:
 
 ## What NOT to Touch Without Asking
 
-- Stripe webhook handler — live payments depend on it. The intentional additions are the coupon affiliate commission block (April 2026) and, okayed by Joshua on Nov 20, 2026, `logIfRejected` on its two emails and the `/studio-stax` refresh when a listing goes live (#824). Don't touch the rest without his OK by name
+- Stripe webhook handler — live payments depend on it. The intentional additions are the coupon affiliate commission block (April 2026) and, okayed by Joshua on Nov 20, 2026, `logIfRejected` on its two emails and the `/studio-stax` refresh when a listing goes live (#824), and, okayed on Nov 28, 2026, the TikTok pack block (#853). Don't touch the rest without his OK by name
 - RLS policies — they're in place for security, don't remove or bypass
-- Inngest publish jobs — idempotency guards are critical, don't remove them. The deleted-post skip in `publishScheduledPost` (Nov 20, 2026) was okayed by Joshua by name
+- Inngest publish jobs — idempotency guards are critical, don't remove them. The deleted-post skip in `publishScheduledPost` (Nov 20, 2026) was okayed by Joshua by name, and so was the TikTok pack give-back in the scheduled TikTok send's failure step (Nov 28, 2026, #853)
 - The three-pool credit system logic — complex, tested, working. As of July 26, 2026 (PR #535) deduction is atomic via the `deduct_ai_credits` / `refund_ai_credits` Postgres RPCs (`lib/ai-credits.ts`); keep the pool/preference math in sync with the RPC if you ever change either
 - Any env vars — don't suggest hardcoding these
 
