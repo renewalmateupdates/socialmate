@@ -11,6 +11,7 @@ import { PLAN_X_POSTS } from '@/lib/plan'
 import { localeToBCP47 } from '@/lib/i18n'
 import { BLACK_FRIDAY, BLACK_FRIDAY_PRICES, COUPON_LENGTH, blackFridayEndLabel, isBlackFridayLive } from '@/lib/promos'
 import { LIVE_PLATFORM_NAMES, SENTENCES, listWords } from '@/lib/site-facts'
+import { TIKTOK_PACK, TIKTOK_PACK_PRICE } from '@/lib/tiktok-pack'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -967,6 +968,29 @@ export default function Pricing() {
             <p className="text-xs text-ink-muted">
               X posts cost $0.01 each via the Twitter API. Boosters let you pre-purchase in bulk — saving you ~75% vs. paying per-post at API cost.
             </p>
+          </div>
+        </div>
+
+        {/* TIKTOK PACK (lib/tiktok-pack.ts). TikTok stays free on every plan;
+            this only extends scheduling past the month's videos. */}
+        <div className="bg-panel border border-edge rounded-2xl p-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-base font-extrabold">TikTok pack</h3>
+              <span className="text-xs font-bold bg-raised text-ink-body px-2 py-0.5 rounded-full">One-time</span>
+            </div>
+            <p className="text-xs text-ink-muted max-w-xl leading-relaxed">
+              Used this month&apos;s TikTok videos? Post now still works. To keep scheduling, a pack adds {TIKTOK_PACK.videos} scheduled
+              videos. Packs stack and never expire, and you can buy one in TikTok Studio when you need it.
+            </p>
+          </div>
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <p className="text-xl font-extrabold">{TIKTOK_PACK_PRICE}</p>
+            <Link
+              href="/tiktok/studio"
+              className="min-h-[44px] inline-flex items-center text-xs font-bold px-4 rounded-lg bg-raised hover:bg-edge-lit transition-colors text-ink-high">
+              Open TikTok Studio →
+            </Link>
           </div>
         </div>
 

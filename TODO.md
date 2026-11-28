@@ -31,8 +31,10 @@ replies expired long ago.)
    (#836). Scheduled videos cost storage and egress, and `/api/tiktok/post`
    still refuses one past the cap. The copy keeps 20 / 60 / 200 a month, which
    holds for scheduled videos. Past the cap, Post now still works and
-   scheduling stops until the 1st. Revisit if Post now starts costing money,
-   or if the cap should become an upgrade reason.
+   scheduling stops until the 1st. Revisit if Post now starts costing money.
+   **Nov 28:** the cap is not an upgrade reason. Joshua: "I dont want to make
+   tiktok a pro feature". Past it, a one-time TikTok pack (20 scheduled videos
+   for $1.99, `lib/tiktok-pack.ts`) extends scheduling instead.
 2. **Speed Insights Plus is off.** Asked whether to keep it at $10 a month,
    Joshua said "Turn it off", and its renewal was cancelled the same day in
    the project's Speed Insights page ("..." menu). Plus runs to Dec 19 (no

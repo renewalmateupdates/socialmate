@@ -31,6 +31,7 @@ import {
   PLAN_X_POSTS,
   type PlanTier,
 } from './plan'
+import { TIKTOK_PACK } from './tiktok-pack'
 
 // ─── Brand ──────────────────────────────────────────────────────────────────
 
@@ -154,6 +155,8 @@ export const ADDONS = {
     { name: 'Surge', posts: 250, price: 9.99 },
     { name: 'Storm', posts: 500, price: 19.99 },
   ],
+  // Scheduled TikTok videos past the month's allowance (lib/tiktok-pack.ts).
+  tiktokPack: { videos: TIKTOK_PACK.videos, price: TIKTOK_PACK.priceCents / 100 },
   soma: [
     { name: 'SOMA Autopilot', monthly: 10 },
     { name: 'SOMA Full Send', monthly: 20 },

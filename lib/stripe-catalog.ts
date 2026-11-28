@@ -80,6 +80,7 @@ export function priceInfo(priceId: string | null | undefined, productId?: string
 const SESSION_TYPES: Record<string, PriceInfo> = {
   credit_pack:     { label: 'AI credits',      group: 'Credits & boosters' },
   twitter_booster: { label: 'X Booster',       group: 'Credits & boosters' },
+  tiktok_pack:     { label: 'TikTok pack',     group: 'Credits & boosters' },
   soma_credits:    { label: 'SOMA credits',    group: 'Credits & boosters' },
   merch:           { label: 'Merch',           group: 'Merch' },
   donation:        { label: 'Donation',        group: 'Donations' },

@@ -138,7 +138,8 @@ function checkGuardedCopies() {
   expect('lib/inngest.ts', 'const CREDIT_MAP', 'aiCreditsPerMonth')
   expect('lib/publish/twitter.ts', 'const TWITTER_QUOTA', 'xPostsPerMonth')
   expect('app/api/accounts/twitter/quota/route.ts', 'const limits', 'xPostsPerMonth')
-  expect('app/api/tiktok/post/route.ts', 'const PLAN_TIKTOK_QUOTA', 'tiktokVideosPerMonth')
+  // /api/tiktok/post kept its own PLAN_TIKTOK_QUOTA until Nov 28, 2026; it reads
+  // PLAN_TIKTOK_VIDEOS from lib/plan.ts now (scripts/test-tiktok-pack.mjs).
   // confirm-upload has no table since Nov 27, 2026: TikTok already has the
   // video when it runs, so it records and counts it without checking a cap.
 
